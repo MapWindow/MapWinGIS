@@ -24,11 +24,7 @@
  // Sergei Leschinski (lsu) 8 feb 2011 - created the file
 
 #pragma once
-
-//DeclareInterface(IBar)
-//   virtual int GetBarData() const = 0;
-//   virtual void SetBarData(int nData) = 0;
-//EndInterface
+#include "ShapeUtility.h"
 
 class IShapeData
 {
@@ -53,7 +49,6 @@ public:
 //EndInterface
 };
 
-#pragma region IShapeWrapper
 class IShapeWrapper
 {
 	// Interface for CShapeWrapper and CShapeWrapperCom classes
@@ -104,7 +99,9 @@ public:
 	virtual int get_PartEndPoint(int PartIndex) = 0;
 	virtual bool put_PartStartPoint(long PartIndex, long newVal) = 0;
 
+	virtual void ReversePoints(long startIndex, long endIndex) = 0;
+
 	virtual ~IShapeWrapper(){}
 //EndInterface
 };
-#pragma endregion
+

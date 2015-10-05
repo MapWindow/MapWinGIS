@@ -316,7 +316,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 	vector<OGRGeometry *> vGeometries;		  
 	vGeometries.assign(_numShapes1, NULL);
 
-	vector<ShapeData*>* data = ((CShapefile*)sf)->get_ShapeVector();
+	vector<ShapeRecord*>* data = ((CShapefile*)sf)->get_ShapeVector();
 
 	long percent = 0;
 	for(long shapeid2 = 0; shapeid2 < _numShapes2; shapeid2++)		

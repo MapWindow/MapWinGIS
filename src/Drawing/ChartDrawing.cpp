@@ -76,7 +76,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 		return;
 
 	//positions
-	std::vector<ShapeData*>* positions;
+	std::vector<ShapeRecord*>* positions;
 	positions = ((CShapefile*)sf)->get_ShapeVector();
 	if (!positions || positions->size() == 0)
 		return;
@@ -294,7 +294,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			int i = arr[k];		// extracting index from array of visible shapes
 			
 			double x, y;
-			ShapeData* pnt = (*positions)[i];
+			ShapeRecord* pnt = (*positions)[i];
 			
 			// within extents?
 			if (pnt->chart->x < _extents->left || pnt->chart->x >_extents->right || pnt->chart->y > _extents->top || pnt->chart->y < _extents->bottom)
@@ -495,7 +495,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 				}
 			}
 			
-			ShapeData* info = (*positions)[i];
+			ShapeRecord* info = (*positions)[i];
 			if (info)
 			{
 				// storing rectangle for dragging operations				
@@ -558,7 +558,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			int i = arr[k];	// extracting index of shape from the array of visible shapes
 			
 			double x, y;
-			ShapeData* pnt = (*positions)[i];
+			ShapeRecord* pnt = (*positions)[i];
 
 			// within extents?
 			if (pnt->chart->x < _extents->left || pnt->chart->x >_extents->right || pnt->chart->y > _extents->top || pnt->chart->y < _extents->bottom)
@@ -799,7 +799,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			if ( _options->avoidCollisions && _collisionList != NULL)
 			{
 				_collisionList->AddRectangle(rectChart, _collisionBuffer, _collisionBuffer);
-				ShapeData* info = (*positions)[i];
+				ShapeRecord* info = (*positions)[i];
 				if (info)
 				{
 					info->chart->frame = rectChart;

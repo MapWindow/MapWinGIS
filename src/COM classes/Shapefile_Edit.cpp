@@ -45,7 +45,6 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 	
 	if( _table == NULL || _sourceType == sstUninitialized)
 	{	
-		// Error: shapefile is not initialized
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
 	}
 	else if( _isEditingShapes )
@@ -95,11 +94,11 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 			
 			_shapeData[i]->shape = shp;
 			_shapeData[i]->originalIndex = i;
-			this->QuickExtentsCore(i, &xm,&ym,&xM,&yM);
-
-			// Neio 2009 07 21 QuadTree
+			
 			if(_useQTree)
 			{
+				QuickExtentsCore(i, &xm, &ym, &xM, &yM);
+
 				QTreeNode node;
 				node.Extent.left = xm;
 				node.Extent.right= xM;
@@ -115,19 +114,8 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 
 		*retval = VARIANT_TRUE;
 	
-		// releasing data for the fast non-edit mode
-		if (_fastMode )
-		{
-			for (unsigned int i = 0; i < _shapeData.size(); i++)
-			{
-				//ASSERT(_shapeData[i]->fastData);
-				if (_shapeData[i]->renderData)
-				{
-					delete _shapeData[i]->renderData;
-					_shapeData[i]->renderData = NULL;
-				}
-			}
-		}
+		// it's used in the disk based mode only
+		ReleaseRenderingCache();
 
 		// ------------------------------------------
 		// reading table into memory
@@ -301,13 +289,6 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 		*retval = VARIANT_TRUE;
 	}
 		
-	// restoring fast mode
-	if (*retval == VARIANT_TRUE && _fastMode)
-	{
-		this->put_FastMode(VARIANT_FALSE);
-		this->put_FastMode(VARIANT_TRUE);
-	}
-	
 	return S_OK;
 }
 
@@ -335,7 +316,7 @@ void CShapefile::RestoreShapeRecordsMapping()
 		_shapeData.reserve(_shpOffsets.size());
 		for (size_t i = 0; i < _shpOffsets.size(); i++)
 		{
-			_shapeData.push_back(new ShapeData());
+			_shapeData.push_back(new ShapeRecord());
 		}
 
 		// reapply categories
@@ -499,7 +480,6 @@ void CShapefile::ReregisterShape(int shapeIndex)
 		return;
 
 	IShape* shp = _shapeData[shapeIndex]->shape;
-	_shapeData[shapeIndex]->renderData;
 	
 	bool fastMode = _fastMode ? true : false;
 	if (fastMode != ((CShape*)shp)->get_fastMode())
@@ -613,7 +593,7 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 					}			
 					else
 					{	
-						ShapeData* data = new ShapeData();
+						ShapeRecord* data = new ShapeRecord();
 						Shape->AddRef();
 						data->shape = Shape;
 						data->modified(true);

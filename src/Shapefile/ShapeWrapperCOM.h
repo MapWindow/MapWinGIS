@@ -21,19 +21,18 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski 03-feb-2011 - created the file
-
+ 
 #pragma once
 #include "ShapeInterfaces.h"
 
-class CShapeWrapperCOM : public IShapeWrapper //, public IShapeData
+class CShapeWrapperCOM : public IShapeWrapper
 {
 public:
 	//	Constructor
 	CShapeWrapperCOM(ShpfileType shpType)
 	{
 		_ShapeType = shpType;
-		_ShapeType2D = ShapeTypeConvert2D(_ShapeType);
+		_ShapeType2D = Utility::ShapeTypeConvert2D(_ShapeType);
 		_boundsChanged = true;
 		_lastErrorCode = tkNO_ERROR;
 		_xMin = _yMin = _xMax = _yMax = _zMin = _mMin = _zMax = _mMax = 0.0;
@@ -111,13 +110,12 @@ public:
 	
 	bool PointInRing(int partIndex, double pointX, double pointY);
 
+	void ReversePoints(long startIndex, long endIndex);
+
 	int get_LastErrorCode()
 	{
 		int code = _lastErrorCode;
 		_lastErrorCode = tkNO_ERROR;
 		return code;
 	}
-	
-	static ShpfileType ShapeTypeConvert2D(ShpfileType type);
-private:
 };

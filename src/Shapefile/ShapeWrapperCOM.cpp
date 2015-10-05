@@ -40,7 +40,7 @@ bool CShapeWrapperCOM::put_ShapeType(ShpfileType shpType)
 	else
 	{	
 		_ShapeType = shpType;
-		_ShapeType2D = ShapeTypeConvert2D(_ShapeType);
+		_ShapeType2D = Utility::ShapeTypeConvert2D(_ShapeType);
 		
 		// specific _ShapeType settings
 		if( _ShapeType == SHP_NULLSHAPE )
@@ -630,15 +630,14 @@ bool CShapeWrapperCOM::put_PartStartPoint(long PartIndex, long newVal)
 #pragma endregion
 
 // **************************************************************
-//		ShapeTypeConvert2D()
+//		ReversePoints()
 // **************************************************************
-ShpfileType CShapeWrapperCOM::ShapeTypeConvert2D(ShpfileType shpType)
+void CShapeWrapperCOM::ReversePoints(long startIndex, long endIndex)
 {
-	if		(shpType == SHP_NULLSHAPE)																return SHP_NULLSHAPE;
-	else if (shpType == SHP_POINT || shpType == SHP_POINTM || shpType == SHP_POINTZ)				return SHP_POINT;
-	else if	(shpType == SHP_MULTIPOINT || shpType == SHP_MULTIPOINTM || shpType == SHP_MULTIPOINTZ)	return SHP_MULTIPOINT;
-	else if (shpType == SHP_POLYGON || shpType == SHP_POLYGONM || shpType == SHP_POLYGONZ)			return SHP_POLYGON;
-	else if (shpType == SHP_POLYLINE || shpType == SHP_POLYLINEM || shpType == SHP_POLYLINEZ)		return SHP_POLYLINE;
-	else																							return SHP_NULLSHAPE;
+	vector<IPoint *>::iterator iter1 = _allPoints.begin();
+	vector<IPoint *>::iterator iter2 = _allPoints.begin();
+	iter1 += startIndex;
+	iter2 += endIndex;
+	reverse(iter1, iter2);
 }
 

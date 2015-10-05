@@ -178,18 +178,26 @@ CShapefile::~CShapefile()
 	gReferenceCounter.Release(tkInterface::idShapefile);
 }
 
-std::vector<ShapeData*>* CShapefile::get_ShapeVector()
+std::vector<ShapeRecord*>* CShapefile::get_ShapeVector()
 {
 	return &_shapeData;
 }
+
 IShapeWrapper* CShapefile::get_ShapeWrapper(int ShapeIndex)
 {
 	return ((CShape*)_shapeData[ShapeIndex]->shape)->get_ShapeWrapper();
 }
-IShapeData* CShapefile::get_ShapeData(int ShapeIndex)
+
+IShapeData* CShapefile::get_ShapeRenderingData(int ShapeIndex)
 {
-	return (_shapeData[ShapeIndex])->renderData;
+	return _shapeData[ShapeIndex]->get_RenderingData();
 }
+
+void CShapefile::put_ShapeRenderingData(int ShapeIndex, CShapeData* data)
+{
+	return _shapeData[ShapeIndex]->put_RenderingData(data);
+}
+
 void CShapefile::SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType)
 {
 	ComHelper::SetRef(info, 
@@ -610,7 +618,7 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 				_shapeData.reserve(_shpOffsets.size());
 				for (size_t i = 0; i < _shpOffsets.size(); i++)
 				{
-					_shapeData.push_back(new ShapeData());
+					_shapeData.push_back(new ShapeRecord());
 				}
 				return true;
 			}
@@ -659,12 +667,6 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 
 		if (OpenCore(tmp_shpfileName, cBack))
 		{
-			if (_fastMode)
-			{
-				_fastMode = FALSE;
-				this->put_FastMode(VARIANT_TRUE);
-			}
-
 			_sourceType = sstDiskBased;
 
 			// reading projection
@@ -2194,8 +2196,7 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 		if (s != "")
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "VisibilityExpression", s);
 
-		if (_fastMode != FALSE)
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "FastMode", CPLString().Printf("%d", (int)_fastMode));
+
 
 		if (_useQTree != FALSE)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "UseQTree", CPLString().Printf("%d", (int)_useQTree));
@@ -2367,9 +2368,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	SysFreeString(_expression);
 	_expression = A2BSTR(s);
 	
-	s = CPLGetXMLValue( node, "FastMode", NULL );
-	bool fastMode = (s != "") ? atoi(s.GetString()) == 0 ? false : true : false;
-	this->put_FastMode(fastMode);
+
 
 	s = CPLGetXMLValue( node, "UseQTree", NULL );
 	_useQTree = (s != "") ? (BOOL)atoi(s.GetString()) : FALSE;

@@ -32,7 +32,7 @@
 STDMETHODIMP CShapefile::get_FastMode (VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = _fastMode;
+	*retval = _fastMode ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -43,94 +43,37 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (newVal && !_fastMode)
-	{
-		// fast mode on
-		if (_isEditingShapes)
-		{
-			// data stored in the COM points must be transfered to the CShapeWrapper
-			// all the work can be done inside shape class
-			for (unsigned int i = 0; i < _shapeData.size(); i++)
-			{
-				((CShape*)_shapeData[i]->shape)->put_fastMode(true);
-			}
-			_fastMode = TRUE;
-		}
-		else
-		{
-			// make sure that memory is released
-			for (unsigned int i = 0; i < _shapeData.size(); i++)
-			{
-				if (_shapeData[i]->renderData)
-				{
-					delete _shapeData[i]->renderData;
-					_shapeData[i]->renderData = NULL;
-				}
-			}
-			
-			// fill CShapeData objects
-			CShapefileReader* reader = new CShapefileReader();
-			int numShapes = _shapeData.size();
-			long percent = 0;
-
-			if (reader->ReadShapefileIndex(_shpfileName, _shpfile, &_readLock))
-			{
-				for (int i = 0; i < numShapes; i++)
-				{
-					char* data = reader->ReadShapeData(i);
-					if (data)
-					{
-						_shapeData[i]->renderData = new CShapeData(data);
-						delete[] data;
-					}
-
-					CallbackHelper::Progress(_globalCallback, i, numShapes, "Reading shapes...", _key, percent);
-				}
-				_fastMode = TRUE;
-			}
-			delete reader;
-		}
-	}
-	else if (!newVal && _fastMode)
-	{
-		// fast mode off
-		if (_isEditingShapes)
-		{
-			for (unsigned int i = 0; i < _shapeData.size(); i++)
-			{
-				((CShape*)_shapeData[i]->shape)->put_fastMode(false);
-			}
-			_fastMode = FALSE;
-		}
-		else
-		{
-			if (_shpfileName.GetLength() == 0)
-			{
-				CallbackHelper::AssertionFailed("Shapefile.put_FastMode: No disk shapefile when editing mode is on.");
-				return S_OK;
-			}
-			else
-			{
-				// delete the in-memory data
-				for (unsigned int i = 0; i < _shapeData.size(); i++)
-				{
-					if (_shapeData[i]->renderData)
-					{
-						delete _shapeData[i]->renderData;
-						_shapeData[i]->renderData = NULL;
-					}
-				}
-				_fastMode = FALSE;
-			}
-		}
+	if (!_isEditingShapes) {
+		return S_OK;
 	}
 
-	CallbackHelper::ProgressCompleted(_globalCallback, _key);
+	if (newVal != _fastMode) 
+	{
+		for (unsigned int i = 0; i < _shapeData.size(); i++)
+		{
+			((CShape*)_shapeData[i]->shape)->put_fastMode(newVal ? true : false);
+		}
+
+		_fastMode = newVal;
+	}
+
 	return S_OK;
 }
+
+// *****************************************************************
+//	   ReleaseRenderingData()
+// *****************************************************************
+void CShapefile::ReleaseRenderingCache()
+{
+	for (unsigned int i = 0; i < _shapeData.size(); i++) {
+		_shapeData[i]->ReleaseRenderingData();
+	}
+}
+
 #pragma endregion
 
 #pragma region PointOptimizations
+
 // *****************************************************************
 //	   get_NumPoints()
 // *****************************************************************
@@ -138,9 +81,10 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
+	*pVal = 0;
+
 	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size()) 
 	{	
-		*pVal = NULL;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return FALSE;
 	}
@@ -155,45 +99,52 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 	CSingleLock lock(&_readLock, TRUE);
 
 	// get the Info from the disk
-	fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
-	int intbuf;
+	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
 	
-	fread(&intbuf,sizeof(int),1,_shpfile);
-	Utility::SwapEndian((char*)&intbuf,sizeof(int));
+	int intbuf;
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	Utility::SwapEndian((char*)&intbuf, sizeof(int));
 	
 	// shape records are 1 based
 	if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
     {
 		ErrorMessage(tkINVALID_SHP_FILE);
-		*pVal = NULL;
 		return FALSE;
 	}
-    
-	bool validPoint = true;
-	fread(&intbuf,sizeof(int),1,_shpfile);
-	Utility::SwapEndian((char*)&intbuf,sizeof(int));
-	int contentLength = intbuf*2;//(16 to 32 bit words)
-	if( contentLength <= 0 )return FALSE;
+	
+	fread(&intbuf,sizeof(int), 1, _shpfile);
+	Utility::SwapEndian((char*)&intbuf, sizeof(int));
+
+	int contentLength = intbuf*2;	//(16 to 32 bit words)
+	if (contentLength <= 0) {
+		return FALSE;
+	}
+
 	long numParts=0, numPoints=0;
+	
 	char * cdata = new char[contentLength];
-	fread(cdata,sizeof(char),contentLength,_shpfile);
+	fread(cdata, sizeof(char), contentLength, _shpfile);
+	
 	int * intdata = (int*)cdata;						
 	ShpfileType shapetype = (ShpfileType)intdata[0];
 	
+	shapetype = Utility::ShapeTypeConvert2D(shapetype);
   	if( shapetype == SHP_NULLSHAPE ) 
 	{
 		*pVal = NULL;
 	}
-	else if( shapetype == SHP_POINT || shapetype == SHP_POINTZ || shapetype == SHP_POINTM )
+	else if( shapetype == SHP_POINT)
 	{
 		*pVal = 1;
 	}
 	else
 	{
-	  *pVal = intdata[10];
+		*pVal = intdata[10];
 	}
+
 	delete [] cdata;
 	cdata = NULL;
+
 	return S_OK;
 }
 
@@ -205,7 +156,7 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())//_numShapes )
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
 		*retval = NULL;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -639,91 +590,96 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
 		ErrorMessage( tkINDEX_OUT_OF_BOUNDS );
 		return false;
 	}
-	else
-	{			
-		if( _isEditingShapes)
-		{		
-			CShape* shp = (CShape*)_shapeData[ShapeIndex]->shape;
-			shp->get_ExtentsXY(result.left, result.bottom, result.right, result.top);
-		}
-		else
-		{				
-			if (_fastMode)
-			{
-				if (_shapeData[ShapeIndex]->renderData)
-				{
-					_shapeData[ShapeIndex]->renderData->get_BoundsXY(result.left, result.right, result.bottom, result.top);
-				}
-			}
-			else
-			{
-				CSingleLock lock(&_readLock, TRUE);
-
-				//Get the Info from the disk
-				fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
-
-				int intbuf;
-				fread(&intbuf,sizeof(int),1,_shpfile);
-				Utility::SwapEndian((char*)&intbuf,sizeof(int));
-
-				//Shape records are 1 based
-				if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
-				{	
-					ErrorMessage( tkINVALID_SHP_FILE );
-					return false;
-				}
-				else
-				{
-					fread(&intbuf,sizeof(int),1,_shpfile);
-					Utility::SwapEndian((char*)&intbuf,sizeof(int));
-					int contentLength = intbuf*2;//(16 to 32 bit words)
-					
-					if( contentLength <= 0 )
-						return FALSE;
-
-					char * cdata = new char[contentLength];
-					fread(cdata,sizeof(char),contentLength,_shpfile);
-					int * intdata = (int*)cdata;						
-					ShpfileType shapetype = (ShpfileType)intdata[0];
-					double * bnds;
-
-					lock.Unlock();
 	
-					if( shapetype == SHP_NULLSHAPE )
-					{
-						return false;
-					}
-					else if( shapetype == SHP_POINT || shapetype == SHP_POINTZ || shapetype == SHP_POINTM )
-					{	
-						int * begOfPts = &(intdata[1]);
-						bnds=(double*)begOfPts;
-						result.left = bnds[0];
-						result.bottom = bnds[1];
-						result.right = bnds[0];
-						result.top = bnds[1];
-					}
-					else if( shapetype == SHP_POLYLINE || shapetype == SHP_POLYLINEZ || shapetype == SHP_POLYLINEM ||
-							 shapetype == SHP_POLYGON || shapetype == SHP_POLYGONZ || shapetype == SHP_POLYGONM ||
-							 shapetype == SHP_MULTIPOINT || shapetype == SHP_MULTIPOINTZ || shapetype == SHP_MULTIPOINTM )									
-					{	
-						bnds=(double*)(&intdata[1]);
-						result.left = bnds[0];
-						result.bottom = bnds[1];
-						result.right = bnds[2];
-						result.top = bnds[3];
-					}				
-					else
-					{	
-						ErrorMessage( tkUNSUPPORTED_SHAPEFILE_TYPE );
-						return false;
-					}
+	if( _isEditingShapes)
+	{		
+		CShape* shp = (CShape*)_shapeData[ShapeIndex]->shape;
+		shp->get_ExtentsXY(result.left, result.bottom, result.right, result.top);
+		return true;
+	}
 
-					delete [] cdata;
-					cdata = NULL;
-				}
-			}
+	if (m_globalSettings.cacheShapeRenderingData)
+	{
+		// it's loaded during the rendering only, as there is instance of ShapefileReader available there
+		IShapeData* data = _shapeData[ShapeIndex]->get_RenderingData();
+		if (data)
+		{
+			data->get_BoundsXY(result.left, result.right, result.bottom, result.top);
+			return true;
 		}
 	}
+		
+	return ReadShapeExtents(ShapeIndex, result);
+}
+
+// *****************************************************************
+//	   ReadShapeExtents()
+// *****************************************************************
+bool CShapefile::ReadShapeExtents(long ShapeIndex, Extent& result)
+{
+	CSingleLock lock(&_readLock, TRUE);
+
+	//Get the Info from the disk
+	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
+
+	int intbuf;
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	Utility::SwapEndian((char*)&intbuf, sizeof(int));
+
+	//Shape records are 1 based
+	if (intbuf != ShapeIndex + 1 && intbuf != ShapeIndex)
+	{
+		ErrorMessage(tkINVALID_SHP_FILE);
+		return false;
+	}
+	
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	Utility::SwapEndian((char*)&intbuf, sizeof(int));
+	int contentLength = intbuf * 2;//(16 to 32 bit words)
+
+	if (contentLength <= 0)
+		return FALSE;
+
+	char * cdata = new char[contentLength];
+	fread(cdata, sizeof(char), contentLength, _shpfile);
+	int * intdata = (int*)cdata;
+	ShpfileType shapetype = (ShpfileType)intdata[0];
+	double * bnds;
+
+	lock.Unlock();
+
+	if (shapetype == SHP_NULLSHAPE)
+	{
+		return false;
+	}
+	else if (shapetype == SHP_POINT || shapetype == SHP_POINTZ || shapetype == SHP_POINTM)
+	{
+		int * begOfPts = &(intdata[1]);
+		bnds = (double*)begOfPts;
+		result.left = bnds[0];
+		result.bottom = bnds[1];
+		result.right = bnds[0];
+		result.top = bnds[1];
+	}
+	else if (shapetype == SHP_POLYLINE || shapetype == SHP_POLYLINEZ || shapetype == SHP_POLYLINEM ||
+		shapetype == SHP_POLYGON || shapetype == SHP_POLYGONZ || shapetype == SHP_POLYGONM ||
+		shapetype == SHP_MULTIPOINT || shapetype == SHP_MULTIPOINTZ || shapetype == SHP_MULTIPOINTM)
+	{
+		bnds = (double*)(&intdata[1]);
+		result.left = bnds[0];
+		result.bottom = bnds[1];
+		result.right = bnds[2];
+		result.top = bnds[3];
+	}
+	else
+	{
+		ErrorMessage(tkUNSUPPORTED_SHAPEFILE_TYPE);
+		return false;
+	}
+
+	delete[] cdata;
+	cdata = NULL;
 	return true;
 }
+
 #pragma endregion

@@ -1289,6 +1289,28 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 }
 
 // *************************************************************
+//		ReadAndCacheShapeData()
+// *************************************************************
+IShapeData* CShapefileDrawer::ReadAndCacheShapeData(int shapeIndex)
+{
+	IShapeData* shapeData = _shapefile->get_ShapeRenderingData(shapeIndex);
+	if (!shapeData)
+	{
+		char* data = _sfReader->ReadShapeData(shapeIndex);
+		if (data)
+		{
+			CShapeData* newData = new CShapeData(data);
+			_shapefile->put_ShapeRenderingData(shapeIndex, newData);
+			delete[] data;
+
+			shapeData = newData;
+		}
+	}
+
+	return shapeData;
+}
+
+// *************************************************************
 //		DrawPolygonGDIPlus()
 // *************************************************************
 bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath& path, double minSize, OLE_COLOR pointColor, tkVectorDrawingMode drawingMode,
@@ -1296,16 +1318,14 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 {
 	if (! _isEditing)
 	{
-		if (_fastMode)
+		if (m_globalSettings.cacheShapeRenderingData)
 		{
-			IShapeData* shpData = _shapefile->get_ShapeData(shapeIndex);
+			IShapeData* shpData = ReadAndCacheShapeData(shapeIndex);
 			if (shpData)
 			{
 				shpData->get_BoundsXY(xMin, xMax, yMin, yMax);
-				if (this->WithinVisibleExtents(xMin, xMax, yMin, yMax))
+				if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
 				{
-					(*_shapeData)[shapeIndex]->size = (int)(((xMax - xMin) + (yMax - yMin))/2.0*_dx);
-					(*_shapeData)[shapeIndex]->wasRendered(true);
 					if ((xMax - xMin >= minSize) || (yMax - yMin >= minSize))	// the poly must be larger than a pixel at a current to be drawn
 					{
 						this->AddPolygonToPath(&path, shpData, drawingMode);
@@ -1328,10 +1348,8 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 				xMin = bounds[0]; yMin = bounds[1];	xMax = bounds[2]; yMax = bounds[3];
 
 				bool result = false;
-				if (this->WithinVisibleExtents(xMin, xMax, yMin, yMax))
+				if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
 				{
-					(*_shapeData)[shapeIndex]->size = (int)(((xMax - xMin) + (yMax - yMin))/2.0*_dx);
-					(*_shapeData)[shapeIndex]->wasRendered(true);
 					if ((xMax - xMin >= minSize) || (yMax - yMin >= minSize))	// the poly must be larger than a pixel at a current to be drawn
 					{
 						PolygonData* shapeData = _sfReader->ReadPolygonData(data);
@@ -1359,10 +1377,8 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 			if ( shpData )
 			{
 				shpData->get_BoundsXY(xMin, xMax, yMin, yMax);
-				if (this->WithinVisibleExtents(xMin, xMax, yMin, yMax))
+				if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
 				{
-					(*_shapeData)[shapeIndex]->size = (int)(((xMax - xMin) + (yMax - yMin))/2.0*_dx);
-					(*_shapeData)[shapeIndex]->wasRendered(true);
 					if ((xMax - xMin >= minSize) || (yMax - yMin >= minSize))	// the poly must be larger than a pixel at a current to be drawn
 					{
 						this->AddPolygonToPath(&path, shpData, drawingMode);
@@ -1384,10 +1400,8 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 			{
 				shp->get_BoundsXY(xMin, xMax, yMin, yMax);
 
-				if (this->WithinVisibleExtents(xMin, xMax, yMin, yMax))
+				if (this->WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
 				{
-					(*_shapeData)[shapeIndex]->size = (int)(((xMax - xMin) + (yMax - yMin))/2.0*_dx);
-					(*_shapeData)[shapeIndex]->wasRendered(true);
 					if ((xMax - xMin >= minSize) || (yMax - yMin >= minSize))	// the poly must be larger than a pixel at a current to be drawn
 					{
 						this->AddPolygonToPath(&path, shp, drawingMode);
@@ -1402,6 +1416,7 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 			}
 		}
 	}
+
 	return false;
 }
 #pragma endregion
@@ -1446,17 +1461,15 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 		int shapeIndex = (*indices)[j];
 		if (! _isEditing)
 		{
-			if (fastMode)
+			if (m_globalSettings.cacheShapeRenderingData)
 			{
-				shpData = _shapefile->get_ShapeData(shapeIndex);
+				shpData = ReadAndCacheShapeData(shapeIndex);
 				if (shpData)
 				{
 					shpData->get_BoundsXY(xMin, xMax, yMin, yMax);
 					
-					if (WithinVisibleExtents(xMin, xMax, yMin, yMax))
+					if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
 					{
-						(*_shapeData)[shapeIndex]->size = (int)(((xMax - xMin) + (yMax - yMin))/2.0*_dx);
-						(*_shapeData)[shapeIndex]->wasRendered(true);
 						if ((xMax - xMin >= delta) || (yMax - yMin >= delta))	// the poly must be larger than a pixel at a current to be drawn
 						{
 							this->DrawPolyGDI( shpData, options, *path, options->verticesVisible?true:false);
@@ -1476,10 +1489,8 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 					double* bounds = (double*)(data + 4);
 					xMin = bounds[0]; yMin = bounds[1];	xMax = bounds[2]; yMax = bounds[3];
 
-					if (WithinVisibleExtents(xMin, xMax, yMin, yMax))
+					if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
 					{
-						(*_shapeData)[shapeIndex]->size = (int)(((xMax - xMin) + (yMax - yMin))/2.0*_dx);
-						(*_shapeData)[shapeIndex]->wasRendered(true);
 						if ((xMax - xMin >= delta) || (yMax - yMin >= delta))	// the poly must be larger than a pixel at a current to be drawn
 						{
 							PolygonData* shapeData = _sfReader->ReadPolygonData(data);
@@ -1506,10 +1517,8 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 				{
 					shpData->get_BoundsXY(xMin, xMax, yMin, yMax);
 
-					if (WithinVisibleExtents(xMin, xMax, yMin, yMax))
+					if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
 					{
-						(*_shapeData)[shapeIndex]->size = (int)(((xMax - xMin) + (yMax - yMin))/2.0*_dx);
-						(*_shapeData)[shapeIndex]->wasRendered(true);
 						if ((xMax - xMin >= delta) || (yMax - yMin >= delta))	// the poly must be larger than a pixel at a current to be drawn
 						{
 							this->DrawPolyGDI( shpData, options, *path, options->verticesVisible?true:false);
@@ -1529,10 +1538,8 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 				{
 					shp->get_BoundsXY(xMin, xMax, yMin, yMax);
 
-					if (WithinVisibleExtents(xMin, xMax, yMin, yMax))
+					if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
 					{
-						(*_shapeData)[shapeIndex]->size = (int)(((xMax - xMin) + (yMax - yMin))/2.0*_dx);
-						(*_shapeData)[shapeIndex]->wasRendered(true);
 						if ((xMax - xMin >= delta) || (yMax - yMin >= delta))	// the poly must be larger than a pixel at a current to be drawn
 						{
 							this->DrawPolyGDI(shp, options, *path, options->verticesVisible?true:false);
@@ -1546,6 +1553,7 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 			}
 		}
 	}
+
 	options->ReleaseGdiBrushAndPen(_dc);
 	_graphics->ReleaseHDC(m_hdc);
 	_dc = NULL;

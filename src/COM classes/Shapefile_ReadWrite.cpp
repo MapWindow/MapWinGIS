@@ -23,6 +23,7 @@
 #include "stdafx.h"
 #include "Shapefile.h"
 #include "Shape.h"
+#include "ShapeWrapper.h"
 
 #pragma region GetShape
 // ************************************************************
@@ -1075,7 +1076,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 		shape->get_NumParts(&numParts);
 		shape->get_ShapeType(&shptype);
 
-		int contentLength = CShapeWrapper::get_ContentLength(shptype, numPoints, numParts);
+		int contentLength = ShapeUtility::get_ContentLength(shptype, numPoints, numParts);
 
 		offset = offset + RECORD_HEADER_LENGTH_32 + contentLength;
 
@@ -1201,7 +1202,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 		sh->get_NumParts(&numParts);
 		sh->get_ShapeType(&shptype);
 
-		int contentLength = CShapeWrapper::get_ContentLength(shptype, numPoints, numParts);
+		int contentLength = ShapeUtility::get_ContentLength(shptype, numPoints, numParts);
 		filelength = filelength + RECORD_HEADER_LENGTH_32 + contentLength;
 
 		sh->Release();
@@ -1245,7 +1246,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 		shape->get_NumParts(&numParts);
 		shape->get_ShapeType(&shptype);
 
-		int contentLength = CShapeWrapper::get_ContentLength(shptype, numPoints, numParts);
+		int contentLength = ShapeUtility::get_ContentLength(shptype, numPoints, numParts);
 		int length = contentLength;
 		contentLength /= 2;
 

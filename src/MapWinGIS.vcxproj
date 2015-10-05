@@ -291,9 +291,13 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="Processing\PointInPolygon.h" />
     <ClInclude Include="Processing\Projections.h" />
     <ClInclude Include="Processing\QTree.h" />
+    <ClInclude Include="Shapefile\ChartInfo.h" />
     <ClInclude Include="Shapefile\DraggingState.h" />
     <ClInclude Include="Shapefile\GeoProcessing.h" />
     <ClInclude Include="Shapefile\HotTrackingInfo.h" />
+    <ClInclude Include="Shapefile\ShapeRecord.h" />
+    <ClInclude Include="Shapefile\ShapeUtility.h" />
+    <ClInclude Include="Shapefile\ShapeWrapperM.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -420,7 +424,6 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="Shapefile\ShapeData.h" />
     <ClInclude Include="Shapefile\shapefil.h" />
     <ClInclude Include="Shapefile\ShapefileReader.h" />
-    <ClInclude Include="Shapefile\ShapeInfo.h" />
     <ClInclude Include="Shapefile\ShapeInterfaces.h" />
     <ClInclude Include="Shapefile\ShapePoint.h" />
     <ClInclude Include="Shapefile\ShapeValidator.h" />
@@ -637,6 +640,8 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="Processing\QTree.cpp" />
     <ClCompile Include="Shapefile\GeoProcessing.cpp" />
     <ClCompile Include="Shapefile\HotTrackingInfo.cpp" />
+    <ClCompile Include="Shapefile\ShapeUtility.cpp" />
+    <ClCompile Include="Shapefile\ShapeWrapperM.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

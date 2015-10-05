@@ -91,7 +91,7 @@ protected:
 
 	OLE_COLOR m_selectionColor;
 	unsigned short m_selectionTransparency;
-	std::vector<ShapeData*>* _shapeData;		// reference for shapefile's data for faster access
+	std::vector<ShapeRecord*>* _shapeData;		// reference for shapefile's data for faster access
 	std::vector<CRect*> _pointRectangles;
 	CShapefile* _shapefile;
 	Extent* _extents; 
@@ -154,10 +154,18 @@ private:
 
 	void GetVisibilityMask(std::vector<int>& indices, vector<bool>& visibilityMask);
 
-	bool WithinVisibleExtents(double xMin, double xMax, double yMin, double yMax)
+	bool WithinVisibleExtents(int shapeIndex, double xMin, double xMax, double yMin, double yMax)
 	{
 		bool result = !(xMin > _extents->right || xMax < _extents->left || yMin > _extents->top || yMax < _extents->bottom);
-		if (result) _shapeCount++;
+
+		if (result) 
+		{
+			(*_shapeData)[shapeIndex]->size = (int)(((xMax - xMin) + (yMax - yMin)) / 2.0*_dx);
+			(*_shapeData)[shapeIndex]->wasRendered(true);
+
+			_shapeCount++;
+		}
+
 		return result;
 	};
 
@@ -177,5 +185,6 @@ private:
 			_dc = NULL;
 		}
 	}
-	
+
+	IShapeData* ReadAndCacheShapeData(int shapeIndex);
 };

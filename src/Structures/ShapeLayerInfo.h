@@ -28,7 +28,7 @@
 # define SHAPE_LAYER_INFO_H
 
 # include <vector>
-# include "ShapeInfo.h"
+# include "ShapeRecord.h"
 # include "BaseLayerInfo.h"
 
 //class udPointListItem

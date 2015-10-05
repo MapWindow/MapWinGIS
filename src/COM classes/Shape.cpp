@@ -44,14 +44,14 @@ CShape::CShape()
 	_isValidReason = "";
 	
 	_useFastMode = m_globalSettings.shapefileFastMode;
-	if (m_globalSettings.shapefileFastMode)
-	{
+
+	if (m_globalSettings.shapefileFastMode)	{
 		_shp = new CShapeWrapper(SHP_NULLSHAPE);
 	}
-	else
-	{
+	else {
 		_shp = new CShapeWrapperCOM(SHP_NULLSHAPE);
 	}
+
 	gReferenceCounter.AddRef(tkInterface::idShape);
 }
 	
@@ -114,35 +114,24 @@ CShapeWrapper* CShape::InitShapeWrapper(CShapeWrapperCOM* shpOld)
 	std::vector<IPoint*>* allPoints = &(shpOld->_allPoints);
 	std::vector<long>* allParts = &(shpOld->_allParts);
 	
-	// creating new wrapper
+	// TODO: choose appropriate type
 	CShapeWrapper* shpNew = new CShapeWrapper(type);
 
-	// passing points
+	// points
 	unsigned int size = allPoints->size();
 	for (unsigned int i = 0; i < size; i++)
 	{
 		(*allPoints)[i]->get_X(&x);
 		(*allPoints)[i]->get_Y(&y);
-		shpNew->_points.push_back(pointEx(x, y));
-
-		if (isZ)
-		{ 
-			(*allPoints)[i]->get_Z(&z);
-			shpNew->_pointsZ.push_back(z);
-		}
-		else if (isM)
-		{
-			(*allPoints)[i]->get_Z(&z);
-			(*allPoints)[i]->get_M(&m);
-			shpNew->_pointsZ.push_back(z);
-			shpNew->_pointsM.push_back(m);
-		}
+		(*allPoints)[i]->get_Z(&z);
+		(*allPoints)[i]->get_M(&m);
+		shpNew->AddPoint(x, y, z, m);
 	}
 
-	// passing parts
+	// parts
 	for (unsigned int i = 0; i < (*allParts).size(); i++)
 	{
-		shpNew->_parts.push_back((*allParts)[i]);
+		shpNew->AddPart((*allParts)[i]);
 	}
 
 	return shpNew;
@@ -167,29 +156,37 @@ CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld)
 	
 	// passing points
 	IPoint* pnt = NULL;
-	unsigned int size = shpOld->_points.size();
+	int size = shpOld->get_PointCount();
 	
-	for (unsigned int i = 0; i < size; i++)
+	double x, y, z, m;
+	for (int i = 0; i < size; i++)
 	{
 		ComHelper::CreatePoint(&pnt);
-		pnt->put_X(shpOld->_points[i].X);
-		pnt->put_Y(shpOld->_points[i].Y);
+
+		
+		shpOld->get_PointXY(i, x, y);
+		pnt->put_X(x);
+		pnt->put_Y(y);
+
 		if (isZ || isM)
 		{
-			pnt->put_Z(shpOld->_pointsZ[i]);
+			shpOld->get_PointZ(i, z);
+			pnt->put_Z(z);
 		}
 		if (isM)
 		{
-			pnt->put_M(shpOld->_pointsM[i]);
+			shpOld->get_PointZ(i, m);
+			pnt->put_M(m);
 		}
+
 		allPoints->push_back(pnt);
 	}
 	
 	// passing parts
-	size = shpOld->_parts.size();
-	for (unsigned int i = 0; i < size; i++)
+	size = shpOld->get_PartCount();
+	for (int i = 0; i < size; i++)
 	{
-		allParts->push_back(shpOld->_parts[i]);
+		allParts->push_back(shpOld->get_PartStartPoint(i));
 	}
 
 	return shpNew;
@@ -666,47 +663,8 @@ STDMETHODIMP CShape::ReversePointsOrder(long PartIndex, VARIANT_BOOL* retval)
 	{
 		end_part = numPoints;
 	}
-	
-	if (_useFastMode)
-	{
-		CShapeWrapper* shp = (CShapeWrapper*) _shp;
-		if (shp->_points.size() > 1)
-		{
-			std::vector<pointEx>::iterator iter1 = shp->_points.begin();
-			std::vector<pointEx>::iterator iter2 = shp->_points.begin();
-			iter1 +=beg_part;
-			iter2 +=end_part;
-			reverse( iter1, iter2);
-		}
-		
-		if (shp->_pointsZ.size() > 1)
-		{
-			std::vector<double>::iterator iterZ1 = shp->_pointsZ.begin();
-			std::vector<double>::iterator iterZ2 = shp->_pointsZ.begin();
-			iterZ1 +=beg_part;
-			iterZ2 +=end_part;
-			reverse( iterZ1, iterZ2);
-		}
-		
-		if (shp->_pointsM.size() > 1)
-		{
-			std::vector<double>::iterator iterM1 = shp->_pointsM.begin();
-			std::vector<double>::iterator iterM2 = shp->_pointsM.begin();
-			iterM1 +=beg_part;
-			iterM2 +=end_part;
-			reverse( iterM1, iterM2);
-		}
-	}
-	else
-	{
-		CShapeWrapperCOM* shp = (CShapeWrapperCOM*) _shp;
-		std::vector<IPoint* >* allPoints = &shp->_allPoints;
-		vector<IPoint *>::iterator iter1 = allPoints->begin();
-		vector<IPoint *>::iterator iter2 = allPoints->begin();
-		iter1 +=beg_part;
-		iter2 +=end_part;
-		reverse( iter1, iter2);
-	}
+
+	_shp->ReversePoints(beg_part, end_part);
 
 	*retval = VARIANT_TRUE;
 	return S_OK;

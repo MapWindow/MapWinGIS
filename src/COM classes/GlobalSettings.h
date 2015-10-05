@@ -184,6 +184,10 @@ public:
 	STDMETHOD(put_GridUseHistogram)(VARIANT_BOOL newVal);
 	STDMETHOD(get_OverrideLocalCallback)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_OverrideLocalCallback)(VARIANT_BOOL newVal);
+	STDMETHOD(get_CacheDbfRecords)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_CacheDbfRecords)(VARIANT_BOOL newVal);
+	STDMETHOD(get_CacheShapeRenderingData)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_CacheShapeRenderingData)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

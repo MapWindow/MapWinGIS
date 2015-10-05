@@ -150,3 +150,15 @@ struct ImageSpecs
 		return yllCorner + (double)height * dy;
 	}
 };
+
+struct pointEx
+{
+	pointEx(){}
+	pointEx(double& x, double& y)
+	{
+		X = x;
+		Y = y;
+	}
+	double X;
+	double Y;
+};

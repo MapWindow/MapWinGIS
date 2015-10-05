@@ -79,7 +79,9 @@ struct GlobalSettingsInfo
 	CString hereAppCode;
 	bool gridFavorGreyScale;
 	bool gridUseHistogram;
-	bool overrideLocalCallback;
+	bool overrideLocalCallback; 
+	bool cacheDbfRecords;
+	bool cacheShapeRenderingData;
 
 	~GlobalSettingsInfo()
 	{
@@ -91,6 +93,8 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		cacheShapeRenderingData = false;
+		cacheDbfRecords = true;
 		overrideLocalCallback = true;
 		proxyAuthentication = asBasic;
 		hereAppId = "";

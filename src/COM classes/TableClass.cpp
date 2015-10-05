@@ -869,12 +869,7 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 	}
 	_fields.clear();
 
-	for( int j = 0; j < RowCount(); j++ )
-	{	
-        if( _rows[j].row != NULL )
-            delete _rows[j].row;
-	}
-	_rows.clear();
+	ClearRows();
 	
 	_filename = "";
 	if( _dbfHandle != NULL )
@@ -930,22 +925,32 @@ void CTableClass::LoadDefaultFields()
 }
 
 // **************************************************************
+//	  ClearRows()
+// **************************************************************
+void CTableClass::ClearRows() 
+{
+	for (int j = 0; j < RowCount(); j++)
+	{
+		if (_rows[j].row != NULL) {
+			delete _rows[j].row;
+		}
+	}
+
+	_rows.clear();
+}
+
+// **************************************************************
 //	  LoadDefaultRows()
 // **************************************************************
 //Initialize RecordWrapper array and set the TableRow pointer to NULL
 void CTableClass::LoadDefaultRows()
 {	
-    if (!_rows.empty())
-    {
-        for (std::vector<RecordWrapper>::iterator i = _rows.begin(); i!= _rows.end(); ++i)
-        {
-            if ( (*i).row != NULL) delete (*i).row;
-        }
-        _rows.clear();
-    }
+	ClearRows();
     
 	if (_dbfHandle == NULL) return;
+
 	long num_rows = DBFGetRecordCount(_dbfHandle);
+
     for (long i = 0; i < num_rows; i++)
     {
         RecordWrapper rw;
@@ -1023,6 +1028,7 @@ STDMETHODIMP CTableClass::EditInsertField(IField *Field, long *FieldIndex, ICall
 			val->vt = VT_NULL;
 
 		_rows[i].row->values.insert( _rows[i].row->values.begin() + *FieldIndex, val);
+		_rows[i].row->SetDirty(TableRow::DATA_MODIFIED);
     }
 
     FieldWrapper* fw = new FieldWrapper();
@@ -1161,12 +1167,14 @@ STDMETHODIMP CTableClass::EditInsertRow(long * RowIndex, VARIANT_BOOL *retval)
 
 		tr->values.push_back(val);
 	}
+
 	RecordWrapper rw;
 	rw.row = tr;
 	rw.oldIndex = -1;
 	_rows.insert( _rows.begin() + *RowIndex, rw);
 
     m_needToSaveAsNewFile = true;
+
 	*retval = VARIANT_TRUE;		
     return S_OK;
 }
@@ -1210,14 +1218,17 @@ bool CTableClass::InsertTableRow(TableRow* row, long rowIndex)
 TableRow* CTableClass::SwapTableRow(TableRow* newRow, long rowIndex)
 {
 	if (!newRow) return NULL;
+
 	if (rowIndex < 0 || rowIndex >= (long)_rows.size())
 		return NULL;
+
 	if (ReadRecord(rowIndex)) {
 		TableRow* oldRow = _rows[rowIndex].row;
 		_rows[rowIndex].row = newRow;
 		newRow->SetDirty(TableRow::DATA_MODIFIED);
 		return oldRow;
 	}
+
 	return NULL;
 }
 
@@ -1248,7 +1259,20 @@ bool CTableClass::ReadRecord(long RowIndex)
 
     if (RowIndex < 0 && RowIndex >= RowCount())
         return false;
-	
+
+	if (!m_globalSettings.cacheDbfRecords )
+	{
+		if (_lastRecordIndex != RowIndex && 
+			_lastRecordIndex >= 0 && _lastRecordIndex < RowCount() && 
+			!_rows[_lastRecordIndex].row->IsModified())
+		{
+			// make sure that only one row in a time can be read
+			ClearRow(_lastRecordIndex);
+		}
+	}
+
+	_lastRecordIndex = RowIndex;
+
 	if (_rows[RowIndex].row != NULL)
 		return true;
 
@@ -1834,9 +1858,9 @@ long CTableClass::GetFieldPrecision(long fieldIndex)
 // *********************************************************************
 void CTableClass::ClearRow(long rowIndex)
 {
-    if (rowIndex > 0 && rowIndex < RowCount())
+    if (rowIndex >= 0 && rowIndex < RowCount())
     {
-        if (_rows[rowIndex].row != 0)
+        if (_rows[rowIndex].row)
         {
             delete _rows[rowIndex].row;
             _rows[rowIndex].row = NULL;
@@ -3630,6 +3654,23 @@ bool CTableClass::GetRelativeValues(long fieldIndex, bool logScale, vector<doubl
 	return true;
 }
 
+// ********************************************************
+//     ClearCache()
+// ********************************************************
+STDMETHODIMP CTableClass::ClearCache()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	for (int j = 0; j < RowCount(); j++)
+	{
+		if (_rows[j].row != NULL && !_rows[j].row->IsModified()) 
+		{
+			delete _rows[j].row;
+			_rows[j].row = NULL;
+		}
+	}
 
+	_lastRecordIndex = -1;
 
+	return S_OK;
+}

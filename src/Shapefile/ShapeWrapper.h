@@ -21,8 +21,7 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 25 june 2010 - created the file
-
+ 
 #pragma once
 #include "ShapeInterfaces.h"
 
@@ -84,104 +83,68 @@
 // * optional
 #pragma endregion
 
-struct pointEx
-{
-	pointEx(){}
-	pointEx(double& x, double& y)
-	{
-		X = x;
-		Y = y;
-	}
-	double X;
-	double Y;
-};
-
-
-
 class CShapeWrapper: public IShapeWrapper, public IShapeData
 {
 public:
-	// Constructors
 	CShapeWrapper(ShpfileType shpType)
 	{
-		_ShapeType = shpType;
-		_ShapeType2D = ShapeTypeConvert2D(_ShapeType);
+		_shapeType = shpType;
 		_boundsChanged = true;
 		_lastErrorCode = tkNO_ERROR;
-		_xMin = _yMin =	_xMax =	_yMax =	_zMin =	_mMin =	_zMax =	_mMax = 0.0;
+		_xMin = _yMin =	_xMax =	_yMax =	0.0;
 	}
 	CShapeWrapper(char* shpData)
 	{
-		_xMin = _yMin =	_xMax =	_yMax =	_zMin =	_mMin =	_zMax =	_mMax= 0.0;
+		_xMin = _yMin =	_xMax =	_yMax =	0.0;
 		_boundsChanged = true;
 		_lastErrorCode = tkNO_ERROR;
 		put_ShapeData(shpData, NULL);
 	}
 	CShapeWrapper(char* shpData, Extent* extents)
 	{
-		_xMin = _yMin =	_xMax =	_yMax =	_zMin =	_mMin =	_zMax =	_mMax= 0.0;
+		_xMin = _yMin =	_xMax =	_yMax =	0.0;
 		_boundsChanged = true;
 		_lastErrorCode = tkNO_ERROR;
 		put_ShapeData(shpData, extents);
 	}
 
-	// -----------------------------------------------------
-	//		Destructor
-	// -----------------------------------------------------
-	~CShapeWrapper()
+	virtual ~CShapeWrapper()
 	{
 		_parts.clear();
 		_points.clear();
-		_pointsZ.clear();
-		_pointsM.clear();
 	}
 	
 private:	
-	/*	Members */
-	// -----------
-	// type
-	ShpfileType _ShapeType;
-	ShpfileType _ShapeType2D;    // TODO: remove
+	ShpfileType _shapeType;
+
 	// bounds
 	double _xMin;
 	double _yMin;
 	double _xMax;
 	double _yMax;
 
-	// TODO: move to derived class
-	double _zMin;
-	double _mMin;
-	double _zMax;
-	double _mMax;
-
 	bool _boundsChanged;
 	short _lastErrorCode;
-	
-public:
-	// Actually this breaks encapsulation, but in many cases we want faster access
+
 	std::vector<int> _parts;
 	std::vector<pointEx> _points;
-
-	// TODO: move to derived class
-	std::vector<double> _pointsZ;			// We could merge points with Z and M in one structure, 
-	std::vector<double> _pointsM;			// but it'll be impossible to copy all points at once to/from vector through memcopy
 	
 public:
+	vector<pointEx>* get_Points() { return &_points; }
+	vector<int>* get_Parts() { return &_parts; }
+
 	int get_ContentLength();
 	int get_PointCount(){return _points.size();}
 	int get_PartCount(){return _parts.size();}
 
 	// shpData
 	bool put_ShapeData(char* shapeData, Extent* extents);
-	bool put_ShapeData(char* shapeData)
-	{
-		return put_ShapeData(shapeData, NULL);
-	}
+	bool put_ShapeData(char* shapeData) { return put_ShapeData(shapeData, NULL); }
 	int* get_ShapeData(void);
 	
 	// type
-	ShpfileType get_ShapeType(void) {return _ShapeType;}
-	ShpfileType get_ShapeType2D(void){return _ShapeType2D;}
+	ShpfileType get_ShapeType(void) { return _shapeType; }
+	ShpfileType get_ShapeType2D(void){ return Utility::ShapeTypeConvert2D(_shapeType); }
 	bool put_ShapeType(ShpfileType shpType);
 	
 	// bounds
@@ -195,7 +158,6 @@ public:
 	double* get_PointsXY();
 	double* get_PointsM();
 	double* get_PointsZ();
-	
 
 	void get_XYFast(int PointIndex, double& x, double& y);
 	bool get_PointXY(int PointIndex, double& x, double& y);
@@ -211,12 +173,16 @@ public:
 
 	// changing size
 	void Clear();
+	void AddPoint(IPoint* pnt);
+	void AddPoint(double x, double y);
+	void AddPoint(double x, double y, double z, double m);
 	bool InsertPoint(int PointIndex, IPoint* pnt);
 	bool InsertPointXY(int Pointindex, double x, double y);
 	bool InsertPointXYZM(int PointIndex, double x, double y, double z, double m);
 	bool DeletePoint(int Pointindex);
 	
 	// parts
+	void AddPart(int pointIndex);
 	bool InsertPart(int PartIndex, int PointIndex);
 	bool DeletePart(int PartIndex);
 	int get_PartStartPoint(int PartIndex);
@@ -225,18 +191,13 @@ public:
 	
 	bool PointInRing(int partIndex, double pointX, double pointY);
 
+	void ReversePoints(long startIndex, long endIndex);
+
 	int get_LastErrorCode()
 	{
 		int code = _lastErrorCode;
 		_lastErrorCode = tkNO_ERROR;
 		return code;
 	}
-
-	static int get_ContentLength(ShpfileType shpType,  int numPoints, int numParts);
-	static ShpfileType ShapeTypeConvert2D(ShpfileType type);
-private:
-	/*	Inner functions */
-	// ------------
-	
 };
 

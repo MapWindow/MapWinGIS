@@ -410,3 +410,4 @@ IShape* ShapeHelper::CenterAsShape(IShape* shp)
 
 	return shp;
 }
+

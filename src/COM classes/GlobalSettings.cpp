@@ -1075,3 +1075,43 @@ STDMETHODIMP CGlobalSettings::put_OverrideLocalCallback(VARIANT_BOOL newVal)
 
 	return S_OK;
 }
+
+// ***************************************************************
+//		CacheDbfRecords
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_CacheDbfRecords(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = m_globalSettings.cacheDbfRecords;
+
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_CacheDbfRecords(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_globalSettings.cacheDbfRecords = newVal ? true : false;
+
+	return S_OK;
+}
+
+// ***************************************************************
+//		CacheShapeRenderingData
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_CacheShapeRenderingData(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = m_globalSettings.cacheShapeRenderingData;
+
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_CacheShapeRenderingData(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_globalSettings.cacheShapeRenderingData = newVal ? true : false;
+
+	return S_OK;
+}

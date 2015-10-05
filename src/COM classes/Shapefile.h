@@ -21,7 +21,7 @@
 #include "IndexSearching.h"
 #include "QTree.h"
 #include "ClipperConverter.h"
-#include "ShapeInfo.h"
+#include "ShapeRecord.h"
 #include "ColoringGraph.h"
 #include <afxmt.h>
 
@@ -296,7 +296,7 @@ private:
 	CStringW _dbffileName;
 	CStringW _prjfileName;
 	
-	std::vector<ShapeData*> _shapeData;
+	std::vector<ShapeRecord*> _shapeData;
 	std::vector<long> _shpOffsets;		//(32 bit words)
 
 	// table is initialized in CreateNew or Open methods
@@ -330,7 +330,7 @@ private:
 	
 	// When this flag is on CShapeWrapper will be used in the Shape class to store the points
 	// otherwise usual COM points
-	BOOL _fastMode;
+	VARIANT_BOOL _fastMode;
 	int _minDrawingSize;	// objects which are less than this value in pixels for current scale, will drawn as point
 	BOOL _cacheExtents;	// extents won't be recalculated in each get_Extents call
 	bool _volatile;
@@ -405,7 +405,9 @@ private:
 	void CalculateFieldStats(map<int, vector<int>*>& indicesMap, IFieldStatOperations* operations, IShapefile* output);
 	void InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes, IShapefile* sfSubject, long subjectId, std::map<long, long>* fieldMapSubject = NULL,	IShapefile* sfClip = NULL, long clipId = -1, std::map<long, long>* fieldMapClip = NULL);
 	void GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval);
-	
+	void ReleaseRenderingCache();
+	bool ReadShapeExtents(long ShapeIndex, Extent& result);
+
 public:
 	// accessing shapes
 	bool ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly);
@@ -422,9 +424,10 @@ public:
 	void ErrorMessage(long ErrorCode, ICallback* cBack);
 
 	// underlying data
-	std::vector<ShapeData*>* get_ShapeVector();
+	std::vector<ShapeRecord*>* get_ShapeVector();
 	IShapeWrapper* get_ShapeWrapper(int ShapeIndex);
-	IShapeData* get_ShapeData(int ShapeIndex);
+	IShapeData* get_ShapeRenderingData(int ShapeIndex);
+	void put_ShapeRenderingData(int ShapeIndex, CShapeData* data);
 	FILE* get_File(){ return _shpfile; }
 	::CCriticalSection* get_ReadLock(){ return &_readLock; }
 	
@@ -460,5 +463,8 @@ public:
 	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
 	bool GetSorting(vector<long>** indices);
 	
+
+
+
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

@@ -10,6 +10,7 @@
 #include "RamCache.h"
 #include "map.h"
 #include "Functions.h"
+#include "PointClass.h"
 
 #ifdef _DEBUG
 #include "gdal.h"

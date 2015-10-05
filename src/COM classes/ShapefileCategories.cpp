@@ -139,7 +139,7 @@ STDMETHODIMP CShapefileCategories::Clear()
 
 	if (_shapefile)
 	{
-		std::vector<ShapeData*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
+		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 		for (unsigned  int i = 0; i < data->size(); i++)
 		{
 			(*data)[i]->category = -1;
@@ -468,7 +468,7 @@ STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	// switching off shapes that are currently included in the category
-	std::vector<ShapeData*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
+	std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 	for (unsigned int i = 0; i < data->size(); i++)
 	{
 		if ((*data)[i]->category == CategoryIndex)
@@ -725,7 +725,7 @@ STDMETHODIMP CShapefileCategories::MoveUp (long Index, VARIANT_BOOL* retval)
 		_categories[Index - 1] = _categories[Index];
 		_categories[Index] = catBefore;
 		
-		std::vector<ShapeData*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
+		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 		for (unsigned int i = 0; i < data->size(); i++)
 		{
 			if ((*data)[i]->category == Index)
@@ -760,7 +760,7 @@ STDMETHODIMP CShapefileCategories::MoveDown (long Index, VARIANT_BOOL* retval)
 		_categories[Index + 1] = _categories[Index];
 		_categories[Index] = catAfter;
 
-		std::vector<ShapeData*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
+		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 		for (unsigned int i = 0; i < data->size(); i++)
 		{
 			if ((*data)[i]->category == Index)

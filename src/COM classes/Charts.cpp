@@ -545,7 +545,7 @@ STDMETHODIMP CCharts::get_Chart(long ShapeIndex, IChart** retVal)
 	}
 	else
 	{
-		std::vector<ShapeData*>* positions = ((CShapefile*)_shapefile)->get_ShapeVector();
+		std::vector<ShapeRecord*>* positions = ((CShapefile*)_shapefile)->get_ShapeVector();
 		if ( ShapeIndex < 0 || ShapeIndex > (long)positions->size())
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -558,7 +558,7 @@ STDMETHODIMP CCharts::get_Chart(long ShapeIndex, IChart** retVal)
 			CoCreateInstance(CLSID_Chart,NULL,CLSCTX_INPROC_SERVER,IID_IChart,(void**)&chart);
 			if (chart)
 			{
-				ShapeData* data = (*positions)[ShapeIndex];
+				ShapeRecord* data = (*positions)[ShapeIndex];
 				((CChart*)chart)->put_ChartData(reinterpret_cast<char*>(data->chart));
 			}
 			*retVal = chart;
@@ -682,7 +682,7 @@ STDMETHODIMP CCharts::Clear()
 	IShapefile* sf = this->get_ParentShapefile();
 	if (sf)
 	{
-		std::vector<ShapeData*>* data = ((CShapefile*)sf)->get_ShapeVector();
+		std::vector<ShapeRecord*>* data = ((CShapefile*)sf)->get_ShapeVector();
 		for (unsigned int i = 0; i < data->size(); i++)
 		{
 			if ((*data)[i]->chart != NULL)
@@ -1263,7 +1263,7 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 	long numShapes;
 	_shapefile->get_NumShapes(&numShapes);
 
-	std::vector<ShapeData*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
+	std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 
 	for (long i = 0; i < numShapes; i++)
 	{
@@ -1736,7 +1736,7 @@ CPLXMLNode* CCharts::SerializeChartData(CString ElementName)
 		if (!_shapefile)
 			return NULL;
 		
-		std::vector<ShapeData*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
+		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 		if (data)
 		{
 			CPLXMLNode* nodeOld = NULL;
@@ -1826,7 +1826,7 @@ bool CCharts::DeserializeChartData(CPLXMLNode* node)
 {
 	if (node)
 	{
-		std::vector<ShapeData*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
+		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 		if (data)
 		{
 			this->Clear();

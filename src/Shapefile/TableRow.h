@@ -45,6 +45,8 @@ public:
 	VARIANT* GetValue(int index) {
 		return (index >= 0 && index < (int)values.size()) ? values[index] : NULL;
 	}
+
+	bool IsModified() {return _status != DATA_CLEAN; }
 private:
     DataStatusType _status;
 };

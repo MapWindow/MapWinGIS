@@ -82,7 +82,7 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 	vector<vector<CLabelInfo*>*>* labelData = lbs->get_LabelData();
 
 	IShapefile* sf = lbs->get_ParentShapefile();
-	std::vector<ShapeData*>* shapeData = NULL;
+	std::vector<ShapeRecord*>* shapeData = NULL;
 	if (sf) {
 		shapeData = ((CShapefile*)sf)->get_ShapeVector();
 	}
@@ -417,7 +417,7 @@ bool CLabelDrawer::GetExpressionFilter(ILabels* labels, IShapefile* sf, vector<l
 // *********************************************************************
 // 					GetVisibilityMask()										
 // *********************************************************************
-void CLabelDrawer::GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<ShapeData*>* shapeData, std::vector<bool>& visibilityMask)
+void CLabelDrawer::GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<ShapeRecord*>* shapeData, std::vector<bool>& visibilityMask)
 {
 	vector<long> filter;
 	bool hasFilter = GetExpressionFilter(labels, sf, filter);

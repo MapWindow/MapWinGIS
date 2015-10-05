@@ -43,6 +43,7 @@ public:
 	{
 		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
+		_lastRecordIndex = -1;
 		gReferenceCounter.AddRef(tkInterface::idTable);
 	}
 
@@ -155,6 +156,7 @@ public:
 	STDMETHOD(get_JoinFields)(LONG joinIndex, BSTR* pVal);
 	STDMETHOD(get_Filename)(BSTR* pVal);
 	STDMETHOD(get_JoinOptions)(LONG joinIndex, BSTR* pVal);
+	STDMETHOD(ClearCache)();
 
 private:
 	struct JoinInfo
@@ -186,6 +188,7 @@ private:
 	vector<JoinInfo*> _joins;
 	int _lastJoinId;
 	IShapefile* _shapefile;
+	int _lastRecordIndex;    // last index accessed with get_CellValue
 
 public:
 	bool m_needToSaveAsNewFile;
@@ -208,6 +211,7 @@ private:
 	void RestoreFields(CPLXMLNode* node);
 	void ClearFieldCustomizations();
 	void RemoveTempFiles();
+	void ClearRows();
 
 public:	
 	void DeserializeCore(CPLXMLNode* node);

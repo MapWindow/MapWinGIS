@@ -432,9 +432,6 @@
     <ClInclude Include="Shapefile\ShapefileReader.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
-    <ClInclude Include="Shapefile\ShapeInfo.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
     <ClInclude Include="Shapefile\ShapeInterfaces.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
@@ -875,6 +872,18 @@
     </ClInclude>
     <ClInclude Include="Utilities\GraphicsStateHelper.h">
       <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ChartInfo.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeRecord.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeWrapperM.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeUtility.h">
+      <Filter>Shapefile</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1862,6 +1871,12 @@
     </ClCompile>
     <ClCompile Include="Utilities\GraphicsStateHelper.cpp">
       <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeWrapperM.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeUtility.cpp">
+      <Filter>Shapefile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
