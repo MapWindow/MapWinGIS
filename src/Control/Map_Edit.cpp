@@ -320,7 +320,7 @@ bool CMapView::InitDraggingShapefile()
 			IShapefile* sfNew = ShapefileHelper::CloneSelection(sf);
 			ShpfileType shpType;
 			sf->get_ShapefileType(&shpType);
-			shpType = Utility::ShapeTypeConvert2D(shpType);
+			shpType = ShapeUtility::Convert2D(shpType);
 			if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 			{
 				CComPtr<IShapeDrawingOptions> options = NULL;

@@ -130,7 +130,7 @@ private:
 	void DrawLineCategoryGDI( CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection);
 	void DrawPolyGDI(PolygonData* shapeData, CDrawingOptionsEx* options, Gdiplus::GraphicsPath& path, bool pathIsNeeded );
 	void DrawPolyGDI(IShapeData* shp, CDrawingOptionsEx* options, Gdiplus::GraphicsPath& path, bool pathIsNeeded );
-	void DrawPolyGDI(CShapeWrapperCOM* shp, CDrawingOptionsEx* options, Gdiplus::GraphicsPath& path, bool pathIsNeeded );
+	void DrawPolyGDI(IShapeWrapper* shp, CDrawingOptionsEx* options, Gdiplus::GraphicsPath& path, bool pathIsNeeded );
 	inline void DrawPolygonPoint(double &xMin, double& xMax, double& yMin, double& yMax, OLE_COLOR& pointColor);
 
 	// GDI+ drawing
@@ -140,7 +140,7 @@ private:
 
 	void AddPolygonToPath( Gdiplus::GraphicsPath* pathFill, IShapeData* shp, tkVectorDrawingMode drawingMode);
 	void AddPolygonToPath( Gdiplus::GraphicsPath* pathFill, PolygonData* shapeData, tkVectorDrawingMode drawingMode);
-	void AddPolygonToPath( Gdiplus::GraphicsPath* pathFill, CShapeWrapperCOM* shp, tkVectorDrawingMode drawingMode);
+	void AddPolygonToPath( Gdiplus::GraphicsPath* pathFill, IShapeWrapper* shp, tkVectorDrawingMode drawingMode);
 	
 	// drawing of point layer
 	void DrawPointCategory( CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection);

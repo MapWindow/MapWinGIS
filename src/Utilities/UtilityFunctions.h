@@ -79,14 +79,6 @@ namespace Utility
 	byte GetBrightness(OLE_COLOR color);
 	void InitGdiPlusFont(Gdiplus::Font** font, CStringW name, float size);
 	
-
-	// shapefile
-	void SwapEndian(char* a,int size);
-	bool ShapeTypeIsM(ShpfileType shpType);
-	ShpfileType ShapeTypeConvert2D(ShpfileType shpType);
-	void ClearShapefileModifiedFlag(IShapefile* sf);
-	tkLabelPositioning LabelPositionForShapeType(ShpfileType shpType);
-
 	// units conversions
 	CStringW GetLocalizedUnitsText(tkUnitsOfMeasure units);
 	double GetConversionFactor(tkUnitsOfMeasure Units);

@@ -407,6 +407,8 @@ private:
 	void GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval);
 	void ReleaseRenderingCache();
 	bool ReadShapeExtents(long ShapeIndex, Extent& result);
+	IShape* ReadComShape(long ShapeIndex);
+	IShape* ReadFastModeShape(long ShapeIndex);
 
 public:
 	// accessing shapes
@@ -463,8 +465,5 @@ public:
 	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
 	bool GetSorting(vector<long>** indices);
 	
-
-
-
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

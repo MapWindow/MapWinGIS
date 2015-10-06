@@ -111,7 +111,7 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	_useSpatialIndex = (_useSpatialIndex && _hasSpatilaIndex);
 		
 	// get 2D type for not checking it afterwards
-	_shptype = Utility::ShapeTypeConvert2D(_shptype);
+	_shptype = ShapeUtility::Convert2D(_shptype);
 
 	// clearing the paths	
 	_vertexPathes.clear();
@@ -773,7 +773,6 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 	_shapefile->get_FastMode(&fastMode);
 
 	double x = 0, y = 0;
-	VARIANT_BOOL vbretval;
 	int shapeIndex;
 
 	tkCollisionMode collisionMode;
@@ -839,37 +838,14 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		}
 		else
 		{
-			if (fastMode)
+			shp = _shapefile->get_ShapeWrapper(shapeIndex);
+
+			if (!shp) continue;
+			
+			for (int i = 0; i < shp->get_PointCount(); i++)
 			{
-				shp = _shapefile->get_ShapeWrapper(shapeIndex);
-				if (shp != NULL)
-				{
-					for(int i = 0; i < shp->get_PointCount(); i++)
-					{
-						shp->get_PointXY(i, x, y);
-						points.push_back(PointWithId(x, y, shapeIndex));
-					}
-				}
-				else 
-					continue;
-			}
-			else
-			{
-				IShape* shape = NULL;
-				_shapefile->get_Shape(shapeIndex, &shape);
-				if (shape)
-				{
-					long numPoints;
-					shape->get_NumPoints(&numPoints);
-					for(int i = 0; i < numPoints; i++)
-					{
-						shape->get_XY(i, &x, &y, &vbretval);
-						points.push_back(PointWithId(x, y, shapeIndex));
-					}
-					shape->Release();
-				}
-				else
-					continue;
+				shp->get_PointXY(i, x, y);
+				points.push_back(PointWithId(x, y, shapeIndex));
 			}
 		}
 		
@@ -1370,48 +1346,28 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 	}
 	else
 	{
-		if (_fastMode)
+		IShapeWrapper* shp = ((CShapefile*)_shapefile)->get_ShapeWrapper(shapeIndex);
+		if (shp)
 		{
-			CShapeWrapper* wrapper = (CShapeWrapper*)_shapefile->get_ShapeWrapper(shapeIndex);
-			IShapeData* shpData = (IShapeData*)wrapper;
-			if ( shpData )
-			{
-				shpData->get_BoundsXY(xMin, xMax, yMin, yMax);
-				if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
-				{
-					if ((xMax - xMin >= minSize) || (yMax - yMin >= minSize))	// the poly must be larger than a pixel at a current to be drawn
-					{
-						this->AddPolygonToPath(&path, shpData, drawingMode);
-						return true;
-					}
-					else
-					{
-						this->DrawPolygonPoint(xMin, xMax, yMin, yMax, pointColor);
-						return false;
-					}
-				}
-			}
-		}
-		else
-		{
-			// regular mode with COM points
-			CShapeWrapperCOM* shp = (CShapeWrapperCOM*)((CShapefile*)_shapefile)->get_ShapeWrapper(shapeIndex);
-			if (shp)
-			{
-				shp->get_BoundsXY(xMin, xMax, yMin, yMax);
+			shp->get_BoundsXY(xMin, xMax, yMin, yMax);
 
-				if (this->WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
+			if (this->WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
+			{
+				if ((xMax - xMin >= minSize) || (yMax - yMin >= minSize))	// the poly must be larger than a pixel at a current to be drawn
 				{
-					if ((xMax - xMin >= minSize) || (yMax - yMin >= minSize))	// the poly must be larger than a pixel at a current to be drawn
-					{
-						this->AddPolygonToPath(&path, shp, drawingMode);
-						return true;
+					IShapeData* data = dynamic_cast<IShapeData*>(shp);
+					if (data) {
+						AddPolygonToPath(&path, data, drawingMode);
 					}
-					else
-					{
-						this->DrawPolygonPoint(xMin, xMax, yMin, yMax, pointColor);
-						return false;
+					else {
+						AddPolygonToPath(&path, shp, drawingMode);
 					}
+					return true;
+				}
+				else
+				{
+					this->DrawPolygonPoint(xMin, xMax, yMin, yMax, pointColor);
+					return false;
 				}
 			}
 		}
@@ -1428,8 +1384,6 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 // GDI drawing
 void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection)
 {
-	IShapeData* shpData = NULL;
-
 	double xMin, xMax, yMin, yMax;
 	
 	// Entering GDI mode; no calls to _graphics until releasing HDC!!!
@@ -1463,7 +1417,7 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 		{
 			if (m_globalSettings.cacheShapeRenderingData)
 			{
-				shpData = ReadAndCacheShapeData(shapeIndex);
+				IShapeData* shpData = ReadAndCacheShapeData(shapeIndex);
 				if (shpData)
 				{
 					shpData->get_BoundsXY(xMin, xMax, yMin, yMax);
@@ -1508,46 +1462,26 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 		}
 		else
 		{
-			if (fastMode)
+			IShapeWrapper* shp = ((CShapefile*)_shapefile)->get_ShapeWrapper(shapeIndex);
+			if (shp)
 			{
-				CShapeWrapper* wrapper = (CShapeWrapper*)_shapefile->get_ShapeWrapper(shapeIndex);
-				IShapeData* shpData = (IShapeData*)wrapper;
-				
-				if ( shpData )
-				{
-					shpData->get_BoundsXY(xMin, xMax, yMin, yMax);
+				shp->get_BoundsXY(xMin, xMax, yMin, yMax);
 
-					if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
+				if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
+				{
+					if ((xMax - xMin >= delta) || (yMax - yMin >= delta))	// the poly must be larger than a pixel at a current to be drawn
 					{
-						if ((xMax - xMin >= delta) || (yMax - yMin >= delta))	// the poly must be larger than a pixel at a current to be drawn
-						{
-							this->DrawPolyGDI( shpData, options, *path, options->verticesVisible?true:false);
+						IShapeData* data = dynamic_cast<IShapeData*>(shp);
+						if (data) {
+							DrawPolyGDI(data, options, *path, options->verticesVisible ? true : false);
 						}
-						else
-						{
-							this->DrawPolygonPoint(xMin, xMax, yMin, yMax, pointColor);
+						else {
+							DrawPolyGDI(shp, options, *path, options->verticesVisible?true:false);
 						}
 					}
-				}
-			}
-			else
-			{
-				// regular mode with COM points
-				CShapeWrapperCOM* shp = (CShapeWrapperCOM*)((CShapefile*)_shapefile)->get_ShapeWrapper(shapeIndex);
-				if (shp)
-				{
-					shp->get_BoundsXY(xMin, xMax, yMin, yMax);
-
-					if (WithinVisibleExtents(shapeIndex, xMin, xMax, yMin, yMax))
+					else
 					{
-						if ((xMax - xMin >= delta) || (yMax - yMin >= delta))	// the poly must be larger than a pixel at a current to be drawn
-						{
-							this->DrawPolyGDI(shp, options, *path, options->verticesVisible?true:false);
-						}
-						else
-						{
-							this->DrawPolygonPoint(xMin, xMax, yMin, yMax, pointColor);
-						}
+						this->DrawPolygonPoint(xMin, xMax, yMin, yMax, pointColor);
 					}
 				}
 			}
@@ -1969,14 +1903,10 @@ void CShapefileDrawer::AddPolygonToPath(Gdiplus::GraphicsPath* pathFill, Polygon
 // ******************************************************************
 //		AddPolygonToPath()
 // ******************************************************************
-// Regular in-memory version for GDI+
-void CShapefileDrawer::AddPolygonToPath( Gdiplus::GraphicsPath* pathFill, CShapeWrapperCOM* shp, tkVectorDrawingMode drawingMode)
+void CShapefileDrawer::AddPolygonToPath( Gdiplus::GraphicsPath* pathFill, IShapeWrapper* shp, tkVectorDrawingMode drawingMode)
 {
-	// fast access to points
-	std::vector<IPoint*>	allPoints = shp->_allPoints;
-	std::vector<long> allParts = shp->_allParts;
-	
-	int partCount =  allParts.size();
+	int partCount = shp->get_PartCount();
+
 	for(int i = 0; i < partCount; i++)
 	{
 		long start, end;
@@ -1992,8 +1922,7 @@ void CShapefileDrawer::AddPolygonToPath( Gdiplus::GraphicsPath* pathFill, CShape
 			double x,y;
 			for(long j = start; j <= end; j++)
 			{
-				allPoints[j]->get_X(&x);
-				allPoints[j]->get_Y(&y);
+				shp->get_PointXY(j, x, y);
 				
 				int k2 = k * 2;
 				points[k2] = (int)((x - _extents->left) * _dx);
@@ -2151,17 +2080,15 @@ void CShapefileDrawer::DrawPolyGDI( PolygonData* shapeData, CDrawingOptionsEx* o
 //		DrawPolyGDI()
 // ******************************************************************
 // Regular in-memory version
-void CShapefileDrawer::DrawPolyGDI( CShapeWrapperCOM* shp, CDrawingOptionsEx* options, Gdiplus::GraphicsPath& path, bool pathIsNeeded )
+void CShapefileDrawer::DrawPolyGDI( IShapeWrapper* shp, CDrawingOptionsEx* options, Gdiplus::GraphicsPath& path, bool pathIsNeeded )
 {
-	// fast access to points
-	std::vector<IPoint*>	allPoints = shp->_allPoints;
-	std::vector<long> allParts = shp->_allParts;
+	int numPoints = shp->get_PointCount();
+	int numParts = shp->get_PartCount();
 
-	if (allParts.size() == 0 || allPoints.size() == 0)
+	if (numPoints == 0 || numParts == 0)
 		return;
 	
-	int numParts = allParts.size();
-	int* points = new int[allPoints.size() * 2];
+	int* points = new int[numPoints * 2];
 	int* parts = new int[numParts];
 
 	int count = 0;
@@ -2175,8 +2102,7 @@ void CShapefileDrawer::DrawPolyGDI( CShapeWrapperCOM* shp, CDrawingOptionsEx* op
 		double x, y;
 		for(int j = start; j <= end; j++)
 		{
-			allPoints[j]->get_X(&x);
-			allPoints[j]->get_Y(&y);
+			shp->get_PointXY(j, x, y);
 
 			int k2 = count * 2;
 			points[k2] = (int)((x - _extents->left) * _dx);

@@ -1,8 +1,8 @@
 /**************************************************************************************
- * File name: CShapeWrapperPoint.h
+ * File name: CShapeWrapperEmpty.h
  *
  * Project: MapWindow Open Source (MapWinGis ActiveX control) 
- * Description: Declaration of CShapeWrapperPoint
+ * Description: Declaration of CShapeWrapperEmpty
  *
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
@@ -25,77 +25,49 @@
 #pragma once
 #include "ShapeInterfaces.h"
 
-class CShapeWrapperPoint: public IShapeWrapper
+class CShapeWrapperEmpty: public IShapeWrapper
 {
-private:
-	CShapeWrapperPoint() 
-		: _lastErrorCode(tkNO_ERROR), _x(0.0), _y(0.0), _z(0.0), _m(0.0), _initialized(false)
-	{
-	}
 public:
-	CShapeWrapperPoint(ShpfileType shpType)
-		: CShapeWrapperPoint()
-	{
-		_shpType = shpType;
-	}
+	ShapeWrapperType get_WrapperType() { return swtEmpty; }
 
-	CShapeWrapperPoint(char* shpData) 
-		: CShapeWrapperPoint()
-	{
-		put_RawData(shpData);
-	}
-
-private:	
-	bool _initialized;
-	double _x;
-	double _y;
-	double _z;
-	double _m;
-
-	short _lastErrorCode;
-	ShpfileType _shpType;	
-
-public:
-	ShapeWrapperType get_WrapperType() { return swtPoint; }
-
-	int get_ContentLength();
-	int get_PointCount(){ return _initialized ? 1 : 0; }
+	int get_ContentLength() { return ShapeUtility::get_ContentLength(SHP_NULLSHAPE, 0, 0); }
+	int get_PointCount(){ return 0; }
 	int get_PartCount() { return 0; }
 
 	// shpData
-	bool put_RawData(char* shapeData);
-	int* get_RawData(void);
+	bool put_RawData(char* shapeData) { return false; }
+	int* get_ShapeData(void) {return NULL; } 
 	
 	// type
-	ShpfileType get_ShapeType(void) { return _shpType; }
-	ShpfileType get_ShapeType2D(void){ return ShapeUtility::Convert2D(_shpType); }
-	bool put_ShapeType(ShpfileType shpType);
+	ShpfileType get_ShapeType(void) { return SHP_NULLSHAPE; }
+	ShpfileType get_ShapeType2D(void){ return SHP_NULLSHAPE; }
+	bool put_ShapeType(ShpfileType shpType) { return shpType == SHP_NULLSHAPE; }
 	
 	// bounds
 	void RefreshBounds() { };
 	void RefreshBoundsXY() { };
-	bool get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax);
+	bool get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax) { return false; }
 	bool get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax, 
-					double& zMin, double& zMax, double& mMin, double& mMax);
+		double& zMin, double& zMax, double& mMin, double& mMax) { return false; }
 
-	void get_XYFast(int PointIndex, double& x, double& y);
-	bool get_PointXY(int PointIndex, double& x, double& y);
-	bool put_PointXY(int PointIndex, double x, double y);
-	bool get_PointZ(int PointIndex, double& z);
-	bool get_PointM(int PointIndex, double& m);
-	bool put_PointZ(int PointIndex, double z);
-	bool put_PointM(int PointIndex, double m);
+	void get_XYFast(int PointIndex, double& x, double& y) { }
+	bool get_PointXY(int PointIndex, double& x, double& y) { return false; }
+	bool put_PointXY(int PointIndex, double x, double y){ return false; }
+	bool get_PointZ(int PointIndex, double& z){ return false; }
+	bool get_PointM(int PointIndex, double& m){ return false; }
+	bool put_PointZ(int PointIndex, double z){ return false; }
+	bool put_PointM(int PointIndex, double m){ return false; }
 	
 	// COM points
-	IPoint* get_Point(long Index);
-	bool put_Point(long Index, IPoint* pnt);
+	IPoint* get_Point(long Index) {return NULL; }
+	bool put_Point(long Index, IPoint* pnt) { return false; }
 
 	// changing size
-	void Clear() { _initialized = false; }
-	bool InsertPoint(int PointIndex, IPoint* pnt);
-	bool InsertPointXY(int Pointindex, double x, double y);
-	bool InsertPointXYZM(int PointIndex, double x, double y, double z, double m);
-	bool DeletePoint(int Pointindex);
+	void Clear() { }
+	bool InsertPoint(int PointIndex, IPoint* pnt) { return false; }
+	bool InsertPointXY(int Pointindex, double x, double y) { return false; }
+	bool InsertPointXYZM(int PointIndex, double x, double y, double z, double m) { return false; }
+	bool DeletePoint(int Pointindex) { return false; }
 	
 	// parts
 	bool InsertPart(int PartIndex, int PointIndex) { return false; }
@@ -105,13 +77,11 @@ public:
 	bool put_PartStartPoint(long PartIndex, long newVal) { return false; }
 	
 	bool PointInRing(int partIndex, double pointX, double pointY) { return false; }
+
+	int get_LastErrorCode() { return tkNO_ERROR; }
+
 	void ReversePoints(long startIndex, long endIndex) { };
 
-	int get_LastErrorCode()
-	{
-		int code = _lastErrorCode;
-		_lastErrorCode = tkNO_ERROR;
-		return code;
-	}
+	int* get_RawData() { return new int[get_ContentLength() / 4]; }
 };
 

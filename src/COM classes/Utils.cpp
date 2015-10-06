@@ -3275,7 +3275,7 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 			SubjectPolygon->get_ShapeType(&shptype);
 			
 			vector<IShape* > vShapes;
-			if (OgrConverter::GeometryToShapes(oGeom, &vShapes, Utility::ShapeTypeIsM(shptype)))
+			if (OgrConverter::GeometryToShapes(oGeom, &vShapes, ShapeUtility::IsM(shptype)))
 			{
 				*retval = vShapes[0];
 				

@@ -27,6 +27,7 @@
 #include "GeosHelper.h"
 #include <algorithm>
 #include "GeosConverter.h"
+#include "LabelsHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -34,9 +35,13 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// **********************************************
+//		Constructor
+// **********************************************
 CShape::CShape()
 {	
 	_pUnkMarshaler = NULL;
+	
 	USES_CONVERSION;
 	_key = A2BSTR("");
 	_globalCallback = NULL;
@@ -45,193 +50,72 @@ CShape::CShape()
 	
 	_useFastMode = m_globalSettings.shapefileFastMode;
 
-	if (m_globalSettings.shapefileFastMode)	{
-		_shp = new CShapeWrapper(SHP_NULLSHAPE);
-	}
-	else {
-		_shp = new CShapeWrapperCOM(SHP_NULLSHAPE);
-	}
+	_shp = ShapeUtility::CreateEmptyWrapper(!_useFastMode);
 
 	gReferenceCounter.AddRef(tkInterface::idShape);
 }
-	
-	// destructor
+
+// **********************************************
+//		Destructor
+// **********************************************
 CShape::~CShape()
 {
 	::SysFreeString(_key);			
 		
-	if (_shp)
-	{
-		if (_useFastMode)
-		{
-			delete (CShapeWrapper*)_shp;
-		}
-		else
-		{
-			delete (CShapeWrapperCOM*)_shp;
-		}
+	if (_shp) {
+		delete _shp;
 		_shp = NULL;
 	}
 
-	if (_globalCallback)
-	{
+	if (_globalCallback) {
 		_globalCallback->Release();
 	}
+
 	gReferenceCounter.Release(tkInterface::idShape);
 }
-
 
 #pragma region DataConversions
 
 // **********************************************
-//		CShape::get_fastMode
+//   put_RawData()
 // **********************************************
-bool CShape::get_fastMode()
+bool CShape::put_RawData(char* data)
 {
-	return _useFastMode;
-}
+	if (data == NULL) return false;
 
-void CShape::put_fastModeAdd(bool state)
-{
-	_useFastMode = state;
-}
-
-// **********************************************
-//		InitShapeWrapper()
-// **********************************************
-CShapeWrapper* CShape::InitShapeWrapper(CShapeWrapperCOM* shpOld)
-{
-	ASSERT(shpOld != NULL);
-	
-	ShpfileType type = shpOld->get_ShapeType();
-
-	bool isM = (type == SHP_MULTIPOINTM || type == SHP_POINTM || type == SHP_POLYGONM || type == SHP_POLYLINEM);
-	bool isZ = (type == SHP_MULTIPOINTZ || type == SHP_POINTZ || type == SHP_POLYGONZ || type == SHP_POLYLINEZ);
-	
-	double x, y, z, m;
-
-	// referencing the old one
-	std::vector<IPoint*>* allPoints = &(shpOld->_allPoints);
-	std::vector<long>* allParts = &(shpOld->_allParts);
-	
-	// TODO: choose appropriate type
-	CShapeWrapper* shpNew = new CShapeWrapper(type);
-
-	// points
-	unsigned int size = allPoints->size();
-	for (unsigned int i = 0; i < size; i++)
-	{
-		(*allPoints)[i]->get_X(&x);
-		(*allPoints)[i]->get_Y(&y);
-		(*allPoints)[i]->get_Z(&z);
-		(*allPoints)[i]->get_M(&m);
-		shpNew->AddPoint(x, y, z, m);
+	IShapeWrapper* wrapper = ShapeUtility::CreateFastWrapper(data);
+	if (!wrapper) {
+		return false;
 	}
 
-	// parts
-	for (unsigned int i = 0; i < (*allParts).size(); i++)
-	{
-		shpNew->AddPart((*allParts)[i]);
+	if (_shp) {
+		delete _shp;
 	}
 
-	return shpNew;
+	_shp = wrapper;
+	return true;
 }
 
 // **********************************************
-//		InitComWrapper()
+//		put_FastMode
 // **********************************************
-CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld)
+void CShape::put_FastMode(bool newValue)
 {
-	ASSERT(shpOld != NULL);
-	
-	ShpfileType type = shpOld->get_ShapeType();
-
-	bool isM = (type == SHP_MULTIPOINTM || type == SHP_POINTM || type == SHP_POLYGONM || type == SHP_POLYLINEM);
-	bool isZ = (type == SHP_MULTIPOINTZ || type == SHP_POINTZ || type == SHP_POLYGONZ || type == SHP_POLYLINEZ);
-	
-	// creating the new wrapper
-	CShapeWrapperCOM* shpNew = new CShapeWrapperCOM(type);
-	std::vector<IPoint*>* allPoints = &(shpNew->_allPoints);
-	std::vector<long>* allParts = &(shpNew->_allParts);
-	
-	// passing points
-	IPoint* pnt = NULL;
-	int size = shpOld->get_PointCount();
-	
-	double x, y, z, m;
-	for (int i = 0; i < size; i++)
+	if (newValue != _useFastMode )
 	{
-		ComHelper::CreatePoint(&pnt);
+		ShpfileType shpType = _shp->get_ShapeType();
 
-		
-		shpOld->get_PointXY(i, x, y);
-		pnt->put_X(x);
-		pnt->put_Y(y);
-
-		if (isZ || isM)
+		// for M and Z types the same COM point-based wrapper is used
+		if (!ShapeUtility::IsM(shpType) && !ShapeUtility::IsZ(shpType))
 		{
-			shpOld->get_PointZ(i, z);
-			pnt->put_Z(z);
-		}
-		if (isM)
-		{
-			shpOld->get_PointZ(i, m);
-			pnt->put_M(m);
+			IShapeWrapper* wrapper = ShapeUtility::CreateWrapper(shpType, !newValue);
+			_shp->CopyTo(wrapper);
+			delete _shp;
+			_shp = wrapper;
 		}
 
-		allPoints->push_back(pnt);
+		_useFastMode = newValue;
 	}
-	
-	// passing parts
-	size = shpOld->get_PartCount();
-	for (int i = 0; i < size; i++)
-	{
-		allParts->push_back(shpOld->get_PartStartPoint(i));
-	}
-
-	return shpNew;
-}
-
-// **********************************************
-//		put_FastEditMode
-// **********************************************
-// Toggles between fast (CShapeWrapper) and regular mode (_allPoints)
-void CShape::put_fastMode(bool state)
-{
-	ASSERT(_shp != NULL);
-	
-	if (state && !_useFastMode )
-	{
-		// COM wrapper -> CShapeWrapper
-
-		// referencing the old one
-		CShapeWrapperCOM* shpOld = (CShapeWrapperCOM*)_shp;
-		
-		// converting
-		CShapeWrapper* shpNew = InitShapeWrapper(shpOld);
-
-		// deleting the old wrapper
-		delete shpOld;
-
-		// storing the new one
-		_shp = shpNew;
-	}
-	else if ( !state && _useFastMode )
-	{
-		// CShapeWrapper -> COM wrapper
-
-		// referencing the old one
-		CShapeWrapper* shpOld = (CShapeWrapper*)_shp;
-		
-		CShapeWrapperCOM* shpNew = InitComWrapper(shpOld);
-
-		// deleting the old wrapper
-		delete shpOld;
-
-		// storing the new one
-		_shp = shpNew;
-	}
-	_useFastMode = state;
 }
 
 #pragma endregion
@@ -323,13 +207,23 @@ STDMETHODIMP CShape::Create(ShpfileType ShpType, VARIANT_BOOL *retval)
 		ErrorMessage(tkUNSUPPORTED_SHAPEFILE_TYPE);
 		*retval = VARIANT_FALSE;
 	}
-	else
-	{
-		_shp->Clear();
-		_shp->put_ShapeType(ShpType);		// the only error here (multipatch shape) is checked above
-											// so we don't control return value of function here
-		*retval = VARIANT_TRUE;
+
+	// we shall create a new instance of wrapper each and every time
+	// old data is expected to be cleared all the same
+	IShapeWrapper* wrapper = ShapeUtility::CreateWrapper(ShpType, !_useFastMode);
+	if (!wrapper) {
+		return false;
 	}
+
+	if (_shp) {
+		_shp->Clear();
+		delete _shp;
+		_shp = NULL;
+	}
+
+	_shp = wrapper;
+	
+	*retval = VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -349,10 +243,31 @@ STDMETHODIMP CShape::get_ShapeType(ShpfileType *pVal)
 STDMETHODIMP CShape::put_ShapeType(ShpfileType newVal)
 {	
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (!_shp->put_ShapeType(newVal))
+
+	ShapeWrapperType type = _shp->get_WrapperType();
+	ShapeWrapperType newType = ShapeUtility::GetShapeWrapperType(newVal, !_useFastMode);
+
+	if (type == newType) 
 	{
-		ErrorMessage(_shp->get_LastErrorCode());
+		if (!_shp->put_ShapeType(newVal))
+		{
+			ErrorMessage(_shp->get_LastErrorCode());
+		}
 	}
+	else 
+	{
+		// change wrapper type if needed
+		IShapeWrapper* shpNew = ShapeUtility::CreateWrapper(newVal, !_useFastMode);
+		
+		if (!shpNew->put_ShapeType(newVal))	{
+			ErrorMessage(shpNew->get_LastErrorCode());
+		}
+		else {
+			delete _shp;
+			_shp = shpNew;
+		}
+	}
+
 	return S_OK;
 }
 
@@ -368,7 +283,7 @@ bool CShape::ValidateBasics(ShapeValidityCheck& failedCheck, CString& errMsg)
 		return false;
 	}
 
-	ShpfileType shptype = Utility::ShapeTypeConvert2D(_shp->get_ShapeType());
+	ShpfileType shptype = ShapeUtility::Convert2D(_shp->get_ShapeType());
 
 	if (shptype == SHP_POLYGON || shptype == SHP_POLYLINE)
 	{
@@ -1406,7 +1321,7 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 	IShape* shp;
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
-	shp = OgrConverter::GeometryToShape(oGeom3, Utility::ShapeTypeIsM(shpType), oReturnType);
+	shp = OgrConverter::GeometryToShape(oGeom3, ShapeUtility::IsM(shpType), oReturnType);
 	
 	OGRGeometryFactory::destroyGeometry(oGeom3);
 
@@ -1486,7 +1401,7 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 	this->get_ShapeType(&shpType);
 
 	IShape* shp;
-	shp = OgrConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
+	shp = OgrConverter::GeometryToShape(oGeom2, ShapeUtility::IsM(shpType));
 
 	*retval = shp;
 	OGRGeometryFactory::destroyGeometry(oGeom2);
@@ -1534,7 +1449,7 @@ STDMETHODIMP CShape::BufferWithParams(DOUBLE Ditances, LONG numSegments, VARIANT
 		get_ShapeType(&shpType);
 
 		vector<IShape*> shapes;
-		if (GeosConverter::GeomToShapes(gsNew, &shapes, Utility::ShapeTypeIsM(shpType)))
+		if (GeosConverter::GeomToShapes(gsNew, &shapes, ShapeUtility::IsM(shpType)))
 		{
 			if (shapes.size() > 0) {
 				*retVal = shapes[0];
@@ -1572,7 +1487,7 @@ STDMETHODIMP CShape::Boundary(IShape** retval)
 	this->get_ShapeType(&shpType);
 
 	IShape* shp;
-	shp = OgrConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
+	shp = OgrConverter::GeometryToShape(oGeom2, ShapeUtility::IsM(shpType));
 
 	*retval = shp;
 	OGRGeometryFactory::destroyGeometry(oGeom2);
@@ -1604,7 +1519,7 @@ STDMETHODIMP CShape::ConvexHull(IShape** retval)
 	this->get_ShapeType(&shpType);
 
 	IShape* shp;
-	shp = OgrConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
+	shp = OgrConverter::GeometryToShape(oGeom2, ShapeUtility::IsM(shpType));
 
 	*retval = shp;
 	OGRGeometryFactory::destroyGeometry(oGeom2);
@@ -1665,7 +1580,7 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 	this->get_ShapeType(&shpType);
 
 	std::vector<IShape*> vShapes;
-	if (!OgrConverter::GeometryToShapes(oGeom3, &vShapes, Utility::ShapeTypeIsM(shpType)))return S_OK;
+	if (!OgrConverter::GeometryToShapes(oGeom3, &vShapes, ShapeUtility::IsM(shpType)))return S_OK;
 	OGRGeometryFactory::destroyGeometry(oGeom3);
 
 	if (vShapes.size()!=0) 
@@ -1714,7 +1629,7 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 	double x = DBL_MIN;
 	double y = DBL_MIN;
 	
-	ShpfileType shptype = Utility::ShapeTypeConvert2D(_shp->get_ShapeType());
+	ShpfileType shptype = ShapeUtility::Convert2D(_shp->get_ShapeType());
 
 	if( shptype == SHP_POLYLINE)
 	{
@@ -1927,44 +1842,6 @@ double CShape::get_SegmentAngle( long segementIndex)
 }
 
 // **********************************************
-//   get_ShapeWrapper()
-// **********************************************
-IShapeWrapper* CShape::get_ShapeWrapper()
-{ 
-	return _shp; 
-}
-
-// **********************************************
-//   put_ShapeWrapper()
-// **********************************************
-bool CShape::put_ShapeWrapper(CShapeWrapper* data)
-{
-	if (data == NULL )		// fast mode should be set explicitly before using wrapper
-	{
-		return false;
-	}
-	else
-	{
-		if (_shp)
-		{
-			if (_useFastMode)
-			{
-				delete (CShapeWrapper*)_shp;
-			}
-			else
-			{
-				delete (CShapeWrapperCOM*)_shp;
-			}
-			_shp = NULL;
-		}
-		_shp = data;		// shp must never be null
-		_useFastMode = true;
-		return true;
-	}
-}
-
-
-// **********************************************
 //   Clone()
 // **********************************************
 STDMETHODIMP CShape::Clone(IShape** retval)
@@ -2116,7 +1993,7 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 	}
 	else
 	{
-		bool isM = Utility::ShapeTypeIsM(shpType);
+		bool isM = ShapeUtility::IsM(shpType);
 		
 		// for polygons holes should be treated, the main problem here is to determine 
 		// to which part the hole belong; OGR will be used for this
@@ -2157,15 +2034,15 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 /***********************************************************************/
 /*			get_LabelPositionAutoChooseMethod()
 /***********************************************************************/
-void CShape::get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double& x, double& y, double& rotation,
-	tkLineLabelOrientation orientation)
+void CShape::get_LabelPositionAuto(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation)
 {
 	if (method == lpNone)
 	{
 		ShpfileType type;
 		get_ShapeType(&type);
-		method = Utility::LabelPositionForShapeType(type);
+		method = LabelsHelper::LabelPositionForShapeType(type);
 	}
+
 	get_LabelPosition(method, x, y, rotation, orientation);
 }
 
@@ -2174,8 +2051,7 @@ void CShape::get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double
 /***********************************************************************/
 // sub-function for GenerateLabels
 // returns coordinates of label and angle of segment rotation for polylines
-void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, 
-				tkLineLabelOrientation orientation)
+void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation)
 {
 	x = y = rotation = 0.0;
 	if (method == lpNone)
@@ -2187,7 +2063,7 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 	VARIANT_BOOL vbretval;
 	int segmentIndex = -1;	// for polylines
 
-	shpType = Utility::ShapeTypeConvert2D(shpType);
+	shpType = ShapeUtility::Convert2D(shpType);
 	
 	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 	{
@@ -2369,35 +2245,21 @@ STDMETHODIMP CShape::ExportToBinary(VARIANT* bytesArray, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	int* data = NULL;
-	int contentLength;
-	
-	if (_useFastMode)
-	{
-		data = ((CShapeWrapper*)_shp)->get_ShapeData();
-		contentLength = ((CShapeWrapper*)_shp)->get_ContentLength();
-	}
-	else
-	{
-		CShapeWrapperCOM* shp = ((CShapeWrapperCOM*)_shp);
-		CShapeWrapper* shpNew = this->InitShapeWrapper(shp);
-		data = shpNew->get_ShapeData();
-		contentLength = shpNew->get_ContentLength();
-		delete shpNew;
-	}
+	int* data = _shp->get_RawData();
+	int contentLength = _shp->get_ContentLength();
 
 	if (data)
 	{
 		unsigned char* buffer = reinterpret_cast<unsigned char*>(data);
 		*retVal = Bytes2SafeArray(buffer, contentLength, bytesArray);
 		delete[] data;
-		return S_OK;
 	}
 	else
 	{
 		*retVal = NULL;
-		return S_OK;
 	}
+
+	return S_OK;
 }
 
 //********************************************************************
@@ -2414,31 +2276,9 @@ STDMETHODIMP CShape::ImportFromBinary(VARIANT bytesArray, VARIANT_BOOL* retVal)
 	unsigned char* p = NULL;
 	SafeArrayAccessData(bytesArray.parray,(void HUGEP* FAR*)(&p));
 	char* data = reinterpret_cast<char*>(p);
-
-	bool result = false;
-	if (_useFastMode)
-	{
-		 result = ((CShapeWrapper*)_shp)->put_ShapeData(data);
-	}
-	else
-	{
-		CShapeWrapperCOM* shpOld = (CShapeWrapperCOM*)_shp;
-		CShapeWrapper* shp = InitShapeWrapper(shpOld);
-		if (shp)
-		{
-			if (shp->put_ShapeData(data))
-			{
-				CShapeWrapperCOM* shpNew = InitComWrapper(shp);
-				if (shpNew)
-				{
-					_shp = shpNew;
-					delete shpOld;
-					result = true;
-				}
-			}
-			delete shp;
-		}
-	}
+	
+	bool result = _shp->put_RawData(data);
+	
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
 	SafeArrayUnaccessData(bytesArray.parray);
 	return S_OK;
@@ -2469,7 +2309,7 @@ bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck)
 				bool hasM = _shp->get_ShapeType() == SHP_POLYGONM || _shp->get_ShapeType() == SHP_POLYGONZ;
 				bool hasZ = _shp->get_ShapeType() == SHP_POLYGONZ;
 
-				ShpfileType shptype = Utility::ShapeTypeConvert2D(_shp->get_ShapeType());
+				ShpfileType shptype = ShapeUtility::Convert2D(_shp->get_ShapeType());
 				if (shptype == SHP_POLYGON)
 				{
 					int beg_part, end_part;
@@ -2892,7 +2732,7 @@ STDMETHODIMP CShape::Rotate(DOUBLE originX, DOUBLE originY, DOUBLE angle)
 //*****************************************************************
 STDMETHODIMP CShape::get_ShapeType2D(ShpfileType* pVal)
 {
-	*pVal = Utility::ShapeTypeConvert2D(_shp->get_ShapeType());
+	*pVal = ShapeUtility::Convert2D(_shp->get_ShapeType());
 	return S_OK;
 }
 

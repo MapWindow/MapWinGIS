@@ -198,8 +198,8 @@ private:
 	bool SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace, ICallback* cBack);
 	void LoadDefaultFields();
 	void LoadDefaultRows();
-	long RowCount();
-	long FieldCount();
+	long RowCount() { return _rows.size(); }
+	long FieldCount() { return _fields.size(); }
 	bool ReadRecord(long RowIndex);
 	bool WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowIndex);
 	void ClearRow(long rowIndex);

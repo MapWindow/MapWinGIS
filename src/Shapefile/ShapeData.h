@@ -21,8 +21,7 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 30 jan 2011 - created the file
-#pragma once
+ #pragma once
 #include "ShapeInterfaces.h"
 
 // CShapeData declaration
@@ -37,7 +36,7 @@ public:
 		_bounds = NULL;
 		_points = NULL;
 		_parts = NULL;
-		put_ShapeData(shpData);
+		put_RawData(shpData);
 	}
 
 	// Destructor
@@ -82,7 +81,7 @@ public:
 	bool get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax);
 
 	// data
-	bool put_ShapeData(char* shapeData);
+	bool put_RawData(char* shapeData);
 
 	// parts
 	int get_PartStartPoint(int PartIndex);

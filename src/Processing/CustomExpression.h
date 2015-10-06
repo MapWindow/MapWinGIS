@@ -32,7 +32,7 @@ private:
 public:
 	CustomExpression() 
 		: _useFields(true), _saveOperations(true), _floatFormat(m_globalSettings.floatNumberFormat),
-		_shape(NULL)
+		_shape(NULL), _errorPosition(-1)
 	{
 		
 	}

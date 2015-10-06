@@ -26,6 +26,7 @@
 #include "ShapeWrapper.h"
 
 #pragma region GetShape
+
 // ************************************************************
 //		get_Shape()
 // ************************************************************
@@ -45,886 +46,887 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 	// editing shapes?
 	if (_isEditingShapes)
 	{
-		_shapeData[ShapeIndex]->shape->AddRef();
+		if (_shapeData[ShapeIndex]->shape) {
+			_shapeData[ShapeIndex]->shape->AddRef();
+		}
+
 		*pVal = _shapeData[ShapeIndex]->shape;
 		return S_OK;
 	}
 
 	CSingleLock lock(&_readLock, TRUE);
 
-	// using fast mode?
-	if (_fastMode)
-	{
-		fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
-
-		// read the shp from disk
-		int intbuf;
-		fread(&intbuf,sizeof(int),1,_shpfile);
-		Utility::SwapEndian((char*)&intbuf,sizeof(int));
-
-		if( intbuf != ShapeIndex + 1 )
-		{
-			ErrorMessage(tkINVALID_SHP_FILE);
-			*pVal = NULL;
-			return S_OK;
-		}
-
-		fread(&intbuf,sizeof(int),1,_shpfile);
-		Utility::SwapEndian((char*)&intbuf,sizeof(int));
-		int contentLength = intbuf * 2;	//(32 bit words)
-
-		// *2: for conversion from 16-bit words to 8-bit words
-		// -2: skip first 2 int - it's record number and content length;
-		int length = contentLength; //- 2 * sizeof(int);
-
-		char* shapeData = new char[length];
-		int count = (int)fread(shapeData, sizeof(char), length, _shpfile);
-
-		if (count != length)
-		{
-			delete[] shapeData;
-			*pVal = NULL;
-			return S_OK;
-		}
-
-		CShapeWrapper* shp = new CShapeWrapper(shapeData);
-		delete[] shapeData;
-
-		if (shp != NULL)
-		{
-			IShape* shape = NULL;
-			ComHelper::CreateShape(&shape);
-			shape->put_GlobalCallback(_globalCallback);
-			((CShape*)shape)->put_ShapeWrapper(shp);
-			*pVal = shape;
-		}
-		return S_OK;
-	}
-
-	// read the shp from disk
-	fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
-
-	int intbuf;
-	fread(&intbuf,sizeof(int),1,_shpfile);
-	Utility::SwapEndian((char*)&intbuf,sizeof(int));
-
-	// shape records are 1 based - Allow for a mistake
-	if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
-	{
-		*pVal = NULL;
-		ErrorMessage(tkINVALID_SHP_FILE);
-	}
-	else
-	{
-		fread(&intbuf,sizeof(int),1,_shpfile);
-		Utility::SwapEndian((char*)&intbuf,sizeof(int));
-		int contentLength = intbuf * 2;//(32 bit words)
-
-		fread(&intbuf,sizeof(int),1,_shpfile);
-		ShpfileType shpType = (ShpfileType)intbuf;
-
-		IShape * shape = NULL;
-		IPoint * pnt = NULL;
-#pragma region Nullshape Or Mismatch
-		// ------------------------------------------------------
-		//	  Shape specific record contents
-		// ------------------------------------------------------
-		if( _shpfiletype == SHP_NULLSHAPE )
-		{
-			if( shpType != SHP_NULLSHAPE )
-			{
-				ErrorMessage(tkINVALID_SHP_FILE);
-				*pVal = NULL;
-			}
-			else
-			{
-							
-				shape->Create(shpType,&vbretval);
-				shape->put_GlobalCallback(_globalCallback);
-				*pVal = shape;
-			}
-		}
-		else if ( shpType != SHP_NULLSHAPE && shpType != _shpfiletype )
-		{
-			ErrorMessage(tkINVALID_SHP_FILE);
-			*pVal = NULL;
-		}
-#pragma endregion
-#pragma region Point
-		// ------------------------------------------------------
-		//	  SHP_POINT
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_POINT )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-
-			if( shpType == SHP_POINT )
-			{
-				ComHelper::CreatePoint(&pnt);
-				pnt->put_GlobalCallback(_globalCallback);
-
-				double x, y;
-				fread(&x,sizeof(double),1,_shpfile);
-				fread(&y,sizeof(double),1,_shpfile);
-				pnt->put_X(x);
-				pnt->put_Y(y);
-
-				long pointIndex = 0;
-				shape->InsertPoint(pnt, &pointIndex, &vbretval);
-				if( vbretval == VARIANT_FALSE )
-				{
-					*pVal = NULL;
-					shape->Release();
-					return S_OK;
-				}
-				pnt->Release();
-			}
-			*pVal = shape;
-		}
-
-		// ------------------------------------------------------
-		//	  SHP_POINTZ
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_POINTZ )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-
-			if( shpType == SHP_POINTZ )
-			{
-				ComHelper::CreatePoint(&pnt);
-				pnt->put_GlobalCallback(_globalCallback);
-
-				double x, y, z, m;
-				fread(&x,sizeof(double),1,_shpfile);
-				fread(&y,sizeof(double),1,_shpfile);
-				fread(&z,sizeof(double),1,_shpfile);
-				fread(&m,sizeof(double),1,_shpfile);
-				pnt->put_X(x);
-				pnt->put_Y(y);
-				pnt->put_Z(z);
-				pnt->put_M(m);
-
-				long pointIndex = 0;
-				shape->InsertPoint(pnt, &pointIndex, &vbretval);
-				if( vbretval == VARIANT_FALSE )
-				{
-					*pVal = NULL;
-					shape->Release();
-					return S_OK;
-				}
-				pnt->Release();
-			}
-			*pVal = shape;
-		}
-
-		// ------------------------------------------------------
-		//	  SHP_POINTM
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_POINTM )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-
-			if( shpType == SHP_POINTM )
-			{
-				ComHelper::CreatePoint(&pnt);
-				pnt->put_GlobalCallback(_globalCallback);
-
-				double x, y, m;
-				fread(&x,sizeof(double),1,_shpfile);
-				fread(&y,sizeof(double),1,_shpfile);
-				fread(&m,sizeof(double),1,_shpfile);
-				pnt->put_X(x);
-				pnt->put_Y(y);
-				pnt->put_M(m);
-
-				long pointIndex = 0;
-				shape->InsertPoint(pnt, &pointIndex, &vbretval);
-				if( vbretval == VARIANT_FALSE )
-				{
-					*pVal = NULL;
-					shape->Release();
-					return S_OK;
-				}
-				pnt->Release();
-			}
-			*pVal = shape;
-		}
-#pragma endregion
-#pragma region Polyline
-		// ------------------------------------------------------
-		//	  SHP_POLYLINE
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_POLYLINE )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-
-			if( shpType == SHP_POLYLINE )
-			{
-				VARIANT_BOOL retval;
-				double bx, by;
-				int numParts;
-				int numPoints;
-				int part;
-				double x, y;
-
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-
-				fread(&numParts,sizeof(int),1,_shpfile);
-				fread(&numPoints,sizeof(int),1,_shpfile);
-
-				long partIndex = 0;
-				for( int i = 0; i < numParts; i++ )
-				{
-					fread(&part,sizeof(int),1,_shpfile);
-					partIndex = i;
-					shape->InsertPart(part,&partIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{
-						*pVal = NULL;
-						shape->Release();
-						return S_OK;
-					}
-				}
-
-				long pointIndex = 0;
-				for( int j = 0; j < numPoints; j++ )
-				{
-					ComHelper::CreatePoint(&pnt);
-					pnt->put_GlobalCallback(_globalCallback);
-					fread(&x,sizeof(double),1,_shpfile);
-					fread(&y,sizeof(double),1,_shpfile);
-					pnt->put_X(x);
-					pnt->put_Y(y);
-					pointIndex = j;
-					shape->InsertPoint(pnt,&pointIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{
-						*pVal = NULL;
-						shape->Release();
-						return S_OK;
-					}
-					pnt->Release();
-				}
-			}
-			*pVal = shape;
-		}
-
-		// ------------------------------------------------------
-		//	  SHP_POLYLINEZ
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_POLYLINEZ )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-			if( shpType == SHP_POLYLINEZ )
-			{
-				VARIANT_BOOL retval;
-				double bx, by, bz, bm;
-				int numParts;
-				int numPoints;
-				int part;
-				double x, y, z, m;
-
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-
-				fread(&numParts,sizeof(int),1,_shpfile);
-				fread(&numPoints,sizeof(int),1,_shpfile);
-
-				long partIndex = 0;
-				for( int i = 0; i < numParts; i++ )
-				{	fread(&part,sizeof(int),1,_shpfile);
-				partIndex = i;
-				shape->InsertPart(part,&partIndex,&retval);
-				if( retval == VARIANT_FALSE )
-				{	*pVal = NULL;
-				shape->Release();
-				return S_OK;
-				}
-				}
-
-				long pointIndex = 0;
-				//Read the x, y part of the point
-				for( int j = 0; j < numPoints; j++ )
-				{
-					ComHelper::CreatePoint(&pnt);
-					pnt->put_GlobalCallback(_globalCallback);
-					fread(&x,sizeof(double),1,_shpfile);
-					fread(&y,sizeof(double),1,_shpfile);
-					pnt->put_X(x);
-					pnt->put_Y(y);
-					pointIndex = j;
-					shape->InsertPoint(pnt,&pointIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->Release();
-				}
-
-				fread(&bz,sizeof(double),1,_shpfile);
-				fread(&bz,sizeof(double),1,_shpfile);
-
-				for( int k = 0; k < numPoints; k++ )
-				{	fread(&z,sizeof(double),1,_shpfile);
-				pointIndex = k;
-				IPoint * pnt = NULL;
-				shape->get_Point(pointIndex, &pnt);
-				if( pnt == NULL )
-				{	*pVal = NULL;
-				shape->Release();
-				return S_OK;
-				}
-				pnt->put_Z(z);
-				//Rob Cairns 20-Dec-05
-				pnt->Release();
-				}
-
-				fread(&bm,sizeof(double),1,_shpfile);
-				fread(&bm,sizeof(double),1,_shpfile);
-
-				for( int mc = 0; mc < numPoints; mc++ )
-				{	fread(&m,sizeof(double),1,_shpfile);
-				pointIndex = mc;
-				IPoint * pnt = NULL;
-				shape->get_Point(pointIndex, &pnt);
-				if( pnt == NULL )
-				{	*pVal = NULL;
-				shape->Release();
-				return S_OK;
-				}
-				pnt->put_M(m);
-				//Rob Cairns 20-Dec-05
-				pnt->Release();
-				}
-			}
-			*pVal = shape;
-		}
-
-		// ------------------------------------------------------
-		//	  SHP_POLYLINEM
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_POLYLINEM )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-
-			if( shpType == SHP_POLYLINEM )
-			{
-				VARIANT_BOOL retval;
-				double bx, by, bm;
-				int numParts;
-				int numPoints;
-				int part;
-				double x, y, m;
-
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-
-				fread(&numParts,sizeof(int),1,_shpfile);
-				fread(&numPoints,sizeof(int),1,_shpfile);
-
-				long partIndex = 0;
-				for( int i = 0; i < numParts; i++ )
-				{	fread(&part,sizeof(int),1,_shpfile);
-				partIndex = i;
-				shape->InsertPart(part,&partIndex,&retval);
-				if( retval == VARIANT_FALSE )
-				{	*pVal = NULL;
-				shape->Release();
-				return S_OK;
-				}
-				}
-
-				long pointIndex = 0;
-				//Read the x, y part of the point
-				for( int j = 0; j < numPoints; j++ )
-				{
-					ComHelper::CreatePoint(&pnt);
-					pnt->put_GlobalCallback(_globalCallback);
-					fread(&x,sizeof(double),1,_shpfile);
-					fread(&y,sizeof(double),1,_shpfile);
-					pnt->put_X(x);
-					pnt->put_Y(y);
-					pointIndex = j;
-					shape->InsertPoint(pnt,&pointIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->Release();
-				}
-
-				fread(&bm,sizeof(double),1,_shpfile);
-				fread(&bm,sizeof(double),1,_shpfile);
-
-				for( int mc = 0; mc < numPoints; mc++ )
-				{	fread(&m,sizeof(double),1,_shpfile);
-				pointIndex = mc;
-				IPoint * pnt = NULL;
-				shape->get_Point(pointIndex, &pnt);
-				if( pnt == NULL )
-				{	*pVal = NULL;
-				shape->Release();
-				return S_OK;
-				}
-				pnt->put_M(m);
-				//Rob Cairns 20-Dec-05
-				pnt->Release();
-
-				}
-			}
-			*pVal = shape;
-		}
-#pragma endregion
-#pragma region Polygon
-		// ------------------------------------------------------
-		//	  SHP_POLYGON
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_POLYGON )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-
-			if( shpType == SHP_POLYGON )
-			{
-				VARIANT_BOOL retval;
-				double bx, by;
-				int numParts;
-				int numPoints;
-				int part;
-				double x, y;
-
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-
-				fread(&numParts,sizeof(int),1,_shpfile);
-				fread(&numPoints,sizeof(int),1,_shpfile);
-
-				long partIndex = 0;
-				for( int i = 0; i < numParts; i++ )
-				{	fread(&part,sizeof(int),1,_shpfile);
-				partIndex = i;
-				shape->InsertPart(part,&partIndex,&retval);
-				if( retval == VARIANT_FALSE )
-				{	*pVal = NULL;
-				shape->Release();
-				return S_OK;
-				}
-				}
-
-				long pointIndex = 0;
-				for( int j = 0; j < numPoints; j++ )
-				{
-					ComHelper::CreatePoint(&pnt);
-					pnt->put_GlobalCallback(_globalCallback);
-					fread(&x,sizeof(double),1,_shpfile);
-					fread(&y,sizeof(double),1,_shpfile);
-					pnt->put_X(x);
-					pnt->put_Y(y);
-					pointIndex = j;
-					shape->InsertPoint(pnt,&pointIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->Release();
-				}
-			}
-			*pVal = shape;
-		}
-
-		// ------------------------------------------------------
-		//	  SHP_POLYGONZ
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_POLYGONZ )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-			if( shpType == SHP_POLYGONZ )
-			{
-				VARIANT_BOOL retval;
-				double bx, by, bz, bm;
-				int numParts;
-				int numPoints;
-				int part;
-				double x, y, z, m;
-
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-
-				fread(&numParts,sizeof(int),1,_shpfile);
-				fread(&numPoints,sizeof(int),1,_shpfile);
-
-				long partIndex = 0;
-				for( int i = 0; i < numParts; i++ )
-				{	fread(&part,sizeof(int),1,_shpfile);
-				partIndex = i;
-				shape->InsertPart(part,&partIndex,&retval);
-				if( retval == VARIANT_FALSE )
-				{	*pVal = NULL;
-				shape->Release();
-				return S_OK;
-				}
-				}
-
-				//Read the x, y part of the point
-				long pointIndex = 0;
-				for( int j = 0; j < numPoints; j++ )
-				{
-					ComHelper::CreatePoint(&pnt);
-					pnt->put_GlobalCallback(_globalCallback);
-					fread(&x,sizeof(double),1,_shpfile);
-					fread(&y,sizeof(double),1,_shpfile);
-					pnt->put_X(x);
-					pnt->put_Y(y);
-					pointIndex = j;
-					shape->InsertPoint(pnt,&pointIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->Release();
-				}
-
-				fread(&bz,sizeof(double),1,_shpfile);
-				fread(&bz,sizeof(double),1,_shpfile);
-
-				for( int k = 0; k < numPoints - 1; k++ )
-				{	fread(&z,sizeof(double),1,_shpfile);
-				pointIndex = k;
-				IPoint * pnt = NULL;
-				shape->get_Point(pointIndex, &pnt);
-				if( pnt == NULL )
-				{	*pVal = NULL;
-				shape->Release();
-				return S_OK;
-				}
-				pnt->put_Z(z);
-				pnt->Release();
-				}
-
-				fread(&bm,sizeof(double),1,_shpfile);
-				fread(&bm,sizeof(double),1,_shpfile);
-
-				for( int mc = 0; mc < numPoints; mc++ )
-				{	fread(&m,sizeof(double),1,_shpfile);
-				pointIndex = mc;
-				IPoint * pnt = NULL;
-				shape->get_Point(pointIndex, &pnt);
-				if( pnt == NULL )
-				{	*pVal = NULL;
-				shape->Release();
-				return S_OK;
-				}
-				pnt->put_M(m);
-				pnt->Release();
-				}
-			}
-			*pVal = shape;
-		}
-
-		// ------------------------------------------------------
-		//	  SHP_POLYGONM
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_POLYGONM )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-			if( shpType == SHP_POLYGONM )
-			{
-				VARIANT_BOOL retval;
-				double bx, by, bm;
-				int numParts;
-				int numPoints;
-				int part;
-				double x, y, m;
-
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-
-				fread(&numParts,sizeof(int),1,_shpfile);
-				fread(&numPoints,sizeof(int),1,_shpfile);
-
-				long partIndex = 0;
-				for( int i = 0; i < numParts; i++ )
-				{
-					fread(&part,sizeof(int),1,_shpfile);
-					partIndex = i;
-					shape->InsertPart(part,&partIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{
-						*pVal = NULL;
-						shape->Release();
-						return S_OK;
-					}
-				}
-
-				//Read the x, y part of the point
-				long pointIndex = 0;
-				for( int j = 0; j < numPoints; j++ )
-				{
-					ComHelper::CreatePoint(&pnt);
-					pnt->put_GlobalCallback(_globalCallback);
-					fread(&x,sizeof(double),1,_shpfile);
-					fread(&y,sizeof(double),1,_shpfile);
-					pnt->put_X(x);
-					pnt->put_Y(y);
-					pointIndex = j;
-					shape->InsertPoint(pnt,&pointIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->Release();
-				}
-
-				// M range
-				fread(&bm,sizeof(double),1,_shpfile);
-				fread(&bm,sizeof(double),1,_shpfile);
-
-				for( int mc = 0; mc < numPoints; mc++ )
-				{
-					fread(&m,sizeof(double),1,_shpfile);
-					pointIndex = mc;
-					IPoint * pnt = NULL;
-					shape->get_Point(pointIndex, &pnt);
-					if( pnt == NULL )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->put_M(m);
-					pnt->Release();
-				}
-			}
-			*pVal = shape;
-		}
-#pragma endregion
-#pragma region Multipoint
-		// ------------------------------------------------------
-		//	  SHP_MULTIPOINT
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_MULTIPOINT )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-
-			if( shpType == SHP_MULTIPOINT )
-			{
-				VARIANT_BOOL retval;
-				double bx, by;
-				int numPoints;
-				double x, y;
-
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-
-				fread(&numPoints,sizeof(int),1,_shpfile);
-
-				long pointIndex = 0;
-				for( int j = 0; j < numPoints; j++ )
-				{
-					ComHelper::CreatePoint(&pnt);
-					pnt->put_GlobalCallback(_globalCallback);
-					fread(&x,sizeof(double),1,_shpfile);
-					fread(&y,sizeof(double),1,_shpfile);
-					pnt->put_X(x);
-					pnt->put_Y(y);
-					pointIndex = j;
-					shape->InsertPoint(pnt,&pointIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->Release();
-				}
-			}
-			*pVal = shape;
-		}
-
-		// ------------------------------------------------------
-		//	  SHP_MULTIPOINTZ
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_MULTIPOINTZ )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-
-			if( shpType == SHP_MULTIPOINTZ )
-			{
-				VARIANT_BOOL retval;
-				double bx, by, bz, bm;
-				int numPoints;
-				double x, y, z, m;
-
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-
-				fread(&numPoints,sizeof(int),1,_shpfile);
-
-				long pointIndex = 0;
-				for( int j = 0; j < numPoints; j++ )
-				{
-					ComHelper::CreatePoint(&pnt);
-					pnt->put_GlobalCallback(_globalCallback);
-					fread(&x,sizeof(double),1,_shpfile);
-					fread(&y,sizeof(double),1,_shpfile);
-					pnt->put_X(x);
-					pnt->put_Y(y);
-					pointIndex = j;
-					shape->InsertPoint(pnt,&pointIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{	*pVal = NULL;
-						shape->Release();
-						return S_OK;
-					}
-					pnt->Release();
-				}
-
-				fread(&bz,sizeof(double),1,_shpfile);
-				fread(&bz,sizeof(double),1,_shpfile);
-
-				for( int k = 0; k < numPoints; k++ )
-				{
-					fread(&z,sizeof(double),1,_shpfile);
-					pointIndex = k;
-					IPoint * pnt = NULL;
-					shape->get_Point(pointIndex, &pnt);
-					if( pnt == NULL )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->put_Z(z);
-					pnt->Release();
-				}
-
-				fread(&bm,sizeof(double),1,_shpfile);
-				fread(&bm,sizeof(double),1,_shpfile);
-
-				for( int mc = 0; mc < numPoints; mc++ )
-				{
-					fread(&m,sizeof(double),1,_shpfile);
-					pointIndex = mc;
-					IPoint * pnt = NULL;
-					shape->get_Point(pointIndex, &pnt);
-					if( pnt == NULL )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->put_M(m);
-					pnt->Release();
-				}
-			}
-			*pVal = shape;
-		}
-
-		// ------------------------------------------------------
-		//	  SHP_MULTIPOINTM
-		// ------------------------------------------------------
-		else if( _shpfiletype == SHP_MULTIPOINTM )
-		{
-			ComHelper::CreateShape(&shape);
-			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(_globalCallback);
-
-			if( shpType == SHP_MULTIPOINTM )
-			{
-				VARIANT_BOOL retval;
-				double bx, by, bm;
-				int numPoints;
-				double x, y, m;
-
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-				fread(&bx,sizeof(double),1,_shpfile);
-				fread(&by,sizeof(double),1,_shpfile);
-
-				fread(&numPoints,sizeof(int),1,_shpfile);
-
-				long pointIndex = 0;
-				for( int j = 0; j < numPoints; j++ )
-				{
-					ComHelper::CreatePoint(&pnt);
-					pnt->put_GlobalCallback(_globalCallback);
-					fread(&x,sizeof(double),1,_shpfile);
-					fread(&y,sizeof(double),1,_shpfile);
-					pnt->put_X(x);
-					pnt->put_Y(y);
-					pointIndex = j;
-					shape->InsertPoint(pnt,&pointIndex,&retval);
-					if( retval == VARIANT_FALSE )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->Release();
-				}
-
-				fread(&bm,sizeof(double),1,_shpfile);
-				fread(&bm,sizeof(double),1,_shpfile);
-
-				for( int mc = 0; mc < numPoints; mc++ )
-				{
-					fread(&m,sizeof(double),1,_shpfile);
-					pointIndex = mc;
-					IPoint * pnt = NULL;
-					shape->get_Point(pointIndex, &pnt);
-					if( pnt == NULL )
-					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
-					}
-					pnt->put_M(m);
-					pnt->Release();
-				}
-			}
-			*pVal = shape;
-		}
-#pragma endregion
-	}
+	*pVal = _fastMode ? ReadFastModeShape(ShapeIndex) : ReadComShape(ShapeIndex);
 
 	return S_OK;
+}
+
+// ************************************************************
+//		ReadFastModeShape()
+// ************************************************************
+IShape* CShapefile::ReadFastModeShape(long ShapeIndex)
+{
+	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
+
+	// read the shp from disk
+	int intbuf;
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
+
+	if (intbuf != ShapeIndex + 1)
+	{
+		ErrorMessage(tkINVALID_SHP_FILE);
+		return NULL;
+	}
+
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
+	int contentLength = intbuf * 2;	//(32 bit words)
+
+	// *2: for conversion from 16-bit words to 8-bit words
+	// -2: skip first 2 int - it's record number and content length;
+	int length = contentLength; //- 2 * sizeof(int);
+
+	char* data = new char[length];
+	int count = (int)fread(data, sizeof(char), length, _shpfile);
+
+	if (count != length)
+	{
+		delete[] data;
+		return NULL;
+	}
+
+	IShape* shape = NULL;
+
+	if (data != NULL)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->put_GlobalCallback(_globalCallback);
+		((CShape*)shape)->put_RawData(data);
+		delete[] data;
+	}
+
+	return shape;
+}
+
+// ************************************************************
+//		ReadComShape()
+// ************************************************************
+IShape* CShapefile::ReadComShape(long ShapeIndex)
+{
+	// read the shp from disk
+	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
+
+	int intbuf;
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
+
+	// shape records are 1 based - Allow for a mistake
+	if (intbuf != ShapeIndex + 1 && intbuf != ShapeIndex)
+	{
+		ErrorMessage(tkINVALID_SHP_FILE);
+		return NULL;
+	}
+	
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
+	int contentLength = intbuf * 2;//(32 bit words)
+
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	ShpfileType shpType = (ShpfileType)intbuf;
+
+	IShape * shape = NULL;
+	IPoint * pnt = NULL;
+	VARIANT_BOOL vbretval;
+
+#pragma region Nullshape Or Mismatch
+	// ------------------------------------------------------
+	//	  Shape specific record contents
+	// ------------------------------------------------------
+	if (_shpfiletype == SHP_NULLSHAPE)
+	{
+		if (shpType != SHP_NULLSHAPE)
+		{
+			ErrorMessage(tkINVALID_SHP_FILE);
+			return NULL;
+		}
+		else
+		{
+			shape->Create(shpType, &vbretval);
+			shape->put_GlobalCallback(_globalCallback);
+			return shape;
+		}
+	}
+	else if (shpType != SHP_NULLSHAPE && shpType != _shpfiletype)
+	{
+		ErrorMessage(tkINVALID_SHP_FILE);
+		return NULL;
+	}
+#pragma endregion
+
+#pragma region Point
+	// ------------------------------------------------------
+	//	  SHP_POINT
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_POINT)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+
+		if (shpType == SHP_POINT)
+		{
+			ComHelper::CreatePoint(&pnt);
+			pnt->put_GlobalCallback(_globalCallback);
+
+			double x, y;
+			fread(&x, sizeof(double), 1, _shpfile);
+			fread(&y, sizeof(double), 1, _shpfile);
+			pnt->put_X(x);
+			pnt->put_Y(y);
+
+			long pointIndex = 0;
+			shape->InsertPoint(pnt, &pointIndex, &vbretval);
+			if (vbretval == VARIANT_FALSE)
+			{
+				shape->Release();
+				return NULL;
+			}
+			pnt->Release();
+		}
+	}
+
+	// ------------------------------------------------------
+	//	  SHP_POINTZ
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_POINTZ)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+
+		if (shpType == SHP_POINTZ)
+		{
+			ComHelper::CreatePoint(&pnt);
+			pnt->put_GlobalCallback(_globalCallback);
+
+			double x, y, z, m;
+			fread(&x, sizeof(double), 1, _shpfile);
+			fread(&y, sizeof(double), 1, _shpfile);
+			fread(&z, sizeof(double), 1, _shpfile);
+			fread(&m, sizeof(double), 1, _shpfile);
+			pnt->put_X(x);
+			pnt->put_Y(y);
+			pnt->put_Z(z);
+			pnt->put_M(m);
+
+			long pointIndex = 0;
+			shape->InsertPoint(pnt, &pointIndex, &vbretval);
+			if (vbretval == VARIANT_FALSE)
+			{
+				shape->Release();
+				return NULL;
+			}
+			pnt->Release();
+		}
+	}
+
+	// ------------------------------------------------------
+	//	  SHP_POINTM
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_POINTM)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+
+		if (shpType == SHP_POINTM)
+		{
+			ComHelper::CreatePoint(&pnt);
+			pnt->put_GlobalCallback(_globalCallback);
+
+			double x, y, m;
+			fread(&x, sizeof(double), 1, _shpfile);
+			fread(&y, sizeof(double), 1, _shpfile);
+			fread(&m, sizeof(double), 1, _shpfile);
+			pnt->put_X(x);
+			pnt->put_Y(y);
+			pnt->put_M(m);
+
+			long pointIndex = 0;
+			shape->InsertPoint(pnt, &pointIndex, &vbretval);
+			if (vbretval == VARIANT_FALSE)
+			{
+				shape->Release();
+				return NULL;
+			}
+			pnt->Release();
+		}
+	}
+#pragma endregion
+#pragma region Polyline
+	// ------------------------------------------------------
+	//	  SHP_POLYLINE
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_POLYLINE)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+
+		if (shpType == SHP_POLYLINE)
+		{
+			VARIANT_BOOL retval;
+			double bx, by;
+			int numParts;
+			int numPoints;
+			int part;
+			double x, y;
+
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+
+			fread(&numParts, sizeof(int), 1, _shpfile);
+			fread(&numPoints, sizeof(int), 1, _shpfile);
+
+			long partIndex = 0;
+			for (int i = 0; i < numParts; i++)
+			{
+				fread(&part, sizeof(int), 1, _shpfile);
+				partIndex = i;
+				shape->InsertPart(part, &partIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+			}
+
+			long pointIndex = 0;
+			for (int j = 0; j < numPoints; j++)
+			{
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_GlobalCallback(_globalCallback);
+				fread(&x, sizeof(double), 1, _shpfile);
+				fread(&y, sizeof(double), 1, _shpfile);
+				pnt->put_X(x);
+				pnt->put_Y(y);
+				pointIndex = j;
+				shape->InsertPoint(pnt, &pointIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->Release();
+			}
+		}
+	}
+
+	// ------------------------------------------------------
+	//	  SHP_POLYLINEZ
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_POLYLINEZ)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+		if (shpType == SHP_POLYLINEZ)
+		{
+			VARIANT_BOOL retval;
+			double bx, by, bz, bm;
+			int numParts;
+			int numPoints;
+			int part;
+			double x, y, z, m;
+
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+
+			fread(&numParts, sizeof(int), 1, _shpfile);
+			fread(&numPoints, sizeof(int), 1, _shpfile);
+
+			long partIndex = 0;
+			for (int i = 0; i < numParts; i++)
+			{
+				fread(&part, sizeof(int), 1, _shpfile);
+				partIndex = i;
+				shape->InsertPart(part, &partIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+			}
+
+			long pointIndex = 0;
+			//Read the x, y part of the point
+			for (int j = 0; j < numPoints; j++)
+			{
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_GlobalCallback(_globalCallback);
+				fread(&x, sizeof(double), 1, _shpfile);
+				fread(&y, sizeof(double), 1, _shpfile);
+				pnt->put_X(x);
+				pnt->put_Y(y);
+				pointIndex = j;
+				shape->InsertPoint(pnt, &pointIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->Release();
+			}
+
+			fread(&bz, sizeof(double), 1, _shpfile);
+			fread(&bz, sizeof(double), 1, _shpfile);
+
+			for (int k = 0; k < numPoints; k++)
+			{
+				fread(&z, sizeof(double), 1, _shpfile);
+				pointIndex = k;
+				IPoint * pnt = NULL;
+				shape->get_Point(pointIndex, &pnt);
+				if (pnt == NULL)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->put_Z(z);
+				pnt->Release();
+			}
+
+			fread(&bm, sizeof(double), 1, _shpfile);
+			fread(&bm, sizeof(double), 1, _shpfile);
+
+			for (int mc = 0; mc < numPoints; mc++)
+			{
+				fread(&m, sizeof(double), 1, _shpfile);
+				pointIndex = mc;
+				IPoint * pnt = NULL;
+				shape->get_Point(pointIndex, &pnt);
+				if (pnt == NULL)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->put_M(m);
+				//Rob Cairns 20-Dec-05
+				pnt->Release();
+			}
+		}
+	}
+
+	// ------------------------------------------------------
+	//	  SHP_POLYLINEM
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_POLYLINEM)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+
+		if (shpType == SHP_POLYLINEM)
+		{
+			VARIANT_BOOL retval;
+			double bx, by, bm;
+			int numParts;
+			int numPoints;
+			int part;
+			double x, y, m;
+
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+
+			fread(&numParts, sizeof(int), 1, _shpfile);
+			fread(&numPoints, sizeof(int), 1, _shpfile);
+
+			long partIndex = 0;
+			for (int i = 0; i < numParts; i++)
+			{
+				fread(&part, sizeof(int), 1, _shpfile);
+				partIndex = i;
+				shape->InsertPart(part, &partIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+			}
+
+			long pointIndex = 0;
+			//Read the x, y part of the point
+			for (int j = 0; j < numPoints; j++)
+			{
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_GlobalCallback(_globalCallback);
+				fread(&x, sizeof(double), 1, _shpfile);
+				fread(&y, sizeof(double), 1, _shpfile);
+				pnt->put_X(x);
+				pnt->put_Y(y);
+				pointIndex = j;
+				shape->InsertPoint(pnt, &pointIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->Release();
+			}
+
+			fread(&bm, sizeof(double), 1, _shpfile);
+			fread(&bm, sizeof(double), 1, _shpfile);
+
+			for (int mc = 0; mc < numPoints; mc++)
+			{
+				fread(&m, sizeof(double), 1, _shpfile);
+				pointIndex = mc;
+				IPoint * pnt = NULL;
+				shape->get_Point(pointIndex, &pnt);
+				if (pnt == NULL)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->put_M(m);
+				pnt->Release();
+
+			}
+		}
+	}
+#pragma endregion
+#pragma region Polygon
+	// ------------------------------------------------------
+	//	  SHP_POLYGON
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_POLYGON)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+
+		if (shpType == SHP_POLYGON)
+		{
+			VARIANT_BOOL retval;
+			double bx, by;
+			int numParts;
+			int numPoints;
+			int part;
+			double x, y;
+
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+
+			fread(&numParts, sizeof(int), 1, _shpfile);
+			fread(&numPoints, sizeof(int), 1, _shpfile);
+
+			long partIndex = 0;
+			for (int i = 0; i < numParts; i++)
+			{
+				fread(&part, sizeof(int), 1, _shpfile);
+				partIndex = i;
+				shape->InsertPart(part, &partIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+			}
+
+			long pointIndex = 0;
+			for (int j = 0; j < numPoints; j++)
+			{
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_GlobalCallback(_globalCallback);
+				fread(&x, sizeof(double), 1, _shpfile);
+				fread(&y, sizeof(double), 1, _shpfile);
+				pnt->put_X(x);
+				pnt->put_Y(y);
+				pointIndex = j;
+				shape->InsertPoint(pnt, &pointIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->Release();
+			}
+		}
+	}
+
+	// ------------------------------------------------------
+	//	  SHP_POLYGONZ
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_POLYGONZ)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+		if (shpType == SHP_POLYGONZ)
+		{
+			VARIANT_BOOL retval;
+			double bx, by, bz, bm;
+			int numParts;
+			int numPoints;
+			int part;
+			double x, y, z, m;
+
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+
+			fread(&numParts, sizeof(int), 1, _shpfile);
+			fread(&numPoints, sizeof(int), 1, _shpfile);
+
+			long partIndex = 0;
+			for (int i = 0; i < numParts; i++)
+			{
+				fread(&part, sizeof(int), 1, _shpfile);
+				partIndex = i;
+				shape->InsertPart(part, &partIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+			}
+
+			//Read the x, y part of the point
+			long pointIndex = 0;
+			for (int j = 0; j < numPoints; j++)
+			{
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_GlobalCallback(_globalCallback);
+				fread(&x, sizeof(double), 1, _shpfile);
+				fread(&y, sizeof(double), 1, _shpfile);
+				pnt->put_X(x);
+				pnt->put_Y(y);
+				pointIndex = j;
+				shape->InsertPoint(pnt, &pointIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->Release();
+			}
+
+			fread(&bz, sizeof(double), 1, _shpfile);
+			fread(&bz, sizeof(double), 1, _shpfile);
+
+			for (int k = 0; k < numPoints - 1; k++)
+			{
+				fread(&z, sizeof(double), 1, _shpfile);
+				pointIndex = k;
+				IPoint * pnt = NULL;
+				shape->get_Point(pointIndex, &pnt);
+				if (pnt == NULL)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->put_Z(z);
+				pnt->Release();
+			}
+
+			fread(&bm, sizeof(double), 1, _shpfile);
+			fread(&bm, sizeof(double), 1, _shpfile);
+
+			for (int mc = 0; mc < numPoints; mc++)
+			{
+				fread(&m, sizeof(double), 1, _shpfile);
+				pointIndex = mc;
+				IPoint * pnt = NULL;
+				shape->get_Point(pointIndex, &pnt);
+				if (pnt == NULL)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->put_M(m);
+				pnt->Release();
+			}
+		}
+	}
+
+	// ------------------------------------------------------
+	//	  SHP_POLYGONM
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_POLYGONM)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+		if (shpType == SHP_POLYGONM)
+		{
+			VARIANT_BOOL retval;
+			double bx, by, bm;
+			int numParts;
+			int numPoints;
+			int part;
+			double x, y, m;
+
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+
+			fread(&numParts, sizeof(int), 1, _shpfile);
+			fread(&numPoints, sizeof(int), 1, _shpfile);
+
+			long partIndex = 0;
+			for (int i = 0; i < numParts; i++)
+			{
+				fread(&part, sizeof(int), 1, _shpfile);
+				partIndex = i;
+				shape->InsertPart(part, &partIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+			}
+
+			//Read the x, y part of the point
+			long pointIndex = 0;
+			for (int j = 0; j < numPoints; j++)
+			{
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_GlobalCallback(_globalCallback);
+				fread(&x, sizeof(double), 1, _shpfile);
+				fread(&y, sizeof(double), 1, _shpfile);
+				pnt->put_X(x);
+				pnt->put_Y(y);
+				pointIndex = j;
+				shape->InsertPoint(pnt, &pointIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->Release();
+			}
+
+			// M range
+			fread(&bm, sizeof(double), 1, _shpfile);
+			fread(&bm, sizeof(double), 1, _shpfile);
+
+			for (int mc = 0; mc < numPoints; mc++)
+			{
+				fread(&m, sizeof(double), 1, _shpfile);
+				pointIndex = mc;
+				IPoint * pnt = NULL;
+				shape->get_Point(pointIndex, &pnt);
+				if (pnt == NULL)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->put_M(m);
+				pnt->Release();
+			}
+		}
+	}
+#pragma endregion
+#pragma region Multipoint
+	// ------------------------------------------------------
+	//	  SHP_MULTIPOINT
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_MULTIPOINT)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+
+		if (shpType == SHP_MULTIPOINT)
+		{
+			VARIANT_BOOL retval;
+			double bx, by;
+			int numPoints;
+			double x, y;
+
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+
+			fread(&numPoints, sizeof(int), 1, _shpfile);
+
+			long pointIndex = 0;
+			for (int j = 0; j < numPoints; j++)
+			{
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_GlobalCallback(_globalCallback);
+				fread(&x, sizeof(double), 1, _shpfile);
+				fread(&y, sizeof(double), 1, _shpfile);
+				pnt->put_X(x);
+				pnt->put_Y(y);
+				pointIndex = j;
+				shape->InsertPoint(pnt, &pointIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->Release();
+			}
+		}
+	}
+
+	// ------------------------------------------------------
+	//	  SHP_MULTIPOINTZ
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_MULTIPOINTZ)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+
+		if (shpType == SHP_MULTIPOINTZ)
+		{
+			VARIANT_BOOL retval;
+			double bx, by, bz, bm;
+			int numPoints;
+			double x, y, z, m;
+
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+
+			fread(&numPoints, sizeof(int), 1, _shpfile);
+
+			long pointIndex = 0;
+			for (int j = 0; j < numPoints; j++)
+			{
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_GlobalCallback(_globalCallback);
+				fread(&x, sizeof(double), 1, _shpfile);
+				fread(&y, sizeof(double), 1, _shpfile);
+				pnt->put_X(x);
+				pnt->put_Y(y);
+				pointIndex = j;
+				shape->InsertPoint(pnt, &pointIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->Release();
+			}
+
+			fread(&bz, sizeof(double), 1, _shpfile);
+			fread(&bz, sizeof(double), 1, _shpfile);
+
+			for (int k = 0; k < numPoints; k++)
+			{
+				fread(&z, sizeof(double), 1, _shpfile);
+				pointIndex = k;
+				IPoint * pnt = NULL;
+				shape->get_Point(pointIndex, &pnt);
+				if (pnt == NULL)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->put_Z(z);
+				pnt->Release();
+			}
+
+			fread(&bm, sizeof(double), 1, _shpfile);
+			fread(&bm, sizeof(double), 1, _shpfile);
+
+			for (int mc = 0; mc < numPoints; mc++)
+			{
+				fread(&m, sizeof(double), 1, _shpfile);
+				pointIndex = mc;
+				IPoint * pnt = NULL;
+				shape->get_Point(pointIndex, &pnt);
+				if (pnt == NULL)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->put_M(m);
+				pnt->Release();
+			}
+		}
+	}
+
+	// ------------------------------------------------------
+	//	  SHP_MULTIPOINTM
+	// ------------------------------------------------------
+	else if (_shpfiletype == SHP_MULTIPOINTM)
+	{
+		ComHelper::CreateShape(&shape);
+		shape->Create(shpType, &vbretval);
+		shape->put_GlobalCallback(_globalCallback);
+
+		if (shpType == SHP_MULTIPOINTM)
+		{
+			VARIANT_BOOL retval;
+			double bx, by, bm;
+			int numPoints;
+			double x, y, m;
+
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+			fread(&bx, sizeof(double), 1, _shpfile);
+			fread(&by, sizeof(double), 1, _shpfile);
+
+			fread(&numPoints, sizeof(int), 1, _shpfile);
+
+			long pointIndex = 0;
+			for (int j = 0; j < numPoints; j++)
+			{
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_GlobalCallback(_globalCallback);
+				fread(&x, sizeof(double), 1, _shpfile);
+				fread(&y, sizeof(double), 1, _shpfile);
+				pnt->put_X(x);
+				pnt->put_Y(y);
+				pointIndex = j;
+				shape->InsertPoint(pnt, &pointIndex, &retval);
+				if (retval == VARIANT_FALSE)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->Release();
+			}
+
+			fread(&bm, sizeof(double), 1, _shpfile);
+			fread(&bm, sizeof(double), 1, _shpfile);
+
+			for (int mc = 0; mc < numPoints; mc++)
+			{
+				fread(&m, sizeof(double), 1, _shpfile);
+				pointIndex = mc;
+				IPoint * pnt = NULL;
+				shape->get_Point(pointIndex, &pnt);
+				if (pnt == NULL)
+				{
+					shape->Release();
+					return NULL;
+				}
+				pnt->put_M(m);
+				pnt->Release();
+			}
+		}
+	}
+#pragma endregion
+
+	return shape;
 }
 #pragma endregion
 
@@ -941,7 +943,7 @@ BOOL CShapefile::ReadShx()
 	// file code
 	int intbuf;
 	fread(&intbuf,sizeof(int),1,_shxfile);
-	Utility::SwapEndian((char*)&intbuf,sizeof(int));
+	ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 	if( intbuf != FILE_CODE )
 		return FALSE;
 
@@ -950,14 +952,14 @@ BOOL CShapefile::ReadShx()
 	for(int i=0; i < UNUSEDSIZE; i++)
 	{
 		fread(&intbuf,sizeof(int),1,_shxfile);
-		Utility::SwapEndian((char*)&intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 		if( intbuf != unused )
 			return FALSE;
 	}
 
 	// file length (16 bit words)
 	fread(&intbuf,sizeof(int),1,_shxfile);
-	Utility::SwapEndian((char*)&intbuf,sizeof(int));
+	ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 	int filelength = intbuf;
 
 	// version
@@ -984,12 +986,12 @@ BOOL CShapefile::ReadShx()
 	{
 		// offset
 		fread(&intbuf,sizeof(int),1,_shxfile);
-		Utility::SwapEndian((char*)&intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 		_shpOffsets.push_back(intbuf*2);			// convert to (32 bit words)
 
 		// content length
 		fread(&intbuf,sizeof(int),1,_shxfile);
-		Utility::SwapEndian((char*)&intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 		readLength += 4;
 	}
 	//_numShapes = shpOffsets.size();
@@ -1012,7 +1014,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 	void* intbuf;
 	int fileCode = FILE_CODE;
 	intbuf = (char*)&fileCode;
-	Utility::SwapEndian((char*)intbuf,sizeof(int));
+	ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 	fwrite(intbuf,sizeof(int),1,shx);
 
 	// unused
@@ -1020,14 +1022,14 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 	{
 		int unused = UNUSEDVAL;
 		intbuf = (char*)&unused;
-		Utility::SwapEndian((char*)intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf,sizeof(int),1,shx);
 	}
 
 	// FILELENGTH (16 bit words)
 	int fileLength = HEADER_BYTES_16 + (int)_shapeData.size() * 4; //_numShapes*4;
 	intbuf = (char*)&fileLength;
-	Utility::SwapEndian((char*)intbuf,sizeof(int));
+	ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 	fwrite(intbuf, sizeof(int),1,shx);
 
 	//VERSION
@@ -1068,7 +1070,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 		void * intbuf;
 		int sixteenBitOffset = offset/2;
 		intbuf = (char*)&sixteenBitOffset;
-		Utility::SwapEndian((char*)intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf,sizeof(int),1,shx);
 
 		get_Shape(i,&shape);
@@ -1083,7 +1085,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 		contentLength = contentLength/2;
 		intbuf = (char*)&contentLength;
 
-		Utility::SwapEndian((char*)intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf, sizeof(int),1,shx);
 
 		shape->Release();
@@ -1174,7 +1176,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	void* intbuf;
 	int fileCode = FILE_CODE;
 	intbuf = (char*)&fileCode;
-	Utility::SwapEndian((char*)intbuf,sizeof(int));
+	ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 	fwrite(intbuf,sizeof(int),1,shp);
 
 	//UNUSED
@@ -1182,7 +1184,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	{
 		int unused = UNUSEDVAL;
 		intbuf = (char*)&unused;
-		Utility::SwapEndian((char*)intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf,sizeof(int),1,shp);
 	}
 
@@ -1210,7 +1212,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 
 	filelength = filelength/2;
 	intbuf = (char*)&filelength;
-	Utility::SwapEndian((char*)intbuf,sizeof(int));
+	ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 	fwrite(intbuf, sizeof(int),1,shp);
 
 	//VERSION
@@ -1253,17 +1255,17 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 		//Write the Record Header
 		long recNum = k + 1;
 		intbuf = (char*)&recNum;
-		Utility::SwapEndian((char*)intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf, sizeof(int),1,shp);
 		intbuf = (char*)&contentLength;
-		Utility::SwapEndian((char*)intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf, sizeof(int),1,shp);
 
 		if ( _fastMode && _isEditingShapes)
 		{
-			CShapeWrapper* shpWrapper = (CShapeWrapper*)(shape)->get_ShapeWrapper();
+			IShapeWrapper* shpWrapper = (shape)->get_ShapeWrapper();
 			shpWrapper->RefreshBounds();
-			int* data = shpWrapper->get_ShapeData();
+			int* data = shpWrapper->get_RawData();
 			fwrite(data, sizeof(char), length, shp);
 			delete[] data;
 		}
@@ -1273,7 +1275,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 			// disk-based + fast data (probably a bit faster procedure can be devised)
 			// in-memory mode (COM points)
 
-			ShpfileType shptype2D = Utility::ShapeTypeConvert2D(shptype);
+			ShpfileType shptype2D = ShapeUtility::Convert2D(shptype);
 
 			//Write the Record
 			if( shptype2D == SHP_NULLSHAPE )

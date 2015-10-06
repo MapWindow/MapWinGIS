@@ -920,7 +920,7 @@ STDMETHODIMP CShapeEditor::put_VerticesVisible(VARIANT_BOOL newVal)
 // *******************************************************
 bool CShapeEditor::GetClosestPoint(double projX, double projY, double& xResult, double& yResult)
 {
-	ShpfileType shpType = Utility::ShapeTypeConvert2D(_activeShape->GetShapeType2D());
+	ShpfileType shpType = ShapeUtility::Convert2D(_activeShape->GetShapeType2D());
 
 	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 		return false;				// TODO: multi points should be supported
@@ -1071,7 +1071,7 @@ bool CShapeEditor::ValidateWithGeos(IShape** shp)
 
 	ShpfileType shpType;
 	(*shp)->get_ShapeType(&shpType);
-	Utility::ShapeTypeConvert2D(shpType);
+	ShapeUtility::Convert2D(shpType);
 
 	bool skipGeosCheck = false;
 	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT || shpType == SHP_POLYLINE)

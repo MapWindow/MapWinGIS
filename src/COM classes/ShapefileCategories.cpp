@@ -559,9 +559,6 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 		{
 			if (i == CategoryIndex || CategoryIndex == -1 )
 			{
-				CComVariant val;
-				_categories[i]->get_MinValue(&val);
-				
 				CComBSTR expr;
 				_categories[i]->get_Expression(&expr);
 				USES_CONVERSION;
@@ -577,6 +574,7 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 		}
 
 		// adding category indices for shapes in the results vector
+		
 		TableHelper::Cast(tbl)->AnalyzeExpressions(expressions, results);
 	}
 		
@@ -1036,7 +1034,7 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 
 	ShpfileType shpType;
 	_shapefile->get_ShapefileType(&shpType);
-	if (Utility::ShapeTypeConvert2D(shpType) != SHP_POLYGON)
+	if (ShapeUtility::Convert2D(shpType) != SHP_POLYGON)
 	{
 		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
 		return S_OK;

@@ -53,7 +53,7 @@ bool EditorBase::HasClosedPolygon()
 // ************************************************
 bool EditorBase::SnapToPreviousVertex(int& vertexIndex, double screenX, double screenY)
 {
-	ShpfileType type = Utility::ShapeTypeConvert2D(_shpType);
+	ShpfileType type = ShapeUtility::Convert2D(_shpType);
 	if (type == SHP_POLYLINE && _points.size() == 0 ||
 		type == SHP_POLYGON && _points.size() < 3)
 	{
@@ -480,7 +480,7 @@ bool EditorBase::HasPolygon(bool dynamicBuffer)
 {
 	if (_points.size() < 2) return false;
 	if (dynamicBuffer != _creationMode) return false;
-	return (Utility::ShapeTypeConvert2D(_shpType) == SHP_POLYGON);
+	return (ShapeUtility::Convert2D(_shpType) == SHP_POLYGON);
 }
 
 // ************************************************
@@ -490,7 +490,7 @@ bool EditorBase::HasPolygon()
 {
 	if (GetNumParts() > 1) return false;
 	if (_points.size() < 2) return false;
-	return (Utility::ShapeTypeConvert2D(_shpType) == SHP_POLYGON);
+	return (ShapeUtility::Convert2D(_shpType) == SHP_POLYGON);
 }
 
 // *******************************************************

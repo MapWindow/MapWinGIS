@@ -2492,7 +2492,7 @@ STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 	{
 		ShpfileType type;
 		_shapefile->get_ShapefileType(&type);
-		type = Utility::ShapeTypeConvert2D(type);
+		type = ShapeUtility::Convert2D(type);
 
 		bool polyline =false, polygon = false;
 		switch(newVal)

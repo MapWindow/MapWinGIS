@@ -297,7 +297,8 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="Shapefile\HotTrackingInfo.h" />
     <ClInclude Include="Shapefile\ShapeRecord.h" />
     <ClInclude Include="Shapefile\ShapeUtility.h" />
-    <ClInclude Include="Shapefile\ShapeWrapperM.h" />
+    <ClInclude Include="Shapefile\ShapeWrapperEmpty.h" />
+    <ClInclude Include="Shapefile\ShapeWrapperPoint.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -640,8 +641,9 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="Processing\QTree.cpp" />
     <ClCompile Include="Shapefile\GeoProcessing.cpp" />
     <ClCompile Include="Shapefile\HotTrackingInfo.cpp" />
+    <ClCompile Include="Shapefile\ShapeInterfaces.cpp" />
     <ClCompile Include="Shapefile\ShapeUtility.cpp" />
-    <ClCompile Include="Shapefile\ShapeWrapperM.cpp" />
+    <ClCompile Include="Shapefile\ShapeWrapperPoint.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

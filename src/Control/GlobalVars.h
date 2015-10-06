@@ -11,6 +11,7 @@
 #include "MapWinGis.h"
 #include "structures.h"
 #include "UtilityFunctions.h"
+#include "ShapeUtility.h"
 #include "GdalHelper.h"
 #include "ComHelper.h"
 #include "Utilities\Debugging\ReferenceCounter.h"

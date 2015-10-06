@@ -37,18 +37,24 @@ bool CShapeWrapper::put_ShapeType(ShpfileType newVal)
 		_lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
 		return false;		
 	}
-	
-	// TODO: report error if z or m type is passed
+
+	if (ShapeUtility::IsM(newVal) || ShapeUtility::IsZ(newVal))
+	{
+		_lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
+		return false;
+	}
+
 	_shapeType = newVal;
 
-	ShpfileType shpType2D = Utility::ShapeTypeConvert2D(_shapeType);
+	ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
 	if (shpType2D == SHP_NULLSHAPE)
 	{	
-		this->Clear();
+		Clear();
 	}
 	else if (shpType2D == SHP_POINT)
 	{	
-		// TODO: report error, unsupported type
+		_lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
+		return false;
 	}
 	else if (shpType2D == SHP_POLYLINE || shpType2D == SHP_POLYGON)
 	{	
@@ -400,7 +406,7 @@ bool CShapeWrapper::get_Bounds(double& xMin, double& xMax, double& yMin, double&
 //		put_Data 
 // **************************************************************
 // Passing the shape data from disk to the memory structures.
-bool CShapeWrapper::put_ShapeData(char* shapeData, Extent* extents)
+bool CShapeWrapper::put_RawData(char* shapeData)
 {
 	_shapeType = (ShpfileType)*(int*)shapeData;
 	_boundsChanged = true;
@@ -421,12 +427,6 @@ bool CShapeWrapper::put_ShapeData(char* shapeData, Extent* extents)
 		_xMax = bounds[2];					// 28
 		_yMax = bounds[3];					// 36
 
-		if (extents)
-		{
-			if (_xMin > extents->right || _xMax < extents->left || _yMin > extents->top || _yMax < extents->bottom)
-				return false;
-		}
-
 		numPoints = *(int*)(shapeData + 36);
 		double* points = (double*)(shapeData + 40);
 
@@ -442,12 +442,6 @@ bool CShapeWrapper::put_ShapeData(char* shapeData, Extent* extents)
 		_yMin = bounds[1];					// 20
 		_xMax = bounds[2];					// 28
 		_yMax = bounds[3];					// 36
-
-		if (extents)
-		{
-			if (_xMin > extents->right || _xMax < extents->left || _yMin > extents->top || _yMax < extents->bottom)
-				return false;
-		}
 
 		numParts = *(int*)(shapeData + 36);
 		numPoints = *(int*)(shapeData + 40);
@@ -475,7 +469,7 @@ bool CShapeWrapper::put_ShapeData(char* shapeData, Extent* extents)
 //		get_Data 
 // **************************************************************
 // Forming the data to write to the disk. Should be optimized as far as possible.
-int* CShapeWrapper::get_ShapeData(void)
+int* CShapeWrapper::get_RawData(void)
 {
 	int numPoints = _points.size();
 	int numParts = _parts.size();
@@ -644,14 +638,6 @@ bool CShapeWrapper::DeletePoint(int PointIndex)
 		_points.erase( _points.begin() + PointIndex );
 		return true;
 	}
-}
-
-// ********************************************************
-//		get_ContentLength()
-// ********************************************************
-int CShapeWrapper::get_ContentLength()
-{
-	return ShapeUtility::get_ContentLength(_shapeType, this->get_PointCount(), this->get_PartCount());
 }
 
 #pragma endregion

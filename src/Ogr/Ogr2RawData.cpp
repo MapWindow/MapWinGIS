@@ -71,7 +71,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 
 		if (generateLabels)
 		{
-			((CShape*)shp)->get_LabelPositionAutoChooseMethod(loader->LabelPosition, 
+			((CShape*)shp)->get_LabelPositionAuto(loader->LabelPosition, 
 				data->LabelX, data->LabelY, data->LabelRotation, loader->LabelOrientation);
 		}
 		

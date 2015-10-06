@@ -2767,7 +2767,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		}
 	}
 	
-	Utility::ClearShapefileModifiedFlag((*retVal));		// inserted shapes were marked as modified, correct this
+	ShapefileHelper::ClearShapefileModifiedFlag((*retVal));		// inserted shapes were marked as modified, correct this
 
 	// -------------------------------------- 
 	//	  Output validation
@@ -3113,7 +3113,7 @@ STDMETHODIMP CShapefile::put_Snappable(VARIANT_BOOL newVal)
 STDMETHODIMP CShapefile::get_ShapefileType2D(ShpfileType* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = Utility::ShapeTypeConvert2D(_shpfiletype);
+	*pVal = ShapeUtility::Convert2D(_shpfiletype);
 	return S_OK;
 }
 

@@ -358,33 +358,33 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& result
 // Results vector with certain categories can be provided by caller; those categories won't be changed
 void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vector<int>& results)
 {
-	//std::vector<int>* results = new std::vector<int>;
-	//results->resize(_rows.size(), -1);
-	
+	// TODO: optimize, if all expressions have the same fields in the same positions
+	// don't read the values multiple times.
+	// For unique values classification it's better to store classification field,
+	// but in older style files it may be not present.
 	CustomExpression expr;	
-	if (expr.ReadFieldNames(this))
+	if (!expr.ReadFieldNames(this)) return;
+	
+	for (unsigned int categoryId = 0; categoryId < expressions.size(); categoryId++)
 	{
-		for (unsigned int categoryId = 0; categoryId < expressions.size(); categoryId++)
+		if (expressions[categoryId] != "")
 		{
-			if (expressions[categoryId] != "")
+			CString err;
+			if (expr.Parse(expressions[categoryId], true, err))
 			{
-				CString err;
-				if (expr.Parse(expressions[categoryId], true, err))
+				for (unsigned int i = 0; i < _rows.size(); i++)
 				{
-					for (unsigned int i = 0; i < _rows.size(); i++)
+					if (results[i] == -1)
 					{
-						if (results[i] == -1)
-						{
-							TableHelper::SetFieldValues(this, i, expr);
+						TableHelper::SetFieldValues(this, i, expr);
 						
-							// if expression returns true for the given record we'll save the index 
-							CExpressionValue* result = expr.Calculate(err);
-							if ( result )
+						// if expression returns true for the given record we'll save the index 
+						CExpressionValue* result = expr.Calculate(err);
+						if ( result )
+						{
+							if (result->isBoolean() && result->bln())
 							{
-								if (result->isBoolean() && result->bln())
-								{
-									results[i] = categoryId;
-								}
+								results[i] = categoryId;
 							}
 						}
 					}
@@ -402,10 +402,6 @@ STDMETHODIMP CTableClass::get_NumRows(long *pVal)
 	*pVal = RowCount();
 	return S_OK;
 }
-long CTableClass::RowCount()
-{
-    return _rows.size();
-}
 
 // ***********************************************************
 //		get_NumFields
@@ -414,10 +410,6 @@ STDMETHODIMP CTableClass::get_NumFields(long *pVal)
 {
 	*pVal = FieldCount();
 	return S_OK;
-}
-long CTableClass::FieldCount()
-{
-    return _fields.size();
 }
 
 // ***********************************************************
@@ -432,7 +424,6 @@ STDMETHODIMP CTableClass::get_Field(long FieldIndex, IField **pVal)
 	{	
 		*pVal = NULL;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		
 	}
 	else
 	{
@@ -1264,7 +1255,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 	{
 		if (_lastRecordIndex != RowIndex && 
 			_lastRecordIndex >= 0 && _lastRecordIndex < RowCount() && 
-			!_rows[_lastRecordIndex].row->IsModified())
+			_rows[_lastRecordIndex].row != NULL && !_rows[_lastRecordIndex].row->IsModified())
 		{
 			// make sure that only one row in a time can be read
 			ClearRow(_lastRecordIndex);

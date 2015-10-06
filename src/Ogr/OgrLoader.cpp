@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "OgrLoader.h"
+#include "LabelsHelper.h"
 
 long OgrLoadingTask::SeedId = 0;
 
@@ -91,7 +92,7 @@ void OgrDynamicLoader::LockShapefile(bool lock)
 tkLabelPositioning OgrDynamicLoader::GetLabelPosition(ShpfileType type)
 {
 	if (LabelPosition == lpNone)
-		return Utility::LabelPositionForShapeType(type);
+		return LabelsHelper::LabelPositionForShapeType(type);
 	else
 		return LabelPosition;
 }

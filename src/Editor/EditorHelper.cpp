@@ -11,7 +11,7 @@ ShpfileType EditorHelper::GetShapeType2D(IShapeEditor* editor)
 	if (!editor) return SHP_NULLSHAPE;
 	ShpfileType shpType;
 	editor->get_ShapeType(&shpType);
-	return Utility::ShapeTypeConvert2D(shpType);
+	return ShapeUtility::Convert2D(shpType);
 }
 
 // ************************************************************
@@ -76,7 +76,7 @@ void EditorHelper::CopyOptionsFrom(IShapeEditor* editor, IShapeDrawingOptions* o
 	options->get_LineWidth(&lineWidth);
 	editor->put_FillColor(fillColor);
 	
-	if (Utility::ShapeTypeConvert2D(shpType) == SHP_POLYGON) {
+	if (ShapeUtility::Convert2D(shpType) == SHP_POLYGON) {
 		lineColor = Utility::ChangeBrightness(fillColor, -50);
 		lineWidth = 1.0f;
 	}

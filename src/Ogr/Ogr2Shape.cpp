@@ -206,7 +206,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 				goto next_feature;
 			}
 
-			shp = OgrConverter::GeometryToShape(oGeom, Utility::ShapeTypeIsM(shpType));
+			shp = OgrConverter::GeometryToShape(oGeom, ShapeUtility::IsM(shpType));
 		}
 
 		if (!shp)
@@ -273,7 +273,7 @@ next_feature:
 	CallbackHelper::ProgressCompleted(callback);
 
 	sf->RefreshExtents(&vbretval);
-	Utility::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
+	ShapefileHelper::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
 	return true;
 }
 

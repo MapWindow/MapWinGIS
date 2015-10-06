@@ -25,8 +25,10 @@
 #pragma once
 
 // CPointClass
+// In contrast with other classes we are using CComSingleThreadModel base class here.
+// CComSingleMultiThreadModel increases memory usage by 24 more bytes which is unacceptable.
 class ATL_NO_VTABLE CPointClass : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CPointClass, &CLSID_Point>,
 	public IDispatchImpl<IPoint, &IID_IPoint, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -94,7 +96,7 @@ public:
 private:
 	double _x;
 	double _y;
-	double _z;      // TODO: it's quite a waste to allocate Z and M for flat types
+	double _z;
 	double _m;
 
 };

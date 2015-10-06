@@ -1,5 +1,5 @@
 /**************************************************************************************
- * File name: ShapeWrapper.cpp
+ * File name: ShapeWrapper.h
  *
  * Project: MapWindow Open Source (MapWinGis ActiveX control) 
  * Description: Declaration of CShapeWrapper
@@ -85,27 +85,23 @@
 
 class CShapeWrapper: public IShapeWrapper, public IShapeData
 {
+private:
+	CShapeWrapper()
+		: _xMin(0.0), _yMin(0.0), _xMax(0.0), _yMax(0.0), _boundsChanged(true), _lastErrorCode(tkNO_ERROR)
+	{
+
+	}
 public:
 	CShapeWrapper(ShpfileType shpType)
+		: CShapeWrapper()
 	{
 		_shapeType = shpType;
-		_boundsChanged = true;
-		_lastErrorCode = tkNO_ERROR;
-		_xMin = _yMin =	_xMax =	_yMax =	0.0;
 	}
-	CShapeWrapper(char* shpData)
+
+	CShapeWrapper(char* data) 
+		: CShapeWrapper()
 	{
-		_xMin = _yMin =	_xMax =	_yMax =	0.0;
-		_boundsChanged = true;
-		_lastErrorCode = tkNO_ERROR;
-		put_ShapeData(shpData, NULL);
-	}
-	CShapeWrapper(char* shpData, Extent* extents)
-	{
-		_xMin = _yMin =	_xMax =	_yMax =	0.0;
-		_boundsChanged = true;
-		_lastErrorCode = tkNO_ERROR;
-		put_ShapeData(shpData, extents);
+		put_RawData(data);
 	}
 
 	virtual ~CShapeWrapper()
@@ -115,8 +111,6 @@ public:
 	}
 	
 private:	
-	ShpfileType _shapeType;
-
 	// bounds
 	double _xMin;
 	double _yMin;
@@ -124,62 +118,65 @@ private:
 	double _yMax;
 
 	bool _boundsChanged;
-	short _lastErrorCode;
 
 	std::vector<int> _parts;
 	std::vector<pointEx> _points;
-	
+
+protected:
+	ShpfileType _shapeType;
+	short _lastErrorCode;
+
 public:
+	ShapeWrapperType get_WrapperType() { return swtFast; }
+
 	vector<pointEx>* get_Points() { return &_points; }
 	vector<int>* get_Parts() { return &_parts; }
 
-	int get_ContentLength();
-	int get_PointCount(){return _points.size();}
-	int get_PartCount(){return _parts.size();}
+	int get_PointCount(){ return _points.size(); }
+	int get_PartCount(){ return _parts.size(); }
 
-	// shpData
-	bool put_ShapeData(char* shapeData, Extent* extents);
-	bool put_ShapeData(char* shapeData) { return put_ShapeData(shapeData, NULL); }
-	int* get_ShapeData(void);
+	// shape data
+	bool put_RawData(char* shapeData);
+	virtual int* get_RawData(void);
 	
 	// type
 	ShpfileType get_ShapeType(void) { return _shapeType; }
-	ShpfileType get_ShapeType2D(void){ return Utility::ShapeTypeConvert2D(_shapeType); }
-	bool put_ShapeType(ShpfileType shpType);
+	ShpfileType get_ShapeType2D(void){ return ShapeUtility::Convert2D(_shapeType); }
+	virtual bool put_ShapeType(ShpfileType shpType);
 	
 	// bounds
-	void RefreshBounds();
+	virtual void RefreshBounds();
 	void RefreshBoundsXY();
 	bool get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax);
-	bool get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax, 
+	virtual bool get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax, 
 					double& zMin, double& zMax, double& mMin, double& mMax);
 
 	// getting all values
 	double* get_PointsXY();
-	double* get_PointsM();
-	double* get_PointsZ();
+	virtual double* get_PointsM() { return NULL; }
+	virtual double* get_PointsZ() { return NULL; }
 
 	void get_XYFast(int PointIndex, double& x, double& y);
 	bool get_PointXY(int PointIndex, double& x, double& y);
 	bool put_PointXY(int PointIndex, double x, double y);
-	bool get_PointZ(int PointIndex, double& z);
-	bool get_PointM(int PointIndex, double& m);
-	bool put_PointZ(int PointIndex, double z);
-	bool put_PointM(int PointIndex, double m);
+	virtual bool get_PointZ(int PointIndex, double& z);
+	virtual bool get_PointM(int PointIndex, double& m);
+	virtual bool put_PointZ(int PointIndex, double z);
+	virtual bool put_PointM(int PointIndex, double m);
 	
 	// COM points
-	IPoint* get_Point(long Index);
-	bool put_Point(long Index, IPoint* pnt);
+	virtual IPoint* get_Point(long Index);
+	virtual bool put_Point(long Index, IPoint* pnt);
 
 	// changing size
-	void Clear();
-	void AddPoint(IPoint* pnt);
-	void AddPoint(double x, double y);
-	void AddPoint(double x, double y, double z, double m);
-	bool InsertPoint(int PointIndex, IPoint* pnt);
-	bool InsertPointXY(int Pointindex, double x, double y);
-	bool InsertPointXYZM(int PointIndex, double x, double y, double z, double m);
-	bool DeletePoint(int Pointindex);
+	virtual void Clear();
+	virtual void AddPoint(IPoint* pnt);
+	virtual void AddPoint(double x, double y);
+	virtual void AddPoint(double x, double y, double z, double m);
+	virtual bool InsertPoint(int PointIndex, IPoint* pnt);
+	virtual bool InsertPointXY(int Pointindex, double x, double y);
+	virtual bool InsertPointXYZM(int PointIndex, double x, double y, double z, double m);
+	virtual bool DeletePoint(int Pointindex);
 	
 	// parts
 	void AddPart(int pointIndex);
@@ -191,7 +188,7 @@ public:
 	
 	bool PointInRing(int partIndex, double pointX, double pointY);
 
-	void ReversePoints(long startIndex, long endIndex);
+	virtual void ReversePoints(long startIndex, long endIndex);
 
 	int get_LastErrorCode()
 	{

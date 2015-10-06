@@ -382,7 +382,7 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 	if (sf) 
 	{
 		ShpfileType shpType = ShapefileHelper::GetShapeType(sf);
-		loader->IsMShapefile = Utility::ShapeTypeIsM(shpType);
+		loader->IsMShapefile = ShapeUtility::IsM(shpType);
 
 		IShapefileCategories* categories = NULL;
 		sf->get_Categories(&categories);
@@ -467,7 +467,7 @@ void Layer::UpdateShapefile(long layerHandle)
 					count++;
 				}
 			}
-			Utility::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
+			ShapefileHelper::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
 		}
 
 		sfLock.Unlock();

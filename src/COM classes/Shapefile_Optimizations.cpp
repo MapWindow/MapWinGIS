@@ -51,7 +51,7 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 	{
 		for (unsigned int i = 0; i < _shapeData.size(); i++)
 		{
-			((CShape*)_shapeData[i]->shape)->put_fastMode(newVal ? true : false);
+			((CShape*)_shapeData[i]->shape)->put_FastMode(newVal ? true : false);
 		}
 
 		_fastMode = newVal;
@@ -103,7 +103,7 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 	
 	int intbuf;
 	fread(&intbuf, sizeof(int), 1, _shpfile);
-	Utility::SwapEndian((char*)&intbuf, sizeof(int));
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
 	
 	// shape records are 1 based
 	if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -113,7 +113,7 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 	}
 	
 	fread(&intbuf,sizeof(int), 1, _shpfile);
-	Utility::SwapEndian((char*)&intbuf, sizeof(int));
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
 
 	int contentLength = intbuf*2;	//(16 to 32 bit words)
 	if (contentLength <= 0) {
@@ -128,7 +128,7 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 	int * intdata = (int*)cdata;						
 	ShpfileType shapetype = (ShpfileType)intdata[0];
 	
-	shapetype = Utility::ShapeTypeConvert2D(shapetype);
+	shapetype = ShapeUtility::Convert2D(shapetype);
   	if( shapetype == SHP_NULLSHAPE ) 
 	{
 		*pVal = NULL;
@@ -176,7 +176,7 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 
 			int intbuf;
 			fread(&intbuf,sizeof(int),1,_shpfile);
-			Utility::SwapEndian((char*)&intbuf,sizeof(int));
+			ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 
 			//Shape records are 1 based
 			if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -190,7 +190,7 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 				double x=0.0, y=0.0, z=0.0, m=0.0;
 				
 				fread(&intbuf,sizeof(int),1,_shpfile);
-				Utility::SwapEndian((char*)&intbuf,sizeof(int));
+				ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 				int contentLength = intbuf*2;	//(16 to 32 bit words)
 				
 				if( contentLength <= 0 )
@@ -390,7 +390,7 @@ STDMETHODIMP CShapefile::QuickPoints(long ShapeIndex, long *NumPoints, SAFEARRAY
 
 			int intbuf;
 			fread(&intbuf,sizeof(int),1,_shpfile);
-			Utility::SwapEndian((char*)&intbuf,sizeof(int));
+			ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 
 			//Shape records are 1 based
 			if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -401,7 +401,7 @@ STDMETHODIMP CShapefile::QuickPoints(long ShapeIndex, long *NumPoints, SAFEARRAY
 			else
 			{
 				fread(&intbuf,sizeof(int),1,_shpfile);
-				Utility::SwapEndian((char*)&intbuf,sizeof(int));
+				ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 				int contentLength = intbuf*2;//(16 to 32 bit words)
 				
 				if( contentLength <= 0 )
@@ -624,7 +624,7 @@ bool CShapefile::ReadShapeExtents(long ShapeIndex, Extent& result)
 
 	int intbuf;
 	fread(&intbuf, sizeof(int), 1, _shpfile);
-	Utility::SwapEndian((char*)&intbuf, sizeof(int));
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
 
 	//Shape records are 1 based
 	if (intbuf != ShapeIndex + 1 && intbuf != ShapeIndex)
@@ -634,7 +634,7 @@ bool CShapefile::ReadShapeExtents(long ShapeIndex, Extent& result)
 	}
 	
 	fread(&intbuf, sizeof(int), 1, _shpfile);
-	Utility::SwapEndian((char*)&intbuf, sizeof(int));
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
 	int contentLength = intbuf * 2;//(16 to 32 bit words)
 
 	if (contentLength <= 0)

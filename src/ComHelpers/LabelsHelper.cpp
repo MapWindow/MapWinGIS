@@ -57,3 +57,17 @@ long LabelsHelper::GetCount(ILabels* labels)
 	labels->get_Count(&count);
 	return count;
 }
+
+// ****************************************************************** 
+//		LabelPositionForShapeType
+// ****************************************************************** 
+tkLabelPositioning LabelsHelper::LabelPositionForShapeType(ShpfileType shpType)
+{
+	shpType = ShapeUtility::Convert2D(shpType);
+	if (shpType == SHP_POLYGON)
+		return lpCentroid;
+	else if (shpType == SHP_POLYLINE)
+		return lpLongestSegement;
+	else
+		return lpCenter;
+}

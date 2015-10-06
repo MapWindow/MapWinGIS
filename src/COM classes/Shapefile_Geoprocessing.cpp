@@ -106,7 +106,7 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes,
 		if (shpType == fileType)
 		{
 			// area checking
-			shpType = Utility::ShapeTypeConvert2D(shpType);
+			shpType = ShapeUtility::Convert2D(shpType);
 			if (shpType == SHP_POLYGON)
 			{
 				double area;
@@ -185,7 +185,7 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 	{
 		ShpfileType shpType;
 		sfTarget->get_ShapefileType(&shpType);
-		bool isM = Utility::ShapeTypeIsM(shpType);
+		bool isM = ShapeUtility::IsM(shpType);
 		
 		std::vector<IShape*> shapes;
 		if (GeosConverter::GeomToShapes(gsNew, &shapes, isM))
@@ -684,7 +684,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 
 	ShpfileType type;
 	sf->get_ShapefileType(&type);
-	type = Utility::ShapeTypeConvert2D(type);
+	type = ShapeUtility::Convert2D(type);
 
 	map <int, vector<int>*>::iterator p = fieldMap.begin();	  // row in the output, rows in the input
 	while(p != fieldMap.end())
@@ -889,7 +889,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 		}
 	}
 	
-	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
+	bool isM = ShapeUtility::IsM(_shpfiletype);
 
 	// saving results							
 	long count = 0;	// number of shapes inserted
@@ -1244,7 +1244,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 			{
 				IShape* shp = (*shapes)[j];
 				
-				if (Utility::ShapeTypeConvert2D(targetType) == SHP_MULTIPOINT)
+				if (ShapeUtility::Convert2D(targetType) == SHP_MULTIPOINT)
 				{
 					// in case of multi-point target type, simply copy all the points to base shape
 					// no need to deal with parts, multi-points don't have those
@@ -1383,7 +1383,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 
 	ReadGeosGeometries(SelectedOnly);
 
-	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
+	bool isM = ShapeUtility::IsM(_shpfiletype);
 
 	for (long i = 0; i < size; i++)
 	{
@@ -1432,7 +1432,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			
 			if (oGeom)
 			{
-				bool isM = Utility::ShapeTypeIsM(this->_shpfiletype);
+				bool isM = ShapeUtility::IsM(this->_shpfiletype);
 
 				OGRwkbGeometryType type = oGeom->getGeometryType();
 				if (type == wkbMultiPolygon || type == wkbMultiPolygon25D)
@@ -1615,10 +1615,10 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 	}
 	
 	ShpfileType type1, type2;	
-	type1 = Utility::ShapeTypeConvert2D(_shpfiletype);
+	type1 = ShapeUtility::Convert2D(_shpfiletype);
 
 	sfOverlay->get_ShapefileType(&type2);	
-	type2 = Utility::ShapeTypeConvert2D(type2);
+	type2 = ShapeUtility::Convert2D(type2);
 	bool canUseClipper = (type1 == SHP_POLYGON && type2 == SHP_POLYGON);
 	
 	if (returnType == SHP_NULLSHAPE)
@@ -1791,7 +1791,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 	long numShapesSubject, numShapesClip;		
 	this->get_NumShapes(&numShapesSubject);		
 	sfOverlay->get_NumShapes(&numShapesClip);		
-	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
+	bool isM = ShapeUtility::IsM(_shpfiletype);
 
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
@@ -2029,7 +2029,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 	this->get_NumShapes(&numShapesSubject);		
 	sfClip->get_NumShapes(&numShapesClip);		
 	
-	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
+	bool isM = ShapeUtility::IsM(_shpfiletype);
 
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
@@ -2166,7 +2166,7 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 	sfClip->get_ShapefileType(&shpType);
 
 	bool buildSkipLists = (subjectShapesToSkip != NULL && clippingShapesToSkip != NULL && m_globalSettings.shapefileFastUnion &&
-						   Utility::ShapeTypeConvert2D(_shpfiletype) == SHP_POLYGON && Utility::ShapeTypeConvert2D(shpType) == SHP_POLYGON);
+						   ShapeUtility::Convert2D(_shpfiletype) == SHP_POLYGON && ShapeUtility::Convert2D(shpType) == SHP_POLYGON);
 	
 	if (buildSkipLists)
 	{
@@ -2335,7 +2335,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 	sfSubject->get_NumShapes(&numShapesSubject);		
 	sfOverlay->get_NumShapes(&numShapesClip);		
 
-	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
+	bool isM = ShapeUtility::IsM(_shpfiletype);
 
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
@@ -2724,7 +2724,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
 		fseek(_shpfile, _shpOffsets[ShapeIndex] + sizeof(int)*2, SEEK_SET);
 		fread(&shpType, sizeof(int), 1, _shpfile);
 
-		shpType = Utility::ShapeTypeConvert2D((ShpfileType)shpType);
+		shpType = ShapeUtility::Convert2D((ShpfileType)shpType);
 		if(shpType != SHP_POLYGON)
 		{
 			*retval = VARIANT_FALSE;
@@ -3368,7 +3368,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	// ----------------------------------------------
 	//	  Validation
 	// ----------------------------------------------
-	ShpfileType shpType = Utility::ShapeTypeConvert2D(_shpfiletype);
+	ShpfileType shpType = ShapeUtility::Convert2D(_shpfiletype);
 	if (shpType != SHP_POLYLINE && shpType != SHP_POLYGON)
 	{
 		ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
@@ -3468,7 +3468,7 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 	// ----------------------------------------------
 	//    Validating
 	// ----------------------------------------------
-	ShpfileType shpType = Utility::ShapeTypeConvert2D(this->_shpfiletype);
+	ShpfileType shpType = ShapeUtility::Convert2D(this->_shpfiletype);
 	if (shpType != SHP_POLYLINE)
 	{
 		this->ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);

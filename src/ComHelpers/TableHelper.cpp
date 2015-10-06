@@ -51,6 +51,7 @@ void TableHelper::SetFieldValues(ITable* table, int rowIndex, CustomExpression& 
 		}
 	}
 
+	// TODO: don't set shape, if the expression doesn't contain geometry function
 	IShapefile* sf = ((CTableClass*)table)->GetParentShapefile();	 // doesn't add reference
 	if (sf)
 	{

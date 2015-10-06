@@ -138,7 +138,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	int i, j;
 	long numpoints;
 	
-	ShpfileType shpType2D = Utility::ShapeTypeConvert2D(_shpfiletype);;
+	ShpfileType shpType2D = ShapeUtility::Convert2D(_shpfiletype);;
 
 	// --------------------------------------------------
 	//	Point Selection
@@ -400,7 +400,7 @@ BOOL CShapefile::DefineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std
 
 		int intbuf;
 		fread(&intbuf,sizeof(int),1,_shpfile);
-		Utility::SwapEndian((char*)&intbuf,sizeof(int));
+		ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 
 		// shape records are 1 based
 		if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -411,7 +411,7 @@ BOOL CShapefile::DefineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std
 		else
 		{	
 			fread(&intbuf,sizeof(int),1,_shpfile);
-			Utility::SwapEndian((char*)&intbuf,sizeof(int));
+			ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 			int contentLength = intbuf*2;			//(16 to 32 bit words)
 
 			if( contentLength <= 0 )

@@ -46,94 +46,95 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 	if( _table == NULL || _sourceType == sstUninitialized)
 	{	
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
+		return S_OK;
 	}
 	else if( _isEditingShapes )
 	{	
-		// editing is going on already
 		*retval = VARIANT_TRUE;
+		return S_OK;
 	}
 	else if (_writing) 
 	{
 		ErrorMessage(tkSHP_READ_VIOLATION);
+		return S_OK;
+	}
+	
+	
+	// quad tree generation
+	IExtents * box = NULL;	
+	double xm,ym,zm,xM,yM,zM;
+	if(_useQTree)
+	{
+		if (_qtree)
+		{
+			delete _qtree;
+			_qtree = NULL;
+		}
+		IExtents * box = NULL;	
+		this->get_Extents(&box);
+		box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
+		box->Release();
+		_qtree = new QTree(QTreeExtent(xm,xM,yM,ym));
+	}
+		
+	// reading shapes into memory
+	IShape * shp = NULL;
+	_lastErrorCode = tkNO_ERROR;	
+	long percent = 0, newpercent = 0; 
+		
+	int size = (int)_shapeData.size();
+	for( int i = 0; i < size; i++)
+	{	
+		this->get_Shape(i, &shp);
+
+		if( _lastErrorCode != tkNO_ERROR )
+		{	
+			ErrorMessage(_lastErrorCode);
+			ReleaseMemoryShapes();
+			return S_OK;
+		}
+			
+		_shapeData[i]->shape = shp;
+		_shapeData[i]->originalIndex = i;
+			
+		if(_useQTree)
+		{
+			QuickExtentsCore(i, &xm, &ym, &xM, &yM);
+
+			QTreeNode node;
+			node.Extent.left = xm;
+			node.Extent.right= xM;
+			node.Extent.top = yM;
+			node.Extent.bottom = ym;
+			node.index = i;
+			_qtree->AddNode(node);
+		}
+			
+		CallbackHelper::Progress(_globalCallback, i, size, "Reading shapes into memory", _key, percent);
+	}
+	CallbackHelper::ProgressCompleted(_globalCallback);
+
+	*retval = VARIANT_TRUE;
+	
+	// it's used in the disk based mode only
+	ReleaseRenderingCache();
+
+	// ------------------------------------------
+	// reading table into memory
+	// ------------------------------------------
+	if(StartEditTable != VARIANT_FALSE)
+	{
+		StartEditingTable(_globalCallback,retval);
+	}
+		
+	if (*retval == VARIANT_FALSE)
+	{
+		ErrorMessage(_table->get_LastErrorCode(&_lastErrorCode));
+		ReleaseMemoryShapes();
 	}
 	else
 	{
-		// quad tree generation
-		IExtents * box = NULL;	
-		double xm,ym,zm,xM,yM,zM;
-		if(_useQTree)
-		{
-			if (_qtree)
-			{
-				delete _qtree;
-				_qtree = NULL;
-			}
-			IExtents * box = NULL;	
-			this->get_Extents(&box);
-			box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
-			box->Release();
-			_qtree = new QTree(QTreeExtent(xm,xM,yM,ym));
-		}
-		
-		// reading shapes into memory
-		IShape * shp = NULL;
-		_lastErrorCode = tkNO_ERROR;	
-		long percent = 0, newpercent = 0; 
-		
-		int size = (int)_shapeData.size();
-		for( int i = 0; i < size; i++)
-		{	
-			this->get_Shape(i, &shp);
-
-			if( _lastErrorCode != tkNO_ERROR )
-			{	
-				ErrorMessage(_lastErrorCode);
-				ReleaseMemoryShapes();
-				return S_OK;
-			}
-			
-			_shapeData[i]->shape = shp;
-			_shapeData[i]->originalIndex = i;
-			
-			if(_useQTree)
-			{
-				QuickExtentsCore(i, &xm, &ym, &xM, &yM);
-
-				QTreeNode node;
-				node.Extent.left = xm;
-				node.Extent.right= xM;
-				node.Extent.top = yM;
-				node.Extent.bottom = ym;
-				node.index = i;
-				_qtree->AddNode(node);
-			}
-			
-			CallbackHelper::Progress(_globalCallback, i, size, "Reading shapes into memory", _key, percent);
-		}
-		CallbackHelper::ProgressCompleted(_globalCallback);
-
-		*retval = VARIANT_TRUE;
-	
-		// it's used in the disk based mode only
-		ReleaseRenderingCache();
-
-		// ------------------------------------------
-		// reading table into memory
-		// ------------------------------------------
-		if(StartEditTable != VARIANT_FALSE)
-		{
-			StartEditingTable(_globalCallback,retval);
-		}
-		
-		if (*retval == VARIANT_FALSE)
-		{
-			ErrorMessage(_table->get_LastErrorCode(&_lastErrorCode));
-			ReleaseMemoryShapes();
-		}
-		else
-		{
-			_isEditingShapes = TRUE;
-		}
+		_isEditingShapes = TRUE;
 	}
 
 	if (callbackIsNull)
@@ -341,9 +342,9 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 	// shape must have correct underlying data structure
 	// shapes not bound to shapefile all use CShapeWrapperCOM underlying class
 	// and if fast mode is set to true, CShapeWrapper class is expected
-	if ((this->_fastMode ? true : false) != ((CShape*)Shape)->get_fastMode())
+	if ((_fastMode ? true : false) != ((CShape*)Shape)->get_fastMode())
 	{
-		((CShape*)Shape)->put_fastMode(this->_fastMode?true:false);
+		((CShape*)Shape)->put_FastMode(_fastMode ? true : false);
 	}
 
 	VARIANT_BOOL bSynchronized;
@@ -453,7 +454,7 @@ STDMETHODIMP CShapefile::EditUpdateShape(long shapeIndex, IShape* shpNew, VARIAN
 
 	ShpfileType shpType;
 	shpNew->get_ShapeType2D(&shpType);
-	if (shpType != Utility::ShapeTypeConvert2D(_shpfiletype) && shpType != SHP_NULLSHAPE)
+	if (shpType != ShapeUtility::Convert2D(_shpfiletype) && shpType != SHP_NULLSHAPE)
 	{
 		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
 		return S_OK;
@@ -484,7 +485,7 @@ void CShapefile::ReregisterShape(int shapeIndex)
 	bool fastMode = _fastMode ? true : false;
 	if (fastMode != ((CShape*)shp)->get_fastMode())
 	{
-		((CShape*)shp)->put_fastMode(fastMode);
+		((CShape*)shp)->put_FastMode(fastMode);
 	}
 
 	IExtents * box;

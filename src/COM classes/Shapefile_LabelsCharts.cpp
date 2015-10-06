@@ -258,7 +258,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 	
 	ShpfileType shpType;
 	this->get_ShapefileType(&shpType);
-	shpType = Utility::ShapeTypeConvert2D(shpType);
+	shpType = ShapeUtility::Convert2D(shpType);
 	
 	long _numShapes;
 	this->get_NumShapes(&_numShapes);

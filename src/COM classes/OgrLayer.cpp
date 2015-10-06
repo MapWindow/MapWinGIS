@@ -562,7 +562,7 @@ STDMETHODIMP COgrLayer::get_ShapeType2D(ShpfileType* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	get_ShapeType(pVal);
-	*pVal = Utility::ShapeTypeConvert2D(*pVal);
+	*pVal = ShapeUtility::Convert2D(*pVal);
 	return S_OK;
 }
 

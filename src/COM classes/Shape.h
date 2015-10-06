@@ -36,6 +36,7 @@ class ATL_NO_VTABLE CShape :
 {
 public:
 	CShape();
+
 	~CShape();
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPE)
@@ -161,18 +162,16 @@ private:
 	void ErrorMessage(long ErrorCode);
 	bool PointInThisPolyFast(IPoint * pt);
 	bool PointInThisPolyRegular(IPoint * pt);
-	
+	double get_SegmentAngle(long segementIndex);
+	IShape* FixupByBuffer(tkUnitsOfMeasure units);
+
 public:
 	bool ExplodeCore(std::vector<IShape*>& vShapes);
-	CShapeWrapperCOM* InitComWrapper(CShapeWrapper* shpOld);
-	CShapeWrapper* InitShapeWrapper(CShapeWrapperCOM* shpOld);
 	bool FixupShapeCore(ShapeValidityCheck validityCheck);
-	bool put_ShapeWrapper(CShapeWrapper* data);
-	IShapeWrapper* get_ShapeWrapper();
-	void put_fastMode(bool state);				// toggles the storing mode for the shape
-	bool get_fastMode();
-	double get_SegmentAngle( long segementIndex);
-	void put_fastModeAdd(bool state);
+	bool put_RawData(char* data);
+	IShapeWrapper* get_ShapeWrapper() { return _shp; }
+	void put_FastMode(bool state);
+	bool get_fastMode() { return _useFastMode; }
 	void get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
 	bool get_Z(long PointIndex, double* z);
 	bool get_M(long PointIndex, double* m);
@@ -183,9 +182,8 @@ public:
 	bool get_ExtentsXY(double& xMin, double& yMin, double& xMax, double& yMax);
 	bool get_ExtentsXYZM(double& xMin, double& yMin, double& xMax, double& yMax, double& zMin, double& zMax, double& mMin, double& mMax);
 	bool ValidateBasics(ShapeValidityCheck& failedCheck, CString& err);
-	void get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
+	void get_LabelPositionAuto(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
 	bool SplitByPolylineCore(IShape* polyline, vector<IShape*>& results);
-	IShape* FixupByBuffer(tkUnitsOfMeasure units);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Shape), CShape)

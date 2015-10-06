@@ -75,7 +75,7 @@ bool ShapeHelper::PointWithinShape(IShape* shape, double projX, double projY, do
 
 	ShpfileType shpType2D;
 	shape->get_ShapeType(&shpType2D);
-	shpType2D = Utility::ShapeTypeConvert2D(shpType2D);
+	shpType2D = ShapeUtility::Convert2D(shpType2D);
 
 	double halfTolerance = Tolerance*.5;
 	double b_minX = projX - halfTolerance;
@@ -279,7 +279,7 @@ bool ShapeHelper::ForceProperShapeType(IShape* shp, ShpfileType sfType)
 	ShpfileType shapeType;
 	shp->get_ShapeType(&shapeType);
 
-	if (Utility::ShapeTypeConvert2D(sfType) == SHP_MULTIPOINT && Utility::ShapeTypeConvert2D(shapeType) == SHP_POINT)
+	if (ShapeUtility::Convert2D(sfType) == SHP_MULTIPOINT && ShapeUtility::Convert2D(shapeType) == SHP_POINT)
 	{
 		VARIANT_BOOL vb;
 		CComPtr<IPoint> pnt = NULL;

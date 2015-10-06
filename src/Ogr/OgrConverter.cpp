@@ -70,7 +70,7 @@ void AddPoints(CShape* shp, OGRLineString* geom, int startPointIndex, int endPoi
 {
 	ShpfileType shpType;
 	shp->get_ShapeType(&shpType);
-	bool isM = Utility::ShapeTypeIsM(shpType);
+	bool isM = ShapeUtility::IsM(shpType);
 
 	VARIANT_BOOL vb;
 	double x, y, z;

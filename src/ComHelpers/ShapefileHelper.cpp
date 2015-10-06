@@ -393,7 +393,7 @@ bool ShapefileHelper::ShapeTypeIsM(IShapefile* sf)
 {
 	if (!sf) return false;
 	ShpfileType shpType = GetShapeType(sf);
-	return Utility::ShapeTypeIsM(shpType);
+	return ShapeUtility::IsM(shpType);
 }
 
 // ********************************************************************
@@ -497,4 +497,20 @@ int ShapefileHelper::GetModifiedCount(IShapefile* sf)
 	}
 	
 	return count;
+}
+
+// ****************************************************************** 
+//		ClearShapefileModifiedFlag
+// ****************************************************************** 
+void ShapefileHelper::ClearShapefileModifiedFlag(IShapefile* sf)
+{
+	if (!sf) return;
+
+	long numShapes = 0;
+	sf->get_NumShapes(&numShapes);
+
+	for (int i = 0; i < numShapes; i++)
+	{
+		sf->put_ShapeModified(i, VARIANT_FALSE);
+	}
 }

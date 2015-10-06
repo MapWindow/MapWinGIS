@@ -27,27 +27,35 @@
 
 class CShapeWrapperCOM : public IShapeWrapper
 {
-public:
-	//	Constructor
-	CShapeWrapperCOM(ShpfileType shpType)
+private:
+	CShapeWrapperCOM()
+		: _xMin(0.0), _yMin(0.0), _xMax(0.0), _yMax(0.0), _zMin(0.0), _mMin(0.0), _zMax(0.0), _mMax(0.0),
+		_boundsChanged(true), _lastErrorCode(tkNO_ERROR)
 	{
-		_ShapeType = shpType;
-		_ShapeType2D = Utility::ShapeTypeConvert2D(_ShapeType);
-		_boundsChanged = true;
-		_lastErrorCode = tkNO_ERROR;
-		_xMin = _yMin = _xMax = _yMax = _zMin = _mMin = _zMax = _mMax = 0.0;
 	}
 
-	//	Destructor
-	~CShapeWrapperCOM()
+public:
+	CShapeWrapperCOM(ShpfileType shpType)
+		: CShapeWrapperCOM() 
 	{
-		this->Clear();
+		_shapeType = shpType;
+	}
+
+	CShapeWrapperCOM(char* data)
+		: CShapeWrapperCOM() 	
+	{
+		put_RawData(data);
+	}
+
+	virtual ~CShapeWrapperCOM()
+	{
+		Clear();
 	}
 	
 private:	
 	// type
-	ShpfileType _ShapeType;
-	ShpfileType _ShapeType2D;
+	ShpfileType _shapeType;
+	
 	// bounds
 	double _xMin;
 	double _yMin;
@@ -60,19 +68,19 @@ private:
 	double _mMax;
 	bool _boundsChanged;
 	short _lastErrorCode;
-	
-public:
-	// Actually this breaks encapsulation, but in many cases we want faster access
-	std::vector<IPoint *> _allPoints;
-	std::vector<long> _allParts;
+
+	std::vector<IPoint *> _points;
+	std::vector<long> _parts;
 
 public:
-	int get_PointCount(){return _allPoints.size();}
-	int get_PartCount(){return _allParts.size();}
+	ShapeWrapperType get_WrapperType() { return swtCom; }
+
+	int get_PointCount(){ return _points.size(); }
+	int get_PartCount(){ return _parts.size(); }
 
 	// type
-	ShpfileType get_ShapeType(){return _ShapeType;}
-	ShpfileType get_ShapeType2D(){return _ShapeType2D;}
+	ShpfileType get_ShapeType(){ return _shapeType; }
+	ShpfileType get_ShapeType2D(){ return ShapeUtility::Convert2D(_shapeType); }
 	bool put_ShapeType(ShpfileType shpType);
 	
 	// bounds
@@ -109,8 +117,10 @@ public:
 	bool put_PartStartPoint(long PartIndex, long newVal);
 	
 	bool PointInRing(int partIndex, double pointX, double pointY);
-
 	void ReversePoints(long startIndex, long endIndex);
+
+	int* get_RawData();
+	bool put_RawData(char* shapeData);
 
 	int get_LastErrorCode()
 	{

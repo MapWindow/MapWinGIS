@@ -523,7 +523,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 	// getting shape type
 	ShpfileType shpType;
 	shape->get_ShapeType(&shpType);
-	ShpfileType simpleType =Utility::ShapeTypeConvert2D(shpType);
+	ShpfileType simpleType =ShapeUtility::Convert2D(shpType);
 	
 	// do we have line pattern here?
 	bool usePattern = false;

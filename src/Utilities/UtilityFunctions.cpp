@@ -163,42 +163,6 @@ namespace Utility
 	}
 #pragma endregion
 
-#pragma region Shapefile
-	// **************************************************************
-	//		ShapeTypeIsM()
-	// **************************************************************
-	bool ShapeTypeIsM(ShpfileType shpType)
-	{
-		return shpType == SHP_POINTM || shpType == SHP_MULTIPOINTM || shpType == SHP_POLYLINEM || shpType == SHP_POLYGONM;
-	}
-
-	// **************************************************************
-	//		ShapeTypeConvert2D()
-	// **************************************************************
-	ShpfileType ShapeTypeConvert2D(ShpfileType shpType)
-	{
-		if		(shpType == SHP_NULLSHAPE)																return SHP_NULLSHAPE;
-		else if (shpType == SHP_POINT || shpType == SHP_POINTM || shpType == SHP_POINTZ)				return SHP_POINT;
-		else if	(shpType == SHP_MULTIPOINT || shpType == SHP_MULTIPOINTM || shpType == SHP_MULTIPOINTZ)	return SHP_MULTIPOINT;
-		else if (shpType == SHP_POLYGON || shpType == SHP_POLYGONM || shpType == SHP_POLYGONZ)			return SHP_POLYGON;
-		else if (shpType == SHP_POLYLINE || shpType == SHP_POLYLINEM || shpType == SHP_POLYLINEZ)		return SHP_POLYLINE;
-		else																							return shpType;
-	}
-	
-	// **************************************************************
-	//		Utility::swapEndian()
-	// **************************************************************
-	void Utility::SwapEndian(char* a,int size) 
-	{
-		char hold;
-		for(int i = 0; i < size*.5; i++)
-		{	hold = a[i];
-			a[i] = a[size-i-1];
-			a[size-i-1] = hold;
-		}
-	}
-#pragma endregion
-
 #pragma region Files
 	// *******************************************************************
 	//		fileExists()
@@ -1217,33 +1181,8 @@ namespace Utility
 		return result;
 	}
 
-	// ****************************************************************** 
-	//		ClearShapefileModifiedFlag
-	// ****************************************************************** 
-	void ClearShapefileModifiedFlag(IShapefile* sf)
-	{
-		if (!sf) return;
-		long numShapes = 0;
-		sf->get_NumShapes(&numShapes);
-		for (int i = 0; i < numShapes; i++)
-		{
-			sf->put_ShapeModified(i, VARIANT_FALSE);
-		}
-	}
 
-	// ****************************************************************** 
-	//		LabelPositionForShapeType
-	// ****************************************************************** 
-	tkLabelPositioning LabelPositionForShapeType(ShpfileType shpType)
-	{
-		shpType = ShapeTypeConvert2D(shpType);
-		if (shpType == SHP_POLYGON)
-			return lpCentroid;
-		else if (shpType == SHP_POLYLINE)
-			return lpLongestSegement;
-		else
-			return lpCenter;
-	}
+
 	
 	// ****************************************************************** 
 	//		SerializeVariant
