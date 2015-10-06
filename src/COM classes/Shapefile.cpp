@@ -49,11 +49,12 @@ CShapefile::CShapefile()
 	_sortAscending = VARIANT_FALSE;
 	_sortField = SysAllocString(L"");
 
+	_appendStartShapeCount = -1;
+	_appendMode = VARIANT_FALSE;
 	_snappable = VARIANT_TRUE;
 	_interactiveEditing = VARIANT_FALSE;
 	_hotTracking = VARIANT_TRUE;
 	_geosGeometriesRead = false;
-	_useValidationList = false;
 	_stopExecution = NULL;
 
 	_selectionTransparency = 180;
@@ -547,13 +548,11 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 	_dbffileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + L"dbf";
 	_prjfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + L"prj";
 
-	// Running 2k, XP, NT, or other future versions
-	////Changes made to use _wfopen to support Asian character file names ---Lailin Chen 11/5/2005
+	// read mode
 	_shpfile = _wfopen( _shpfileName, L"rb");
 	_shxfile = _wfopen(_shxfileName,L"rb");
 
 	// opening DBF
-	//ASSERT(dbf == NULL);
 	if (!_table)
 	{
 		CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&_table);
@@ -697,7 +696,7 @@ STDMETHODIMP CShapefile::CreateNew(BSTR ShapefileName, ShpfileType ShapefileType
 HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType, bool applyRandomOptions, VARIANT_BOOL *retval)
 {
 	*retval = VARIANT_FALSE;
-	VARIANT_BOOL vbretval;
+	VARIANT_BOOL vb;
 
 	// check for supported types
 	if( ShapefileType != SHP_NULLSHAPE &&
@@ -714,136 +713,129 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 		ShapefileType != SHP_MULTIPOINTM )
 	{
 		ErrorMessage(tkUNSUPPORTED_SHAPEFILE_TYPE);
+		return S_OK;
 	}
-	else
-	{
-		USES_CONVERSION;
-		CString tmp_shpfileName = OLE2CA(ShapefileName);
+	
+	USES_CONVERSION;
+	CString tmp_shpfileName = OLE2CA(ShapefileName);
 		
-		// ----------------------------------------------
-		// in memory shapefile (without name)
-		// ----------------------------------------------
-		if (tmp_shpfileName.GetLength() == 0)
-		{
-			// closing the old shapefile (error code inside the function)
-			Close(&vbretval);
+	// ----------------------------------------------
+	// in memory shapefile (without name)
+	// ----------------------------------------------
+	if (tmp_shpfileName.GetLength() == 0)
+	{
+		// closing the old shapefile (error code inside the function)
+		Close(&vb);
 			
-			if( vbretval == VARIANT_TRUE )
-			{	
-				CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&_table);
-				if (!_table)
-				{
-					ErrorMessage(tkCANT_COCREATE_COM_INSTANCE);
-				}
-				else
-				{
-					_table->CreateNew(m_globalSettings.emptyBstr, &vbretval);
+		if( vb == VARIANT_TRUE )
+		{	
+			CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&_table);
+
+			_table->CreateNew(m_globalSettings.emptyBstr, &vb);
 					
-					if (!vbretval)
-					{
-						long error;
-						_table->get_LastErrorCode(&error);
-						ErrorMessage(error);
-						_table->Release();
-						_table = NULL;
-					}
-					else
-					{
-						_shpfiletype = ShapefileType;
-						_isEditingShapes = true;
-						_sourceType = sstInMemory;
+			if (!vb)
+			{
+				long error;
+				_table->get_LastErrorCode(&error);
+				ErrorMessage(error);
+				_table->Release();
+				_table = NULL;
+			}
+			else
+			{
+				_shpfiletype = ShapefileType;
+				_isEditingShapes = true;
+				_sourceType = sstInMemory;
 
-						if (applyRandomOptions)
-							ShapeStyleHelper::ApplyRandomDrawingOptions(this);
-
-						*retval = VARIANT_TRUE;
-					}
+				if (applyRandomOptions) {
+					ShapeStyleHelper::ApplyRandomDrawingOptions(this);
 				}
+
+				*retval = VARIANT_TRUE;
 			}
 		}
-		else if (tmp_shpfileName.GetLength() <= 3)
+
+		return S_OK;
+	}
+
+	if (tmp_shpfileName.GetLength() <= 3)
+	{
+		ErrorMessage(tkINVALID_FILENAME);
+		return S_OK;
+	}
+	
+	// ----------------------------------------------
+	// in memory shapefile (name specified, is acceptable and available)
+	// ----------------------------------------------
+	CString shpName, shxName, dbfName, prjName;
+	shpName = tmp_shpfileName;
+	shxName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "shx";
+	dbfName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
+	prjName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "prj";
+			
+	// new file is created, so there must not be any files with this names
+	if( Utility::FileExists(shpName) != FALSE )
+	{	
+		ErrorMessage(tkSHP_FILE_EXISTS);
+		return S_OK;
+	}
+	if( Utility::FileExists(shxName) != FALSE )
+	{	
+		ErrorMessage(tkSHX_FILE_EXISTS);
+		return S_OK;
+	}
+	if( Utility::FileExists(dbfName) != FALSE )
+	{	
+		ErrorMessage(tkDBF_FILE_EXISTS);
+		return S_OK;
+	}
+	if( Utility::FileExists(prjName) != FALSE )
+	{	
+		ErrorMessage(tkPRJ_FILE_EXISTS);
+		return S_OK;
+	}
+
+	// closing the old shapefile (error code inside the function)
+	this->Close(&vb);
+			
+	if( vb == VARIANT_TRUE )
+	{	
+		CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&_table);
+				
+		_table->put_GlobalCallback(_globalCallback);
+
+		CString newDbfName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
+		CComBSTR bstrName(newDbfName);
+		_table->CreateNew(bstrName, &vb);
+
+		if (!vb)
 		{
-			ErrorMessage(tkINVALID_FILENAME);
+			_table->get_LastErrorCode(&_lastErrorCode);
+			ErrorMessage(_lastErrorCode);
+			_table->Release();
+			_table = NULL;
 		}
 		else
 		{
-			// ----------------------------------------------
-			// in memory shapefile (name specified, is acceptable and available)
-			// ----------------------------------------------
-			CString shpName, shxName, dbfName, prjName;
-			shpName = tmp_shpfileName;
-			shxName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "shx";
-			dbfName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
-			prjName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "prj";
-			
-			// new file is created, so there must not be any files with this names
-			if( Utility::FileExists(shpName) != FALSE )
-			{	
-				ErrorMessage(tkSHP_FILE_EXISTS);
-				return S_OK;
-			}
-			if( Utility::FileExists(shxName) != FALSE )
-			{	
-				ErrorMessage(tkSHX_FILE_EXISTS);
-				return S_OK;
-			}
-			if( Utility::FileExists(dbfName) != FALSE )
-			{	
-				ErrorMessage(tkDBF_FILE_EXISTS);
-				return S_OK;
-			}
-			if( Utility::FileExists(prjName) != FALSE )
-			{	
-				ErrorMessage(tkPRJ_FILE_EXISTS);	// lsu: probably it's ok to overwrite it blindly ?
-				return S_OK;
+			_shpfileName = tmp_shpfileName;
+			_shxfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "shx";
+			_dbffileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
+			_prjfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "prj";
+
+			_shpfiletype = ShapefileType;
+			_isEditingShapes = true;
+			_sourceType = sstInMemory;
+
+			if (applyRandomOptions) {
+				ShapeStyleHelper::ApplyRandomDrawingOptions(this);
 			}
 
-			// closing the old shapefile (error code inside the function)
-			this->Close(&vbretval);
-			
-			if( vbretval == VARIANT_TRUE )
-			{	
-				CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&_table);
-				
-				if (!_table)
-				{
-					ErrorMessage(tkCANT_COCREATE_COM_INSTANCE);
-				}
-				else
-				{
-					_table->put_GlobalCallback(_globalCallback);
-					
-					CString newDbfName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
-					CComBSTR bstrName(newDbfName);
-					_table->CreateNew(bstrName, &vbretval);
-					
-					if (!vbretval)
-					{
-						_table->get_LastErrorCode(&_lastErrorCode);
-						ErrorMessage(_lastErrorCode);
-						_table->Release();
-						_table = NULL;
-					}
-					else
-					{
-						_shpfileName = tmp_shpfileName;
-						_shxfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "shx";
-						_dbffileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
-						_prjfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "prj";
-						
-						_shpfiletype = ShapefileType;
-						_isEditingShapes = true;
-						_sourceType = sstInMemory;
-						if (applyRandomOptions)
-							ShapeStyleHelper::ApplyRandomDrawingOptions(this);
-
-						*retval = VARIANT_TRUE;
-					}
-				}
-			}
+			*retval = VARIANT_TRUE;
 		}
 	}
+		
 	LabelsHelper::UpdateLabelsPositioning(this);
+
 	return S_OK;
 }
 
@@ -872,6 +864,10 @@ STDMETHODIMP CShapefile::CreateNewWithShapeID(BSTR ShapefileName, ShpfileType Sh
 STDMETHODIMP CShapefile::Close(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
+	if (_appendMode) {
+		StopAppendMode();
+	}
 
 	ClearCachedGeometries();
 
@@ -1047,19 +1043,18 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		// -----------------------------------------------
 		// opening files
 		// -----------------------------------------------
-		FILE * sa_shpfile = fopen( sa_shpfileName, "wb+" );		
-		if( sa_shpfile == NULL )
+		FILE * shpfile = fopen( sa_shpfileName, "wb+" );		
+		if( shpfile == NULL )
 		{	
 			ErrorMessage(tkCANT_CREATE_SHP);
 			return S_OK;
 		}
 		
 		//shx
-		FILE * sa_shxfile = fopen( sa_shxfileName, "wb+" );
-		if( sa_shxfile == NULL )
+		FILE * shxfile = fopen( sa_shxfileName, "wb+" );
+		if( shxfile == NULL )
 		{	
-			fclose( sa_shpfile );
-			sa_shpfile = NULL;
+			fclose( shpfile );
 			ErrorMessage(tkCANT_CREATE_SHX);
 			return S_OK;
 		}
@@ -1067,13 +1062,11 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		// ------------------------------------------------
 		//	writing the files
 		// ------------------------------------------------
-		this->WriteShp(sa_shpfile,cBack);
-		this->WriteShx(sa_shxfile,cBack);
+		this->WriteShp(shpfile,cBack);
+		this->WriteShx(shxfile,cBack);
 		
-		fclose(sa_shpfile);
-		fclose(sa_shxfile);
-		//_unlink(sa_shpfileName);
-		//_unlink(sa_shxfileName);
+		fclose(shpfile);
+		fclose(shxfile);
 
 		// ------------------------------------------------
 		//	saving dbf table
@@ -1095,15 +1088,17 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 	}
 	
 	// restoring callback
-	if (callbackIsNull)
+	if (callbackIsNull) {
 		_globalCallback = NULL;
+	}
+
 	return S_OK;
 }
 
 // **********************************************************
 //		SaveAs()
 // **********************************************************
-// Saves shapefile to the new or the same location. Doesn't change the editing state (source type) 
+// Saves shapefile to the new or the same location. Doesn't stop editing mode.
 STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -1181,25 +1176,24 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 
 			// refresh extents
 			VARIANT_BOOL retVal;
-			this->RefreshExtents(&retVal);
+			RefreshExtents(&retVal);
 		}		
 		
 		// -----------------------------------------------
 		// opening files
 		// -----------------------------------------------
-		FILE * sa_shpfile = _wfopen(newShpName, L"wb+");
-		if( sa_shpfile == NULL )
+		FILE * shpfile = _wfopen(newShpName, L"wb+");
+		if( shpfile == NULL )
 		{	
 			ErrorMessage(tkCANT_CREATE_SHP);
 			return S_OK;
 		}
 		
 		//shx
-		FILE * sa_shxfile = _wfopen(newShxName, L"wb+");
-		if( sa_shxfile == NULL )
+		FILE * shxfile = _wfopen(newShxName, L"wb+");
+		if( shxfile == NULL )
 		{	
-			fclose( sa_shpfile );
-			sa_shpfile = NULL;
+			fclose( shpfile );
 			ErrorMessage(tkCANT_CREATE_SHX);
 			return S_OK;
 		}
@@ -1207,25 +1201,21 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		// ------------------------------------------------
 		//	writing the files
 		// ------------------------------------------------
-		this->WriteShp(sa_shpfile,cBack);
-		this->WriteShx(sa_shxfile,cBack);
+		WriteShp(shpfile,cBack);
+		WriteShx(shxfile,cBack);
 
-		fclose(sa_shpfile);
-		fclose(sa_shxfile);
-
-		sa_shpfile = _wfopen(newShpName, L"rb");
-		sa_shxfile = _wfopen(newShxName, L"rb");
+		fclose(shpfile);
+		fclose(shxfile);
 
 		// ------------------------------------------------
 		//	saving dbf table
 		// ------------------------------------------------
 		CComBSTR bstrDbf(newDbfName);
 		_table->SaveAs(bstrDbf, cBack, retval);
+
 		if( *retval != VARIANT_TRUE )
 		{	
 			_table->get_LastErrorCode(&_lastErrorCode);
-			fclose(sa_shpfile);
-			fclose(sa_shxfile);
 			_wunlink(newShpName);
 			_wunlink(newShxName);
 			return S_OK;
@@ -1234,11 +1224,14 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		// -------------------------------------------------
 		//	switching to the new files
 		// -------------------------------------------------
+		shpfile = _wfopen(newShpName, L"rb");
+		shxfile = _wfopen(newShxName, L"rb");
+
 		if( _shpfile != NULL )	fclose(_shpfile);
-		_shpfile = sa_shpfile;
+		_shpfile = shpfile;
 		
 		if( _shxfile != NULL )	fclose(_shxfile);
-		_shxfile = sa_shxfile;
+		_shxfile = shxfile;
 	
 		// update all filenames:
 		_shpfileName = newShpName;	// saving of shp filename should be done before writing the projection;
@@ -1246,8 +1239,7 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		_dbffileName = newDbfName;
 		_prjfileName = newShpName.Left(newShpName.GetLength() - 3) + L"prj";
 
-		// projection will be written to the disk after this
-		_sourceType = sstDiskBased;	
+		_sourceType = sstDiskBased;
 
 		// saving projection in new format
 		VARIANT_BOOL vbretval, isEmpty;
@@ -1264,15 +1256,17 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 	}
 	
 	// restoring callback
-	if (callbackIsNull)
+	if (callbackIsNull) {
 		_globalCallback = NULL;
+	}
+
 	return S_OK;
 }
 
 // **************************************************************
 //		Save()
 // **************************************************************
-//Neio, 2009/07/23, add "Save" Method for saving without exiting edit mode
+// saving without exiting edit mode
 STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -1335,7 +1329,6 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 		*retval = FALSE;
 		
 		ErrorMessage(_lastErrorCode);
-		
 	}
 	else
 	{
@@ -1379,17 +1372,20 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 			//Save the table file
 			_table->Save(cBack,retval);
 			
-			// projection will be written to the disk after this
 			_sourceType = sstDiskBased;	
 
 			// saving projection in new format
-			VARIANT_BOOL vbretval;
-			CComBSTR bstr(_prjfileName);
-			_geoProjection->WriteToFileEx(bstr, VARIANT_TRUE, &vbretval);
+			VARIANT_BOOL vbretval, isEmpty;
+			_geoProjection->get_IsEmpty(&isEmpty);
+			if (!isEmpty) {
+				CComBSTR bstr(_prjfileName);
+				_geoProjection->WriteToFileEx(bstr, VARIANT_TRUE, &vbretval);
+			}
 
 			*retval = VARIANT_TRUE;
 		}
 	}
+
 	_writing = false;
 	return S_OK;
 }
@@ -1530,7 +1526,6 @@ STDMETHODIMP CShapefile::EditCellValue(long FieldIndex, long ShapeIndex, VARIANT
 	if( *retval == VARIANT_FALSE )
 	{	
 		_table->get_LastErrorCode(&_lastErrorCode);
-		*retval = VARIANT_FALSE;
 	}
 
 	return S_OK;
@@ -1542,7 +1537,14 @@ STDMETHODIMP CShapefile::EditCellValue(long FieldIndex, long ShapeIndex, VARIANT
 STDMETHODIMP CShapefile::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
+	if (_appendMode) 
+	{
+		ErrorMessage(tkDBF_NO_EDIT_MODE_WHEN_APPENDING);
+		*retval = VARIANT_FALSE;
+		return S_OK;
+	}
+
 	if(_globalCallback == NULL && cBack != NULL)
 	{
 		_globalCallback = cBack;
@@ -2792,61 +2794,76 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*fixed = VARIANT_FALSE;
-	this->Clone(retVal);
 	
+	FixUpShapes2(VARIANT_TRUE, retVal, fixed);
+	
+	return S_OK;
+}
+
+// *********************************************************
+//		FixUpShapes2()
+// *********************************************************
+STDMETHODIMP CShapefile::FixUpShapes2(VARIANT_BOOL SelectedOnly, IShapefile** result, VARIANT_BOOL* fixed)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*fixed = VARIANT_FALSE;
+
+	if (*result == NULL) {
+		Clone(result);
+	}
+
 	tkUnitsOfMeasure units;
 	_geoProjection->get_LinearUnits(&units);
+	
+	long numFields;
+	this->get_NumFields(&numFields);
 
-	if (*retVal)
+	long percent = 0;
+	int numShapes = _shapeData.size();
+	*fixed = VARIANT_TRUE;
+
+	for (int i = 0; i < numShapes; i++)
 	{
-		long numFields;
-		this->get_NumFields(&numFields);
-		long percent = 0;
-		int numShapes = _shapeData.size();
-		*fixed = VARIANT_TRUE;
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Fixing...", _key, percent);
 
-		for (int i = 0; i < numShapes; i++)
+		IShape* shp = NULL;
+		this->get_Shape(i, &shp);
+		if (!shp) {
+			continue;
+		}
+
+		IShape* shpNew = NULL;
+		shp->FixUp2(units, &shpNew);
+		shp->Release();
+
+		// failed to fix the shape? skip it.
+		if (!shpNew)
+			continue;
+
+		long shapeIndex = 0;
+		(*result)->get_NumShapes(&shapeIndex);
+
+		VARIANT_BOOL vbretval = VARIANT_FALSE;
+		(*result)->EditInsertShape(shpNew, &shapeIndex, &vbretval);
+		shpNew->Release();
+
+		if (vbretval)
 		{
-			CallbackHelper::Progress(_globalCallback, i, numShapes, "Fixing...", _key, percent);
-			
-			IShape* shp = NULL;
-			this->get_Shape(i, &shp);
-			if (!shp)
-				continue;
-
-			IShape* shpNew = NULL;
-			shp->FixUp2(units, &shpNew);
-			shp->Release();
-
-			// failed to fix the shape? skip it.
-			if (!shpNew)
-				continue;
-			
-			long shapeIndex = 0;
-			(*retVal)->get_NumShapes(&shapeIndex);
-
-			VARIANT_BOOL vbretval = VARIANT_FALSE;
-			(*retVal)->EditInsertShape(shpNew, &shapeIndex, &vbretval);
-			shpNew->Release();			
-
-			if (vbretval)
+			// TODO: extract, it's definitely used in other methods as well
+			CComVariant var;
+			for (int iFld = 0; iFld < numFields; iFld++)
 			{
-				// copy attributes
-				CComVariant var;
-				for (int iFld = 0; iFld < numFields; iFld++)
-				{	
-					this->get_CellValue(iFld, i, &var);
-					(*retVal)->EditCellValue(iFld, shapeIndex, var, &vbretval);
-				}
+				this->get_CellValue(iFld, i, &var);
+				(*result)->EditCellValue(iFld, shapeIndex, var, &vbretval);
 			}
 		}
 	}
 
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
+
 	return S_OK;
 }
-
 
 // *********************************************************
 //		GetRelatedShapes()
@@ -3003,14 +3020,17 @@ STDMETHODIMP CShapefile::EditAddField(BSTR name, FieldType type, int precision, 
 STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	VARIANT_BOOL retval;
 	*shapeIndex = _shapeData.size();
-	this->EditInsertShape(shape, shapeIndex, &retval);
+
+	EditInsertShape(shape, shapeIndex, &retval);
+
 	if (retval == VARIANT_FALSE)
 		*shapeIndex = -1;
+
 	return S_OK;
 }
-
 
 // *****************************************************************
 //		GetClosestVertex()

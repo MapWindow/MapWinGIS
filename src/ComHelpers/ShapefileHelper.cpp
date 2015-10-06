@@ -66,12 +66,6 @@ void ShapefileHelper::CloneNoFields(IShapefile* sfSource, IShapefile** retVal, S
 	
 	if (gpSource && gpTarget) {
 		gpTarget->CopyFrom(gpSource, &vb);
-
-		// older proj4 version - intentionally commented
-		/*CComBSTR pVal;
-		sfSource->get_Projection(&pVal);
-		if (pVal != NULL)
-		sf->put_Projection(pVal);*/
 	}
 
 	ICallback* callback = NULL;

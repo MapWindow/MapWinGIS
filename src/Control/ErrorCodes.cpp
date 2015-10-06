@@ -207,6 +207,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Shapefile.InteractiveEditing is supposed to be on.";
 		case tkEXPRESSION_NO_SHAPEFILE:
 			return "Expression can be set only for labels of shapefile layer.";
+		case tkAPPEND_MODE_NO_FILE:
+			return "Append mode works with disk-based shapefiles in non-edit mode only.";
 		
 		//301-400 = OGR
 		case tkFAILED_TO_OPEN_OGR_LAYER:
@@ -351,6 +353,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "Fields of the same type are expected for this operation";
 		case tkDBF_RECORDS_SHAPES_MISMATCH:
 			return "Number of records in attribute table doesn't match the number of shapes in shapefile.";
+		case tkDBF_CANT_WRITE_ROW:
+			return "Failed to write DBF record to the disk.";
+		case tkDBF_NO_EDIT_MODE_WHEN_APPENDING:
+			return "Can't start editing mode for DBF table when append mode is on (call Shapefile.StopAppendMode).";
 
 		//1001-1200 = tkutils
 		case tkOUT_OF_RANGE_0_TO_180:

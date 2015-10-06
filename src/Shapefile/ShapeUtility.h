@@ -13,4 +13,6 @@ public:
 	static IShapeWrapper* CreateWrapper(ShpfileType shpType, bool forceCOM);
 	static IShapeWrapper* CreateEmptyWrapper(bool forceCOM);
 	static ShapeWrapperType GetShapeWrapperType(ShpfileType shpType, bool forceCom);
+	static void WriteBigEndian(FILE* file, int value);
+	static long ReadIntBigEndian(FILE* file);
 };

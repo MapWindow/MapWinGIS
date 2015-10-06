@@ -39,7 +39,8 @@ class ATL_NO_VTABLE CTableClass :
 public:
 	CTableClass()
 		:_shapefile(NULL), _globalCallback(NULL), _lastErrorCode(tkNO_ERROR),
-		_isEditingTable(FALSE), _dbfHandle(NULL), m_maxRowId(-1)
+		_isEditingTable(FALSE), _dbfHandle(NULL), m_maxRowId(-1), _appendMode(false),
+		_appendStartShapeCount(-1)
 	{
 		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
@@ -189,6 +190,8 @@ private:
 	int _lastJoinId;
 	IShapefile* _shapefile;
 	int _lastRecordIndex;    // last index accessed with get_CellValue
+	bool _appendMode;
+	int _appendStartShapeCount;
 
 public:
 	bool m_needToSaveAsNewFile;
@@ -212,6 +215,8 @@ private:
 	void ClearFieldCustomizations();
 	void RemoveTempFiles();
 	void ClearRows();
+	void TryClearLastRecord(long rowIndex);
+	void ClearFields();
 
 public:	
 	void DeserializeCore(CPLXMLNode* node);
@@ -237,11 +242,8 @@ public:
 	bool get_FieldValuesString(int FieldIndex, std::vector<CString>& values);
 
 	bool set_IndexValue(int rowIndex);
-
 	bool MakeUniqueFieldNames();
-
 	bool CheckJoinInput(ITable* table2, CString fieldTo, CString fieldFrom, long& index1, long& index2);
-
 	bool JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList);
 	bool JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CStringW filenameToReopen, CString options, set<CString>& fieldList);
 	void RemoveJoinedFields();
@@ -251,11 +253,15 @@ public:
 	IShapefile* GetParentShapefile() { return _shapefile; }
 	bool GetSorting(long fieldIndex, vector<long>& indices);
 	bool GetRelativeValues(long fieldIndex, bool logScale, vector<double>& values);
+	bool WriteAppendedRow();
+	void StartAppendMode() { _appendMode = true; _appendStartShapeCount = _rows.size(); };
+	void StopAppendMode();
 
 public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)
 		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
 	END_CONNECTION_POINT_MAP()
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Table), CTableClass)

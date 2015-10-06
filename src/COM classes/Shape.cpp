@@ -2433,6 +2433,7 @@ IShape* CShape::FixupByBuffer(tkUnitsOfMeasure units)
 		result->get_IsValid(&vb);
 		if (!vb) {
 			result->Release();
+			result = NULL;
 		}
 	}
 

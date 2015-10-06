@@ -105,6 +105,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkADD_SHAPE_MODE_ONLY 245
 # define tkNO_INTERACTIVE_EDITING 246
 # define tkEXPRESSION_NO_SHAPEFILE 247
+# define tkAPPEND_MODE_NO_FILE 248
 
 //301-400 = OGR layers
 # define tkFAILED_TO_OPEN_OGR_LAYER 301
@@ -181,6 +182,8 @@ const char * ErrorMsg( long ErrorCode );
 # define tkSAME_FIELD_TYPE_EXPECTED 809
 # define tkGRID_MERGE_PROJECTION_MISMATCH 810
 # define tkDBF_RECORDS_SHAPES_MISMATCH 811
+# define tkDBF_CANT_WRITE_ROW 812
+# define tkDBF_NO_EDIT_MODE_WHEN_APPENDING 813
 
 //1001-1200 = tkutils
 # define tkOUT_OF_RANGE_0_TO_180 1001

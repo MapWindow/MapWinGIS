@@ -46,6 +46,7 @@ class ATL_NO_VTABLE CShapefile :
 public:
 	
 	CShapefile();
+
 	~CShapefile();
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEFILE)
@@ -251,6 +252,10 @@ public:
 	STDMETHOD(put_SortAscending)(VARIANT_BOOL newVal);
 	STDMETHOD(UpdateSortField)();
 	STDMETHOD(SaveAsEx)(BSTR newFilename, VARIANT_BOOL stopEditing, VARIANT_BOOL unboundFile, VARIANT_BOOL* retVal);
+	STDMETHOD(FixUpShapes2)(VARIANT_BOOL SelectedOnly, IShapefile** result, VARIANT_BOOL* retVal);
+	STDMETHOD(StartAppendMode)(VARIANT_BOOL* retVal);
+	STDMETHOD(StopAppendMode)();
+	STDMETHOD(get_AppendMode)(VARIANT_BOOL* pVal);
 private:
 
 	// data for point in shapefile test
@@ -327,6 +332,8 @@ private:
 	long _nextShapeHandle;		// the next unique handle to assign
 	VARIANT_BOOL _interactiveEditing;
 	VARIANT_BOOL _snappable;
+	VARIANT_BOOL _appendMode;
+	int _appendStartShapeCount;	  // number of shapes when append mode is started
 	
 	// When this flag is on CShapeWrapper will be used in the Shape class to store the points
 	// otherwise usual COM points
@@ -355,8 +362,6 @@ private:
 	// during processing operations only
 	QTree* _tempTree;
 	
-	bool _useValidationList;
-
 	BSTR _sortField;
 	VARIANT_BOOL _sortAscending;
 	bool _sortingChanged;
@@ -409,6 +414,12 @@ private:
 	bool ReadShapeExtents(long ShapeIndex, Extent& result);
 	IShape* ReadComShape(long ShapeIndex);
 	IShape* ReadFastModeShape(long ShapeIndex);
+	int GetWriteFileLength();
+	bool WriteAppendedShape();
+	bool AppendToShx(FILE* shx, IShape* shp, int offset);
+	bool AppendToShpFile(FILE* shp, IShapeWrapper* wrapper);
+	void WriteBounds(FILE* shp);
+	bool ReopenFiles(bool writeMode);
 
 public:
 	// accessing shapes
@@ -465,5 +476,7 @@ public:
 	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
 	bool GetSorting(vector<long>** indices);
 	
+
+
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

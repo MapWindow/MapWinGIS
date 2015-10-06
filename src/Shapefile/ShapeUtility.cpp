@@ -265,4 +265,32 @@ IShapeWrapper* ShapeUtility::CreateEmptyWrapper(bool forceCOM)
 	}
 }
 
+// **************************************************************
+//		WriteBigEndian 
+// **************************************************************
+void ShapeUtility::WriteBigEndian(FILE* file, int value)
+{
+	if (!file) return;
+
+	void* intbuf = (char*)&value;
+	ShapeUtility::SwapEndian((char*)intbuf, sizeof(int));
+
+	size_t size = fwrite(intbuf, sizeof(int), 1, file);
+	if (size != 1)
+	{
+		CallbackHelper::ErrorMsg("Failed to write int value");
+	}
+}
+
+// **************************************************************
+//		ReadIntBigEndian 
+// **************************************************************
+long ShapeUtility::ReadIntBigEndian(FILE* file)
+{
+	int buf;
+	fread(&buf, sizeof(int), 1, file);
+	ShapeUtility::SwapEndian((char*)&buf, sizeof(int));
+	return buf;
+}
+
 

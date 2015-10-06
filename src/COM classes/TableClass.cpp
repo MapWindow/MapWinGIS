@@ -591,11 +591,13 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 		}
 		bool readOnly = (dwAttrs & FILE_ATTRIBUTE_READONLY);
 
-		if (!readOnly)
+		if (!readOnly) {
 			_dbfHandle = DBFOpen_MW(name,"rb+");
+		}
 
-		if( _dbfHandle == NULL )
-				_dbfHandle = DBFOpen_MW(name,"rb");
+		if (_dbfHandle == NULL) {
+			_dbfHandle = DBFOpen_MW(name,"rb");
+		}
 		
 		if( _dbfHandle == NULL )
 		{	
@@ -645,6 +647,9 @@ STDMETHODIMP CTableClass::CreateNew(BSTR dbfFilename, VARIANT_BOOL *retval)
 	return S_OK;
 }
 
+// ********************************************************
+//     CloseUnderlyingFile()
+// ********************************************************
 void CTableClass::CloseUnderlyingFile()
 {
 	_filename = "";
@@ -652,6 +657,51 @@ void CTableClass::CloseUnderlyingFile()
 	{
 		DBFClose(_dbfHandle);
 		_dbfHandle = NULL;
+	}
+}
+
+// ********************************************************
+//     WriteAppendedRow()
+// ********************************************************
+bool CTableClass::WriteAppendedRow()
+{
+	if (_rows.size() == 0 || _rows.size() == _appendStartShapeCount) return false;
+
+	int rowIndex = _rows.size() - 1;	
+
+	if (!WriteRecord(_dbfHandle, rowIndex, rowIndex))
+	{
+		ErrorMessage(tkDBF_CANT_WRITE_ROW);
+		return false;
+	}
+
+	if (!m_globalSettings.cacheDbfRecords) 
+	{
+		ClearRow(rowIndex);
+	}
+	else {
+		_rows[rowIndex].row->SetDirty(TableRow::DATA_CLEAN);
+	}
+
+	return true;
+}
+
+// ********************************************************
+//     StopAppendMode()
+// ********************************************************
+void CTableClass::StopAppendMode()
+{
+	if (_appendMode) 
+	{
+		WriteAppendedRow();
+
+		CStringW filename = _filename;
+
+		VARIANT_BOOL vb;
+		Close(&vb);		// _appendMode will be set to false here
+
+		CComBSTR bstr(filename);
+		Open(bstr, NULL, &vb);
 	}
 }
 
@@ -675,96 +725,55 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 		return false;		
 	}
 
-	DBFInfo * newdbfHandle;
-	if(updateFileInPlace)
-	{
-		newdbfHandle = _dbfHandle;
-		
-		// DOESN'T WORK: dbfHandle can't be modified directly
-
-		// in case some of the field attributes changed
-		//FieldType type;
-		//long width, precision;
-		//
-		//for (int i = 0; i < FieldCount(); i++)
-		//{
-		//	IField* field = _fields[i].field;
-		//	if (((CField*)field)->isUpdated)
-		//	{
-		//		field->get_Type(&type);
-		//		field->get_Width(&width);
-		//		field->get_Precision(&precision);
-		//		
-		//		dbfHandle->panFieldSize[dbfHandle->nFields-1] = width;
-		//		dbfHandle->panFieldDecimals[dbfHandle->nFields-1] = precision;
-		//		dbfHandle->pachFieldType[dbfHandle->nFields-1] = type;
-		//		
-		//		// saving name
-		//		BSTR fname;
-		//		field->get_Name(&fname);
-		//		const char* name = OLE2CA(fname);
-
-		//		char* pszFInfo = dbfHandle->pszHeader + 32 * (dbfHandle->nFields-1);
-
-		//		if( (int) strlen(name) < 10 )
-		//			strncpy( pszFInfo, name, strlen(name));
-		//		else
-		//			strncpy( pszFInfo, name, 10);
-		//	}
-		//}
+	if ( Utility::FileExistsW(dbfFilename) != FALSE )
+	{	
+		ErrorMessage(tkDBF_FILE_EXISTS);
+		return false;
 	}
-	else
-	{
-		if ( Utility::FileExistsW(dbfFilename) != FALSE )
-		{	
-			ErrorMessage(tkDBF_FILE_EXISTS);
-			return false;
-		}
 
-		newdbfHandle = DBFCreate_MW(dbfFilename);
-		if( newdbfHandle == NULL )
-		{	
-			ErrorMessage(tkCANT_CREATE_DBF);
-			return false;
-		}
+	DBFInfo * newdbfHandle = DBFCreate_MW(dbfFilename);
+	if( newdbfHandle == NULL )
+	{	
+		ErrorMessage(tkCANT_CREATE_DBF);
+		return false;
+	}
 	
-		// joined fields must be removed; they will be restored in the process of reopening table
-		// after saving operation
-		this->RemoveJoinedFields();
+	// joined fields must be removed; they will be restored in the process of reopening table
+	// after saving operation
+	this->RemoveJoinedFields();
 
-		for( int i = 0; i < FieldCount(); i++ )
-		{	
-			IField * field = NULL;
-			this->get_Field(i,&field);
-			CComBSTR fname;
-			FieldType type;
-			long width, precision;
-			field->get_Name(&fname);
-			field->get_Type(&type);
-			field->get_Width(&width);
-			field->get_Precision(&precision);
+	for( int i = 0; i < FieldCount(); i++ )
+	{	
+		IField * field = NULL;
+		this->get_Field(i,&field);
+		CComBSTR fname;
+		FieldType type;
+		long width, precision;
+		field->get_Name(&fname);
+		field->get_Type(&type);
+		field->get_Width(&width);
+		field->get_Precision(&precision);
 
-			if( type == DOUBLE_FIELD )
-			{
-				if( precision <= 0 ) 
-					precision = 1;
-			}
-			else
-			{
-				precision = 0;
-			}
-
-			if (type == INTEGER_FIELD)
-			{
-				if (width > 9)
-				{
-					width = 9;  // otherwise it will be reopened as double
-				}
-			}
-
-			DBFAddField(newdbfHandle, OLE2CA(fname), (DBFFieldType)type, width, precision);
-			field->Release(); 
+		if( type == DOUBLE_FIELD )
+		{
+			if( precision <= 0 ) 
+				precision = 1;
 		}
+		else
+		{
+			precision = 0;
+		}
+
+		if (type == INTEGER_FIELD)
+		{
+			if (width > 9)
+			{
+				width = 9;  // otherwise it will be reopened as double
+			}
+		}
+
+		DBFAddField(newdbfHandle, OLE2CA(fname), (DBFFieldType)type, width, precision);
+		field->Release(); 
 	}
 	
 	long percent = 0, newpercent = 0;
@@ -785,7 +794,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 
         if (!WriteRecord(newdbfHandle, rowIndex, ++currentRowIndex))
         {
-		    ErrorMessage(tkDBF_CANT_ADD_DBF_FIELD);
+			ErrorMessage(tkDBF_CANT_WRITE_ROW);
 		    return false;
         }
 
@@ -840,36 +849,52 @@ STDMETHODIMP CTableClass::SaveAs(BSTR dbfFilename, ICallback *cBack, VARIANT_BOO
 }
 
 // **************************************************************
+//	  ClearFields()
+// **************************************************************
+void CTableClass::ClearFields()
+{
+	for (int i = 0; i < FieldCount(); i++)
+	{
+		if (_fields[i]->field != NULL)
+		{
+			// if the field is used somewhere else, we must not refer to this table - is it really needed ?
+			((CField*)_fields[i]->field)->SetTable(NULL);
+		}
+		delete _fields[i];
+	}
+	_fields.clear();
+}
+
+// **************************************************************
 //	  Close()
 // **************************************************************
 STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
 	*retval = VARIANT_TRUE;
 
-	this->StopAllJoins();
+	StopAllJoins();
 
-	for( int i = 0; i < FieldCount(); i++ )
-	{	
-        if (_fields[i]->field != NULL)
-        {
-			// if the field is used somewhere else, we must not refer to this table - is it really needed ?
-			((CField*)_fields[i]->field)->SetTable(NULL);
-        }
-		delete _fields[i];
-	}
-	_fields.clear();
+	ClearFields();
 
 	ClearRows();
-	
-	_filename = "";
+
+	if (_appendMode) 
+	{
+		WriteAppendedRow();
+		_appendMode = false;
+		_appendStartShapeCount = -1;
+	}
+
+	_filename = L"";
+
 	if( _dbfHandle != NULL )
 	{
 		DBFClose(_dbfHandle);
 		_dbfHandle = NULL;
 	}
 	
-	*retval = VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -1107,7 +1132,7 @@ STDMETHODIMP CTableClass::EditDeleteField(long FieldIndex, ICallback *cBack, VAR
 	delete _fields[FieldIndex];
 	_fields.erase( _fields.begin() + FieldIndex );
 
-	//DeleteField operation can't be saved into the original dbf file.
+	//DeleteField operation can't be saved into the original DBF file.
     m_needToSaveAsNewFile = true;
 
 	*retval = VARIANT_TRUE;		
@@ -1120,9 +1145,12 @@ STDMETHODIMP CTableClass::EditDeleteField(long FieldIndex, ICallback *cBack, VAR
 STDMETHODIMP CTableClass::EditInsertRow(long * RowIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
 	*retval = VARIANT_FALSE;
-	
-	if( _isEditingTable == FALSE )
+
+	bool canAppend = _appendMode && *RowIndex >= (long)_rows.size();
+
+	if (!_isEditingTable && !canAppend)
 	{	
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
@@ -1241,6 +1269,24 @@ bool CTableClass::UpdateTableRow(TableRow* newRow, long rowIndex)
 }
 
 // *******************************************************************
+//		TryClearLastRecord()
+// *******************************************************************
+void CTableClass::TryClearLastRecord(long rowIndex)
+{
+	if (!m_globalSettings.cacheDbfRecords)
+	{
+		if (_lastRecordIndex != rowIndex &&
+			_lastRecordIndex >= 0 && _lastRecordIndex < RowCount() &&
+			_rows[_lastRecordIndex].row != NULL && !_rows[_lastRecordIndex].row->IsModified() &&
+			_joins.size() == 0)
+		{
+			// make sure that only one row in a time can be read
+			ClearRow(_lastRecordIndex);
+		}
+	}
+}
+
+// *******************************************************************
 //		ReadRecord()
 // *******************************************************************
 //Read one row values and cached into the RecordWrapper array.
@@ -1248,19 +1294,11 @@ bool CTableClass::ReadRecord(long RowIndex)
 {			   
 	USES_CONVERSION;
 
-    if (RowIndex < 0 && RowIndex >= RowCount())
+	if (RowIndex < 0 && RowIndex >= RowCount()) {
         return false;
-
-	if (!m_globalSettings.cacheDbfRecords )
-	{
-		if (_lastRecordIndex != RowIndex && 
-			_lastRecordIndex >= 0 && _lastRecordIndex < RowCount() && 
-			_rows[_lastRecordIndex].row != NULL && !_rows[_lastRecordIndex].row->IsModified())
-		{
-			// make sure that only one row in a time can be read
-			ClearRow(_lastRecordIndex);
-		}
 	}
+
+	TryClearLastRecord(RowIndex);
 
 	_lastRecordIndex = RowIndex;
 
@@ -1459,10 +1497,12 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT newVal, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+
 	*retval = VARIANT_FALSE;
 
-	if( _isEditingTable == FALSE )
+	bool canAppend = _appendMode && _rows.size() > 0 && RowIndex == _rows.size() - 1;
+
+	if (_isEditingTable == FALSE && !canAppend)
 	{	
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
@@ -1473,6 +1513,8 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
+
+	USES_CONVERSION;
 
 	if( newVal.vt == VT_I2 )
 	{	
@@ -1524,6 +1566,7 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 	}
 	else if( newVal.vt == (VT_BYREF|VT_BSTR) )
 	{	
+		
 		BSTR val = OLE2BSTR(*(newVal.pbstrVal));
 		newVal.vt = VT_BSTR;
 		newVal.bstrVal = val;
@@ -1650,6 +1693,13 @@ STDMETHODIMP CTableClass::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retv
 	if( _dbfHandle == NULL )
 	{	
 		ErrorMessage(tkFILE_NOT_OPEN);
+		*retval = VARIANT_FALSE;
+		return S_OK;
+	}
+
+	if (_appendMode) 
+	{
+		ErrorMessage(tkDBF_NO_EDIT_MODE_WHEN_APPENDING);
 		*retval = VARIANT_FALSE;
 		return S_OK;
 	}
@@ -3665,3 +3715,4 @@ STDMETHODIMP CTableClass::ClearCache()
 
 	return S_OK;
 }
+

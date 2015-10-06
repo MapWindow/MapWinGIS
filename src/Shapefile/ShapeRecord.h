@@ -80,6 +80,14 @@ public:
 
 	IShapeData* get_RenderingData() { return _renderingData; }
 
+	void ReleaseShape() 
+	{
+		if (shape) {
+			shape->Release();
+			shape = NULL;
+		}
+	}
+
 	void put_RenderingData(CShapeData* data) 
 	{ 
 		ReleaseRenderingData();

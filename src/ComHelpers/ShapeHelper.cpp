@@ -411,3 +411,20 @@ IShape* ShapeHelper::CenterAsShape(IShape* shp)
 	return shp;
 }
 
+// *************************************************************
+//		GetContentLength()
+// *************************************************************
+int ShapeHelper::GetContentLength(IShape* shp)
+{
+	if (!shp) return -1;
+
+	long numPoints, numParts;
+	ShpfileType shpType;
+
+	shp->get_NumPoints(&numPoints);
+	shp->get_NumParts(&numParts);
+	shp->get_ShapeType(&shpType);
+
+	return ShapeUtility::get_ContentLength(shpType, numPoints, numParts);
+}
+

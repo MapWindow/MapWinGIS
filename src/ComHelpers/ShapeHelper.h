@@ -18,5 +18,6 @@ public:
 	static int GetLargestPart(IShape* shp);
 	static void AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, tkLabelPositioning method, tkLineLabelOrientation orientation);
 	static IShape* CenterAsShape(IShape* shp);
+	static int GetContentLength(IShape* shp);
 };
 

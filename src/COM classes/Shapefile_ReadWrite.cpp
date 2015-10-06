@@ -24,6 +24,7 @@
 #include "Shapefile.h"
 #include "Shape.h"
 #include "ShapeWrapper.h"
+#include "ShapeHelper.h"
 
 #pragma region GetShape
 
@@ -43,8 +44,11 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		return S_OK;
 	}
 
+	// last shape in the append mode is always in memory
+	bool appendedShape = _appendMode && ShapeIndex == _shapeData.size() - 1;
+
 	// editing shapes?
-	if (_isEditingShapes)
+	if (_isEditingShapes || appendedShape)
 	{
 		if (_shapeData[ShapeIndex]->shape) {
 			_shapeData[ShapeIndex]->shape->AddRef();
@@ -69,19 +73,15 @@ IShape* CShapefile::ReadFastModeShape(long ShapeIndex)
 	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
 
 	// read the shp from disk
-	int intbuf;
-	fread(&intbuf, sizeof(int), 1, _shpfile);
-	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
+	int index = ShapeUtility::ReadIntBigEndian(_shpfile);
 
-	if (intbuf != ShapeIndex + 1)
+	if (index != ShapeIndex + 1)
 	{
 		ErrorMessage(tkINVALID_SHP_FILE);
 		return NULL;
 	}
 
-	fread(&intbuf, sizeof(int), 1, _shpfile);
-	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
-	int contentLength = intbuf * 2;	//(32 bit words)
+	int contentLength = ShapeUtility::ReadIntBigEndian(_shpfile) * 2;
 
 	// *2: for conversion from 16-bit words to 8-bit words
 	// -2: skip first 2 int - it's record number and content length;
@@ -931,8 +931,9 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 #pragma endregion
 
 #pragma region ShxReadingWriting
+
 // **************************************************************
-//		readShx()
+//		ReadShx()
 // **************************************************************
 BOOL CShapefile::ReadShx()
 {
@@ -967,7 +968,7 @@ BOOL CShapefile::ReadShx()
 	if( intbuf != VERSION )
 		return FALSE;
 
-	// shpaefile type
+	// shapefile type
 	fread(&intbuf,sizeof(int),1,_shxfile);
 	_shpfiletype = (ShpfileType)intbuf;
 
@@ -994,43 +995,54 @@ BOOL CShapefile::ReadShx()
 		ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
 		readLength += 4;
 	}
-	//_numShapes = shpOffsets.size();
+	
 	rewind(_shxfile);
 	return TRUE;
 }
 
 // **************************************************************
-//		writeShx()
+//		AppendToShx()
+// **************************************************************
+bool CShapefile::AppendToShx(FILE* shx, IShape* shp, int offset)
+{
+	if (!shx || !shp) return false;
+
+	_shpOffsets.push_back(offset);
+
+	int success = fseek(shx, 0, SEEK_END);
+
+	ShapeUtility::WriteBigEndian(shx, offset / 2);
+
+	int contentLength = ShapeHelper::GetContentLength(shp);
+	ShapeUtility::WriteBigEndian(shx, contentLength / 2);
+
+	fflush(shx);
+
+	return true;
+}
+
+// **************************************************************
+//		WriteShx()
 // **************************************************************
 BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 {
 	ICallback* callback = cBack ? cBack : _globalCallback;
 
-	//m_writing = true;
 	// guaranteed that .shx file is open
 	rewind(shx);
 
 	// FILE CODE
-	void* intbuf;
-	int fileCode = FILE_CODE;
-	intbuf = (char*)&fileCode;
-	ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-	fwrite(intbuf,sizeof(int),1,shx);
+	ShapeUtility::WriteBigEndian(shx, FILE_CODE);
 
 	// unused
 	for(int j = 0; j < UNUSEDSIZE; j++)
 	{
-		int unused = UNUSEDVAL;
-		intbuf = (char*)&unused;
-		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-		fwrite(intbuf,sizeof(int),1,shx);
+		ShapeUtility::WriteBigEndian(shx, UNUSEDVAL);
 	}
 
 	// FILELENGTH (16 bit words)
-	int fileLength = HEADER_BYTES_16 + (int)_shapeData.size() * 4; //_numShapes*4;
-	intbuf = (char*)&fileLength;
-	ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-	fwrite(intbuf, sizeof(int),1,shx);
+	int fileLength = HEADER_BYTES_16 + (int)_shapeData.size() * 4;
+	ShapeUtility::WriteBigEndian(shx, fileLength);
 
 	//VERSION
 	int version = VERSION;
@@ -1041,16 +1053,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 	fwrite(&tmpshapefiletype, sizeof(int),1,shx);
 
 	//BOUNDS
-	double ShapefileBounds[8];
-	ShapefileBounds[0] = _minX;
-	ShapefileBounds[1] = _minY;
-	ShapefileBounds[2] = _maxX;
-	ShapefileBounds[3] = _maxY;
-	ShapefileBounds[4] = _minZ;
-	ShapefileBounds[5] = _maxZ;
-	ShapefileBounds[6] = _minM;
-	ShapefileBounds[7] = _maxM;
-	fwrite(ShapefileBounds,sizeof(double),8,shx);
+	WriteBounds(shx);
 
 	int offset = HEADER_BYTES_32;
 	long numPoints = 0;
@@ -1067,11 +1070,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 		// convert to (32 bit words)
 		_shpOffsets.push_back(offset);
 
-		void * intbuf;
-		int sixteenBitOffset = offset/2;
-		intbuf = (char*)&sixteenBitOffset;
-		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-		fwrite(intbuf,sizeof(int),1,shx);
+		ShapeUtility::WriteBigEndian(shx, offset / 2);
 
 		get_Shape(i,&shape);
 		shape->get_NumPoints(&numPoints);
@@ -1082,11 +1081,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 
 		offset = offset + RECORD_HEADER_LENGTH_32 + contentLength;
 
-		contentLength = contentLength/2;
-		intbuf = (char*)&contentLength;
-
-		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-		fwrite(intbuf, sizeof(int),1,shx);
+		ShapeUtility::WriteBigEndian(shx, contentLength / 2);
 
 		shape->Release();
 
@@ -1101,6 +1096,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 }
 #pragma endregion
 
+// TODO: move to shape utility
 double x, y, m, z;
 double xMin, xMax, yMin, yMax, zMin, zMax, mMin, mMax;
 
@@ -1164,42 +1160,24 @@ void WriteExtentsZ(CShape* shape, FILE* file )
 }
 
 #pragma region ShpReadingWriting
+
 // **************************************************************
-//		writeShp()
+//		GetWriteFileLength()
 // **************************************************************
-BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
+int CShapefile::GetWriteFileLength()
 {
-	// guaranteed that .shp file is open
-	rewind(shp);
-
-	//FILE_CODE
-	void* intbuf;
-	int fileCode = FILE_CODE;
-	intbuf = (char*)&fileCode;
-	ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-	fwrite(intbuf,sizeof(int),1,shp);
-
-	//UNUSED
-	for(int j = 0; j < UNUSEDSIZE; j++)
-	{
-		int unused = UNUSEDVAL;
-		intbuf = (char*)&unused;
-		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-		fwrite(intbuf,sizeof(int),1,shp);
-	}
-
-	//FILELENGTH (32 bit words)
+	IShape * sh = NULL;
 	long numPoints = 0;
 	long numParts = 0;
 	long part = 0;
 	ShpfileType shptype;
-	int filelength = HEADER_BYTES_32;
-	IShape * sh = NULL;
 
-	int size  = (int)_shapeData.size();
-	for( int i = 0; i < size; i++)
+	int filelength = HEADER_BYTES_32;
+
+	int size = (int)_shapeData.size();
+	for (int i = 0; i < size; i++)
 	{
-		this->get_Shape(i,&sh);
+		this->get_Shape(i, &sh);
 		sh->get_NumPoints(&numPoints);
 		sh->get_NumParts(&numParts);
 		sh->get_ShapeType(&shptype);
@@ -1209,11 +1187,76 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 
 		sh->Release();
 	}
+	return filelength;
+}
 
-	filelength = filelength/2;
-	intbuf = (char*)&filelength;
-	ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-	fwrite(intbuf, sizeof(int),1,shp);
+// **************************************************************
+//		AppendToShpFile()
+// **************************************************************
+bool CShapefile::AppendToShpFile(FILE* shp, IShapeWrapper* wrapper)
+{
+	if (!shp || !wrapper) return false;
+
+	int length = wrapper->get_ContentLength();
+
+	// write record header
+	ShapeUtility::WriteBigEndian(shp, _shapeData.size());
+	ShapeUtility::WriteBigEndian(shp, length / 2);
+
+	// write content		
+	wrapper->RefreshBounds();
+	int* data = wrapper->get_RawData();
+	if (data) 
+	{
+		fseek(shp, 0, SEEK_END);
+		size_t size = fwrite(data, sizeof(char), length, shp);
+		fflush(shp);
+		
+		delete[] data;
+
+		return true;
+	}
+
+	return false;
+}
+
+// **************************************************************
+//		WriteShp()
+// **************************************************************
+void CShapefile::WriteBounds(FILE * shp)
+{
+	double ShapefileBounds[8];
+	ShapefileBounds[0] = _minX;
+	ShapefileBounds[1] = _minY;
+	ShapefileBounds[2] = _maxX;
+	ShapefileBounds[3] = _maxY;
+	ShapefileBounds[4] = _minZ;
+	ShapefileBounds[5] = _maxZ;
+	ShapefileBounds[6] = _minM;
+	ShapefileBounds[7] = _maxM;
+	fwrite(ShapefileBounds, sizeof(double), 8, shp);
+}
+
+// **************************************************************
+//		WriteShp()
+// **************************************************************
+BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
+{
+	// guaranteed that .shp file is open
+	rewind(shp);
+
+	//FILE_CODE
+	ShapeUtility::WriteBigEndian(shp, FILE_CODE);
+
+	//UNUSED
+	for(int j = 0; j < UNUSEDSIZE; j++)
+	{
+		ShapeUtility::WriteBigEndian(shp, UNUSEDVAL);
+	}
+
+	//FILELENGTH (32 bit words)
+	int fileLength = GetWriteFileLength();
+	ShapeUtility::WriteBigEndian(shp, fileLength / 2);
 
 	//VERSION
 	int version = VERSION;
@@ -1224,42 +1267,33 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	fwrite(&tmpshapefiletype, sizeof(int),1,shp);
 
 	//BOUNDS
-	double ShapefileBounds[8];
-	ShapefileBounds[0] = _minX;
-	ShapefileBounds[1] = _minY;
-	ShapefileBounds[2] = _maxX;
-	ShapefileBounds[3] = _maxY;
-	ShapefileBounds[4] = _minZ;
-	ShapefileBounds[5] = _maxZ;
-	ShapefileBounds[6] = _minM;
-	ShapefileBounds[7] = _maxM;
-	fwrite(ShapefileBounds,sizeof(double),8,shp);
+	WriteBounds(shp);
 
 	long percent = 0, newpercent = 0;
 
 	ICallback* callback = _globalCallback ? _globalCallback : cBack;
 
+	long numPoints = 0;
+	long numParts = 0;
+	long part = 0;
+	ShpfileType shptype;
+	IShape * sh = NULL;
+
+	int size = _shapeData.size();
+
 	for( int k = 0; k < size; k++)
 	{
-		this->get_Shape(k,&sh);
+		get_Shape(k,&sh);
 		CShape* shape = (CShape*)sh;
 
 		shape->get_NumPoints(&numPoints);
 		shape->get_NumParts(&numParts);
 		shape->get_ShapeType(&shptype);
-
-		int contentLength = ShapeUtility::get_ContentLength(shptype, numPoints, numParts);
-		int length = contentLength;
-		contentLength /= 2;
+		int length = ShapeUtility::get_ContentLength(shptype, numPoints, numParts);
 
 		//Write the Record Header
-		long recNum = k + 1;
-		intbuf = (char*)&recNum;
-		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-		fwrite(intbuf, sizeof(int),1,shp);
-		intbuf = (char*)&contentLength;
-		ShapeUtility::SwapEndian((char*)intbuf,sizeof(int));
-		fwrite(intbuf, sizeof(int),1,shp);
+		ShapeUtility::WriteBigEndian(shp, k + 1);
+		ShapeUtility::WriteBigEndian(shp, length / 2);
 
 		if ( _fastMode && _isEditingShapes)
 		{
@@ -1274,7 +1308,6 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 			// disk based mode
 			// disk-based + fast data (probably a bit faster procedure can be devised)
 			// in-memory mode (COM points)
-
 			ShpfileType shptype2D = ShapeUtility::Convert2D(shptype);
 
 			//Write the Record
