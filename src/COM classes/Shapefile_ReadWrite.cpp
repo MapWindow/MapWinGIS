@@ -1096,69 +1096,6 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 }
 #pragma endregion
 
-// TODO: move to shape utility
-double x, y, m, z;
-double xMin, xMax, yMin, yMax, zMin, zMax, mMin, mMax;
-
-void WritePointXY(CShape* shape, int pointIndex, FILE* file )
-{
-	shape->get_XY(pointIndex, &x, &y);
-	fwrite(&x,sizeof(double),1,file);
-	fwrite(&y,sizeof(double),1,file);
-}
-
-void WritePointXYM(CShape* shape, int pointIndex, FILE* file )
-{
-	shape->get_XYM(pointIndex, &x, &y, &m);
-	fwrite(&x,sizeof(double),1,file);
-	fwrite(&y,sizeof(double),1,file);
-	fwrite(&m,sizeof(double),1,file);
-}
-
-void WritePointXYZ(CShape* shape, int pointIndex, FILE* file )
-{
-	shape->get_XYZM(pointIndex, x, y, z, m);
-	fwrite(&x,sizeof(double),1,file);
-	fwrite(&y,sizeof(double),1,file);
-	fwrite(&z,sizeof(double),1,file);
-	fwrite(&m,sizeof(double),1,file);
-}
-
-void WritePointZ(CShape* shape, int pointIndex, FILE* file )
-{
-	shape->get_Z(pointIndex, &z);
-	fwrite(&z,sizeof(double),1,file);
-}
-
-void WritePointM(CShape* shape, int pointIndex, FILE* file )
-{
-	shape->get_M(pointIndex, &m);
-	fwrite(&m,sizeof(double),1,file);
-}
-
-void WriteExtentsXY(CShape* shape, FILE* file )
-{
-	shape->get_ExtentsXY(xMin, yMin, xMax, yMax);
-	fwrite(&xMin,sizeof(double),1,file);
-	fwrite(&yMin,sizeof(double),1,file);
-	fwrite(&xMax,sizeof(double),1,file);
-	fwrite(&yMax,sizeof(double),1,file);
-}
-
-void WriteExtentsM(CShape* shape, FILE* file )
-{
-	shape->get_ExtentsXYZM(xMin, yMin, xMax, yMax, zMin, zMax, mMin, mMax);
-	fwrite(&mMin,sizeof(double),1,file);
-	fwrite(&mMax,sizeof(double),1,file);
-}
-
-void WriteExtentsZ(CShape* shape, FILE* file )
-{
-	shape->get_ExtentsXYZM(xMin, yMin, xMax, yMax, zMin, zMax, mMin, mMax);
-	fwrite(&zMin,sizeof(double),1,file);
-	fwrite(&zMax,sizeof(double),1,file);
-}
-
 #pragma region ShpReadingWriting
 
 // **************************************************************
@@ -1276,7 +1213,6 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	long numPoints = 0;
 	long numParts = 0;
 	long part = 0;
-	ShpfileType shptype;
 	IShape * sh = NULL;
 
 	int size = _shapeData.size();
@@ -1285,21 +1221,18 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	{
 		get_Shape(k,&sh);
 		CShape* shape = (CShape*)sh;
-
-		shape->get_NumPoints(&numPoints);
-		shape->get_NumParts(&numParts);
-		shape->get_ShapeType(&shptype);
-		int length = ShapeUtility::get_ContentLength(shptype, numPoints, numParts);
-
+		
+		IShapeWrapper* wrapper = shape->get_ShapeWrapper();
+		int length = wrapper->get_ContentLength();
+		
 		//Write the Record Header
 		ShapeUtility::WriteBigEndian(shp, k + 1);
 		ShapeUtility::WriteBigEndian(shp, length / 2);
 
 		if ( _fastMode && _isEditingShapes)
 		{
-			IShapeWrapper* shpWrapper = (shape)->get_ShapeWrapper();
-			shpWrapper->RefreshBounds();
-			int* data = shpWrapper->get_RawData();
+			wrapper->RefreshBounds();
+			int* data = wrapper->get_RawData();
 			fwrite(data, sizeof(char), length, shp);
 			delete[] data;
 		}
@@ -1308,13 +1241,14 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 			// disk based mode
 			// disk-based + fast data (probably a bit faster procedure can be devised)
 			// in-memory mode (COM points)
-			ShpfileType shptype2D = ShapeUtility::Convert2D(shptype);
+			ShpfileType shptype = wrapper->get_ShapeType();
+			ShpfileType shptype2D = wrapper->get_ShapeType2D();
 
 			//Write the Record
 			if( shptype2D == SHP_NULLSHAPE )
 			{
 				int ishptype = shptype;
-				fwrite(&ishptype,sizeof(int),1,shp);
+				fwrite(&shptype, sizeof(int), 1, shp);
 			}
 			else if( shptype2D == SHP_POINT )
 			{
@@ -1323,13 +1257,13 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 				switch (shptype)
 				{
 					case SHP_POINT:
-						WritePointXY(shape, 0, shp);
+						ShapeUtility::WritePointXY(wrapper, 0, shp);
 						break;
 					case SHP_POINTZ:
-						WritePointXYZ(shape, 0, shp);
+						ShapeUtility::WritePointXYZ(wrapper, 0, shp);
 						break;
 					case SHP_POINTM:
-						WritePointXYM(shape, 0, shp);
+						ShapeUtility::WritePointXYM(wrapper, 0, shp);
 						break;
 				}
 			}
@@ -1338,7 +1272,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 				int ishptype = shptype;
 				fwrite(&ishptype,sizeof(int),1,shp);
 
-				WriteExtentsXY(shape, shp);
+				ShapeUtility::WriteExtentsXY(wrapper, shp);
 
 				if (shptype2D != SHP_MULTIPOINT)		// parts should be written for both polylines and polygons
 					fwrite(&numParts,sizeof(int),1,shp);
@@ -1355,23 +1289,28 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 				}
 
 				// xy
-				for( int i = 0; i < numPoints; i++ )
-					WritePointXY(shape, i, shp);
+				for (int i = 0; i < numPoints; i++) {
+					ShapeUtility::WritePointXY(wrapper, i, shp);
+				}
 
 				// z
 				if (shptype == SHP_POLYLINEZ || shptype == SHP_POLYGONZ || shptype == SHP_MULTIPOINTZ)
 				{
-					WriteExtentsZ(shape, shp);
-					for( int i = 0; i < numPoints; i++ )
-						WritePointZ(shape, i, shp);
+					ShapeUtility::WriteExtentsZ(wrapper, shp);
+
+					for (int i = 0; i < numPoints; i++) {
+						ShapeUtility::WritePointZ(wrapper, i, shp);
+					}
 				}
 
 				// m
 				if (shptype != SHP_POLYLINE && shptype != SHP_POLYGON && shptype != SHP_MULTIPOINT)	// writing for both M and Z
 				{
-					WriteExtentsM(shape, shp);
-					for( int i = 0; i < numPoints; i++ )
-						WritePointM(shape, i, shp);
+					ShapeUtility::WriteExtentsM(wrapper, shp);
+
+					for (int i = 0; i < numPoints; i++) {
+						ShapeUtility::WritePointM(wrapper, i, shp);
+					}
 				}
 			}
 		}

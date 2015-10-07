@@ -97,6 +97,7 @@ public:
 	virtual bool put_PointZ(int PointIndex, double z) = 0;
 	virtual bool put_PointM(int PointIndex, double m) = 0;
 	virtual void get_XYFast(int PointIndex, double& x, double& y) = 0;
+	virtual bool get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m) = 0;
 
 	// changing size
 	virtual void Clear() = 0;

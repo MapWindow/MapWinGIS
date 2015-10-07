@@ -85,6 +85,7 @@ public:
 	bool get_PointM(int PointIndex, double& m);
 	bool put_PointZ(int PointIndex, double z);
 	bool put_PointM(int PointIndex, double m);
+	bool get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m);
 	
 	// COM points
 	IPoint* get_Point(long Index);

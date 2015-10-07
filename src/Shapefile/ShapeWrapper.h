@@ -163,6 +163,7 @@ public:
 	virtual bool get_PointM(int PointIndex, double& m);
 	virtual bool put_PointZ(int PointIndex, double z);
 	virtual bool put_PointM(int PointIndex, double m);
+	bool get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m);
 	
 	// COM points
 	virtual IPoint* get_Point(long Index);

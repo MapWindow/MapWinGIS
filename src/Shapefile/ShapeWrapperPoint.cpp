@@ -332,4 +332,18 @@ int CShapeWrapperPoint::get_ContentLength()
 	return ShapeUtility::get_ContentLength(_shpType, this->get_PointCount(), this->get_PartCount());
 }
 
+// ********************************************************
+//		get_PointXYZM()
+// ********************************************************
+bool CShapeWrapperPoint::get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m)
+{
+	if (_initialized) {
+		x = _x;
+		y = _y;
+		z = _z;
+		m = _m;
+		return true;
+	}
+}
+
 #pragma endregion

@@ -256,6 +256,26 @@ bool CShapeWrapperCOM::get_PointXY(int PointIndex, double& x, double& y)
 }
 
 // ********************************************************
+//		get_PointXYZM ()
+// ********************************************************
+bool CShapeWrapperCOM::get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m)
+{
+	if (pointIndex < 0 || pointIndex >= (int)_points.size())
+	{
+		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
+		return false;
+	}
+	else
+	{
+		_points[pointIndex]->get_X(&x);
+		_points[pointIndex]->get_Y(&y);
+		_points[pointIndex]->get_Z(&z);
+		_points[pointIndex]->get_M(&m);
+		return true;
+	}
+}
+
+// ********************************************************
 //		get_PointsXY ()
 // ********************************************************
 void CShapeWrapperCOM::get_XYFast(int PointIndex, double& x, double& y)
@@ -956,3 +976,4 @@ int* CShapeWrapperCOM::get_RawData()
 
 	return intdata;
 }
+

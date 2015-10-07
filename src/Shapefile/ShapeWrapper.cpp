@@ -92,6 +92,15 @@ bool CShapeWrapper::get_PointXY(int PointIndex, double& x, double& y)
 	}
 }
 
+// *******************************************************************
+//     get_PointXYZM()
+// *******************************************************************
+bool CShapeWrapper::get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m)
+{
+	z = 0.0; m = 0.0;
+	return get_PointXY(pointIndex, x, y);
+}
+
 // ********************************************************
 //		get_XYFast 
 // ********************************************************
@@ -732,3 +741,4 @@ void CShapeWrapper::AddPart(int pointIndex)
 {
 	_parts.push_back(pointIndex);
 }
+

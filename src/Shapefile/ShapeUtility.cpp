@@ -4,6 +4,7 @@
 #include "ShapeWrapperEmpty.h"
 #include "ShapeWrapperPoint.h"
 #include "ShapeWrapper.h"
+#include "Shape.h"
 
 // **************************************************************
 //		IsM()
@@ -293,4 +294,94 @@ long ShapeUtility::ReadIntBigEndian(FILE* file)
 	return buf;
 }
 
+// **************************************************************
+//		WritePointXY 
+// **************************************************************
+void ShapeUtility::WritePointXY(IShapeWrapper* shape, int pointIndex, FILE* file)
+{
+	double x, y;
+	shape->get_PointXY(pointIndex, x, y);
+	fwrite(&x, sizeof(double), 1, file);
+	fwrite(&y, sizeof(double), 1, file);
+}
+
+// **************************************************************
+//		WritePointXYM 
+// **************************************************************
+void ShapeUtility::WritePointXYM(IShapeWrapper* shape, int pointIndex, FILE* file)
+{
+	double x, y, m, z;
+	shape->get_PointXYZM(pointIndex, x, y, z, m);
+	fwrite(&x, sizeof(double), 1, file);
+	fwrite(&y, sizeof(double), 1, file);
+	fwrite(&m, sizeof(double), 1, file);
+}
+
+// **************************************************************
+//		WritePointXYZ 
+// **************************************************************
+void ShapeUtility::WritePointXYZ(IShapeWrapper* shape, int pointIndex, FILE* file)
+{
+	double x, y, m, z;
+	shape->get_PointXYZM(pointIndex, x, y, z, m);
+	fwrite(&x, sizeof(double), 1, file);
+	fwrite(&y, sizeof(double), 1, file);
+	fwrite(&z, sizeof(double), 1, file);
+	fwrite(&m, sizeof(double), 1, file);
+}
+
+// **************************************************************
+//		WritePointZ 
+// **************************************************************
+void ShapeUtility::WritePointZ(IShapeWrapper* shape, int pointIndex, FILE* file)
+{
+	double z;
+	shape->get_PointZ(pointIndex, z);
+	fwrite(&z, sizeof(double), 1, file);
+}
+
+// **************************************************************
+//		WritePointM 
+// **************************************************************
+void ShapeUtility::WritePointM(IShapeWrapper* shape, int pointIndex, FILE* file)
+{
+	double m;
+	shape->get_PointM(pointIndex, m);
+	fwrite(&m, sizeof(double), 1, file);
+}
+
+// **************************************************************
+//		WriteExtentsXY 
+// **************************************************************
+void ShapeUtility::WriteExtentsXY(IShapeWrapper* shape, FILE* file)
+{
+	double xMin, yMin, xMax, yMax;
+	shape->get_BoundsXY(xMin, yMin, xMax, yMax);
+	fwrite(&xMin, sizeof(double), 1, file);
+	fwrite(&yMin, sizeof(double), 1, file);
+	fwrite(&xMax, sizeof(double), 1, file);
+	fwrite(&yMax, sizeof(double), 1, file);
+}
+
+// **************************************************************
+//		WriteExtentsM 
+// **************************************************************
+void ShapeUtility::WriteExtentsM(IShapeWrapper* shape, FILE* file)
+{
+	double xMin, yMin, xMax, yMax, zMin, zMax, mMin, mMax;
+	shape->get_Bounds(xMin, yMin, xMax, yMax, zMin, zMax, mMin, mMax);
+	fwrite(&mMin, sizeof(double), 1, file);
+	fwrite(&mMax, sizeof(double), 1, file);
+}
+
+// **************************************************************
+//		WriteExtentsZ 
+// **************************************************************
+void ShapeUtility::WriteExtentsZ(IShapeWrapper* shape, FILE* file)
+{
+	double xMin, yMin, xMax, yMax, zMin, zMax, mMin, mMax;
+	shape->get_Bounds(xMin, yMin, xMax, yMax, zMin, zMax, mMin, mMax);
+	fwrite(&zMin, sizeof(double), 1, file);
+	fwrite(&zMax, sizeof(double), 1, file);
+}
 
