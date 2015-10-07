@@ -95,7 +95,7 @@ public:
 	CShapeWrapper(ShpfileType shpType)
 		: CShapeWrapper()
 	{
-		_shapeType = shpType;
+		put_ShapeType(shpType);
 	}
 
 	CShapeWrapper(char* data) 
