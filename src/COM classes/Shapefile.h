@@ -479,5 +479,8 @@ public:
 public:	
 	// geoprocessing methods
 	VARIANT_BOOL FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* result);
+	VARIANT_BOOL BufferByDistanceCore(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, VARIANT_BOOL MergeResults, IShapefile* result);
+	VARIANT_BOOL ExplodeShapesCore(VARIANT_BOOL SelectedOnly, IShapefile* result);
+	VARIANT_BOOL ExportSelectionCore(IShapefile* result);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

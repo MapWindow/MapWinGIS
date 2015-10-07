@@ -1,31 +1,78 @@
 #include "stdafx.h"
 #include "Utils.h"
 #include "Shapefile.h"
+#include "ShapefileHelper.h"
 
 // ********************************************************
-//		CreateOutputShapefile ()
+//		SaveOutputShapefile ()
 // ********************************************************
-IShapefile* CUtils::CreateOutputShapefile(BSTR outputFilename, IShapefile* source)
+VARIANT_BOOL CUtils::SaveOutputShapefile(BSTR outputFilename, IShapefile* sf, VARIANT_BOOL overwrite)
 {
 	if (Utility::FileExistsW(outputFilename))
 	{
-		ErrorMessage(tkFILE_EXISTS);
-		return false;
+		if (!overwrite) {
+			ErrorMessage(tkFILE_EXISTS);
+			return false;
+		}
+		else {
+			if(!ShapefileHelper::Delete(OLE2W(outputFilename))) {
+				return false;
+			}
+		}
 	}
 
-	IShapefile* result = NULL;
-	source->Clone(&result);
-
 	VARIANT_BOOL vb;
-	result->SaveAsEx(outputFilename, VARIANT_TRUE, VARIANT_FALSE, &vb);
+	sf->SaveAsEx(outputFilename, VARIANT_TRUE, VARIANT_FALSE, &vb);
 
 	if (vb) {
-		result->StartAppendMode(&vb);
+		sf->StartAppendMode(&vb);
 	}
 
 	if (!vb) {
+		sf->Release();
+	}
+
+	return vb;
+}
+
+// ********************************************************
+//		CloseOutputShapefile ()
+// ********************************************************
+void CUtils::CloseOutputShapefile(IShapefile* sf)
+{
+	sf->StopAppendMode();
+
+	VARIANT_BOOL vb;
+	sf->Close(&vb);
+}
+
+// ********************************************************
+//		CheckInputShapefile ()
+// ********************************************************
+bool CUtils::CheckInputShapefile(IShapefile* input)
+{
+	if (!input)
+	{
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return false;
+	}
+
+	return true;
+}
+
+// ********************************************************
+//		CloneInput ()
+// ********************************************************
+IShapefile* CUtils::CloneInput(IShapefile* input, BSTR outputFilename, VARIANT_BOOL overwrite)
+{
+	if (!CheckInputShapefile(input)) return S_OK;
+
+	IShapefile* result = NULL;
+	input->Clone(&result);
+
+	if (!SaveOutputShapefile(outputFilename, result, overwrite)) {
 		result->Release();
-		result = NULL;
+		return NULL;
 	}
 
 	return result;
@@ -34,29 +81,94 @@ IShapefile* CUtils::CreateOutputShapefile(BSTR outputFilename, IShapefile* sourc
 // ********************************************************
 //		FixUpShapes ()
 // ********************************************************
-STDMETHODIMP CUtils::FixUpShapes(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL* retVal)
+STDMETHODIMP CUtils::FixUpShapes(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL overwrite, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	*retVal = VARIANT_FALSE;
-
-	if (!subject) 
-	{
-		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_OK;	
-	}
-
-	IShapefile* result = CreateOutputShapefile(outputFilename, subject);
-	if (!result) {
+	
+	IShapefile* result = CloneInput(subject, outputFilename, overwrite);
+	if (!result)  {
 		return S_OK;
 	}
 
 	*retVal = ((CShapefile*)subject)->FixupShapesCore(SelectedOnly, result);
 
-	result->StopAppendMode();
+	CloseOutputShapefile(result);
 
-	VARIANT_BOOL vb;
-	result->Close(&vb);
+	return S_OK;
+}
+
+// ********************************************************
+//		BufferByDistance ()
+// ********************************************************
+STDMETHODIMP CUtils::BufferByDistance(IShapefile* subject, DOUBLE Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, 
+						VARIANT_BOOL MergeResults, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = VARIANT_FALSE;
+
+	if (!CheckInputShapefile(subject)) return S_OK;
+
+	IShapefile* result = NULL;
+
+	if (MergeResults) {
+		ShapefileHelper::CloneNoFields(subject, &result, SHP_POLYGON, true);
+	}
+	else  {
+		ShapefileHelper::CloneCore(subject, &result, SHP_POLYGON, false);
+	}
+
+	if (!SaveOutputShapefile(outputFilename, result, Overwrite)) {
+		return S_OK;
+	}
+
+	*retVal = ((CShapefile*)subject)->BufferByDistanceCore(Distance, nSegments, SelectedOnly, MergeResults, result);
+
+	CloseOutputShapefile(result);
+
+	return S_OK;
+}
+
+// ********************************************************
+//		ExplodeShapes ()
+// ********************************************************
+STDMETHODIMP CUtils::ExplodeShapes(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = VARIANT_FALSE;
+
+	IShapefile* result = CloneInput(subject, outputFilename, Overwrite);
+	if (!result)  {
+		return S_OK;
+	}
+
+	*retVal = ((CShapefile*)subject)->ExplodeShapesCore(SelectedOnly, result);
+
+	CloseOutputShapefile(result);
+
+	return S_OK;
+}
+
+// ********************************************************
+//		ExportSelection ()
+// ********************************************************
+STDMETHODIMP CUtils::ExportSelection(IShapefile* subject, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = VARIANT_FALSE;
+
+	IShapefile* result = CloneInput(subject, outputFilename, Overwrite);
+	if (!result)  {
+		return S_OK;
+	}
+
+	*retVal = ((CShapefile*)subject)->ExportSelectionCore(result);
+
+	CloseOutputShapefile(result);
 
 	return S_OK;
 }

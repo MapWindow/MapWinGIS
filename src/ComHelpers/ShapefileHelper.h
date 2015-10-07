@@ -31,5 +31,6 @@ public:
 	static tkShapefileSourceType GetSourceType(IShapefile* sf);
 	static int GetModifiedCount(IShapefile* sf);
 	static void ClearShapefileModifiedFlag(IShapefile* sf);
+	static bool Delete(CStringW filename);
 };
 

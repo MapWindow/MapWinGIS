@@ -176,7 +176,11 @@ public:
 		BSTR gdalOutputFormat, ICallback* cBack, VARIANT_BOOL* retVal);
 	STDMETHOD(IsTiffGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(GeodesicArea)(IShape* shapeWgs84, DOUBLE* retVal);
-	STDMETHOD(FixUpShapes)(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL* retVal);
+	STDMETHOD(FixUpShapes)(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal);
+	STDMETHOD(BufferByDistance)(IShapefile* subject, DOUBLE Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, 
+		VARIANT_BOOL MergeResults, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal);
+	STDMETHOD(ExplodeShapes)(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal);
+	STDMETHOD(ExportSelection)(IShapefile* subject, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal);
 
 private:
 	struct RasterPoint
@@ -293,10 +297,15 @@ private:
 	HRESULT ResetConfigOptions(long ErrorCode = 0);
 	ICallback* GetCallback()  { return _globalCallback;	}
 	BOOL IsTIFFGrid(LPCTSTR Filename);
-	IShapefile* CreateOutputShapefile(BSTR outputFilename, IShapefile* source);
+
+	VARIANT_BOOL SaveOutputShapefile(BSTR outputFilename, IShapefile* sf, VARIANT_BOOL overwrite);
+	void CloseOutputShapefile(IShapefile* sf);
+	bool CheckInputShapefile(IShapefile* input);
+	IShapefile* CloneInput(IShapefile* input, BSTR outputFilename, VARIANT_BOOL overwrite);
 
 public:
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
+	
 };
 
 double CalcPolyGeodesicArea(std::vector<Point2D>& points);

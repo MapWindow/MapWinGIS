@@ -1344,6 +1344,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 #pragma endregion
 
 #pragma region Buffer
+
 // ********************************************************************
 //		BufferByDistance()
 // ********************************************************************
@@ -1351,24 +1352,33 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	if (MergeResults) {
+		ShapefileHelper::CloneNoFields(this, sf, SHP_POLYGON, true);
+	}
+	else  {
+		// if not merging shapes, copy fields
+		ShapefileHelper::CloneCore(this, sf, SHP_POLYGON, false);
+	}
+
+	if (!BufferByDistanceCore(Distance, nSegments, SelectedOnly, MergeResults, *sf))
+	{
+		(*sf)->Release();
+		*sf = NULL;
+	}
+
+	return S_OK;
+}
+
+// ********************************************************************
+//		BufferByDistance()
+// ********************************************************************
+VARIANT_BOOL CShapefile::BufferByDistanceCore(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, VARIANT_BOOL MergeResults, IShapefile* sf)
+{
 	// -------------------------------------------
 	//  validating
 	// -------------------------------------------
 	if (!ValidateInput(this, "BufferByDistance", "this", SelectedOnly))
-		return S_OK;
-
-	// -------------------------------------------
-	//  creating output
-	// -------------------------------------------
-	if (MergeResults)
-	{
-		ShapefileHelper::CloneNoFields(this, sf, SHP_POLYGON, true);
-	}
-	else
-	{
-		// if not merging shapes, copy fields
-		ShapefileHelper::CloneCore(this, sf, SHP_POLYGON, false);
-	}
+		return VARIANT_FALSE;
 
 	// -------------------------------------------
 	//  processing
@@ -1377,7 +1387,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	int size = _shapeData.size();
 	long count = 0;
 	long percent = 0;
-	
+
 	std::vector<GEOSGeometry*> results;
 	results.reserve(size);
 
@@ -1391,15 +1401,14 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
-		
+
 		GEOSGeometry* oGeom1 = this->GetGeosGeometry(i);
 		if (oGeom1)
 		{
 			GEOSGeometry* oGeom2 = GeosHelper::Buffer(oGeom1, Distance, (int)nSegments);
-			//GeosHelper::DestroyGeometry(oGeom1);
 
 			if (oGeom2 == NULL)	continue;
-			
+
 			if (MergeResults)
 			{
 				results.push_back(oGeom2);
@@ -1410,26 +1419,26 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 
 				if (GeosConverter::GeomToShapes(oGeom2, &vShapes, isM))
 				{
-					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
+					this->InsertShapesVector(sf, vShapes, this, i, NULL);
 					count += vShapes.size();
 				}
 				GeosHelper::DestroyGeometry(oGeom2);
 			}
 		}
 	}
-	
+
 	// -------------------------------------------
 	//  merging the results
 	// -------------------------------------------
 	if (MergeResults)
 	{
 		GEOSGeometry* gsGeom = GeosConverter::MergeGeometries(results, _globalCallback);	// geometries will be released in the process
-		
+
 		if (gsGeom != NULL)		// the result should always be in g1
 		{
 			OGRGeometry* oGeom = GeosHelper::CreateFromGEOS(gsGeom);
 			GeosHelper::DestroyGeometry(gsGeom);
-			
+
 			if (oGeom)
 			{
 				bool isM = ShapeUtility::IsM(this->_shpfiletype);
@@ -1438,7 +1447,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 				if (type == wkbMultiPolygon || type == wkbMultiPolygon25D)
 				{
 					std::vector<OGRGeometry*> polygons;
-					
+
 					if (OgrConverter::MultiPolygon2Polygons(oGeom, &polygons))
 					{
 						for (unsigned int i = 0; i < polygons.size(); i++)
@@ -1446,7 +1455,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 							IShape* shp = OgrConverter::GeometryToShape(polygons[i], isM);
 							if (shp)
 							{
-								(*sf)->EditInsertShape(shp, &count, &vb);
+								sf->EditInsertShape(shp, &count, &vb);
 								shp->Release();
 								count++;
 							}
@@ -1459,7 +1468,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 					IShape* shp = OgrConverter::GeometryToShape(oGeom, isM);
 					if (shp)
 					{
-						(*sf)->EditInsertShape(shp, &count, &vb);	
+						sf->EditInsertShape(shp, &count, &vb);
 						shp->Release();
 						count++;
 					}
@@ -1476,8 +1485,10 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	// -------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	ValidateOutput(sf, "BufferByDistance");
-	return S_OK;
+
+	return VARIANT_TRUE;
 }
+
 #pragma endregion
 
 #pragma region Clipping
@@ -2954,23 +2965,18 @@ STDMETHODIMP CShapefile::EndPointInShapefile(void)
 #pragma endregion
 
 #pragma region Non-spatial
-// ********************************************************************
-//		ExplodeShapes()
-// ********************************************************************
-STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** retval)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+// ********************************************************************
+//		ExplodeShapesCore()
+// ********************************************************************
+VARIANT_BOOL CShapefile::ExplodeShapesCore(VARIANT_BOOL SelectedOnly, IShapefile* result)
+{
 	// ----------------------------------------------
 	//   Validation
 	// ----------------------------------------------
-	if (!ValidateInput(this, "ExplodeShapes", "this", SelectedOnly))
-		return S_OK;
-
-	// ----------------------------------------------
-	//   Creating output
-	// ----------------------------------------------
-	Clone(retval);
+	if (!ValidateInput(this, "ExplodeShapes", "this", SelectedOnly)) {
+		return VARIANT_FALSE;
+	}
 
 	// ----------------------------------------------
 	//   Processing
@@ -2980,7 +2986,7 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 	CComVariant var;
 	std::vector<IShape*> vShapes;
 	long percent = 0;
-	
+
 	LONG numShapes;
 	this->get_NumShapes(&numShapes);
 
@@ -2990,61 +2996,76 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 	for (long i = 0; i < numShapes; i++)
 	{
 		CallbackHelper::Progress(_globalCallback, i, numShapes, "Exploding...", _key, percent);
-		
+
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
 
 		IShape* shp = NULL;
-		this->GetValidatedShape(i, &shp);
+		GetValidatedShape(i, &shp);
 		if (!shp) continue;
-	
+
 		if (((CShape*)shp)->ExplodeCore(vShapes))
 		{
 			for (long j = 0; j < (long)vShapes.size(); j++)
 			{
 				// all the shapes are copies of the initial ones, so no further cloning is needed					
-				(*retval)->get_NumShapes(&count);
-				(*retval)->EditInsertShape(vShapes[j], &count, &vb);
-				
+				result->get_NumShapes(&count);
+				result->EditInsertShape(vShapes[j], &count, &vb);
+
 				if (vb)
 				{
 					// copy attributes
 					for (int iFld = 0; iFld < numFields; iFld++)
-					{	
+					{
 						this->get_CellValue(iFld, i, &var);
-						(*retval)->EditCellValue(iFld, count, var, &vb);
+						result->EditCellValue(iFld, count, var, &vb);
 					}
 				}
 				vShapes[j]->Release();	// reference was added in EditInsertShape
 			}
 		}
+
+		shp->Release();
 	}
 
 	// ----------------------------------------------
 	//   Output validation
 	// ----------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	ValidateOutput(retval, "ExplodeShapes");
+	ValidateOutput(result, "ExplodeShapes");
+
+	return VARIANT_TRUE;
+}
+
+// ********************************************************************
+//		ExplodeShapes()
+// ********************************************************************
+STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	Clone(retval);
+
+	if (!ExplodeShapesCore(SelectedOnly, *retval))
+	{
+		(*retval)->Release();
+		(*retval) = NULL;
+	}
+	
 	return S_OK;
 }
 
 // ********************************************************************
-//		ExportSelection()
+//		ExportSelectionCore()
 // ********************************************************************
-STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
+VARIANT_BOOL CShapefile::ExportSelectionCore(IShapefile* result)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
 	// ----------------------------------------------
 	//   Validation
 	// ----------------------------------------------
-	if(!ValidateInput(this, "Sort", "this", false))
-		return S_OK;
-
-	// ----------------------------------------------
-	//   Creating output
-	// ----------------------------------------------
-	this->Clone(retval);
+	if (!ValidateInput(this, "Sort", "this", false)) {
+		return VARIANT_FALSE;
+	}
 
 	// ----------------------------------------------
 	//   Processing
@@ -3058,9 +3079,9 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 
 	long count = 0;
 	CComVariant var;
-	
+
 	long percent = 0;
-	
+
 	for (long i = 0; i < numShapes; i++)
 	{
 		CallbackHelper::Progress(_globalCallback, i, numShapes, "Exporting...", _key, percent);
@@ -3071,28 +3092,28 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 		IShape* shp = NULL;
 		this->GetValidatedShape(i, &shp);
 		if (!shp) continue;
-		
+
 		if (_isEditingShapes)
 		{
 			// in the editing mode we share a shape with the parent shapefile
 			// a copy is needed to avoid conflicts
 			IShape* shpCopy = NULL;
 			shp->Clone(&shpCopy);
-			(*retval)->EditInsertShape(shpCopy, &count, &vbretval);
+			result->EditInsertShape(shpCopy, &count, &vbretval);
 			shpCopy->Release();
 		}
 		else
 		{
-			(*retval)->EditInsertShape(shp, &count, &vbretval);
+			result->EditInsertShape(shp, &count, &vbretval);
 		}
-				
+
 		if (vbretval)
 		{
 			// copy attributes
 			for (int iFld = 0; iFld < numFields; iFld++)
-			{	
+			{
 				this->get_CellValue(iFld, i, &var);
-				(*retval)->EditCellValue(iFld, count, var, &vbretval);
+				result->EditCellValue(iFld, count, var, &vbretval);
 			}
 			count++;
 		}
@@ -3103,7 +3124,26 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 	//   Validating output
 	// ----------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	ValidateOutput(retval, "ExportSelection");
+	ValidateOutput(result, "ExportSelection");
+
+	return VARIANT_TRUE;
+}
+
+// ********************************************************************
+//		ExportSelection()
+// ********************************************************************
+STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	Clone(retval);
+	
+	if (!ExportSelectionCore(*retval))
+	{
+		(*retval)->Release();
+		(*retval) = NULL;
+	}
+	
 	return S_OK;
 }
 

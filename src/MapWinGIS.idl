@@ -4376,7 +4376,10 @@ interface IUtils : IDispatch{
 		[in]SAFEARRAY(double) NewValues, [in]BSTR gdalOutputFormat, [in]ICallback* cBack, [out, retval]VARIANT_BOOL* retVal);
 	[id(53)] HRESULT IsTiffGrid([in] BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	[id(54)] HRESULT GeodesicArea([in] IShape* shapeWgs84, [out, retval] DOUBLE* retVal);
-	[id(55)] HRESULT FixUpShapes([in] IShapefile* subject, [in] VARIANT_BOOL SelectedOnly, [in] BSTR outputFilename, [out, retval] VARIANT_BOOL* retVal);
+	[id(55)] HRESULT FixUpShapes([in] IShapefile* subject, [in] VARIANT_BOOL SelectedOnly, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
+	[id(56)] HRESULT BufferByDistance([in] IShapefile* subject, [in] DOUBLE Distance, [in] LONG nSegments, [in] VARIANT_BOOL SelectedOnly, [in] VARIANT_BOOL MergeResults, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval]VARIANT_BOOL* retVal);
+	[id(57)] HRESULT ExplodeShapes([in] IShapefile* subject, [in] VARIANT_BOOL SelectedOnly, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
+	[id(58)] HRESULT ExportSelection([in] IShapefile* subject, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/

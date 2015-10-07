@@ -508,3 +508,24 @@ void ShapefileHelper::ClearShapefileModifiedFlag(IShapefile* sf)
 		sf->put_ShapeModified(i, VARIANT_FALSE);
 	}
 }
+
+// ****************************************************************** 
+//		Delete
+// ****************************************************************** 
+bool ShapefileHelper::Delete(CStringW filename)
+{
+	vector<CStringW> exts = { L"shp", L"shx", L"dbf", L"prj", L"lbl", L"chart", L"mwd", L"mwx", L"shp.mwsymb", L"mwsr" };
+
+	for (size_t i = 0; i < exts.size(); i++)
+	{
+		CStringW name = Utility::ChangeExtension(filename, exts[i]);
+		if (Utility::FileExistsW(name) && _wremove(name) != 0)
+		{
+			USES_CONVERSION;
+			CallbackHelper::ErrorMsg(Debug::Format("Failed to remove file: %s", W2A(name)));
+			return false;
+		}
+	}
+
+	return true;
+}
