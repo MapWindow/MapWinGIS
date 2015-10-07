@@ -475,8 +475,9 @@ public:
 	void MarkUndrawn();
 	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
 	bool GetSorting(vector<long>** indices);
-	
 
-
+public:	
+	// geoprocessing methods
+	VARIANT_BOOL FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* result);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

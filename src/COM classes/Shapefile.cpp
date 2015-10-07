@@ -2813,22 +2813,37 @@ STDMETHODIMP CShapefile::FixUpShapes2(VARIANT_BOOL SelectedOnly, IShapefile** re
 		Clone(result);
 	}
 
+	*fixed = FixupShapesCore(SelectedOnly, *result);
+
+	return S_OK;
+}
+
+// *********************************************************
+//		FixupShapesCore()
+// *********************************************************
+VARIANT_BOOL CShapefile::FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* result)
+{
+	if (!result) return VARIANT_FALSE;
+
 	tkUnitsOfMeasure units;
 	_geoProjection->get_LinearUnits(&units);
-	
+
 	long numFields;
 	this->get_NumFields(&numFields);
 
 	long percent = 0;
 	int numShapes = _shapeData.size();
-	*fixed = VARIANT_TRUE;
+	VARIANT_BOOL fixed = VARIANT_TRUE;
 
 	for (int i = 0; i < numShapes; i++)
 	{
 		CallbackHelper::Progress(_globalCallback, i, numShapes, "Fixing...", _key, percent);
 
+		if (!ShapeAvailable(i, selectedOnly))
+			continue;
+
 		IShape* shp = NULL;
-		this->get_Shape(i, &shp);
+		get_Shape(i, &shp);
 		if (!shp) {
 			continue;
 		}
@@ -2838,14 +2853,16 @@ STDMETHODIMP CShapefile::FixUpShapes2(VARIANT_BOOL SelectedOnly, IShapefile** re
 		shp->Release();
 
 		// failed to fix the shape? skip it.
-		if (!shpNew)
+		if (!shpNew) {
+			CallbackHelper::ErrorMsg("Shapefile", NULL, "", "Failed to fix shape: %d", i);
 			continue;
+		}
 
 		long shapeIndex = 0;
-		(*result)->get_NumShapes(&shapeIndex);
+		result->get_NumShapes(&shapeIndex);
 
 		VARIANT_BOOL vbretval = VARIANT_FALSE;
-		(*result)->EditInsertShape(shpNew, &shapeIndex, &vbretval);
+		result->EditInsertShape(shpNew, &shapeIndex, &vbretval);
 		shpNew->Release();
 
 		if (vbretval)
@@ -2854,15 +2871,15 @@ STDMETHODIMP CShapefile::FixUpShapes2(VARIANT_BOOL SelectedOnly, IShapefile** re
 			CComVariant var;
 			for (int iFld = 0; iFld < numFields; iFld++)
 			{
-				this->get_CellValue(iFld, i, &var);
-				(*result)->EditCellValue(iFld, shapeIndex, var, &vbretval);
+				get_CellValue(iFld, i, &var);
+				result->EditCellValue(iFld, shapeIndex, var, &vbretval);
 			}
 		}
 	}
 
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
-	return S_OK;
+	return VARIANT_TRUE;
 }
 
 // *********************************************************
@@ -3305,3 +3322,4 @@ bool CShapefile::GetSorting(vector<long>** indices)
 
 	return false;
 }
+

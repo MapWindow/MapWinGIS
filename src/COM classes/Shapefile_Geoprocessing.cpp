@@ -3028,8 +3028,6 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 	return S_OK;
 }
 
-
-
 // ********************************************************************
 //		ExportSelection()
 // ********************************************************************

@@ -3959,7 +3959,7 @@ interface IShapefile : IDispatch{
 	[propput, id(135)] HRESULT SortAscending([in] VARIANT_BOOL newVal);
 	[id(136)] HRESULT UpdateSortField();
 	[id(137)] HRESULT SaveAsEx([in] BSTR newFilename, [in] VARIANT_BOOL stopEditing, [in] VARIANT_BOOL unboundFile, [out, retval] VARIANT_BOOL* retVal);
-	[id(138)] HRESULT FixUpShapes2([in] VARIANT_BOOL SelectedOnly, [in, out] IShapefile** result, [out, retval] VARIANT_BOOL* retVal);
+	[id(138)] HRESULT FixUpShapes2([in] VARIANT_BOOL SelectedOnly, [out] IShapefile** result, [out, retval] VARIANT_BOOL* fixed);
 	[id(139)] HRESULT StartAppendMode([out, retval] VARIANT_BOOL* retVal);
 	[id(140)] HRESULT StopAppendMode();
 	[propget, id(141)] HRESULT AppendMode([out, retval] VARIANT_BOOL* pVal);
@@ -4376,6 +4376,7 @@ interface IUtils : IDispatch{
 		[in]SAFEARRAY(double) NewValues, [in]BSTR gdalOutputFormat, [in]ICallback* cBack, [out, retval]VARIANT_BOOL* retVal);
 	[id(53)] HRESULT IsTiffGrid([in] BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	[id(54)] HRESULT GeodesicArea([in] IShape* shapeWgs84, [out, retval] DOUBLE* retVal);
+	[id(55)] HRESULT FixUpShapes([in] IShapefile* subject, [in] VARIANT_BOOL SelectedOnly, [in] BSTR outputFilename, [out, retval] VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/

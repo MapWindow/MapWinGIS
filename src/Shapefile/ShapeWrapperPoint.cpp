@@ -344,6 +344,8 @@ bool CShapeWrapperPoint::get_PointXYZM(int pointIndex, double& x, double& y, dou
 		m = _m;
 		return true;
 	}
+
+	return false;
 }
 
 #pragma endregion

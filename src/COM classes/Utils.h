@@ -176,6 +176,7 @@ public:
 		BSTR gdalOutputFormat, ICallback* cBack, VARIANT_BOOL* retVal);
 	STDMETHOD(IsTiffGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(GeodesicArea)(IShape* shapeWgs84, DOUBLE* retVal);
+	STDMETHOD(FixUpShapes)(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL* retVal);
 
 private:
 	struct RasterPoint
@@ -292,10 +293,10 @@ private:
 	HRESULT ResetConfigOptions(long ErrorCode = 0);
 	ICallback* GetCallback()  { return _globalCallback;	}
 	BOOL IsTIFFGrid(LPCTSTR Filename);
+	IShapefile* CreateOutputShapefile(BSTR outputFilename, IShapefile* source);
 
 public:
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
-	
 };
 
 double CalcPolyGeodesicArea(std::vector<Point2D>& points);
