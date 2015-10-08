@@ -63,6 +63,7 @@ bool SQLiteCache::Initialize(SqliteOpenMode openMode)
 			if (_createNeeded) {
 				SQLiteCache::CreateDatabase();
 				_createNeeded = false;
+				_openNeeded = false;
 			}
 	}
 	section.Unlock();
@@ -74,6 +75,11 @@ bool SQLiteCache::Initialize(SqliteOpenMode openMode)
 // ***********************************************************
 CStringW SQLiteCache::get_DbName()
 {
+	if (m_dbName.GetLength() == 0)
+	{
+		return get_DefaultDbName();
+	}
+
 	return m_dbName;
 }
 
@@ -82,6 +88,7 @@ CStringW SQLiteCache::get_DbName()
 // ***********************************************************
 bool SQLiteCache::set_DbName(CStringW name)
 {
+
 	if (name.MakeLower() != m_dbName.MakeLower())
 	{
 		m_dbName = name;
