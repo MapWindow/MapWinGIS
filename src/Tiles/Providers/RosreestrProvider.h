@@ -47,7 +47,7 @@ public:
 	}
 };
 
-class RosreestrBordersProvider: public WMSGMercProvider
+class RosreestrBordersProvider: public WmsGMercProvider
 {
 private:	
 	CString url2;

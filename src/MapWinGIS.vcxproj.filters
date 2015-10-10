@@ -888,6 +888,12 @@
     <ClInclude Include="Shapefile\ShapeWrapperEmpty.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
+    <ClInclude Include="COM classes\WmsProvider.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\WmsProviders.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1887,6 +1893,15 @@
     <ClCompile Include="COM classes\Utils_Shapefile.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
+    <ClCompile Include="COM classes\WmsProvider.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\WmsProviders.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Projections\MercatorProjection.cpp">
+      <Filter>Tiles\Projections</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -2091,6 +2106,12 @@
       <Filter>COM classes\Resources</Filter>
     </None>
     <None Include="COM classes\Expression.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="COM classes\WmsProvider.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="COM classes\WmsProviders.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
   </ItemGroup>

@@ -25,53 +25,53 @@
 // and tile coordinates (indices of tiles at particular zoom level)
 class BaseProjection
 {
+public:
+	BaseProjection()
+		: yMinLat(0.0), yMaxLat(0.0), xMinLng(0.0), xMaxLng(0.0)
+	{
+		_tileSize = CSize(256, 256);
+		_yInverse = false;
+		_earthRadius = 6378137.0;
+		_worldWide = true;
+		_serverProjection = tkTileProjection::SphericalMercator;
+		_projected = false;
+	};
+
+	virtual ~BaseProjection() 
+	{
+	}
+
 protected:
 	double MinLatitude;
 	double MaxLatitude;
 	double MinLongitude;
 	double MaxLongitude;
+	bool _projected;	  // it's projected coordinate system; direct calculations of tile positions will be attempted
+	bool _yInverse;
+	CSize _tileSize;
+	double _earthRadius;
+	bool _worldWide;
+	tkTileProjection _serverProjection;
+
 public:
-    CSize tileSize;
 	double yMinLat;		// in decimal degrees for Mercator projection or projected units for custom projections
 	double yMaxLat;
 	double xMinLng;
 	double xMaxLng;
-	bool yInverse;
-	double PI;
-	bool projected;	  // it's projected coordinate system; direct calculations of tile positions will be attempted
-	double earthRadius;
-	bool worldWide;
-	tkTileProjection serverProjection;
+	
+public:
+	tkTileProjection get_ServerProjection() { return _serverProjection; }
 
-	double GetMinLatitude() { 
-		return projected ? MinLatitude : yMinLat; 
-	}
-	double GetMaxLatitude() { 
-		return projected ? MaxLatitude : yMaxLat; }
-	double GetMinLongitude() { 
-		return projected ? MinLongitude : xMinLng; 
-	}
-	double GetMaxLongitude() { 
-		return projected ? MaxLongitude : xMaxLng; 
-	}
+	bool IsWorldWide() { return _worldWide; }
+
+	double GetMinLatitude() { return _projected ? MinLatitude : yMinLat; }
+	double GetMaxLatitude() { return _projected ? MaxLatitude : yMaxLat; }
+	double GetMinLongitude() { return _projected ? MinLongitude : xMinLng; }
+	double GetMaxLongitude() { return _projected ? MaxLongitude : xMaxLng; }
 
 	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret) = 0;
 	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret) = 0;
 	virtual double GetWidth() = 0;
-
-	BaseProjection()
-	{
-		 tileSize = CSize(256, 256);
-		 PI = 3.1415926535897932384626433832795;
-		 yInverse = false;
-		 earthRadius = 6378137.0;
-		 worldWide = true;
-		 serverProjection = tkTileProjection::SphericalMercator;
-		 yMinLat = yMaxLat = xMinLng = xMaxLng = 0.0;
-		 projected = false;
-	};
-	
-	virtual ~BaseProjection() {}
 
 	void GetTileMatrixMinXY(int zoom, CSize &size)
 	{
@@ -103,37 +103,10 @@ public:
 	void GetTileSizeLatLon(CPoint point, int zoom, SizeLatLng &ret);
 	void GetTileMatrixSizeXY(int zoom, CSize &ret);
 
-	RectLatLng CalculateGeogBounds(CPoint pnt, int zoom)
-	{
-		// calculating geographic coordinates
-		SizeLatLng size;
-		this->GetTileSizeLatLon(pnt, zoom, size );
-
-		if (size.WidthLng == 0.0 || size.HeightLat == 0.0) {
-			CallbackHelper::AssertionFailed("Invalid tile size on calculating geographic bounds.");
-		}
-
-		if (this->yInverse)
-		{
-			PointLatLng geoPnt;
-			CPoint pnt2 = pnt;
-			pnt2.y++;			// y corresponds to the bottom of tile as the axis is directed up
-			// while the drawing position is defined by its top-left corner
-			// so the calculation is made by the upper tile
-
-			this->FromXYToLatLng(pnt2, zoom, geoPnt);
-			return RectLatLng(geoPnt.Lng, geoPnt.Lat, size.WidthLng, size.HeightLat);
-		}
-		else
-		{
-			PointLatLng geoPnt;
-			this->FromXYToLatLng(pnt, zoom, geoPnt);
-			return RectLatLng(geoPnt.Lng, geoPnt.Lat, size.WidthLng, size.HeightLat );
-		}
-	}
+	RectLatLng CalculateGeogBounds(CPoint pnt, int zoom);
 };
 
-class MercatorBase: public BaseProjection
+class MercatorProjectionBase: public BaseProjection
 {
 	double GetWidth()
 	{

@@ -1,0 +1,16 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {EE9A0CDA-162C-4663-A48F-A5A29C1071C6} = s 'WmsProvider Class'
+		{
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+			Version = s '4.9'
+		}
+	}
+}

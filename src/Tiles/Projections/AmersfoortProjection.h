@@ -54,17 +54,17 @@ public:
 			xMaxLng = 595401.92;
 
 			VARIANT_BOOL ret1, ret2;
-			projWGS84->ImportFromEPSG(4326, &ret1);
-			projCustom->ImportFromEPSG(28992, &ret2);
+			_projWGS84->ImportFromEPSG(4326, &ret1);
+			_projCustom->ImportFromEPSG(28992, &ret2);
 
 			if (!ret1 || !ret2)
 				CallbackHelper::ErrorMsg("Failed to initialize projection for Amersfoort.");
 
-			projWGS84->StartTransform(projCustom, &ret1);
+			_projWGS84->StartTransform(_projCustom, &ret1);
 			if (!ret1)
 				CallbackHelper::ErrorMsg("Failed to initialize WGS84 to Amersfoort transformation.");
 
-			projCustom->StartTransform(projWGS84, &ret2);
+			_projCustom->StartTransform(_projWGS84, &ret2);
 			if (!ret2)
 				CallbackHelper::ErrorMsg("Failed to initialize Amersfoort to WGS84 transformation.");
 
@@ -72,13 +72,13 @@ public:
 			MaxLatitude = yMaxLat;
 			MinLongitude = xMinLng;
 			MaxLongitude = xMaxLng;
-			projCustom->Transform(&MinLongitude, &MinLatitude, &ret1);
-			projCustom->Transform(&MaxLongitude, &MaxLatitude, &ret2);
+			_projCustom->Transform(&MinLongitude, &MinLatitude, &ret1);
+			_projCustom->Transform(&MaxLongitude, &MaxLatitude, &ret2);
 		}
 
-		yInverse = true;
-		worldWide = false;
+		_yInverse = true;
+		_worldWide = false;
 
-		serverProjection = tkTileProjection::Amersfoort;
+		_serverProjection = tkTileProjection::Amersfoort;
 	}
 };

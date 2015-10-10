@@ -21,30 +21,32 @@
 #pragma once
 #include "BaseProjection.h"
 
-// A base class for projected coordinte systems, i.e. specified in meters rather than decimal degrees
+// A base class for projected coordinate systems, i.e. specified in meters rather than decimal degrees
 // Additional transformation with proj4.dll is carries out for them
 class CustomProjection: public BaseProjection
 {
 protected:	
-	IGeoProjection* projWGS84;
+	IGeoProjection* _projWGS84;
+	IGeoProjection* _projCustom;
+
 public:
-	IGeoProjection* projCustom;
-	
 	CustomProjection()
 	{
-		projected = true;
-		CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&projWGS84);
-		CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&projCustom);
+		_projected = true;
+
+		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_projWGS84);
+		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_projCustom);
 	};
 
 	virtual ~CustomProjection()
 	{
-		projWGS84->StopTransform();
-		projCustom->StopTransform();
-		projWGS84->Release();
-		projCustom->Release();
+		_projWGS84->StopTransform();
+		_projCustom->StopTransform();
+		_projWGS84->Release();
+		_projCustom->Release();
 	}
 
+	IGeoProjection* get_Projection() { return _projCustom; }
 	void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret);
 	void FromProjToXY(double lat, double lng, int zoom, CPoint &ret);
 	void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret);

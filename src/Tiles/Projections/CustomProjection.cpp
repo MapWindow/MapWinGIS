@@ -21,6 +21,9 @@
 #include "stdafx.h"
 #include "CustomProjection.h"
 
+// *******************************************************
+//		FromLatLngToXY
+// *******************************************************
 // Converts from decimal degrees to tile coordinates
 void CustomProjection::FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 {
@@ -28,11 +31,14 @@ void CustomProjection::FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 	double lng = pnt.Lng;
 	
 	VARIANT_BOOL vb;
-	projWGS84->Transform(&lng, &lat, &vb);
+	_projWGS84->Transform(&lng, &lat, &vb);
 	
 	this->FromProjToXY(lat, lng, zoom, ret);
 }
 
+// *******************************************************
+//		FromProjToXY
+// *******************************************************
 // Converts from projected units to tile coordinates
 void CustomProjection::FromProjToXY(double lat, double lng, int zoom, CPoint &ret)
 {
@@ -53,18 +59,24 @@ void CustomProjection::FromProjToXY(double lat, double lng, int zoom, CPoint &re
 	Clip(ret, zoom);
 }
 
+// *******************************************************
+//		FromXYToLatLng
+// *******************************************************
 // Converts tile coordinates to decimal degrees
 void CustomProjection::FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret)
 {
 	FromXYToProj(pnt, zoom, ret);
 
 	VARIANT_BOOL vb;
-	projCustom->Transform(&ret.Lng, &ret.Lat, &vb);
+	_projCustom->Transform(&ret.Lng, &ret.Lat, &vb);
 
 	ret.Lat = ret.Lat;
 	ret.Lng = ret.Lng;
 }
 
+// *******************************************************
+//		FromXYToProj
+// *******************************************************
 // Converts from tile coordinates to projected coordinates
 void CustomProjection::FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret)
 {

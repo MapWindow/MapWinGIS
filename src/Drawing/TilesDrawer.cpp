@@ -54,7 +54,7 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 		if (customProj)
 		{
 			// TODO: can be cached
-			mapProjection->get_IsSame(customProj->projCustom, &isSame);
+			mapProjection->get_IsSame(customProj->get_Projection(), &isSame);
 		}
 	}
 	

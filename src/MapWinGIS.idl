@@ -1128,6 +1128,8 @@ enum tkScalebarUnits
 		idGdalDriverManager = 49,
 		idFunction = 50,
 		idExpression = 51,
+		idWmsProvider = 52,
+		idWmsProviders = 53,
 	} tkInterface;	
 
 	typedef		
@@ -6288,6 +6290,37 @@ interface IExpression : IDispatch{
 	[id(9)] HRESULT CalculateForTableRow([in] LONG rowIndex, [in] LONG targetFieldIndex, [out, retval] VARIANT_BOOL* retVal);
 	[id(10)] HRESULT CalculateForTableRow2([in] LONG rowIndex, [out] VARIANT* result, [out, retval] VARIANT_BOOL* retVal);
 };
+[
+	object,
+	uuid(74BFB63D-6DBC-41FF-A50F-22CD10BAC930),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IWmsProvider : IDispatch{
+	[propget, id(1)] HRESULT LastErrorCode([out, retval] long *pVal);
+	[propget, id(2)] HRESULT Key([out, retval] BSTR *pVal);
+	[propput, id(2)] HRESULT Key([in] BSTR newVal);
+	[propget, id(3)] HRESULT Name([out, retval] BSTR* pVal);
+	[propput, id(3)] HRESULT Name([in] BSTR newVal);
+	[propget, id(4)] HRESULT BoundingBox([out, retval] IExtents** pVal);
+	[propput, id(4)] HRESULT BoundingBox([in] IExtents* newVal);
+	[propget, id(5)] HRESULT CrsEpsg([out, retval] LONG* pVal);
+	[propput, id(5)] HRESULT CrsEpsg([in] LONG newVal);
+	[propget, id(6)] HRESULT LayersCsv([out, retval] BSTR* pVal);
+	[propput, id(6)] HRESULT LayersCsv([in] BSTR newVal);
+	[propget, id(7)] HRESULT BaseUrl([out, retval] BSTR* pVal);
+	[propput, id(7)] HRESULT BaseUrl([in] BSTR newVal);
+};
+[
+	object,
+	uuid(CAF0590A-D743-427C-A68F-350B33E4013F),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IWmsProviders : IDispatch{
+};
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -7282,5 +7315,19 @@ library MapWinGIS
 	coclass Expression
 	{
 		[default] interface IExpression;
+	};
+	[
+		uuid(EE9A0CDA-162C-4663-A48F-A5A29C1071C6)		
+	]
+	coclass WmsProvider
+	{
+		[default] interface IWmsProvider;
+	};
+	[
+		uuid(418D2651-CDE2-4044-8661-CEB663702BF5)		
+	]
+	coclass WmsProviders
+	{
+		[default] interface IWmsProviders;
 	};
 };

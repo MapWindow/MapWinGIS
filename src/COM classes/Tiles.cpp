@@ -1869,7 +1869,7 @@ bool CTiles::ProjectionBounds( BaseProvider* provider, IGeoProjection* mapProjec
 			// and identify projection on setting it to map;
 			bool supportsWorldWideTransform = ProjectionSupportsWorldWideTransform(mapProjection, wgsProjection);
 
-			if (proj->worldWide && !supportsWorldWideTransform) // server projection is world wide, map projection - not
+			if (proj->IsWorldWide() && !supportsWorldWideTransform) // server projection is world wide, map projection - not
 			{
 				// so far just skip it;
 				// optionally possible to transform to check if the results make sense
@@ -1933,7 +1933,7 @@ STDMETHODIMP CTiles::get_ServerProjection(tkTileProjection* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	BaseProjection* p = m_provider->Projection;
-	*retVal = p ? p->serverProjection : tkTileProjection::SphericalMercator;
+	*retVal = p ? p->get_ServerProjection() : tkTileProjection::SphericalMercator;
 	return S_OK;
 }
 
@@ -1943,17 +1943,22 @@ STDMETHODIMP CTiles::get_ServerProjection(tkTileProjection* retVal)
 STDMETHODIMP CTiles::get_ProjectionStatus(tkTilesProjectionStatus* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*retVal = tkTilesProjectionStatus::tpsEmptyOrInvalid;
 
 	CMapView* map = ((CMapView*)this->_mapView);
 	if (map) {
+
 		IGeoProjection* gp = map->GetMapProjection();
 		IGeoProjection* gpServer = NULL;
-		GetUtils()->TileProjectionToGeoProjection(m_provider->Projection->serverProjection, &gpServer);
+
+		GetUtils()->TileProjectionToGeoProjection(m_provider->Projection->get_ServerProjection(), &gpServer);
+
 		if (gp && gpServer)
 		{
 			VARIANT_BOOL vb;
 			gp->get_IsSame(gpServer, &vb);
+
 			if (vb) {
 				*retVal = tkTilesProjectionStatus::tpsNative;
 			}

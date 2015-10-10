@@ -95,6 +95,32 @@ public:
 // Downloads map tiles via HTTP; this is abstract class to inherit from
 class BaseProvider
 {
+public:
+	BaseProvider()
+		: minZoom(1), maxZoom(18), zoom(0), httpStatus(200)
+	{
+		mapView = NULL;
+		LanguageStr = "en";
+		Projection = NULL;
+		Selected = false;
+		IsStopped = false;
+		DynamicOverlay = false;
+		_initAttemptCount = 0;
+		LicenseUrl = "https://mapwingis.codeplex.com/wikipage?title=tiles";
+	}
+
+	virtual ~BaseProvider(void)
+	{
+		if (Projection != NULL)
+			delete Projection;
+		for (size_t i = 0; i < _httpClients.size(); i++)
+		{
+			_httpClients[i]->Close();
+			delete _httpClients[i];
+		}
+		_httpClients.clear();
+	};
+
 protected:
 	static CString m_proxyAddress;
 	static short m_proxyPort;
@@ -104,8 +130,9 @@ protected:
 	std::vector<HttpClientEx*> _httpClients;
 	static ::CCriticalSection _clientLock;
 	int _initAttemptCount;
+
 public:
-	bool BaseProvider::CheckConnection(CString url);
+	bool CheckConnection(CString url);
 	std::vector<BaseProvider*> subProviders;	// for complex providers with more than one source bitmap per tile
 	BaseProjection* Projection;
 	void *mapView;
@@ -138,32 +165,8 @@ protected:
 	{
 		return (pos.x + 2 * pos.y) % max;
 	}
+
 public:
-	BaseProvider()
-		: minZoom(1), maxZoom(18), zoom(0), httpStatus(200)
-	{
-		mapView = NULL;
-		LanguageStr = "en";
-		Projection = NULL;
-		Selected = false;
-		IsStopped = false;
-		DynamicOverlay = false;
-		_initAttemptCount = 0;
-		LicenseUrl = "https://mapwingis.codeplex.com/wikipage?title=tiles";
-	}
-
-	virtual ~BaseProvider(void)
-	{
-		if (Projection != NULL)
-			delete Projection;
-		for(size_t i = 0; i < _httpClients.size(); i++)
-		{
-			_httpClients[i]->Close();
-			delete _httpClients[i];
-		}
-		_httpClients.clear();
-	};
-
 	// proxy support
 	short get_ProxyPort() {return m_proxyPort;}
 	CString get_ProxyAddress() {return m_proxyAddress;}
@@ -173,9 +176,7 @@ public:
 	bool AutodetectProxy();
 	void AddDynamicOverlay(BaseProvider* p);
 	void ClearSubProviders();
-	virtual CStringW GetCopyright() {
-		return Copyright;
-	}
+	virtual CStringW GetCopyright() { return Copyright;	}
 	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
 	TileCore* GetTileImage(CPoint &pos, int zoom);	
 	virtual bool Initialize() { return true; };

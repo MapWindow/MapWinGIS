@@ -21,16 +21,16 @@
 #pragma once
 #include "BaseProvider.h"
 
-class WMSGMercProvider: public BaseProvider
+class WmsGMercProvider: public BaseProvider
 {
-CString url2;
 public:
-	~WMSGMercProvider(void){};
+	virtual ~WmsGMercProvider(void) { };
 
-	WMSGMercProvider() 
+	WmsGMercProvider() 
 	{
 		this->Projection = new MercatorProjection();
 	}
+
 	// gets bounding box in Google mercator projection (meters; EPSG:3857)
 	CString GetBoundingBox(CPoint &pos, int zoom)
 	{

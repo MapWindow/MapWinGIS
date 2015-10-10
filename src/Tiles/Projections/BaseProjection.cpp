@@ -21,6 +21,9 @@
 #include "stdafx.h"
 #include "BaseProjection.h"
 
+// *******************************************************
+//		GetTileSizeLatLon
+// *******************************************************
 // gets matrix size in decimal degrees
 void BaseProjection::GetTileSizeLatLon(PointLatLng point, int zoom, SizeLatLng &ret)
 {
@@ -29,13 +32,16 @@ void BaseProjection::GetTileSizeLatLon(PointLatLng point, int zoom, SizeLatLng &
 	this->GetTileSizeLatLon(temp, zoom, ret);
 }
 
+// *******************************************************
+//		GetTileSizeLatLon
+// *******************************************************
 // gets matrix size in decimal degrees
 void BaseProjection::GetTileSizeLatLon(CPoint point, int zoom, SizeLatLng &ret)
 {
 	PointLatLng pnt1;
 	this->FromXYToLatLng(point, zoom, pnt1);
 
-	// moving to the neighbouring tile
+	// moving to the neighboring tile
 	CPoint newPoint(point.x, point.y);
 
 	CSize size;
@@ -54,6 +60,9 @@ void BaseProjection::GetTileSizeLatLon(CPoint point, int zoom, SizeLatLng &ret)
 	ret.HeightLat = fabs(pnt2.Lat - pnt1.Lat);
 }
 
+// *******************************************************
+//		GetTileMatrixSizeXY
+// *******************************************************
 // gets matrix size in tile coordinates
 void BaseProjection::GetTileMatrixSizeXY(int zoom, CSize &ret)
 {
@@ -62,4 +71,36 @@ void BaseProjection::GetTileMatrixSizeXY(int zoom, CSize &ret)
 	GetTileMatrixMaxXY(zoom, sMax);
 	ret.cx = sMax.cx - sMin.cx + 1;
 	ret.cy = sMax.cy - sMin.cy + 1;
+}
+
+// *******************************************************
+//		CalculateGeogBounds
+// *******************************************************
+RectLatLng BaseProjection::CalculateGeogBounds(CPoint pnt, int zoom)
+{
+	// calculating geographic coordinates
+	SizeLatLng size;
+	this->GetTileSizeLatLon(pnt, zoom, size);
+
+	if (size.WidthLng == 0.0 || size.HeightLat == 0.0) {
+		CallbackHelper::AssertionFailed("Invalid tile size on calculating geographic bounds.");
+	}
+
+	if (this->_yInverse)
+	{
+		PointLatLng geoPnt;
+		CPoint pnt2 = pnt;
+		pnt2.y++;			// y corresponds to the bottom of tile as the axis is directed up
+		// while the drawing position is defined by its top-left corner
+		// so the calculation is made by the upper tile
+
+		this->FromXYToLatLng(pnt2, zoom, geoPnt);
+		return RectLatLng(geoPnt.Lng, geoPnt.Lat, size.WidthLng, size.HeightLat);
+	}
+	else
+	{
+		PointLatLng geoPnt;
+		this->FromXYToLatLng(pnt, zoom, geoPnt);
+		return RectLatLng(geoPnt.Lng, geoPnt.Lat, size.WidthLng, size.HeightLat);
+	}
 }

@@ -57,10 +57,10 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <TargetExt>.ocx</TargetExt>
-    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
     <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
   </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
@@ -225,6 +225,8 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="COM classes\SelectionList.h" />
     <ClInclude Include="COM classes\ShapeEditor.h" />
     <ClInclude Include="COM classes\UndoList.h" />
+    <ClInclude Include="COM classes\WmsProvider.h" />
+    <ClInclude Include="COM classes\WmsProviders.h" />
     <ClInclude Include="ComHelpers\CallbackHelper.h" />
     <ClInclude Include="ComHelpers\ChartsHelper.h" />
     <ClInclude Include="ComHelpers\ExtentsHelper.h" />
@@ -496,6 +498,8 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
     <ClCompile Include="COM classes\UndoList.cpp" />
     <ClCompile Include="COM classes\Utils_Shapefile.cpp" />
+    <ClCompile Include="COM classes\WmsProvider.cpp" />
+    <ClCompile Include="COM classes\WmsProviders.cpp" />
     <ClCompile Include="ComHelpers\CallbackHelper.cpp" />
     <ClCompile Include="ComHelpers\ChartsHelper.cpp" />
     <ClCompile Include="ComHelpers\ExtentsHelper.cpp" />
@@ -652,6 +656,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="Structures\Layer.cpp" />
     <ClCompile Include="Structures\Structures.cpp" />
     <ClCompile Include="Tiles\LoadingTask.cpp" />
+    <ClCompile Include="Tiles\Projections\MercatorProjection.cpp" />
     <ClCompile Include="Tiles\Providers\BingMapProvider.cpp" />
     <ClCompile Include="Utilities\AngleHelper.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
@@ -877,6 +882,8 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <None Include="COM classes\UndoList.rgs" />
     <None Include="COM classes\Utils.rgs" />
     <None Include="COM classes\Vector.rgs" />
+    <None Include="COM classes\WmsProvider.rgs" />
+    <None Include="COM classes\WmsProviders.rgs" />
     <None Include="Grid\fip\Makefile" />
     <None Include="Grid\fip\readme.123" />
     <None Include="MapWinGIS.def" />
