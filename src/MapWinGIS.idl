@@ -64,6 +64,8 @@ interface IGdalDriver;
 interface IGdalDriverManager;
 interface IFunction;
 interface IExpression;
+interface IWmsProvider;
+interface IWmsProviders;
 
 /************************** tkFunctionGroup Enumeration **********************/
 typedef
@@ -5752,6 +5754,7 @@ interface ITiles : IDispatch{
 	[id(52)] HRESULT ClearProxyAuthorization();
 	[propget, id(53)] HRESULT ProxyAuthenticationScheme([out, retval] tkProxyAuthentication* pVal);
 	[propput, id(53)] HRESULT ProxyAuthenticationScheme([in] tkProxyAuthentication newVal);
+	[propget, id(54)] HRESULT WmsProviders([out, retval] IWmsProviders** pVal);
 };
 
 [
@@ -6299,18 +6302,21 @@ interface IExpression : IDispatch{
 ]
 interface IWmsProvider : IDispatch{
 	[propget, id(1)] HRESULT LastErrorCode([out, retval] long *pVal);
-	[propget, id(2)] HRESULT Key([out, retval] BSTR *pVal);
-	[propput, id(2)] HRESULT Key([in] BSTR newVal);
-	[propget, id(3)] HRESULT Name([out, retval] BSTR* pVal);
-	[propput, id(3)] HRESULT Name([in] BSTR newVal);
-	[propget, id(4)] HRESULT BoundingBox([out, retval] IExtents** pVal);
-	[propput, id(4)] HRESULT BoundingBox([in] IExtents* newVal);
-	[propget, id(5)] HRESULT CrsEpsg([out, retval] LONG* pVal);
-	[propput, id(5)] HRESULT CrsEpsg([in] LONG newVal);
-	[propget, id(6)] HRESULT LayersCsv([out, retval] BSTR* pVal);
-	[propput, id(6)] HRESULT LayersCsv([in] BSTR newVal);
-	[propget, id(7)] HRESULT BaseUrl([out, retval] BSTR* pVal);
-	[propput, id(7)] HRESULT BaseUrl([in] BSTR newVal);
+	[propget, id(2)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+	[propget, id(3)] HRESULT Key([out, retval] BSTR *pVal);
+	[propput, id(3)] HRESULT Key([in] BSTR newVal);
+	[propget, id(4)] HRESULT Name([out, retval] BSTR* pVal);
+	[propput, id(4)] HRESULT Name([in] BSTR newVal);
+	[propget, id(5)] HRESULT BoundingBox([out, retval] IExtents** pVal);
+	[propput, id(5)] HRESULT BoundingBox([in] IExtents* newVal);
+	[propget, id(6)] HRESULT CrsEpsg([out, retval] LONG* pVal);
+	[propput, id(6)] HRESULT CrsEpsg([in] LONG newVal);
+	[propget, id(7)] HRESULT LayersCsv([out, retval] BSTR* pVal);
+	[propput, id(7)] HRESULT LayersCsv([in] BSTR newVal);
+	[propget, id(8)] HRESULT BaseUrl([out, retval] BSTR* pVal);
+	[propput, id(8)] HRESULT BaseUrl([in] BSTR newVal);
+	[propget, id(9)] HRESULT Id([out, retval] LONG* pVal);
+	[propput, id(9)] HRESULT Id([in] LONG newVal);
 };
 [
 	object,
@@ -6320,6 +6326,15 @@ interface IWmsProvider : IDispatch{
 	pointer_default(unique)
 ]
 interface IWmsProviders : IDispatch{
+	[propget, id(1)] HRESULT LastErrorCode([out, retval] long *pVal);
+	[propget, id(2)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+	[propget, id(3)] HRESULT Key([out, retval] BSTR *pVal);
+	[propput, id(3)] HRESULT Key([in] BSTR newVal);
+	[id(4)] HRESULT Add([in] IWmsProvider* provider);
+	[id(6)] HRESULT Clear();
+	[propget, id(7)] HRESULT Count([out, retval] LONG* pVal);
+	[propget, id(8)] HRESULT Item([in] LONG Index, [out, retval] IWmsProvider** pVal);
+	[id(9)] HRESULT Remove([in] LONG providerId, [out, retval] VARIANT_BOOL* retVal);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),

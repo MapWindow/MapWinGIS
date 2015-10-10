@@ -19,6 +19,7 @@ public:
 		_layerCsv = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR; 
 		_epgs = -1;
+		_id = -1;
 
 		gReferenceCounter.AddRef(tkInterface::idWmsProvider);
 	}
@@ -71,6 +72,8 @@ public:
 	STDMETHOD(put_LayersCsv)(BSTR newVal);
 	STDMETHOD(get_BaseUrl)(BSTR* pVal);
 	STDMETHOD(put_BaseUrl)(BSTR newVal);
+	STDMETHOD(get_Id)(LONG* pVal);
+	STDMETHOD(put_Id)(LONG newVal);
 
 private:	
 	BSTR _key;
@@ -79,6 +82,9 @@ private:
 	long _lastErrorCode;
 	IExtents* _bounds;
 	long _epgs;
+	long _id;
+	
+public:
 	
 };
 

@@ -46,19 +46,24 @@ public:
 		_key = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
-		
-		CoCreateInstance( CLSID_TileProviders, NULL, CLSCTX_INPROC_SERVER, IID_ITileProviders, (void**)&_providers);
-		((CTileProviders*)_providers)->put_Tiles(this);
-		this->SetDefaults();
 		_lastZoom = -1;
 		_lastProvider = tkTileProvider::ProviderNone;
+		
+		ComHelper::CreateInstance(idWmsProviders, (IDispatch**)&_wmsProviders);
+		ComHelper::CreateInstance(idTileProviders, (IDispatch**)&_providers);
+		((CTileProviders*)_providers)->put_Tiles(this);
+
+		SetDefaults();
+
 		gReferenceCounter.AddRef(tkInterface::idTiles);
 	}
 
 	~CTiles()
 	{
 		SysFreeString(_key);
+
 		ClearAll();
+
 		gReferenceCounter.Release(tkInterface::idTiles);
 	}
 	
@@ -66,10 +71,16 @@ public:
 	{
 		this->Stop();
 		this->Clear();
+
 		if (_providers)
 		{
 			_providers->Release();
 			_providers = NULL;
+		}
+
+		if (_wmsProviders) {
+			_wmsProviders->Release();
+			_wmsProviders = NULL;
 		}
 	}
 
@@ -182,6 +193,7 @@ public:
 	STDMETHOD(ClearProxyAuthorization)();
 	STDMETHOD(get_ProxyAuthenticationScheme)(tkProxyAuthentication* pVal);
 	STDMETHOD(put_ProxyAuthenticationScheme)(tkProxyAuthentication newVal);
+	STDMETHOD(get_WmsProviders)(IWmsProviders** pVal);
 
 private:
 	long _lastErrorCode;
@@ -202,6 +214,7 @@ private:
 	int _maxScaleToCache;
 	
 	ITileProviders* _providers;
+	IWmsProviders* _wmsProviders;
 	
 	TileLoader _tileLoader;
 	TileLoader _prefetchLoader;

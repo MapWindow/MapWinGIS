@@ -14,11 +14,19 @@ public:
 	CWmsProviders()
 	{
 		m_pUnkMarshaler = NULL;
+
+		_key = SysAllocString(L"");
+		_lastErrorCode = tkNO_ERROR;
+
 		gReferenceCounter.AddRef(tkInterface::idWmsProviders);
 	}
 
 	~CWmsProviders()
 	{
+		SysFreeString(_key);
+
+		Clear();
+
 		gReferenceCounter.Release(tkInterface::idWmsProviders);
 	}
 
@@ -47,7 +55,23 @@ public:
 	CComPtr<IUnknown> m_pUnkMarshaler;
 
 public:
+	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
+	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
+	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
+	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
+	STDMETHOD(Add)(IWmsProvider* provider);
+	STDMETHOD(Clear)();
+	STDMETHOD(get_Count)(LONG* pVal);
+	STDMETHOD(get_Item)(LONG Index, IWmsProvider** pVal);
+	STDMETHOD(Remove)(LONG providerId, VARIANT_BOOL* retVal);
 
+private:
+	void ErrorMessage(long ErrorCode);
+
+private:
+	BSTR _key;
+	long _lastErrorCode;
+	vector<IWmsProvider*> _providers;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(WmsProviders), CWmsProviders)

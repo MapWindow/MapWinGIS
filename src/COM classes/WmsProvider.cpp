@@ -31,7 +31,7 @@ STDMETHODIMP CWmsProvider::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		USES_CONVERSION;
+	USES_CONVERSION;
 	*pVal = OLE2BSTR(_key);
 
 	return S_OK;
@@ -41,7 +41,7 @@ STDMETHODIMP CWmsProvider::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		USES_CONVERSION;
+	USES_CONVERSION;
 	::SysFreeString(_key);
 	_key = OLE2BSTR(newVal);
 
@@ -153,6 +153,26 @@ STDMETHODIMP CWmsProvider::put_BaseUrl(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	// TODO: Add your implementation code here
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     Id()
+// *********************************************************
+STDMETHODIMP CWmsProvider::get_Id(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _id;
+
+	return S_OK;
+}
+STDMETHODIMP CWmsProvider::put_Id(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_id = newVal;
 
 	return S_OK;
 }
