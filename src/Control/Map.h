@@ -34,6 +34,7 @@
 #include "DraggingState.h"
 #include "ImageDrawing.h"
 #include "ShapefileDrawing.h"
+#include "BaseProvider.h"
 
 # define SHOWTEXT 450
 # define HIDETEXT 451
@@ -1192,8 +1193,12 @@ private:
 	VARIANT_BOOL ZoomToTileLevelCore(int zoom, bool logPrevious);
 	bool ValidatePreviousExtent();
 	bool MapIsEmpty();
-	
 	void UpdateMapTranformation();
+	int ChooseZoom(Extent ext, double scalingRatio, bool limitByProvider, BaseProvider* provider);
+	bool get_TileProviderBounds(BaseProvider* provider, Extent& retVal);
+	bool get_TilesForMap(void* provider, CRect& indices, int& zoom);
+	Extent get_Extents() { return _extents; }
+
 #pragma endregion
 
 public:
@@ -1221,13 +1226,8 @@ public:
 	virtual double _GetMouseProjTolerance() { return GetMouseTolerance(MouseTolerance::ToleranceSelect); }
 	virtual void _StartDragging(DraggingOperation operation) {	StartDragging(operation); }
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
-	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) 
-	{		FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
-	
-
-
-
-
+	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) {	FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
+	virtual void _FireTilesLoaded(VARIANT_BOOL isSnapshot, CString key) { FireTilesLoaded(isSnapshot, key); }
 
 protected:
 

@@ -373,6 +373,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="Tiles\Providers\CustomTileProvider.h" />
     <ClInclude Include="Tiles\Providers\WmsCustomProvider.h" />
     <ClInclude Include="Tiles\Providers\WmsProviderBase.h" />
+    <ClInclude Include="Tiles\TileManager.h" />
     <ClInclude Include="Utilities\AngleHelper.h" />
     <ClInclude Include="Utilities\ColoringGraph.h" />
     <ClInclude Include="Utilities\ComHelper.h" />
@@ -566,6 +567,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="COM classes\Utils_OGR.cpp" />
     <ClCompile Include="COM classes\Vector.cpp" />
     <ClCompile Include="Control\Map_Identifier.cpp" />
+    <ClCompile Include="Control\Map_Tiles.cpp" />
     <ClCompile Include="Drawing\BaseDrawer.cpp" />
     <ClCompile Include="Drawing\ChartDrawing.cpp" />
     <ClCompile Include="Drawing\CollisionList.cpp" />
@@ -661,6 +663,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="Tiles\Providers\CustomTileProvider.cpp" />
     <ClCompile Include="Tiles\Providers\WmsCustomProvider.cpp" />
     <ClCompile Include="Tiles\Providers\WmsProviderBase.cpp" />
+    <ClCompile Include="Tiles\TileManager.cpp" />
     <ClCompile Include="Utilities\AngleHelper.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
     <ClCompile Include="Utilities\ComHelper.cpp" />

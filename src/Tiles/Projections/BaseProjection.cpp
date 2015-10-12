@@ -134,3 +134,19 @@ RectLatLng BaseProjection::CalculateGeogBounds(CPoint pnt, int zoom)
 		return RectLatLng(geoPnt.Lng, geoPnt.Lat, size.WidthLng, size.HeightLat);
 	}
 }
+
+// *******************************************************
+//		getTileRectXY
+// *******************************************************
+void BaseProjection::getTileRectXY(Extent extentsWgs84, int zoom, CRect &rect)
+{
+	CPoint p1, p2;
+
+	FromLatLngToXY(PointLatLng(extentsWgs84.top, extentsWgs84.left), zoom, p1);
+	FromLatLngToXY(PointLatLng(extentsWgs84.bottom, extentsWgs84.right), zoom, p2);
+
+	rect.left = p1.x;
+	rect.right = p2.x;
+	rect.top = p1.y;
+	rect.bottom = p2.y;
+}

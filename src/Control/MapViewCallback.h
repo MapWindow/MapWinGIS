@@ -27,6 +27,11 @@ public:
 	virtual void _StartDragging(DraggingOperation operation) = 0;
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) = 0;
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) = 0;
+	virtual void _FireTilesLoaded(VARIANT_BOOL isSnapshot, CString key) = 0;
+
+	// tiles
+	virtual bool get_TilesForMap(void* provider, CRect& indices, int& zoom) = 0;
+	virtual Extent get_Extents() = 0;
 };
 
 

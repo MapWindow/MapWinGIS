@@ -10,5 +10,6 @@ public:
 	static OGRErr ImportFromEsri(OGRSpatialReference* sr, CString proj);
 	static OGRErr ImportFromWkt(OGRSpatialReference* sr, CString proj);
 	static OGRErr ExportToWkt(OGRSpatialReference* sr, CString& proj);
+	static bool SupportsWorldWideTransform(IGeoProjection* mapProjection, IGeoProjection* wgsProjection);
 };
 

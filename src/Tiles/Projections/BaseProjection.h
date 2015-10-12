@@ -82,6 +82,7 @@ public:
 	void GetTileSizeLatLon(PointLatLng point, int zoom, SizeLatLng &ret);
 	void GetTileSizeLatLon(CPoint point, int zoom, SizeLatLng &ret);
 	void GetTileMatrixSizeXY(int zoom, CSize &ret);
+	void getTileRectXY(Extent extentsWgs84, int zoom, CRect &rect);
 
 	RectLatLng CalculateGeogBounds(CPoint pnt, int zoom);
 

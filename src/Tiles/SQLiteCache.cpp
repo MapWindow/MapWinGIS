@@ -25,7 +25,7 @@
 
 // init static members
 sqlite3 *SQLiteCache::m_conn = NULL;
-bool SQLiteCache::m_locked = false;
+bool SQLiteCache::m_locked = false;			// TODO: lock with critical section
 bool SQLiteCache::_createNeeded = true;
 bool SQLiteCache::_openNeeded = true;
 CStringW SQLiteCache::m_dbName;

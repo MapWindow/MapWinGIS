@@ -894,6 +894,9 @@
     <ClInclude Include="Tiles\Providers\WmsCustomProvider.h">
       <Filter>Tiles\Providers</Filter>
     </ClInclude>
+    <ClInclude Include="Tiles\TileManager.h">
+      <Filter>Tiles\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1910,6 +1913,12 @@
     </ClCompile>
     <ClCompile Include="Tiles\Providers\WmsCustomProvider.cpp">
       <Filter>Tiles\Providers</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\TileManager.cpp">
+      <Filter>Tiles\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Tiles.cpp">
+      <Filter>Control</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -26,6 +26,9 @@
 
 #define THREADPOOL_SIZE	5
 
+// ******************************************************
+//    CTilePoint()
+// ******************************************************
 // A point with X, Y coordinates and distance from center of screen
 class CTilePoint: public CPoint
 {
@@ -36,40 +39,14 @@ public:
 };
 bool compPoints(CTilePoint* p1, CTilePoint* p2);
 
+
+// ******************************************************
+//    TileLoader()
+// ******************************************************
 // Handles the loading queue of map tiles, schedules the loaded tiles for caching
 class TileLoader
 {
-private:
-	// 2 pools will be used in alternate fashion,
-	// as it's problematic to terminate threads correctly until their current task is finished
-	// but it's quite desirable to start the processing of new requests ASAP
-	CThreadPool<ThreadWorker>* m_pool;
-	CThreadPool<ThreadWorker>* m_pool2;
-	list<void*> m_tasks;
-	TileCacher m_sqliteCacher;
-	TileCacher m_diskCacher;
-	void* tiles;
-	bool isSnapshot;
-	CString key;
-	void CleanTasks();
-	std::list<void*> _activeTasks;	// http requests are performed
-	::CCriticalSection _activeTasksLock;
 public:
-	long m_sleepBeforeRequestTimeout;
-	int m_errorCount;
-	int m_totalCount;
-	int m_sumCount;
-	int m_count;
-	static ::CCriticalSection section;
-	static ::CCriticalSection _requestLock;
-
-	ICallback* m_callback;			 // to report progress to clients via COM interface
-	IStopExecution* m_stopCallback;	 // to stop execution by clients via COM interface
-	int tileGeneration;
-	bool stopped;
-	bool doCacheSqlite;
-	bool doCacheDisk;
-
 	TileLoader::TileLoader()
 	{
 		m_diskCacher.cacheType = CacheType::DiskCache;
@@ -91,7 +68,7 @@ public:
 		m_count = 0;
 	}
 
-	TileLoader::~TileLoader(void)
+	virtual ~TileLoader(void)
 	{
 		CleanTasks();
 
@@ -104,6 +81,38 @@ public:
 			delete m_pool2;
 		}
 	}
+
+private:
+	// 2 pools will be used in alternate fashion,
+	// as it's problematic to terminate threads correctly until their current task is finished
+	// but it's quite desirable to start the processing of new requests ASAP
+	CThreadPool<ThreadWorker>* m_pool;
+	CThreadPool<ThreadWorker>* m_pool2;
+	list<void*> m_tasks;
+	TileCacher m_sqliteCacher;
+	TileCacher m_diskCacher;
+	void* tiles;
+	bool isSnapshot;
+	CString key;
+	void CleanTasks();
+	std::list<void*> _activeTasks;	// http requests are performed
+	::CCriticalSection _activeTasksLock;
+
+public:
+	long m_sleepBeforeRequestTimeout;
+	int m_errorCount;
+	int m_totalCount;
+	int m_sumCount;
+	int m_count;
+	static ::CCriticalSection section;
+	static ::CCriticalSection _requestLock;
+
+	ICallback* m_callback;			 // to report progress to clients via COM interface
+	IStopExecution* m_stopCallback;	 // to stop execution by clients via COM interface
+	int tileGeneration;
+	bool stopped;
+	bool doCacheSqlite;
+	bool doCacheDisk;
 
 	std::list<void*> GetActiveTasks() { return _activeTasks; }
 	void LockActiveTasks(bool lock);
