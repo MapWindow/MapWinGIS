@@ -56,7 +56,7 @@ STDMETHODIMP CWmsProvider::get_Name(BSTR* pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(_name);
+	*pVal = A2BSTR(_provider->Name);
 
 	return S_OK;
 }
@@ -65,8 +65,7 @@ STDMETHODIMP CWmsProvider::put_Name(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	USES_CONVERSION;
-	::SysFreeString(_name);
-	_name = OLE2BSTR(newVal);
+	_provider->Name = OLE2A(newVal);
 
 	return S_OK;
 }
@@ -78,15 +77,42 @@ STDMETHODIMP CWmsProvider::get_BoundingBox(IExtents** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// TODO: Add your implementation code here
+	*pVal = NULL;
+
+	CustomProjection* projection = _provider->get_CustomProjection();
+	if (projection) 
+	{
+		double xMin, xMax, yMin, yMax;
+		projection->get_Bounds(xMin, xMax, yMin, yMax);
+
+		IExtents* box = NULL;
+		ComHelper::CreateExtents(&box);
+		
+		box->SetBounds(xMin, yMin, 0.0, xMax, yMax, 0.0);
+
+		*pVal = box;
+	}
 
 	return S_OK;
 }
+
 STDMETHODIMP CWmsProvider::put_BoundingBox(IExtents* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// TODO: Add your implementation code here
+	if (!newVal) 
+	{
+		ErrorMsg(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
+	}
+
+	CustomProjection* projection = _provider->get_CustomProjection();
+	if (projection)
+	{
+		double xMin, yMin, zMin, xMax, yMax, zMax;
+		newVal->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		projection->put_Bounds(xMin, xMax, yMin, yMax);
+	}
 
 	return S_OK;
 }
@@ -98,7 +124,7 @@ STDMETHODIMP CWmsProvider::get_CrsEpsg(LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = _epgs;
+	*pVal = _provider->get_CustomProjection()->get_Epsg();
 
 	return S_OK;
 }
@@ -109,7 +135,7 @@ STDMETHODIMP CWmsProvider::put_CrsEpsg(LONG newVal)
 
 	if (newVal < 0) return S_OK;
 
-	_epgs = newVal;
+	_provider->get_CustomProjection()->put_Epsg(newVal);
 
 	return S_OK;
 }
@@ -120,9 +146,9 @@ STDMETHODIMP CWmsProvider::put_CrsEpsg(LONG newVal)
 STDMETHODIMP CWmsProvider::get_LayersCsv(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
+	
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(_layerCsv);
+	*pVal = A2BSTR(_provider->get_Layers());
 
 	return S_OK;
 }
@@ -131,8 +157,7 @@ STDMETHODIMP CWmsProvider::put_LayersCsv(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	USES_CONVERSION;
-	::SysFreeString(_layerCsv);
-	_layerCsv = OLE2BSTR(newVal);
+	_provider->set_Layers(OLE2A(newVal));
 
 	return S_OK;
 }
@@ -144,7 +169,10 @@ STDMETHODIMP CWmsProvider::get_BaseUrl(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// TODO: Add your implementation code here
+	CString s = _provider->get_UrlFormat();
+
+	USES_CONVERSION;
+	*pVal = A2BSTR(s);
 
 	return S_OK;
 }
@@ -152,7 +180,10 @@ STDMETHODIMP CWmsProvider::put_BaseUrl(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// TODO: Add your implementation code here
+	USES_CONVERSION;
+	CString s = OLE2A(newVal);
+
+	_provider->put_UrlFormat(s);
 
 	return S_OK;
 }
@@ -164,15 +195,39 @@ STDMETHODIMP CWmsProvider::get_Id(LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = _id;
+	*pVal = _provider->Id;
 
 	return S_OK;
 }
+
 STDMETHODIMP CWmsProvider::put_Id(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	_id = newVal;
+	_provider->Id = newVal;
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     Id()
+// *********************************************************
+STDMETHODIMP CWmsProvider::get_Format(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	*pVal = A2BSTR(_provider->get_Format());
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsProvider::put_Format(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	_provider->set_Format(OLE2A(newVal));
 
 	return S_OK;
 }

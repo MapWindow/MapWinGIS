@@ -27,6 +27,9 @@
 
 extern Debug::Logger tilesLogger;
 
+// ***************************************************************
+//		HttpClientEx
+// ***************************************************************
 class HttpClientEx: public CAtlHttpClient
 {
 public:
@@ -43,6 +46,9 @@ public:
 	}
 };
 
+// ***************************************************************
+//		BasicAuth
+// ***************************************************************
 class BasicAuth : public CBasicAuthObject, public ATL::IAuthInfo
 {
 private:
@@ -92,34 +98,41 @@ public:
 	}
 };
 
+// ***************************************************************
+//		BaseProvider
+// ***************************************************************
 // Downloads map tiles via HTTP; this is abstract class to inherit from
 class BaseProvider
 {
 public:
 	BaseProvider()
-		: minZoom(1), maxZoom(18), zoom(0), httpStatus(200)
+		: _minZoom(1), _maxZoom(18), _httpStatus(200),
+		_mapView(NULL),  _projection(NULL), _isStopped(false), 
+		_dynamicOverlay(false),	_initAttemptCount(0)
 	{
-		mapView = NULL;
+		_licenseUrl = "https://mapwingis.codeplex.com/wikipage?title=tiles";
 		LanguageStr = "en";
-		Projection = NULL;
-		Selected = false;
-		IsStopped = false;
-		DynamicOverlay = false;
-		_initAttemptCount = 0;
-		LicenseUrl = "https://mapwingis.codeplex.com/wikipage?title=tiles";
 	}
 
 	virtual ~BaseProvider(void)
 	{
-		if (Projection != NULL)
-			delete Projection;
+		if (_projection != NULL) {
+			delete _projection;
+		}
+
 		for (size_t i = 0; i < _httpClients.size(); i++)
 		{
 			_httpClients[i]->Close();
 			delete _httpClients[i];
 		}
+
 		_httpClients.clear();
 	};
+
+private:
+	bool _dynamicOverlay;
+	bool _isStopped;
+	int _httpStatus;
 
 protected:
 	static CString m_proxyAddress;
@@ -127,46 +140,51 @@ protected:
 	static CString _proxyUsername;
 	static CString _proxyPassword;
 	static CString _proxyDomain;
-	std::vector<HttpClientEx*> _httpClients;
+
+protected:
 	static ::CCriticalSection _clientLock;
+	vector<HttpClientEx*> _httpClients;
+	vector<BaseProvider*> _subProviders;	// for complex providers with more than one source bitmap per tile
+	BaseProjection* _projection;
+	CStringW _copyright;
+	CString _refererUrl; 
+	CString _licenseUrl;
+	CString _urlFormat;
 	int _initAttemptCount;
+	CString _serverLetters;
+	void* _mapView;				// TODO: is it really needed
+	int _minZoom;
+	int _maxZoom;
 
 public:
-	bool CheckConnection(CString url);
-	std::vector<BaseProvider*> subProviders;	// for complex providers with more than one source bitmap per tile
-	BaseProjection* Projection;
-	void *mapView;
 	int Id;
-	CString LanguageStr;
-	CString RefererUrl;
-	CString LicenseUrl;
-	CStringW Copyright;
-	CString ServerLetters;
 	CString Name;
-	CString UrlFormat;
 	CString Version;
-	CSize minOfTiles;
-	CSize maxOfTiles;
-	int minZoom;
-    int maxZoom;
-	int zoom;
-	bool Selected;	// is used by clients only
-	int httpStatus;
-	bool IsStopped;
-	bool DynamicOverlay;
+	CString LanguageStr;
 
 private:
 	CMemoryBitmap* GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive = false);
 
 protected:
 	virtual CString MakeTileImageUrl(CPoint &pos, int zoom) = 0;
-
-	int GetServerNum(CPoint &pos, int max)
-	{
-		return (pos.x + 2 * pos.y) % max;
-	}
+	int GetServerNum(CPoint &pos, int max) 	{ return (pos.x + 2 * pos.y) % max; }
 
 public:
+	virtual CStringW get_Copyright() { return _copyright; }
+	virtual bool Initialize() { return true; };
+
+	int get_MinZoom() { return _minZoom; }
+	int get_MaxZoom() { return _maxZoom; }
+	void* get_Map() { return _mapView; }
+	void put_Map(void* map) { _mapView = map; }
+	vector<BaseProvider*>* get_SubProviders() { return &_subProviders; }
+	CString get_LicenseUrl() { return _licenseUrl; }
+	BaseProjection* get_Projection() { return _projection; }
+	CString get_UrlFormat() { return _urlFormat; }
+
+	bool CheckConnection(CString url);
+	bool InitHttpClient(HttpClientEx& httpClient, BasicAuth& basicAuth, CNTLMAuthObject& ntlmAuth);
+
 	// proxy support
 	short get_ProxyPort() {return m_proxyPort;}
 	CString get_ProxyAddress() {return m_proxyAddress;}
@@ -174,11 +192,10 @@ public:
 	bool SetProxyAuthorization(CString username, CString password, CString domain);
 	void ClearProxyAuthorization();
 	bool AutodetectProxy();
+
 	void AddDynamicOverlay(BaseProvider* p);
 	void ClearSubProviders();
-	virtual CStringW GetCopyright() { return Copyright;	}
+
 	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
 	TileCore* GetTileImage(CPoint &pos, int zoom);	
-	virtual bool Initialize() { return true; };
-	bool InitHttpClient(HttpClientEx& httpClient, BasicAuth& basicAuth, CNTLMAuthObject& ntlmAuth);
 };

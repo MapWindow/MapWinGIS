@@ -21,6 +21,9 @@
 #pragma once
 #include "BaseProvider.h"
 
+// *******************************************************
+//			OpenStreetMapProvider
+// *******************************************************
 class OpenStreetMapProvider: public BaseProvider
 {
 public:
@@ -31,35 +34,22 @@ public:
 		count = 0;
 		Id = tkTileProvider::OpenStreetMap;
 		Name = "OpenStreetMap";
-		Copyright.Format(L"© OpenStreetMap contributors");
-		this->Projection = new MercatorProjection();
-		subProviders.push_back(this);
-		ServerLetters = "abc";
-		RefererUrl = "http://www.openstreetmap.org/";
-		UrlFormat = "http://%c.tile.openstreetmap.org/%d/%d/%d.png";
-		maxZoom = 19;
-		LicenseUrl = "http://wiki.openstreetmap.org/wiki/Tile_usage_policy";
-
-		//_clientLock.Lock();
-		//for(int i = 0; i < 3; i++)
-		//{
-		//	CString url;
-		//	url.Format("http://%c.tile.openstreetmap.org/", ServerLetters[i]);
-		//	for(int j = 0; j < 2; j++) {
-		//		MyHttpClient* client = new MyHttpClient();
-		//		//client->SetDefaultUrl(url);
-		//		_httpClients.push_back(client);
-		//	}
-		//}
-		//_clientLock.Unlock();
+		_copyright.Format(L"© OpenStreetMap contributors");
+		this->_projection = new MercatorProjection();
+		_subProviders.push_back(this);
+		_serverLetters = "abc";
+		_refererUrl = "http://www.openstreetmap.org/";
+		_urlFormat = "http://%c.tile.openstreetmap.org/%d/%d/%d.png";
+		_maxZoom = 19;
+		_licenseUrl = "http://wiki.openstreetmap.org/wiki/Tile_usage_policy";
 	}
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
-		char letter = ServerLetters[count % 3];
+		char letter = _serverLetters[count % 3];
 		count++;
 		CString s; 
-		s.Format(UrlFormat, letter, zoom, pos.x, pos.y);
+		s.Format(_urlFormat, letter, zoom, pos.x, pos.y);
 		return s;
 	}
 };
@@ -71,9 +61,9 @@ public:
 	{
 		Id = tkTileProvider::OpenCycleMap;
 		Name = "OpenCycleMap";
-		RefererUrl = "http://www.opencyclemap.org/";
-		LicenseUrl = "http://www.opencyclemap.org/docs/";
-		UrlFormat = "http://%c.tile.opencyclemap.org/cycle/%d/%d/%d.png";
+		_refererUrl = "http://www.opencyclemap.org/";
+		_licenseUrl = "http://www.opencyclemap.org/docs/";
+		_urlFormat = "http://%c.tile.opencyclemap.org/cycle/%d/%d/%d.png";
 	}
 };
 
@@ -84,8 +74,8 @@ public:
 	{
 		Id = tkTileProvider::OpenTransportMap;
 		Name = "OpenTransportMap";
-		RefererUrl = "http://www.opencyclemap.org/";
-		UrlFormat = "http://%c.tile2.opencyclemap.org/transport/%d/%d/%d.png";
+		_refererUrl = "http://www.opencyclemap.org/";
+		_urlFormat = "http://%c.tile2.opencyclemap.org/transport/%d/%d/%d.png";
 	}
 };
 
@@ -97,8 +87,8 @@ public:
 	{
 		Id = tkTileProvider::OpenHumanitarianMap;
 		Name = "OpenHumanitarianMap";
-		RefererUrl = "http://www.openstreetmap.org/";
-		UrlFormat = "http://%c.tile.openstreetmap.fr/hot/%d/%d/%d.png";
+		_refererUrl = "http://www.openstreetmap.org/";
+		_urlFormat = "http://%c.tile.openstreetmap.fr/hot/%d/%d/%d.png";
 	}
 };
 
@@ -110,10 +100,10 @@ public:
 	{
 		Id = tkTileProvider::MapQuestAerial;
 		Name = "MapQuest Aerial";
-		RefererUrl = "http://www.mapquest.com/";
-		LicenseUrl = "http://developer.mapquest.com/web/products/open/map";
-		UrlFormat = "http://otile%c.mqcdn.com/tiles/1.0.0/sat/%d/%d/%d.png";
-		ServerLetters = "1234";
-		Copyright = "Tiles Courtesy of MapQuest";
+		_refererUrl = "http://www.mapquest.com/";
+		_licenseUrl = "http://developer.mapquest.com/web/products/open/map";
+		_urlFormat = "http://otile%c.mqcdn.com/tiles/1.0.0/sat/%d/%d/%d.png";
+		_serverLetters = "1234";
+		_copyright = "Tiles Courtesy of MapQuest";
 	}
 };

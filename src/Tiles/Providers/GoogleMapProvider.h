@@ -21,6 +21,9 @@
 #pragma once
 #include "BaseProvider.h"
 
+// *******************************************************
+//			GoogleBaseProvider
+// *******************************************************
 class GoogleBaseProvider: public BaseProvider
 {
 protected:
@@ -35,12 +38,12 @@ public:
 		SecureWord = "Galileo";
 		Sec1 = "&s=";
 		server = "google.com";
-		RefererUrl.Format("http://maps.%s/", server);
-		LicenseUrl = "https://mapwingis.codeplex.com/wikipage?title=googletiles";
+		_refererUrl.Format("http://maps.%s/", server);
+		_licenseUrl = "https://mapwingis.codeplex.com/wikipage?title=googletiles";
 		int year = Utility::GetCurrentYear();
-		Copyright.Format(L"©%d Google (FOR PRIVATE USE ONLY)", year);
-		this->Projection = new MercatorProjection();
-		this->maxZoom = 20;
+		_copyright.Format(L"©%d Google (FOR PRIVATE USE ONLY)", year);
+		this->_projection = new MercatorProjection();
+		this->_maxZoom = 20;
 	}
 	
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
@@ -50,7 +53,7 @@ public:
         GetSecureWords(pos, sec1, sec2);
 		
 		CString s;
-		s.Format(UrlFormat, UrlFormatServer, GetServerNum(pos, 4), server, UrlFormatRequest, Version, LanguageStr, pos.x, sec1, pos.y, zoom, sec2);
+		s.Format(_urlFormat, UrlFormatServer, GetServerNum(pos, 4), server, UrlFormatRequest, Version, LanguageStr, pos.x, sec1, pos.y, zoom, sec2);
 		return s;
 	}
 
@@ -67,6 +70,9 @@ public:
 	}
 };
 
+// *******************************************************
+//			GoogleBaseProvider
+// *******************************************************
 class GoogleMapProvider: public GoogleBaseProvider
 {
 public:
@@ -77,11 +83,14 @@ public:
 		Version = "m@285000000";
 		Id = tkTileProvider::GoogleMaps;
 		Name = "GoogleMaps";
-		UrlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
-		subProviders.push_back(this);
+		_urlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
+		_subProviders.push_back(this);
 	}
 };
 
+// *******************************************************
+//			GoogleSatelliteProvider
+// *******************************************************
 class GoogleSatelliteProvider: public GoogleBaseProvider
 {
 public:
@@ -92,11 +101,14 @@ public:
 		Version = "164";
 		Id = tkTileProvider::GoogleSatellite;
 		Name = "GoogleSatellite";
-		UrlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
-		subProviders.push_back(this);
+		_urlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
+		_subProviders.push_back(this);
 	}
 };
 
+// *******************************************************
+//			GoogleHybridProvider
+// *******************************************************
 class GoogleHybridProvider: public GoogleBaseProvider
 {
 public:
@@ -107,12 +119,15 @@ public:
 		Version = "h@285000000";
 		Id = tkTileProvider::GoogleHybrid;
 		Name = "GoogleHybrid";
-		UrlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
-		subProviders.push_back(list->get_Provider(tkTileProvider::GoogleSatellite));
-		subProviders.push_back(this);
+		_urlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
+		_subProviders.push_back(list->get_Provider(tkTileProvider::GoogleSatellite));
+		_subProviders.push_back(this);
 	}
 };
 
+// *******************************************************
+//			GoogleTerrainProvider
+// *******************************************************
 class GoogleTerrainProvider: public GoogleBaseProvider
 {
 public:
@@ -123,7 +138,7 @@ public:
 		Version = "t@164,r@285000000";
 		Id = tkTileProvider::GoogleTerrain;
 		Name = "GoogleTerrain";
-		UrlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
-		subProviders.push_back(this);
+		_urlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
+		_subProviders.push_back(this);
 	}
 };

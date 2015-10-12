@@ -27,6 +27,7 @@
 #include "RosreestrProvider.h"
 #include "SQLiteCache.h"
 #include "RAMCache.h"
+#include "CustomTileProvider.h"
 
 // ************************************************************
 //		get_Provider()
@@ -179,7 +180,7 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 		case Rosreestr:
 			{
 				RosreestrProvider* pr1 = new RosreestrProvider(false);
-				pr1->subProviders.push_back(pr1);
+				pr1->get_SubProviders()->push_back(pr1);
 				pr1->AddDynamicOverlay(new RosreestrProvider(true));
 				pr1->AddDynamicOverlay(new RosreestrBordersProvider());
 				p = (BaseProvider*)pr1;
@@ -197,10 +198,10 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 	{
 		_providers.push_back(p);
 	}
-	/*else
+	else
 	{
 		CallbackHelper::AssertionFailed(Debug::Format("Provider wasn't found: %d.", (int)provider));
-	}*/
+	}
 	return p;
 }
 #pragma endregion
@@ -219,7 +220,7 @@ STDMETHODIMP CTileProviders::Remove(LONG providerId, VARIANT_BOOL clearCache, VA
 	}
 	else
 	{
-		CustomProvider* custom = dynamic_cast<CustomProvider*>(p);
+		CustomTileProvider* custom = dynamic_cast<CustomTileProvider*>(p);
 		if (!custom)
 		{
 			ErrorMessage(tkCANT_DELETE_DEFAULT_PROVIDER);
@@ -275,7 +276,7 @@ STDMETHODIMP CTileProviders::Clear(VARIANT_BOOL clearCache)
 	std::vector<BaseProvider*>::iterator it = _providers.begin();
 	while (it < _providers.end())
 	{
-		CustomProvider* p = dynamic_cast<CustomProvider*>(*it);
+		CustomTileProvider* p = dynamic_cast<CustomTileProvider*>(*it);
 		if (p)
 		{
 			if (clearCache)
@@ -329,7 +330,7 @@ STDMETHODIMP CTileProviders::Add(int Id, BSTR name, BSTR urlPattern, tkTileProje
 
 	try
 	{
-		CustomProvider* provider = new CustomProvider(Id, name, urlPattern, projection, minZoom, maxZoom);
+		CustomTileProvider* provider = new CustomTileProvider(Id, name, urlPattern, projection, minZoom, maxZoom);
 		_providers.push_back(provider);
 		*retVal = VARIANT_TRUE;
 	}
@@ -489,7 +490,7 @@ STDMETHODIMP CTileProviders::get_UrlPattern(int Index, BSTR* retVal)
 		*retVal = A2BSTR("");
 	}
 	else {
-		*retVal = A2BSTR(_providers[Index]->UrlFormat);
+		*retVal = A2BSTR(_providers[Index]->get_UrlFormat());
 	}	
 	return S_OK;
 }
@@ -506,8 +507,8 @@ STDMETHODIMP CTileProviders::get_Projection(int Index, tkTileProjection* retVal)
 		*retVal = (tkTileProjection)-1;
 	}
 	else {
-		CustomProvider* p = dynamic_cast<CustomProvider*>(_providers[Index]);
-		*retVal = p ? p->m_projectionId :(tkTileProjection)-1;
+		CustomTileProvider* p = dynamic_cast<CustomTileProvider*>(_providers[Index]);
+		*retVal = p ? p->get_Projection() : (tkTileProjection)-1;
 	}	
 	return S_OK;
 }
@@ -524,7 +525,7 @@ STDMETHODIMP CTileProviders::get_MinZoom(int Index, int* retVal)
 		*retVal = -1;
 	}
 	else {
-		*retVal = _providers[Index]->minZoom;
+		*retVal = _providers[Index]->get_MinZoom();
 	}	
 	return S_OK;
 }
@@ -541,7 +542,7 @@ STDMETHODIMP CTileProviders::get_MaxZoom(int Index, int* retVal)
 		*retVal = -1;
 	}
 	else {
-		*retVal = _providers[Index]->maxZoom;
+		*retVal = _providers[Index]->get_MaxZoom();
 	}	
 	return S_OK;
 }
@@ -580,7 +581,7 @@ CStringW CTileProviders::get_CopyrightNotice(tkTileProvider provider)
 	int index = -1;
 	get_IndexByProviderId((int)provider, &index);
 	if (index >= 0 && index < (int)_providers.size()) {
-		return _providers[index]->GetCopyright();
+		return _providers[index]->get_Copyright();
 	}
 	return L"";
 }
@@ -591,9 +592,11 @@ CStringW CTileProviders::get_CopyrightNotice(tkTileProvider provider)
 CString CTileProviders::get_LicenseUrl(tkTileProvider provider)
 {
 	int index = -1;
+
 	get_IndexByProviderId((int)provider, &index);
+
 	if (index >= 0 && index < (int)_providers.size()) {
-		return _providers[index]->LicenseUrl;
+		return _providers[index]->get_LicenseUrl();
 	}
 	return "";
 }

@@ -22,6 +22,36 @@
 #include "BaseProjection.h"
 
 // *******************************************************
+//		GetTileMatrixMinXY
+// *******************************************************
+void BaseProjection::GetTileMatrixMinXY(int zoom, CSize &size)
+{
+	size.cx = 0;
+	size.cy = 0;
+}
+
+// *******************************************************
+//		GetTileMatrixMaxXY
+// *******************************************************
+void BaseProjection::GetTileMatrixMaxXY(int zoom, CSize &size)
+{
+	int xy = (1 << zoom);
+	size.cx = xy - 1;
+	size.cy = xy - 1;
+}
+
+// *******************************************************
+//		Clip
+// *******************************************************
+void BaseProjection::Clip(CPoint& tilePnt, int zoom)
+{
+	CSize size;
+	GetTileMatrixMaxXY(zoom, size);
+	tilePnt.x = MIN(MAX(tilePnt.x, 0), size.cx);
+	tilePnt.y = MIN(MAX(tilePnt.y, 0), size.cy);
+}
+
+// *******************************************************
 //		GetTileSizeLatLon
 // *******************************************************
 // gets matrix size in decimal degrees

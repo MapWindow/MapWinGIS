@@ -28,6 +28,7 @@
 #include "BaseProvider.h"
 #include "TileProviders.h"
 #include "TileLoader.h"
+#include "WmsCustomProvider.h"
 using namespace std;
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -262,11 +263,12 @@ public:
 	CPLXMLNode* SerializeCore(CString ElementName);
 	bool UndrawnTilesExist();
 	bool DrawnTilesExist();
-	BaseProjection* get_Projection(){return m_provider->Projection;}
+	BaseProjection* get_Projection(){ return m_provider->get_Projection(); }
 	bool ProjectionBounds(BaseProvider* provider, IGeoProjection* mapProjection, IGeoProjection* wgsProjection,tkTransformationMode transformationMode, Extent& retVal);
 	void HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoad);
 	void UpdateProjection();
 	void Stop();
+	WmsCustomProvider* get_CurrentProvider();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Tiles), CTiles)

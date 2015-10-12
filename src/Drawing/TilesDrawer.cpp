@@ -41,20 +41,21 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 	// to support both GDI and GDI+ drawing
 	Graphics* g = m_graphics ? m_graphics : Graphics::FromHDC(_dc->m_hDC);		
 	
-	Gdiplus::ImageAttributes attr;
-	attr.SetWrapMode(Gdiplus::WrapModeTileFlipXY);
+	ImageAttributes attr;
+	attr.SetWrapMode(WrapModeTileFlipXY);
 
 	// check perhaps map projection is the same as the one for tiles
 	// then we don't have to use conversion to WGS84 decimal degrees
 	VARIANT_BOOL isSame = VARIANT_FALSE;
 	CustomProjection* customProj = NULL;
+
 	if (tileProjection && mapProjection)
 	{
 		customProj = dynamic_cast<CustomProjection*>(tileProjection);
 		if (customProj)
 		{
 			// TODO: can be cached
-			mapProjection->get_IsSame(customProj->get_Projection(), &isSame);
+			mapProjection->get_IsSame(customProj->get_GeoProjection(), &isSame);
 		}
 	}
 	
@@ -89,26 +90,33 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 			
 			if (width < 0 || height < 0) continue;		// there was problem with transformation (coordinates outside bounds, don't draw it)
 
-			Gdiplus::RectF rect((Gdiplus::REAL)x, (Gdiplus::REAL)y, (Gdiplus::REAL)width, (Gdiplus::REAL)height);
+			RectF rect((REAL)x, (REAL)y, (REAL)width, (REAL)height);
 			
 			// actual drawing
 			for (size_t i = 0; i < tile->Overlays.size(); i++)
 			{
-				Gdiplus::Bitmap* bmp = tile->getBitmap(i)->m_bitmap;
+				Bitmap* bmp = tile->getBitmap(i)->m_bitmap;
 				if (bmp)
 				{
+					Status status;
+
 					double ROUNDING_TOLERANCE = 0.1;
 					if ( abs(width - bmp->GetWidth()) < ROUNDING_TOLERANCE && 
 						 abs(height - bmp->GetHeight()) < ROUNDING_TOLERANCE)
 					{
 						// TODO: perhaps better to check that all tiles have the same size
 						// and apply this rendering only then
-						g->DrawImage(bmp,  Utility::Rint(x), Utility::Rint(y));
+						status = g->DrawImage(bmp, Utility::Rint(x), Utility::Rint(y));
 					}
 					else
 					{
-						g->DrawImage(bmp, rect, (Gdiplus::REAL)(-0.0), (Gdiplus::REAL)(-0.0), 
-							(Gdiplus::REAL)bmp->GetWidth(), (Gdiplus::REAL)bmp->GetHeight(), Gdiplus::UnitPixel, &attr);
+						status = g->DrawImage(bmp, rect, (REAL)(-0.0), (REAL)(-0.0), 
+								(REAL)bmp->GetWidth(), (REAL)bmp->GetHeight(), UnitPixel, &attr);
+					}
+
+					if (status != Gdiplus::Status::Ok)
+					{
+						Debug::WriteLine("Failed to draw.");
 					}
 				}
 			}
@@ -116,8 +124,8 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 			// draw grid (debugging)
 			if (drawGrid)
 			{
-				Gdiplus::Pen pen(Gdiplus::Color::Orange, 1.0f);
-				pen.SetDashStyle(Gdiplus::DashStyleDash);
+				Pen pen(Color::Orange, 1.0f);
+				pen.SetDashStyle(DashStyleDash);
 				g->DrawRectangle(&pen, rect);
 			}
 
@@ -128,12 +136,12 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 				CString str;
 				str.Format("x=%d; y=%d", tile->m_tileX, tile->m_tileY);
 				WCHAR* wStr = Utility::StringToWideChar(str);
-				Gdiplus::Font* font = Utility::GetGdiPlusFont("Arial", 14);
+				Font* font = Utility::GetGdiPlusFont("Arial", 14);
 				
-				Gdiplus::SolidBrush brush(Gdiplus::Color::Orange);
-				Gdiplus::RectF r((Gdiplus::REAL)rect.X, (Gdiplus::REAL)rect.Y, (Gdiplus::REAL)rect.Width, (Gdiplus::REAL)rect.Height);
+				SolidBrush brush(Color::Orange);
+				RectF r((REAL)rect.X, (REAL)rect.Y, (REAL)rect.Width, (REAL)rect.Height);
 				
-				Gdiplus::StringFormat format;
+				StringFormat format;
 				format.SetAlignment(StringAlignmentCenter);
 				format.SetLineAlignment(StringAlignmentCenter);
 

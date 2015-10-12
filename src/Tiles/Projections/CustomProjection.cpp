@@ -42,11 +42,11 @@ void CustomProjection::FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 // Converts from projected units to tile coordinates
 void CustomProjection::FromProjToXY(double lat, double lng, int zoom, CPoint &ret)
 {
-	lat = Clip(lat, yMinLat, yMaxLat);
-	lng = Clip(lng, xMinLng, xMaxLng);
+	lat = Clip(lat, _yMin, _yMax);
+	lng = Clip(lng, _xMin, _xMax);
 
-	double y = (lat - yMinLat)/(yMaxLat - yMinLat);
-	double x = (lng - xMinLng)/(xMaxLng - xMinLng);
+	double y = (lat - _yMin)/(_yMax - _yMin);
+	double x = (lng - _xMin)/(_xMax - _xMin);
 	
 	CSize s;
 	GetTileMatrixSizeXY(zoom, s);
@@ -88,9 +88,98 @@ void CustomProjection::FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret)
 	double x = Clip(pnt.x, 0, mapSizeX) / mapSizeX;
 	double y = Clip(pnt.y, 0, mapSizeY) / mapSizeY;
 
-	x = xMinLng + x * (xMaxLng - xMinLng);
-	y = yMinLat + y * (yMaxLat - yMinLat);
+	x = _xMin + x * (_xMax - _xMin);
+	y = _yMin + y * (_yMax - _yMin);
 
 	ret.Lat = y;
 	ret.Lng = x;
+}
+
+// *******************************************************
+//		FromXYToProj
+// *******************************************************
+void CustomProjection::GetTileSizeProj(int zoom, CSize &size)
+{
+	GetTileMatrixSizeXY(zoom, size);
+	size.cx = (long)((_xMax - _xMin) / (double)size.cx);
+	size.cy = (long)((_yMax - _yMin) / (double)size.cy);
+}
+
+// ******************************************************
+//    put_Extents()
+// ******************************************************
+void CustomProjection::put_Bounds(double xMin, double xMax, double yMin, double yMax)
+{
+	_xMin = xMin;
+	_xMax = xMax;
+	_yMin = yMin;
+	_yMax = yMax;
+	_boundsChanged = true;
+}
+
+// ******************************************************
+//    get_Extents()
+// ******************************************************
+void CustomProjection::get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax)
+{
+	xMin = _xMin;
+	xMax = _xMax;
+	yMin = _yMin;
+	yMax = _yMax;
+}
+
+// ******************************************************
+//    UpdateBounds()
+// ******************************************************
+bool CustomProjection::UpdateBounds()
+{
+	if (!_boundsChanged) return false;
+
+	VARIANT_BOOL vb, vb2;
+
+	_projCustom->get_IsEmpty(&vb);
+	if (vb) {
+		CallbackHelper::ErrorMsg("Projection for WMS provider isn't set.");
+		return false;
+	}
+
+	// TODO: stop transform if it's already started
+
+	_projWGS84->StartTransform(_projCustom, &vb);
+	if (!vb) {
+		CallbackHelper::ErrorMsg("Failed to initialize coordinate transformation for WMS provider.");
+		return false;
+	}
+
+	_projCustom->StartTransform(_projWGS84, &vb);
+	if (!vb) {
+		CallbackHelper::ErrorMsg("Failed to initialize coordinate transformation for WMS provider.");
+	}
+
+	_minLat = _yMin;
+	_maxLat = _yMax;
+	_minLng = _xMin;
+	_maxLng = _xMax;
+
+	_projCustom->Transform(&_minLng, &_minLat, &vb);
+	_projCustom->Transform(&_maxLng, &_maxLat, &vb2);
+
+	_boundsChanged = false;
+
+	return vb && vb2;
+}
+
+// ******************************************************
+//    put_Epsg()
+// ******************************************************
+void CustomProjection::put_Epsg(long epsg)
+{
+	VARIANT_BOOL vb;
+	_projCustom->ImportFromEPSG(epsg, &vb);
+
+	if (vb) 
+	{ 
+		_epsg = epsg; 
+		_boundsChanged = true;
+	}
 }

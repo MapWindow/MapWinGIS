@@ -318,9 +318,9 @@ bool SQLiteCache::get_Exists(BaseProvider* provider, LONG scale, LONG x, LONG y)
 
 	try
 	{
-		for(size_t i = 0; i < provider->subProviders.size(); i++)
+		for(size_t i = 0; i < provider->get_SubProviders()->size(); i++)
 		{
-			int providerId = provider->subProviders[i]->Id;
+			int providerId = (*provider->get_SubProviders())[i]->Id;
 
 			CString sql;
 			sql.Format("SELECT id FROM Tiles WHERE X = %d AND Y = %d AND Zoom = %d AND Type = %d", x, y, scale, provider->Id);
@@ -366,9 +366,9 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, LONG scale, LONG x, LONG
 
 	try
 	{
-		for(size_t i = 0; i < provider->subProviders.size(); i++)
+		for(size_t i = 0; i < provider->get_SubProviders()->size(); i++)
 		{
-			int providerId = provider->subProviders[i]->Id;
+			int providerId = (*provider->get_SubProviders())[i]->Id;
 
 			CString sql;
 			sql.Format("SELECT id FROM Tiles WHERE X = %d AND Y = %d AND Zoom = %d AND Type = %d", x, y, scale, providerId);
@@ -394,7 +394,7 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, LONG scale, LONG x, LONG
 								if (bmp->LoadFromRawData((const char*)data, size))
 								{
 									if (i == 0)
-										tile = new TileCore(providerId, scale, CPoint(x, y), provider->Projection);
+										tile = new TileCore(providerId, scale, CPoint(x, y), provider->get_Projection());
 
 									if (tile)
 										tile->AddBitmap(bmp);
@@ -415,7 +415,7 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, LONG scale, LONG x, LONG
 		}
 
 		// have we found all the overlays? If not - request from server ones more
-		if (tile && tile->Overlays.size() != provider->subProviders.size())
+		if (tile && tile->Overlays.size() != provider->get_SubProviders()->size())
 		{
 			delete tile;
 			tile = NULL;

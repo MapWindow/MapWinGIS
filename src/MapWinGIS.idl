@@ -6317,6 +6317,8 @@ interface IWmsProvider : IDispatch{
 	[propput, id(8)] HRESULT BaseUrl([in] BSTR newVal);
 	[propget, id(9)] HRESULT Id([out, retval] LONG* pVal);
 	[propput, id(9)] HRESULT Id([in] LONG newVal);
+	[propget, id(10)] HRESULT Format([out, retval] BSTR* pVal);
+	[propput, id(10)] HRESULT Format([in] BSTR newVal);
 };
 [
 	object,

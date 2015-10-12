@@ -138,9 +138,12 @@ public:
 				if (::CreateStreamOnHGlobal(m_data, FALSE, &m_stream) == S_OK)
 				{
 					m_bitmap = new Gdiplus::Bitmap(m_stream);
+
 					m_size = size;
-					if (m_bitmap)
+					if (m_bitmap) {
+						Gdiplus::Status status = m_bitmap->GetLastStatus();
 						return true;
+					}
 				}
 			}
 		}

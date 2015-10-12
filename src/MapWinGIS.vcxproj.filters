@@ -555,9 +555,6 @@
     <ClInclude Include="Tiles\Providers\BingMapProvider.h">
       <Filter>Tiles\Providers</Filter>
     </ClInclude>
-    <ClInclude Include="Tiles\Providers\CustomProvider.h">
-      <Filter>Tiles\Providers</Filter>
-    </ClInclude>
     <ClInclude Include="Tiles\Providers\GoogleMapProvider.h">
       <Filter>Tiles\Providers</Filter>
     </ClInclude>
@@ -570,9 +567,6 @@
     <ClInclude Include="Tiles\Providers\RosreestrProvider.h">
       <Filter>Tiles\Providers</Filter>
     </ClInclude>
-    <ClInclude Include="Tiles\Providers\WMSGMercProvider.h">
-      <Filter>Tiles\Providers</Filter>
-    </ClInclude>
     <ClInclude Include="Tiles\Projections\AmersfoortProjection.h">
       <Filter>Tiles\Projections</Filter>
     </ClInclude>
@@ -583,9 +577,6 @@
       <Filter>Tiles\Projections</Filter>
     </ClInclude>
     <ClInclude Include="Tiles\Projections\MercatorProjection.h">
-      <Filter>Tiles\Projections</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\Projections\MercatorProjectionYandex.h">
       <Filter>Tiles\Projections</Filter>
     </ClInclude>
     <ClInclude Include="_ITableEvents_CP.H" />
@@ -893,6 +884,15 @@
     </ClInclude>
     <ClInclude Include="COM classes\WmsProviders.h">
       <Filter>COM classes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\CustomTileProvider.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\WmsProviderBase.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\WmsCustomProvider.h">
+      <Filter>Tiles\Providers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1901,6 +1901,15 @@
     </ClCompile>
     <ClCompile Include="Tiles\Projections\MercatorProjection.cpp">
       <Filter>Tiles\Projections</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Providers\CustomTileProvider.cpp">
+      <Filter>Tiles\Providers</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Providers\WmsProviderBase.cpp">
+      <Filter>Tiles\Providers</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Providers\WmsCustomProvider.cpp">
+      <Filter>Tiles\Providers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

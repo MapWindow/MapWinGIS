@@ -50,7 +50,7 @@ void LoadingTask::DoTask()
 				if (!tile->IsEmpty())
 				{
 					this->busy = true;	// notifies that related classes like CTiles can't be deleted until exiting this section
-					CMapView* mapView = (CMapView*)Provider->mapView;
+					CMapView* mapView = (CMapView*)Provider->get_Map();
 					CTiles* tiles = (CTiles*)mapView->GetTilesNoRef();
 
 					// quickly pass it from active list to cache; so it's always avaiable while building the next list of requests

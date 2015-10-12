@@ -21,15 +21,15 @@
 #include "BaseProjection.h"
 
 // commonly used Google Mercator projection; EPSG 3857
-class MercatorProjection: public MercatorProjectionBase
+class MercatorProjection: public BaseProjection
 {
 public:
 	MercatorProjection()
 	{
-		 yMinLat = -85.05112878;
-		 yMaxLat = 85.05112878;
-		 xMinLng = -180;
-		 xMaxLng = 180;
+		 _minLat = -85.05112878;
+		 _maxLat = 85.05112878;
+		 _minLng = -180;
+		 _maxLng = 180;
 	};
 	
 	virtual ~MercatorProjection() 
@@ -37,13 +37,11 @@ public:
 	}
 
 private:
-	double degToRad(double ang) {
-		return ang * pi_ / 180.0;
-	}
+	double GetWidth() { return MERCATOR_MAX_VAL * 2.0; }
 
 public:
 	// converts coordinates to meters in EPSG:3857
-	PointLatLng TileXYToProj(CPoint &pos, int zoom, PointLatLng &ret);
+	void FromXYToProj(CPoint pos, int zoom, PointLatLng &ret);
 	
 	// converts decimal degrees to tile coordinates
 	void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret);

@@ -37,10 +37,10 @@ Debug::Logger tilesLogger;
 // ************************************************************
 TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
 {
-	TileCore* tile = new TileCore(this->Id, zoom, pos, this->Projection);
-	for (size_t i = 0; i < subProviders.size(); i++)
+	TileCore* tile = new TileCore(this->Id, zoom, pos, this->_projection);
+	for (size_t i = 0; i < _subProviders.size(); i++)
 	{
-		CMemoryBitmap* bmp = subProviders[i]->DownloadBitmap(pos, zoom);
+		CMemoryBitmap* bmp = _subProviders[i]->DownloadBitmap(pos, zoom);
 		if (bmp)
 		{
 			tile->AddBitmap(bmp);	
@@ -149,7 +149,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 
 	BasicAuth basicAuth; 
 	CNTLMAuthObject ntlmAuth;
-	InitHttpClient(httpClient, basicAuth, ntlmAuth);
+	InitHttpClient(httpClient, basicAuth, ntlmAuth);      // rename
 
 	char* body = NULL;
 	int bodyLen = 0;
@@ -166,20 +166,20 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 
 	bool result = httpClient.Navigate( urlStr, &navData );
 
-	if (IsStopped) {
+	if (_isStopped) {
 		return NULL;
 	}
-	httpStatus = httpClient.GetStatus();
+	_httpStatus = httpClient.GetStatus();
 
 	if (!result) 
 	{
 		DWORD socketError = httpClient.GetLastError();
-		ReportHttpError(httpStatus, socketError);
+		ReportHttpError(_httpStatus, socketError);
 	}
 
 	if (result)
 	{
-		if (httpStatus == 200) // 200 = successful HTTP transaction
+		if (_httpStatus == 200) // 200 = successful HTTP transaction
 		{
 			bodyLen = httpClient.GetBodyLength();
 			if (bodyLen > 0)
@@ -201,7 +201,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 	
 	if (tilesLogger.IsOpened() || Debug::LogTiles())
 	{
-		bool hasError = httpStatus != 200;
+		bool hasError = _httpStatus != 200;
 		bool useShortUrl = false;
 		
 		if (tilesLogger.errorsOnly && !hasError)
@@ -213,7 +213,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 			CString err;
 			err.Format("ERROR: %d; ", httpClient.GetLastError());
 			CString s;
-			s.Format("%sstatus %d size %6d b %s", (!hasError ? "": err), httpStatus, bodyLen, 
+			s.Format("%sstatus %d size %6d b %s", (!hasError ? "": err), _httpStatus, bodyLen, 
 					m_globalSettings.useShortUrlForTiles ? shortUrl : urlStr);
 			tilesLogger.Log(s);
 		}
@@ -229,7 +229,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 	if (body)
 		delete [] body;
 	
-	if (!result && !recursive && (httpStatus == -1 || bodyLen == 0))
+	if (!result && !recursive && (_httpStatus == -1 || bodyLen == 0))
 	{
 		// let's try one more time
 		Sleep(20);
@@ -373,9 +373,9 @@ bool BaseProvider::AutodetectProxy()
 void BaseProvider::AddDynamicOverlay(BaseProvider* p)
 {
 	if (p) {
-		p->DynamicOverlay = true;
+		p->_dynamicOverlay = true;
 	}
-	subProviders.push_back(p);
+	_subProviders.push_back(p);
 }
 
 // *************************************************************
@@ -383,12 +383,12 @@ void BaseProvider::AddDynamicOverlay(BaseProvider* p)
 // *************************************************************
 void BaseProvider::ClearSubProviders()
 {
-	for (size_t i = 0; i < subProviders.size(); i++)
+	for (size_t i = 0; i < _subProviders.size(); i++)
 	{
-		if (subProviders[i]->DynamicOverlay)
-			delete subProviders[i];
+		if (_subProviders[i]->_dynamicOverlay)
+			delete _subProviders[i];
 	}
-	subProviders.clear();
+	_subProviders.clear();
 }
 
 

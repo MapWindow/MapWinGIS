@@ -29,18 +29,18 @@ public:
 
 	OviBaseProvider() 
 	{
-		RefererUrl = "https://www.here.com/";
+		_refererUrl = "https://www.here.com/";
         int year = Utility::GetCurrentYear();
-		Copyright.Format(L"©%d Here, DigitalGlobe", year);
+		_copyright.Format(L"©%d Here, DigitalGlobe", year);
 		UrlServerLetters = "1234";
-		this->Projection = new MercatorProjection();
-		subProviders.push_back(this);
+		this->_projection = new MercatorProjection();
+		_subProviders.push_back(this);
 	}
 	
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
 		CString s;
-		s.Format(UrlFormat, UrlServerLetters[GetServerNum(pos, 4)], zoom, pos.x, pos.y);
+		s.Format(_urlFormat, UrlServerLetters[GetServerNum(pos, 4)], zoom, pos.x, pos.y);
 		s.Format("%s?app_id=%s&app_code=%s", s, m_globalSettings.hereAppId, m_globalSettings.hereAppCode);
 		return s;
 	}
@@ -62,7 +62,7 @@ public:
 			return "INVALID HERE MAPS APP_ID";
 		}
 		else {
-			return Copyright;
+			return _copyright;
 		}
 	}
 };
@@ -74,7 +74,7 @@ public:
 	{
 		Id = tkTileProvider::HereMaps;
 		Name = "Here Maps";
-		UrlFormat = "http://%c.base.maps.api.here.com/maptile/2.1/maptile/newest/normal.day/%d/%d/%d/256/png8";
+		_urlFormat = "http://%c.base.maps.api.here.com/maptile/2.1/maptile/newest/normal.day/%d/%d/%d/256/png8";
 	}
 };
 
@@ -85,7 +85,7 @@ public:
 	{
 		Id = tkTileProvider::HereSatellite;
 		Name = "Here Satellite";
-		UrlFormat = "http://%c.aerial.maps.api.here.com/maptile/2.1/maptile/newest/satellite.day/%d/%d/%d/256/png8";
+		_urlFormat = "http://%c.aerial.maps.api.here.com/maptile/2.1/maptile/newest/satellite.day/%d/%d/%d/256/png8";
 	}
 };
 
@@ -96,7 +96,7 @@ public:
 	{
 		Id = tkTileProvider::HereHybrid;
 		Name = "Here Hybrid";
-		UrlFormat = "http://%c.aerial.maps.api.here.com/maptile/2.1/maptile/newest/hybrid.day/%d/%d/%d/256/png8";
+		_urlFormat = "http://%c.aerial.maps.api.here.com/maptile/2.1/maptile/newest/hybrid.day/%d/%d/%d/256/png8";
 	}
 };
 
@@ -107,7 +107,7 @@ public:
 	{
 		Id = tkTileProvider::HereTerrain;
 		Name = "Here Terrain";
-		UrlFormat = "http://%c.aerial.maps.api.here.com/maptile/2.1/maptile/newest/terrain.day/%d/%d/%d/256/png8";
+		_urlFormat = "http://%c.aerial.maps.api.here.com/maptile/2.1/maptile/newest/terrain.day/%d/%d/%d/256/png8";
 	}
 };
 

@@ -28,7 +28,10 @@ class CustomProjection: public BaseProjection
 protected:	
 	IGeoProjection* _projWGS84;
 	IGeoProjection* _projCustom;
-
+	long _epsg = -1;
+	bool _boundsChanged = true;
+	
+	// TODO: make sure that UpdateBounds is called before the first use of the projection
 public:
 	CustomProjection()
 	{
@@ -36,6 +39,9 @@ public:
 
 		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_projWGS84);
 		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_projCustom);
+
+		VARIANT_BOOL vb;
+		_projWGS84->ImportFromEPSG(4326, &vb);
 	};
 
 	virtual ~CustomProjection()
@@ -46,21 +52,20 @@ public:
 		_projCustom->Release();
 	}
 
-	IGeoProjection* get_Projection() { return _projCustom; }
+	IGeoProjection* get_GeoProjection() { return _projCustom; }
 	void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret);
 	void FromProjToXY(double lat, double lng, int zoom, CPoint &ret);
 	void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret);
 	void FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret);
+	double GetWidth() {	return _xMax - _xMin;	}
+	void GetTileSizeProj(int zoom, CSize &size);
 
-	double GetWidth()
-	{
-		return xMaxLng - xMinLng;
-	}
+	long get_Epsg(){ return _epsg; }
+	void put_Epsg(long epsg);
+	
+	void put_Bounds(double xMin, double xMax, double yMin, double yMax);
+	void get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax);
 
-	void GetTileSizeProj(int zoom, CSize &size)
-	{
-		this->GetTileMatrixSizeXY(zoom, size);
-		size.cx = (long)((xMaxLng - xMinLng)/(double)size.cx);
-		size.cy = (long)((yMaxLat - yMinLat)/(double)size.cy);
-	}
+	// starts coordinate transformation and update bounds of projection in WGS84 degrees
+	bool UpdateBounds();
 };

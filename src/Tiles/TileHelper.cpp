@@ -7,55 +7,54 @@
 double TileHelper::GetTileSizeProj(VARIANT_BOOL isSameProjection, BaseProvider* provider, IGeoProjection* wgsToMapTransformation, 
 								   PointLatLng& location, int zoom)
 {
-	CustomProjection* customProj = dynamic_cast<CustomProjection*>(provider->Projection);
+	CustomProjection* customProj = dynamic_cast<CustomProjection*>(provider->get_Projection());
+
 	if (isSameProjection && customProj)
 	{
 		CSize size;
 		customProj->GetTileSizeProj(zoom, size);
 		return size.cx;
 	}
+	
+	CPoint point;
+	provider->get_Projection()->FromLatLngToXY(location, zoom, point);
+	SizeLatLng size;
+	provider->get_Projection()->GetTileSizeLatLon(point, zoom, size);
+
+	PointLatLng newLoc;
+	provider->get_Projection()->FromXYToLatLng(point, zoom, newLoc);
+
+	double xMin, xMax, yMin, yMax;
+	xMin = newLoc.Lng;
+	xMax = xMin + size.WidthLng;
+	if (abs(xMax) > 180.0)
+		xMax = xMin - size.WidthLng;
+
+	yMin = newLoc.Lat;
+	yMax = yMin + size.HeightLat;
+	if (abs(yMax) > 90.0) {
+		yMax = yMin - size.HeightLat;
+	}
+
+	if (wgsToMapTransformation)
+	{
+		VARIANT_BOOL vb1, vb2;
+		m_globalSettings.suppressGdalErrors = true;
+		wgsToMapTransformation->Transform(&xMin, &yMin, &vb1);
+		wgsToMapTransformation->Transform(&xMax, &yMax, &vb2);
+		m_globalSettings.suppressGdalErrors = false;
+
+		if (vb1 && vb2)
+		{
+			double val = xMax - xMin;
+			return val > 0 ? val : -1.0;
+		}
+		return -1.0;
+	}
 	else
 	{
-		CPoint point;
-		provider->Projection->FromLatLngToXY(location, zoom, point);
-		SizeLatLng size;
-		provider->Projection->GetTileSizeLatLon(point, zoom, size);
-
-		PointLatLng newLoc;
-		provider->Projection->FromXYToLatLng(point, zoom, newLoc);
-
-		double xMin, xMax, yMin, yMax;
-		xMin = newLoc.Lng;
-		xMax = xMin + size.WidthLng;
-		if (abs(xMax) > 180.0)
-			xMax = xMin - size.WidthLng;
-
-		yMin = newLoc.Lat;
-		yMax = yMin + size.HeightLat;
-		if (abs(yMax) > 90.0)
-			yMax = yMin - size.HeightLat;
-
-		if (wgsToMapTransformation)
-		{
-			VARIANT_BOOL vb1, vb2;
-			m_globalSettings.suppressGdalErrors = true;
-			wgsToMapTransformation->Transform(&xMin, &yMin, &vb1);
-			wgsToMapTransformation->Transform(&xMax, &yMax, &vb2);
-			m_globalSettings.suppressGdalErrors = false;
-
-			if (vb1 && vb2)
-			{
-				double val = xMax - xMin;
-				return val > 0 ? val : -1.0;
-			}
-			return -1.0;
-		}
-		else
-		{
-			return xMax - xMin;
-		}
+		return xMax - xMin;
 	}
-	return false;
 }
 
 // ************************************************************
@@ -93,10 +92,10 @@ bool TileHelper::Transform(RectLatLng& Geog, IGeoProjection* proj, BaseProjectio
 			BaseProjection* pr = baseProj;
 			if (pr)
 			{
-				xMin = MAX(xMin, pr->GetMinLongitude());
-				xMax = MIN(xMax, pr->GetMaxLongitude());
-				yMin = MAX(yMin, pr->GetMinLatitude());
-				yMax = MIN(yMax, pr->GetMaxLatitude());
+				xMin = MAX(xMin, pr->get_MinLong());
+				xMax = MIN(xMax, pr->get_MaxLong());
+				yMin = MAX(yMin, pr->get_MinLat());
+				yMax = MIN(yMax, pr->get_MaxLat());
 			}
 
 			double xTL, xTR, xBL, xBR;

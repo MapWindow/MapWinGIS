@@ -7,7 +7,7 @@
 // Runs imagery metadata request: http://msdn.microsoft.com/en-us/library/ff701716.aspx
 bool BingBaseProvider::Initialize()
 {
-	if (UrlFormat.GetLength() > 0) return true;
+	if (_urlFormat.GetLength() > 0) return true;
 
 	if (m_globalSettings.bingApiKey.GetLength() == 0)
 	{
@@ -58,7 +58,7 @@ bool BingBaseProvider::Initialize()
 		if (s.GetLength() == 0) 
 			return false;
 
-		UrlFormat = s;
+		_urlFormat = s;
 		return true;
 	}
 	return result;

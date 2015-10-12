@@ -705,11 +705,13 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 	}
 	
 	CTilesDrawer drawer(g, &this->_extents, _pixelPerProjectionX, _pixelPerProjectionY);
+
 	if (_transformationMode == tmDoTransformation)
 	{
 		drawer.m_transfomation = GetWgs84ToMapTransform(); 
 	}
-	drawer.DrawTiles(_tiles, this->PixelsPerMapUnit(), GetMapProjection(), ((CTiles*)_tiles)->m_provider->Projection, _isSnapshot, _projectionChangeCount);
+
+	drawer.DrawTiles(_tiles, this->PixelsPerMapUnit(), GetMapProjection(), ((CTiles*)_tiles)->m_provider->get_Projection(), _isSnapshot, _projectionChangeCount);
 }
 
 #pragma region Draw layers

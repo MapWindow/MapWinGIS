@@ -20,17 +20,20 @@
   
 #include "stdafx.h"
 #include "MercatorProjection.h"
+#include "AngleHelper.h"
 
 // ****************************************************
 //		TileXYToProj
 // ****************************************************
-PointLatLng MercatorProjection::TileXYToProj(CPoint &pos, int zoom, PointLatLng &ret){
-	this->FromXYToLatLng(pos, zoom, ret);
-	double x = this->_earthRadius * degToRad(ret.Lng);
-	double y = this->_earthRadius * log(tan(pi_ / 4.0 + degToRad(ret.Lat) / 2));
+void MercatorProjection::FromXYToProj(CPoint pos, int zoom, PointLatLng &ret)
+{
+	FromXYToLatLng(pos, zoom, ret);
+
+	double x = _earthRadius * AngleHelper::ToRad(ret.Lng);
+	double y = _earthRadius * log(tan(pi_ / 4.0 + AngleHelper::ToRad(ret.Lat) / 2));
+
 	ret.Lng = x;
 	ret.Lat = y;
-	return ret;
 }
 
 // ****************************************************
@@ -39,8 +42,8 @@ PointLatLng MercatorProjection::TileXYToProj(CPoint &pos, int zoom, PointLatLng 
 // converts decimal degrees to tile coordinates
 void MercatorProjection::FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 {
-	double lat = Clip(pnt.Lat, yMinLat, yMaxLat);
-	double lng = Clip(pnt.Lng, xMinLng, xMaxLng);
+	double lat = Clip(pnt.Lat, _minLat, _maxLat);
+	double lng = Clip(pnt.Lng, _minLng, _maxLng);
 
 	double x = (lng + 180) / 360;
 	double sinLatitude = sin(lat * pi_ / 180);

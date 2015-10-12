@@ -22,6 +22,9 @@
 #include "BaseProvider.h"
 #include "MercatorProjection.h"
 
+// *******************************************************
+//			BingBaseProvider
+// *******************************************************
 class BingBaseProvider: public BaseProvider
 {
 protected:
@@ -29,10 +32,10 @@ protected:
 public:
 	BingBaseProvider() 
 	{
-		RefererUrl = "http://www.bing.com/maps/";
-		Copyright = L"Copyright © 2014 Microsoft and its suppliers";
-		this->Projection = new MercatorProjection();
-		subProviders.push_back(this);
+		_refererUrl = "http://www.bing.com/maps/";
+		_copyright = L"Copyright © 2014 Microsoft and its suppliers";
+		this->_projection = new MercatorProjection();
+		_subProviders.push_back(this);
 	}
 	
 	bool Initialize();
@@ -45,7 +48,7 @@ public:
 		CString subDomain;
 		subDomain.Format("t%d", GetServerNum(pos, 4));
 
-		CString temp = UrlFormat;
+		CString temp = _urlFormat;
 		temp.Replace("{quadkey}", key);
 		temp.Replace("{culture}", LanguageStr);
 		temp.Replace("{subdomain}", subDomain);
@@ -55,15 +58,18 @@ public:
 
 	virtual CStringW GetCopyright()
 	{
-		if (UrlFormat.GetLength() == 0) {
+		if (_urlFormat.GetLength() == 0) {
 			return "INVALID BING MAPS API KEY";
 		}
 		else {
-			return Copyright;
+			return _copyright;
 		}
 	}
 };
 
+// *******************************************************
+//			BingMapProvider
+// *******************************************************
 class BingMapProvider: public BingBaseProvider
 {
 public:
@@ -75,6 +81,9 @@ public:
 	}
 };
 
+// *******************************************************
+//			BingSatelliteProvider
+// *******************************************************
 class BingSatelliteProvider: public BingBaseProvider
 {
 public:
@@ -86,6 +95,9 @@ public:
 	}
 };
 
+// *******************************************************
+//			BingHybridProvider
+// *******************************************************
 class BingHybridProvider: public BingBaseProvider
 {
 public:

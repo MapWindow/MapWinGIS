@@ -20,8 +20,11 @@
  
 #pragma once
 #include "BaseProvider.h"
-#include "WMSGMercProvider.h"
+#include "WmsProviderBase.h"
 
+// ************************************************************
+//		RosreestrProvider()
+// ************************************************************
 class RosreestrProvider: public BaseProvider
 {
 public:
@@ -29,44 +32,47 @@ public:
 	{
 		Id = tkTileProvider::Rosreestr;
 		Name = "Rosreestr";
-		Copyright = "©Росреестр";
-		ServerLetters = "abc";
-		LicenseUrl = "http://maps.rosreestr.ru/PortalOnline/terms.html";
-		RefererUrl = "http://maps.rosreestr.ru/";
+		_copyright = "©Росреестр";
+		_serverLetters = "abc";
+		_licenseUrl = "http://maps.rosreestr.ru/PortalOnline/terms.html";
+		_refererUrl = "http://maps.rosreestr.ru/";
 		CString type = labels ? "Anno" : "BaseMap";
-		UrlFormat = "http://%c.maps.rosreestr.ru/arcgis/rest/services/BaseMaps/" + type + "/MapServer/tile/%d/%d/%d";
-		this->Projection = new MercatorProjection();
-		this->maxZoom = 19;
+		_urlFormat = "http://%c.maps.rosreestr.ru/arcgis/rest/services/BaseMaps/" + type + "/MapServer/tile/%d/%d/%d";
+		_projection = new MercatorProjection();
+		_maxZoom = 19;
 	}
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
-		char letter = ServerLetters[GetServerNum(pos, 3)];
+		char letter = _serverLetters[GetServerNum(pos, 3)];
 		CString s; 
-		s.Format(UrlFormat, letter, zoom,  pos.y, pos.x);
+		s.Format(_urlFormat, letter, zoom,  pos.y, pos.x);
 		return s;
 	}
 };
 
-class RosreestrBordersProvider: public WmsGMercProvider
+// ************************************************************
+//		RosreestrBordersProvider()
+// ************************************************************
+class RosreestrBordersProvider: public WmsMercatorProvider
 {
 private:	
-	CString url2;
+	CString _url2;
 public:
 	RosreestrBordersProvider() 
 	{
 		Id = tkTileProvider::Rosreestr;
 		Name = "Rosreestr";
-		Copyright = "";
-		LicenseUrl = "http://maps.rosreestr.ru/PortalOnline/terms.html";
-		RefererUrl = "http://maps.rosreestr.ru/";
-		UrlFormat = "http://maps.rosreestr.ru/arcgis/rest/services/Cadastre/Cadastre/MapServer/export?dpi=96&transparent=true&format=png32&bbox=";
-		url2 = "&bboxSR=102100&imageSR=102100&size=256%2C256&f=image";
-		this->subProviders.push_back(this);
+		_copyright = "";
+		_licenseUrl = "http://maps.rosreestr.ru/PortalOnline/terms.html";
+		_refererUrl = "http://maps.rosreestr.ru/";
+		_urlFormat = "http://maps.rosreestr.ru/arcgis/rest/services/Cadastre/Cadastre/MapServer/export?dpi=96&transparent=true&format=png32&bbox=";
+		_url2 = "&bboxSR=102100&imageSR=102100&size=256%2C256&f=image";
+		_subProviders.push_back(this);
 	}
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
-		CString s = UrlFormat + GetBoundingBox(pos, zoom) + url2; 
+		CString s = _urlFormat + GetBoundingBox(pos, zoom) + _url2; 
 		return s;
 	}
 };

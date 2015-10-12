@@ -27,7 +27,7 @@ class BaseProjection
 {
 public:
 	BaseProjection()
-		: yMinLat(0.0), yMaxLat(0.0), xMinLng(0.0), xMaxLng(0.0)
+		: _yMin(0.0), _yMax(0.0), _xMin(0.0), _xMax(0.0)
 	{
 		_tileSize = CSize(256, 256);
 		_yInverse = false;
@@ -42,75 +42,50 @@ public:
 	}
 
 protected:
-	double MinLatitude;
-	double MaxLatitude;
-	double MinLongitude;
-	double MaxLongitude;
 	bool _projected;	  // it's projected coordinate system; direct calculations of tile positions will be attempted
 	bool _yInverse;
 	CSize _tileSize;
 	double _earthRadius;
 	bool _worldWide;
+
+	// TODO: use EPGS instead
 	tkTileProjection _serverProjection;
 
+	// bounds in decimal degrees
+	double _minLat;
+	double _maxLat;
+	double _minLng;
+	double _maxLng;
+
+	// bounds in projected coordinates
+	double _yMin;
+	double _yMax;
+	double _xMin;
+	double _xMax;
+
 public:
-	double yMinLat;		// in decimal degrees for Mercator projection or projected units for custom projections
-	double yMaxLat;
-	double xMinLng;
-	double xMaxLng;
-	
-public:
+	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret) = 0;
+	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret) = 0;
+	virtual void FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret) = 0;
+	virtual double GetWidth() = 0;
+
 	tkTileProjection get_ServerProjection() { return _serverProjection; }
 
 	bool IsWorldWide() { return _worldWide; }
+	double get_MinLat() { return _minLat; }
+	double get_MaxLat() { return _maxLat; }
+	double get_MinLong() { return _minLng; }
+	double get_MaxLong() { return _maxLng; }
 
-	double GetMinLatitude() { return _projected ? MinLatitude : yMinLat; }
-	double GetMaxLatitude() { return _projected ? MaxLatitude : yMaxLat; }
-	double GetMinLongitude() { return _projected ? MinLongitude : xMinLng; }
-	double GetMaxLongitude() { return _projected ? MaxLongitude : xMaxLng; }
-
-	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret) = 0;
-	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret) = 0;
-	virtual double GetWidth() = 0;
-
-	void GetTileMatrixMinXY(int zoom, CSize &size)
-	{
-		size.cx = 0;
-		size.cy = 0;
-	}
-
-	void GetTileMatrixMaxXY(int zoom, CSize &size)
-	{
-		int xy = (1 << zoom);
-		size.cx = xy-1;
-		size.cy = xy-1;
-	}
-
-	static double Clip(double n, double minValue, double maxValue)
-	{
-	   return MIN(MAX(n, minValue), maxValue);
-    }
-
-	void Clip(CPoint& tilePnt, int zoom)
-	{
-		CSize size; 
-		GetTileMatrixMaxXY(zoom, size);
-		tilePnt.x = MIN(MAX(tilePnt.x, 0), size.cx);
-		tilePnt.y = MIN(MAX(tilePnt.y, 0), size.cy);
-    }
-
+	void GetTileMatrixMinXY(int zoom, CSize &size);
+	void GetTileMatrixMaxXY(int zoom, CSize &size);
 	void GetTileSizeLatLon(PointLatLng point, int zoom, SizeLatLng &ret);
 	void GetTileSizeLatLon(CPoint point, int zoom, SizeLatLng &ret);
 	void GetTileMatrixSizeXY(int zoom, CSize &ret);
 
 	RectLatLng CalculateGeogBounds(CPoint pnt, int zoom);
-};
 
-class MercatorProjectionBase: public BaseProjection
-{
-	double GetWidth()
-	{
-		return MERCATOR_MAX_VAL * 2.0;
-	}
-};
+	void Clip(CPoint& tilePnt, int zoom);
 
+	static double Clip(double n, double minValue, double maxValue) { return MIN(MAX(n, minValue), maxValue); }
+};

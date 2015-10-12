@@ -21,8 +21,7 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // lsu 21 aug 2011 - created the file
-
+ 
 #include "stdafx.h"
 #include "Tiles.h"
 #include "SqliteCache.h"
@@ -31,6 +30,8 @@
 #include "DiskCache.h"
 #include "TileHelper.h"
 #include "LoadingTask.h"
+#include "CustomTileProvider.h"
+#include "WmsProvider.h"
 
 ::CCriticalSection m_tilesBufferSection;
 
@@ -340,32 +341,30 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 	bool precise = map->_tileProjectionState == ProjectionMatch;
 	double ratio = precise ? 0.99: 0.90;		// 0.99 = set some error margin for rounding issues
 
-	int bestZoom = provider->minZoom;
-	for (int i = provider->minZoom; i <= (limitByProvider ? provider->maxZoom : 20); i++)
+	int bestZoom = provider->get_MinZoom();
+
+	for (int i = provider->get_MinZoom(); i <= (limitByProvider ? provider->get_MaxZoom() : 20); i++)
 	{
 		VARIANT_BOOL isSame = precise ? VARIANT_TRUE : VARIANT_FALSE;
+
 		double tileSize = TileHelper::GetTileSizeProj(isSame, provider, map->GetWgs84ToMapTransform(), location, i);
-		if (tileSize == -1)
+		if (tileSize == -1) 
 			continue;
 
 		double pixelsPerMapUnit = map->PixelsPerMapUnit();
 		tileSize *= pixelsPerMapUnit;
 
 		int minSize = (int)(256 * _scalingRatio  * ratio);	
-		if (tileSize < minSize)
+		if (tileSize < minSize) {
 			break;
+		}
 
 		bestZoom = i;
 	}
 
 	CSize s1, s2;
-	provider->Projection->GetTileMatrixMinXY(bestZoom, s1);
-	provider->Projection->GetTileMatrixMaxXY(bestZoom, s2);
-	provider->minOfTiles.cx = s1.cx;
-	provider->minOfTiles.cy = s1.cy;
-	provider->maxOfTiles.cx = s2.cx;
-	provider->maxOfTiles.cy = s2.cy;
-	provider->zoom = bestZoom;
+	provider->get_Projection()->GetTileMatrixMinXY(bestZoom, s1);
+	provider->get_Projection()->GetTileMatrixMaxXY(bestZoom, s2);
 
 	return bestZoom;
 }
@@ -400,8 +399,8 @@ void CTiles::getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMa
 	{
 		CPoint p1, p2;
 
-		provider->Projection->FromLatLngToXY(PointLatLng(yMaxD, xMinD), zoom, p1);
-		provider->Projection->FromLatLngToXY(PointLatLng(yMinD, xMaxD), zoom, p2);
+		provider->get_Projection()->FromLatLngToXY(PointLatLng(yMaxD, xMinD), zoom, p1);
+		provider->get_Projection()->FromLatLngToXY(PointLatLng(yMinD, xMaxD), zoom, p2);
 
 		rect.left = p1.x;
 		rect.right = p2.x;
@@ -513,9 +512,14 @@ bool CTiles::GetTilesForMap(void* mapView, int& xMin, int& xMax, int& yMin, int&
 // returns list of tiles for current map extents
 bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax, int& yMin, int& yMax, int& zoom)
 {
-	BaseProvider* provider = providerId == -1 ? m_provider : ((CTileProviders*)_providers)->get_Provider(providerId);
-	if (!provider)
+	// TODO: what's this hack for?
+	/*BaseProvider* provider = providerId == -1 ? m_provider : ((CTileProviders*)_providers)->get_Provider(providerId);
+	*/
+
+	BaseProvider* provider = get_CurrentProvider();
+	if (!provider) {
 		return false;
+	}
 
 	CMapView* map = (CMapView*)mapView;
 	tkTransformationMode transformMode = map->_transformationMode;
@@ -523,10 +527,9 @@ bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax,
 		return false;		// no need to go any further there is no projection
 
 	Extent clipExtents(map->_extents.left, map->_extents.right, map->_extents.bottom, map->_extents.top);
-	bool clipForTiles = this->ProjectionBounds(provider, map->GetMapProjection(), map->GetWgs84Projection(), transformMode, clipExtents);
+	bool clipForTiles = ProjectionBounds(provider, map->GetMapProjection(), map->GetWgs84Projection(), transformMode, clipExtents);
 	
-	if (!provider->mapView)
-		provider->mapView = mapView;
+	provider->put_Map(mapView);
 
 	// we don't want to have coordinates outside world bounds, as it breaks tiles loading
 	IExtents* ext = map->GetGeographicExtentsCore(clipForTiles, &clipExtents);
@@ -561,6 +564,26 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, CString key)
 }
 
 // *********************************************************
+//	     get_CurrentProvider()
+// *********************************************************
+WmsCustomProvider* CTiles::get_CurrentProvider()
+{
+	IWmsProvider* wmsProvider = NULL;
+	_wmsProviders->get_Item(0, &wmsProvider);
+
+	if (wmsProvider == NULL) {
+		return NULL;
+	}
+	
+	WmsCustomProvider* provider = ((CWmsProvider*)wmsProvider)->get_InnerProvider();
+	if (provider) {
+		provider->get_CustomProjection()->UpdateBounds();
+	}
+
+	return provider;
+}
+
+// *********************************************************
 //	     LoadTiles()
 // *********************************************************
 // any provider can be passed (for caching or snapshot)
@@ -570,11 +593,20 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 
 	if (_lastMapExtents == map->_extents && _lastProvider == providerId)
 	{
-		tilesLogger.WriteLine("Duplicate request dropped.");
+		tilesLogger.WriteLine("Duplicate request is dropped.");
 		return;	
 	}
 	
-	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
+	IWmsProvider* wmsProvider = NULL;
+	_wmsProviders->get_Item(0, &wmsProvider);
+
+	if (wmsProvider == NULL) {
+		Clear();
+		return;
+	}
+
+	//BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
+	WmsCustomProvider* provider = get_CurrentProvider();
 	if (!_visible || !provider) {
 		this->Clear();
 		return;
@@ -628,8 +660,7 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	m_tilesBufferLock.Unlock();
 	((CMapView*)mapView)->_tileBuffer.Initialized = false;
 
-	if (!provider->mapView)
-		provider->mapView = mapView;
+	provider->put_Map(mapView);
 	
 	int centX = (xMin + xMax) /2;
 	int centY = (yMin + yMax) /2;
@@ -679,7 +710,7 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	{
 		for (int y = yMin; y <= yMax; y++)
 		{
-			// was it reassigned already is reassigned?
+			// was it already reassigned?
 			bool found = false;
 			for (size_t i = 0; i < activeTasks.size(); i++ )
 			{
@@ -721,7 +752,8 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 				}
 			}
 
-			if (_useDiskCache)
+			// TODO: !!! RESTORE !!!
+			if (0)  //_useDiskCache
 			{
 				TileCore* tile = SQLiteCache::get_Tile(provider, zoom, x, y);
 				if (tile)
@@ -745,8 +777,9 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		_tileLoader.m_totalCount = points.size() + activeTasks.size();
 	}
 
-	for (size_t i = 0; i < activeTasks.size(); i++)
+	for (size_t i = 0; i < activeTasks.size(); i++) {     // wrap in function; where NULL is set?
 		delete activeTasks[i];
+	}
 
 	// -------------------------------------------------
 	// delete unused tiles from the screen buffer
@@ -803,10 +836,10 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 // *********************************************************
 void CTiles::HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoad)
 {
-	if ((CMapView*)m_provider->mapView != NULL)
+	if ((CMapView*)(m_provider->get_Map()) != NULL)
 	{
 		LPCTSTR newStr = (LPCTSTR)key;
-		((CMapView*)m_provider->mapView)->FireTilesLoaded(isSnapshot, newStr);
+		((CMapView*)m_provider->get_Map())->FireTilesLoaded(isSnapshot, newStr);
 		tilesLogger.WriteLine("Tiles loaded event; Were loaded from server (y/n): %d", !nothingToLoad);
 	}
 }
@@ -883,7 +916,7 @@ void CTiles::Clear()
 STDMETHODIMP CTiles::get_Provider(tkTileProvider* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CustomProvider* p = dynamic_cast<CustomProvider*>(m_provider);
+	CustomTileProvider* p = dynamic_cast<CustomTileProvider*>(m_provider);
 	*pVal = p ? tkTileProvider::ProviderCustom : (tkTileProvider)m_provider->Id;
 	return S_OK;
 }
@@ -1293,16 +1326,16 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 		vector<BaseProvider*>* providers = ((CTileProviders*)_providers)->GetList();
 		for(size_t i = 0; i < providers->size(); i++)
 		{
-			CustomProvider* cp = dynamic_cast<CustomProvider*>(providers->at(i));
+			CustomTileProvider* cp = dynamic_cast<CustomTileProvider*>(providers->at(i));
 			if (cp)
 			{
 				CPLXMLNode* psCustom = CPLCreateXMLNode( NULL, CXT_Element, "TileProvider");
 				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Id", CPLString().Printf("%d", cp->Id));
 				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Name", cp->Name);
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Url", cp->UrlFormat);
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Projection", CPLString().Printf("%d", (int)cp->m_projectionId));
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MinZoom", CPLString().Printf("%d", cp->minZoom));
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MaxZoom", CPLString().Printf("%d", cp->maxZoom));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Url", cp->get_UrlFormat());
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Projection", CPLString().Printf("%d", (int)cp->get_Projection()));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MinZoom", CPLString().Printf("%d", cp->get_MinZoom()));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MaxZoom", CPLString().Printf("%d", cp->get_MaxZoom()));
 				CPLAddXMLChild(psProviders, psCustom);
 			}
 		}
@@ -1468,10 +1501,10 @@ STDMETHODIMP CTiles::GetTilesIndices(IExtents* boundsDegrees, int zoom, int prov
 	if (provider)
 	{
 		CPoint p1;
-		provider->Projection->FromLatLngToXY(PointLatLng(yMax, xMin), zoom, p1);
+		provider->get_Projection()->FromLatLngToXY(PointLatLng(yMax, xMin), zoom, p1);
 
 		CPoint p2;
-		provider->Projection->FromLatLngToXY(PointLatLng(yMin, xMax), zoom, p2);
+		provider->get_Projection()->FromLatLngToXY(PointLatLng(yMin, xMax), zoom, p2);
 
 		IExtents* ext = NULL;
 		ComHelper::CreateExtents(&ext);
@@ -1501,10 +1534,10 @@ STDMETHODIMP CTiles::Prefetch(double minLat, double maxLat, double minLng, doubl
 	else
 	{
 		CPoint p1;
-		p->Projection->FromLatLngToXY(PointLatLng(minLat, minLng), zoom, p1);
+		p->get_Projection()->FromLatLngToXY(PointLatLng(minLat, minLng), zoom, p1);
 
 		CPoint p2;
-		p->Projection->FromLatLngToXY(PointLatLng(maxLat, maxLng), zoom, p2);
+		p->get_Projection()->FromLatLngToXY(PointLatLng(maxLat, maxLng), zoom, p2);
 
 		this->Prefetch2(p1.x, p2.x, MIN(p1.y, p2.y) , MAX(p1.y, p2.y), zoom, providerId, stop, retVal);
 		return S_OK;
@@ -1621,10 +1654,10 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 
 		CPoint p1;
-		p->Projection->FromLatLngToXY(PointLatLng(yMin, xMin), zoom, p1);
+		p->get_Projection()->FromLatLngToXY(PointLatLng(yMin, xMin), zoom, p1);
 
 		CPoint p2;
-		p->Projection->FromLatLngToXY(PointLatLng(yMax, xMax), zoom, p2);
+		p->get_Projection()->FromLatLngToXY(PointLatLng(yMax, xMax), zoom, p2);
 
 		*retVal = this->PrefetchCore(p1.x, p2.x, MIN(p1.y, p2.y) , MAX(p1.y, p2.y), zoom, providerId, savePath, fileExt, stop);
 	}
@@ -1643,15 +1676,16 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 		ErrorMessage(tkINVALID_PROVIDER_ID);
 		return 0;
 	}
-	else if (provider->maxZoom < zoom) 
+
+	if (provider->get_MaxZoom() < zoom) 
 	{
 		ErrorMessage(tkINVALID_ZOOM_LEVEL);
 		return 0;
 	}
 	
 	CSize size1, size2;
-	provider->Projection->GetTileMatrixMinXY(zoom, size1);
-	provider->Projection->GetTileMatrixMaxXY(zoom, size2);
+	provider->get_Projection()->GetTileMatrixMinXY(zoom, size1);
+	provider->get_Projection()->GetTileMatrixMaxXY(zoom, size2);
 
 	minX = (int)BaseProjection::Clip(minX, size1.cx, size2.cx);
 	maxX = (int)BaseProjection::Clip(maxX, size1.cy, size2.cy);
@@ -1770,7 +1804,9 @@ STDMETHODIMP CTiles::CheckConnection(BSTR url, VARIANT_BOOL* retVal)
 STDMETHODIMP CTiles::GetTileBounds(int provider, int zoom, int tileX, int tileY, IExtents** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*retVal = VARIANT_FALSE;
+
 	BaseProvider* prov = ((CTileProviders*)_providers)->get_Provider(provider);
 	if (!prov)
 	{
@@ -1779,23 +1815,24 @@ STDMETHODIMP CTiles::GetTileBounds(int provider, int zoom, int tileX, int tileY,
 	}
 	
 	CSize size;
-	prov->Projection->GetTileMatrixSizeXY(zoom, size);
+	prov->get_Projection()->GetTileMatrixSizeXY(zoom, size);
+
 	if (tileX < 0 || tileX > size.cx - 1 || tileY < 0 || tileY > size.cy - 1)
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
-	{
-		CPoint pnt1(tileX, tileY);
-		CPoint pnt2(tileX + 1, tileY + 1);
-		PointLatLng p1, p2;
-		prov->Projection->FromXYToLatLng(pnt1, zoom, p1);
-		prov->Projection->FromXYToLatLng(pnt2, zoom, p2);
-		IExtents* ext = NULL;
-		ComHelper::CreateExtents(&ext);
-		ext->SetBounds(p1.Lng, p1.Lat, 0.0, p2.Lng, p2.Lat, 0.0);
-		*retVal = ext;
-	}
+	
+	CPoint pnt1(tileX, tileY);
+	CPoint pnt2(tileX + 1, tileY + 1);
+	PointLatLng p1, p2;
+	prov->get_Projection()->FromXYToLatLng(pnt1, zoom, p1);
+	prov->get_Projection()->FromXYToLatLng(pnt2, zoom, p2);
+	IExtents* ext = NULL;
+	ComHelper::CreateExtents(&ext);
+	ext->SetBounds(p1.Lng, p1.Lat, 0.0, p2.Lng, p2.Lat, 0.0);
+	*retVal = ext;
+	
 	return S_OK;
 }
 
@@ -1840,18 +1877,24 @@ bool CTiles::ProjectionSupportsWorldWideTransform( IGeoProjection* mapProjection
 // ************************************************************
 //		ProjectionBounds
 // ************************************************************
-bool CTiles::ProjectionBounds( BaseProvider* provider, IGeoProjection* mapProjection, IGeoProjection* wgsProjection, tkTransformationMode transformationMode, Extent& retVal )
+bool CTiles::ProjectionBounds( BaseProvider* provider, IGeoProjection* mapProjection, IGeoProjection* wgsProjection, 
+							   tkTransformationMode transformationMode, Extent& retVal )
 {
-	if (!wgsProjection || !provider || !provider->Projection)	return false;
+	if (!wgsProjection || !provider || !provider->get_Projection())	return false;
 
-	BaseProjection* proj = provider->Projection;
+	BaseProjection* proj = provider->get_Projection();
 	
 	if (proj && _projExtentsNeedUpdate)
 	{
-		double left =  proj->xMinLng;
+		/*double left =  proj->xMinLng;
 		double right = proj->xMaxLng;
 		double top = proj->yMaxLat;
-		double bottom = proj->yMinLat;
+		double bottom = proj->yMinLat;*/
+
+		double left = proj->get_MinLong();
+		double right = proj->get_MaxLong();
+		double top = proj->get_MaxLat();
+		double bottom = proj->get_MinLat();
 		
 		if (transformationMode == tmDoTransformation)	// i.e. map cs isn't in decimal degrees
 		{
@@ -1912,7 +1955,7 @@ bool CTiles::ProjectionBounds( BaseProvider* provider, IGeoProjection* mapProjec
 STDMETHODIMP CTiles::get_MaxZoom(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = m_provider->maxZoom;
+	*retVal = m_provider->get_MaxZoom();
 	return S_OK;
 }
 
@@ -1922,7 +1965,7 @@ STDMETHODIMP CTiles::get_MaxZoom(int* retVal)
 STDMETHODIMP CTiles::get_MinZoom(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = m_provider->minZoom;
+	*retVal = m_provider->get_MinZoom();
 	return S_OK;
 }
 
@@ -1932,8 +1975,11 @@ STDMETHODIMP CTiles::get_MinZoom(int* retVal)
 STDMETHODIMP CTiles::get_ServerProjection(tkTileProjection* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	BaseProjection* p = m_provider->Projection;
+
+	BaseProjection* p = m_provider->get_Projection();
+
 	*retVal = p ? p->get_ServerProjection() : tkTileProjection::SphericalMercator;
+
 	return S_OK;
 }
 
@@ -1952,7 +1998,8 @@ STDMETHODIMP CTiles::get_ProjectionStatus(tkTilesProjectionStatus* retVal)
 		IGeoProjection* gp = map->GetMapProjection();
 		IGeoProjection* gpServer = NULL;
 
-		GetUtils()->TileProjectionToGeoProjection(m_provider->Projection->get_ServerProjection(), &gpServer);
+		// TODO: store GeoProjection instance directly
+		GetUtils()->TileProjectionToGeoProjection(m_provider->get_Projection()->get_ServerProjection(), &gpServer);
 
 		if (gp && gpServer)
 		{
