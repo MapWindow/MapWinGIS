@@ -48,18 +48,16 @@ class TileLoader
 {
 public:
 	TileLoader::TileLoader()
+		: tileManager(NULL), m_pool(NULL), m_pool2(NULL), m_callback(NULL), m_stopCallback(NULL)
 	{
 		m_diskCacher.cacheType = CacheType::DiskCache;
 		m_sqliteCacher.cacheType = CacheType::SqliteCache;
 		tileGeneration = 0;
-		m_pool = NULL;
-		m_pool2 = NULL;
-		m_callback = NULL;
-		m_stopCallback = NULL;
+	
 		stopped = false;
 		doCacheSqlite = true;
 		doCacheDisk = false;
-		tiles = NULL;
+		
 		m_errorCount = 0;
 		m_sumCount = 0;
 		m_sleepBeforeRequestTimeout = 0;
@@ -91,7 +89,7 @@ private:
 	list<void*> m_tasks;
 	TileCacher m_sqliteCacher;
 	TileCacher m_diskCacher;
-	void* tiles;
+	void* tileManager;
 	bool isSnapshot;
 	CString key;
 	void CleanTasks();
@@ -113,6 +111,10 @@ public:
 	bool stopped;
 	bool doCacheSqlite;
 	bool doCacheDisk;
+
+public:
+	bool get_isSnapShot() { return isSnapshot; }
+	CString get_Key() { return key; }
 
 	std::list<void*> GetActiveTasks() { return _activeTasks; }
 	void LockActiveTasks(bool lock);
@@ -158,6 +160,6 @@ public:
 	bool InitPools();
 	void Stop();
 	void TileLoaded(TileCore* tile);
-	void CheckComplete();
+	bool CheckComplete() { return m_count == m_totalCount; }
 };
 

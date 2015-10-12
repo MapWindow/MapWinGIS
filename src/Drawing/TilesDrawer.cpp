@@ -30,16 +30,18 @@ using namespace Gdiplus;
 // ***************************************************************
 //		DrawTiles()
 // ***************************************************************
-void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProjection* mapProjection, 
-							 BaseProjection* tileProjection, bool printing, int projectionChangeCount )
+void TilesDrawer::DrawTiles( TileManager* manager, double pixelsPerMapUnit, IGeoProjection* mapProjection, 
+							 BaseProvider* provider, bool printing, int projectionChangeCount )
 {
-	vector<TileCore*> tiles = ((CTiles*)itiles)->m_tiles;
+	if (!manager || !provider) return;
 
-	VARIANT_BOOL drawGrid;
-	itiles->get_GridLinesVisible(&drawGrid);
+	VARIANT_BOOL drawGrid = VARIANT_FALSE;
+
+	// TODO: restore
+	/* itiles->get_GridLinesVisible(&drawGrid); */
 	
 	// to support both GDI and GDI+ drawing
-	Graphics* g = m_graphics ? m_graphics : Graphics::FromHDC(_dc->m_hDC);		
+	Graphics* g = _graphics ? _graphics : Graphics::FromHDC(_dc->m_hDC);		
 	
 	ImageAttributes attr;
 	attr.SetWrapMode(WrapModeTileFlipXY);
@@ -49,9 +51,9 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 	VARIANT_BOOL isSame = VARIANT_FALSE;
 	CustomProjection* customProj = NULL;
 
-	if (tileProjection && mapProjection)
+	if (mapProjection)
 	{
-		customProj = dynamic_cast<CustomProjection*>(tileProjection);
+		customProj = dynamic_cast<CustomProjection*>(provider->get_Projection());
 		if (customProj)
 		{
 			// TODO: can be cached
@@ -60,9 +62,8 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 	}
 	
 	// copy to temporary vector, for not lock the original one for the whole length of drawing	
-	((CTiles*)itiles)->m_tilesBufferLock.Lock();
-	std::vector<TileCore*> tempTiles(tiles);
-	((CTiles*)itiles)->m_tilesBufferLock.Unlock();
+	std::vector<TileCore*> tiles;
+	manager->CopyBuffer(tiles);
 
 	// per tile drawing
 	for (size_t i = 0; i < tiles.size();i++)
@@ -84,7 +85,7 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 			
 			// convert to screen coordinates
 			double x, y;
-			this->ProjectionToPixel(tile->Proj.xLng, tile->Proj.yLat, x, y);
+			ProjectionToPixel(tile->Proj.xLng, tile->Proj.yLat, x, y);
 			double width = tile->Proj.WidthLng * pixelsPerMapUnit;
 			double height = tile->Proj.HeightLat * pixelsPerMapUnit;
 			
@@ -153,7 +154,8 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 			tile->m_drawn = true;	
 		}
 	}
-	if (!m_graphics)
+
+	if (!_graphics)
 	{
 		g->ReleaseHDC(_dc->m_hDC);
 		delete g;

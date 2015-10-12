@@ -3,6 +3,52 @@
 #include "GeoPoint.h"
 #include "TileHelper.h"
 #include "ProjectionHelper.h"
+#include "Tiles.h"
+
+// ************************************************************
+//		get_TileManager
+// ************************************************************
+TileManager& CMapView::get_TileManager()
+{
+	return ((CTiles*)_tiles)->get_Manager();
+}
+
+// ************************************************************
+//		GetTilesForMap
+// ************************************************************
+// Returns zoom level and indices to be loaded for the specific provider, given current map extents.
+bool CMapView::get_TilesForMap(void* p, CRect& indices, int& zoom)
+{
+	BaseProvider* provider = reinterpret_cast<BaseProvider*>(p);
+	if (!provider) {
+		return false;
+	}
+
+	// no need to go any further there is no projection
+	if (_transformationMode == tmNotDefined) {
+		return false;
+	}
+
+	Extent clipExtents = _extents;
+	bool clipForTiles = get_TileProviderBounds(provider, clipExtents);
+
+	// we don't want to have coordinates outside world bounds, as it breaks tiles loading
+	IExtents* ext = GetGeographicExtentsCore(clipForTiles, &clipExtents);
+	if (!ext) return false;
+
+	Extent bounds(ext);
+	ext->Release();
+
+	double xMaxD, xMinD, yMaxD, yMinD, zMaxD, zMinD;
+	ext->GetBounds(&xMinD, &yMinD, &zMinD, &xMaxD, &yMaxD, &zMaxD);
+
+	double scalingRatio = 1.0;
+	zoom = ChooseZoom(bounds, scalingRatio, true, provider);
+
+	provider->get_Projection()->getTileRectXY(bounds, zoom, indices);
+
+	return true;
+}
 
 // ************************************************************
 //		ChooseZoom()
@@ -51,9 +97,17 @@ int CMapView::ChooseZoom(Extent ext, double scalingRatio, bool limitByProvider, 
 // Returns bounds of the tile provider under current map projection
 bool CMapView::get_TileProviderBounds(BaseProvider* provider, Extent& retVal)
 {
-	if (!provider || !provider->get_Projection())	return false;
+	if (!provider)	return false;
 
 	BaseProjection* proj = provider->get_Projection();
+
+	if (_projectionChangeCount == proj->MapProjectionCount)
+	{
+		// map projection hasn't changed from the last calculation,
+		// bounds can be reused
+		retVal = proj->MapBounds;
+		return true;
+	}
 
 	double left = proj->get_MinLong();
 	double right = proj->get_MaxLong();
@@ -101,51 +155,66 @@ bool CMapView::get_TileProviderBounds(BaseProvider* provider, Extent& retVal)
 
 		//Debug::WriteLine("Projected world bounds: left = %f; right = %f; bottom = %f; top = %f", left, right, bottom, top);
 	}
-
 	retVal.left = left;
 	retVal.right = right;
 	retVal.top = top;
 	retVal.bottom = bottom;
 
+	// cache bounds for the further reuse
+	proj->MapProjectionCount = _projectionChangeCount;
+	proj->MapBounds = retVal;
+
 	return true;
 }
 
-// ************************************************************
-//		GetTilesForMap
-// ************************************************************
-// Returns zoom level and indices to be loaded for the specific provider, given current map extents.
-bool CMapView::get_TilesForMap(void* p, CRect& indices, int& zoom)
+// *****************************************************
+//		UpdateTileProjection()
+// *****************************************************
+void CMapView::UpdateTileProjection()
 {
-	BaseProvider* provider = reinterpret_cast<BaseProvider*>(p);
-	if (!provider) {
-		return false;
+	VARIANT_BOOL vb;
+	_tileProjection->Clear(&vb);
+	_tileReverseProjection->Clear(&vb);
+
+	tkTileProjection tp;
+	_tiles->get_ServerProjection(&tp);
+
+	switch (tp)
+	{
+		case SphericalMercator:
+			_tileProjection->SetGoogleMercator(&vb);
+			break;
+		case Amersfoort:
+			_tileProjection->ImportFromEPSG(EPSG_AMERSFOORT, &vb);
+			break;
+	}
+	_tileReverseProjection->CopyFrom(_projection, &vb);
+
+	if (ProjectionHelper::IsEmpty(_projection))
+	{
+		_tileProjectionState = ProjectionDoTransform;
+		return;
 	}
 
-	// no need to go any further there is no projection
-	if (_transformationMode == tmNotDefined) {
-		return false;		
+	_tileProjection->get_IsSame(_projection, &vb);
+	_tileProjectionState = vb ? ProjectionMatch : ProjectionDoTransform;
+
+	if (_transformationMode == tmWgs84Complied && tp == SphericalMercator)
+	{
+		// transformation is needed, but it leads only to some vertical scaling which is quite acceptable
+		_tileProjectionState = ProjectionCompatible;
 	}
 
-	Extent clipExtents = _extents;
-	bool clipForTiles = get_TileProviderBounds(provider, clipExtents);
+	if (_tileProjectionState == ProjectionDoTransform || _tileProjectionState == ProjectionCompatible)
+	{
+		_tileProjection->StartTransform(_projection, &vb);
+		if (!vb) {
+			ErrorMessage(tkTILES_MAP_TRANSFORM_FAILED);
+		}
 
-	// TODO: is it really needed?
-	provider->put_Map(this);
-
-	// we don't want to have coordinates outside world bounds, as it breaks tiles loading
-	IExtents* ext = GetGeographicExtentsCore(clipForTiles, &clipExtents);
-	if (!ext) return false;
-
-	Extent bounds(ext);
-	ext->Release();
-
-	double xMaxD, xMinD, yMaxD, yMinD, zMaxD, zMinD;
-	ext->GetBounds(&xMinD, &yMinD, &zMinD, &xMaxD, &yMaxD, &zMaxD);
-
-	double scalingRatio = 1.0;
-	zoom = ChooseZoom(bounds, scalingRatio, true, provider);
-
-	provider->get_Projection()->getTileRectXY(bounds, zoom, indices);
-	
-	return true;
+		_tileReverseProjection->StartTransform(_tileProjection, &vb);
+		if (!vb) {
+			ErrorMessage(tkMAP_TILES_TRANSFORM_FAILED);
+		}
+	}
 }

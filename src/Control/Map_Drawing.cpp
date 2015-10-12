@@ -265,9 +265,11 @@ void CMapView::RedrawTiles(Gdiplus::Graphics* g, CDC* dc)
 		{
 			//if (tiles->TilesAreInScreenBuffer((void*)this))
 			{
-				tiles->MarkUndrawn();
+				get_TileManager().MarkUndrawn();
+				
 				DrawTiles(g);
-				tiles->MarkUndrawn();
+
+				get_TileManager().MarkUndrawn();
 			}
 		}
 		else
@@ -516,6 +518,7 @@ void CMapView::RenderSelectedPixels(vector<long>& handles, CShapefileDrawer& dra
 // ***************************************************************
 //		UpdateTileBuffer
 // ***************************************************************
+// TODO: revisit
 void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 {
 	CTiles* tiles = (CTiles*)_tiles;
@@ -570,12 +573,14 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 		_tileBuffer.Provider = tileProvider;
 	}
 
-	if (initialization)
-		tiles->MarkUndrawn();
+	if (initialization) {
+		get_TileManager().MarkUndrawn();
+	}	
 
 	// drawing new tiles
-	if (initialization || tiles->UndrawnTilesExist())
+	if (initialization || tiles->get_Manager().UndrawnTilesExist()) {
 		DrawTiles(gTiles);		
+	}
 }
 
 // ***************************************************************
@@ -704,18 +709,20 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 		if (_currentZoom < minZoom) return;
 	}
 	
-	CTilesDrawer drawer(g, &this->_extents, _pixelPerProjectionX, _pixelPerProjectionY);
+	TilesDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY);
 
 	if (_transformationMode == tmDoTransformation)
 	{
 		drawer.m_transfomation = GetWgs84ToMapTransform(); 
 	}
 
-	drawer.DrawTiles(_tiles, this->PixelsPerMapUnit(), GetMapProjection(), ((CTiles*)_tiles)->m_provider->get_Projection(), _isSnapshot, _projectionChangeCount);
+	CTiles* tiles = (CTiles*)_tiles;
+
+	drawer.DrawTiles(&tiles->get_Manager(), PixelsPerMapUnit(), GetMapProjection(), 
+					 tiles->get_Provider(), _isSnapshot, _projectionChangeCount);
 }
 
 #pragma region Draw layers
-
 
 // ****************************************************************
 //		DrawLayers()

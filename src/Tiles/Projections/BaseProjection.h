@@ -35,6 +35,7 @@ public:
 		_worldWide = true;
 		_serverProjection = tkTileProjection::SphericalMercator;
 		_projected = false;
+		MapProjectionCount = -1;
 	};
 
 	virtual ~BaseProjection() 
@@ -62,6 +63,10 @@ protected:
 	double _yMax;
 	double _xMin;
 	double _xMax;
+
+public:
+	Extent MapBounds;        // bounds of the projection in map coordinate system
+	int MapProjectionCount;  // the index of the map projection under which the bounds were calculated	
 
 public:
 	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret) = 0;

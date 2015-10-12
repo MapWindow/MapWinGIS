@@ -21,14 +21,14 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // lsu 21 aug 2011 - created the file
-
+ 
 #pragma once
 #include "TileCore.h"
 #include "BaseProvider.h"
 #include "TileProviders.h"
 #include "TileLoader.h"
 #include "WmsCustomProvider.h"
+#include "TileManager.h"
 using namespace std;
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -47,8 +47,6 @@ public:
 		_key = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
-		_lastZoom = -1;
-		_lastProvider = tkTileProvider::ProviderNone;
 		
 		ComHelper::CreateInstance(idWmsProviders, (IDispatch**)&_wmsProviders);
 		ComHelper::CreateInstance(idTileProviders, (IDispatch**)&_providers);
@@ -70,8 +68,9 @@ public:
 	
 	void ClearAll()
 	{
-		this->Stop();
-		this->Clear();
+		Stop();
+
+		_manager.Clear();
 
 		if (_providers)
 		{
@@ -87,17 +86,12 @@ public:
 
 	void SetDefaults()
 	{
-		m_provider = ((CTileProviders*)_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
+		_provider = ((CTileProviders*)_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
 		_visible = true;
 		_gridLinesVisible = false;
-		_doRamCaching = true;
-		_doDiskCaching = false;
-		_useRamCache = true;
-		_useDiskCache = true;
-		_useServer = true;
+		
 		_minScaleToCache = 0;
 		_maxScaleToCache = 100;
-		_projExtentsNeedUpdate = true;
 		_scalingRatio = 1.0;
 	}
 
@@ -200,75 +194,41 @@ private:
 	long _lastErrorCode;
 	ICallback * _globalCallback;
 	BSTR _key;
-
 	double _scalingRatio;
-
 	bool _visible;
 	bool _gridLinesVisible;
-	bool _doRamCaching;
-	bool _doDiskCaching;
-	bool _useRamCache;
-	bool _useDiskCache;
-	bool _useServer;
-	
 	int _minScaleToCache;
 	int _maxScaleToCache;
-	
 	ITileProviders* _providers;
 	IWmsProviders* _wmsProviders;
 	
-	TileLoader _tileLoader;
-	TileLoader _prefetchLoader;
-	
-	Extent _projExtents;			// extents of the world under current projection; in WGS84 it'll be (-180, 180, -90, 90)
-	bool _projExtentsNeedUpdate;	// do we need to update bounds in m_projExtents on the next request?
 	CStringW _logPath;
-	void* _mapView;
-
-	// to avoid duplicate consecutive requests
-	int _lastZoom;
-	int _lastProvider;
-	Extent _lastTileExtents;	// in tile coordinates
-	Extent _lastMapExtents;
-
 public:
-	::CCriticalSection m_tilesBufferLock;
-	std::vector<TileCore*> m_tiles;
-	BaseProvider* m_provider;
+	TileManager _manager;
+	BaseProvider* _provider;
 
 private:
 	void ErrorMessage(long ErrorCode);
-	int ChooseZoom(double xMin, double xMax, double yMin, double yMax, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
-	int ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
-	void getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect, BaseProvider* provider);
-	bool ProjectionSupportsWorldWideTransform(IGeoProjection* mapProjection, IGeoProjection* wgs84Projection);
 	void SetAuthorization(BSTR userName, BSTR password, BSTR domain);
+	TileLoader* get_Prefetcher() { return _manager.get_Prefetcher(); }
 
-public:	
-	void Init(void* map) {	_mapView = map; }
-	void MarkUndrawn();
+public:
+	// properties
+	TileManager& get_Manager() { return _manager; }
+	BaseProvider* get_Provider() { return _provider; }
+
+public:
+	void Init(void* map) {	_manager.set_MapCallback(reinterpret_cast<IMapViewCallback*>(map)); }
+	
 	long PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop);
-	void AddTileWithCaching(TileCore* tile);
-	void AddTileNoCaching(TileCore* tile);
-	void AddTileOnlyCaching(TileCore* tile);
-	void AddTileToRamCache(TileCore* tile);
-	void Clear();
-	void LoadTiles(void* mapView, bool isSnapshot = false, CString key = "");
-	void LoadTiles(void* mapView, bool isSnapshot, int providerId, CString key = "");
-	bool TilesAreInCache(void* mapView, tkTileProvider providerId = ProviderNone);
-	bool TilesAreInScreenBuffer(void* mapView);
-	bool GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax, int& yMin, int& yMax, int& zoom);
-	bool GetTilesForMap(void* mapView, int& xMin, int& xMax, int& yMin, int& yMax, int& zoom);
+	void LoadTiles(bool isSnapshot = false, CString key = "");
+	void LoadTiles(bool isSnapshot, int providerId, CString key = "");
+	bool TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId = ProviderNone);
+	bool TilesAreInScreenBuffer(IMapViewCallback* map);
 	bool DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(CString ElementName);
-	bool UndrawnTilesExist();
-	bool DrawnTilesExist();
-	BaseProjection* get_Projection(){ return m_provider->get_Projection(); }
-	bool ProjectionBounds(BaseProvider* provider, IGeoProjection* mapProjection, IGeoProjection* wgsProjection,tkTransformationMode transformationMode, Extent& retVal);
-	void HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoad);
-	void UpdateProjection();
+	BaseProjection* get_Projection(){ return _provider->get_Projection(); }
 	void Stop();
-	WmsCustomProvider* get_CurrentProvider();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Tiles), CTiles)

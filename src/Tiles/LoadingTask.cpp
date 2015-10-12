@@ -8,83 +8,91 @@
 // *******************************************************
 void LoadingTask::DoTask()
 {
-	ASSERT(this->Loader);
+	ASSERT(Loader);
+
+	if (Loader->stopped)
+	{
+		return;		// do nothing; the task was aborted
+	}
+
+	if (this->_generation < Loader->tileGeneration)
+	{
+		// this tile is no longer needed; another set of tiles was requested		
+		tilesLogger.WriteLine("Outdated tile loading; cancelled: %d\\%d\\%d", this->_zoom, this->_x, this->_y);
+		return;
+	}
+	
+	long timeout = Loader->m_sleepBeforeRequestTimeout;
+	if (timeout > 0 && timeout < 10000)  {
+		Sleep(timeout);
+	}
+
+	if (!this->_cacheOnly) {
+		Loader->AddActiveTask(this);
+	}
+
+	TileCore* tile = Provider->GetTileImage(CPoint(_x, _y), _zoom);		// HTTP call
 
 	if (this->Loader->stopped)
 	{
-		// do nothing; the task was aborted
-	}
-	else if (this->generation < this->Loader->tileGeneration)
-	{
-		// this tile is no longer needed; another set of tiles was requested		
-		tilesLogger.WriteLine("Outdated tile loading; cancelled: %d\\%d\\%d", this->zoom, this->x, this->y);
+		delete tile;	// requesting from a server takes time; probably the task was already aborted
+
+		if (!this->_cacheOnly) {
+			this->Loader->RemoveActiveTask(this);
+		}
 	}
 	else
 	{
-		long timeout = this->Loader->m_sleepBeforeRequestTimeout;
-		if (timeout > 0 && timeout < 10000) Sleep(timeout);
+		if (this->_generation == this->Loader->tileGeneration) {
+			this->Loader->m_count++;
+		}
 
-		if (!this->cacheOnly)
-			this->Loader->AddActiveTask(this);
-
-		TileCore* tile = Provider->GetTileImage(CPoint(x, y), zoom);		// HTTP call
-
-		if (this->Loader->stopped)
+		// prefetching without display
+		if (this->_cacheOnly)
 		{
-			delete tile;	// requesting from a server takes time; probably the task was already aborted
-			if (!this->cacheOnly)
-				this->Loader->RemoveActiveTask(this);
+			this->Loader->TileLoaded(tile);
 		}
 		else
 		{
-			if (this->generation == this->Loader->tileGeneration)
-				this->Loader->m_count++;
+			if (!tile->IsEmpty())
+			{
+				_busy = true;	// notifies that related classes like CTiles can't be deleted until exiting this section
+				TileManager* manager = (TileManager*)Provider->get_Manager();
+					
+				// quickly pass it from active list to cache; so it's always avaiable while building the next list of requests
+				Loader->LockActiveTasks(true);
 
-			// pre-fetching without display
-			if (this->cacheOnly)
-			{
-				this->Loader->TileLoaded(tile);
-			}
-			else
-			{
-				if (!tile->IsEmpty())
+				manager->AddTileToRamCache(tile);
+				Loader->RemoveActiveTask(this);
+
+				Loader->LockActiveTasks(false);
+
+				if (this->_generation < this->Loader->tileGeneration)
 				{
-					this->busy = true;	// notifies that related classes like CTiles can't be deleted until exiting this section
-					CMapView* mapView = (CMapView*)Provider->get_Map();
-					CTiles* tiles = (CTiles*)mapView->GetTilesNoRef();
-
-					// quickly pass it from active list to cache; so it's always avaiable while building the next list of requests
-					this->Loader->LockActiveTasks(true);
-					tiles->AddTileToRamCache(tile);
-					this->Loader->RemoveActiveTask(this);
-					this->Loader->LockActiveTasks(false);
-
-					if (this->generation < this->Loader->tileGeneration)
-					{
-						tiles->AddTileOnlyCaching(tile);
-						tilesLogger.WriteLine("Outdated tile; cached: %d\\%d\\%d", this->zoom, this->x, this->y);
-					}
-					else
-					{
-						tiles->AddTileWithCaching(tile);
-						mapView->RedrawCore(RedrawSkipDataLayers, false);
-						this->Loader->RunCaching();		// if there is no pending tasks, the caching will be started		
-					}
-					this->busy = false;
+					manager->AddTileOnlyCaching(tile);
+					tilesLogger.WriteLine("Outdated tile; cached: %d\\%d\\%d", this->_zoom, this->_x, this->_y);
 				}
-				else {
-					this->Loader->RemoveActiveTask(this);
+				else
+				{
+					manager->AddTileWithCaching(tile);
+					manager->TriggerMapRedraw();
+					Loader->RunCaching();		// if there is no pending tasks, the caching will be started		
 				}
+				this->_busy = false;
 			}
+			else {
+				Loader->RemoveActiveTask(this);
+			}
+		}
 
-			// check generation to avoid firing the event several times when outdated times are loaded
-			if (this->generation == this->Loader->tileGeneration) {
-				this->Loader->CheckComplete();
-			}
+		// check generation to avoid firing the event several times when outdated times are loaded
+		if (_generation == Loader->tileGeneration && Loader->CheckComplete()) {
+			TileManager* manager = (TileManager*)Provider->get_Manager();
+			manager->FireTilesLoaded(Loader->get_isSnapShot(), Loader->get_Key());
 		}
 	}
 
 	// let's try to duplicate this, as sometimes tiles still remain in the list when completed flag is set
-	this->Loader->RemoveActiveTask(this);
-	this->completed = true;
+	Loader->RemoveActiveTask(this);
+	this->_completed = true;
 }

@@ -376,7 +376,6 @@ void CMapView::SetDefaults()
 	_showCoordinatesFormat = afDegrees;
 	_panningExtentsChanged = false;
 	_prevExtentsIndex = 0;
-	
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:

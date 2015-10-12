@@ -129,7 +129,6 @@ void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* 
 {
 	this->key = key;
 	this->isSnapshot = isSnapshot;
-	this->tiles = tiles;
 	if (isSnapshot) {
 		this->tileGeneration++;
 		generation = this->tileGeneration;
@@ -165,17 +164,6 @@ void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* 
 bool compPoints(CTilePoint* p1, CTilePoint* p2)
 {
 	return p1->dist < p2->dist;
-}
-
-// *******************************************************
-//		CheckComplete()
-// *******************************************************
-void TileLoader::CheckComplete()
-{
-	if (this->tiles != NULL && m_count == m_totalCount)
-	{
-		((CTiles*)this->tiles)->HandleOnTilesLoaded(this->isSnapshot, this->key, false);
-	}
 }
 
 // *******************************************************
@@ -254,7 +242,7 @@ void TileLoader::CleanTasks()
 	while (it != m_tasks.end())
 	{
 		LoadingTask* task = (LoadingTask*)*it;
-		if (task->completed)
+		if (task->completed())
 		{
 			delete task;
 			it = m_tasks.erase(it);

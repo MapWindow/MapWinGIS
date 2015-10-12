@@ -17,39 +17,43 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // lsu 17 apr 2012 - created the file
-
-#pragma once
+ #pragma once
 #include "basedrawer.h"
 #include "Tiles.h"
 
-class CTilesDrawer : public CBaseDrawer
+class TilesDrawer : public CBaseDrawer
 {
 public:
 	// old version for GDI drawing
-	CTilesDrawer(CDC* dc, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY)
+	TilesDrawer(CDC* dc, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY)
 	{
 		_dc = dc;
 		_extents = extents;
 		_pixelPerProjectionX = pixelPerProjectionX;
 		_pixelPerProjectionY = pixelPerProjectionY;
+		_graphics = NULL;
 		m_transfomation = NULL;
-		m_graphics = NULL;
 	};
+
 	// newer one for GDI+ drawing
-	CTilesDrawer(Gdiplus::Graphics* g, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY)
+	TilesDrawer(Gdiplus::Graphics* g, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY)
 	{
 		_dc = NULL;
-		m_graphics = g;
 		_extents = extents;
 		_pixelPerProjectionX = pixelPerProjectionX;
 		_pixelPerProjectionY = pixelPerProjectionY;
+		_graphics = g;
 		m_transfomation = NULL;
 	};
-	~CTilesDrawer(void){};
 
-	void DrawTiles(ITiles* tiles, double pixelsPerDegree, IGeoProjection* mapProjection, BaseProjection* tileProjection, bool printing, int projectionChangeCount);
+	virtual ~TilesDrawer(void){};
 
+private:
+	Gdiplus::Graphics* _graphics;
+
+public:
 	IGeoProjection* m_transfomation;
-	Gdiplus::Graphics* m_graphics;
+
+public:
+	void DrawTiles(TileManager* manager, double pixelsPerMapUnit, IGeoProjection* mapProjection, BaseProvider* provider, bool printing, int projectionChangeCount);
 };

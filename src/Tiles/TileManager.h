@@ -25,19 +25,25 @@ class TileManager
 {
 public:
 	TileManager()
+		: _map(NULL)
 	{
-		_useDiskCache = false;
+		_doRamCaching = true;
 		_doDiskCaching = false;
-
+		_useRamCache = true;
+		_useDiskCache = true;
+		_useServer = true;
+		_lastZoom = -1;
+		_lastProvider = tkTileProvider::ProviderNone;
 		// TODO: initialize members
 	}
 
 private:
 	// to avoid duplicate consecutive requests
-	::CCriticalSection m_tilesBufferLock;
-	vector<TileCore*> m_tiles;
+	::CCriticalSection _tilesBufferLock;
+	vector<TileCore*> _tiles;
 	TileLoader _tileLoader;
-	IMapViewCallback* _map;		// TODO: assign
+	TileLoader _prefetchLoader;
+	IMapViewCallback* _map;
 
 	Extent _projExtents;			// extents of the world under current projection; in WGS84 it'll be (-180, 180, -90, 90)
 	bool _projExtentsNeedUpdate;	// do we need to update bounds in m_projExtents on the next request?
@@ -54,8 +60,6 @@ private:
 	bool _useServer;
 
 private:
-	void LoadTiles(BaseProvider* provider, bool isSnapshot, CString key);
-	void Clear();
 	void BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<CTilePoint*>& activeTasks, vector<CTilePoint*>& points);
 	void GetActiveTasks(std::vector<CTilePoint*>& activeTasks, int providerId, int zoom, int generation, CRect indices);
 	bool IsNewRequest(Extent& mapExtents, CRect indices, int providerId, int zoom);
@@ -63,10 +67,40 @@ private:
 	void DeleteMarkedTilesFromBuffer();
 	void InitializeDiskCache();
 	void ReleaseMemory(vector<CTilePoint*> points);
+	void UnlockDiskCache();
+	bool GetTileIndices(BaseProvider* provider, CRect& indices, int& zoom);
+
+public:
+	// properties
+	void set_MapCallback(IMapViewCallback* map) { _map = map; }
+	IMapViewCallback* get_MapCallback() { return _map; }
+	bool TileIsInBuffer(int providerId, int zoom, int x, int y);
+	bool useDiskCache() { return _useDiskCache ;}
+	void useDiskCache(bool value) { _useDiskCache = value; }
+	bool doDiskCaching() { return _doDiskCaching; }
+	void doDiskCaching(bool value) { _doDiskCaching = value; }
+	bool useRamCache() { return _useRamCache; }
+	void useRamCache(bool value) { _useRamCache = value; }
+	bool doRamCaching() { return _doRamCaching; }
+	void doRamCaching(bool value) { _doRamCaching = value; }
+	bool useServer() { return _useServer; }
+	void useServer(bool value) { _useServer = value; }
+	TileLoader* get_Prefetcher() { return &_prefetchLoader; }
+	TileLoader* get_Loader() { return &_tileLoader; }
+	void CopyBuffer(vector<TileCore*>& buffer);
+public:
+	// methods
+	void Clear();
+	void LoadTiles(BaseProvider* provider, bool isSnapshot, CString key);
+	void MarkUndrawn();
+	bool UndrawnTilesExist();
+	bool DrawnTilesExist();
+
+	void AddTileToRamCache(TileCore* tile);
 	void AddTileWithCaching(TileCore* tile);
 	void AddTileNoCaching(TileCore* tile);
 	void AddTileOnlyCaching(TileCore* tile);
-	void AddTileToRamCache(TileCore* tile);
-	void UnlockDiskCache();
-	bool GetTileIndices(BaseProvider* provider, CRect& indices, int& zoom);
+
+	void TriggerMapRedraw() { _map->_Redraw(tkRedrawType::RedrawSkipDataLayers, false, true); };
+	void FireTilesLoaded(bool isSnapshot, CString key) { _map->_FireTilesLoaded(isSnapshot, key); }
 };

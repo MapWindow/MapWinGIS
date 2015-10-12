@@ -113,7 +113,7 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 
 	ClearExtentHistory();
 
-	((CTiles*)_tiles)->UpdateProjection();
+	UpdateTileProjection();
 
 	// restore extents
 	if (ext) 
@@ -170,57 +170,7 @@ void CMapView::UpdateMapTranformation()
 	}
 }
 
-// *****************************************************
-//		UpdateTileProjection()
-// *****************************************************
-void CMapView::UpdateTileProjection()
-{
-	VARIANT_BOOL vb;
-	_tileProjection->Clear(&vb);
-	_tileReverseProjection->Clear(&vb);
-	
-	tkTileProjection tp;
-	_tiles->get_ServerProjection(&tp);
-	
-	switch(tp)
-	{
-		case SphericalMercator:
-			_tileProjection->SetGoogleMercator(&vb);
-			break;
-		case Amersfoort:
-			_tileProjection->ImportFromEPSG(EPSG_AMERSFOORT, &vb);
-			break;
-	}
-	_tileReverseProjection->CopyFrom(_projection, &vb);
 
-	if (ProjectionHelper::IsEmpty(_projection)) 
-	{
-		_tileProjectionState = ProjectionDoTransform;
-		return;
-	}
-
-	_tileProjection->get_IsSame(_projection, &vb);
-	_tileProjectionState = vb ? ProjectionMatch : ProjectionDoTransform;
-
-	if (_transformationMode == tmWgs84Complied && tp == SphericalMercator)
-	{
-		// transformation is needed, but it leads only to some vertical scaling which is quite acceptable
-		_tileProjectionState = ProjectionCompatible;
-	}
-
-	if (_tileProjectionState == ProjectionDoTransform || _tileProjectionState == ProjectionCompatible)
-	{
-		_tileProjection->StartTransform(_projection, &vb);
-		if (!vb) {
-			ErrorMessage(tkTILES_MAP_TRANSFORM_FAILED);
-		}
-		
-		_tileReverseProjection->StartTransform(_tileProjection, &vb);
-		if (!vb) {
-			ErrorMessage(tkMAP_TILES_TRANSFORM_FAILED);
-		}
-	}
-}
 
 // *****************************************************
 //		GetProjection()

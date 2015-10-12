@@ -48,7 +48,7 @@ VARIANT_BOOL CMapView::ZoomToTileLevelCore(int zoom, bool logPrevious)
 	((CTiles*)_tiles)->get_ScalingRatio(&ratio);	// 1.0 by default
 
 	// half of equator circumference (width and height for Mercator projection)
-	double projWidth = ((CTiles*)_tiles)->m_provider->get_Projection()->GetWidth();
+	double projWidth = ((CTiles*)_tiles)->_provider->get_Projection()->GetWidth();
 
 	double pxWidth = ratio * 512.0 * pow(2.0, zoom - 1);	// width of map in pixels at the requested zoom
 
@@ -154,7 +154,7 @@ double CMapView::GetCurrentTileSize( int zoom )
 	loc.Lng = xTemp;
 	
 	double size = TileHelper::GetTileSizeProj(_tileProjectionState == ProjectionMatch, 
-		((CTiles*)_tiles)->m_provider, GetWgs84ToMapTransform(), loc, zoom);
+		((CTiles*)_tiles)->_provider, GetWgs84ToMapTransform(), loc, zoom);
 
 	double pixelsPerMapUnit = PixelsPerMapUnit();
 	size *= pixelsPerMapUnit;

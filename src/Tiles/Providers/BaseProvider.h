@@ -107,7 +107,7 @@ class BaseProvider
 public:
 	BaseProvider()
 		: _minZoom(1), _maxZoom(18), _httpStatus(200),
-		_mapView(NULL),  _projection(NULL), _isStopped(false), 
+		_manager(NULL), _projection(NULL), _isStopped(false),
 		_dynamicOverlay(false),	_initAttemptCount(0)
 	{
 		_licenseUrl = "https://mapwingis.codeplex.com/wikipage?title=tiles";
@@ -133,6 +133,7 @@ private:
 	bool _dynamicOverlay;
 	bool _isStopped;
 	int _httpStatus;
+	void* _manager;
 
 protected:
 	static CString m_proxyAddress;
@@ -140,9 +141,9 @@ protected:
 	static CString _proxyUsername;
 	static CString _proxyPassword;
 	static CString _proxyDomain;
+	static ::CCriticalSection _clientLock;
 
 protected:
-	static ::CCriticalSection _clientLock;
 	vector<HttpClientEx*> _httpClients;
 	vector<BaseProvider*> _subProviders;	// for complex providers with more than one source bitmap per tile
 	BaseProjection* _projection;
@@ -152,7 +153,7 @@ protected:
 	CString _urlFormat;
 	int _initAttemptCount;
 	CString _serverLetters;
-	void* _mapView;				// TODO: is it really needed
+	
 	int _minZoom;
 	int _maxZoom;
 
@@ -175,8 +176,8 @@ public:
 
 	int get_MinZoom() { return _minZoom; }
 	int get_MaxZoom() { return _maxZoom; }
-	void* get_Map() { return _mapView; }
-	void put_Map(void* map) { _mapView = map; }
+	void* get_Manager() { return _manager; }
+	void put_Manager(void* value) { _manager = value; }
 	vector<BaseProvider*>* get_SubProviders() { return &_subProviders; }
 	CString get_LicenseUrl() { return _licenseUrl; }
 	BaseProjection* get_Projection() { return _projection; }

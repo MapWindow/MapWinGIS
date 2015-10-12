@@ -35,6 +35,7 @@
 #include "ImageDrawing.h"
 #include "ShapefileDrawing.h"
 #include "BaseProvider.h"
+#include "TileManager.h"
 
 # define SHOWTEXT 450
 # define HIDETEXT 451
@@ -1198,7 +1199,7 @@ private:
 	bool get_TileProviderBounds(BaseProvider* provider, Extent& retVal);
 	bool get_TilesForMap(void* provider, CRect& indices, int& zoom);
 	Extent get_Extents() { return _extents; }
-
+	TileManager& get_TileManager();
 #pragma endregion
 
 public:
@@ -1228,7 +1229,7 @@ public:
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) {	FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
 	virtual void _FireTilesLoaded(VARIANT_BOOL isSnapshot, CString key) { FireTilesLoaded(isSnapshot, key); }
-
+	
 protected:
 
 };

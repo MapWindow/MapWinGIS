@@ -130,7 +130,9 @@ INT CMapView::TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvide
 		else
 		{
 			SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
-			bool tilesInCache =((CTiles*)_tiles)->TilesAreInCache((void*)this, provider);
+
+			bool tilesInCache = ((CTiles*)_tiles)->TilesAreInCache(this, provider);
+
 			RestoreExtents();
 			return tilesInCache ? 1 : 0;
 		}
@@ -163,10 +165,11 @@ void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR
 		{
 			CString key = (char*)Key;
 			SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
-			bool tilesInCache =((CTiles*)_tiles)->TilesAreInCache((void*)this, provider);
+
+			bool tilesInCache =((CTiles*)_tiles)->TilesAreInCache(this, provider);
 			if (!tilesInCache)
 			{
-				((CTiles*)_tiles)->LoadTiles((void*)this, true, (int)provider, key);
+				((CTiles*)_tiles)->LoadTiles(true, (int)provider, key);
 				RestoreExtents();
 			}
 			else
@@ -318,7 +321,8 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	if (mm_newExtents)
 	{
 		ReloadBuffers();
-		((CTiles*)_tiles)->MarkUndrawn();		// otherwise they will be taken from screen buffer
+
+		get_TileManager().MarkUndrawn();		// otherwise they will be taken from screen buffer
 	}
 
 	IImage * iimg = NULL;
@@ -336,9 +340,9 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	// do the drawing
 	ScheduleLayerRedraw();
 	_isSnapshot = true;
-
 	
-	tilesInCache =((CTiles*)_tiles)->TilesAreInCache((void*)this);
+	// TODO: make sure that WMS layers are loaded as well
+	tilesInCache =((CTiles*)_tiles)->TilesAreInCache(this);
 	if (tilesInCache)
 	{
 		DoUpdateTiles(true);		// simply move the to the screen buffer (is performed synchronously)
