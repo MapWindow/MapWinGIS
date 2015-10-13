@@ -17,16 +17,13 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // lsu 17 apr 2012 - created the file
-
 #include "stdafx.h"
 #include "TileLoader.h"
 #include "SqliteCache.h"
 #include "LoadingTask.h"
 #include "Tiles.h"
 
-::CCriticalSection TileLoader::section;
-::CCriticalSection TileLoader::_requestLock;
+::CCriticalSection TileLoader::_callbackLock;
 
 // *******************************************************
 //		LockActiveTasks()
@@ -98,46 +95,46 @@ bool TileLoader::HasActiveTask(void* t)
 // *******************************************************
 bool TileLoader::InitPools()
 {
-	this->stopped = false;
+	_stopped = false;
 
 	int size = m_globalSettings.GetTilesThreadPoolSize();
 
-	if (!m_pool)
+	if (!_pool)
 	{
-		m_pool = new CThreadPool<ThreadWorker>();
-		HRESULT hr = m_pool->Initialize(NULL, size);
+		_pool = new CThreadPool<ThreadWorker>();
+		HRESULT hr = _pool->Initialize(NULL, size);
 		if (!SUCCEEDED( hr ))
 			CallbackHelper::ErrorMsg("Failed to initialize thread pool (1) for tile loading.");
 	}
 
-	if (!m_pool2)
+	if (!_pool2)
 	{
-		m_pool2 = new CThreadPool<ThreadWorker>();
-		HRESULT hr = m_pool2->Initialize(NULL, size);
+		_pool2 = new CThreadPool<ThreadWorker>();
+		HRESULT hr = _pool2->Initialize(NULL, size);
 		if(!SUCCEEDED( hr ))
 			CallbackHelper::ErrorMsg("Failed to initialize thread pool (2) for tile loading.");
 	}
-	return m_pool && m_pool2;
+	return _pool && _pool2;
 }
 
 // *******************************************************
 //		Load()
 // *******************************************************
 //	Creates tasks for tile points and enqueues them in thread pool
-void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* provider, void* tiles, 
+void TileLoader::Load(std::vector<CTilePoint*> &points, BaseProvider* provider, int zoom,
 					  bool isSnapshot, CString key, int generation, bool cacheOnly)
 {
-	this->key = key;
-	this->isSnapshot = isSnapshot;
+	_key = key;
+	_isSnapshot = isSnapshot;
 	if (isSnapshot) {
-		this->tileGeneration++;
-		generation = this->tileGeneration;
+		_tileGeneration++;
+		generation = _tileGeneration;
 	}
 	
 	if (!InitPools())
 		return;
 
-	CThreadPool<ThreadWorker>* pool = (generation % 2 == 0)  ? m_pool : m_pool2;
+	CThreadPool<ThreadWorker>* pool = (generation % 2 == 0)  ? _pool : _pool2;
 
 	pool->SetSize(m_globalSettings.GetTilesThreadPoolSize());
 
@@ -146,18 +143,18 @@ void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* 
 	tilesLogger.WriteLine("Tiles requested; generation = %d", generation);
 
 	if (isSnapshot || cacheOnly) {
-		m_count = 0;
-		m_totalCount = points.size();
+		_count = 0;
+		_totalCount = points.size();
 	}
 
-	this->CleanTasks();
+	CleanTasks();
 
 	sort(points.begin(), points.end(), &compPoints);
 	for ( size_t i = 0; i < points.size(); i++ ) 
 	{
 		LoadingTask* task = new LoadingTask(points[i]->x, points[i]->y, zoom, provider, generation, cacheOnly);
 		task->Loader = this;
-		m_tasks.push_back(task);
+		_tasks.push_back(task);
 		pool->QueueRequest( (ThreadWorker::RequestType) task );
 	}
 }
@@ -172,35 +169,35 @@ bool compPoints(CTilePoint* p1, CTilePoint* p2)
 //	Reports progress to clients, aborts the operation
 void TileLoader::TileLoaded(TileCore* tile)
 {	
-	this->m_sumCount++;
+	_sumCount++;
+
 	if (tile->m_hasErrors)
 	{
-		this->m_errorCount++;
+		_errorCount++;
 	}
 
-	if (m_callback != NULL)
+	if (_callback != NULL)
 	{
-		section.Lock();
-		USES_CONVERSION;
-		CallbackHelper::Progress(m_callback, this->m_count >= this->m_totalCount ? -1 : this->m_count, "Caching...");
-		section.Unlock();
+		_callbackLock.Lock();
+		CallbackHelper::Progress(_callback, _count >= _totalCount ? -1 : _count, "Caching...");
+		_callbackLock.Unlock();
 	}
 
-	if (m_stopCallback)
+	if (_stopCallback)
 	{
 		VARIANT_BOOL stop;
-		m_stopCallback->StopFunction(&stop);
-		if (stop && !this->stopped)
+		_stopCallback->StopFunction(&stop);
+		if (stop && !_stopped)
 		{
-			this->stopped = true;
-			CallbackHelper::Progress(m_callback, -2, "Caching...");
+			_stopped = true;
+			CallbackHelper::Progress(_callback, -2, "Caching...");
 		}
 	}
 	
 	if (!tile->IsEmpty())
 	{
-		this->ScheduleForCaching(tile);
-		this->RunCaching();
+		ScheduleForCaching(tile);
+		RunCaching();
 	}
 }
 
@@ -214,7 +211,7 @@ void TileLoader::Stop()
 	// Don't bother with releasing memory for unfinished tasks as 
 	// they use around 30 bytes of memory, so just let it leak.
 
-	this->stopped = true;
+	_stopped = true;
 
 	/// notify the provider
 	/*list<void*>::iterator it = m_tasks.begin();
@@ -238,14 +235,14 @@ void TileLoader::Stop()
 // Cleans completed tasks
 void TileLoader::CleanTasks()
 {
-	list<void*>::iterator it = m_tasks.begin();
-	while (it != m_tasks.end())
+	list<void*>::iterator it = _tasks.begin();
+	while (it != _tasks.end())
 	{
 		LoadingTask* task = (LoadingTask*)*it;
 		if (task->completed())
 		{
 			delete task;
-			it = m_tasks.erase(it);
+			it = _tasks.erase(it);
 		}
 		else
 		{
@@ -254,6 +251,49 @@ void TileLoader::CleanTasks()
 	}
 }
 
+// *******************************************************
+//		StopCaching()
+// *******************************************************
+void TileLoader::StopCaching()
+{
+	_diskCacher.stopped = true;
+	_sqliteCacher.stopped = true;
+}
+
+// *******************************************************
+//		ScheduleForCaching()
+// *******************************************************
+void TileLoader::ScheduleForCaching(TileCore* tile)
+{
+	if (tile)
+	{
+		if (_doCacheSqlite)
+		{
+			tile->AddRef();
+			_sqliteCacher.Enqueue(tile);
+		}
+		if (_doCacheDisk)
+		{
+			tile->AddRef();
+			_diskCacher.Enqueue(tile);
+		}
+	}
+}
+
+// *******************************************************
+//		ScheduleForCaching()
+// *******************************************************
+void TileLoader::RunCaching()
+{
+	if (_doCacheSqlite)
+	{
+		_sqliteCacher.Run();
+	}
+	if (_doCacheDisk)
+	{
+		_diskCacher.Run();
+	}
+}
 
 
 

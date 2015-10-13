@@ -51,19 +51,18 @@ STDMETHODIMP CTiles::ClearPrefetchErrors()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	get_Prefetcher()->m_errorCount = 0;
-	get_Prefetcher()->m_sumCount = 0;
+	get_Prefetcher()->ResetErrorCount();
 
 	return S_OK;
 }
 
 // ************************************************************
-//		get_PrefetchErrorCount()
+//		get_PrefetchTotalCount()
 // ************************************************************
 STDMETHODIMP CTiles::get_PrefetchTotalCount(int *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = get_Prefetcher()->m_sumCount;
+	*retVal = get_Prefetcher()->get_SumCount();
 	return S_OK;
 }
 
@@ -73,7 +72,7 @@ STDMETHODIMP CTiles::get_PrefetchTotalCount(int *retVal)
 STDMETHODIMP CTiles::get_PrefetchErrorCount(int *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = get_Prefetcher()->m_errorCount;
+	*retVal = get_Prefetcher()->get_ErrorCount();
 	return S_OK;
 }
 
@@ -166,7 +165,7 @@ STDMETHODIMP CTiles::get_SleepBeforeRequestTimeout(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = get_Prefetcher()->m_sleepBeforeRequestTimeout;
+	*pVal = get_Prefetcher()->get_SleepBeforeRequestTimeout();
 
 	return S_OK;
 }
@@ -176,7 +175,7 @@ STDMETHODIMP CTiles::put_SleepBeforeRequestTimeout(long newVal)
 
 	if (newVal > 10000) newVal = 10000;
 	if (newVal < 0) newVal = 0;
-	get_Prefetcher()->m_sleepBeforeRequestTimeout = newVal;
+	get_Prefetcher()->set_SleepBeforeRequestTimeout(newVal);
 
 	return S_OK;
 }
@@ -1256,8 +1255,8 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 
 	if (points.size() > 0)
 	{
-		get_Prefetcher()->doCacheSqlite = type == CacheType::SqliteCache;
-		get_Prefetcher()->doCacheDisk = type == CacheType::DiskCache;
+		get_Prefetcher()->set_DiskCaching(type == CacheType::SqliteCache);
+		get_Prefetcher()->set_SqliteCaching(type == CacheType::DiskCache);
 			
 		if (type == CacheType::SqliteCache)
 		{
@@ -1267,15 +1266,16 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 		{
 			DiskCache::CreateFolders(zoom, points);
 		}
-		get_Prefetcher()->m_stopCallback = stop;
+
+		get_Prefetcher()->set_StopCallback(stop);
 
 		if (_globalCallback)
 		{
-			get_Prefetcher()->m_callback = this->_globalCallback;
+			get_Prefetcher()->set_Callback(_globalCallback);
 		}
 			
 		// actual call to do the job
-		get_Prefetcher()->Load(points, zoom, provider, (void*)this, false, "", 0, true);
+		get_Prefetcher()->Load(points, provider, zoom, false, "", 0, true);
 
 		for (size_t i = 0; i < points.size(); i++)
 		{

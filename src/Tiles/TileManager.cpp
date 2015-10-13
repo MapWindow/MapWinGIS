@@ -48,7 +48,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	InitializeDiskCache();
 
 	// all incoming tasks will be discarded
-	int generation = ++_tileLoader.tileGeneration;
+	int generation = _tileLoader.NextGeneration();
 
 	//  check which ones we already have, and which ones are to be loaded
 	std::vector<CTilePoint*> activeTasks;
@@ -63,8 +63,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	BuildLoadingList(provider, indices, zoom, activeTasks, points);
 
 	if (!isSnapshot) {
-		// TODO review this
-		_tileLoader.m_totalCount = points.size() + activeTasks.size();
+		_tileLoader.set_TotalCount(points.size() + activeTasks.size());
 	}
 
 	// delete unused tiles from the screen buffer
@@ -81,7 +80,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 		tilesLogger.WriteLine("Queued to load from server: %d", points.size());
 
 		// zoom can change in the process, so we use the calculated version and not the one current for provider
-		loader->Load(points, zoom, provider, (void*)this, isSnapshot, key, generation);
+		loader->Load(points, provider, zoom, isSnapshot, key, generation);
 	}
 	else
 	{
@@ -370,8 +369,8 @@ void TileManager::GetActiveTasks(vector<CTilePoint*>& activeTasks, int providerI
 		++it;
 	}
 
-	_tileLoader.m_count = 0;
-	_tileLoader.m_totalCount = 1000;		// set it to a big number until we count them all
+	_tileLoader.ResetCount();
+	_tileLoader.set_TotalCount(1000);		// set it to a big number until we count them all
 	_tileLoader.LockActiveTasks(false);
 }
 

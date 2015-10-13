@@ -106,7 +106,7 @@ void CustomProjection::GetTileSizeProj(int zoom, CSize &size)
 }
 
 // ******************************************************
-//    put_Extents()
+//    put_Bounds()
 // ******************************************************
 void CustomProjection::put_Bounds(double xMin, double xMax, double yMin, double yMax)
 {
@@ -115,10 +115,20 @@ void CustomProjection::put_Bounds(double xMin, double xMax, double yMin, double 
 	_yMin = yMin;
 	_yMax = yMax;
 	_boundsChanged = true;
+
+	// let's assign bounds in server projection to bounds in map projection,
+	// when WMS layer is the first one added to the map, both projection 
+	// and bounds will be grabbed from it; in other cases bounds will be 
+	// recalculate on first data loading
+	MapBounds.left = xMin;
+	MapBounds.right = xMax;
+	MapBounds.bottom = yMin;
+	MapBounds.top = yMax;
+	MapProjectionCount = -1;	  // bounds should be update on first redraw
 }
 
 // ******************************************************
-//    get_Extents()
+//    get_Bounds()
 // ******************************************************
 void CustomProjection::get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax)
 {

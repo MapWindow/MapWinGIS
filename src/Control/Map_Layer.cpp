@@ -625,8 +625,10 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 	{
 		if (_activeLayers.size() == 1 && pVisible)
 		{
-			if (!l->IsEmpty())
+			if (!l->IsEmpty()) 
+			{
 				SetExtentsWithPadding(l->extents);
+			}
 		}
 	}
 

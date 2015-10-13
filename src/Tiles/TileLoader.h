@@ -48,35 +48,35 @@ class TileLoader
 {
 public:
 	TileLoader::TileLoader()
-		: tileManager(NULL), m_pool(NULL), m_pool2(NULL), m_callback(NULL), m_stopCallback(NULL)
+		: _pool(NULL), _pool2(NULL), _callback(NULL), _stopCallback(NULL)
 	{
-		m_diskCacher.cacheType = CacheType::DiskCache;
-		m_sqliteCacher.cacheType = CacheType::SqliteCache;
-		tileGeneration = 0;
+		_diskCacher.cacheType = CacheType::DiskCache;
+		_sqliteCacher.cacheType = CacheType::SqliteCache;
+		_tileGeneration = 0;
 	
-		stopped = false;
-		doCacheSqlite = true;
-		doCacheDisk = false;
-		
-		m_errorCount = 0;
-		m_sumCount = 0;
-		m_sleepBeforeRequestTimeout = 0;
-		m_totalCount = 0;
-		isSnapshot = false;
-		m_count = 0;
+		_stopped = false;
+		_doCacheSqlite = true;
+		_doCacheDisk = false;
+		_isSnapshot = false;
+
+		_errorCount = 0;
+		_sumCount = 0;
+		_sleepBeforeRequestTimeout = 0;
+		_totalCount = 0;
+		_count = 0;
 	}
 
 	virtual ~TileLoader(void)
 	{
 		CleanTasks();
 
-		if (m_pool != NULL) {
-			m_pool->Shutdown(50);   // will result in TerminateThread call after 50ms delay
-			delete m_pool;
+		if (_pool != NULL) {
+			_pool->Shutdown(50);   // will result in TerminateThread call after 50ms delay
+			delete _pool;
 		}
-		if (m_pool2 != NULL) {
-			m_pool2->Shutdown(50);  // will result in TerminateThread call after 50ms delay
-			delete m_pool2;
+		if (_pool2 != NULL) {
+			_pool2->Shutdown(50);  // will result in TerminateThread call after 50ms delay
+			delete _pool2;
 		}
 	}
 
@@ -84,82 +84,67 @@ private:
 	// 2 pools will be used in alternate fashion,
 	// as it's problematic to terminate threads correctly until their current task is finished
 	// but it's quite desirable to start the processing of new requests ASAP
-	CThreadPool<ThreadWorker>* m_pool;
-	CThreadPool<ThreadWorker>* m_pool2;
-	list<void*> m_tasks;
-	TileCacher m_sqliteCacher;
-	TileCacher m_diskCacher;
-	void* tileManager;
-	bool isSnapshot;
-	CString key;
-	void CleanTasks();
-	std::list<void*> _activeTasks;	// http requests are performed
+	CThreadPool<ThreadWorker>* _pool;
+	CThreadPool<ThreadWorker>* _pool2;
+	list<void*> _tasks;
+	TileCacher _sqliteCacher;
+	TileCacher _diskCacher;
+	bool _isSnapshot;
+	CString _key;
+	std::list<void*> _activeTasks;	// HTTP requests being currently performed
 	::CCriticalSection _activeTasksLock;
+	bool _stopped;
+	bool _doCacheSqlite;
+	bool _doCacheDisk;
+	int _tileGeneration;
+	long _sleepBeforeRequestTimeout;
+	int _totalCount;
+	int _count;
+
+	// caching only
+	ICallback* _callback;			 // to report progress to clients via COM interface
+	IStopExecution* _stopCallback;	 // to stop execution by clients via COM interface
+	int _errorCount;
+	int _sumCount;                   // sums all requests even if generation doesn't match
+	static ::CCriticalSection _callbackLock;
+
+private:
+	void CleanTasks();
 
 public:
-	long m_sleepBeforeRequestTimeout;
-	int m_errorCount;
-	int m_totalCount;
-	int m_sumCount;
-	int m_count;
-	static ::CCriticalSection section;
-	static ::CCriticalSection _requestLock;
-
-	ICallback* m_callback;			 // to report progress to clients via COM interface
-	IStopExecution* m_stopCallback;	 // to stop execution by clients via COM interface
-	int tileGeneration;
-	bool stopped;
-	bool doCacheSqlite;
-	bool doCacheDisk;
-
-public:
-	bool get_isSnapShot() { return isSnapshot; }
-	CString get_Key() { return key; }
-
+	// properties
+	bool get_isSnapShot() { return _isSnapshot; }
+	CString get_Key() { return _key; }
 	std::list<void*> GetActiveTasks() { return _activeTasks; }
+	bool isStopped() { return _stopped; }
+	void set_DiskCaching(bool value) { _doCacheDisk = value; }
+	void set_SqliteCaching(bool value) { _doCacheSqlite = value; }
+	void set_Callback(ICallback* callback) { _callback = callback; }
+	void set_StopCallback(IStopExecution* callback) { _stopCallback = callback; }
+	int get_TileGeneration() { return _tileGeneration; }
+	int NextGeneration() { return ++_tileGeneration; }
+	int get_ErrorCount() { return _errorCount; }
+	void set_TotalCount(int value) { _totalCount = value; }
+	int get_SumCount() { return _sumCount; }
+	long get_SleepBeforeRequestTimeout() { return _sleepBeforeRequestTimeout; }
+	void set_SleepBeforeRequestTimeout(long value) { _sleepBeforeRequestTimeout = value; }
+
+public:
+	//methods
+	void Load(vector<CTilePoint*> &points, BaseProvider* provider, int zoom, bool isSnaphot, CString key, int generation, bool cacheOnly = false);
 	void LockActiveTasks(bool lock);
 	void AddActiveTask(void* task);
 	void RemoveActiveTask(void* task);
 	bool HasActiveTask(void* task);
-
-	void StopCaching()
-	{
-		m_diskCacher.stopped = true;
-		m_sqliteCacher.stopped = true;
-	}
-
-	void ScheduleForCaching(TileCore* tile)
-	{
-		if (tile)
-		{		
-			if (doCacheSqlite) 
-			{
-				tile->AddRef();
-				m_sqliteCacher.Enqueue(tile);
-			}
-			if (doCacheDisk)
-			{
-				tile->AddRef();
-				m_diskCacher.Enqueue(tile);
-			}
-		}
-	}
-	void RunCaching()
-	{
-		if (doCacheSqlite) 
-		{
-			m_sqliteCacher.Run();
-		}
-		if (doCacheDisk)
-		{
-			m_diskCacher.Run();
-		}
-	}
-	void Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* provider, void* tiles, bool isSnaphot, CString key, 
-		int generation, bool cacheOnly = false);
+	void StopCaching();
+	void ScheduleForCaching(TileCore* tile);
+	void RunCaching();
 	bool InitPools();
 	void Stop();
 	void TileLoaded(TileCore* tile);
-	bool CheckComplete() { return m_count == m_totalCount; }
+	bool IsCompleted() { return _count == _totalCount; }
+	void IncrementCount() { _count++; }
+	void ResetCount() { _count = 0; };
+	void ResetErrorCount() { _errorCount = 0; _sumCount = 0; }
 };
 

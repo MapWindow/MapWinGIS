@@ -8,49 +8,47 @@
 // *******************************************************
 void LoadingTask::DoTask()
 {
-	ASSERT(Loader);
-
-	if (Loader->stopped)
+	if (Loader->isStopped())
 	{
 		return;		// do nothing; the task was aborted
 	}
 
-	if (this->_generation < Loader->tileGeneration)
+	if (_generation < Loader->get_TileGeneration())
 	{
 		// this tile is no longer needed; another set of tiles was requested		
-		tilesLogger.WriteLine("Outdated tile loading; cancelled: %d\\%d\\%d", this->_zoom, this->_x, this->_y);
+		tilesLogger.WriteLine("Outdated tile loading; cancelled: %d\\%d\\%d", _zoom, _x, _y);
 		return;
 	}
 	
-	long timeout = Loader->m_sleepBeforeRequestTimeout;
+	long timeout = Loader->get_SleepBeforeRequestTimeout();
 	if (timeout > 0 && timeout < 10000)  {
 		Sleep(timeout);
 	}
 
-	if (!this->_cacheOnly) {
+	if (!_cacheOnly) {
 		Loader->AddActiveTask(this);
 	}
 
 	TileCore* tile = Provider->GetTileImage(CPoint(_x, _y), _zoom);		// HTTP call
 
-	if (this->Loader->stopped)
+	if (Loader->isStopped())
 	{
 		delete tile;	// requesting from a server takes time; probably the task was already aborted
 
-		if (!this->_cacheOnly) {
-			this->Loader->RemoveActiveTask(this);
+		if (!_cacheOnly) {
+			Loader->RemoveActiveTask(this);
 		}
 	}
 	else
 	{
-		if (this->_generation == this->Loader->tileGeneration) {
-			this->Loader->m_count++;
+		if (_generation == Loader->get_TileGeneration()) {
+			Loader->IncrementCount();
 		}
 
-		// prefetching without display
-		if (this->_cacheOnly)
+		if (_cacheOnly)
 		{
-			this->Loader->TileLoaded(tile);
+			// loading without display
+			Loader->TileLoaded(tile);
 		}
 		else
 		{
@@ -67,10 +65,10 @@ void LoadingTask::DoTask()
 
 				Loader->LockActiveTasks(false);
 
-				if (this->_generation < this->Loader->tileGeneration)
+				if (_generation < Loader->get_TileGeneration())
 				{
 					manager->AddTileOnlyCaching(tile);
-					tilesLogger.WriteLine("Outdated tile; cached: %d\\%d\\%d", this->_zoom, this->_x, this->_y);
+					tilesLogger.WriteLine("Outdated tile; cached: %d\\%d\\%d", _zoom, _x, _y);
 				}
 				else
 				{
@@ -78,7 +76,7 @@ void LoadingTask::DoTask()
 					manager->TriggerMapRedraw();
 					Loader->RunCaching();		// if there is no pending tasks, the caching will be started		
 				}
-				this->_busy = false;
+				_busy = false;
 			}
 			else {
 				Loader->RemoveActiveTask(this);
@@ -86,7 +84,7 @@ void LoadingTask::DoTask()
 		}
 
 		// check generation to avoid firing the event several times when outdated times are loaded
-		if (_generation == Loader->tileGeneration && Loader->CheckComplete()) {
+		if (_generation == Loader->get_TileGeneration() && Loader->IsCompleted()) {
 			TileManager* manager = (TileManager*)Provider->get_Manager();
 			manager->FireTilesLoaded(Loader->get_isSnapShot(), Loader->get_Key());
 		}
@@ -94,5 +92,5 @@ void LoadingTask::DoTask()
 
 	// let's try to duplicate this, as sometimes tiles still remain in the list when completed flag is set
 	Loader->RemoveActiveTask(this);
-	this->_completed = true;
+	_completed = true;
 }

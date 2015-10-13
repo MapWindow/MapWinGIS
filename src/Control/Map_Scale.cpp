@@ -892,7 +892,7 @@ void CMapView::ZoomToLayer(long LayerHandle)
 {
 	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{	
-		this->AdjustLayerExtents(LayerHandle);
+		AdjustLayerExtents(LayerHandle);
 		
 		Layer * l = _allLayers[LayerHandle];
 		SetExtentsWithPadding(l->extents);

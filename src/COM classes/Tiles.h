@@ -153,25 +153,11 @@ public:
 	STDMETHOD(get_ProviderId)(int* retVal);
 	STDMETHOD(put_ProviderId)(int newVal);
 	STDMETHOD(GetTilesIndices)(IExtents* boundsDegrees, int zoom, int provider, IExtents** retVal);
-	STDMETHOD(Prefetch)(double minLat, double maxLat, double minLng, double maxLng, int zoom, int provider, IStopExecution* stop, LONG* retVal);
-	STDMETHOD(Prefetch2)(int minX, int maxX, int minY, int maxY, int zoom, int provider, IStopExecution* stop, LONG* retVal);
 	STDMETHOD(get_DiskCacheCount)(int provider, int zoom, int xMin, int xMax, int yMin, int yMax, LONG* retVal);
 	STDMETHOD(get_ProviderName)(BSTR* retVal);
 	STDMETHOD(CheckConnection)(BSTR url, VARIANT_BOOL* retVal);
 	STDMETHOD(GetTileBounds)(int provider, int zoom, int tileX, int tileY, IExtents** retVal);
 	STDMETHOD(get_CurrentZoom)(int* retVal);
-	STDMETHOD(PrefetchToFolder)(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal);
-	STDMETHOD(get_PrefetchErrorCount)(int* retVal);
-	STDMETHOD(get_PrefetchTotalCount)(int* retVal);
-	STDMETHOD(ClearPrefetchErrors)();
-	STDMETHOD(StartLogRequests)(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal);
-	STDMETHOD(StopLogRequests)();
-	STDMETHOD(get_LogFilename)(BSTR* retVal);
-	STDMETHOD(get_LogIsOpened)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_LogErrorsOnly)(VARIANT_BOOL* retVal);
-	STDMETHOD(put_LogErrorsOnly)(VARIANT_BOOL pVal);
-	STDMETHOD(get_SleepBeforeRequestTimeout)(long* retVal);
-	STDMETHOD(put_SleepBeforeRequestTimeout)(long pVal);
 	STDMETHOD(get_MaxZoom)(int* retVal);
 	STDMETHOD(get_MinZoom)(int* pVal);
 	STDMETHOD(get_ServerProjection)(tkTileProjection* retVal);
@@ -182,6 +168,24 @@ public:
 	STDMETHOD(ClearProxyAuthorization)();
 	STDMETHOD(get_ProxyAuthenticationScheme)(tkProxyAuthentication* pVal);
 	STDMETHOD(put_ProxyAuthenticationScheme)(tkProxyAuthentication newVal);
+	
+	// logging
+	STDMETHOD(StartLogRequests)(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal);
+	STDMETHOD(StopLogRequests)();
+	STDMETHOD(get_LogFilename)(BSTR* retVal);
+	STDMETHOD(get_LogIsOpened)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_LogErrorsOnly)(VARIANT_BOOL* retVal);
+	STDMETHOD(put_LogErrorsOnly)(VARIANT_BOOL pVal);
+
+	// bulk download
+	STDMETHOD(Prefetch)(double minLat, double maxLat, double minLng, double maxLng, int zoom, int provider, IStopExecution* stop, LONG* retVal);
+	STDMETHOD(Prefetch2)(int minX, int maxX, int minY, int maxY, int zoom, int provider, IStopExecution* stop, LONG* retVal);
+	STDMETHOD(get_PrefetchErrorCount)(int* retVal);
+	STDMETHOD(get_PrefetchTotalCount)(int* retVal);
+	STDMETHOD(ClearPrefetchErrors)();
+	STDMETHOD(PrefetchToFolder)(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal);
+	STDMETHOD(get_SleepBeforeRequestTimeout)(long* retVal);
+	STDMETHOD(put_SleepBeforeRequestTimeout)(long pVal);
 
 private:
 	long _lastErrorCode;

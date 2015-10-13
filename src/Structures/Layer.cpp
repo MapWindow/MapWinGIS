@@ -296,7 +296,7 @@ bool Layer::UpdateExtentsFromDatasource()
 	if (IsWmsLayer())
 	{
 		CComPtr<IWmsLayer> wmsLayer = NULL;
-		if (QueryWmsLayer(&wmsLayer)) {
+		if (!QueryWmsLayer(&wmsLayer)) {
 			return false;
 		}
 		

@@ -114,7 +114,7 @@ public:
 
 public:	
 	// properties
-	void put_Visible(bool value) { value ? _flags | Visible : _flags & (0xFFFFFFFF ^ Visible); }
+	void put_Visible(bool value) { _flags = value ? _flags | Visible : _flags & (0xFFFFFFFF ^ Visible); }
 	bool get_Visible() { return _flags & Visible; }
 	IDispatch* get_Object() { return _object; }
 	void set_Object(IDispatch* value)  { _object = value; }

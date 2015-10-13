@@ -77,9 +77,7 @@ private:
 
 public:
 	// properties
-	void set_MapCallback(IMapViewCallback* map) { 
-		_map = map; 
-	}
+	void set_MapCallback(IMapViewCallback* map) { _map = map; }
 	IMapViewCallback* get_MapCallback() { return _map; }
 	bool TileIsInBuffer(int providerId, int zoom, int x, int y);
 	bool useDiskCache() { return _useDiskCache ;}
@@ -97,6 +95,7 @@ public:
 	TileLoader* get_Prefetcher() { return &_prefetchLoader; }
 	TileLoader* get_Loader() { return &_tileLoader; }
 	void CopyBuffer(vector<TileCore*>& buffer);
+
 public:
 	// methods
 	void Clear();
