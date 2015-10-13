@@ -204,7 +204,7 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{	
 		Layer * l = _allLayers[LayerHandle];
-		if(l->object == NULL) return FALSE;
+		if(!l->get_Object()) return FALSE;
 		return l->UpdateExtentsFromDatasource() ? TRUE: FALSE;
 	}
 	else

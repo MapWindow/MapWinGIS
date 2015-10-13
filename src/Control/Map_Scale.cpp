@@ -844,13 +844,12 @@ void CMapView::ZoomToMaxVisibleExtents(void)
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
 		this->AdjustLayerExtents(_activeLayers[i]);
-		if( l->flags & Visible)
+		if( l->get_Visible())
 		{
 			if( extentsSet == false )
 			{	double xrange = l->extents.right - l->extents.left;
 				double yrange = l->extents.top - l->extents.bottom;
 
-				//Neio 2009-07-02 for empty layer will cause the caculation error
 				if(xrange == 0 && yrange ==0 && l->extents.right ==0 && l->extents.top == 0)
 					continue;
 
@@ -864,7 +863,6 @@ void CMapView::ZoomToMaxVisibleExtents(void)
 			{	double xrange = l->extents.right - l->extents.left;
 				double yrange = l->extents.top - l->extents.bottom;
 
-				//Neio 2009-07-02 for empty layer will cause the caculation error
 				if(xrange == 0 && yrange ==0 && l->extents.right ==0 && l->extents.top == 0)
 					continue;
 

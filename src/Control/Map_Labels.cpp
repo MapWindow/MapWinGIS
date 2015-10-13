@@ -26,6 +26,24 @@ long CMapView::GetLineSeparationFactor(void)
 }
 
 // *************************************************************
+//		GetWmsLayer()
+// *************************************************************
+IWmsLayer* CMapView::GetWmsLayer(LONG LayerHandle)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	Layer * layer = GetLayer(LayerHandle);
+	if (!layer) return NULL;
+
+	IWmsLayer* wms = NULL;
+	if (layer->QueryWmsLayer(&wms))	{
+		return wms;
+	}
+
+	return NULL;
+}
+
+// *************************************************************
 //		GetOgrLayer()
 // *************************************************************
 IOgrLayer* CMapView::GetOgrLayer(LONG LayerHandle)

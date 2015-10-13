@@ -163,7 +163,7 @@ BOOL CMapView::GetLayerVisible(long LayerHandle)
 {
 	if( IsValidLayer(LayerHandle) )
 	{	
-		return ( _allLayers[LayerHandle]->flags & Visible );
+		return ( _allLayers[LayerHandle]->get_Visible());
 	}
 	else
 	{	
@@ -179,15 +179,12 @@ void CMapView::SetLayerVisible(long LayerHandle, BOOL bNewValue)
 {
 	if( IsValidLayer(LayerHandle) )
 	{	
-		if( bNewValue != FALSE )
-			_allLayers[LayerHandle]->flags |= Visible;
-		else
-			_allLayers[LayerHandle]->flags = _allLayers[LayerHandle]->flags & ( 0xFFFFFFFF ^ Visible );
+		_allLayers[LayerHandle]->put_Visible(bNewValue != FALSE);
 
 		// we need to refresh the buffer here
 		if (_allLayers[LayerHandle]->IsImage())
 		{
-			if (_allLayers[LayerHandle]->object)
+			if (_allLayers[LayerHandle]->get_Object())
 			{
 				IImage * iimg = NULL;
 				if (_allLayers[LayerHandle]->QueryImage(&iimg))
@@ -213,7 +210,7 @@ LPDISPATCH CMapView::GetGetObject(long LayerHandle)
 {
 	if( IsValidLayer(LayerHandle) )
 	{	
-		if (_allLayers[LayerHandle]->type == OgrLayerSource)
+		if (_allLayers[LayerHandle]->get_LayerType() == OgrLayerSource)
 		{
 			// for OGR layers we return underlying shapefile to make it compliant with existing client code
 			IShapefile* sf = NULL;
@@ -221,7 +218,7 @@ LPDISPATCH CMapView::GetGetObject(long LayerHandle)
 			return (IDispatch*)sf;
 		}
 
-		IDispatch* obj = _allLayers[LayerHandle]->object;
+		IDispatch* obj = _allLayers[LayerHandle]->get_Object();
 		if (obj != NULL) obj->AddRef();
 		return obj;
 	}
@@ -414,7 +411,10 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 	IOgrLayer * iogr = NULL;
 	Object->QueryInterface(IID_IOgrLayer, (void**)&iogr);
 
-	if (!igrid && !iimg && !ishp && !iogr)
+	IWmsLayer* iwms = NULL;
+	Object->QueryInterface(IID_IWmsLayer, (void**)&iwms);
+
+	if (!igrid && !iimg && !ishp && !iogr && !iwms)
 	{
 		ErrorMessage(tkINTERFACE_NOT_SUPPORTED);
 		return -1;
@@ -449,11 +449,13 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 		}
 
 		l = new Layer();
-		if (ishp) l->object = ishp;
-		else l->object = iogr;
-		l->type = ishp ? ShapefileLayer : OgrLayerSource;
+
+		if (ishp) l->set_Object(ishp);
+		else l->set_Object(iogr);
+
+		l->put_LayerType( ishp ? ShapefileLayer : OgrLayerSource);
 		l->UpdateExtentsFromDatasource();
-		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & (0xFFFFFFFF ^ Visible);
+		l->put_Visible(pVisible != FALSE);
 
 		layerHandle = AddLayerCore(l);
 	}
@@ -530,9 +532,9 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 		}
 
 		l = new Layer();
-		l->object = iimg;
-		l->type = ImageLayer;
-		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & (0xFFFFFFFF ^ Visible);
+		l->set_Object(iimg);
+		l->put_LayerType(ImageLayer);
+		l->put_Visible(pVisible != FALSE);
 		l->UpdateExtentsFromDatasource();
 
 		layerHandle = AddLayerCore(l);
@@ -543,6 +545,19 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 			if (!((CImageClass*)iimg)->SaveNotNullPixels())	// analyzing pixels...
 				iimg->put_CanUseGrouping(VARIANT_FALSE);	//  don't try this image any more, before transparency values will be changed
 		}
+	}
+
+	// WMS layer
+	if (iwms != NULL)
+	{
+		// TODO: check if it's properly initialized
+		l = new Layer();
+		l->set_Object(iwms);
+		l->put_LayerType(WmsLayerSource);
+		l->put_Visible(pVisible != FALSE);
+		l->UpdateExtentsFromDatasource();
+
+		layerHandle = AddLayerCore(l);
 	}
 
 	l->GrabLayerNameFromDatasource();
@@ -788,7 +803,7 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 	// release should be called twice, smart pointer won't allow it
 	ShapefileHelper::Cast(sf)->Release();
 
-	if (layer->type == OgrLayerSource)
+	if (layer->get_LayerType() == OgrLayerSource)
 	{
 		CComPtr<IOgrLayer> ogr = NULL;
 		layer->QueryOgrLayer(&ogr);
@@ -798,7 +813,7 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 	}
 	else
 	{
-		layer->object = sfNew;
+		layer->set_Object(sfNew);
 	}
 	layer->UpdateExtentsFromDatasource();
 
@@ -1378,7 +1393,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 		Layer* layer = _allLayers[LayerHandle];
 		if (layer)
 		{
-			switch (layer->type)
+			switch (layer->get_LayerType())
 			{
 				case OgrLayerSource:
 					s = "OgrLayer";
@@ -1396,7 +1411,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerType", s);
 			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerName", layer->name);
 			
-			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerVisible", CPLString().Printf("%d", (int)(layer->flags & Visible) ));
+			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerVisible", CPLString().Printf("%d", (int)(layer->get_Visible()) ));
 			
 			if (OLE2A(layer->key) != "")
 				Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerKey", OLE2CA(layer->key));
@@ -1535,11 +1550,12 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	// actual layer type
 	bool injectShapefileToOgr = false;	
 	Layer* layer = _allLayers[LayerHandle];
+
 	if (layer->IsOgrLayer() && layerType == ShapefileLayer)
 	{
 		injectShapefileToOgr = true;
 	}
-	else if (layer->type != layerType)
+	else if (layer->get_LayerType() != layerType)
 	{
 		ErrorMessage(tkINVALID_FILE);
 		return VARIANT_FALSE;
@@ -1549,18 +1565,14 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	s = CPLGetXMLValue( node, "LayerVisible", NULL );
 	if (s != "") 
 	{
-		BOOL val = atoi(s);
-		if( val )
-			_allLayers[LayerHandle]->flags |= Visible;
-		else
-			_allLayers[LayerHandle]->flags = _allLayers[LayerHandle]->flags & ( 0xFFFFFFFF ^ Visible );
+		_allLayers[LayerHandle]->put_Visible(atoi(s) != 0);
 	}
 
 	s = CPLGetXMLValue( node, "DynamicVisibility", NULL );
 	_allLayers[LayerHandle]->dynamicVisibility = (s != "") ? (atoi(s) == 0 ? false : true) : false;
 	
 	s = CPLGetXMLValue( node, "MaxVisibleScale", NULL );
-	_allLayers[LayerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom(s) : 100000000.0;	// todo use constant
+	_allLayers[LayerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom(s) : 100000000.0;	// TODO: use constant
 
 	s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
 	_allLayers[LayerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom(s) : 0.0;

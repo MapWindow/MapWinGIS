@@ -211,11 +211,8 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idVector:
 			result = CoCreateInstance(CLSID_Vector, NULL, CLSCTX_INPROC_SERVER, IID_IVector, (void**)&val);
 			break;
-		case tkInterface::idWmsProvider:
-			result = CoCreateInstance(CLSID_WmsProvider, NULL, CLSCTX_INPROC_SERVER, IID_IWmsProvider, (void**)&val);
-			break;
-		case tkInterface::idWmsProviders:
-			result = CoCreateInstance(CLSID_WmsProviders, NULL, CLSCTX_INPROC_SERVER, IID_IWmsProviders, (void**)&val);
+		case tkInterface::idWmsLayer:
+			result = CoCreateInstance(CLSID_WmsLayer, NULL, CLSCTX_INPROC_SERVER, IID_IWmsLayer, (void**)&val);
 			break;
 	}
 	*retVal = val ? (IDispatch*)val : NULL;
@@ -272,8 +269,7 @@ CString ComHelper::GetInterfaceName(tkInterface id)
 		case idOgrLayer:		return "OgrLayer";
 		case idShapeEditor:		return "ShapeEditor";
 		case idUndoList:		return "UndoList";
-		case idWmsProvider:		return "WmsProvider";
-		case idWmsProviders:		return "WmsProviders";
+		case idWmsLayer:		return "WmsLayer";
 		default:				return "Unknown";
 	}
 }

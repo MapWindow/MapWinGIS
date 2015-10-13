@@ -803,7 +803,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	{
 		long layerHandle = _activeLayers[i];
 		Layer * l = _allLayers[layerHandle];
-		if (!l || !l->object) continue;
+		if (!l || !l->get_Object()) continue;
 
 		bool visible = l->IsVisible(scale, zoom) && !isConcealed[i];
 		l->wasRendered = visible;
@@ -874,7 +874,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
 
-		if( !l || !l->object) continue;
+		if( !l || !l->get_Object()) continue;
 
 		if (!l->IsVisible(scale, zoom))	continue;
 	

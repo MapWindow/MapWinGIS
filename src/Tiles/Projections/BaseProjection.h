@@ -27,7 +27,7 @@ class BaseProjection
 {
 public:
 	BaseProjection()
-		: _yMin(0.0), _yMax(0.0), _xMin(0.0), _xMax(0.0)
+		: _yMin(0.0), _yMax(0.0), _xMin(0.0), _xMax(0.0), MapBounds(0.0, 0.0, 0.0, 0.0)
 	{
 		_tileSize = CSize(256, 256);
 		_yInverse = false;
@@ -49,7 +49,7 @@ protected:
 	double _earthRadius;
 	bool _worldWide;
 
-	// TODO: use EPGS instead
+	// TODO: use EPSG instead
 	tkTileProjection _serverProjection;
 
 	// bounds in decimal degrees
@@ -58,7 +58,7 @@ protected:
 	double _minLng;
 	double _maxLng;
 
-	// bounds in projected coordinates
+	// bounds in projected coordinates (server projection)
 	double _yMin;
 	double _yMax;
 	double _xMin;

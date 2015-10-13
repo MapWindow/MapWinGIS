@@ -13,7 +13,9 @@ enum LayerType
 	ShapefileLayer,
 	UndefinedLayer,
 	OgrLayerSource,
+	WmsLayerSource,
 };
+
 enum LayerFlags
 {	Visible = 1
 };

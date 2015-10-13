@@ -29,6 +29,9 @@
 
 class Layer;
 
+// **************************************************
+//		AsyncLoadingParams
+// **************************************************
 // A structure to pass parameters to the background thread
 struct AsyncLoadingParams : CObject
 {
@@ -59,14 +62,15 @@ struct AsyncLoadingParams : CObject
 	}
 };
 
+// **************************************************
+//		Layer
+// **************************************************
 class Layer
 {	
 public:
 	Layer()
+		: _type(UndefinedLayer), _object(NULL), _flags(0), _asyncLoading(false)
 	{	
-		type = UndefinedLayer;
-		object = NULL;
-		flags = 0;
 		key = SysAllocString(L"");
 		dynamicVisibility = false;
 		maxVisibleScale = 100000000.0;
@@ -76,27 +80,30 @@ public:
 		description = "";
 		skipOnSaving = VARIANT_FALSE;
 		wasRendered = false;
-		_asyncLoading = false;
 	}
 
 	~Layer()
 	{
 		::SysFreeString(key);
-		if (object != NULL) 
+
+		if (_object != NULL) 
 		{
-			ULONG refcnt = object->Release();
+			ULONG refcnt = _object->Release();
 			//Debug::WriteLine("Releasing layer; Remaining ref count: %d", refcnt);
 		}
-		object = NULL;
 	}	
-	
-	CString description;
-	LayerType type;
-	IDispatch * object;
-	Extent extents;
-	long flags;
+
+private:
+	long _flags;
+	IDispatch * _object;
+	bool _asyncLoading;
+	LayerType _type;
+
+public:	
 	BSTR key;
 	CStringW name;
+	CString description;
+	Extent extents;
 	bool dynamicVisibility;
 	double maxVisibleScale;
 	double minVisibleScale;
@@ -104,23 +111,34 @@ public:
 	int minVisibleZoom;
 	VARIANT_BOOL skipOnSaving;
 	bool wasRendered;
-	bool _asyncLoading;
-	vector<CWinThread*> _threads;
-	
-	OgrDynamicLoader* GetOgrLoader();
-	bool IsAsyncLoading() {return _asyncLoading; }
-	LayerType GetLayerType() { return type; }
-	bool IsShapefile() { return(type == ShapefileLayer || type == OgrLayerSource);	}
-	bool IsImage() { return type == ImageLayer;	}
-	bool IsOgrLayer() { return type == OgrLayerSource; }
+
+public:	
+	// properties
+	void put_Visible(bool value) { value ? _flags | Visible : _flags & (0xFFFFFFFF ^ Visible); }
+	bool get_Visible() { return _flags & Visible; }
+	IDispatch* get_Object() { return _object; }
+	void set_Object(IDispatch* value)  { _object = value; }
+	LayerType get_LayerType() { return _type; }
+	void put_LayerType(LayerType value) { _type = value; }
+	void put_AsyncLoading(bool value) { _asyncLoading = value; }
+	bool IsAsyncLoading() { return _asyncLoading; }
+	bool IsShapefile() { return(_type == ShapefileLayer || _type == OgrLayerSource); }
+	bool IsImage() { return _type == ImageLayer; }
+	bool IsOgrLayer() { return _type == OgrLayerSource; }
+	bool IsWmsLayer() { return _type == WmsLayerSource; }
 	bool IsInMemoryShapefile();
 	bool IsDynamicOgrLayer();
+	ILabels* get_Labels();
+	IGeoProjection* GetGeoProjection();
+	OgrDynamicLoader* GetOgrLoader();
+
+public:
+	// methods
 	bool QueryShapefile(IShapefile** sf);
 	bool QueryImage(IImage** img);
 	bool QueryOgrLayer(IOgrLayer** ogrLayer);
+	bool QueryWmsLayer(IWmsLayer** wmsLayer);
 	bool IsVisible(double scale, int zoom);
-	ILabels* get_Labels();
-	IGeoProjection* GetGeoProjection();
 	void GetExtentsAsNewInstance(IExtents** extents);
 	bool UpdateExtentsFromDatasource();
 	void LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandle);
@@ -131,6 +149,5 @@ public:
 	void GrabLayerNameFromDatasource();
 	BSTR GetFilename();
 	bool PointWithinExtents(double projX, double projY);
-	
 };
 # endif

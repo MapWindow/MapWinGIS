@@ -77,8 +77,7 @@ IDR_GDALDRIVER          REGISTRY                "COM Classes/GdalDriver.rgs"
 IDR_GDALDRIVERMANAGER   REGISTRY                "COM Classes/GdalDriverManager.rgs"
 IDR_FUNCTION            REGISTRY                "COM Classes/Function.rgs"
 IDR_EXPRESSION          REGISTRY                "COM Classes/Expression.rgs"
-IDR_WMSPROVIDER         REGISTRY                "COM Classes/WmsProvider.rgs"
-IDR_WMSPROVIDERS        REGISTRY                "COM Classes/WmsProviders.rgs"
+IDR_WmsLayer         REGISTRY                "COM Classes/WmsLayer.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

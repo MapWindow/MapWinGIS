@@ -225,8 +225,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="COM classes\SelectionList.h" />
     <ClInclude Include="COM classes\ShapeEditor.h" />
     <ClInclude Include="COM classes\UndoList.h" />
-    <ClInclude Include="COM classes\WmsProvider.h" />
-    <ClInclude Include="COM classes\WmsProviders.h" />
+    <ClInclude Include="COM classes\WmsLayer.h" />
     <ClInclude Include="ComHelpers\CallbackHelper.h" />
     <ClInclude Include="ComHelpers\ChartsHelper.h" />
     <ClInclude Include="ComHelpers\ExtentsHelper.h" />
@@ -241,6 +240,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="ComHelpers\ShapeHelper.h" />
     <ClInclude Include="ComHelpers\ShapeStyleHelper.h" />
     <ClInclude Include="ComHelpers\TableHelper.h" />
+    <ClInclude Include="ComHelpers\WmsHelper.h" />
     <ClInclude Include="Control\MapViewCallback.h" />
     <ClInclude Include="Drawing\BaseDrawer.h" />
     <ClInclude Include="Drawing\ChartDrawing.h" />
@@ -499,8 +499,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
     <ClCompile Include="COM classes\UndoList.cpp" />
     <ClCompile Include="COM classes\Utils_Shapefile.cpp" />
-    <ClCompile Include="COM classes\WmsProvider.cpp" />
-    <ClCompile Include="COM classes\WmsProviders.cpp" />
+    <ClCompile Include="COM classes\WmsLayer.cpp" />
     <ClCompile Include="ComHelpers\CallbackHelper.cpp" />
     <ClCompile Include="ComHelpers\ChartsHelper.cpp" />
     <ClCompile Include="ComHelpers\ExtentsHelper.cpp" />
@@ -515,6 +514,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="ComHelpers\ShapeHelper.cpp" />
     <ClCompile Include="ComHelpers\ShapeStyleHelper.cpp" />
     <ClCompile Include="ComHelpers\TableHelper.cpp" />
+    <ClCompile Include="ComHelpers\WmsHelper.cpp" />
     <ClCompile Include="Control\Map_Dynamic.cpp" />
     <ClCompile Include="Control\Map_Edit.cpp" />
     <ClCompile Include="COM classes\Chart.cpp" />
@@ -888,8 +888,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <None Include="COM classes\UndoList.rgs" />
     <None Include="COM classes\Utils.rgs" />
     <None Include="COM classes\Vector.rgs" />
-    <None Include="COM classes\WmsProvider.rgs" />
-    <None Include="COM classes\WmsProviders.rgs" />
+    <None Include="COM classes\WmsLayer.rgs" />
     <None Include="Grid\fip\Makefile" />
     <None Include="Grid\fip\readme.123" />
     <None Include="MapWinGIS.def" />

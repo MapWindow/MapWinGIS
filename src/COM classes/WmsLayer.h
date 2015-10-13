@@ -1,4 +1,4 @@
-// WmsProvider.h : Declaration of the CWmsProvider
+// WmsLayer.h : Declaration of the CWmsLayer
 #pragma once
 #include "WmsCustomProvider.h"
 
@@ -6,35 +6,35 @@
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
 
-class ATL_NO_VTABLE CWmsProvider :
+class ATL_NO_VTABLE CWmsLayer :
 	public CComObjectRootEx<CComMultiThreadModel>,
-	public CComCoClass<CWmsProvider, &CLSID_WmsProvider>,
-	public IDispatchImpl<IWmsProvider, &IID_IWmsProvider, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
+	public CComCoClass<CWmsLayer, &CLSID_WmsLayer>,
+	public IDispatchImpl<IWmsLayer, &IID_IWmsLayer, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
-	CWmsProvider()
+	CWmsLayer()
 	{
 		m_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR; 
 		_provider = new WmsCustomProvider();
 
-		gReferenceCounter.AddRef(tkInterface::idWmsProvider);
+		gReferenceCounter.AddRef(tkInterface::idWmsLayer);
 	}
 
-	~CWmsProvider()
+	~CWmsLayer()
 	{
 		::SysFreeString(_key);
 
 		delete _provider;
 
-		gReferenceCounter.Release(tkInterface::idWmsProvider);
+		gReferenceCounter.Release(tkInterface::idWmsLayer);
 	}
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_WMSPROVIDER)
+	DECLARE_REGISTRY_RESOURCEID(IDR_WmsLayer)
 
-	BEGIN_COM_MAP(CWmsProvider)
-		COM_INTERFACE_ENTRY(IWmsProvider)
+	BEGIN_COM_MAP(CWmsLayer)
+		COM_INTERFACE_ENTRY(IWmsLayer)
 		COM_INTERFACE_ENTRY(IDispatch)
 		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, m_pUnkMarshaler.p)
 	END_COM_MAP()
@@ -66,14 +66,19 @@ public:
 	STDMETHOD(put_Name)(BSTR newVal);
 	STDMETHOD(get_BoundingBox)(IExtents** pVal);
 	STDMETHOD(put_BoundingBox)(IExtents* newVal);
-	STDMETHOD(get_CrsEpsg)(LONG* pVal);
-	STDMETHOD(put_CrsEpsg)(LONG newVal);
-	STDMETHOD(get_LayersCsv)(BSTR* pVal);
-	STDMETHOD(put_LayersCsv)(BSTR newVal);
+	STDMETHOD(get_Epsg)(LONG* pVal);
+	STDMETHOD(put_Epsg)(LONG newVal);
+	STDMETHOD(get_Layers)(BSTR* pVal);
+	STDMETHOD(put_Layers)(BSTR newVal);
 	STDMETHOD(get_BaseUrl)(BSTR* pVal);
 	STDMETHOD(put_BaseUrl)(BSTR newVal);
 	STDMETHOD(get_Format)(BSTR* pVal);
 	STDMETHOD(put_Format)(BSTR newVal);
+	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_MapExtents)(IExtents** pVal);
+	STDMETHOD(Close)();
+	STDMETHOD(Serialize)();
+	STDMETHOD(Deserialize)(BSTR state, VARIANT_BOOL* retVal);
 
 private:	
 	BSTR _key;
@@ -84,4 +89,4 @@ public:
 	WmsCustomProvider* get_InnerProvider() { return _provider; }
 };
 
-OBJECT_ENTRY_AUTO(__uuidof(WmsProvider), CWmsProvider)
+OBJECT_ENTRY_AUTO(__uuidof(WmsLayer), CWmsLayer)

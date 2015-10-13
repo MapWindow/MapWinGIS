@@ -1,11 +1,11 @@
-// WmsProvider.cpp : Implementation of CWmsProvider
+// WmsLayer.cpp : Implementation of CWmsLayer
 #include "stdafx.h"
-#include "WmsProvider.h"
+#include "WmsLayer.h"
 
 // *********************************************************************
 //		get_LastErrorCode
 // *********************************************************************
-STDMETHODIMP CWmsProvider::get_LastErrorCode(long *pVal)
+STDMETHODIMP CWmsLayer::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _lastErrorCode;
@@ -16,7 +16,7 @@ STDMETHODIMP CWmsProvider::get_LastErrorCode(long *pVal)
 // *********************************************************************
 //		get_ErrorMsg
 // *********************************************************************
-STDMETHODIMP CWmsProvider::get_ErrorMsg(long ErrorCode, BSTR *pVal)
+STDMETHODIMP CWmsLayer::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
@@ -27,7 +27,7 @@ STDMETHODIMP CWmsProvider::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 // *********************************************************************
 //		get/put_Key
 // *********************************************************************
-STDMETHODIMP CWmsProvider::get_Key(BSTR *pVal)
+STDMETHODIMP CWmsLayer::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -37,7 +37,7 @@ STDMETHODIMP CWmsProvider::get_Key(BSTR *pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CWmsProvider::put_Key(BSTR newVal)
+STDMETHODIMP CWmsLayer::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -51,7 +51,7 @@ STDMETHODIMP CWmsProvider::put_Key(BSTR newVal)
 // *********************************************************
 //	     Name()
 // *********************************************************
-STDMETHODIMP CWmsProvider::get_Name(BSTR* pVal)
+STDMETHODIMP CWmsLayer::get_Name(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -60,7 +60,7 @@ STDMETHODIMP CWmsProvider::get_Name(BSTR* pVal)
 
 	return S_OK;
 }
-STDMETHODIMP CWmsProvider::put_Name(BSTR newVal)
+STDMETHODIMP CWmsLayer::put_Name(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -73,7 +73,7 @@ STDMETHODIMP CWmsProvider::put_Name(BSTR newVal)
 // *********************************************************
 //	     BoundingBox()
 // *********************************************************
-STDMETHODIMP CWmsProvider::get_BoundingBox(IExtents** pVal)
+STDMETHODIMP CWmsLayer::get_BoundingBox(IExtents** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -96,7 +96,7 @@ STDMETHODIMP CWmsProvider::get_BoundingBox(IExtents** pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CWmsProvider::put_BoundingBox(IExtents* newVal)
+STDMETHODIMP CWmsLayer::put_BoundingBox(IExtents* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -120,7 +120,7 @@ STDMETHODIMP CWmsProvider::put_BoundingBox(IExtents* newVal)
 // *********************************************************
 //	     CrsEpsg()
 // *********************************************************
-STDMETHODIMP CWmsProvider::get_CrsEpsg(LONG* pVal)
+STDMETHODIMP CWmsLayer::get_Epsg(LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -129,7 +129,7 @@ STDMETHODIMP CWmsProvider::get_CrsEpsg(LONG* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CWmsProvider::put_CrsEpsg(LONG newVal)
+STDMETHODIMP CWmsLayer::put_Epsg(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -143,7 +143,7 @@ STDMETHODIMP CWmsProvider::put_CrsEpsg(LONG newVal)
 // *********************************************************
 //	     LayersCsv()
 // *********************************************************
-STDMETHODIMP CWmsProvider::get_LayersCsv(BSTR* pVal)
+STDMETHODIMP CWmsLayer::get_Layers(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -152,7 +152,7 @@ STDMETHODIMP CWmsProvider::get_LayersCsv(BSTR* pVal)
 
 	return S_OK;
 }
-STDMETHODIMP CWmsProvider::put_LayersCsv(BSTR newVal)
+STDMETHODIMP CWmsLayer::put_Layers(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -165,7 +165,7 @@ STDMETHODIMP CWmsProvider::put_LayersCsv(BSTR newVal)
 // *********************************************************
 //	     BaseUrl()
 // *********************************************************
-STDMETHODIMP CWmsProvider::get_BaseUrl(BSTR* pVal)
+STDMETHODIMP CWmsLayer::get_BaseUrl(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -176,7 +176,7 @@ STDMETHODIMP CWmsProvider::get_BaseUrl(BSTR* pVal)
 
 	return S_OK;
 }
-STDMETHODIMP CWmsProvider::put_BaseUrl(BSTR newVal)
+STDMETHODIMP CWmsLayer::put_BaseUrl(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -191,7 +191,7 @@ STDMETHODIMP CWmsProvider::put_BaseUrl(BSTR newVal)
 // *********************************************************
 //	     Id()
 // *********************************************************
-STDMETHODIMP CWmsProvider::get_Id(LONG* pVal)
+STDMETHODIMP CWmsLayer::get_Id(LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -200,7 +200,7 @@ STDMETHODIMP CWmsProvider::get_Id(LONG* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CWmsProvider::put_Id(LONG newVal)
+STDMETHODIMP CWmsLayer::put_Id(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -210,9 +210,9 @@ STDMETHODIMP CWmsProvider::put_Id(LONG newVal)
 }
 
 // *********************************************************
-//	     Id()
+//	     Format()
 // *********************************************************
-STDMETHODIMP CWmsProvider::get_Format(BSTR* pVal)
+STDMETHODIMP CWmsLayer::get_Format(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -222,12 +222,85 @@ STDMETHODIMP CWmsProvider::get_Format(BSTR* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CWmsProvider::put_Format(BSTR newVal)
+STDMETHODIMP CWmsLayer::put_Format(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	USES_CONVERSION;
 	_provider->set_Format(OLE2A(newVal));
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     IsEmpty()
+// *********************************************************
+STDMETHODIMP CWmsLayer::get_IsEmpty(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_provider->get_UrlFormat().GetLength() == 0 ||
+		_provider->get_Format().GetLength() == 0 ||
+		_provider->get_Layers().GetLength() == 0 ||
+		_provider->get_CustomProjection()->get_Epsg() <= 0)
+	{
+		*pVal = VARIANT_TRUE;
+	}
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     MapExtents()
+// *********************************************************
+STDMETHODIMP CWmsLayer::get_MapExtents(IExtents** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	BaseProjection* p = _provider->get_Projection();
+	if (p) 
+	{
+		IExtents* ext = NULL;
+		ComHelper::CreateExtents(&ext);
+		ext->SetBounds(p->MapBounds.left, p->MapBounds.bottom, 0.0, p->MapBounds.right, p->MapBounds.top, 0.0);
+		*pVal = ext;
+	}
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     Close()
+// *********************************************************
+STDMETHODIMP CWmsLayer::Close()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// TODO: implement
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     Serialize()
+// *********************************************************
+STDMETHODIMP CWmsLayer::Serialize()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// TODO: implement
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     Deserialize()
+// *********************************************************
+STDMETHODIMP CWmsLayer::Deserialize(BSTR state, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// TODO: implement
 
 	return S_OK;
 }

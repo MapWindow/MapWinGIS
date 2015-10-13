@@ -879,12 +879,6 @@
     <ClInclude Include="Shapefile\ShapeWrapperEmpty.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
-    <ClInclude Include="COM classes\WmsProvider.h">
-      <Filter>COM classes\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="COM classes\WmsProviders.h">
-      <Filter>COM classes\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Tiles\Providers\CustomTileProvider.h">
       <Filter>Tiles\Providers</Filter>
     </ClInclude>
@@ -896,6 +890,12 @@
     </ClInclude>
     <ClInclude Include="Tiles\TileManager.h">
       <Filter>Tiles\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\WmsHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\WmsLayer.h">
+      <Filter>COM classes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1896,12 +1896,6 @@
     <ClCompile Include="COM classes\Utils_Shapefile.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
-    <ClCompile Include="COM classes\WmsProvider.cpp">
-      <Filter>COM classes\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="COM classes\WmsProviders.cpp">
-      <Filter>COM classes\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Tiles\Projections\MercatorProjection.cpp">
       <Filter>Tiles\Projections</Filter>
     </ClCompile>
@@ -1919,6 +1913,12 @@
     </ClCompile>
     <ClCompile Include="Control\Map_Tiles.cpp">
       <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\WmsHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\WmsLayer.cpp">
+      <Filter>COM classes\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2126,10 +2126,7 @@
     <None Include="COM classes\Expression.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
-    <None Include="COM classes\WmsProvider.rgs">
-      <Filter>COM classes\Resources</Filter>
-    </None>
-    <None Include="COM classes\WmsProviders.rgs">
+    <None Include="COM classes\WmsLayer.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
   </ItemGroup>

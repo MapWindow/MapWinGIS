@@ -26,7 +26,7 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 					CImageClass* img = (CImageClass*)iimg;
 					img->m_groupID = -1;
 					
-					if (l->flags & Visible)
+					if (l->get_Visible())
 					{
 						if ( img->_canUseGrouping)
 						{
@@ -402,7 +402,7 @@ void CMapView::ReloadBuffers()
 		}
 
 		// reload dynamic OGR layers as well
-		if (l->GetLayerType() == OgrLayerSource) 
+		if (l->get_LayerType() == OgrLayerSource) 
 		{
 			l->LoadAsync(this, _extents, _activeLayers[i]);
 		}

@@ -31,7 +31,6 @@
 #include "TileHelper.h"
 #include "LoadingTask.h"
 #include "CustomTileProvider.h"
-#include "WmsProvider.h"
 
 ::CCriticalSection m_tilesBufferSection;
 
@@ -1445,21 +1444,5 @@ STDMETHODIMP CTiles::put_ProxyAuthenticationScheme(tkProxyAuthentication newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.proxyAuthentication = newVal;
-	return S_OK;
-}
-
-// ************************************************************
-//		WmsProviders
-// ************************************************************
-STDMETHODIMP CTiles::get_WmsProviders(IWmsProviders** pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	*pVal = _wmsProviders;
-	
-	if (_wmsProviders) {
-		_wmsProviders->AddRef();
-	}
-
 	return S_OK;
 }

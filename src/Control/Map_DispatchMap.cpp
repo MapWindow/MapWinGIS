@@ -287,6 +287,7 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "ExtentHistoryUndoCount", dispidExtentHistoryUndoCount, GetExtentHistoryUndoCount, SetNotSupported, VT_I4)
 	DISP_PROPERTY_EX_ID(CMapView, "ExtentHistoryRedoCount", dispidExtentHistoryRedoCount, GetExtentHistoryRedoCount, SetNotSupported, VT_I4)
 	DISP_FUNCTION_ID(CMapView, "ClearExtentHistory", dispidClearExtentHistory, ClearExtentHistory, VT_EMPTY, VTS_NONE)
+	DISP_PROPERTY_PARAM_ID(CMapView, "WmsLayer", dispidWmsLayer, GetWmsLayer, SetNotSupported, VT_DISPATCH, VTS_I4)
 
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP

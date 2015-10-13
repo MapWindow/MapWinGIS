@@ -59,8 +59,7 @@
 #define IDR_GDALDRIVERMANAGER           157
 #define IDR_FUNCTION                    158
 #define IDR_EXPRESSION                  159
-#define IDR_WMSPROVIDER                 160
-#define IDR_WMSPROVIDERS                161
+#define IDR_WmsLayer                 160
 #define IDS_MAP_PPG_CAPTION             200
 #define IDD_PROPPAGE_MAP                200
 #define IDC_ZOOMIN                      203
@@ -89,6 +88,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        216
 #define _APS_NEXT_COMMAND_VALUE         32768
 #define _APS_NEXT_CONTROL_VALUE         201
-#define _APS_NEXT_SYMED_VALUE           162
+#define _APS_NEXT_SYMED_VALUE           161
 #endif
 #endif

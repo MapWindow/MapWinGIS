@@ -64,8 +64,7 @@ interface IGdalDriver;
 interface IGdalDriverManager;
 interface IFunction;
 interface IExpression;
-interface IWmsProvider;
-interface IWmsProviders;
+interface IWmsLayer;
 
 /************************** tkFunctionGroup Enumeration **********************/
 typedef
@@ -1130,8 +1129,7 @@ enum tkScalebarUnits
 		idGdalDriverManager = 49,
 		idFunction = 50,
 		idExpression = 51,
-		idWmsProvider = 52,
-		idWmsProviders = 53,
+		idWmsLayer = 52,
 	} tkInterface;	
 
 	typedef		
@@ -5754,7 +5752,6 @@ interface ITiles : IDispatch{
 	[id(52)] HRESULT ClearProxyAuthorization();
 	[propget, id(53)] HRESULT ProxyAuthenticationScheme([out, retval] tkProxyAuthentication* pVal);
 	[propput, id(53)] HRESULT ProxyAuthenticationScheme([in] tkProxyAuthentication newVal);
-	[propget, id(54)] HRESULT WmsProviders([out, retval] IWmsProviders** pVal);
 };
 
 [
@@ -6300,7 +6297,7 @@ interface IExpression : IDispatch{
 	nonextensible,
 	pointer_default(unique)
 ]
-interface IWmsProvider : IDispatch{
+interface IWmsLayer : IDispatch{
 	[propget, id(1)] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(2)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(3)] HRESULT Key([out, retval] BSTR *pVal);
@@ -6309,35 +6306,23 @@ interface IWmsProvider : IDispatch{
 	[propput, id(4)] HRESULT Name([in] BSTR newVal);
 	[propget, id(5)] HRESULT BoundingBox([out, retval] IExtents** pVal);
 	[propput, id(5)] HRESULT BoundingBox([in] IExtents* newVal);
-	[propget, id(6)] HRESULT CrsEpsg([out, retval] LONG* pVal);
-	[propput, id(6)] HRESULT CrsEpsg([in] LONG newVal);
-	[propget, id(7)] HRESULT LayersCsv([out, retval] BSTR* pVal);
-	[propput, id(7)] HRESULT LayersCsv([in] BSTR newVal);
+	[propget, id(6)] HRESULT Epsg([out, retval] LONG* pVal);
+	[propput, id(6)] HRESULT Epsg([in] LONG newVal);
+	[propget, id(7)] HRESULT Layers([out, retval] BSTR* pVal);
+	[propput, id(7)] HRESULT Layers([in] BSTR newVal);
 	[propget, id(8)] HRESULT BaseUrl([out, retval] BSTR* pVal);
 	[propput, id(8)] HRESULT BaseUrl([in] BSTR newVal);
 	[propget, id(9)] HRESULT Id([out, retval] LONG* pVal);
 	[propput, id(9)] HRESULT Id([in] LONG newVal);
 	[propget, id(10)] HRESULT Format([out, retval] BSTR* pVal);
 	[propput, id(10)] HRESULT Format([in] BSTR newVal);
+	[propget, id(11)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
+	[propget, id(12)] HRESULT MapExtents([out, retval] IExtents** pVal);
+	[id(13)] HRESULT Close();
+	[id(14)] HRESULT Serialize();
+	[id(15)] HRESULT Deserialize([in] BSTR state, [out, retval] VARIANT_BOOL* retVal);
 };
-[
-	object,
-	uuid(CAF0590A-D743-427C-A68F-350B33E4013F),
-	dual,
-	nonextensible,
-	pointer_default(unique)
-]
-interface IWmsProviders : IDispatch{
-	[propget, id(1)] HRESULT LastErrorCode([out, retval] long *pVal);
-	[propget, id(2)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(3)] HRESULT Key([out, retval] BSTR *pVal);
-	[propput, id(3)] HRESULT Key([in] BSTR newVal);
-	[id(4)] HRESULT Add([in] IWmsProvider* provider);
-	[id(6)] HRESULT Clear();
-	[propget, id(7)] HRESULT Count([out, retval] LONG* pVal);
-	[propget, id(8)] HRESULT Item([in] LONG Index, [out, retval] IWmsProvider** pVal);
-	[id(9)] HRESULT Remove([in] LONG providerId, [out, retval] VARIANT_BOOL* retVal);
-};
+
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -6527,6 +6512,7 @@ library MapWinGIS
 			[id(90), propget] IDispatch* GetObject(long LayerHandle);
 			[id(238), propget] VARIANT_BOOL LayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
+			[id(259), propget] IWmsLayer* WmsLayer(LONG LayerHandle);
 			[id(48)] IDispatch* GetColorScheme(long LayerHandle);
 			[id(92)] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
 
@@ -7336,15 +7322,8 @@ library MapWinGIS
 	[
 		uuid(EE9A0CDA-162C-4663-A48F-A5A29C1071C6)		
 	]
-	coclass WmsProvider
+	coclass WmsLayer
 	{
-		[default] interface IWmsProvider;
-	};
-	[
-		uuid(418D2651-CDE2-4044-8661-CEB663702BF5)		
-	]
-	coclass WmsProviders
-	{
-		[default] interface IWmsProviders;
+		[default] interface IWmsLayer;
 	};
 };

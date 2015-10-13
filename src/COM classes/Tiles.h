@@ -49,7 +49,6 @@ public:
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		
-		ComHelper::CreateInstance(idWmsProviders, (IDispatch**)&_wmsProviders);
 		ComHelper::CreateInstance(idTileProviders, (IDispatch**)&_providers);
 		((CTileProviders*)_providers)->put_Tiles(this);
 
@@ -77,11 +76,6 @@ public:
 		{
 			_providers->Release();
 			_providers = NULL;
-		}
-
-		if (_wmsProviders) {
-			_wmsProviders->Release();
-			_wmsProviders = NULL;
 		}
 	}
 
@@ -188,7 +182,6 @@ public:
 	STDMETHOD(ClearProxyAuthorization)();
 	STDMETHOD(get_ProxyAuthenticationScheme)(tkProxyAuthentication* pVal);
 	STDMETHOD(put_ProxyAuthenticationScheme)(tkProxyAuthentication newVal);
-	STDMETHOD(get_WmsProviders)(IWmsProviders** pVal);
 
 private:
 	long _lastErrorCode;
@@ -200,7 +193,6 @@ private:
 	int _minScaleToCache;
 	int _maxScaleToCache;
 	ITileProviders* _providers;
-	IWmsProviders* _wmsProviders;
 	CStringW _logPath;
 
 public:
