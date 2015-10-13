@@ -142,9 +142,8 @@ bool CustomProjection::UpdateBounds()
 		CallbackHelper::ErrorMsg("Projection for WMS provider isn't set.");
 		return false;
 	}
-
-	// TODO: stop transform if it's already started
-
+	
+	// existing transformation will be stopped within the call
 	_projWGS84->StartTransform(_projCustom, &vb);
 	if (!vb) {
 		CallbackHelper::ErrorMsg("Failed to initialize coordinate transformation for WMS provider.");

@@ -30,8 +30,9 @@ public:
 	virtual void _FireTilesLoaded(VARIANT_BOOL isSnapshot, CString key) = 0;
 
 	// tiles
-	virtual bool get_TilesForMap(void* provider, CRect& indices, int& zoom) = 0;
-	virtual Extent get_Extents() = 0;
+	virtual bool _GetTilesForMap(void* p, double scalingRatio, CRect& indices, int& zoom) = 0;
+	virtual int _ChooseZoom(void* provider, double scalingRatio, bool limitByProvider) = 0;
+	virtual Extent* _GetExtents() = 0;
+	virtual void _MarkTileBufferChanged() = 0;
 };
-
 

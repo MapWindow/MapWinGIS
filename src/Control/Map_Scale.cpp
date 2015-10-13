@@ -513,6 +513,23 @@ IExtents* CMapView::GetGeographicExtents()
 // ***************************************************************
 //	   GetGeographicExtentsCore
 // ***************************************************************
+bool CMapView::GetGeographicExtentsInternal(bool clipForTiles, Extent* clipExtents, Extent& result)
+{
+	// we don't want to have coordinates outside world bounds, as it breaks tiles loading
+	IExtents* ext = GetGeographicExtentsCore(clipForTiles, clipExtents);
+	if (!ext) return false;
+
+	Extent bounds(ext);
+	ext->Release();
+
+	result = bounds;
+
+	return true;
+}
+
+// ***************************************************************
+//	   GetGeographicExtentsCore
+// ***************************************************************
 IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExtents)
 {
 	IExtents * box = NULL;
@@ -1822,38 +1839,7 @@ int CMapView::GetCurrentZoom()
 		return -1;
 }
 
-// ****************************************************************
-//		TileProvider()
-// ****************************************************************
-void CMapView::SetTileProvider(tkTileProvider provider)
-{
-	tkTileProvider oldProvider = GetTileProvider();
-	if (provider != oldProvider)
-	{
-		if (provider == tkTileProvider::ProviderNone) {
-			_tiles->put_Visible(VARIANT_FALSE);
-		}
-		else {
-			_tiles->put_Provider(provider);
-			_tiles->put_Visible(VARIANT_TRUE);
-		}
-		RedrawWithTiles(RedrawMinimal, false, false);
-	}
-}
-tkTileProvider CMapView::GetTileProvider()
-{
-	VARIANT_BOOL vb;
-	_tiles->get_Visible(&vb);
-	if (!vb) {
-		return tkTileProvider::ProviderNone;
-	}
-	else
-	{
-		tkTileProvider provider;
-		_tiles->get_Provider(&provider);
-		return provider;
-	}
-}
+
 
 // ****************************************************************
 //		SetInitExtents()

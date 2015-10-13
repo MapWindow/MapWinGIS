@@ -117,7 +117,7 @@ STDMETHODIMP CWmsProviders::get_Item(LONG Index, IWmsProvider** pVal)
 	if (Index < 0 || Index >= static_cast<long>(_providers.size()))
 	{
 		*pVal = NULL;
-		//ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
 

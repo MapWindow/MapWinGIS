@@ -26,7 +26,7 @@ bool BingBaseProvider::Initialize()
 	BasicAuth basicAuth;
 	CNTLMAuthObject ntlmAuth;
 
-	InitHttpClient(httpClient, basicAuth, ntlmAuth);
+	InitProxy(httpClient, basicAuth, ntlmAuth);
 
 	CAtlNavigateData navData;
 

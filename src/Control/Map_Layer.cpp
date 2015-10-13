@@ -680,7 +680,7 @@ void CMapView::GrabLayerProjection( Layer* layer )
 					}
 					else
 					{
-						this->SetGeoProjection(newProj);
+						SetGeoProjection(newProj);
 						newProj->Release();
 					}
 				}

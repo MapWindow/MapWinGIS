@@ -24,8 +24,8 @@
 class TileManager
 {
 public:
-	TileManager()
-		: _map(NULL)
+	TileManager(bool isBackground)
+		: _map(NULL), _lastZoom(-1), _lastProvider(-1), _isBackground(isBackground)
 	{
 		_doRamCaching = true;
 		_doDiskCaching = false;
@@ -34,16 +34,19 @@ public:
 		_useServer = true;
 		_lastZoom = -1;
 		_lastProvider = tkTileProvider::ProviderNone;
-		// TODO: initialize members
+		_scalingRatio = 1.0;
 	}
 
 private:
-	// to avoid duplicate consecutive requests
-	::CCriticalSection _tilesBufferLock;
-	vector<TileCore*> _tiles;
 	TileLoader _tileLoader;
 	TileLoader _prefetchLoader;
 	IMapViewCallback* _map;
+	double _scalingRatio;
+	bool _isBackground;			    // this is background TMS layer associated with ITiles (screen buffer can be scaled on zooming)
+
+	// can be wrapped in a separate class
+	::CCriticalSection _tilesBufferLock;
+	vector<TileCore*> _tiles;
 
 	Extent _projExtents;			// extents of the world under current projection; in WGS84 it'll be (-180, 180, -90, 90)
 	bool _projExtentsNeedUpdate;	// do we need to update bounds in m_projExtents on the next request?
@@ -60,6 +63,8 @@ private:
 	bool _useServer;
 
 private:
+	void UpdateScreenBuffer();
+	bool IsBackground() { return _isBackground; }
 	void BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<CTilePoint*>& activeTasks, vector<CTilePoint*>& points);
 	void GetActiveTasks(std::vector<CTilePoint*>& activeTasks, int providerId, int zoom, int generation, CRect indices);
 	bool IsNewRequest(Extent& mapExtents, CRect indices, int providerId, int zoom);
@@ -72,7 +77,9 @@ private:
 
 public:
 	// properties
-	void set_MapCallback(IMapViewCallback* map) { _map = map; }
+	void set_MapCallback(IMapViewCallback* map) { 
+		_map = map; 
+	}
 	IMapViewCallback* get_MapCallback() { return _map; }
 	bool TileIsInBuffer(int providerId, int zoom, int x, int y);
 	bool useDiskCache() { return _useDiskCache ;}
@@ -85,6 +92,8 @@ public:
 	void doRamCaching(bool value) { _doRamCaching = value; }
 	bool useServer() { return _useServer; }
 	void useServer(bool value) { _useServer = value; }
+	double scalingRatio() { return _scalingRatio; }
+	void scalingRatio(double value) { _scalingRatio = value; }
 	TileLoader* get_Prefetcher() { return &_prefetchLoader; }
 	TileLoader* get_Loader() { return &_tileLoader; }
 	void CopyBuffer(vector<TileCore*>& buffer);

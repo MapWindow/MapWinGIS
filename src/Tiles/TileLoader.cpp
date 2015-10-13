@@ -227,9 +227,9 @@ void TileLoader::Stop()
 		++it;
 	}*/
 
-	this->StopCaching();
-	
-	this->CleanTasks();
+	StopCaching();
+
+	CleanTasks();
 }
 
 // *******************************************************

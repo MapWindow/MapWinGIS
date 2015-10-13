@@ -42,6 +42,7 @@ class ATL_NO_VTABLE CTiles :
 {
 public:
 	CTiles()
+		: _manager(true)
 	{
 		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
@@ -92,7 +93,6 @@ public:
 		
 		_minScaleToCache = 0;
 		_maxScaleToCache = 100;
-		_scalingRatio = 1.0;
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_TILES)
@@ -194,15 +194,15 @@ private:
 	long _lastErrorCode;
 	ICallback * _globalCallback;
 	BSTR _key;
-	double _scalingRatio;
+	
 	bool _visible;
 	bool _gridLinesVisible;
 	int _minScaleToCache;
 	int _maxScaleToCache;
 	ITileProviders* _providers;
 	IWmsProviders* _wmsProviders;
-	
 	CStringW _logPath;
+
 public:
 	TileManager _manager;
 	BaseProvider* _provider;
@@ -214,12 +214,11 @@ private:
 
 public:
 	// properties
-	TileManager& get_Manager() { return _manager; }
+	TileManager* get_Manager() { return &_manager; }
 	BaseProvider* get_Provider() { return _provider; }
 
 public:
-	void Init(void* map) {	_manager.set_MapCallback(reinterpret_cast<IMapViewCallback*>(map)); }
-	
+	void Init(IMapViewCallback* map) {_manager.set_MapCallback(map); }
 	long PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop);
 	void LoadTiles(bool isSnapshot = false, CString key = "");
 	void LoadTiles(bool isSnapshot, int providerId, CString key = "");

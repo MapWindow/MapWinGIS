@@ -8,7 +8,7 @@
 // ************************************************************
 //		get_TileManager
 // ************************************************************
-TileManager& CMapView::get_TileManager()
+TileManager* CMapView::get_TileManager()
 {
 	return ((CTiles*)_tiles)->get_Manager();
 }
@@ -17,7 +17,7 @@ TileManager& CMapView::get_TileManager()
 //		GetTilesForMap
 // ************************************************************
 // Returns zoom level and indices to be loaded for the specific provider, given current map extents.
-bool CMapView::get_TilesForMap(void* p, CRect& indices, int& zoom)
+bool CMapView::get_TilesForMap(void* p, double scalingRatio, CRect& indices, int& zoom)
 {
 	BaseProvider* provider = reinterpret_cast<BaseProvider*>(p);
 	if (!provider) {
@@ -31,19 +31,11 @@ bool CMapView::get_TilesForMap(void* p, CRect& indices, int& zoom)
 
 	Extent clipExtents = _extents;
 	bool clipForTiles = get_TileProviderBounds(provider, clipExtents);
+	
+	Extent bounds;
+	GetGeographicExtentsInternal(clipForTiles, &clipExtents, bounds);
 
-	// we don't want to have coordinates outside world bounds, as it breaks tiles loading
-	IExtents* ext = GetGeographicExtentsCore(clipForTiles, &clipExtents);
-	if (!ext) return false;
-
-	Extent bounds(ext);
-	ext->Release();
-
-	double xMaxD, xMinD, yMaxD, yMinD, zMaxD, zMinD;
-	ext->GetBounds(&xMinD, &yMinD, &zMinD, &xMaxD, &yMaxD, &zMaxD);
-
-	double scalingRatio = 1.0;
-	zoom = ChooseZoom(bounds, scalingRatio, true, provider);
+	zoom = ChooseZoom(provider, bounds, scalingRatio, true);
 
 	provider->get_Projection()->getTileRectXY(bounds, zoom, indices);
 
@@ -53,7 +45,7 @@ bool CMapView::get_TilesForMap(void* p, CRect& indices, int& zoom)
 // ************************************************************
 //		ChooseZoom()
 // ************************************************************
-int CMapView::ChooseZoom(Extent ext, double scalingRatio, bool limitByProvider, BaseProvider* provider)
+int CMapView::ChooseZoom(BaseProvider* provider, Extent ext, double scalingRatio, bool limitByProvider)
 {
 	if (!provider) return 1;
 
@@ -89,6 +81,22 @@ int CMapView::ChooseZoom(Extent ext, double scalingRatio, bool limitByProvider, 
 	provider->get_Projection()->GetTileMatrixMaxXY(bestZoom, s2);
 
 	return bestZoom;
+}
+
+// ************************************************************
+//		ChooseZoom()
+// ************************************************************
+int CMapView::ChooseZoom(void* provider, double scalingRatio, bool limitByProvider)
+{
+	if (!provider) return -1;
+
+	Extent bounds;
+	if (GetGeographicExtentsInternal(false, NULL, bounds))
+	{
+		return ChooseZoom((BaseProvider*)provider, bounds, scalingRatio, limitByProvider);
+	}
+
+	return -1;
 }
 
 // ************************************************************
@@ -216,5 +224,39 @@ void CMapView::UpdateTileProjection()
 		if (!vb) {
 			ErrorMessage(tkMAP_TILES_TRANSFORM_FAILED);
 		}
+	}
+}
+
+// ****************************************************************
+//		TileProvider()
+// ****************************************************************
+void CMapView::SetTileProvider(tkTileProvider provider)
+{
+	tkTileProvider oldProvider = GetTileProvider();
+	if (provider != oldProvider)
+	{
+		if (provider == tkTileProvider::ProviderNone) {
+			_tiles->put_Visible(VARIANT_FALSE);
+		}
+		else {
+			_tiles->put_Provider(provider);
+			_tiles->put_Visible(VARIANT_TRUE);
+		}
+		RedrawWithTiles(RedrawMinimal, false, false);
+	}
+}
+
+tkTileProvider CMapView::GetTileProvider()
+{
+	VARIANT_BOOL vb;
+	_tiles->get_Visible(&vb);
+	if (!vb) {
+		return tkTileProvider::ProviderNone;
+	}
+	else
+	{
+		tkTileProvider provider;
+		_tiles->get_Provider(&provider);
+		return provider;
 	}
 }

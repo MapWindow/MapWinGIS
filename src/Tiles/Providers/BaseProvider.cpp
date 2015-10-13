@@ -88,7 +88,7 @@ bool BaseProvider::CheckConnection(CString url)
 // ************************************************************
 // passing authorization object in such way it ugly, but allocating them dynamically might 
 // give even more troubles
-bool BaseProvider::InitHttpClient(HttpClientEx& httpClient, BasicAuth& basicAuth, CNTLMAuthObject& ntlmAuth)
+bool BaseProvider::InitProxy(HttpClientEx& httpClient, BasicAuth& basicAuth, CNTLMAuthObject& ntlmAuth)
 {
 	// otherwise it will query zone settings in IE for that URL
 	// if the setting is anything other than URLPOLICY_CREDENTIALS_SILENT_LOGON_OK it will fail
@@ -144,12 +144,12 @@ void ReportHttpError(int httpStatus, DWORD socketError)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
 {
-	HttpClientEx httpClient; //this->GetHttpClient();
+	HttpClientEx httpClient;
 	CAtlNavigateData navData;
 
 	BasicAuth basicAuth; 
 	CNTLMAuthObject ntlmAuth;
-	InitHttpClient(httpClient, basicAuth, ntlmAuth);      // rename
+	InitProxy(httpClient, basicAuth, ntlmAuth);
 
 	char* body = NULL;
 	int bodyLen = 0;
@@ -226,8 +226,10 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		bmp->LoadFromRawData(body, bodyLen);
 		bmp->Provider = this->Id;
 	}
-	if (body)
+
+	if (body) {
 		delete [] body;
+	}
 	
 	if (!result && !recursive && (_httpStatus == -1 || bodyLen == 0))
 	{
@@ -236,6 +238,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		tilesLogger.Log("Reloading attempt: " + m_globalSettings.useShortUrlForTiles ? shortUrl : urlStr);
 		bmp = this->GetTileImageUsingHttp(urlStr, shortUrl, true);
 	}
+
 	return bmp;
 }
 #pragma endregion

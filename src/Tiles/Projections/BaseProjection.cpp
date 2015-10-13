@@ -147,6 +147,6 @@ void BaseProjection::getTileRectXY(Extent extentsWgs84, int zoom, CRect &rect)
 
 	rect.left = p1.x;
 	rect.right = p2.x;
-	rect.top = p1.y;
-	rect.bottom = p2.y;
+	rect.top = MAX(p1.y, p2.y);
+	rect.bottom = MIN(p1.y, p2.y);
 }

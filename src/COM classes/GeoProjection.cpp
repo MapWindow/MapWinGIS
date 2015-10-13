@@ -1064,47 +1064,44 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	*retval = VARIANT_FALSE;
+
 	if (_isFrozen)
 	{
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
-		*retval = VARIANT_FALSE;
+		return S_OK;
 	}
-	else
+	
+
+	if (!target)
 	{
-		*retval = VARIANT_FALSE;
-
-#ifdef _DEBUG
-	gMemLeakDetect.stopped = true;
-#endif
-		if (!target)
-		{
-			this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-			return S_OK;
-		}
-		
-		VARIANT_BOOL vbretval;
-		target->get_IsEmpty(&vbretval);
-		
-		if (vbretval)
-		{
-			this->ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
-			return S_OK;
-		}
-
-		OGRSpatialReference* projTarget = ((CGeoProjection*)target)->get_SpatialReference();
-
-		StopTransform();
-
-		_transformation = OGRCreateCoordinateTransformation ( _projection, projTarget );
-
-		if (!_transformation)
-		{
-			ErrorMessage(tkFAILED_TO_REPROJECT);
-			return S_OK;
-		}
-		
-		*retval = VARIANT_TRUE;
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
 	}
+
+	VARIANT_BOOL vbretval;
+	target->get_IsEmpty(&vbretval);
+
+	if (vbretval)
+	{
+		ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
+		return S_OK;
+	}
+
+	OGRSpatialReference* projTarget = ((CGeoProjection*)target)->get_SpatialReference();
+
+	StopTransform();
+
+	_transformation = OGRCreateCoordinateTransformation(_projection, projTarget);
+
+	if (!_transformation)
+	{
+		ErrorMessage(tkFAILED_TO_REPROJECT);
+		return S_OK;
+	}
+
+	*retval = VARIANT_TRUE;
+	
 	return S_OK;
 }
 

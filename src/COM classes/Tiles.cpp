@@ -42,10 +42,9 @@ void CTiles::Stop()
 {
 	_manager.get_Loader()->Stop();
 
-	_visible = false;	// will prevent reloading tiles after remove all layers in map destructor
+	put_Visible(VARIANT_FALSE);   // will prevent reloading tiles after remove all layers in map destructor
 }
 
-#pragma region "ErrorHandling"
 // ************************************************************
 //		ClearPrefetchErrors()
 // ************************************************************
@@ -189,7 +188,7 @@ STDMETHODIMP CTiles::put_SleepBeforeRequestTimeout(long newVal)
 STDMETHODIMP CTiles::get_ScalingRatio(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _scalingRatio;
+	*pVal = _manager.scalingRatio();;
 	return S_OK;
 }
 
@@ -202,7 +201,8 @@ STDMETHODIMP CTiles::put_ScalingRatio(double newVal)
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return S_OK;
 	}
-	_scalingRatio = newVal;
+
+	_manager.scalingRatio(newVal);
 
 	return S_OK;
 }
@@ -284,15 +284,11 @@ STDMETHODIMP CTiles::get_CurrentZoom(int* retVal)
 
 	*retVal = -1;
 
-	// TODO: update
-	/*CMapView* map = (CMapView*)this->_mapView;
+	IMapViewCallback* map = _manager.get_MapCallback();
 	if (map) {
-	IExtents* ext = map->GetGeographicExtents();
-	if (ext) {
-	*retVal = this->ChooseZoom(ext, map->GetPixelsPerDegree(), false, m_provider);
-	ext->Release();
+		*retVal = map->_ChooseZoom(_provider, _manager.scalingRatio(), false);
 	}
-	}*/
+
 	return S_OK;
 }
 
@@ -308,7 +304,7 @@ bool CTiles::TilesAreInScreenBuffer(IMapViewCallback* map)
 	int zoom;
 	CRect indices;
 	
-	if (!map->get_TilesForMap(_provider, indices, zoom)) {
+	if (!map->_GetTilesForMap(_provider, _manager.scalingRatio(), indices, zoom)) {
 		return true;
 	}
 	
@@ -341,7 +337,7 @@ bool CTiles::TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId)
 	CRect indices;
 	int zoom;
 
-	if (!map->get_TilesForMap(_provider, indices, zoom)) {
+	if (!map->_GetTilesForMap(_provider, _manager.scalingRatio(), indices, zoom)) {
 		return true;
 	}
 	
@@ -382,10 +378,12 @@ void CTiles::LoadTiles(bool isSnapshot, CString key)
 void CTiles::LoadTiles(bool isSnapshot, int providerId, CString key)
 {
 	// any provider can be passed (for caching or snapshot)
-	if (_visible) return;
+	if (!_visible) return;
 	
 	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
-	_manager.LoadTiles(provider, isSnapshot, key);
+	if (provider) {
+		_manager.LoadTiles(provider, isSnapshot, key);
+	}
 }
 
 // *********************************************************
@@ -975,6 +973,13 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 STDMETHODIMP CTiles::get_ProviderId(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!_visible)
+	{
+		*retVal = -1;
+		return S_OK;
+	}
+
 	*retVal = _provider->Id;
 	return S_OK;
 }
@@ -982,6 +987,8 @@ STDMETHODIMP CTiles::get_ProviderId(int* retVal)
 STDMETHODIMP CTiles::put_ProviderId(int providerId)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	put_Visible(providerId == -1 ? VARIANT_FALSE: VARIANT_TRUE);
 
 	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
 

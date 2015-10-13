@@ -322,7 +322,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	{
 		ReloadBuffers();
 
-		get_TileManager().MarkUndrawn();		// otherwise they will be taken from screen buffer
+		get_TileManager()->MarkUndrawn();		// otherwise they will be taken from screen buffer
 	}
 
 	IImage * iimg = NULL;

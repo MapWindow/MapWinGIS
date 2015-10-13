@@ -937,6 +937,7 @@ public:
 
 public:
 	IExtents* GetGeographicExtentsCore(bool clipForTiles, Extent* clipExtents = NULL);
+	bool GetGeographicExtentsInternal(bool clipForTiles, Extent* clipExtents, Extent& result);
 	ITiles* GetTilesNoRef(void);
 	bool SendMouseMove();
 	bool SendSelectBoxDrag();
@@ -1016,7 +1017,7 @@ private:
 	IDispatch* SnapShotCore(double left, double right, double top, double bottom, long Width, long Height, 
 								  CDC* snapDC = NULL, float offsetX = 0.0f, float offsetY = 0.0f,
 								  float clipX = 0.0f, float clipY = 0.0f, float clipWidth = 0.0f, float clipHeight = 0.0f);
-	
+
 
 	// ---------------------------------------------
 	//	 Serialization
@@ -1044,7 +1045,6 @@ private:
 	bool SetGeoPosition(double x, double y);
 	void SetCurrentZoomCore(int zoom, bool forceUpdate = false);
 	void SetInitGeoExtents();
-	
 
 	// ---------------------------------------------
 	//	Data layers
@@ -1195,11 +1195,14 @@ private:
 	bool ValidatePreviousExtent();
 	bool MapIsEmpty();
 	void UpdateMapTranformation();
-	int ChooseZoom(Extent ext, double scalingRatio, bool limitByProvider, BaseProvider* provider);
+
+	// tiles
+	int ChooseZoom(BaseProvider* provider, Extent ext, double scalingRatio, bool limitByProvider);
+	int ChooseZoom(void* baseProvider, double scalingRatio, bool limitByProvider);
 	bool get_TileProviderBounds(BaseProvider* provider, Extent& retVal);
-	bool get_TilesForMap(void* provider, CRect& indices, int& zoom);
-	Extent get_Extents() { return _extents; }
-	TileManager& get_TileManager();
+	bool get_TilesForMap(void* p, double scalingRatio, CRect& indices, int& zoom);
+	TileManager* get_TileManager();
+
 #pragma endregion
 
 public:
@@ -1229,7 +1232,11 @@ public:
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) {	FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
 	virtual void _FireTilesLoaded(VARIANT_BOOL isSnapshot, CString key) { FireTilesLoaded(isSnapshot, key); }
-	
+	virtual bool _GetTilesForMap(void* p, double scalingRatio, CRect& indices, int& zoom) { return get_TilesForMap(p, scalingRatio, indices, zoom); }
+	virtual int _ChooseZoom(void* provider, double scalingRatio, bool limitByProvider) { return ChooseZoom(provider, scalingRatio, limitByProvider); }
+	virtual Extent* _GetExtents() { return &_extents; }
+	virtual void _MarkTileBufferChanged() { _tileBuffer.Initialized = false; }
+
 protected:
 
 };

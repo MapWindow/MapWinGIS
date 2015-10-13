@@ -275,7 +275,7 @@ void CMapView::Startup()
 	_rotate = NULL;
 
 	ComHelper::CreateInstance(idTiles, (IDispatch**)&_tiles);
-	((CTiles*)_tiles)->Init((void*)this);
+	((CTiles*)_tiles)->Init(this);
 
 	ComHelper::CreateInstance(idMeasuring, (IDispatch**)&_measuring);
 	ComHelper::CreateInstance(idShapeEditor, (IDispatch**)&_shapeEditor);
@@ -767,7 +767,7 @@ void CMapView::GdiplusShutdown()
 // ***************************************************************
 void CMapView::DoUpdateTiles(bool isSnapshot, CString key)
 {
-	((CTiles*)_tiles)->LoadTiles((void*)this, isSnapshot, key);		// simply move the to the screen buffer (is performed synchronously)
+	((CTiles*)_tiles)->LoadTiles(isSnapshot, key);		// simply move the to the screen buffer (is performed synchronously)
 }
 
 // ***************************************************************
@@ -893,3 +893,6 @@ IDrawingRectangle* CMapView::GetFocusRectangle()
 	}
 	return _focusRectangle;
 }
+
+
+

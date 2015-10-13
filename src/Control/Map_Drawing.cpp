@@ -71,7 +71,6 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 	m_drawMutex.Unlock();
 }
 
-
 // ***************************************************************
 //		HandleNewDrawing()
 // ***************************************************************
@@ -265,11 +264,11 @@ void CMapView::RedrawTiles(Gdiplus::Graphics* g, CDC* dc)
 		{
 			//if (tiles->TilesAreInScreenBuffer((void*)this))
 			{
-				get_TileManager().MarkUndrawn();
+				get_TileManager()->MarkUndrawn();
 				
 				DrawTiles(g);
 
-				get_TileManager().MarkUndrawn();
+				get_TileManager()->MarkUndrawn();
 			}
 		}
 		else
@@ -518,7 +517,6 @@ void CMapView::RenderSelectedPixels(vector<long>& handles, CShapefileDrawer& dra
 // ***************************************************************
 //		UpdateTileBuffer
 // ***************************************************************
-// TODO: revisit
 void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 {
 	CTiles* tiles = (CTiles*)_tiles;
@@ -574,11 +572,11 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 	}
 
 	if (initialization) {
-		get_TileManager().MarkUndrawn();
+		get_TileManager()->MarkUndrawn();
 	}	
 
 	// drawing new tiles
-	if (initialization || tiles->get_Manager().UndrawnTilesExist()) {
+	if (initialization || tiles->get_Manager()->UndrawnTilesExist()) {
 		DrawTiles(gTiles);		
 	}
 }
@@ -718,7 +716,7 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 
 	CTiles* tiles = (CTiles*)_tiles;
 
-	drawer.DrawTiles(&tiles->get_Manager(), PixelsPerMapUnit(), GetMapProjection(), 
+	drawer.DrawTiles(get_TileManager(), PixelsPerMapUnit(), GetMapProjection(), 
 					 tiles->get_Provider(), _isSnapshot, _projectionChangeCount);
 }
 

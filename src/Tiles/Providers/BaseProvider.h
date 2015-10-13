@@ -184,7 +184,7 @@ public:
 	CString get_UrlFormat() { return _urlFormat; }
 
 	bool CheckConnection(CString url);
-	bool InitHttpClient(HttpClientEx& httpClient, BasicAuth& basicAuth, CNTLMAuthObject& ntlmAuth);
+	bool InitProxy(HttpClientEx& httpClient, BasicAuth& basicAuth, CNTLMAuthObject& ntlmAuth);
 
 	// proxy support
 	short get_ProxyPort() {return m_proxyPort;}

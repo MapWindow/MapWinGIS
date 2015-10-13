@@ -17,7 +17,7 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- #include "stdafx.h"
+#include "stdafx.h"
 #include "TileManager.h"
 #include "map.h"
 #include "SQLiteCache.h"
@@ -35,7 +35,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	CRect indices;
 	int zoom;
 
-	if (GetTileIndices(provider, indices, zoom)) {
+	if (!GetTileIndices(provider, indices, zoom)) {
 		return;
 	}
 
@@ -98,27 +98,28 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 // *********************************************************
 bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zoom)
 {
-	Extent mapExtents = _map->get_Extents();
+	Extent* mapExtents = _map->_GetExtents();
 
-	if (_lastMapExtents == mapExtents && _lastProvider == provider->Id)
+	if (_lastMapExtents == *mapExtents && _lastProvider == provider->Id)
 	{
 		tilesLogger.WriteLine("Duplicate request is dropped.");
 		return false;
 	}
 
-	if (!_map->get_TilesForMap(provider, indices, zoom))
+	if (!_map->_GetTilesForMap(provider, _scalingRatio, indices, zoom))
 	{
 		return false;
 	}
 
-	if (!IsNewRequest(mapExtents, indices, provider->Id, zoom)){
+	if (!IsNewRequest(*mapExtents, indices, provider->Id, zoom)){
 		return false;
 	}
 
+	// to apply API key for example
 	if (!provider->Initialize())
 	{
 		Clear();
-		//((CMapView*)mapView)->_tileBuffer.Initialized = false;
+		UpdateScreenBuffer();
 		return false;
 	}
 
@@ -129,7 +130,7 @@ bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zo
 // *********************************************************
 //	     BuildLoadingList()
 // *********************************************************
-void TileManager::BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<CTilePoint*>& points, vector<CTilePoint*>& activeTasks)
+void TileManager::BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<CTilePoint*>& activeTasks, vector<CTilePoint*>& points)
 {
 	CPoint center = indices.CenterPoint();
 
@@ -311,8 +312,7 @@ void TileManager::ClearBuffer()
 
 	_tilesBufferLock.Unlock();
 
-	// TODO: implement
-	//((CMapView*)mapView)->_tileBuffer.Initialized = false;
+	UpdateScreenBuffer();
 }
 
 // *********************************************************
@@ -327,8 +327,7 @@ bool TileManager::IsNewRequest(Extent& mapExtents, CRect indices, int providerId
 		// map extents has changed but the list of tiles to be displayed is the same
 		tilesLogger.WriteLine("The same list of tiles can be used.");
 
-		// TODO: implement
-		//((CMapView*)mapView)->_tileBuffer.Initialized = false;
+		UpdateScreenBuffer();
 
 		return false;
 	}
@@ -500,7 +499,17 @@ void TileManager::CopyBuffer(vector<TileCore*>& buffer)
 	_tilesBufferLock.Lock();
 
 	buffer.reserve(_tiles.size());
-	copy(_tiles.begin(), _tiles.end(), buffer.begin());
+	copy(_tiles.begin(), _tiles.end(), inserter(buffer, buffer.end()));
 
 	_tilesBufferLock.Unlock();
+}
+
+// ************************************************************
+//		UpdateScreenBuffer()
+// ************************************************************
+void TileManager::UpdateScreenBuffer()
+{
+	if (_isBackground) {
+		_map->_MarkTileBufferChanged();
+	}
 }

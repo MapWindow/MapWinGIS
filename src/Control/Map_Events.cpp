@@ -1432,7 +1432,7 @@ void CMapView::OnSize(UINT nType, int cx, int cy)
 	else
 	{
 		_isSizing = false;
-		get_TileManager().Clear();	// this will clear screen buffer and current extents
+		get_TileManager()->Clear();	// this will clear screen buffer and current extents
 									// otherwise no change of extents will be detected
 									// hence tiles in the buffer won't marked as not drawn
 									// while the screen buffer is actually empty
