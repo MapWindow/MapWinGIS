@@ -29,6 +29,7 @@
 #include "TileLoader.h"
 #include "WmsCustomProvider.h"
 #include "TileManager.h"
+#include "SQLiteCache.h"
 using namespace std;
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -42,7 +43,7 @@ class ATL_NO_VTABLE CTiles :
 {
 public:
 	CTiles()
-		: _manager(true)
+		: _manager(true), _prefetchLoader(tctDiskCache)   // TODO: bulk downloader loader must not be stored in class
 	{
 		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
@@ -139,7 +140,7 @@ public:
 	STDMETHOD(get_MaxScaleToCache)(int* pVal);
 	STDMETHOD(put_MaxScaleToCache)(int newVal);
 	STDMETHOD(ClearCache)(tkCacheType type);
-	STDMETHOD(ClearCache2)(tkCacheType type, tkTileProvider provider, int fromScale = 0, int toScale = 100);
+	STDMETHOD(ClearCache2)(tkCacheType type, int providerId, int fromScale = 0, int toScale = 100);
 	STDMETHOD(get_CacheSize)(tkCacheType type, double* retVal);
 	STDMETHOD(get_CacheSize2)(tkCacheType type, tkTileProvider provider, int scale, double* retVal);
 	STDMETHOD(Serialize)(BSTR* retVal);
@@ -198,6 +199,7 @@ private:
 	int _maxScaleToCache;
 	ITileProviders* _providers;
 	CStringW _logPath;
+	TileLoader _prefetchLoader;		// TODO: move to separate class
 
 public:
 	TileManager _manager;
@@ -206,12 +208,13 @@ public:
 private:
 	void ErrorMessage(long ErrorCode);
 	void SetAuthorization(BSTR userName, BSTR password, BSTR domain);
-	TileLoader* get_Prefetcher() { return _manager.get_Prefetcher(); }
+	SQLiteCache* get_SqliteCache() { return dynamic_cast<SQLiteCache*>(TileCacheManager::get_Cache(tctSqliteCache)); }
 
 public:
 	// properties
 	TileManager* get_Manager() { return &_manager; }
 	BaseProvider* get_Provider() { return _provider; }
+	
 
 public:
 	void Init(IMapViewCallback* map) {_manager.set_MapCallback(map); }

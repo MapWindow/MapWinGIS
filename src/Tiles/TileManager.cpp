@@ -25,6 +25,22 @@
 #include "LoadingTask.h"
 #include "RamCache.h"
 
+// ************************************************************
+//		InitCaches()
+// ************************************************************
+void TileManager::InitCaches()
+{
+	_ramCache.doCaching = true;
+	_ramCache.useCache = true;
+	_ramCache.cache = TileCacheManager::get_Cache(tctRamCache);
+	_caches.push_back(&_ramCache);
+
+	_diskCache.doCaching = false;
+	_diskCache.useCache = true;
+	_diskCache.cache = TileCacheManager::get_Cache(tctSqliteCache);
+	_caches.push_back(&_diskCache);
+}
+
 // *********************************************************
 //	     LoadTiles()
 // *********************************************************
@@ -51,7 +67,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	int generation = _tileLoader.NextGeneration();
 
 	//  check which ones we already have, and which ones are to be loaded
-	std::vector<CTilePoint*> activeTasks;
+	std::vector<TilePoint*> activeTasks;
 	if (!isSnapshot)
 	{
 		GetActiveTasks(activeTasks, provider->Id, zoom, generation, indices);
@@ -59,7 +75,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 
 	// loads tiles available in the cache to the buffer
 	// builds list of tiles to be loaded from server
-	std::vector<CTilePoint*> points;
+	std::vector<TilePoint*> points;
 	BuildLoadingList(provider, indices, zoom, activeTasks, points);
 
 	if (!isSnapshot) {
@@ -71,7 +87,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 
 	UnlockDiskCache();
 
-	TileLoader* loader = isSnapshot ? &_prefetchLoader : &_tileLoader;
+	TileLoader* loader = &_tileLoader;
 
 	loader->RunCaching();
 
@@ -88,8 +104,8 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 		FireTilesLoaded(isSnapshot, key);
 	}
 
-	ReleaseMemory(activeTasks);
-	ReleaseMemory(points);
+	TilePoint::ReleaseMemory(activeTasks);
+	TilePoint::ReleaseMemory(points);
 }
 
 // *********************************************************
@@ -125,11 +141,10 @@ bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zo
 	return true;
 }
 
-
 // *********************************************************
 //	     BuildLoadingList()
 // *********************************************************
-void TileManager::BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<CTilePoint*>& activeTasks, vector<CTilePoint*>& points)
+void TileManager::BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<TilePoint*>& activeTasks, vector<TilePoint*>& points)
 {
 	CPoint center = indices.CenterPoint();
 
@@ -169,33 +184,33 @@ void TileManager::BuildLoadingList(BaseProvider* provider, CRect indices, int zo
 
 			_tilesBufferLock.Unlock();
 
-			if (found)
+			if (found) {
 				continue;
+			}
 
-			if (_useRamCache)
+			// seeking through available caches
+			for (size_t i = 0; i < _caches.size(); i++)
 			{
-				TileCore* tile = RamCache::get_Tile(provider->Id, zoom, x, y);
-				if (tile)
+				if (_caches[i]->useCache) 
 				{
-					AddTileNoCaching(tile);
-					continue;
+					TileCore* tile = _caches[i]->cache->get_Tile(provider, zoom, x, y);
+					if (tile)
+					{
+						AddTileNoCaching(tile);
+						found = true;
+						break;
+					}
 				}
 			}
 
-			if (_useDiskCache)
-			{
-				TileCore* tile = SQLiteCache::get_Tile(provider, zoom, x, y);
-				if (tile)
-				{
-					AddTileNoCaching(tile);
-					continue;
-				}
+			if (found) {
+				continue;
 			}
 
 			// if the tile isn't present in both caches, request it from the server
 			if (_useServer)
 			{
-				CTilePoint* pnt = new CTilePoint(x, y);
+				TilePoint* pnt = new TilePoint(x, y);
 				pnt->dist = sqrt(pow((pnt->x - center.x), 2.0) + pow((pnt->y - center.y), 2.0));
 				points.push_back(pnt);
 			}
@@ -233,24 +248,14 @@ void TileManager::Clear()
 }
 
 // *********************************************************
-//	     ReleaseMemory()
-// *********************************************************
-void TileManager::ReleaseMemory(vector<CTilePoint*> points)
-{
-	for (size_t i = 0; i < points.size(); i++) {
-		delete points[i];
-	}
-}
-
-// *********************************************************
 //	     UnlockDiskCache()
 // *********************************************************
 void TileManager::UnlockDiskCache()
 {
-	if (_useDiskCache)
+	if (_diskCache.useCache)
 	{
 		// caching will be stopped while loading tiles to avoid locking the database and speed up things
-		SQLiteCache::m_locked = false;
+		_diskCache.cache->Unlock();
 	}
 }
 
@@ -259,13 +264,10 @@ void TileManager::UnlockDiskCache()
 // *********************************************************
 void TileManager::InitializeDiskCache()
 {
-	if (_doDiskCaching)  {
-		SQLiteCache::Initialize(SqliteOpenMode::OpenOrCreate);
-	}
-
-	if (_useDiskCache)	{
-		SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists);
-		SQLiteCache::m_locked = true;	// caching will be stopped while loading tiles to avoid locking the database
+	_diskCache.cache->Initialize(_diskCache.useCache, _diskCache.doCaching);
+	if (_diskCache.useCache)
+	{
+		_diskCache.cache->Lock();	// caching will be stopped while loading tiles to avoid locking the database
 	}
 }
 
@@ -342,7 +344,7 @@ bool TileManager::IsNewRequest(Extent& mapExtents, CRect indices, int providerId
 // *********************************************************
 //	     GetActiveTasks()
 // *********************************************************
-void TileManager::GetActiveTasks(vector<CTilePoint*>& activeTasks, int providerId, int zoom, int generation, CRect indices)
+void TileManager::GetActiveTasks(vector<TilePoint*>& activeTasks, int providerId, int zoom, int generation, CRect indices)
 {
 	// lock it, so active task can't be removed while we analyze it here
 	_tileLoader.LockActiveTasks(true);
@@ -353,7 +355,7 @@ void TileManager::GetActiveTasks(vector<CTilePoint*>& activeTasks, int providerI
 	while (it != list.end())
 	{
 		LoadingTask* task = (LoadingTask*)*it;
-		if (task->Provider->Id == providerId &&
+		if (task->get_Provider()->Id == providerId &&
 			task->zoom() == zoom &&
 			task->x() >= indices.left &&
 			task->x() <= indices.right &&
@@ -363,7 +365,7 @@ void TileManager::GetActiveTasks(vector<CTilePoint*>& activeTasks, int providerI
 			tilesLogger.WriteLine("Tile reassigned to current generation: %d\\%d\\%d", zoom, task->x(), task->y());
 
 			task->generation(generation);								// reassign it to current generation
-			activeTasks.push_back(new CTilePoint(task->x(), task->y()));    // don't include in current list of requests
+			activeTasks.push_back(new TilePoint(task->x(), task->y()));    // don't include in current list of requests
 		}
 
 		++it;
@@ -403,7 +405,7 @@ void TileManager::AddTileNoCaching(TileCore* tile)
 // *********************************************************
 void TileManager::AddTileOnlyCaching(TileCore* tile)
 {
-	if (_doDiskCaching) {
+	if (_diskCache.doCaching) {
 		_tileLoader.ScheduleForCaching(tile);
 	}
 }
@@ -413,8 +415,9 @@ void TileManager::AddTileOnlyCaching(TileCore* tile)
 // *********************************************************
 void TileManager::AddTileToRamCache(TileCore* tile) 
 {
-	if (_doRamCaching) {
-		RamCache::AddToCache(tile);
+	if (_ramCache.doCaching)
+	{
+		_ramCache.cache->AddTile(tile);
 	}
 }
 
@@ -512,3 +515,4 @@ void TileManager::UpdateScreenBuffer()
 		_map->_MarkTileBufferChanged();
 	}
 }
+

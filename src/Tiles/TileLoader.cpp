@@ -24,6 +24,39 @@
 #include "Tiles.h"
 
 ::CCriticalSection TileLoader::_callbackLock;
+::CCriticalSection TileLoaderFactory::_lock;
+vector<TileLoader*> TileLoaderFactory::_loaders;
+
+// *******************************************************
+//		Create()
+// *******************************************************
+TileLoader* TileLoaderFactory::Create(CacheType type)
+{
+	TileLoader* loader = new TileLoader(type);
+
+	_lock.Lock();
+	_loaders.push_back(loader);
+	_lock.Unlock();
+
+	return loader;
+}
+
+// *******************************************************
+//		Clear()
+// *******************************************************
+void TileLoaderFactory::Clear()
+{
+	_lock.Lock();
+
+	for (size_t i = 0; i < _loaders.size(); i++)
+	{
+		delete _loaders[i];
+	}
+
+	_loaders.clear();
+
+	_lock.Unlock();
+}
 
 // *******************************************************
 //		LockActiveTasks()
@@ -73,9 +106,11 @@ void TileLoader::RemoveActiveTask(void* t)
 bool TileLoader::HasActiveTask(void* t)
 {
 	_activeTasksLock.Lock();
+
 	LoadingTask* task = (LoadingTask*)t;
 	list<void*>::iterator it = _activeTasks.begin();
 	bool found = false;
+
 	while (it != _activeTasks.end())
 	{
 		LoadingTask* item = (LoadingTask*)*it;
@@ -86,7 +121,9 @@ bool TileLoader::HasActiveTask(void* t)
 		}
 		++it;
 	}
+
 	_activeTasksLock.Unlock();
+
 	return found;
 }
 
@@ -114,6 +151,7 @@ bool TileLoader::InitPools()
 		if(!SUCCEEDED( hr ))
 			CallbackHelper::ErrorMsg("Failed to initialize thread pool (2) for tile loading.");
 	}
+
 	return _pool && _pool2;
 }
 
@@ -121,11 +159,12 @@ bool TileLoader::InitPools()
 //		Load()
 // *******************************************************
 //	Creates tasks for tile points and enqueues them in thread pool
-void TileLoader::Load(std::vector<CTilePoint*> &points, BaseProvider* provider, int zoom,
+void TileLoader::Load(std::vector<TilePoint*> &points, BaseProvider* provider, int zoom,
 					  bool isSnapshot, CString key, int generation, bool cacheOnly)
 {
 	_key = key;
 	_isSnapshot = isSnapshot;
+
 	if (isSnapshot) {
 		_tileGeneration++;
 		generation = _tileGeneration;
@@ -138,7 +177,7 @@ void TileLoader::Load(std::vector<CTilePoint*> &points, BaseProvider* provider, 
 
 	pool->SetSize(m_globalSettings.GetTilesThreadPoolSize());
 
-	pool->SetTimeout(100000);		// 100 seconds (low rate limit may be set)
+	pool->SetTimeout(100000);		// 100 seconds (lower rate limit may be set)
 
 	tilesLogger.WriteLine("Tiles requested; generation = %d", generation);
 
@@ -150,15 +189,16 @@ void TileLoader::Load(std::vector<CTilePoint*> &points, BaseProvider* provider, 
 	CleanTasks();
 
 	sort(points.begin(), points.end(), &compPoints);
+
 	for ( size_t i = 0; i < points.size(); i++ ) 
 	{
 		LoadingTask* task = new LoadingTask(points[i]->x, points[i]->y, zoom, provider, generation, cacheOnly);
-		task->Loader = this;
+		task->set_Loader(this);
 		_tasks.push_back(task);
 		pool->QueueRequest( (ThreadWorker::RequestType) task );
 	}
 }
-bool compPoints(CTilePoint* p1, CTilePoint* p2)
+bool compPoints(TilePoint* p1, TilePoint* p2)
 {
 	return p1->dist < p2->dist;
 }
@@ -187,6 +227,7 @@ void TileLoader::TileLoaded(TileCore* tile)
 	{
 		VARIANT_BOOL stop;
 		_stopCallback->StopFunction(&stop);
+
 		if (stop && !_stopped)
 		{
 			_stopped = true;
@@ -212,17 +253,6 @@ void TileLoader::Stop()
 	// they use around 30 bytes of memory, so just let it leak.
 
 	_stopped = true;
-
-	/// notify the provider
-	/*list<void*>::iterator it = m_tasks.begin();
-	while (it != m_tasks.end())
-	{
-		LoadingTask* task = (LoadingTask*)*it;
-		if (task) {
-			task->Provider->IsStopped = true;
-		}
-		++it;
-	}*/
 
 	StopCaching();
 
@@ -256,8 +286,7 @@ void TileLoader::CleanTasks()
 // *******************************************************
 void TileLoader::StopCaching()
 {
-	_diskCacher.stopped = true;
-	_sqliteCacher.stopped = true;
+	_cacher->Stop();
 }
 
 // *******************************************************
@@ -267,16 +296,8 @@ void TileLoader::ScheduleForCaching(TileCore* tile)
 {
 	if (tile)
 	{
-		if (_doCacheSqlite)
-		{
-			tile->AddRef();
-			_sqliteCacher.Enqueue(tile);
-		}
-		if (_doCacheDisk)
-		{
-			tile->AddRef();
-			_diskCacher.Enqueue(tile);
-		}
+		tile->AddRef();
+		_cacher->Enqueue(tile);
 	}
 }
 
@@ -285,18 +306,5 @@ void TileLoader::ScheduleForCaching(TileCore* tile)
 // *******************************************************
 void TileLoader::RunCaching()
 {
-	if (_doCacheSqlite)
-	{
-		_sqliteCacher.Run();
-	}
-	if (_doCacheDisk)
-	{
-		_diskCacher.Run();
-	}
+	_cacher->Run();
 }
-
-
-
-
-
-

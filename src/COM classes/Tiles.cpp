@@ -31,6 +31,7 @@
 #include "TileHelper.h"
 #include "LoadingTask.h"
 #include "CustomTileProvider.h"
+#include "TileCacheManager.h"
 
 ::CCriticalSection m_tilesBufferSection;
 
@@ -51,7 +52,7 @@ STDMETHODIMP CTiles::ClearPrefetchErrors()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	get_Prefetcher()->ResetErrorCount();
+	_prefetchLoader.ResetErrorCount();
 
 	return S_OK;
 }
@@ -62,7 +63,7 @@ STDMETHODIMP CTiles::ClearPrefetchErrors()
 STDMETHODIMP CTiles::get_PrefetchTotalCount(int *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = get_Prefetcher()->get_SumCount();
+	*retVal = _prefetchLoader.get_SumCount();
 	return S_OK;
 }
 
@@ -72,7 +73,7 @@ STDMETHODIMP CTiles::get_PrefetchTotalCount(int *retVal)
 STDMETHODIMP CTiles::get_PrefetchErrorCount(int *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = get_Prefetcher()->get_ErrorCount();
+	*retVal = _prefetchLoader.get_ErrorCount();
 	return S_OK;
 }
 
@@ -165,7 +166,7 @@ STDMETHODIMP CTiles::get_SleepBeforeRequestTimeout(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = get_Prefetcher()->get_SleepBeforeRequestTimeout();
+	*pVal = _prefetchLoader.get_SleepBeforeRequestTimeout();
 
 	return S_OK;
 }
@@ -175,7 +176,7 @@ STDMETHODIMP CTiles::put_SleepBeforeRequestTimeout(long newVal)
 
 	if (newVal > 10000) newVal = 10000;
 	if (newVal < 0) newVal = 0;
-	get_Prefetcher()->set_SleepBeforeRequestTimeout(newVal);
+	_prefetchLoader.set_SleepBeforeRequestTimeout(newVal);
 
 	return S_OK;
 }
@@ -343,18 +344,22 @@ bool CTiles::TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId)
 	{
 		for (int y = indices.bottom; y <= indices.top; y++)
 		{
-			bool found = _manager.TileIsInBuffer(provider->Id, zoom, x, y);
-
-			if (!found && _manager.useRamCache())
-			{
-				TileCore* tile = RamCache::get_Tile(provider->Id, zoom, x, y);
-				if (tile)	found = true;
+			if (_manager.TileIsInBuffer(provider->Id, zoom, x, y)) {
+				continue;
 			}
 
-			if (!found && _manager.useDiskCache())
+			bool found = false;			
+
+			vector<TileCacheInfo*>& caches = _manager.get_AllCaches();
+			for (size_t i = 0; i < caches.size(); i++)
 			{
-				TileCore* tile = SQLiteCache::get_Tile(provider, zoom, x, y);
-				if (tile)	found = true;
+				if (caches[i]->useCache)
+				{
+					if (caches[i]->cache->get_TileExists(provider, zoom, x, y))
+					{
+						found = true;
+					}
+				}
 			}
 
 			if (!found)
@@ -509,40 +514,18 @@ STDMETHODIMP CTiles::get_Providers(ITileProviders** retVal)
 STDMETHODIMP CTiles::get_DoCaching(tkCacheType type, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	switch(type)
-	{
-		case tkCacheType::RAM:
-			*pVal = _manager.doRamCaching();
-			break;
-		case tkCacheType::Disk:
-			*pVal = _manager.doDiskCaching();
-			break;
-		case tkCacheType::Both:
-			*pVal = _manager.doRamCaching() || _manager.doDiskCaching();
-			break;
-		default:
-			*pVal = VARIANT_FALSE;
-			break;
-	}
+
+	*pVal = _manager.get_Cache(type)->doCaching ? VARIANT_TRUE : VARIANT_FALSE;
+	
 	return S_OK;
 }
+
 STDMETHODIMP CTiles::put_DoCaching(tkCacheType type, VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	switch(type)
-	{
-		case tkCacheType::RAM:
-			_manager.doRamCaching(newVal != 0);
-			break;
-		case tkCacheType::Disk:
-			_manager.doDiskCaching(newVal != 0);
-			break;
-		case tkCacheType::Both:
-			bool val = newVal != 0;
-			_manager.doDiskCaching(val);
-			_manager.doRamCaching(val);
-			break;
-	}
+
+	_manager.get_Cache(type)->doCaching = newVal ? true : false;
+
 	return S_OK;
 }
 
@@ -552,40 +535,17 @@ STDMETHODIMP CTiles::put_DoCaching(tkCacheType type, VARIANT_BOOL newVal)
 STDMETHODIMP CTiles::get_UseCache(tkCacheType type, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	switch(type)
-	{
-		case tkCacheType::RAM:
-			*pVal = _manager.useRamCache();
-			break;
-		case tkCacheType::Disk:
-			*pVal = _manager.useDiskCache();
-			break;
-		case tkCacheType::Both:
-			*pVal = _manager.useRamCache() || _manager.useDiskCache();
-			break;
-		default:
-			*pVal = VARIANT_FALSE;
-			break;
-	}
+
+	*pVal = _manager.get_Cache(type)->useCache ? VARIANT_TRUE : VARIANT_FALSE;
+	
 	return S_OK;
 }
 STDMETHODIMP CTiles::put_UseCache(tkCacheType type, VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	switch(type)
-	{
-		case tkCacheType::RAM:
-			_manager.useRamCache(newVal != 0);
-			break;
-		case tkCacheType::Disk:
-			_manager.useDiskCache(newVal != 0);
-			break;
-		case tkCacheType::Both:
-			bool val = newVal != 0;
-			_manager.useRamCache(val);
-			_manager.useDiskCache(val);
-			break;
-	}
+
+	_manager.get_Cache(type)->useCache = newVal ? true : false;
+
 	return S_OK;
 }
 
@@ -598,6 +558,7 @@ STDMETHODIMP CTiles::get_UseServer(VARIANT_BOOL* pVal)
 	*pVal = _manager.useServer();
 	return S_OK;
 }
+
 STDMETHODIMP CTiles::put_UseServer(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -612,7 +573,10 @@ STDMETHODIMP CTiles::get_DiskCacheFilename(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
-	*retVal = W2BSTR(SQLiteCache::get_DbName());
+
+	SQLiteCache* cache = get_SqliteCache();
+	*retVal = cache != NULL ? W2BSTR(cache->get_DbName()) : m_globalSettings.CreateEmptyBSTR();
+	
 	return S_OK;
 }
 
@@ -622,8 +586,10 @@ STDMETHODIMP CTiles::get_DiskCacheFilename(BSTR* retVal)
 STDMETHODIMP CTiles::put_DiskCacheFilename(BSTR pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	USES_CONVERSION;
-	SQLiteCache::set_DbName(OLE2W(pVal));
+	_manager.get_DiskCache()->cache->set_Filename(OLE2W(pVal));
+
 	return S_OK;
 }
 
@@ -633,35 +599,23 @@ STDMETHODIMP CTiles::put_DiskCacheFilename(BSTR pVal)
 STDMETHODIMP CTiles::get_MaxCacheSize(tkCacheType type, double* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	switch(type)
-	{
-		case tkCacheType::RAM:
-			*pVal =  RamCache::m_maxSize;
-			break;
-		case tkCacheType::Disk:
-			*pVal = SQLiteCache::maxSizeDisk;
-			break;
-		default:
-			*pVal = 0;
-			break;
-	}
+
+	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+	*pVal = cache ? cache->get_MaxSize() : 0.0;
+
 	return S_OK;
 }
+
 STDMETHODIMP CTiles::put_MaxCacheSize(tkCacheType type, double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	switch(type)
+
+	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+	if (cache)
 	{
-		case tkCacheType::RAM:
-			RamCache::m_maxSize = newVal;
-			break;
-		case tkCacheType::Disk:
-			SQLiteCache::maxSizeDisk = newVal;
-			break;
-		case tkCacheType::Both:
-			RamCache::m_maxSize = SQLiteCache::maxSizeDisk = newVal;
-			break;
+		cache->set_MaxSize(newVal);
 	}
+	
 	return S_OK;
 }
 
@@ -671,41 +625,29 @@ STDMETHODIMP CTiles::put_MaxCacheSize(tkCacheType type, double newVal)
 STDMETHODIMP CTiles::ClearCache(tkCacheType type)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	switch(type)
+
+	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+	if (cache)
 	{
-		case tkCacheType::RAM:
-			RamCache::ClearByProvider(tkTileProvider::ProviderNone, 0, 100);
-			break;
-		case tkCacheType::Disk:
-			SQLiteCache::Clear(tkTileProvider::ProviderNone, 0, 100);
-			break;
-		case tkCacheType::Both:
-			RamCache::ClearAll(0, 100);
-			SQLiteCache::Clear(tkTileProvider::ProviderNone, 0, 100);
-			break;
+		cache->Clear(tkTileProvider::ProviderNone, 0, 100);
 	}
+	
 	return S_OK;
 }
 
 // *********************************************************
 //	     ClearCache2()
 // *********************************************************
-STDMETHODIMP CTiles::ClearCache2(tkCacheType type, tkTileProvider provider, int fromScale, int toScale)
+STDMETHODIMP CTiles::ClearCache2(tkCacheType type, int providerId, int fromScale, int toScale)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	switch(type)
+
+	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+	if (cache)
 	{
-		case tkCacheType::RAM:
-			RamCache::ClearByProvider(provider, fromScale, toScale);
-			break;
-		case tkCacheType::Disk:
-			SQLiteCache::Clear(provider, fromScale, toScale);
-			break;
-		case tkCacheType::Both:
-			SQLiteCache::Clear(provider, fromScale, toScale);
-			RamCache::ClearByProvider(provider, fromScale, toScale);
-			break;
+		cache->Clear(providerId, fromScale, toScale);
 	}
+	
 	return S_OK;
 }
 
@@ -715,19 +657,15 @@ STDMETHODIMP CTiles::ClearCache2(tkCacheType type, tkTileProvider provider, int 
 STDMETHODIMP CTiles::get_CacheSize(tkCacheType type, double* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*retVal = 0.0;
-	switch(type)
+
+	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+	if (cache)
 	{
-		case tkCacheType::RAM:
-			*retVal = RamCache::get_MemorySize();
-			break;
-		case tkCacheType::Disk:
-			*retVal = SQLiteCache::get_FileSize();
-			break;
-		case tkCacheType::Both:
-			*retVal = 0.0;		// it hardly makes sense to show sum of both values or any of it separately
-			break;
+		*retVal = cache->get_SizeMB();
 	}
+	
 	return S_OK;
 }
 
@@ -738,19 +676,9 @@ STDMETHODIMP CTiles::get_CacheSize(tkCacheType type, double* retVal)
 STDMETHODIMP CTiles::get_CacheSize2(tkCacheType type, tkTileProvider provider, int scale, double* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = 0.0;
-	switch(type)
-	{
-		case tkCacheType::RAM:
-			*retVal = RamCache::get_MemorySize(provider, scale);
-			break;
-		case tkCacheType::Disk:
-			*retVal = SQLiteCache::get_FileSize(provider, scale);
-			break;
-		case tkCacheType::Both:
-			*retVal = 0.0;	// it doesn't make sense to return any of the two
-			break;
-	}
+
+	*retVal = _manager.get_Cache(type)->cache->get_SizeMB();
+	
 	return S_OK;
 }
 
@@ -782,26 +710,32 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 	if (_provider->Id != 0)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Provider", CPLString().Printf("%d", (int)_provider->Id));
 
-	if (!_manager.doRamCaching())
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoRamCaching", CPLString().Printf("%d", (int)_manager.doRamCaching()));
+	bool value = _manager.get_RamCache()->doCaching;
+	if (!value)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoRamCaching", CPLString().Printf("%d", (int)value));
 
-	if (_manager.doDiskCaching())
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoDiskCaching", CPLString().Printf("%d", (int)_manager.doDiskCaching()));
+	value = _manager.get_DiskCache()->doCaching;
+	if (value)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoDiskCaching", CPLString().Printf("%d", (int)value));
 
-	if (!_manager.useRamCache())
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseRamCache", CPLString().Printf("%d", (int)_manager.useRamCache()));
+	value = _manager.get_RamCache()->useCache;
+	if (!value)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseRamCache", CPLString().Printf("%d", (int)value));
 
-	if (!_manager.useDiskCache())
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseDiskCache", CPLString().Printf("%d", (int)_manager.useDiskCache()));
+	value = _manager.get_DiskCache()->useCache;
+	if (!value)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseDiskCache", CPLString().Printf("%d", (int)value));
 
 	if (!_manager.useServer())
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseServer", CPLString().Printf("%d", (int)_manager.useServer()));
 
-	if (RamCache::m_maxSize != 100.0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxRamCacheSize", CPLString().Printf("%f", RamCache::m_maxSize));
+	double dbl = _manager.get_RamCache()->cache->get_MaxSize();
+	if (dbl != 100.0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxRamCacheSize", CPLString().Printf("%f", dbl));
 
-	if (SQLiteCache::maxSizeDisk != 100.0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxDiskCacheSize", CPLString().Printf("%f", SQLiteCache::maxSizeDisk));
+	dbl = _manager.get_DiskCache()->cache->get_MaxSize();
+	if (dbl != 100.0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxDiskCacheSize", CPLString().Printf("%f", dbl));
 
 	if (_minScaleToCache != 0)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinScaleToCache", CPLString().Printf("%d", _minScaleToCache));
@@ -809,7 +743,7 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 	if (_maxScaleToCache != 100)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxScaleToCache", CPLString().Printf("%d", _maxScaleToCache));
 	
-	CStringW dbName = SQLiteCache::get_DbName();
+	CStringW dbName = _manager.get_DiskCache()->cache->get_Filename();
 	if (dbName.GetLength() != 0)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", dbName);
 	
@@ -893,16 +827,16 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 
 	bool temp;
 	setBoolean(node, "DoRamCaching", temp);
-	_manager.doRamCaching(temp);
+	_manager.get_RamCache()->doCaching = temp;
 
 	setBoolean(node, "DoDiskCaching", temp);
-	_manager.doDiskCaching(temp);
+	_manager.get_DiskCache()->doCaching = temp;
 
 	setBoolean(node, "UseRamCache", temp);
-	_manager.useRamCache(temp);
+	_manager.get_RamCache()->useCache = temp;
 
 	setBoolean(node, "UseDiskCache", temp);
-	_manager.useDiskCache(temp);
+	_manager.get_DiskCache()->useCache = temp;
 
 	setBoolean(node, "UseServer", temp);
 	_manager.useServer(temp);
@@ -910,14 +844,21 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 	CString s = CPLGetXMLValue( node, "Provider", NULL );
 	if (s != "") this->put_ProviderId(atoi( s ));
 
-	setDouble(node, "MaxRamCacheSize", RamCache::m_maxSize);
-	setDouble(node, "MaxDiskCacheSize", SQLiteCache::maxSizeDisk);
+	double dbl;
+	setDouble(node, "MaxRamCacheSize", dbl);
+	_manager.get_RamCache()->cache->set_MaxSize(dbl);
+
+	setDouble(node, "MaxDiskCacheSize", dbl);
+	_manager.get_DiskCache()->cache->set_MaxSize(dbl);
+
 	setInteger(node, "MinScaleToCache", _minScaleToCache);
 	setInteger(node, "MaxScaleToCache", _maxScaleToCache);
 	
 	USES_CONVERSION;
 	s = CPLGetXMLValue( node, "DiskCacheFilename", NULL );
-	if (s != "") SQLiteCache::set_DbName(Utility::ConvertFromUtf8(s));
+	if (s != "")  {
+		_manager.get_DiskCache()->cache->set_Filename(Utility::ConvertFromUtf8(s));
+	}
 
 	// custom providers
 	CPLXMLNode* nodeProviders = CPLGetXMLNode(node, "TileProviders");
@@ -1181,6 +1122,7 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 // *********************************************************
 //	     PrefetchCore()
 // *********************************************************
+// TODO: split into parts
 long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, 
 								  BSTR savePath, BSTR fileExt, IStopExecution* stop)
 {
@@ -1215,38 +1157,32 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 	{
 		path += L"\\";
 	}
-	CacheType type = path.GetLength() > 0 ? CacheType::DiskCache : CacheType::SqliteCache;
+	
+	CacheType type = path.GetLength() > 0 ? CacheType::tctDiskCache : CacheType::tctSqliteCache;
 
-	if (type == CacheType::DiskCache)
+	DiskCache* diskCache = NULL;
+	SQLiteCache* sqliteCache = NULL;
+
+	if (type == CacheType::tctDiskCache)
 	{
-		CString ext = OLE2A(fileExt);
-		DiskCache::ext = ext;
-		DiskCache::rootPath = path;
-		DiskCache::encoder = "image/png";	// default
-			
-		if (ext.GetLength() >= 4)
-		{
-			CStringW s = ext.Mid(0, 4).MakeLower(); // try to guess it from input
-			if (s == ".png")
-			{
-				DiskCache::encoder = "image/png";
-			}
-			else if (s == ".jpg")
-			{
-				DiskCache::encoder = "image/jpeg";
-			}
-		}
+		diskCache = dynamic_cast<DiskCache*>(TileCacheManager::get_Cache(tctDiskCache));
+		diskCache->InitializePath(path, OLE2W(fileExt));
 	}
 
-	std::vector<CTilePoint*> points;
+	if (type == CacheType::tctSqliteCache)
+	{
+		sqliteCache = dynamic_cast<SQLiteCache*>(TileCacheManager::get_Cache(tctSqliteCache));
+	}
+
+	std::vector<TilePoint*> points;
 	for (int x = minX; x <= maxX; x++)
 	{
 		for (int y = minY; y <= maxY; y++)
 		{
-			if ((type == CacheType::SqliteCache && !SQLiteCache::get_Exists(provider, zoom, x, y)) || 
-					type == CacheType::DiskCache && !DiskCache::get_TileExists(zoom, x, y))
+			if ((type == tctSqliteCache && !sqliteCache->get_TileExists(provider, zoom, x, y)) ||
+					type == tctDiskCache && !diskCache->get_TileExists(provider, zoom, x, y))
 			{
-				CTilePoint* pnt = new CTilePoint(x, y);
+				TilePoint* pnt = new TilePoint(x, y);
 				pnt->dist = sqrt(pow((pnt->x - centX), 2.0) + pow((pnt->y - centY), 2.0));
 				points.push_back(pnt);
 			}
@@ -1255,44 +1191,48 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 
 	if (points.size() > 0)
 	{
-		get_Prefetcher()->set_DiskCaching(type == CacheType::SqliteCache);
-		get_Prefetcher()->set_SqliteCaching(type == CacheType::DiskCache);
+		TileLoader* loader = TileLoaderFactory::Create(type);
 			
-		if (type == CacheType::SqliteCache)
+		if (type == CacheType::tctSqliteCache)
 		{
-			SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists);
+			sqliteCache->Initialize(SqliteOpenMode::OpenIfExists);
 		}
 		else 
 		{
-			DiskCache::CreateFolders(zoom, points);
+			diskCache->CreateFolders(zoom, points);
 		}
 
-		get_Prefetcher()->set_StopCallback(stop);
-
-		if (_globalCallback)
-		{
-			get_Prefetcher()->set_Callback(_globalCallback);
-		}
+		loader->set_StopCallback(stop);
+		loader->set_Callback(_globalCallback);
+		
 			
 		// actual call to do the job
-		get_Prefetcher()->Load(points, provider, zoom, false, "", 0, true);
+		loader->Load(points, provider, zoom, false, "", 0, true);
 
+		
 		for (size_t i = 0; i < points.size(); i++)
 		{
 			delete points[i];
 		}
+
 		return points.size();
 	}
+
 	return 0;
 }
 
 // *********************************************************
 //	     get_DiskCacheCount
 // *********************************************************
-STDMETHODIMP CTiles::get_DiskCacheCount(int provider, int zoom, int xMin, int xMax, int yMin, int yMax, LONG* retVal)
+STDMETHODIMP CTiles::get_DiskCacheCount(int providerId, int zoom, int xMin, int xMax, int yMin, int yMax, LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = SQLiteCache::get_TileCount(provider, zoom, xMin, xMax, yMin, yMax);
+
+	SQLiteCache* cache = get_SqliteCache();
+	if (cache) {
+		cache->get_TileCount(providerId, zoom, xMin, xMax, yMin, yMax);
+	}
+	
 	return S_OK;
 }
 

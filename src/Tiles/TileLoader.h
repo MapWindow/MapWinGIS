@@ -17,28 +17,54 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // lsu 17 apr 2012 - created the file
-
-#pragma once
+ #pragma once
 #include <list>
 #include "baseprovider.h"
 #include "tilecacher.h"
+#include "TileCacheManager.h"
+#include "ITileCache.h"
 
 #define THREADPOOL_SIZE	5
+class TileLoader;
 
 // ******************************************************
-//    CTilePoint()
+//    TilePoint
 // ******************************************************
 // A point with X, Y coordinates and distance from center of screen
-class CTilePoint: public CPoint
+class TilePoint: public CPoint
 {
 public:
-	double dist;
-	CTilePoint(int x, int y)
-		: CPoint(x, y), dist(0.0) {}
-};
-bool compPoints(CTilePoint* p1, CTilePoint* p2);
+	TilePoint(int x, int y)
+		: CPoint(x, y), dist(0.0)
+	{
+	}
 
+public:
+	double dist;
+
+public:
+	static void ReleaseMemory(vector<TilePoint*>& points)
+	{
+		for (size_t i = 0; i < points.size(); i++) {
+			delete points[i];
+		}
+	}
+};
+
+bool compPoints(TilePoint* p1, TilePoint* p2);
+
+// ******************************************************
+//    TileLoaderFactory()
+// ******************************************************
+class TileLoaderFactory
+{
+private:
+	static vector<TileLoader*> _loaders;
+	static ::CCriticalSection _lock;
+public:
+	static TileLoader* Create(CacheType type);
+	static void Clear();
+};
 
 // ******************************************************
 //    TileLoader()
@@ -47,18 +73,17 @@ bool compPoints(CTilePoint* p1, CTilePoint* p2);
 class TileLoader
 {
 public:
-	TileLoader::TileLoader()
+	// TODO: how to disable caching?
+	TileLoader::TileLoader(CacheType cacheType)
 		: _pool(NULL), _pool2(NULL), _callback(NULL), _stopCallback(NULL)
 	{
-		_diskCacher.cacheType = CacheType::DiskCache;
-		_sqliteCacher.cacheType = CacheType::SqliteCache;
+		ITileCache* cache = TileCacheManager::get_Cache(cacheType);
+		_cacher = new TileCacher(cache);
+
 		_tileGeneration = 0;
 	
 		_stopped = false;
-		_doCacheSqlite = true;
-		_doCacheDisk = false;
 		_isSnapshot = false;
-
 		_errorCount = 0;
 		_sumCount = 0;
 		_sleepBeforeRequestTimeout = 0;
@@ -74,10 +99,13 @@ public:
 			_pool->Shutdown(50);   // will result in TerminateThread call after 50ms delay
 			delete _pool;
 		}
+
 		if (_pool2 != NULL) {
 			_pool2->Shutdown(50);  // will result in TerminateThread call after 50ms delay
 			delete _pool2;
 		}
+
+		delete _cacher;
 	}
 
 private:
@@ -86,16 +114,14 @@ private:
 	// but it's quite desirable to start the processing of new requests ASAP
 	CThreadPool<ThreadWorker>* _pool;
 	CThreadPool<ThreadWorker>* _pool2;
-	list<void*> _tasks;
-	TileCacher _sqliteCacher;
-	TileCacher _diskCacher;
+	list<void*> _tasks;			// all the scheduled tasks
+	list<void*> _activeTasks;	// HTTP requests being currently performed
+	::CCriticalSection _activeTasksLock;
+	TileCacher* _cacher;
 	bool _isSnapshot;
 	CString _key;
-	std::list<void*> _activeTasks;	// HTTP requests being currently performed
-	::CCriticalSection _activeTasksLock;
 	bool _stopped;
-	bool _doCacheSqlite;
-	bool _doCacheDisk;
+	bool _doCaching;
 	int _tileGeneration;
 	long _sleepBeforeRequestTimeout;
 	int _totalCount;
@@ -117,8 +143,6 @@ public:
 	CString get_Key() { return _key; }
 	std::list<void*> GetActiveTasks() { return _activeTasks; }
 	bool isStopped() { return _stopped; }
-	void set_DiskCaching(bool value) { _doCacheDisk = value; }
-	void set_SqliteCaching(bool value) { _doCacheSqlite = value; }
 	void set_Callback(ICallback* callback) { _callback = callback; }
 	void set_StopCallback(IStopExecution* callback) { _stopCallback = callback; }
 	int get_TileGeneration() { return _tileGeneration; }
@@ -131,7 +155,7 @@ public:
 
 public:
 	//methods
-	void Load(vector<CTilePoint*> &points, BaseProvider* provider, int zoom, bool isSnaphot, CString key, int generation, bool cacheOnly = false);
+	void Load(vector<TilePoint*> &points, BaseProvider* provider, int zoom, bool isSnaphot, CString key, int generation, bool cacheOnly = false);
 	void LockActiveTasks(bool lock);
 	void AddActiveTask(void* task);
 	void RemoveActiveTask(void* task);

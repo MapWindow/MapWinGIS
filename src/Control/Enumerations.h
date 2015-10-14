@@ -89,8 +89,10 @@ enum tkTransformationMode
 };
 enum CacheType 
 { 
-	SqliteCache = 0, 
-	DiskCache = 1, 
+	// must match tkCacheType enumeration
+	tctRamCache = 0,
+	tctSqliteCache = 1, 
+	tctDiskCache = 2, 
 };
 
 enum HandleImage

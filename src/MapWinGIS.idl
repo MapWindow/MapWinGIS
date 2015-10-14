@@ -1152,7 +1152,6 @@ enum tkScalebarUnits
 	{	
 		[helpstring("")]RAM = 0,
 		[helpstring("")]Disk = 1,
-		[helpstring("")]Both = 2,
 	} tkCacheType;
 
 	typedef  
@@ -5689,7 +5688,7 @@ interface ITiles : IDispatch{
 	
 	[id(11), helpstring("")] HRESULT ClearCache([in]tkCacheType cacheType);
 	[id(12), helpstring("")] HRESULT ClearCache2([in]tkCacheType cacheType, 
-												 [in]tkTileProvider provider, 
+												 [in]int providerId, 
 												 [in, optional, defaultvalue(0)]int fromScale, 
 												 [in, optional, defaultvalue(100)]int toScale);
 	

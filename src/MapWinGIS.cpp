@@ -103,8 +103,7 @@ int CMapWinGISApp::ExitInstance()
 	// both caches are stored in static variables; 
 	// we clear them explicitly to be able to use memory leaking detection tool;
 	// otherwise the tool reports hundreds of false leaks; so it's difficult to find relevant ones
-	RamCache::Close();
-	SQLiteCache::Close();
+	TileCacheManager::CloseAll();
 
 	parser::ReleaseFunctions();
 

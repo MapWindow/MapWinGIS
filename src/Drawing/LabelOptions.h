@@ -24,10 +24,8 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file
 
 #pragma once
-#include "enumerations.h"
 #include "RotatedRectangle.h"
 #include "cpl_minixml.h"
-
 
 class CLabelOptions
 {

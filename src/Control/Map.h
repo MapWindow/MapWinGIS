@@ -222,7 +222,6 @@ public:
 	afx_msg void SetLayerLabels(LONG LayerHandle, ILabels* pVal);
 
 	afx_msg IOgrLayer* GetOgrLayer(LONG LayerHandle);
-	//afx_msg void SetOgrLayer(LONG LayerHandle, IShapefile* pVal);
 
 	afx_msg IWmsLayer* GetWmsLayer(LONG LayerHandle);
 

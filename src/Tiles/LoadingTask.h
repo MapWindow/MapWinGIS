@@ -10,12 +10,12 @@ class LoadingTask : ITask
 {
 public:
 	LoadingTask(int x, int y, int zoom, BaseProvider* provider, int generation, bool cacheOnly)
-		: _x(x), _y(y), _zoom(zoom), _cacheOnly(cacheOnly), Loader(NULL)
+		: _x(x), _y(y), _zoom(zoom), _cacheOnly(cacheOnly), _loader(NULL)
 	{
 		_busy = false;
 		_completed = false;
 		_generation = generation;
-		Provider = provider;
+		_provider = provider;
 	}
 
 private:
@@ -26,11 +26,8 @@ private:
 	bool _cacheOnly;
 	bool _completed;
 	bool _busy;
-
-public:
-	// TODO: wrap
-	BaseProvider* Provider;
-	TileLoader* Loader;
+	TileLoader* _loader;
+	BaseProvider* _provider;
 
 public:
 	// properties
@@ -42,6 +39,8 @@ public:
 	int cacheOnly() { return _cacheOnly; }
 	int completed() { return _completed; }
 	int busy() { return _busy; }
+	void set_Loader(TileLoader* loader) { _loader = loader; }
+	BaseProvider* get_Provider() { return _provider; }
 
 	bool Compare(LoadingTask* other) {
 		return this->_x == other->_x && this->_y == other->_y && this->_zoom == other->_zoom;

@@ -67,12 +67,6 @@
     <Filter Include="Tiles">
       <UniqueIdentifier>{41e87872-07a9-40e4-9189-b95a36012e5c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tiles\Headers">
-      <UniqueIdentifier>{216653c8-a74a-4b28-b5ec-5f284c3ab7b1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Tiles\Source">
-      <UniqueIdentifier>{c4332e75-9107-47b6-836f-ce8f4ae1d6cf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tiles\Providers">
       <UniqueIdentifier>{53450993-d92b-49bd-ba48-9fcfdb12c188}</UniqueIdentifier>
     </Filter>
@@ -90,6 +84,9 @@
     </Filter>
     <Filter Include="ComHelpers">
       <UniqueIdentifier>{a7a67483-9daa-467e-a255-4f511e28ff39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tiles\Caching">
+      <UniqueIdentifier>{0fcf224e-062b-4548-bddb-0d072143bce2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -522,33 +519,6 @@
     <ClInclude Include="Processing\GeograpicLib\PolygonArea.hpp">
       <Filter>Processing\GeographicLib</Filter>
     </ClInclude>
-    <ClInclude Include="Tiles\DiskCache.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\GeoPoint.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\RamCache.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\SQLiteCache.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\Threading.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\TileCacher.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\TileCore.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\TileHelper.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\TileLoader.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Tiles\Providers\BaseProvider.h">
       <Filter>Tiles\Providers</Filter>
     </ClInclude>
@@ -600,9 +570,6 @@
     </ClInclude>
     <ClInclude Include="MapWinGIS.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Tiles\LoadingTask.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="COM classes\ShapeEditor.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
@@ -888,14 +855,50 @@
     <ClInclude Include="Tiles\Providers\WmsCustomProvider.h">
       <Filter>Tiles\Providers</Filter>
     </ClInclude>
-    <ClInclude Include="Tiles\TileManager.h">
-      <Filter>Tiles\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="ComHelpers\WmsHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
     <ClInclude Include="COM classes\WmsLayer.h">
       <Filter>COM classes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\GeoPoint.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\LoadingTask.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Threading.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\TileCore.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\TileHelper.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\TileLoader.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\TileManager.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\DiskCache.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\RamCache.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\SQLiteCache.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\TileCacher.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\ITileCache.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\TileCacheManager.h">
+      <Filter>Tiles\Caching</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1571,27 +1574,6 @@
     <ClCompile Include="Processing\GeograpicLib\PolygonArea.cpp">
       <Filter>Processing\GeographicLib</Filter>
     </ClCompile>
-    <ClCompile Include="Tiles\DiskCache.cpp">
-      <Filter>Tiles\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Tiles\RamCache.cpp">
-      <Filter>Tiles\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Tiles\SQLiteCache.cpp">
-      <Filter>Tiles\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Tiles\TileCacher.cpp">
-      <Filter>Tiles\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Tiles\TileCore.cpp">
-      <Filter>Tiles\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Tiles\TileHelper.cpp">
-      <Filter>Tiles\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Tiles\TileLoader.cpp">
-      <Filter>Tiles\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Tiles\Providers\BaseProvider.cpp">
       <Filter>Tiles\Providers</Filter>
     </ClCompile>
@@ -1617,9 +1599,6 @@
       <Filter>Control</Filter>
     </ClCompile>
     <ClCompile Include="MapWinGIS.cpp" />
-    <ClCompile Include="Tiles\LoadingTask.cpp">
-      <Filter>Tiles\Source</Filter>
-    </ClCompile>
     <ClCompile Include="COM classes\ShapeEditor.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
@@ -1908,9 +1887,6 @@
     <ClCompile Include="Tiles\Providers\WmsCustomProvider.cpp">
       <Filter>Tiles\Providers</Filter>
     </ClCompile>
-    <ClCompile Include="Tiles\TileManager.cpp">
-      <Filter>Tiles\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Control\Map_Tiles.cpp">
       <Filter>Control</Filter>
     </ClCompile>
@@ -1919,6 +1895,36 @@
     </ClCompile>
     <ClCompile Include="COM classes\WmsLayer.cpp">
       <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\LoadingTask.cpp">
+      <Filter>Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\TileCore.cpp">
+      <Filter>Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\TileHelper.cpp">
+      <Filter>Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\TileLoader.cpp">
+      <Filter>Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\TileManager.cpp">
+      <Filter>Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\DiskCache.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\RamCache.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\SQLiteCache.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\TileCacher.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\TileCacheManager.cpp">
+      <Filter>Tiles\Caching</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

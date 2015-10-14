@@ -18,31 +18,34 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  #pragma once
-#include "BaseProvider.h"
 #include "TileLoader.h"
+#include "ITileCache.h"
 
 class TileManager
 {
 public:
 	TileManager(bool isBackground)
-		: _map(NULL), _lastZoom(-1), _lastProvider(-1), _isBackground(isBackground)
+		: _map(NULL), _lastZoom(-1), _lastProvider(-1), _isBackground(isBackground), 
+		  _tileLoader(CacheType::tctSqliteCache)
 	{
-		_doRamCaching = true;
-		_doDiskCaching = false;
-		_useRamCache = true;
-		_useDiskCache = true;
 		_useServer = true;
 		_lastZoom = -1;
 		_lastProvider = tkTileProvider::ProviderNone;
 		_scalingRatio = 1.0;
+
+		InitCaches();
 	}
+
+	
 
 private:
 	TileLoader _tileLoader;
-	TileLoader _prefetchLoader;
 	IMapViewCallback* _map;
 	double _scalingRatio;
 	bool _isBackground;			    // this is background TMS layer associated with ITiles (screen buffer can be scaled on zooming)
+	TileCacheInfo _diskCache;
+	TileCacheInfo _ramCache;
+	vector<TileCacheInfo*> _caches;
 
 	// can be wrapped in a separate class
 	::CCriticalSection _tilesBufferLock;
@@ -55,23 +58,18 @@ private:
 	Extent _lastMapExtents;
 	int _lastZoom;
 	int _lastProvider;
-
-	bool _useDiskCache;
-	bool _doDiskCaching;
-	bool _useRamCache;
-	bool _doRamCaching;
 	bool _useServer;
 
 private:
+	void InitCaches();
 	void UpdateScreenBuffer();
 	bool IsBackground() { return _isBackground; }
-	void BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<CTilePoint*>& activeTasks, vector<CTilePoint*>& points);
-	void GetActiveTasks(std::vector<CTilePoint*>& activeTasks, int providerId, int zoom, int generation, CRect indices);
+	void BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<TilePoint*>& activeTasks, vector<TilePoint*>& points);
+	void GetActiveTasks(std::vector<TilePoint*>& activeTasks, int providerId, int zoom, int generation, CRect indices);
 	bool IsNewRequest(Extent& mapExtents, CRect indices, int providerId, int zoom);
 	void ClearBuffer();
 	void DeleteMarkedTilesFromBuffer();
 	void InitializeDiskCache();
-	void ReleaseMemory(vector<CTilePoint*> points);
 	void UnlockDiskCache();
 	bool GetTileIndices(BaseProvider* provider, CRect& indices, int& zoom);
 
@@ -80,21 +78,16 @@ public:
 	void set_MapCallback(IMapViewCallback* map) { _map = map; }
 	IMapViewCallback* get_MapCallback() { return _map; }
 	bool TileIsInBuffer(int providerId, int zoom, int x, int y);
-	bool useDiskCache() { return _useDiskCache ;}
-	void useDiskCache(bool value) { _useDiskCache = value; }
-	bool doDiskCaching() { return _doDiskCaching; }
-	void doDiskCaching(bool value) { _doDiskCaching = value; }
-	bool useRamCache() { return _useRamCache; }
-	void useRamCache(bool value) { _useRamCache = value; }
-	bool doRamCaching() { return _doRamCaching; }
-	void doRamCaching(bool value) { _doRamCaching = value; }
 	bool useServer() { return _useServer; }
 	void useServer(bool value) { _useServer = value; }
 	double scalingRatio() { return _scalingRatio; }
 	void scalingRatio(double value) { _scalingRatio = value; }
-	TileLoader* get_Prefetcher() { return &_prefetchLoader; }
 	TileLoader* get_Loader() { return &_tileLoader; }
 	void CopyBuffer(vector<TileCore*>& buffer);
+	TileCacheInfo* get_DiskCache() { return &_diskCache; }
+	TileCacheInfo* get_RamCache() { return &_ramCache; }
+	TileCacheInfo* get_Cache(tkCacheType type) { return type == Disk ? &_diskCache : &_ramCache; }
+	vector<TileCacheInfo*>& get_AllCaches() { return _caches; }
 
 public:
 	// methods

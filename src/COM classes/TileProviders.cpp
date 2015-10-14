@@ -233,8 +233,9 @@ STDMETHODIMP CTileProviders::Remove(LONG providerId, VARIANT_BOOL clearCache, VA
 				// check, probably the provider is currently in use 
 				int id = -1;
 				_tiles->get_ProviderId(&id);
-				if (p->Id == id)
+				if (p->Id == id) {
 					_tiles->put_Provider(tkTileProvider::OpenStreetMap);
+				}
 			}
 			
 			for (size_t i = 0; i < _providers.size(); i++)
@@ -249,8 +250,8 @@ STDMETHODIMP CTileProviders::Remove(LONG providerId, VARIANT_BOOL clearCache, VA
 
 			if (clearCache)
 			{
-				SQLiteCache::Clear(providerId);
-				RamCache::ClearByProvider(providerId);
+				_tiles->ClearCache2(Disk, providerId);
+				_tiles->ClearCache2(RAM, providerId);
 			}
 			return S_OK;
 		}
@@ -265,11 +266,14 @@ STDMETHODIMP CTileProviders::Clear(VARIANT_BOOL clearCache)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	// make sure no provider is currently in use
-	if (_tiles != NULL) {
+	if (_tiles != NULL) 
+	{
 		tkTileProvider provider;
 		_tiles->get_Provider(&provider);
-		if(provider == tkTileProvider::ProviderCustom)
+
+		if (provider == tkTileProvider::ProviderCustom) {
 			_tiles->put_Provider(tkTileProvider::OpenStreetMap);
+		}
 	}
 	
 	// default providers should remain untouched
@@ -281,8 +285,8 @@ STDMETHODIMP CTileProviders::Clear(VARIANT_BOOL clearCache)
 		{
 			if (clearCache)
 			{
-				SQLiteCache::Clear(p->Id);
-				RamCache::ClearByProvider(p->Id);
+				_tiles->ClearCache2(Disk, p->Id);
+				_tiles->ClearCache2(RAM, p->Id);
 			}
 
 			delete *it;

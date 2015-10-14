@@ -550,7 +550,6 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 	// WMS layer
 	if (iwms != NULL)
 	{
-		// TODO: check if it's properly initialized
 		l = new Layer();
 		l->set_Object(iwms);
 		l->put_LayerType(WmsLayerSource);
