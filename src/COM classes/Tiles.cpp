@@ -25,11 +25,8 @@
 #include "stdafx.h"
 #include "Tiles.h"
 #include "SqliteCache.h"
-#include "RamCache.h"
-#include "map.h"
 #include "DiskCache.h"
 #include "TileHelper.h"
-#include "LoadingTask.h"
 #include "CustomTileProvider.h"
 #include "TileCacheManager.h"
 
@@ -43,38 +40,6 @@ void CTiles::Stop()
 	_manager.get_Loader()->Stop();
 
 	put_Visible(VARIANT_FALSE);   // will prevent reloading tiles after remove all layers in map destructor
-}
-
-// ************************************************************
-//		ClearPrefetchErrors()
-// ************************************************************
-STDMETHODIMP CTiles::ClearPrefetchErrors()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	_prefetchLoader.ResetErrorCount();
-
-	return S_OK;
-}
-
-// ************************************************************
-//		get_PrefetchTotalCount()
-// ************************************************************
-STDMETHODIMP CTiles::get_PrefetchTotalCount(int *retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _prefetchLoader.get_SumCount();
-	return S_OK;
-}
-
-// ************************************************************
-//		get_PrefetchErrorCount()
-// ************************************************************
-STDMETHODIMP CTiles::get_PrefetchErrorCount(int *retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _prefetchLoader.get_ErrorCount();
-	return S_OK;
 }
 
 // ************************************************************
@@ -162,21 +127,22 @@ STDMETHODIMP CTiles::put_Key(BSTR newVal)
 // *********************************************************
 //	     SleepBeforeRequestTimeout()
 // *********************************************************
-STDMETHODIMP CTiles::get_SleepBeforeRequestTimeout(long *pVal)
+STDMETHODIMP CTiles::get_DelayRequestTimeout(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = _prefetchLoader.get_SleepBeforeRequestTimeout();
+	*pVal = _manager.get_Loader()->get_DelayRequestTimeout();
 
 	return S_OK;
 }
-STDMETHODIMP CTiles::put_SleepBeforeRequestTimeout(long newVal)
+STDMETHODIMP CTiles::put_DelayRequestTimeout(long newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (newVal > 10000) newVal = 10000;
 	if (newVal < 0) newVal = 0;
-	_prefetchLoader.set_SleepBeforeRequestTimeout(newVal);
+
+	_manager.get_Loader()->set_DelayRequestTimeout(newVal);
 
 	return S_OK;
 }
@@ -437,13 +403,13 @@ STDMETHODIMP CTiles::get_ProviderName(BSTR* retVal)
 STDMETHODIMP CTiles::get_GridLinesVisible(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _gridLinesVisible;
+	*pVal = _manager.get_GridLinesVisible() ? VARIANT_TRUE : VARIANT_TRUE;
 	return S_OK;
 }
 STDMETHODIMP CTiles::put_GridLinesVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_gridLinesVisible = newVal ? true: false;
+	_manager.set_GridLinesVisible(newVal ? true : false);
 	return S_OK;
 }
 
@@ -572,10 +538,9 @@ STDMETHODIMP CTiles::put_UseServer(VARIANT_BOOL newVal)
 STDMETHODIMP CTiles::get_DiskCacheFilename(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
 
-	SQLiteCache* cache = get_SqliteCache();
-	*retVal = cache != NULL ? W2BSTR(cache->get_DbName()) : m_globalSettings.CreateEmptyBSTR();
+	USES_CONVERSION;
+	*retVal = W2BSTR(_manager.get_DiskCache()->cache->get_Filename());
 	
 	return S_OK;
 }
@@ -704,8 +669,9 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 	if (!_visible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_visible));
 
-	if (_gridLinesVisible)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "GridLinesVisible", CPLString().Printf("%d", (int)_gridLinesVisible));
+	
+	if (_manager.get_GridLinesVisible())
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "GridLinesVisible", CPLString().Printf("%d", (int)_manager.get_GridLinesVisible()));
 
 	if (_provider->Id != 0)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Provider", CPLString().Printf("%d", (int)_provider->Id));
@@ -820,12 +786,14 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 	if (!node)
 		return false;
 
-	this->SetDefaults();
+	SetDefaults();
 
 	setBoolean(node, "Visible", _visible);
-	setBoolean(node, "GridLinesVisible", _gridLinesVisible);
 
 	bool temp;
+	setBoolean(node, "GridLinesVisible", temp);
+	_manager.set_GridLinesVisible(temp);
+	
 	setBoolean(node, "DoRamCaching", temp);
 	_manager.get_RamCache()->doCaching = temp;
 
@@ -1010,91 +978,12 @@ STDMETHODIMP CTiles::Prefetch2(int minX, int maxX, int minY, int maxY, int zoom,
 }
 
 // *********************************************************
-//	     StartLogRequests()
-// *********************************************************
-STDMETHODIMP CTiles::StartLogRequests(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	CStringW path = OLE2W(filename);
-	tilesLogger.Open(path);
-	tilesLogger.errorsOnly = errorsOnly ? true: false;
-	*retVal = tilesLogger.IsOpened();
-	return S_OK;
-}
-
-// *********************************************************
-//	     StopLogRequests()
-// *********************************************************
-STDMETHODIMP CTiles::StopLogRequests()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	tilesLogger.Close();
-	return S_OK;
-}
-
-// *********************************************************
-//	     LogIsOpened()
-// *********************************************************
-STDMETHODIMP CTiles::get_LogIsOpened(VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = tilesLogger.IsOpened();
-	return S_OK;
-}
-
-// *********************************************************
-//	     LogFilename()
-// *********************************************************
-STDMETHODIMP CTiles::get_LogFilename(BSTR* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	*retVal = W2BSTR(tilesLogger.GetFilename());
-	return S_OK;
-}
-
-// *********************************************************
-//	     LogErrorsOnly()
-// *********************************************************
-STDMETHODIMP CTiles::get_LogErrorsOnly(VARIANT_BOOL *retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = tilesLogger.errorsOnly;
-	return S_OK;
-}
-STDMETHODIMP CTiles::put_LogErrorsOnly(VARIANT_BOOL newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	tilesLogger.errorsOnly = newVal ? true: false;
-	return S_OK;
-}
-
-// *********************************************************
 //	     PrefetchToFolder()
 // *********************************************************
 // Writes tiles to the specified folder
 STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = 0;
-	
-	USES_CONVERSION;
-	CStringW path = OLE2W(savePath);
-	if (!Utility::DirExists(path))
-	{
-		ErrorMessage(tkFOLDER_NOT_EXISTS);
-		*retVal = -1;
-		return S_OK;
-	}
-
-	if (tilesLogger.IsOpened())
-	{
-		tilesLogger.out() << "\n";
-		tilesLogger.out() << "PREFETCHING TILES:\n";
-		tilesLogger.out() << "ZOOM " << zoom << endl;
-		tilesLogger.out() << "---------------------" << endl;
-	}
 
 	BaseProvider* p = ((CTileProviders*)_providers)->get_Provider(providerId);
 	if (!p)
@@ -1103,28 +992,17 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 		*retVal = -1;
 		return S_OK;
 	}
-	else
-	{
-		double xMin, xMax, yMin, yMax, zMin, zMax;
-		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 
-		CPoint p1;
-		p->get_Projection()->FromLatLngToXY(PointLatLng(yMin, xMin), zoom, p1);
-
-		CPoint p2;
-		p->get_Projection()->FromLatLngToXY(PointLatLng(yMax, xMax), zoom, p2);
-
-		*retVal = this->PrefetchCore(p1.x, p2.x, MIN(p1.y, p2.y) , MAX(p1.y, p2.y), zoom, providerId, savePath, fileExt, stop);
-	}
+	// TODO: use prefetch manager
+	
 	return S_OK;
 }
 
 // *********************************************************
-//	     PrefetchCore()
+//	     PrefetchCore
 // *********************************************************
-// TODO: split into parts
-long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, 
-								  BSTR savePath, BSTR fileExt, IStopExecution* stop)
+long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId,
+	BSTR savePath, BSTR fileExt, IStopExecution* stop)
 {
 	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
 	if (!provider)
@@ -1133,91 +1011,7 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 		return 0;
 	}
 
-	if (provider->get_MaxZoom() < zoom) 
-	{
-		ErrorMessage(tkINVALID_ZOOM_LEVEL);
-		return 0;
-	}
-	
-	CSize size1, size2;
-	provider->get_Projection()->GetTileMatrixMinXY(zoom, size1);
-	provider->get_Projection()->GetTileMatrixMaxXY(zoom, size2);
-
-	minX = (int)BaseProjection::Clip(minX, size1.cx, size2.cx);
-	maxX = (int)BaseProjection::Clip(maxX, size1.cy, size2.cy);
-	minY = (int)BaseProjection::Clip(minY, size1.cx, size2.cx);
-	maxY = (int)BaseProjection::Clip(maxY, size1.cy, size2.cy);
-		
-	int centX = (maxX + minX)/2;
-	int centY = (maxY + minY)/2;
-
-	USES_CONVERSION;
-	CStringW path = OLE2W(savePath);
-	if (path.GetLength() > 0 && path.GetAt(path.GetLength() - 1) != L'\\')
-	{
-		path += L"\\";
-	}
-	
-	CacheType type = path.GetLength() > 0 ? CacheType::tctDiskCache : CacheType::tctSqliteCache;
-
-	DiskCache* diskCache = NULL;
-	SQLiteCache* sqliteCache = NULL;
-
-	if (type == CacheType::tctDiskCache)
-	{
-		diskCache = dynamic_cast<DiskCache*>(TileCacheManager::get_Cache(tctDiskCache));
-		diskCache->InitializePath(path, OLE2W(fileExt));
-	}
-
-	if (type == CacheType::tctSqliteCache)
-	{
-		sqliteCache = dynamic_cast<SQLiteCache*>(TileCacheManager::get_Cache(tctSqliteCache));
-	}
-
-	std::vector<TilePoint*> points;
-	for (int x = minX; x <= maxX; x++)
-	{
-		for (int y = minY; y <= maxY; y++)
-		{
-			if ((type == tctSqliteCache && !sqliteCache->get_TileExists(provider, zoom, x, y)) ||
-					type == tctDiskCache && !diskCache->get_TileExists(provider, zoom, x, y))
-			{
-				TilePoint* pnt = new TilePoint(x, y);
-				pnt->dist = sqrt(pow((pnt->x - centX), 2.0) + pow((pnt->y - centY), 2.0));
-				points.push_back(pnt);
-			}
-		}
-	}
-
-	if (points.size() > 0)
-	{
-		TileLoader* loader = TileLoaderFactory::Create(type);
-			
-		if (type == CacheType::tctSqliteCache)
-		{
-			sqliteCache->Initialize(SqliteOpenMode::OpenIfExists);
-		}
-		else 
-		{
-			diskCache->CreateFolders(zoom, points);
-		}
-
-		loader->set_StopCallback(stop);
-		loader->set_Callback(_globalCallback);
-		
-			
-		// actual call to do the job
-		loader->Load(points, provider, zoom, false, "", 0, true);
-
-		
-		for (size_t i = 0; i < points.size(); i++)
-		{
-			delete points[i];
-		}
-
-		return points.size();
-	}
-
+	// TODO: use prefetch manager
 	return 0;
 }
 
@@ -1228,6 +1022,7 @@ STDMETHODIMP CTiles::get_DiskCacheCount(int providerId, int zoom, int xMin, int 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	// TODO: add to interface
 	SQLiteCache* cache = get_SqliteCache();
 	if (cache) {
 		cache->get_TileCount(providerId, zoom, xMin, xMax, yMin, yMax);

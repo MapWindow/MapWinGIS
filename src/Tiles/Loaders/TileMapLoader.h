@@ -17,36 +17,48 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-#pragma once
-#include "WmsProviderBase.h"
-#include "CustomProjection.h"
+ #pragma once
+#include "ITileLoader.h"
 
-// *******************************************************
-//		WmsCustomProvider
-// *******************************************************
-// WMS provider which uses projection with arbitrary EPSG code.
-class WmsCustomProvider : public WmsProviderBase
+// ******************************************************
+//    TileMapLoader()
+// ******************************************************
+// Tile loader bound to map display, maintains list of active tasks to avoid 
+// duplicate requests on fast zooming / panning, calls map update after each new tile is loaded.
+class TileMapLoader : public ITileLoader
 {
 public:
-	WmsCustomProvider()
+	TileMapLoader(CacheType cacheType)
 	{
-		_projection = new CustomProjection();
-		_subProviders.push_back(this);
+		ITileCache* cache = TileCacheManager::get_Cache(cacheType);
+		_cacher = new TileCacher(cache);
 	}
 
-	virtual ~WmsCustomProvider() { }
+	virtual ~TileMapLoader(void)
+	{
+		delete _cacher;
+	}
 
-private:
-	CString _layers;
-	CString _format;
+protected:
+	list<void*> _activeTasks;	// HTTP requests being currently performed
+	::CCriticalSection _activeTasksLock;
+	TileCacher* _cacher;
 
 public:
-	virtual CString MakeTileImageUrl(CPoint &pos, int zoom);
+	// properties
+	list<void*>& get_ActiveTasks() { return _activeTasks; }
+	bool IsOutdated(int generation) { return _stopped || generation < _lastGeneration; }
 
-	CustomProjection* get_CustomProjection() { return dynamic_cast<CustomProjection*>(_projection); }
-	void put_UrlFormat(CString baseUrl) { _urlFormat = baseUrl; }
-	CString get_Layers() { return _layers; }
-	void set_Layers(CString value) { _layers = value; }
-	CString get_Format() { return _format; }
-	void set_Format(CString value) { _format = value; }
+public:
+	//methods
+	ILoadingTask* CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation);
+	void LockActiveTasks(bool lock);
+	void AddActiveTask(void* task);
+	void RemoveActiveTask(void* task);
+	bool HasActiveTask(void* task);
+	void StopCaching();
+	void ScheduleForCaching(TileCore* tile);
+	void RunCaching();
+	void Stop();
 };
+

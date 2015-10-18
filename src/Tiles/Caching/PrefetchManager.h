@@ -17,36 +17,26 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-#pragma once
-#include "WmsProviderBase.h"
-#include "CustomProjection.h"
+ #pragma once
+#include "TileBulkLoader.h"
 
-// *******************************************************
-//		WmsCustomProvider
-// *******************************************************
-// WMS provider which uses projection with arbitrary EPSG code.
-class WmsCustomProvider : public WmsProviderBase
+class PrefetchManager
 {
-public:
-	WmsCustomProvider()
+	PrefetchManager(ITileCache* cache)
+		: _loader(cache)
 	{
-		_projection = new CustomProjection();
-		_subProviders.push_back(this);
+			
 	}
 
-	virtual ~WmsCustomProvider() { }
-
 private:
-	CString _layers;
-	CString _format;
+	TileBulkLoader _loader;
+
+public: 
+	// properties
+	TileBulkLoader* get_Loader() { return &_loader; }
 
 public:
-	virtual CString MakeTileImageUrl(CPoint &pos, int zoom);
-
-	CustomProjection* get_CustomProjection() { return dynamic_cast<CustomProjection*>(_projection); }
-	void put_UrlFormat(CString baseUrl) { _urlFormat = baseUrl; }
-	CString get_Layers() { return _layers; }
-	void set_Layers(CString value) { _layers = value; }
-	CString get_Format() { return _format; }
-	void set_Format(CString value) { _format = value; }
+	// methods
+	long PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, BaseProvider* provider, BSTR savePath, BSTR fileExt, IStopExecution* stop);
+	void PrefetchToFolder(IExtents* ext, int zoom, BaseProvider* provider, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal);
 };

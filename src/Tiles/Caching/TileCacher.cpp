@@ -19,8 +19,6 @@
  * (Open source contributors should list themselves and their modifications here). */
 #include "stdafx.h"
 #include "TileCacher.h"
-#include "SqliteCache.h"
-#include "DiskCache.h"
 
 // ***********************************************************
 //		DoTask()
@@ -31,10 +29,20 @@ void CachingTask::DoTask()
 	if (!_cacher->isStopped())
 	{
 		_cacher->get_Cache()->AddTile(_tile);
-		_cacher->Run();	// cache the next tile
+		_cacher->Run();
 	}
 
 	delete this;
+}
+
+// ***********************************************************
+//		Run()
+// ***********************************************************
+void TileCacher::Enqueue(TileCore* tile)
+{
+	_queueLock.Lock();
+	_queue.push(tile);
+	_queueLock.Unlock();
 }
 
 // ***********************************************************

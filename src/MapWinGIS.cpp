@@ -6,8 +6,6 @@
 #include "ShapefileColorBreak.h"
 #include "cpl_conv.h" 
 #include "cpl_string.h"
-#include "SQLiteCache.h"
-#include "RamCache.h"
 #include "map.h"
 #include "Functions.h"
 #include "PointClass.h"

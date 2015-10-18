@@ -1115,3 +1115,64 @@ STDMETHODIMP CGlobalSettings::put_CacheShapeRenderingData(VARIANT_BOOL newVal)
 
 	return S_OK;
 }
+
+// *********************************************************
+//	     LogErrorsOnly()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_LogTileErrorsOnly(VARIANT_BOOL *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		*retVal = tilesLogger.errorsOnly;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_LogTileErrorsOnly(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		tilesLogger.errorsOnly = newVal ? true : false;
+	return S_OK;
+}
+
+// *********************************************************
+//	     StartLogRequests()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::StartLogTileRequests(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	CStringW path = OLE2W(filename);
+	tilesLogger.Open(path);
+	tilesLogger.errorsOnly = errorsOnly ? true : false;
+	*retVal = tilesLogger.IsOpened();
+	return S_OK;
+}
+
+// *********************************************************
+//	     StopLogRequests()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::StopLogTileRequests()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	tilesLogger.Close();
+	return S_OK;
+}
+
+// *********************************************************
+//	     LogIsOpened()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_TileLogIsOpened(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = tilesLogger.IsOpened();
+	return S_OK;
+}
+
+// *********************************************************
+//	     LogFilename()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_TileLogFilename(BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	*retVal = W2BSTR(tilesLogger.GetFilename());
+	return S_OK;
+}

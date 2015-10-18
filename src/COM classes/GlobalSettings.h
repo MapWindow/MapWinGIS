@@ -188,6 +188,12 @@ public:
 	STDMETHOD(put_CacheDbfRecords)(VARIANT_BOOL newVal);
 	STDMETHOD(get_CacheShapeRenderingData)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_CacheShapeRenderingData)(VARIANT_BOOL newVal);
+	STDMETHOD(StartLogTileRequests)(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal);
+	STDMETHOD(StopLogTileRequests)();
+	STDMETHOD(get_TileLogFilename)(BSTR* retVal);
+	STDMETHOD(get_TileLogIsOpened)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_LogTileErrorsOnly)(VARIANT_BOOL* retVal);
+	STDMETHOD(put_LogTileErrorsOnly)(VARIANT_BOOL pVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

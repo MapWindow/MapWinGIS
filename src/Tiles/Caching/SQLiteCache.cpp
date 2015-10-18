@@ -201,7 +201,7 @@ void SQLiteCache::AddTile(TileCore* tile)
 		sqlite3_stmt *stmt;
 		for (size_t i = 0; i < tile->Overlays.size(); i++)
 		{
-			CMemoryBitmap* bmp = tile->getBitmap(i);
+			CMemoryBitmap* bmp = tile->get_Bitmap(i);
 			if (bmp)
 			{
 				int size = bmp->get_Size();
@@ -216,9 +216,9 @@ void SQLiteCache::AddTile(TileCore* tile)
 					}
 					else
 					{
-						val = sqlite3_bind_int(stmt, 2, tile->m_tileX);
-						val = sqlite3_bind_int(stmt, 3, tile->m_tileY);
-						val = sqlite3_bind_int(stmt, 4, tile->m_scale);
+						val = sqlite3_bind_int(stmt, 2, tile->tileX());
+						val = sqlite3_bind_int(stmt, 3, tile->tileY());
+						val = sqlite3_bind_int(stmt, 4, tile->zoom());
 						val = sqlite3_bind_int(stmt, 5, bmp->Provider);
 						val = sqlite3_bind_int(stmt, 6, bmp->get_Size());
 						
@@ -410,7 +410,7 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, int scale, int x, int y)
 										tile = new TileCore(providerId, scale, CPoint(x, y), provider->get_Projection());
 
 									if (tile)
-										tile->AddBitmap(bmp);
+										tile->AddOverlay(bmp);
 									else
 										delete bmp;
 								}
@@ -435,8 +435,9 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, int scale, int x, int y)
 		}
 
 		// for composite providers
-		if (tile)
-			tile->m_providerId = provider->Id;
+		if (tile) {
+			tile->set_ProviderId(provider->Id);
+		}
 	}
 	catch(...)
 	{

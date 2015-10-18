@@ -23,7 +23,6 @@
 #include <list>
 #include "sqlite3.h"
 #include "ITileCache.h"
-#include "TileCacher.h"
 
 #define DB_NAME L"mwtiles.db3"
 

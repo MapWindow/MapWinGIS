@@ -17,9 +17,7 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // lsu 17 apr 2012 - created the file
-
-#pragma once
+ #pragma once
 
 // Point on globe with longitude and latitude in decimal degrees
 class PointLatLng
@@ -31,7 +29,7 @@ public:
 	double Lng;
 };
 
-// Size specified of rectangle specified in termas of longitude and latitude in decimal degrees
+// Size of rectangle specified in terms of longitude and latitude in decimal degrees
 class SizeLatLng
 {
 public:
@@ -40,6 +38,7 @@ public:
 	double WidthLng;
 	double HeightLat;
 };
+
 // A rectangle specified in terms of latitude and longitude in decimal degrees
 struct RectLatLng
 {

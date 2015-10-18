@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "tilehelper.h"
+#include "CustomProjection.h"
 
 // ************************************************************
 //		GetTileSizeProj()
@@ -60,19 +61,20 @@ double TileHelper::GetTileSizeProj(VARIANT_BOOL isSameProjection, BaseProvider* 
 // ************************************************************
 //		Transform()
 // ************************************************************
-bool TileHelper::Transform(RectLatLng& Geog, IGeoProjection* proj, BaseProjection* baseProj, 
-							bool isSameProjection, int tileX, int tileY, int zoom, RectLatLng& result)
+// Transforms tile bounds to map projection.
+bool TileHelper::Transform(TileCore* tile, IGeoProjection* mapProjection, bool isSameProjection, RectLatLng& result)
 {
 	if (isSameProjection)
 	{
 		// projection for tiles matches map projection (most often it's Google Mercator; EPSG:3857)
 		PointLatLng pnt;
-		CustomProjection* customProj = (CustomProjection*)baseProj;
+		CustomProjection* customProj = dynamic_cast<CustomProjection*>(tile->get_Projection());
+
 		if (customProj)
 		{
-			customProj->FromXYToProj(CPoint(tileX, tileY + 1), zoom, pnt);
+			customProj->FromXYToProj(CPoint(tile->tileX(), tile->tileY() + 1), tile->zoom(), pnt);
 			CSize size;
-			customProj->GetTileSizeProj(zoom, size);
+			customProj->GetTileSizeProj(tile->zoom(), size);
 			result.xLng = pnt.Lng;
 			result.yLat = pnt.Lat;
 			result.WidthLng = size.cx;
@@ -82,14 +84,15 @@ bool TileHelper::Transform(RectLatLng& Geog, IGeoProjection* proj, BaseProjectio
 	}
 	else
 	{
-		if (proj)
+		if (mapProjection)
 		{
-			double xMin = Geog.xLng; 
-			double yMax = Geog.yLat;
-			double xMax = Geog.MaxLng(); 
-			double yMin = Geog.MinLat();
+			RectLatLng* bounds = tile->get_GeographicBounds();
+			double xMin = bounds->xLng; 
+			double yMax = bounds->yLat;
+			double xMax = bounds->MaxLng();
+			double yMin = bounds->MinLat();
 
-			BaseProjection* pr = baseProj;
+			BaseProjection* pr = tile->get_Projection();
 			if (pr)
 			{
 				xMin = MAX(xMin, pr->get_MinLong());
@@ -107,16 +110,16 @@ bool TileHelper::Transform(RectLatLng& Geog, IGeoProjection* proj, BaseProjectio
 			yBL = yBR = yMin;
 
 			VARIANT_BOOL vb;
-			proj->Transform(&xTL, &yTL, &vb);
+			mapProjection->Transform(&xTL, &yTL, &vb);
 			if (!vb) return false;
 
-			proj->Transform(&xTR, &yTR, &vb);
+			mapProjection->Transform(&xTR, &yTR, &vb);
 			if (!vb) return false;
 
-			proj->Transform(&xBL, &yBL, &vb);
+			mapProjection->Transform(&xBL, &yBL, &vb);
 			if (!vb) return false;
 
-			proj->Transform(&xBR, &yBR, &vb);
+			mapProjection->Transform(&xBR, &yBR, &vb);
 			if (!vb) return false;
 
 			result.xLng = (xBL + xTL)/2.0;
@@ -128,13 +131,15 @@ bool TileHelper::Transform(RectLatLng& Geog, IGeoProjection* proj, BaseProjectio
 		else
 		{
 			// we are working with WGS84 decimal degrees
-			result.xLng = Geog.xLng;
-			result.yLat = Geog.yLat;
-			result.WidthLng = Geog.WidthLng;
-			result.HeightLat = Geog.HeightLat;
+			RectLatLng* bounds = tile->get_GeographicBounds();
+			result.xLng = bounds->xLng;
+			result.yLat = bounds->yLat;
+			result.WidthLng = bounds->WidthLng;
+			result.HeightLat = bounds->HeightLat;
 			return true;
 		}
 	}
+
 	return false;
 }
 

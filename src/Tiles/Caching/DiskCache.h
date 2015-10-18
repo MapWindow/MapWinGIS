@@ -19,7 +19,6 @@
  * (Open source contributors should list themselves and their modifications here). */
 #pragma once
 #include "ITileCache.h"
-#include "TileLoader.h"
 
 // Writes tile images in the following folder structure: Provider\Zoom\X\Y.png
 class DiskCache: public ITileCache

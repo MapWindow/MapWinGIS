@@ -3,7 +3,6 @@
 #include "stdafx.h"
 #include "ShapeEditor.h"
 #include "Shape.h"
-#include "map.h"
 #include "UndoList.h"
 #include <set>
 #include "GeosHelper.h"

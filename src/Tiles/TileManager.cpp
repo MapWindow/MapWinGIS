@@ -19,11 +19,6 @@
  * (Open source contributors should list themselves and their modifications here). */
 #include "stdafx.h"
 #include "TileManager.h"
-#include "map.h"
-#include "SQLiteCache.h"
-#include "TileLoader.h"
-#include "LoadingTask.h"
-#include "RamCache.h"
 
 // ************************************************************
 //		InitCaches()
@@ -64,13 +59,13 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	InitializeDiskCache();
 
 	// all incoming tasks will be discarded
-	int generation = _tileLoader.NextGeneration();
+	TileRequestInfo* requestInfo = new TileRequestInfo(key, isSnapshot);
 
 	//  check which ones we already have, and which ones are to be loaded
 	std::vector<TilePoint*> activeTasks;
 	if (!isSnapshot)
 	{
-		GetActiveTasks(activeTasks, provider->Id, zoom, generation, indices);
+		GetActiveTasks(activeTasks, provider->Id, zoom, requestInfo->generation, indices);
 	}
 
 	// loads tiles available in the cache to the buffer
@@ -78,25 +73,23 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	std::vector<TilePoint*> points;
 	BuildLoadingList(provider, indices, zoom, activeTasks, points);
 
-	if (!isSnapshot) {
-		_tileLoader.set_TotalCount(points.size() + activeTasks.size());
-	}
+	// it will be considered completed when this amount of tiles is loaded
+	requestInfo->totalCount = activeTasks.size() + points.size();
 
 	// delete unused tiles from the screen buffer
 	DeleteMarkedTilesFromBuffer();
 
 	UnlockDiskCache();
 
-	TileLoader* loader = &_tileLoader;
-
-	loader->RunCaching();
+	_loader.RunCaching();
 
 	if (points.size() > 0)
 	{
 		tilesLogger.WriteLine("Queued to load from server: %d", points.size());
 
 		// zoom can change in the process, so we use the calculated version and not the one current for provider
-		loader->Load(points, provider, zoom, isSnapshot, key, generation);
+		_loader.Load(points, provider, zoom, requestInfo);
+		_provider = provider;
 	}
 	else
 	{
@@ -173,10 +166,10 @@ void TileManager::BuildLoadingList(BaseProvider* provider, CRect indices, int zo
 			for (size_t i = 0; i < _tiles.size(); i++)
 			{
 				TileCore* tile = _tiles[i];
-				if (tile->m_tileX == x && tile->m_tileY == y  && tile->m_scale == zoom && tile->m_providerId == provider->Id)
+				if (tile->tileX() == x && tile->tileY() == y  && tile->zoom() == zoom && tile->get_ProviderId() == provider->Id)
 				{
-					tile->m_toDelete = false;
-					tile->m_inBuffer = true;
+					tile->toDelete(false);
+					tile->inBuffer(true);
 					found = true;
 					break;
 				}
@@ -227,8 +220,8 @@ void TileManager::Clear()
 
 	for (size_t i = 0; i < _tiles.size(); i++)
 	{
-		_tiles[i]->m_drawn = false;
-		_tiles[i]->m_inBuffer = false;
+		_tiles[i]->isDrawn(false);
+		_tiles[i]->inBuffer(false);
 		_tiles[i]->Release();
 	}
 
@@ -283,7 +276,7 @@ void TileManager::DeleteMarkedTilesFromBuffer()
 	while (it < _tiles.end())
 	{
 		TileCore* tile = (*it);
-		if (tile->m_toDelete)
+		if (tile->toDelete())
 		{
 			tile->Release();
 			it = _tiles.erase(it);
@@ -306,9 +299,9 @@ void TileManager::ClearBuffer()
 
 	for (size_t i = 0; i < _tiles.size(); i++)
 	{
-		_tiles[i]->m_drawn = false;
-		_tiles[i]->m_inBuffer = false;
-		_tiles[i]->m_toDelete = true;
+		_tiles[i]->isDrawn(false);
+		_tiles[i]->inBuffer(false);
+		_tiles[i]->toDelete(true);
 	}
 
 	_tilesBufferLock.Unlock();
@@ -344,17 +337,17 @@ bool TileManager::IsNewRequest(Extent& mapExtents, CRect indices, int providerId
 // *********************************************************
 //	     GetActiveTasks()
 // *********************************************************
-void TileManager::GetActiveTasks(vector<TilePoint*>& activeTasks, int providerId, int zoom, int generation, CRect indices)
+void TileManager::GetActiveTasks(vector<TilePoint*>& activeTasks, int providerId, int zoom, int newGeneration, CRect indices)
 {
 	// lock it, so active task can't be removed while we analyze it here
-	_tileLoader.LockActiveTasks(true);
+	_loader.LockActiveTasks(true);
 
-	std::list<void*> list = _tileLoader.GetActiveTasks();
+	std::list<void*> list = _loader.get_ActiveTasks();
 	std::list<void*>::iterator it = list.begin();
 
 	while (it != list.end())
 	{
-		LoadingTask* task = (LoadingTask*)*it;
+		ILoadingTask* task = (ILoadingTask*)*it;
 		if (task->get_Provider()->Id == providerId &&
 			task->zoom() == zoom &&
 			task->x() >= indices.left &&
@@ -364,18 +357,15 @@ void TileManager::GetActiveTasks(vector<TilePoint*>& activeTasks, int providerId
 		{
 			tilesLogger.WriteLine("Tile reassigned to current generation: %d\\%d\\%d", zoom, task->x(), task->y());
 
-			task->generation(generation);								// reassign it to current generation
+			task->generation(newGeneration);								   // reassign it to current generation
 			activeTasks.push_back(new TilePoint(task->x(), task->y()));    // don't include in current list of requests
 		}
 
 		++it;
 	}
 
-	_tileLoader.ResetCount();
-	_tileLoader.set_TotalCount(1000);		// set it to a big number until we count them all
-	_tileLoader.LockActiveTasks(false);
+	_loader.LockActiveTasks(false);
 }
-
 
 // *********************************************************
 //	     AddTileWithCaching()
@@ -391,8 +381,8 @@ void TileManager::AddTileWithCaching(TileCore* tile)
 // *********************************************************
 void TileManager::AddTileNoCaching(TileCore* tile)
 {
-	tile->m_inBuffer = true;
-	tile->m_toDelete = false;
+	tile->inBuffer(true);
+	tile->toDelete(false);
 	tile->AddRef();
 
 	_tilesBufferLock.Lock();
@@ -406,7 +396,7 @@ void TileManager::AddTileNoCaching(TileCore* tile)
 void TileManager::AddTileOnlyCaching(TileCore* tile)
 {
 	if (_diskCache.doCaching) {
-		_tileLoader.ScheduleForCaching(tile);
+		_loader.ScheduleForCaching(tile);
 	}
 }
 
@@ -430,10 +420,10 @@ bool TileManager::TileIsInBuffer(int providerId, int zoom, int x, int y)
 
 	for (size_t i = 0; i < _tiles.size(); i++)
 	{
-		if (_tiles[i]->m_tileX == x &&
-			_tiles[i]->m_tileY == y &&
-			_tiles[i]->m_scale == zoom &&
-			_tiles[i]->m_providerId == providerId)
+		if (_tiles[i]->tileX() == x &&
+			_tiles[i]->tileY() == y &&
+			_tiles[i]->zoom() == zoom &&
+			_tiles[i]->get_ProviderId() == providerId)
 		{
 			return true;
 		}
@@ -451,7 +441,7 @@ void TileManager::MarkUndrawn()
 
 	for (size_t i = 0; i < _tiles.size(); i++)
 	{
-		_tiles[i]->m_drawn = false;
+		_tiles[i]->isDrawn(false);
 	}
 
 	_tilesBufferLock.Unlock();
@@ -467,7 +457,7 @@ bool TileManager::UndrawnTilesExist()
 
 	for (size_t i = 0; i < _tiles.size(); i++)
 	{
-		if (!_tiles[i]->m_drawn) {
+		if (!_tiles[i]->isDrawn()) {
 			return true;
 		}
 	}
@@ -485,7 +475,7 @@ bool TileManager::DrawnTilesExist()
 
 	for (size_t i = 0; i < _tiles.size(); i++)
 	{
-		if (_tiles[i]->m_drawn) {
+		if (_tiles[i]->isDrawn()) {
 			return true;
 		}
 	}

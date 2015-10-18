@@ -19,41 +19,39 @@
  * (Open source contributors should list themselves and their modifications here). */
  #pragma once
 #include "basedrawer.h"
-#include "Tiles.h"
+#include "TileManager.h"
 
 class TilesDrawer : public CBaseDrawer
 {
 public:
-	// old version for GDI drawing
-	TilesDrawer(CDC* dc, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY)
-	{
-		_dc = dc;
-		_extents = extents;
-		_pixelPerProjectionX = pixelPerProjectionX;
-		_pixelPerProjectionY = pixelPerProjectionY;
-		_graphics = NULL;
-		m_transfomation = NULL;
-	};
-
-	// newer one for GDI+ drawing
-	TilesDrawer(Gdiplus::Graphics* g, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY)
+	TilesDrawer(Gdiplus::Graphics* g, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY, IGeoProjection* transform)
+		: _graphics(g) , _transfomation(transform)
 	{
 		_dc = NULL;
 		_extents = extents;
 		_pixelPerProjectionX = pixelPerProjectionX;
 		_pixelPerProjectionY = pixelPerProjectionY;
-		_graphics = g;
-		m_transfomation = NULL;
 	};
 
 	virtual ~TilesDrawer(void){};
 
 private:
 	Gdiplus::Graphics* _graphics;
+	IGeoProjection* _transfomation;
 
 public:
-	IGeoProjection* m_transfomation;
+	// properties
+	IGeoProjection* get_Transform() { return _transfomation; }		// WGS84 to map transformation
+
+private:
+	bool IsSameProjection(IGeoProjection* mapProjection, BaseProvider* provider);
+	bool UpdateTileBounds(TileCore* tile, bool isSameProjection, int projectionChangeCount);
+	void DrawGrid(TileCore* tile, Gdiplus::RectF& screenRect);
+	void DrawOverlays(TileCore* tile, Gdiplus::RectF screenBounds, Gdiplus::ImageAttributes& attr);
+	bool CalculateScreenBounds(TileCore* tile, double pixelsPerMapUnit, Gdiplus::RectF& screenBounds);
+	void DrawGridText(TileCore* tile, Gdiplus::RectF& screenRect);
 
 public:
-	void DrawTiles(TileManager* manager, double pixelsPerMapUnit, IGeoProjection* mapProjection, BaseProvider* provider, bool printing, int projectionChangeCount);
+	// methods
+	void DrawTiles(TileManager* manager, double pixelsPerMapUnit, IGeoProjection* mapProjection, bool printing, int projectionChangeCount);
 };

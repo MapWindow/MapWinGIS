@@ -43,11 +43,11 @@ TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
 		CMemoryBitmap* bmp = _subProviders[i]->DownloadBitmap(pos, zoom);
 		if (bmp)
 		{
-			tile->AddBitmap(bmp);	
+			tile->AddOverlay(bmp);	
 		}
 		else
 		{
-			tile->m_hasErrors = true;
+			tile->hasErrors(true);
 		}
 	}
 	return tile;

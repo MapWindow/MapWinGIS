@@ -26,10 +26,10 @@
 #include "TileCore.h"
 #include "BaseProvider.h"
 #include "TileProviders.h"
-#include "TileLoader.h"
 #include "WmsCustomProvider.h"
 #include "TileManager.h"
 #include "SQLiteCache.h"
+#include "PrefetchManager.h"
 using namespace std;
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -43,7 +43,7 @@ class ATL_NO_VTABLE CTiles :
 {
 public:
 	CTiles()
-		: _manager(true), _prefetchLoader(tctDiskCache)   // TODO: bulk downloader loader must not be stored in class
+		: _manager(true)
 	{
 		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
@@ -84,8 +84,6 @@ public:
 	{
 		_provider = ((CTileProviders*)_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
 		_visible = true;
-		_gridLinesVisible = false;
-		
 		_minScaleToCache = 0;
 		_maxScaleToCache = 100;
 	}
@@ -169,39 +167,19 @@ public:
 	STDMETHOD(ClearProxyAuthorization)();
 	STDMETHOD(get_ProxyAuthenticationScheme)(tkProxyAuthentication* pVal);
 	STDMETHOD(put_ProxyAuthenticationScheme)(tkProxyAuthentication newVal);
-	
-	// logging
-	STDMETHOD(StartLogRequests)(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal);
-	STDMETHOD(StopLogRequests)();
-	STDMETHOD(get_LogFilename)(BSTR* retVal);
-	STDMETHOD(get_LogIsOpened)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_LogErrorsOnly)(VARIANT_BOOL* retVal);
-	STDMETHOD(put_LogErrorsOnly)(VARIANT_BOOL pVal);
-
-	// bulk download
+	STDMETHOD(get_DelayRequestTimeout)(long* retVal);
+	STDMETHOD(put_DelayRequestTimeout)(long pVal);
 	STDMETHOD(Prefetch)(double minLat, double maxLat, double minLng, double maxLng, int zoom, int provider, IStopExecution* stop, LONG* retVal);
 	STDMETHOD(Prefetch2)(int minX, int maxX, int minY, int maxY, int zoom, int provider, IStopExecution* stop, LONG* retVal);
-	STDMETHOD(get_PrefetchErrorCount)(int* retVal);
-	STDMETHOD(get_PrefetchTotalCount)(int* retVal);
-	STDMETHOD(ClearPrefetchErrors)();
 	STDMETHOD(PrefetchToFolder)(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal);
-	STDMETHOD(get_SleepBeforeRequestTimeout)(long* retVal);
-	STDMETHOD(put_SleepBeforeRequestTimeout)(long pVal);
-
 private:
 	long _lastErrorCode;
 	ICallback * _globalCallback;
 	BSTR _key;
-	
 	bool _visible;
-	bool _gridLinesVisible;
 	int _minScaleToCache;
 	int _maxScaleToCache;
 	ITileProviders* _providers;
-	CStringW _logPath;
-	TileLoader _prefetchLoader;		// TODO: move to separate class
-
-public:
 	TileManager _manager;
 	BaseProvider* _provider;
 
@@ -214,7 +192,6 @@ public:
 	// properties
 	TileManager* get_Manager() { return &_manager; }
 	BaseProvider* get_Provider() { return _provider; }
-	
 
 public:
 	void Init(IMapViewCallback* map) {_manager.set_MapCallback(map); }

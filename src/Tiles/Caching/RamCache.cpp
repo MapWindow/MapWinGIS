@@ -18,7 +18,6 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  #include "stdafx.h"
-#include "afxmt.h"
 #include "RamCache.h"
 
 // *********************************************************
@@ -62,7 +61,7 @@ void RamCache::Close()
 // *********************************************************
 void RamCache::AddTile(TileCore* tile)
 {
-	if (tile->m_scale < 0 || tile->m_scale >= 25) {
+	if (tile->zoom() < 0 || tile->zoom() >= 25) {
 		return;
 	}
 
@@ -70,43 +69,43 @@ void RamCache::AddTile(TileCore* tile)
 
 	// seeking provider
 	std::vector<TilePoints*>* list = NULL;
-	if (_tilesMap.find(tile->m_providerId) != _tilesMap.end())
+	if (_tilesMap.find(tile->get_ProviderId()) != _tilesMap.end())
 	{
-		list = _tilesMap[tile->m_providerId];
+		list = _tilesMap[tile->get_ProviderId()];
 	}
 	else
 	{
 		list = new std::vector<TilePoints*>();
 		list->resize(25, NULL);
-		_tilesMap[tile->m_providerId] = list;
+		_tilesMap[tile->get_ProviderId()] = list;
 	}
 
 	// seeking scale
-	TilePoints* points = (*list)[tile->m_scale];
+	TilePoints* points = (*list)[tile->zoom()];
 	if (!points)
 	{
 		points = new TilePoints();
-		(*list)[tile->m_scale] = points;
+		(*list)[tile->zoom()] = points;
 	}
 	
 	// seeking X
 	std::map<int, TileCore*>* map = NULL;
-	if (points->find(tile->m_tileX) != points->end())
+	if (points->find(tile->tileX()) != points->end())
 	{
-		map = (*points)[tile->m_tileX];
+		map = (*points)[tile->tileX()];
 	}
 	else
 	{
 		map = new std::map<int, TileCore*>();
-		(*points)[tile->m_tileX] = map;
+		(*points)[tile->tileX()] = map;
 	}
 
 	// seeking Y
-	if (map->find(tile->m_tileY) == map->end())
+	if (map->find(tile->tileY()) == map->end())
 	{
 		tile->AddRef();
-		(*map)[tile->m_tileY] = tile;
-		_size += tile->getSize();
+		(*map)[tile->tileY()] = tile;
+		_size += tile->get_ByteSize();
 		_list.push_back(tile);
 	}
 	_section.Unlock();
@@ -124,15 +123,19 @@ void RamCache::AddTile(TileCore* tile)
 void RamCache::ClearOldest(int sizeToClearBytes)
 {
 	int size = 0;
+
 	for(size_t i = 0; i < _list.size(); i++)
 	{
-		if (!_list[i]->m_inBuffer) {
-			_list[i]->m_toDelete = true;
-			size += _list[i]->getSize();
+		if (!_list[i]->inBuffer()) 
+		{
+			_list[i]->toDelete(true);
+
+			size += _list[i]->get_ByteSize();
 			if (size > TILE_CACHE_SIZE_TO_CLEAR)
 				break;
 		}
 	}
+
 	DeleteMarkedTiles();
 }
 
@@ -170,7 +173,7 @@ void RamCache::Clear(int provider, int fromScale, int toScale)
 						{
 							TileCore* tile = it3->second;
 							
-							if (tile->m_inBuffer)
+							if (tile->inBuffer())
 							{
 								++it3;	// it doesn't make sense to delete tiles which are 
 										// currently displayed; as they will be requested again on simple refresh of the map
@@ -178,10 +181,10 @@ void RamCache::Clear(int provider, int fromScale, int toScale)
 							else
 							{
 								tiles->erase(it3++);
-								_size -= tile->getSize();
+								_size -= tile->get_ByteSize();
 								
 								// marks it to be removed from chronological vector
-								tile->m_toDelete = true;
+								tile->toDelete(true);
 							}
 						}
 						
@@ -226,7 +229,7 @@ void RamCache::DeleteMarkedTiles()
 	while (it != _list.end())
 	{
 		TileCore* tile = *it;
-		if (tile->m_toDelete)
+		if (tile->toDelete())
 		{
 			tile->Release();
 			it = _list.erase(it);
@@ -305,7 +308,7 @@ double RamCache::get_SizeMB(int provider, int scale)
 						for( TilePositions::iterator it3 = tiles->begin(); it3 != tiles->end(); ++it3 ) 
 						{
 							TileCore* tile = it3->second;
-							sum += tile->getSize();
+							sum += tile->get_ByteSize();
 						}
 					}
 				}

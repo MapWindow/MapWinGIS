@@ -17,8 +17,7 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // lsu 17 apr 2012 - created the file
-
+ 
 #pragma once
 
 // Represents task for asynchronous execution

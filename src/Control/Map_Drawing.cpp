@@ -707,17 +707,9 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 		if (_currentZoom < minZoom) return;
 	}
 	
-	TilesDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY);
+	TilesDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, GetWgs84ToMapTransform());
 
-	if (_transformationMode == tmDoTransformation)
-	{
-		drawer.m_transfomation = GetWgs84ToMapTransform(); 
-	}
-
-	CTiles* tiles = (CTiles*)_tiles;
-
-	drawer.DrawTiles(get_TileManager(), PixelsPerMapUnit(), GetMapProjection(), 
-					 tiles->get_Provider(), _isSnapshot, _projectionChangeCount);
+	drawer.DrawTiles(get_TileManager(), PixelsPerMapUnit(), GetMapProjection(), _isSnapshot, _projectionChangeCount);
 }
 
 #pragma region Draw layers

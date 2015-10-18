@@ -18,15 +18,15 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  #pragma once
-#include "TileLoader.h"
 #include "ITileCache.h"
+#include "TileMapLoader.h"
 
 class TileManager
 {
 public:
 	TileManager(bool isBackground)
 		: _map(NULL), _lastZoom(-1), _lastProvider(-1), _isBackground(isBackground), 
-		  _tileLoader(CacheType::tctSqliteCache)
+		_loader(tctSqliteCache), _gridLinesVisible(false), _provider(NULL)
 	{
 		_useServer = true;
 		_lastZoom = -1;
@@ -36,10 +36,9 @@ public:
 		InitCaches();
 	}
 
-	
-
 private:
-	TileLoader _tileLoader;
+	BaseProvider* _provider;
+	TileMapLoader _loader;
 	IMapViewCallback* _map;
 	double _scalingRatio;
 	bool _isBackground;			    // this is background TMS layer associated with ITiles (screen buffer can be scaled on zooming)
@@ -59,13 +58,14 @@ private:
 	int _lastZoom;
 	int _lastProvider;
 	bool _useServer;
+	bool _gridLinesVisible;
 
 private:
 	void InitCaches();
 	void UpdateScreenBuffer();
 	bool IsBackground() { return _isBackground; }
 	void BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<TilePoint*>& activeTasks, vector<TilePoint*>& points);
-	void GetActiveTasks(std::vector<TilePoint*>& activeTasks, int providerId, int zoom, int generation, CRect indices);
+	void GetActiveTasks(std::vector<TilePoint*>& activeTasks, int providerId, int zoom, int newGeneration, CRect indices);
 	bool IsNewRequest(Extent& mapExtents, CRect indices, int providerId, int zoom);
 	void ClearBuffer();
 	void DeleteMarkedTilesFromBuffer();
@@ -82,12 +82,15 @@ public:
 	void useServer(bool value) { _useServer = value; }
 	double scalingRatio() { return _scalingRatio; }
 	void scalingRatio(double value) { _scalingRatio = value; }
-	TileLoader* get_Loader() { return &_tileLoader; }
+	ITileLoader* get_Loader() { return &_loader; }
 	void CopyBuffer(vector<TileCore*>& buffer);
 	TileCacheInfo* get_DiskCache() { return &_diskCache; }
 	TileCacheInfo* get_RamCache() { return &_ramCache; }
 	TileCacheInfo* get_Cache(tkCacheType type) { return type == Disk ? &_diskCache : &_ramCache; }
 	vector<TileCacheInfo*>& get_AllCaches() { return _caches; }
+	bool get_GridLinesVisible() { return _gridLinesVisible; }
+	void set_GridLinesVisible(bool value) { _gridLinesVisible = value; }
+	BaseProvider* get_Provider() { return _provider; }
 
 public:
 	// methods

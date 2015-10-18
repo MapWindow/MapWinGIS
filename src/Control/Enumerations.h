@@ -95,6 +95,12 @@ enum CacheType
 	tctDiskCache = 2, 
 };
 
+enum TileLoaderType
+{
+	tltMapLoader = 0,
+	tltBulkLoader = 1,
+};
+
 enum HandleImage
 { 
 	asRGB=0,      // byte; 3 bands

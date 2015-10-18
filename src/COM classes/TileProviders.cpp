@@ -25,8 +25,6 @@
 #include "OviProvider.h"
 #include "GoogleMapProvider.h"
 #include "RosreestrProvider.h"
-#include "SQLiteCache.h"
-#include "RAMCache.h"
 #include "CustomTileProvider.h"
 
 // ************************************************************

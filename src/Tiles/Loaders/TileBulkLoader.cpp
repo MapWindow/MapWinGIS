@@ -17,36 +17,53 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-#pragma once
-#include "WmsProviderBase.h"
-#include "CustomProjection.h"
+#include "stdafx.h"
+#include "TileBulkLoader.h"
+#include "BulkLoadingTask.h"
 
 // *******************************************************
-//		WmsCustomProvider
+//		CreateTask()
 // *******************************************************
-// WMS provider which uses projection with arbitrary EPSG code.
-class WmsCustomProvider : public WmsProviderBase
+ILoadingTask* TileBulkLoader::CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation)
 {
-public:
-	WmsCustomProvider()
+	return new BulkLoadingTask(x, y, zoom, provider, generation);
+}
+
+// *******************************************************
+//		TileLoaded()
+// *******************************************************
+void TileBulkLoader::TileLoaded(TileCore* tile, int generation)
+{
+	_sumCount++;
+
+	if (tile->hasErrors())
 	{
-		_projection = new CustomProjection();
-		_subProviders.push_back(this);
+		_errorCount++;
 	}
 
-	virtual ~WmsCustomProvider() { }
+	if (_callback != NULL)
+	{
+		TileRequestInfo* info = FindRequest(generation);
+		if (info)
+		{
+			CallbackHelper::Progress(_callback, info->count >= info->totalCount ? -1 : info->count, "Caching...");
+		}
+	}
 
-private:
-	CString _layers;
-	CString _format;
+	if (_stopCallback)
+	{
+		VARIANT_BOOL stop;
+		_stopCallback->StopFunction(&stop);
 
-public:
-	virtual CString MakeTileImageUrl(CPoint &pos, int zoom);
+		if (stop && !_stopped)
+		{
+			_stopped = true;
+			CallbackHelper::Progress(_callback, -2, "Caching...");
+		}
+	}
 
-	CustomProjection* get_CustomProjection() { return dynamic_cast<CustomProjection*>(_projection); }
-	void put_UrlFormat(CString baseUrl) { _urlFormat = baseUrl; }
-	CString get_Layers() { return _layers; }
-	void set_Layers(CString value) { _layers = value; }
-	CString get_Format() { return _format; }
-	void set_Format(CString value) { _format = value; }
-};
+	if (!tile->IsEmpty())
+	{
+		_cache->AddTile(tile);
+	}
+}

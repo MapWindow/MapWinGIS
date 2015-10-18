@@ -82,7 +82,7 @@ void DiskCache::AddTile(TileCore* tile)
 
 	for (size_t i = 0; i < tile->Overlays.size(); i++)
 	{
-		Gdiplus::Bitmap* bmp = tile->getBitmap(i)->m_bitmap;
+		Gdiplus::Bitmap* bmp = tile->get_Bitmap(i)->m_bitmap;
 		if (bmp)
 		{
 			g->DrawImage(bmp, 0.0f, 0.0f);
@@ -90,7 +90,7 @@ void DiskCache::AddTile(TileCore* tile)
 	}
 
 	USES_CONVERSION;
-	CStringW path = tile->getPath(_rootPath, _ext);
+	CStringW path = tile->get_Path(_rootPath, _ext);
 	bmp->Save(path, &_pngClsid, NULL);
 
 	delete g;

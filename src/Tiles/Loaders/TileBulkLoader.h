@@ -17,36 +17,49 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-#pragma once
-#include "WmsProviderBase.h"
-#include "CustomProjection.h"
+ #pragma once
+#include "ITileLoader.h"
 
-// *******************************************************
-//		WmsCustomProvider
-// *******************************************************
-// WMS provider which uses projection with arbitrary EPSG code.
-class WmsCustomProvider : public WmsProviderBase
+// ******************************************************
+//    TileBulkLoader()
+// ******************************************************
+// Handles the loading queue of map tiles, schedules the loaded tiles for caching
+class TileBulkLoader: public ITileLoader
 {
 public:
-	WmsCustomProvider()
+	TileBulkLoader(ITileCache* cache)
+		: _cache(cache)
 	{
-		_projection = new CustomProjection();
-		_subProviders.push_back(this);
+		_errorCount = 0;
+		_sumCount = 0;
 	}
 
-	virtual ~WmsCustomProvider() { }
+	virtual ~TileBulkLoader(void)
+	{
+	}
 
 private:
-	CString _layers;
-	CString _format;
+	// caching only
+	ITileCache* _cache;
+	ICallback* _callback;			 // to report progress to clients via COM interface
+	IStopExecution* _stopCallback;	 // to stop execution by clients via COM interface
+	int _errorCount;
+	int _sumCount;                   // sums all requests even if generation doesn't match
+
+private:
+	void CleanTasks();
 
 public:
-	virtual CString MakeTileImageUrl(CPoint &pos, int zoom);
+	// properties
+	void set_Callback(ICallback* callback) { _callback = callback; }
+	void set_StopCallback(IStopExecution* callback) { _stopCallback = callback; }
+	int get_ErrorCount() { return _errorCount; }
+	int get_SumCount() { return _sumCount; }
 
-	CustomProjection* get_CustomProjection() { return dynamic_cast<CustomProjection*>(_projection); }
-	void put_UrlFormat(CString baseUrl) { _urlFormat = baseUrl; }
-	CString get_Layers() { return _layers; }
-	void set_Layers(CString value) { _layers = value; }
-	CString get_Format() { return _format; }
-	void set_Format(CString value) { _format = value; }
+public:
+	//methods
+	void TileLoaded(TileCore* tile, int generation);
+	void ResetErrorCount() { _errorCount = 0; _sumCount = 0; }
+	ILoadingTask* CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation);
 };
+

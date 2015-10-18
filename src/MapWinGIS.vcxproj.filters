@@ -88,6 +88,9 @@
     <Filter Include="Tiles\Caching">
       <UniqueIdentifier>{0fcf224e-062b-4548-bddb-0d072143bce2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tiles\Loaders">
+      <UniqueIdentifier>{74d43682-27e2-4136-b0b9-97eb9f4451f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Structures\BaseLayerInfo.h">
@@ -864,9 +867,6 @@
     <ClInclude Include="Tiles\GeoPoint.h">
       <Filter>Tiles</Filter>
     </ClInclude>
-    <ClInclude Include="Tiles\LoadingTask.h">
-      <Filter>Tiles</Filter>
-    </ClInclude>
     <ClInclude Include="Tiles\Threading.h">
       <Filter>Tiles</Filter>
     </ClInclude>
@@ -874,9 +874,6 @@
       <Filter>Tiles</Filter>
     </ClInclude>
     <ClInclude Include="Tiles\TileHelper.h">
-      <Filter>Tiles</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\TileLoader.h">
       <Filter>Tiles</Filter>
     </ClInclude>
     <ClInclude Include="Tiles\TileManager.h">
@@ -899,6 +896,27 @@
     </ClInclude>
     <ClInclude Include="Tiles\Caching\TileCacheManager.h">
       <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\PrefetchManager.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\TileBulkLoader.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\TileMapLoader.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\BulkLoadingTask.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\MapLoadingTask.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\ILoadingTask.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\ITileLoader.h">
+      <Filter>Tiles\Loaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1896,16 +1914,10 @@
     <ClCompile Include="COM classes\WmsLayer.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Tiles\LoadingTask.cpp">
-      <Filter>Tiles</Filter>
-    </ClCompile>
     <ClCompile Include="Tiles\TileCore.cpp">
       <Filter>Tiles</Filter>
     </ClCompile>
     <ClCompile Include="Tiles\TileHelper.cpp">
-      <Filter>Tiles</Filter>
-    </ClCompile>
-    <ClCompile Include="Tiles\TileLoader.cpp">
       <Filter>Tiles</Filter>
     </ClCompile>
     <ClCompile Include="Tiles\TileManager.cpp">
@@ -1925,6 +1937,27 @@
     </ClCompile>
     <ClCompile Include="Tiles\Caching\TileCacheManager.cpp">
       <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\PrefetchManager.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\TileBulkLoader.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\TileMapLoader.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\BulkLoadingTask.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\MapLoadingTask.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\ILoadingTask.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\ITileLoader.cpp">
+      <Filter>Tiles\Loaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

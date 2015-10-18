@@ -67,15 +67,8 @@ public:
 
 public:
 	// methods
-	void Enqueue(TileCore* tile)
-	{
-		_queueLock.Lock();
-		_queue.push(tile);
-		_queueLock.Unlock();
-	}
-
+	void Enqueue(TileCore* tile);
 	void Run();
-
 	void Stop() { _stopped = true; }
 };
 
