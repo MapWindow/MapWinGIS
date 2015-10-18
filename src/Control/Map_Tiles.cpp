@@ -203,7 +203,12 @@ void CMapView::UpdateTileProjection()
 	_tiles->get_ServerProjection(&gp);
 
 	if (gp) {
-		ComHelper::SetRef(gp, (IDispatch**)&_tileProjection, false);
+		_tileProjection->CopyFrom(gp, &vb);
+		gp->Release();
+	}
+	else {
+		CallbackHelper::ErrorMsg("Failed to retrieve server projection for tiles.");
+		return;
 	}
 
 	_tileReverseProjection->CopyFrom(_projection, &vb);
@@ -228,6 +233,9 @@ void CMapView::UpdateTileProjection()
 
 	if (_tileProjectionState == ProjectionDoTransform || _tileProjectionState == ProjectionCompatible)
 	{
+		CComBSTR bstr;
+		_tileProjection->ExportToProj4(&bstr);
+
 		_tileProjection->StartTransform(_projection, &vb);
 		if (!vb) {
 			ErrorMessage(tkTILES_MAP_TRANSFORM_FAILED);
