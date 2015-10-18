@@ -194,6 +194,7 @@ private:
 	void ErrorMessage(long ErrorCode);
 	void SetAuthorization(BSTR userName, BSTR password, BSTR domain);
 	SQLiteCache* get_SqliteCache() { return dynamic_cast<SQLiteCache*>(TileCacheManager::get_Cache(tctSqliteCache)); }
+	BaseProvider* get_Provider(int providerId);
 
 public:
 	// properties
@@ -205,7 +206,6 @@ public:
 	void LoadTiles(bool isSnapshot = false, CString key = "");
 	void LoadTiles(bool isSnapshot, int providerId, CString key = "");
 	bool TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId = ProviderNone);
-	bool TilesAreInScreenBuffer(IMapViewCallback* map);
 	bool DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(CString ElementName);
 	BaseProjection* get_Projection(){ return _provider->get_Projection(); }

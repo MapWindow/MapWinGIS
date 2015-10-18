@@ -507,3 +507,50 @@ void TileManager::UpdateScreenBuffer()
 	}
 }
 
+// *********************************************************
+//	     TilesAreInCache()
+// *********************************************************
+// checks whether all the tiles are present in cache
+bool TileManager::TilesAreInCache(BaseProvider* provider)
+{
+	// if false is return the client code will try to load them
+	// but there is no provider to do it
+	if (!provider) return true;		
+
+	CRect indices;
+	int zoom;
+
+	if (!_map->_GetTilesForMap(_provider, scalingRatio(), indices, zoom)) {
+		return true;
+	}
+
+	for (int x = indices.left; x <= indices.right; x++)
+	{
+		for (int y = indices.bottom; y <= indices.top; y++)
+		{
+			if (TileIsInBuffer(provider->Id, zoom, x, y)) {
+				continue;
+			}
+
+			bool found = false;
+
+			vector<TileCacheInfo*>& caches = get_AllCaches();
+			for (size_t i = 0; i < caches.size(); i++)
+			{
+				if (caches[i]->useCache)
+				{
+					if (caches[i]->cache->get_TileExists(provider, zoom, x, y))
+					{
+						found = true;
+					}
+				}
+			}
+
+			if (!found) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}

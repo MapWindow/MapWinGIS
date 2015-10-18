@@ -73,8 +73,7 @@ public:
 	// properties:
 	CStringW get_DbName();
 	bool set_DbName(CStringW name);
-	int get_TileCount(int provider, int zoom, int xMin, int xMax, int yMin, int yMax);
-
+	long get_TileCount(int provider, int zoom, CRect indices);
 public:	
 	// methods
 	bool Initialize(SqliteOpenMode openMode);

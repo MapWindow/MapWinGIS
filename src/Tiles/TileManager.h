@@ -107,4 +107,5 @@ public:
 
 	void TriggerMapRedraw() { _map->_Redraw(tkRedrawType::RedrawSkipDataLayers, false, true); };
 	void FireTilesLoaded(bool isSnapshot, CString key) { _map->_FireTilesLoaded(isSnapshot, key); }
+	bool TilesAreInCache(BaseProvider* provider);
 };

@@ -49,6 +49,7 @@ public:
 	virtual void Lock() = 0;
 	virtual void Unlock() = 0;
 	virtual void InitBulkDownload(int zoom, vector<TilePoint*>& points) = 0;
+	virtual long get_TileCount(int providerId, int zoom, CRect indices) = 0;
 
 public:
 	double get_MaxSize() { return _maxSize; }

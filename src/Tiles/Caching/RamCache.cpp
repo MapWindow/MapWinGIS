@@ -243,18 +243,27 @@ void RamCache::DeleteMarkedTiles()
 	}
 }
 
+
+
 // ********************************************************
-//		get_TileCore()
+//		get_Tile()
 // ********************************************************
 // Extracts a single tile from the cache
 TileCore* RamCache::get_Tile(BaseProvider* provider, int scale, int tileX, int tileY)
 {
 	if (!provider) return NULL;
 	
+	return get_TileCore(provider->Id, scale, tileX, tileY);
+}
+
+// ********************************************************
+//		get_TileCore()
+// ********************************************************
+TileCore* RamCache::get_TileCore(int providerId, int scale, int tileX, int tileY)
+{
 	_section.Lock();
 
 	TileCore* tile = NULL;
-	int providerId = provider->Id;
 
 	if (_tilesMap.find(providerId) != _tilesMap.end())
 	{
@@ -327,4 +336,25 @@ double RamCache::get_SizeMB(int provider, int scale)
 bool RamCache::get_TileExists(BaseProvider* provider, int scale, int x, int y)
 {
 	return get_Tile(provider, scale, x, y) != NULL;
+}
+
+// ***********************************************************
+//		get_TileCount()
+// ***********************************************************
+long RamCache::get_TileCount(int providerId, int zoom, CRect indices)
+{
+	long count = 0;
+
+	for (int x = indices.left; x <= indices.right; x++)
+	{
+		for (int y = indices.bottom; y <= indices.top; y++)
+		{
+			TileCore* tile = get_TileCore(providerId, zoom, x, y);
+			if (tile) {
+				count++;
+			}
+		}
+	}
+
+	return count;
 }

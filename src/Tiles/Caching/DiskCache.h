@@ -62,6 +62,7 @@ public:
 	void Lock() {  }
 	void Unlock() {  }
 	void InitBulkDownload(int zoom, vector<TilePoint*>& points) { CreateFolders(zoom, points); }
+	long get_TileCount(int providerId, int zoom, CRect indices) { return 0; }
 
 public:
 	// properties:

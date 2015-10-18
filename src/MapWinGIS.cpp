@@ -15,6 +15,7 @@
 #define new DEBUG_NEW
 #endif
 #include "MercatorProjection.h"
+#include "PrefetchManager.h"
 
 class CMapWinGISModule :
 	public ATL::CAtlMfcModule
@@ -98,13 +99,13 @@ int CMapWinGISApp::ExitInstance()
 
 	#endif
 
-	if (m_utils)
+	if (m_utils) {
 		m_utils->Release();
+	}
 
-	// both caches are stored in static variables; 
-	// we clear them explicitly to be able to use memory leaking detection tool;
-	// otherwise the tool reports hundreds of false leaks; so it's difficult to find relevant ones
 	TileCacheManager::CloseAll();
+
+	PrefetchManagerFactory::Clear();
 
 	parser::ReleaseFunctions();
 

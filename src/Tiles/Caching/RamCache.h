@@ -44,6 +44,7 @@ private:
 
 private:
 	void DeleteMarkedTiles();	// deletes tiles from chronological vector	
+	TileCore* get_TileCore(int providerId, int zoom, int tileX, int tileY);
 
 public:
 	// interface
@@ -62,9 +63,11 @@ public:
 	void Lock() {  }
 	void Unlock() {  }
 	void InitBulkDownload(int zoom, vector<TilePoint*>& points) {  }
+	long get_TileCount(int providerId, int zoom, CRect indices);
 
 public:
 	// methods
 	void ClearAll(int fromScale, int toScale) { Clear(-1, fromScale, toScale); }
 	void ClearOldest(int sizeToClearBytes);
+	
 };

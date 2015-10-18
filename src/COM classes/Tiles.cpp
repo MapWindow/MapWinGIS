@@ -24,13 +24,18 @@
  
 #include "stdafx.h"
 #include "Tiles.h"
-#include "SqliteCache.h"
 #include "DiskCache.h"
 #include "TileHelper.h"
 #include "CustomTileProvider.h"
 #include "TileCacheManager.h"
 
-::CCriticalSection m_tilesBufferSection;
+// ************************************************************
+//		get_Provider()
+// ************************************************************
+BaseProvider* CTiles::get_Provider(int providerId)
+{
+	return ((CTileProviders*)_providers)->get_Provider(providerId);
+}
 
 // ************************************************************
 //		Stop()
@@ -257,82 +262,20 @@ STDMETHODIMP CTiles::get_CurrentZoom(int* retVal)
 	return S_OK;
 }
 
-// ************************************************************
-//		TilesAreInScreenBuffer()
-// ************************************************************
-bool CTiles::TilesAreInScreenBuffer(IMapViewCallback* map)
-{
-	if (!_visible || !_provider) {
-		return true;		// true because no tiles are actually needed for drawing, hence we need no tiles and yes we "have" them
-	}
-
-	int zoom;
-	CRect indices;
-	
-	if (!map->_GetTilesForMap(_provider, _manager.scalingRatio(), indices, zoom)) {
-		return true;
-	}
-	
-	for (int x = indices.left; x <= indices.right; x++)
-	{
-		for (int y = indices.bottom; y <= indices.top; y++)
-		{
-			if (!_manager.TileIsInBuffer(_provider->Id, zoom, x, y)) {
-				return false;
-			};
-		}
-	}
-
-	return true;
-}
-
 // *********************************************************
 //	     TilesAreInCache()
 // *********************************************************
 // checks whether all the tiles are present in cache
 bool CTiles::TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId)
 {
-	BaseProvider* provider = providerId == ProviderNone ? _provider : ((CTileProviders*)_providers)->get_Provider(providerId);
+	BaseProvider* provider = providerId == ProviderNone ? _provider : get_Provider(providerId);
 
 	if (!_visible || !provider) {
 		// there is no valid provider, so no need to schedule download
 		return true;
 	}
 
-	CRect indices;
-	int zoom;
-
-	if (!map->_GetTilesForMap(_provider, _manager.scalingRatio(), indices, zoom)) {
-		return true;
-	}
-	
-	for (int x = indices.left; x <= indices.right; x++)
-	{
-		for (int y = indices.bottom; y <= indices.top; y++)
-		{
-			if (_manager.TileIsInBuffer(provider->Id, zoom, x, y)) {
-				continue;
-			}
-
-			bool found = false;			
-
-			vector<TileCacheInfo*>& caches = _manager.get_AllCaches();
-			for (size_t i = 0; i < caches.size(); i++)
-			{
-				if (caches[i]->useCache)
-				{
-					if (caches[i]->cache->get_TileExists(provider, zoom, x, y))
-					{
-						found = true;
-					}
-				}
-			}
-
-			if (!found)
-				return false;
-		}
-	}
-	return true;
+	return _manager.TilesAreInCache(provider);
 }
 
 // *********************************************************
@@ -349,7 +292,7 @@ void CTiles::LoadTiles(bool isSnapshot, int providerId, CString key)
 	// any provider can be passed (for caching or snapshot)
 	if (!_visible) return;
 	
-	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
+	BaseProvider* provider = get_Provider(providerId);
 	if (provider) {
 		_manager.LoadTiles(provider, isSnapshot, key);
 	}
@@ -897,7 +840,7 @@ STDMETHODIMP CTiles::put_ProviderId(int providerId)
 
 	put_Visible(providerId == -1 ? VARIANT_FALSE: VARIANT_TRUE);
 
-	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
+	BaseProvider* provider = get_Provider(providerId);
 
 	if (provider) {
 		_provider = provider;
@@ -911,6 +854,9 @@ STDMETHODIMP CTiles::put_ProviderId(int providerId)
 STDMETHODIMP CTiles::GetTilesIndices(IExtents* boundsDegrees, int zoom, int providerId, IExtents** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = NULL;
+
 	if (!boundsDegrees)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -920,7 +866,7 @@ STDMETHODIMP CTiles::GetTilesIndices(IExtents* boundsDegrees, int zoom, int prov
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	boundsDegrees->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 	
-	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
+	BaseProvider* provider = get_Provider(providerId);
 	if (provider)
 	{
 		CPoint p1;
@@ -934,9 +880,7 @@ STDMETHODIMP CTiles::GetTilesIndices(IExtents* boundsDegrees, int zoom, int prov
 		ext->SetBounds(p1.x, p1.y, 0.0, p2.x, p2.y, 0.0);
 		*retVal = ext;
 	}
-	else {
-		*retVal = NULL;
-	}
+
 	return S_OK;
 }
 
@@ -950,7 +894,7 @@ STDMETHODIMP CTiles::Prefetch(double minLat, double maxLat, double minLng, doubl
 
 	*retVal = -1;	
 
-	BaseProvider* p = ((CTileProviders*)_providers)->get_Provider(providerId);
+	BaseProvider* p = get_Provider(providerId);
 	if (!p)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
@@ -975,7 +919,7 @@ STDMETHODIMP CTiles::Prefetch2(int minX, int maxX, int minY, int maxY, int zoom,
 
 	*retVal = -1;
 
-	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
+	BaseProvider* provider = get_Provider(providerId);
 	if (!provider)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
@@ -1001,7 +945,7 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
+	BaseProvider* provider = get_Provider(providerId);
 	if (!provider)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
@@ -1045,10 +989,9 @@ STDMETHODIMP CTiles::get_DiskCacheCount(int providerId, int zoom, int xMin, int 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// TODO: add to interface
-	SQLiteCache* cache = get_SqliteCache();
+	ITileCache* cache = TileCacheManager::get_Cache(tctSqliteCache);
 	if (cache) {
-		cache->get_TileCount(providerId, zoom, xMin, xMax, yMin, yMax);
+		cache->get_TileCount(providerId, zoom, CRect(xMin, yMax, xMax, yMin));
 	}
 	
 	return S_OK;
@@ -1074,21 +1017,21 @@ STDMETHODIMP CTiles::CheckConnection(BSTR url, VARIANT_BOOL* retVal)
 // *********************************************************
 //	     get_TileBounds
 // *********************************************************
-STDMETHODIMP CTiles::GetTileBounds(int provider, int zoom, int tileX, int tileY, IExtents** retVal)
+STDMETHODIMP CTiles::GetTileBounds(int providerId, int zoom, int tileX, int tileY, IExtents** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	*retVal = VARIANT_FALSE;
 
-	BaseProvider* prov = ((CTileProviders*)_providers)->get_Provider(provider);
-	if (!prov)
+	BaseProvider* provider = get_Provider(providerId);
+	if (!provider)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
 		return S_OK;
 	}
 	
 	CSize size;
-	prov->get_Projection()->GetTileMatrixSizeXY(zoom, size);
+	provider->get_Projection()->GetTileMatrixSizeXY(zoom, size);
 
 	if (tileX < 0 || tileX > size.cx - 1 || tileY < 0 || tileY > size.cy - 1)
 	{
@@ -1100,8 +1043,8 @@ STDMETHODIMP CTiles::GetTileBounds(int provider, int zoom, int tileX, int tileY,
 	CPoint pnt2(tileX + 1, tileY + 1);
 	PointLatLng p1, p2;
 
-	prov->get_Projection()->FromXYToLatLng(pnt1, zoom, p1);
-	prov->get_Projection()->FromXYToLatLng(pnt2, zoom, p2);
+	provider->get_Projection()->FromXYToLatLng(pnt1, zoom, p1);
+	provider->get_Projection()->FromXYToLatLng(pnt2, zoom, p2);
 
 	IExtents* ext = NULL;
 	ComHelper::CreateExtents(&ext);

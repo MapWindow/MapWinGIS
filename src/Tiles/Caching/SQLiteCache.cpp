@@ -569,10 +569,11 @@ double SQLiteCache::get_SizeMB(int providerId, int scale)
 // ****************************************************************
 //		get_Count()
 // ****************************************************************
-int SQLiteCache::get_TileCount(int provider, int zoom, int xMin, int xMax, int yMin, int yMax) 
+long SQLiteCache::get_TileCount(int provider, int zoom, CRect indices) 
 {
-	if(!Initialize(SqliteOpenMode::OpenIfExists))
+	if (!Initialize(SqliteOpenMode::OpenIfExists)) {
 		return 0;
+	}
 
 	const char   *tail;
 	sqlite3_stmt *stmt;
@@ -583,7 +584,7 @@ int SQLiteCache::get_TileCount(int provider, int zoom, int xMin, int xMax, int y
 						 "X <= %d and Y >= %d and Y <= %d";
 		
 		CString sql;
-		sql.Format(format, provider, zoom, xMin, xMax, yMin, yMax);
+		sql.Format(format, provider, zoom, indices.left, indices.right, indices.bottom, indices.top);
 	
 		int val = sqlite3_prepare_v2(_conn, sql, sql.GetLength() + 1, &stmt, &tail);
 
