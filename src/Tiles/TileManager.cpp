@@ -59,7 +59,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	InitializeDiskCache();
 
 	// all incoming tasks will be discarded
-	TileRequestInfo* requestInfo = new TileRequestInfo(key, isSnapshot);
+	TileRequestInfo* requestInfo = _loader.CreateNextRequest(key, isSnapshot);
 
 	//  check which ones we already have, and which ones are to be loaded
 	std::vector<TilePoint*> activeTasks;
@@ -83,13 +83,14 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 
 	_loader.RunCaching();
 
+	_provider = provider;
+
 	if (points.size() > 0)
 	{
 		tilesLogger.WriteLine("Queued to load from server: %d", points.size());
 
 		// zoom can change in the process, so we use the calculated version and not the one current for provider
 		_loader.Load(points, provider, zoom, requestInfo);
-		_provider = provider;
 	}
 	else
 	{

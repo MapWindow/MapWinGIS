@@ -180,7 +180,7 @@ void ITileLoader::CleanTasks()
 // *******************************************************
 void ITileLoader::CleanRequests()
 {
-	_requestLock.Lock();
+	CSingleLock lock(&_requestLock, TRUE);
 
 	int size = static_cast<int>(_requests.size());
 

@@ -5694,7 +5694,7 @@ interface ITiles : IDispatch{
 	
 	[id(11), helpstring("")] HRESULT ClearCache([in]tkCacheType cacheType);
 	[id(12), helpstring("")] HRESULT ClearCache2([in]tkCacheType cacheType, 
-												 [in]int providerId, 
+												 [in]int ProviderId, 
 												 [in, optional, defaultvalue(0)]int fromScale, 
 												 [in, optional, defaultvalue(100)]int toScale);
 	
@@ -5734,7 +5734,7 @@ interface ITiles : IDispatch{
 													 [in]int tileX, [in]int tileY, [out, retval] IExtents** retVal);
 	[propget, id(34), helpstring("")] HRESULT CurrentZoom([out, retval] int* retVal);
 	
-	[id(37), helpstring("")] HRESULT PrefetchToFolder([in]IExtents* Extents, [in]int zoom, [in]int providerId, 
+	[id(37), helpstring("")] HRESULT PrefetchToFolder([in]IExtents* Extents, [in]int zoom, [in]int ProviderId, 
 									[in]BSTR savePath, [in]BSTR fileExtension, [in]IStopExecution* stop, [out,retval]LONG* retVal);
 
 	[propget, id(43), helpstring("")] HRESULT DelayRequestTimeout( [out, retval]long* retVal);

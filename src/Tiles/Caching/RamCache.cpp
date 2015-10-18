@@ -209,7 +209,9 @@ void RamCache::Clear(int provider, int fromScale, int toScale)
 			}
 		}
     }
-	
+
+	_tilesMap.clear();
+
 	// now remove tiles from chronological vector
 	DeleteMarkedTiles();
 	

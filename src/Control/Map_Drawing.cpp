@@ -576,7 +576,7 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 	}	
 
 	// drawing new tiles
-	if (initialization || tiles->get_Manager()->UndrawnTilesExist()) {
+	if (initialization || get_TileManager()->UndrawnTilesExist()) {
 		DrawTiles(gTiles);		
 	}
 }
