@@ -199,18 +199,13 @@ void CMapView::UpdateTileProjection()
 	_tileProjection->Clear(&vb);
 	_tileReverseProjection->Clear(&vb);
 
-	tkTileProjection tp;
-	_tiles->get_ServerProjection(&tp);
+	IGeoProjection* gp = NULL;
+	_tiles->get_ServerProjection(&gp);
 
-	switch (tp)
-	{
-		case SphericalMercator:
-			_tileProjection->SetGoogleMercator(&vb);
-			break;
-		case Amersfoort:
-			_tileProjection->ImportFromEPSG(EPSG_AMERSFOORT, &vb);
-			break;
+	if (gp) {
+		ComHelper::SetRef(gp, (IDispatch**)&_tileProjection, false);
 	}
+
 	_tileReverseProjection->CopyFrom(_projection, &vb);
 
 	if (ProjectionHelper::IsEmpty(_projection))
@@ -222,7 +217,10 @@ void CMapView::UpdateTileProjection()
 	_tileProjection->get_IsSame(_projection, &vb);
 	_tileProjectionState = vb ? ProjectionMatch : ProjectionDoTransform;
 
-	if (_transformationMode == tmWgs84Complied && tp == SphericalMercator)
+	VARIANT_BOOL sphericalMercator;
+	_tiles->get_ProjectionIsSphericalMercator(&sphericalMercator);
+	
+	if (_transformationMode == tmWgs84Complied && sphericalMercator)
 	{
 		// transformation is needed, but it leads only to some vertical scaling which is quite acceptable
 		_tileProjectionState = ProjectionCompatible;

@@ -119,7 +119,7 @@ bool TilesDrawer::IsSameProjection(IGeoProjection* mapProjection, BaseProvider* 
 		if (customProj)
 		{
 			// TODO: can be cached
-			mapProjection->get_IsSame(customProj->get_GeoProjection(), &isSame);
+			mapProjection->get_IsSame(customProj->get_ServerProjection(), &isSame);
 		}
 	}
 

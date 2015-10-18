@@ -27,9 +27,6 @@ VARIANT_BOOL CMapView::ZoomToTileLevelCore(int zoom, bool logPrevious)
 	if (_viewWidth == 0 || _viewHeight == 0)
 		return VARIANT_FALSE;
 
-	tkTileProjection tileProjection;
-	_tiles->get_ServerProjection(&tileProjection);
-
 	// we shall make all the calculations in server projection (either GMercator or custom)
 	// and then transform bounds to the current coordinate system
 	double xCentOld = (_extents.left + _extents.right) / 2.0;
@@ -80,7 +77,10 @@ VARIANT_BOOL CMapView::ZoomToTileLevelCore(int zoom, bool logPrevious)
 			minY = yCent - h / 2.0;
 			maxY = yCent + h / 2.0;
 
-			bool extrapolation = tileProjection == SphericalMercator && _transformationMode == tmWgs84Complied;
+			VARIANT_BOOL sphericalMercator;
+			_tiles->get_ProjectionIsSphericalMercator(&sphericalMercator);
+			bool extrapolation = sphericalMercator && _transformationMode == tmWgs84Complied;
+
 			double minLng = 0.0, maxLng = 0.0, minLat = 0.0, maxLat = 0.0;
 			if (extrapolation)		// ding extrapolation for WGS84
 			{

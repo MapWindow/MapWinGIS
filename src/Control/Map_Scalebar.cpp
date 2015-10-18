@@ -711,9 +711,10 @@ bool CMapView::GetMinMaxZoom( int& minZoom, int& maxZoom )
 // ****************************************************************
 bool CMapView::GetTileMismatchMinZoom( int& minZoom )
 {
-	tkTileProjection tp;
-	_tiles->get_ServerProjection(&tp);
-	if (_tileProjectionState == ProjectionDoTransform && tp == SphericalMercator)
+	VARIANT_BOOL sphericalMercator;
+	_tiles->get_ProjectionIsSphericalMercator(&sphericalMercator);
+
+	if (_tileProjectionState == ProjectionDoTransform && sphericalMercator)
 	{
 		minZoom = m_globalSettings.tilesMaxZoomOnProjectionMismatch;
 		return true;

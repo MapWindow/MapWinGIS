@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <deque>
+#include <afxmt.h>
 #include "gdal_priv.h"
 #include "geos_c.h"
 #include "ogr_geometry.h"

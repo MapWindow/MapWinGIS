@@ -51,7 +51,8 @@ public:
 		_projCustom->Release();
 	}
 
-	IGeoProjection* get_GeoProjection() { return _projCustom; }
+public:
+	IGeoProjection* get_ServerProjection() { return _projCustom; }
 	void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret);
 	void FromProjToXY(double lat, double lng, int zoom, CPoint &ret);
 	void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret);

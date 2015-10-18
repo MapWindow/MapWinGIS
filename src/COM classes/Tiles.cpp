@@ -1113,13 +1113,21 @@ STDMETHODIMP CTiles::get_MinZoom(int* retVal)
 // ************************************************************
 //		ServerProjection
 // ************************************************************
-STDMETHODIMP CTiles::get_ServerProjection(tkTileProjection* retVal)
+STDMETHODIMP CTiles::get_ServerProjection(IGeoProjection** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	BaseProjection* p = _provider->get_Projection();
+	*retVal= NULL;
 
-	*retVal = p ? p->get_ServerProjection() : tkTileProjection::SphericalMercator;
+	BaseProjection* p = _provider->get_Projection();
+	if (p) 
+	{
+		*retVal = p->get_ServerProjection();
+
+		if (*retVal) {
+			(*retVal)->AddRef();
+		}
+	}
 
 	return S_OK;
 }
@@ -1139,10 +1147,8 @@ STDMETHODIMP CTiles::get_ProjectionStatus(tkTilesProjectionStatus* retVal)
 	}
 
 	IGeoProjection* gp = map->_GetMapProjection();
-	CComPtr<IGeoProjection> gpServer = NULL;
 
-	// TODO: store GeoProjection instance directly
-	GetUtils()->TileProjectionToGeoProjection(_provider->get_Projection()->get_ServerProjection(), &gpServer);
+	IGeoProjection* gpServer = _provider->get_Projection()->get_ServerProjection();
 
 	if (gp && gpServer)
 	{
@@ -1179,5 +1185,17 @@ STDMETHODIMP CTiles::put_ProxyAuthenticationScheme(tkProxyAuthentication newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.proxyAuthentication = newVal;
+	return S_OK;
+}
+
+// ************************************************************
+//		ProjectionIsSphericalMercator
+// ************************************************************
+STDMETHODIMP CTiles::get_ProjectionIsSphericalMercator(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _provider->get_Projection()->IsSphericalMercator() ? VARIANT_TRUE : VARIANT_FALSE;
+	
 	return S_OK;
 }

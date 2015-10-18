@@ -43,7 +43,7 @@ class ATL_NO_VTABLE CTiles :
 {
 public:
 	CTiles()
-		: _manager(true)
+		: _manager(true), _mercatorProjection(NULL)
 	{
 		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
@@ -63,6 +63,10 @@ public:
 		SysFreeString(_key);
 
 		ClearAll();
+
+		if (_mercatorProjection) {
+			_mercatorProjection->Release();
+		}
 
 		gReferenceCounter.Release(tkInterface::idTiles);
 	}
@@ -159,7 +163,7 @@ public:
 	STDMETHOD(get_CurrentZoom)(int* retVal);
 	STDMETHOD(get_MaxZoom)(int* retVal);
 	STDMETHOD(get_MinZoom)(int* pVal);
-	STDMETHOD(get_ServerProjection)(tkTileProjection* retVal);
+	STDMETHOD(get_ServerProjection)(IGeoProjection** retVal);
 	STDMETHOD(get_ProjectionStatus)(tkTilesProjectionStatus* retVal);
 	STDMETHOD(get_ScalingRatio)(double* pVal);
 	STDMETHOD(put_ScalingRatio)(double newVal);
@@ -172,6 +176,8 @@ public:
 	STDMETHOD(Prefetch)(double minLat, double maxLat, double minLng, double maxLng, int zoom, int provider, IStopExecution* stop, LONG* retVal);
 	STDMETHOD(Prefetch2)(int minX, int maxX, int minY, int maxY, int zoom, int provider, IStopExecution* stop, LONG* retVal);
 	STDMETHOD(PrefetchToFolder)(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal);
+	STDMETHOD(get_ProjectionIsSphericalMercator)(VARIANT_BOOL* pVal);
+
 private:
 	long _lastErrorCode;
 	ICallback * _globalCallback;
@@ -182,6 +188,7 @@ private:
 	ITileProviders* _providers;
 	TileManager _manager;
 	BaseProvider* _provider;
+	IGeoProjection* _mercatorProjection;
 
 private:
 	void ErrorMessage(long ErrorCode);

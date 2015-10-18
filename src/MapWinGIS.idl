@@ -5742,12 +5742,13 @@ interface ITiles : IDispatch{
 	
 	[propget, id(47), helpstring("")] HRESULT MaxZoom( [out, retval]int* retVal);
 	[propget, id(48), helpstring("")] HRESULT MinZoom( [out, retval]int* retVal);
-	[propget, id(49), helpstring("")] HRESULT ServerProjection( [out, retval]tkTileProjection* retVal);
+	[propget, id(49), helpstring("")] HRESULT ServerProjection( [out, retval]IGeoProjection** retVal);
 	[propget, id(50), helpstring("")] HRESULT ProjectionStatus( [out, retval]tkTilesProjectionStatus* retVal);
 	[id(51)] HRESULT SetProxyAuthentication([in] BSTR username, [in] BSTR password, [in] BSTR domain, [out, retval] VARIANT_BOOL* retVal);
 	[id(52)] HRESULT ClearProxyAuthorization();
 	[propget, id(53)] HRESULT ProxyAuthenticationScheme([out, retval] tkProxyAuthentication* pVal);
 	[propput, id(53)] HRESULT ProxyAuthenticationScheme([in] tkProxyAuthentication newVal);
+	[propget, id(54)] HRESULT ProjectionIsSphericalMercator([out, retval] VARIANT_BOOL* pVal);
 };
 
 [

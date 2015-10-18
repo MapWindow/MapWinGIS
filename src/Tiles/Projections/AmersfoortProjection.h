@@ -29,7 +29,6 @@ public:
 	{
 		_yInverse = true;
 		_worldWide = false;
-		_serverProjection = tkTileProjection::Amersfoort;
 
 		_yMin = 22598.080;
 		_yMax = 903401.920;

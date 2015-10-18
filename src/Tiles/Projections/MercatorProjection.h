@@ -37,9 +37,20 @@ public:
 	}
 
 private:
+	static IGeoProjection* _geoProjeciton;
+	static ::CCriticalSection _lock;
+
+private:
 	double GetWidth() { return MERCATOR_MAX_VAL * 2.0; }
 
 public:
+	static void ReleaseGeoProjection();
+
+public:
+	virtual bool IsSphericalMercator() { return true; }
+	
+	IGeoProjection* get_ServerProjection();
+
 	// converts coordinates to meters in EPSG:3857
 	void FromXYToProj(CPoint pos, int zoom, PointLatLng &ret);
 	

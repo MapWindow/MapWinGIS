@@ -22,6 +22,42 @@
 #include "MercatorProjection.h"
 #include "AngleHelper.h"
 
+IGeoProjection* MercatorProjection::_geoProjeciton = NULL;
+::CCriticalSection MercatorProjection::_lock;
+
+// ****************************************************
+//		get_ServerProjection
+// ****************************************************
+void MercatorProjection::ReleaseGeoProjection()
+{
+	_lock.Lock();
+
+	if (_geoProjeciton) {
+		_geoProjeciton->Release();
+		_geoProjeciton = NULL;
+	}
+
+	_lock.Unlock();
+}
+
+// ****************************************************
+//		get_ServerProjection
+// ****************************************************
+IGeoProjection* MercatorProjection::get_ServerProjection()
+{
+	CSingleLock lock(&_lock, TRUE);
+
+	if (!_geoProjeciton) 
+	{
+		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_geoProjeciton);
+
+		VARIANT_BOOL vb;
+		_geoProjeciton->SetGoogleMercator(&vb);
+	}
+
+	return _geoProjeciton;
+}
+
 // ****************************************************
 //		TileXYToProj
 // ****************************************************
@@ -80,3 +116,4 @@ void MercatorProjection::FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret)
 	ret.Lat = 90 - 360 * atan(exp(-yy * 2 * pi_)) / pi_;
 	ret.Lng = 360 * xx;
 }
+

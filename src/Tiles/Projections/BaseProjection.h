@@ -33,7 +33,6 @@ public:
 		_yInverse = false;
 		_earthRadius = 6378137.0;
 		_worldWide = true;
-		_serverProjection = tkTileProjection::SphericalMercator;
 		_projected = false;
 		MapProjectionCount = -1;
 	};
@@ -48,9 +47,6 @@ protected:
 	CSize _tileSize;
 	double _earthRadius;
 	bool _worldWide;
-
-	// TODO: use EPSG instead
-	tkTileProjection _serverProjection;
 
 	// bounds in decimal degrees
 	double _minLat;
@@ -73,9 +69,9 @@ public:
 	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret) = 0;
 	virtual void FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret) = 0;
 	virtual double GetWidth() = 0;
+	virtual IGeoProjection* get_ServerProjection() = 0;
 
-	tkTileProjection get_ServerProjection() { return _serverProjection; }
-
+	virtual bool IsSphericalMercator() { return false; }
 	bool IsWorldWide() { return _worldWide; }
 	double get_MinLat() { return _minLat; }
 	double get_MaxLat() { return _maxLat; }
