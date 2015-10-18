@@ -587,6 +587,11 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		return;
 	}
 
+	if (abs(xMax - xMin) > 50 || abs(yMax - yMin) > 50)
+	{
+		return;
+	}
+
 	if (xMin == _lastTileExtents.left && xMax == _lastTileExtents.right &&
 		yMin == _lastTileExtents.bottom && yMax == _lastTileExtents.top &&
 		_lastProvider == provider->Id && _lastZoom == zoom)
@@ -1802,38 +1807,48 @@ STDMETHODIMP CTiles::GetTileBounds(int provider, int zoom, int tileX, int tileY,
 // ************************************************************
 //		ProjectionSupportsWorldWideTransform
 // ************************************************************
-bool CTiles::ProjectionSupportsWorldWideTransform( IGeoProjection* mapProjection, IGeoProjection* wgsProjection )
+bool CTiles::ProjectionSupportsWorldWideTransform(IGeoProjection* mapProjection, IGeoProjection* wgsProjection)
 {
-	// let's check if map projection supports world wide transformation
-	VARIANT_BOOL isGeograpic;		
+	VARIANT_BOOL isGeograpic;
 	mapProjection->get_IsGeographic(&isGeograpic);
 	if (isGeograpic)
 	{
 		return true;
 	}
-	else
+
+	double TOLERANCE = 0.00001;
+	VARIANT_BOOL vb1, vb2;
+	double minLng = -180.0, maxLng = 180.0, minLat = -85.05112878, maxLat = 85.05112878;
+	double centerLat = 0.0, centerLng = 0.0;
+	double x1 = minLng, x2 = maxLng, y1 = minLat, y2 = maxLat;
+	double x3 = centerLng, y3 = centerLng;
+
+	m_globalSettings.suppressGdalErrors = true;
+	wgsProjection->Transform(&x1, &y1, &vb1);
+	wgsProjection->Transform(&x2, &y2, &vb2);
+	wgsProjection->Transform(&x3, &y3, &vb2);
+	m_globalSettings.suppressGdalErrors = false;
+
+	if ((y3 > y2 && y3 > y1) || (y3 < y2 && y3 < y1))
 	{
-		double TOLERANCE = 0.00001;
-		VARIANT_BOOL vb1, vb2;
-		double minLng = -180.0, maxLng = 180.0, minLat = -85.05112878, maxLat = 85.05112878;
-		double x1 = minLng, x2 = maxLng, y1 = minLat, y2 = maxLat;
-		m_globalSettings.suppressGdalErrors = true;
-		wgsProjection->Transform(&x1, &y1, &vb1);
-		wgsProjection->Transform(&x2, &y2, &vb2);
-		m_globalSettings.suppressGdalErrors = false;
-		if (vb1 && vb2)
+		// this checks that direction of Y axis is the same on its whole length;
+		// for Lambert Conformal Conic, that's not the case
+		return false;
+	}
+
+	if (vb1 && vb2)
+	{
+		mapProjection->Transform(&x1, &y1, &vb1);
+		mapProjection->Transform(&x2, &y2, &vb1);
+		if (abs(x1 - minLng) < TOLERANCE &&
+			abs(x2 - maxLng) < TOLERANCE &&
+			abs(y1 - minLat) < TOLERANCE &&
+			abs(y2 - maxLat) < TOLERANCE)
 		{
-			mapProjection->Transform(&x1, &y1, &vb1);
-			mapProjection->Transform(&x2, &y2, &vb1);
-			if (abs(x1 - minLng) <  TOLERANCE &&
-				abs(x2 - maxLng) <  TOLERANCE &&
-				abs(y1 - minLat) <  TOLERANCE &&
-				abs(y2 - maxLat) <  TOLERANCE)
-			{
-				return true;
-			}
+			return true;
 		}
 	}
+
 	return false;
 }
 
