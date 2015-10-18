@@ -132,12 +132,22 @@ bool ProjectionHelper::SupportsWorldWideTransform(IGeoProjection* mapProjection,
 	double TOLERANCE = 0.00001;
 	VARIANT_BOOL vb1, vb2;
 	double minLng = -180.0, maxLng = 180.0, minLat = -85.05112878, maxLat = 85.05112878;
+	double centerLat = 0.0, centerLng = 0.0;
 	double x1 = minLng, x2 = maxLng, y1 = minLat, y2 = maxLat;
+	double x3 = centerLng, y3 = centerLng;
 
 	m_globalSettings.suppressGdalErrors = true;
 	wgsProjection->Transform(&x1, &y1, &vb1);
 	wgsProjection->Transform(&x2, &y2, &vb2);
+	wgsProjection->Transform(&x3, &y3, &vb2);
 	m_globalSettings.suppressGdalErrors = false;
+
+	if ((y3 > y2 && y3 > y1) || (y3 < y2 && y3 < y1))
+	{
+		// this check that direction of Y axis is the same on its whole length;
+		// for Lambert Conformal Conic, that's not the case
+		return false;
+	}
 
 	if (vb1 && vb2)
 	{

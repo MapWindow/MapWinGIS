@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "map.h"
 #include "GeoPoint.h"
 #include "TileHelper.h"
@@ -38,6 +38,20 @@ bool CMapView::get_TilesForMap(void* p, double scalingRatio, CRect& indices, int
 	zoom = ChooseZoom(provider, bounds, scalingRatio, true);
 
 	provider->get_Projection()->getTileRectXY(bounds, zoom, indices);
+
+	// some projections may return unpredictable results;
+	// so let's put some safeguard against extreme situation (like downloading a million of tiles)
+	if (indices.Width() > 50 || indices.Height() > 50) 
+	{
+		CString s = "Too many tiles are requested for map display. "
+					"It may be caused by irregularities of coordinate transformation "
+					"(we don't have a reliable method to determine coordinate range "
+					"where certain projection use is acceptable).";
+
+		CallbackHelper::ErrorMsg(s);
+
+		return false;
+	}
 
 	return true;
 }
@@ -163,6 +177,7 @@ bool CMapView::get_TileProviderBounds(BaseProvider* provider, Extent& retVal)
 
 		//Debug::WriteLine("Projected world bounds: left = %f; right = %f; bottom = %f; top = %f", left, right, bottom, top);
 	}
+
 	retVal.left = left;
 	retVal.right = right;
 	retVal.top = top;
