@@ -55,6 +55,7 @@ public:
 	void set_StopCallback(IStopExecution* callback) { _stopCallback = callback; }
 	int get_ErrorCount() { return _errorCount; }
 	int get_SumCount() { return _sumCount; }
+	ITileCache* get_Cache() { return _cache; }
 
 public:
 	//methods

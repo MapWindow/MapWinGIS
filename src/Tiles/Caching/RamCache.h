@@ -61,6 +61,7 @@ public:
 	virtual void Initialize(bool canUseCache, bool canDoCaching) { }
 	void Lock() {  }
 	void Unlock() {  }
+	void InitBulkDownload(int zoom, vector<TilePoint*>& points) {  }
 
 public:
 	// methods

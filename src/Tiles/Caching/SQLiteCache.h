@@ -67,6 +67,7 @@ public:
 	virtual void Initialize(bool canUseCache, bool canDoCaching);
 	void Lock() { _locked = true; }
 	void Unlock() { _locked = false; }
+	void InitBulkDownload(int zoom, vector<TilePoint*>& points) { Initialize(SqliteOpenMode::OpenIfExists); }
 
 public:
 	// properties:

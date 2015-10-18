@@ -17,11 +17,30 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- #pragma once
+#pragma once
 #include "TileBulkLoader.h"
 
+class PrefetchManager;
+
+// ******************************************************
+//    PrefetchManagerFactory
+// ******************************************************
+class PrefetchManagerFactory
+{
+private:
+	static vector<PrefetchManager*> _managers;
+	static ::CCriticalSection _lock;
+public:
+	static PrefetchManager* Create(ITileCache* cache);
+	static void Clear();
+};
+
+// ******************************************************
+//    PrefetchManager
+// ******************************************************
 class PrefetchManager
 {
+public:
 	PrefetchManager(ITileCache* cache)
 		: _loader(cache)
 	{
@@ -31,12 +50,16 @@ class PrefetchManager
 private:
 	TileBulkLoader _loader;
 
+private:
+	// methods
+	void BuildDownloadList(BaseProvider* provider, int zoom, CRect indices, vector<TilePoint*>& points);
 public: 
 	// properties
 	TileBulkLoader* get_Loader() { return &_loader; }
 
 public:
 	// methods
-	long PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, BaseProvider* provider, BSTR savePath, BSTR fileExt, IStopExecution* stop);
-	void PrefetchToFolder(IExtents* ext, int zoom, BaseProvider* provider, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal);
+	long Prefetch(BaseProvider* provider, CRect indices, int zoom, ICallback* callback, IStopExecution* stop);
+	void LogBulkDownloadStarted(int zoom);
+	
 };

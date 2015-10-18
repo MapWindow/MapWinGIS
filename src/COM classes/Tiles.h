@@ -202,7 +202,6 @@ public:
 
 public:
 	void Init(IMapViewCallback* map) {_manager.set_MapCallback(map); }
-	long PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop);
 	void LoadTiles(bool isSnapshot = false, CString key = "");
 	void LoadTiles(bool isSnapshot, int providerId, CString key = "");
 	bool TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId = ProviderNone);

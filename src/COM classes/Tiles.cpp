@@ -947,24 +947,23 @@ STDMETHODIMP CTiles::Prefetch(double minLat, double maxLat, double minLng, doubl
 							  IStopExecution* stop, LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
+	*retVal = -1;	
+
 	BaseProvider* p = ((CTileProviders*)_providers)->get_Provider(providerId);
 	if (!p)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
 		return S_OK;
 	}
-	else
-	{
-		CPoint p1;
-		p->get_Projection()->FromLatLngToXY(PointLatLng(minLat, minLng), zoom, p1);
+	
+	CRect indices;
+	Extent ext(minLng, maxLng, minLat, maxLat);
+	p->get_Projection()->getTileRectXY(ext, zoom, indices);
 
-		CPoint p2;
-		p->get_Projection()->FromLatLngToXY(PointLatLng(maxLat, maxLng), zoom, p2);
+	Prefetch2(indices.left, indices.right, indices.bottom, indices.top, zoom, providerId, stop, retVal);
 
-		this->Prefetch2(p1.x, p2.x, MIN(p1.y, p2.y) , MAX(p1.y, p2.y), zoom, providerId, stop, retVal);
-		return S_OK;
-	}
+	return S_OK;
 }
 
 // *********************************************************
@@ -973,7 +972,24 @@ STDMETHODIMP CTiles::Prefetch(double minLat, double maxLat, double minLng, doubl
 STDMETHODIMP CTiles::Prefetch2(int minX, int maxX, int minY, int maxY, int zoom, int providerId, IStopExecution* stop, LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = PrefetchCore(minX, maxX, minY, maxY, zoom, providerId, m_globalSettings.emptyBstr, m_globalSettings.emptyBstr, stop);
+
+	*retVal = -1;
+
+	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
+	if (!provider)
+	{
+		ErrorMessage(tkINVALID_PROVIDER_ID);
+		return S_OK;
+	}
+
+	PrefetchManager* manager = PrefetchManagerFactory::Create(TileCacheManager::get_Cache(tctSqliteCache));
+	if (manager)
+	{
+		USES_CONVERSION;
+		CRect rect(minX, minY, maxX, maxY);
+		*retVal = manager->Prefetch(provider, rect, zoom, _globalCallback, stop);
+	}
+
 	return S_OK;
 }
 
@@ -985,34 +1001,41 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	BaseProvider* p = ((CTileProviders*)_providers)->get_Provider(providerId);
-	if (!p)
+	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
+	if (!provider)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
 		*retVal = -1;
 		return S_OK;
 	}
 
-	// TODO: use prefetch manager
-	
-	return S_OK;
-}
-
-// *********************************************************
-//	     PrefetchCore
-// *********************************************************
-long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId,
-	BSTR savePath, BSTR fileExt, IStopExecution* stop)
-{
-	BaseProvider* provider = ((CTileProviders*)_providers)->get_Provider(providerId);
-	if (!provider)
+	USES_CONVERSION;
+	CStringW path = OLE2W(savePath);
+	if (path.GetLength() > 0 && path.GetAt(path.GetLength() - 1) != L'\\')
 	{
-		ErrorMessage(tkINVALID_PROVIDER_ID);
-		return 0;
+		path += L"\\";
 	}
 
-	// TODO: use prefetch manager
-	return 0;
+	if (!Utility::DirExists(path))
+	{
+		CallbackHelper::ErrorMsg("PrefetchManager", NULL, "", "Folder doesn't exist: ", W2A(path));
+		return -1;
+	}
+
+	DiskCache* cache = new DiskCache(path, fileExt);
+
+	PrefetchManager* manager = PrefetchManagerFactory::Create(cache);
+	if (manager) 
+	{
+		CRect indices;
+		Extent extents(ext);
+		provider->get_Projection()->getTileRectXY(extents, zoom, indices);
+
+		USES_CONVERSION;
+		*retVal = manager->Prefetch(provider, indices, zoom, _globalCallback, stop);
+	}
+
+	return S_OK;
 }
 
 // *********************************************************

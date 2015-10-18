@@ -21,6 +21,26 @@
 #include "DiskCache.h"
 
 // *********************************************************
+//	     InitEncoder()
+// *********************************************************
+void DiskCache::InitEncoder()
+{
+	if (_ext.GetLength() >= 4)
+	{
+		CStringW s = _ext.Mid(0, 4).MakeLower(); // try to guess it from input
+
+		if (s == L".png")
+		{
+			_encoder = "image/png";
+		}
+		else if (s == ".jpg")
+		{
+			_encoder = "image/jpeg";
+		}
+	}
+}
+
+// *********************************************************
 //	     get_TileExists()
 // *********************************************************
 bool DiskCache::get_TileExists(BaseProvider* provider, int zoom, int x, int y)
@@ -97,29 +117,4 @@ void DiskCache::AddTile(TileCore* tile)
 	delete bmp;
 
 	tile->Release();
-}
-
-// *********************************************************
-//	     Initialize()
-// *********************************************************
-// TODO: move to constructor
-void DiskCache::InitializePath(CStringW path, CStringW extension)
-{
-	_ext = _ext;
-	_rootPath = path;
-	_encoder = L"image/png";	// default
-
-	if (_ext.GetLength() >= 4)
-	{
-		CStringW s = _ext.Mid(0, 4).MakeLower(); // try to guess it from input
-
-		if (s == L".png")
-		{
-			_encoder = "image/png";
-		}
-		else if (s == ".jpg")
-		{
-			_encoder = "image/jpeg";
-		}
-	}
 }

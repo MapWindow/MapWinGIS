@@ -24,9 +24,14 @@
 class DiskCache: public ITileCache
 {
 public:
-	DiskCache()
+	DiskCache::DiskCache(CStringW path, CStringW extension)
 		: _init(false)
 	{
+		_ext = _ext;
+		_rootPath = path;
+		_encoder = L"image/png";	// default
+
+		InitEncoder();
 	}
 
 private:	
@@ -35,6 +40,10 @@ private:
 	CString _encoder;	// GDI+ encoder
 	CStringW _ext;		// extension (with leading point)
 	CStringW _rootPath;	// root folder for storage
+
+private:
+	// methods
+	void InitEncoder();
 
 public:	
 	// interface
@@ -52,6 +61,7 @@ public:
 	virtual void Initialize(bool canUseCache, bool canDoCaching) { }
 	void Lock() {  }
 	void Unlock() {  }
+	void InitBulkDownload(int zoom, vector<TilePoint*>& points) { CreateFolders(zoom, points); }
 
 public:
 	// properties:
@@ -59,7 +69,6 @@ public:
 
 public:
 	// methods:
-	void InitializePath(CStringW rootPath, CStringW ext);
 	void CreateFolders(int zoom, vector<TilePoint*>& points);	// creates folders to store provided list of points
 	void CreateFolder(int zoom, TilePoint* pnt);	// creates folder for a single point
 };

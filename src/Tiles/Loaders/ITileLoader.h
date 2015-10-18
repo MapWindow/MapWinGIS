@@ -31,19 +31,6 @@ class ITileLoader;
 class ILoadingTask;
 
 // ******************************************************
-//    TileLoaderFactory()
-// ******************************************************
-class TileLoaderFactory
-{
-private:
-	static vector<ITileLoader*> _loaders;
-	static ::CCriticalSection _lock;
-public:
-	static ITileLoader* Create(CacheType type, TileLoaderType loaderType);
-	static void Clear();
-};
-
-// ******************************************************
 //    TileLoader
 // ******************************************************
 // Handles the loading queue of map tiles, schedules the loaded tiles for caching

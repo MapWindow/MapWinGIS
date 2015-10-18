@@ -23,50 +23,6 @@
 #include "TileBulkLoader.h"
 #include "TileMapLoader.h"
 
-::CCriticalSection TileLoaderFactory::_lock;
-vector<ITileLoader*> TileLoaderFactory::_loaders;
-
-// *******************************************************
-//		Create()
-// *******************************************************
-ITileLoader* TileLoaderFactory::Create(CacheType type, TileLoaderType loaderType)
-{
-	ITileLoader* loader = NULL;
-
-	if (loaderType == tltBulkLoader)
-	{
-		ITileCache* cache = TileCacheManager::get_Cache(type);
-		loader = new TileBulkLoader(cache);
-	}
-	else if (loaderType == tltMapLoader)
-	{
-		loader = new TileMapLoader(type);
-	}
-
-	_lock.Lock();
-	_loaders.push_back(loader);
-	_lock.Unlock();
-
-	return loader;
-}
-
-// *******************************************************
-//		Clear()
-// *******************************************************
-void TileLoaderFactory::Clear()
-{
-	_lock.Lock();
-
-	for (size_t i = 0; i < _loaders.size(); i++)
-	{
-		delete _loaders[i];
-	}
-
-	_loaders.clear();
-
-	_lock.Unlock();
-}
-
 // *******************************************************
 //		InitPools()
 // *******************************************************

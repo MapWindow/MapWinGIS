@@ -37,10 +37,8 @@ ITileCache* TileCacheManager::get_Cache(CacheType type)
 
 	switch (type) {
 		case tctDiskCache:
-			if (!_diskCache) {
-				_diskCache = new DiskCache();
-			}
-			return _diskCache;
+			// we can't create an instance without path
+			return NULL;
 		case tctRamCache:
 			if (!_ramCache) {
 				_ramCache = new RamCache();
