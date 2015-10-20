@@ -43,7 +43,7 @@ class ATL_NO_VTABLE CTiles :
 {
 public:
 	CTiles()
-		: _manager(true), _mercatorProjection(NULL)
+		: _manager(true), _mercatorProjection(NULL), _reloadNeeded(true)
 	{
 		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
@@ -189,6 +189,7 @@ private:
 	TileManager _manager;
 	BaseProvider* _provider;
 	IGeoProjection* _mercatorProjection;
+	bool _reloadNeeded;
 
 private:
 	void ErrorMessage(long ErrorCode);
@@ -200,6 +201,7 @@ public:
 	// properties
 	TileManager* get_Manager() { return &_manager; }
 	BaseProvider* get_Provider() { return _provider; }
+	bool get_ReloadNeeded();
 
 public:
 	void Init(IMapViewCallback* map) {_manager.set_MapCallback(map); }

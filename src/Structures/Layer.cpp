@@ -243,22 +243,31 @@ ILabels* Layer::get_Labels()
 IGeoProjection* Layer::GetGeoProjection()
 {
 	IGeoProjection* gp = NULL;
-	if (this->IsShapefile())
+	if (IsShapefile())
 	{
 		CComPtr<IShapefile> sf = NULL;
-		if (this->QueryShapefile(&sf))
+		if (QueryShapefile(&sf))
 		{
 			sf->get_GeoProjection(&gp);
 		}
 	}
-	else if (this->IsImage())
+	else if (IsImage())
 	{
 		CComPtr<IImage> img = NULL;
-		if (this->QueryImage(&img))
+		if (QueryImage(&img))
 		{
 			img->get_GeoProjection(&gp);
 		}
 	}
+	else if (IsWmsLayer())
+	{
+		CComPtr<IWmsLayer> wms = NULL;
+		if (QueryWmsLayer(&wms))
+		{
+			wms->get_GeoProjection(&gp);
+		}
+	}
+
 	return gp;
 }
 

@@ -68,7 +68,6 @@ private:
 	void BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<TilePoint*>& activeTasks, vector<TilePoint*>& points);
 	void GetActiveTasks(std::vector<TilePoint*>& activeTasks, int providerId, int zoom, int newGeneration, CRect indices);
 	bool IsNewRequest(Extent& mapExtents, CRect indices, int providerId, int zoom);
-	void ClearBuffer();
 	void DeleteMarkedTilesFromBuffer();
 	void InitializeDiskCache();
 	void UnlockDiskCache();
@@ -93,6 +92,7 @@ public:
 	void set_GridLinesVisible(bool value) { _gridLinesVisible = value; }
 	BaseProvider* get_Provider() { return _provider; }
 	bool get_ScreenBufferChanged();
+	void ClearBuffer();
 
 public:
 	// methods

@@ -85,6 +85,7 @@ public:
 		_hasErrors = false;
 		_drawn = false;
 		_toDelete = false;
+		_inBuffer = false;
 		_geogBounds = projection->CalculateGeogBounds(pnt, zoom);
 	}
 

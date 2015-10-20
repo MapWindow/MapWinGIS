@@ -69,16 +69,27 @@ bool TileHelper::Transform(TileCore* tile, IGeoProjection* mapProjection, bool i
 		// projection for tiles matches map projection (most often it's Google Mercator; EPSG:3857)
 		PointLatLng pnt;
 		CustomProjection* customProj = dynamic_cast<CustomProjection*>(tile->get_Projection());
-
+		
 		if (customProj)
 		{
+			if (customProj->get_Epsg() == 4326)
+			{
+				// no need to introduce rounding errors, when we already have the bounds
+				RectLatLng* bounds = tile->get_GeographicBounds();
+				result.WidthLng = bounds->WidthLng;
+				result.HeightLat = bounds->HeightLat;
+				result.xLng = bounds->xLng;
+				result.yLat = bounds->yLat + bounds->HeightLat;
+				return true;
+			}
+
 			customProj->FromXYToProj(CPoint(tile->tileX(), tile->tileY() + 1), tile->zoom(), pnt);
-			CSize size;
+			SizeLatLng size;
 			customProj->GetTileSizeProj(tile->zoom(), size);
 			result.xLng = pnt.Lng;
 			result.yLat = pnt.Lat;
-			result.WidthLng = size.cx;
-			result.HeightLat = size.cy;
+			result.WidthLng = size.WidthLng;
+			result.HeightLat = size.HeightLat;
 			return true;
 		}
 	}

@@ -61,13 +61,13 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	CRect indices;
 	int zoom;
 
+	ClearBuffer();
+
 	if (!GetTileIndices(provider, indices, zoom, isSnapshot)) {
 		return;
 	}
 
 	tilesLogger.WriteLine("\nLOAD TILES: xMin=%d; xMax=%d; yMin=%d; yMax=%d; zoom =%d", indices.left, indices.right, indices.bottom, indices.top, zoom);
-
-	ClearBuffer();
 
 	provider->put_Manager(this);
 

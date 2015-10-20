@@ -6318,6 +6318,7 @@ interface IWmsLayer : IDispatch{
 	[id(13)] HRESULT Close();
 	[id(14)] HRESULT Serialize();
 	[id(15)] HRESULT Deserialize([in] BSTR state, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(16)] HRESULT GeoProjection([out, retval] IGeoProjection** pVal);
 };
 
 [ 

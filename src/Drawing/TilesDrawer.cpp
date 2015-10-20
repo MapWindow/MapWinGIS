@@ -52,7 +52,7 @@ void TilesDrawer::DrawTiles( TileManager* manager, double pixelsPerMapUnit, IGeo
 
 		if (!tile->isDrawn() || printing)
 		{
-			UpdateTileBounds(tile, isSame ? true : false, projectionChangeCount);
+			UpdateTileBounds(tile, isSame, projectionChangeCount);
 
 			RectF screenBounds;
 			if (!CalculateScreenBounds(tile, pixelsPerMapUnit, screenBounds)) {

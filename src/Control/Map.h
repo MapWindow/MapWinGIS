@@ -1093,7 +1093,7 @@ private:
 	void ClearHotTracking();
 	void UpdateHotTracking(LayerShape info, bool fireEvent);
 	void DoPanning(CPoint point);
-	void ReloadTiles(bool snapshot = false, CString key = "");
+	void ReloadTiles(bool force = true, bool snapshot = false, CString key = "");
 	bool HandleOnZoombarMouseDown( CPoint point );
 	bool HandleOnZoombarMouseMove( CPoint point );
 	DWORD GetPropertyExchangeVersion();
@@ -1230,7 +1230,7 @@ public:
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }
 	virtual void _SetMapCursor(tkCursorMode mode, bool clearEditor) { UpdateCursor(mode, false); }
-	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, atOnce); };
+	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, atOnce, updateTiles); };
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
 	virtual void _UnboundShapeFinished(IShape* shp);
 	virtual double _GetMouseProjTolerance() { return GetMouseTolerance(MouseTolerance::ToleranceSelect); }

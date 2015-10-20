@@ -74,6 +74,7 @@ public:
 	STDMETHOD(Close)();
 	STDMETHOD(Serialize)();
 	STDMETHOD(Deserialize)(BSTR state, VARIANT_BOOL* retVal);
+	STDMETHOD(get_GeoProjection)(IGeoProjection** pVal);
 
 private:	
 	BSTR _key;

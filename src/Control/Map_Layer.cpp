@@ -713,6 +713,16 @@ bool CMapView::CheckLayerProjection( Layer* layer, int layerHandle )
 {
 	IGeoProjection* gpMap = GetMapProjection();
 
+	if (layer->IsWmsLayer()) 
+	{
+		// if there is valid map projection we shall be able to do transformation
+		if (_transformationMode == tmNotDefined) 
+		{
+			CallbackHelper::ErrorMsg("Can't add WMS layer: map projection if empty or doesn't support required transformation.");
+			return false;
+		}
+	}
+
 	CComPtr<IGeoProjection> gp = NULL;
 	gp.Attach(layer->GetGeoProjection());
 	
@@ -762,8 +772,9 @@ bool CMapView::CheckLayerProjection( Layer* layer, int layerHandle )
 		return false;
 	}
 			
-	if (layer->IsShapefile())
+	if (layer->IsShapefile()) {
 		return ReprojectLayer(layer, layerHandle);
+	}
 
 	// for other layer types potentially added in the future
 	return true;		

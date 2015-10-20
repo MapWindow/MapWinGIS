@@ -365,3 +365,23 @@ STDMETHODIMP CWmsLayer::Deserialize(BSTR state, VARIANT_BOOL* retVal)
 
 	return S_OK;
 }
+
+// *********************************************************
+//	     get_GeoProjection()
+// *********************************************************
+STDMETHODIMP CWmsLayer::get_GeoProjection(IGeoProjection** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CustomProjection* projection = _provider->get_CustomProjection();
+	if (projection)
+	{
+		IGeoProjection* gp = projection->get_ServerProjection();
+		if (gp) {
+			gp->AddRef();
+			*pVal = gp;
+		}
+	}
+
+	return S_OK;
+}

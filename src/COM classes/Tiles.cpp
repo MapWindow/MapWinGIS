@@ -38,6 +38,16 @@ BaseProvider* CTiles::get_Provider(int providerId)
 }
 
 // ************************************************************
+//		get_ReloadNeeded()
+// ************************************************************
+bool CTiles::get_ReloadNeeded()
+{
+	bool val = _reloadNeeded;
+	_reloadNeeded = false;
+	return val;
+}
+
+// ************************************************************
 //		Stop()
 // ************************************************************
 void CTiles::Stop() 
@@ -283,7 +293,11 @@ bool CTiles::TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId)
 // *********************************************************
 void CTiles::LoadTiles(bool isSnapshot, CString key)
 {
-	if (!_visible) return;
+	if (!_visible) 
+	{
+		_manager.ClearBuffer();
+		return;
+	}
 
 	_manager.LoadTiles(_provider, isSnapshot, key);
 }
@@ -828,13 +842,21 @@ STDMETHODIMP CTiles::put_ProviderId(int providerId)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	put_Visible(providerId == -1 ? VARIANT_FALSE: VARIANT_TRUE);
+	bool visibleOld = _visible;
+	put_Visible(providerId == -1 ? VARIANT_FALSE : VARIANT_TRUE);
 
 	BaseProvider* provider = get_Provider(providerId);
 
-	if (provider) {
+	if (_provider != provider || visibleOld != _visible)
+	{
+		_reloadNeeded = true;
+	}
+
+	if (provider)
+	{
 		_provider = provider;
 	}
+
 	return S_OK;
 }
 
@@ -1155,3 +1177,4 @@ STDMETHODIMP CTiles::get_ProjectionIsSphericalMercator(VARIANT_BOOL* pVal)
 	
 	return S_OK;
 }
+

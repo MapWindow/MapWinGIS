@@ -196,6 +196,8 @@ bool CMapView::get_TileProviderBounds(BaseProvider* provider, Extent& retVal)
 // *****************************************************
 void CMapView::UpdateTileProjection()
 {
+	// TODO: use WMS projection instances for zoom selection instead
+
 	VARIANT_BOOL vb;
 	_tileProjection->Clear(&vb);
 	_tileReverseProjection->Clear(&vb);
@@ -290,12 +292,23 @@ tkTileProvider CMapView::GetTileProvider()
 // ***************************************************************
 //		ReloadTiles
 // ***************************************************************
-void CMapView::ReloadTiles(bool snapshot, CString key)
+void CMapView::ReloadTiles(bool force /*= true*/, bool snapshot /*= false*/, CString key /*= ""*/)
 {
-	// regular tile background
-	((CTiles*)_tiles)->LoadTiles(snapshot, key);
+	if (force)
+	{
+		((CTiles*)_tiles)->LoadTiles(snapshot, key);
 
-	ReloadWmsLayers(snapshot, key);
+		ReloadWmsLayers(snapshot, key);
+	}
+	else 
+	{
+		// for example provider has changed
+		CTiles* tiles = (CTiles*)_tiles;
+		if (tiles->get_ReloadNeeded())
+		{
+			tiles->LoadTiles(snapshot, key);
+		}
+	}
 }
 
 // ***************************************************************

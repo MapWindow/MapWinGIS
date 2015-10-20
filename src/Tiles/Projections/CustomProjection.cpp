@@ -96,13 +96,24 @@ void CustomProjection::FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret)
 }
 
 // *******************************************************
-//		FromXYToProj
+//		GetTileSizeProj
 // *******************************************************
 void CustomProjection::GetTileSizeProj(int zoom, CSize &size)
 {
 	GetTileMatrixSizeXY(zoom, size);
 	size.cx = (long)((_xMax - _xMin) / (double)size.cx);
 	size.cy = (long)((_yMax - _yMin) / (double)size.cy);
+}
+
+// *******************************************************
+//		GetTileSizeProj
+// *******************************************************
+void CustomProjection::GetTileSizeProj(int zoom, SizeLatLng &size)
+{
+	CSize sizeInt;
+	GetTileMatrixSizeXY(zoom, sizeInt);
+	size.WidthLng = (_xMax - _xMin) / (double)sizeInt.cx;
+	size.HeightLat = (_yMax - _yMin) / (double)sizeInt.cy;
 }
 
 // ******************************************************

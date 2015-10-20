@@ -138,7 +138,7 @@ void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR
 
 	bool tilesInCache = TilesAreInCache();
 	if (!tilesInCache) {
-		ReloadTiles(true, key);
+		ReloadTiles(true, true, key);
 	}
 
 	RestoreExtents();
@@ -301,7 +301,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 		ReloadBuffers();
 	}
 
-	ReloadTiles(true);		// simply move them to the screen buffer (is performed synchronously)
+	ReloadTiles(true,true);		// simply move them to the screen buffer (is performed synchronously)
 
 	CRect rcBounds(0,0,_viewWidth,_viewHeight);
 	CRect rcClip((int)clipX, (int)clipY, (int)clipWidth, (int)clipHeight);
@@ -349,7 +349,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	}
 
 	// restore former list of tiles in the buffer
-	ReloadTiles(true);
+	ReloadTiles(true,true);
 
 	LockWindow( lmUnlock );
 	return iimg;
