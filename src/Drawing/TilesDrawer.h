@@ -53,5 +53,6 @@ private:
 
 public:
 	// methods
+	// TODO: move pixelPerMapUnit to constructor
 	void DrawTiles(TileManager* manager, double pixelsPerMapUnit, IGeoProjection* mapProjection, bool printing, int projectionChangeCount);
 };

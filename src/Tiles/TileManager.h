@@ -26,7 +26,7 @@ class TileManager
 public:
 	TileManager(bool isBackground)
 		: _map(NULL), _lastZoom(-1), _lastProvider(-1), _isBackground(isBackground), 
-		_loader(tctSqliteCache), _gridLinesVisible(false), _provider(NULL)
+		_loader(tctSqliteCache), _gridLinesVisible(false), _provider(NULL), _screenBufferChanged(true)
 	{
 		_useServer = true;
 		_lastZoom = -1;
@@ -45,6 +45,7 @@ private:
 	TileCacheInfo _diskCache;
 	TileCacheInfo _ramCache;
 	vector<TileCacheInfo*> _caches;
+	bool _screenBufferChanged;
 
 	// can be wrapped in a separate class
 	::CCriticalSection _tilesBufferLock;
@@ -75,7 +76,7 @@ private:
 
 public:
 	// properties
-	void set_MapCallback(IMapViewCallback* map) { _map = map; }
+	void set_MapCallback(IMapViewCallback* map);
 	IMapViewCallback* get_MapCallback() { return _map; }
 	bool TileIsInBuffer(int providerId, int zoom, int x, int y);
 	bool useServer() { return _useServer; }
@@ -91,6 +92,7 @@ public:
 	bool get_GridLinesVisible() { return _gridLinesVisible; }
 	void set_GridLinesVisible(bool value) { _gridLinesVisible = value; }
 	BaseProvider* get_Provider() { return _provider; }
+	bool get_ScreenBufferChanged();
 
 public:
 	// methods

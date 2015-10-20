@@ -841,8 +841,12 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources, bool fro
 		Layer * l = _allLayers[LayerHandle];
 		if (l == NULL) return;
 
-		if (closeDatasources)
+		if (closeDatasources) {
 			l->CloseDatasources();
+		}		
+		else {
+			l->OnRemoved();
+		}
 			
 		for(unsigned int i = 0; i < _activeLayers.size(); i++ )
 		{	
@@ -1949,3 +1953,15 @@ IExtents* CMapView::GetLayerExtents(LONG layerHandle)
 
 	return NULL;
 }
+
+// ************************************************************
+//		get_LayerByPosition
+// ************************************************************
+Layer* CMapView::get_LayerByPosition(int position)
+{
+	long layerHandle = GetLayerHandle(position);
+	return layerHandle != -1 ? GetLayer(layerHandle) : NULL;
+}
+
+
+

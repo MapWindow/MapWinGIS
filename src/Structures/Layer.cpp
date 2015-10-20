@@ -26,18 +26,43 @@ void Layer::CloseDatasources()
 	else if (IsShapefile())
 	{
 		CComPtr<IShapefile> ishp = NULL;
-		if (QueryShapefile(&ishp))
+		if (QueryShapefile(&ishp)) {
 			ishp->Close(&vb);
+		}
+	}
+	else if (IsWmsLayer())
+	{
+		CComPtr<IWmsLayer> wms = NULL;
+		if (QueryWmsLayer(&wms)) {
+			wms->Close();
+		}
 	}
 
 	CComPtr<IImage> iimg = NULL;
-	if (QueryImage(&iimg))
+	if (QueryImage(&iimg)) {
 		iimg->Close(&vb);
+	}
 
 	CComPtr<IGrid> igrid = NULL;
 	_object->QueryInterface(IID_IGrid, (void**)&igrid);
-	if (igrid != NULL)
+	if (igrid != NULL) {
 		igrid->Close(&vb);
+	}
+}
+
+// ****************************************************
+//		OnRemoved()
+// ****************************************************
+void Layer::OnRemoved()
+{ 
+	if (IsWmsLayer())
+	{
+		CComPtr<IWmsLayer> wms = NULL;
+		if (QueryWmsLayer(&wms)) 
+		{
+			WmsHelper::Cast(wms)->ResizeBuffer(0, 0);
+		}
+	}
 }
 
 // ****************************************************

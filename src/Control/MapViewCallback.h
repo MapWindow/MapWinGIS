@@ -28,6 +28,8 @@ public:
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) = 0;
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) = 0;
 	virtual void _FireTilesLoaded(VARIANT_BOOL isSnapshot, CString key) = 0;
+	virtual long _GetWidth() = 0;
+	virtual long _GetHeight() = 0;
 
 	// tiles
 	virtual bool _GetTilesForMap(void* p, double scalingRatio, CRect& indices, int& zoom) = 0;

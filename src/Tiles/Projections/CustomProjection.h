@@ -66,7 +66,7 @@ public:
 	void put_Bounds(double xMin, double xMax, double yMin, double yMax);
 	void get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax);
 
-	// TODO: make sure that UpdateBounds is called before the first use of the projection
+	// make sure that UpdateBounds is called before the first use of the projection
 	// starts coordinate transformation and update bounds of projection in WGS84 degrees
 	bool UpdateBounds();
 };

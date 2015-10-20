@@ -762,33 +762,6 @@ void CMapView::GdiplusShutdown()
 }
 #pragma endregion
 
-// ***************************************************************
-//	ReloadTiles
-// ***************************************************************
-void CMapView::ReloadTiles(bool snapshot, CString key)
-{
-	((CTiles*)_tiles)->LoadTiles(snapshot, key);
-
-	// TODO: load for WMS layers
-
-	// TODO: fire TilesLoaded event only once, when the last layer is loaded
-	// fire events for individual layers internally
-}
-
-// ***************************************************************
-//	TilesAreInCache
-// ***************************************************************
-bool CMapView::TilesAreInCache()
-{
-	if (!((CTiles*)_tiles)->TilesAreInCache(this))
-	{
-		return false;
-	}
-
-	// TODO: check for WMS layers
-
-	return true;
-}
 
 // ***************************************************************
 //	ClearPanningList
@@ -913,6 +886,4 @@ IDrawingRectangle* CMapView::GetFocusRectangle()
 	}
 	return _focusRectangle;
 }
-
-
 

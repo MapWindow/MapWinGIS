@@ -3,6 +3,39 @@
 #include "WmsLayer.h"
 
 // *********************************************************************
+//		Load
+// *********************************************************************
+void CWmsLayer::Load(IMapViewCallback* map, bool isSnapshot /*= false*/, CString key /*= ""*/)
+{
+	if (!_screenBuffer) 
+	{
+		ResizeBuffer(map->_GetWidth(), map->_GetHeight());
+	}
+
+	_manager.set_MapCallback(map);
+
+	_provider->get_CustomProjection()->UpdateBounds();
+
+	_manager.LoadTiles(_provider, isSnapshot, key);
+}
+
+// *********************************************************************
+//		ResizeBuffer
+// *********************************************************************
+void CWmsLayer::ResizeBuffer(int cx, int cy)
+{
+	if (_screenBuffer)
+	{
+		delete _screenBuffer;
+		_screenBuffer = NULL;
+	}
+
+	if (cx > 0 && cy > 0) {
+		_screenBuffer = new Gdiplus::Bitmap(cx, cy);
+	}
+}
+
+// *********************************************************************
 //		get_LastErrorCode
 // *********************************************************************
 STDMETHODIMP CWmsLayer::get_LastErrorCode(long *pVal)
@@ -275,6 +308,11 @@ STDMETHODIMP CWmsLayer::get_MapExtents(IExtents** pVal)
 STDMETHODIMP CWmsLayer::Close()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_screenBuffer) {
+		delete _screenBuffer;
+		_screenBuffer = NULL;
+	}
 
 	// TODO: implement
 

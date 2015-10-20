@@ -4,6 +4,7 @@
 #include "TileHelper.h"
 #include "ProjectionHelper.h"
 #include "Tiles.h"
+#include "WmsHelper.h"
 
 // ************************************************************
 //		get_TileManager
@@ -268,6 +269,9 @@ void CMapView::SetTileProvider(tkTileProvider provider)
 	}
 }
 
+// ****************************************************************
+//		GetTileProvider()
+// ****************************************************************
 tkTileProvider CMapView::GetTileProvider()
 {
 	VARIANT_BOOL vb;
@@ -281,4 +285,81 @@ tkTileProvider CMapView::GetTileProvider()
 		_tiles->get_Provider(&provider);
 		return provider;
 	}
+}
+
+// ***************************************************************
+//		ReloadTiles
+// ***************************************************************
+void CMapView::ReloadTiles(bool snapshot, CString key)
+{
+	// regular tile background
+	((CTiles*)_tiles)->LoadTiles(snapshot, key);
+
+	ReloadWmsLayers(snapshot, key);
+}
+
+// ***************************************************************
+//		ResizeWmsLayerBuffers
+// ***************************************************************
+void CMapView::ResizeWmsLayerBuffers(int cx, int cy)
+{
+	// resizing buffers for WMS layers
+	for (long i = 0; i < GetNumLayers(); i++)
+	{
+		Layer* layer = get_LayerByPosition(i);
+
+		if (!layer || layer->IsEmpty() || !layer->IsWmsLayer()) {
+			continue;
+		}
+
+		CComPtr<IWmsLayer> wms = NULL;
+		layer->QueryWmsLayer(&wms);
+
+		WmsHelper::Cast(wms)->ResizeBuffer(cx, cy);
+	}
+}
+
+// ***************************************************************
+//		ReloadWmsLayers
+// ***************************************************************
+void CMapView::ReloadWmsLayers(bool snapshot, CString key)
+{
+	double scale = GetCurrentScale();
+
+	// WMS layers
+	for (long i = 0; i < GetNumLayers(); i++)
+	{
+		Layer* layer = get_LayerByPosition(i);
+
+		if (!layer || layer->IsEmpty() || !layer->IsWmsLayer()) {
+			continue;
+		}
+
+		if (!layer->IsVisible(scale, _currentZoom)) {
+			continue;
+		}
+
+		CComPtr<IWmsLayer> wms = NULL;
+		layer->QueryWmsLayer(&wms);
+
+		WmsHelper::Cast(wms)->Load(this, snapshot, key);
+	}
+
+	// TODO: fire TilesLoaded event only once, when the last layer is loaded
+	// fire events for individual layers internally
+}
+
+// ***************************************************************
+//		TilesAreInCache
+// ***************************************************************
+bool CMapView::TilesAreInCache()
+{
+	if (!((CTiles*)_tiles)->TilesAreInCache(this))
+	{
+		return false;
+	}
+
+	// TODO: check for WMS layers
+
+	return true;
 }

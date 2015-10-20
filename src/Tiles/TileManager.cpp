@@ -21,6 +21,21 @@
 #include "TileManager.h"
 
 // ************************************************************
+//		set_MapCallback()
+// ************************************************************
+void TileManager::set_MapCallback(IMapViewCallback* map)
+{
+	if (_map && map) 
+	{
+		// don't allow to use the same manager for 2 map controls,
+		// sicne we have only one buffer for tiles;
+		return;
+	}
+
+	_map = map;
+}
+
+// ************************************************************
 //		InitCaches()
 // ************************************************************
 void TileManager::InitCaches()
@@ -503,6 +518,19 @@ void TileManager::UpdateScreenBuffer()
 	if (_isBackground) {
 		_map->_MarkTileBufferChanged();
 	}
+	else {
+		_screenBufferChanged = true;
+	}
+}
+
+// ************************************************************
+//		get_ScreenBufferChanged()
+// ************************************************************
+bool TileManager::get_ScreenBufferChanged()
+{
+	bool val = _screenBufferChanged;
+	_screenBufferChanged = false;
+	return val;
 }
 
 // *********************************************************

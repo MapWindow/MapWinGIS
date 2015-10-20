@@ -1195,6 +1195,7 @@ private:
 	bool MapIsEmpty();
 	void UpdateMapTranformation();
 	bool TilesAreInCache();
+	Layer* get_LayerByPosition(int position);
 
 	// tiles
 	int ChooseZoom(BaseProvider* provider, Extent ext, double scalingRatio, bool limitByProvider);
@@ -1202,6 +1203,11 @@ private:
 	bool get_TileProviderBounds(BaseProvider* provider, Extent& retVal);
 	bool get_TilesForMap(void* p, double scalingRatio, CRect& indices, int& zoom);
 	TileManager* get_TileManager();
+
+	// WMS
+	void ReloadWmsLayers(bool snapshot, CString key);
+	void ResizeWmsLayerBuffers(int cx, int cy);
+	void RedrawWmsLayers(Gdiplus::Graphics* g);
 
 #pragma endregion
 
@@ -1236,6 +1242,8 @@ public:
 	virtual int _ChooseZoom(void* provider, double scalingRatio, bool limitByProvider) { return ChooseZoom(provider, scalingRatio, limitByProvider); }
 	virtual Extent* _GetExtents() { return &_extents; }
 	virtual void _MarkTileBufferChanged() { _tileBuffer.Initialized = false; }
+	virtual long _GetWidth() { return _viewWidth ; }
+	virtual long _GetHeight() { return _viewHeight; }
 	
 
 protected:

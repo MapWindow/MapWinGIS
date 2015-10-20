@@ -150,5 +150,6 @@ public:
 	void GrabLayerNameFromDatasource();
 	BSTR GetFilename();
 	bool PointWithinExtents(double projX, double projY);
+	void OnRemoved();
 };
 # endif

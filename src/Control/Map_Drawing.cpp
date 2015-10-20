@@ -15,6 +15,7 @@
 #include "SelectionListHelper.h"
 #include "ShapeStyleHelper.h"
 #include "SelectionList.h"
+#include "WmsHelper.h"
 
 // ***************************************************************
 //		OnDraw()
@@ -109,7 +110,9 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	_canUseMainBuffer = true;
 
 	RedrawTiles(g, pdc);
-	
+
+	RedrawWmsLayers(g);
+
 	DWORD startTick = ::GetTickCount();
 
 	bool layersRedraw = RedrawLayers(g, pdc, rcBounds);
@@ -237,10 +240,10 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 
 				bool useRotation = false;	// not implemented
 				if (useRotation) {
-					this->DrawLayersRotated(dc, gLayers, rcBounds);
+					DrawLayersRotated(dc, gLayers, rcBounds);
 				}
 				else {
-					this->DrawLayers(rcBounds, gLayers);
+					DrawLayers(rcBounds, gLayers);
 				}
 
 				// passing layer buffer to the main buffer
@@ -251,6 +254,79 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 
 	_canUseLayerBuffer = true;
 	return layersRedraw;
+}
+
+// ***************************************************************
+//		RedrawWmsLayers()
+// ***************************************************************
+void CMapView::RedrawWmsLayers(Gdiplus::Graphics* g)
+{
+	double scale = GetCurrentScale();
+
+	for (long i = 0; i < GetNumLayers(); i++)
+	{
+		Layer* layer = get_LayerByPosition(i);
+
+		if (!layer || layer->IsEmpty() || !layer->IsWmsLayer()) {
+			continue;
+		}
+
+		if (!layer->IsVisible(scale, _currentZoom)) {
+			continue;
+		}
+
+		CComPtr<IWmsLayer> wms = NULL;
+		layer->QueryWmsLayer(&wms);
+
+		TileManager* manager = WmsHelper::Cast(wms)->get_Manager();
+		if (!manager) return;
+
+		// TODO: restore
+		/*int minZoom;
+		if (GetTileMismatchMinZoom(minZoom))
+		{
+			if (_currentZoom < minZoom) return;
+		}*/
+
+		Gdiplus::Bitmap* wmsBuffer = WmsHelper::Cast(wms)->get_ScreenBuffer();
+
+		if (wmsBuffer)
+		{
+			if (manager->get_ScreenBufferChanged())
+			{
+				manager->MarkUndrawn();
+			}
+
+			bool hasUndrawn = manager->UndrawnTilesExist();
+			bool hasDrawn = manager->DrawnTilesExist();
+
+			if (!hasUndrawn && !hasDrawn)
+			{
+				return;
+			}
+
+			if (!hasUndrawn)
+			{
+				// take it from the buffer
+				g->DrawImage(wmsBuffer, 0.0f, 0.0f);
+			}
+			else
+			{
+				Gdiplus::Graphics* gWms = Gdiplus::Graphics::FromImage(wmsBuffer);
+
+				if (!hasDrawn)
+				{
+					gWms->Clear(Gdiplus::Color::Transparent);
+				}
+
+				TilesDrawer drawer(gWms, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, GetWgs84ToMapTransform());
+
+				drawer.DrawTiles(manager, PixelsPerMapUnit(), GetMapProjection(), _isSnapshot, _projectionChangeCount);
+
+				g->DrawImage(wmsBuffer, 0.0f, 0.0f);
+			}
+		}
+	}
 }
 
 // ***************************************************************
@@ -746,7 +822,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	bool * isConcealed = new bool[endcondition];
 	memset(isConcealed,0,endcondition*sizeof(bool));
 
-	double scale = this->GetCurrentScale();
+	double scale = GetCurrentScale();
 	int zoom;
 	_tiles->get_CurrentZoom(&zoom);
 
@@ -1066,17 +1142,30 @@ void CMapView::DrawImageGroups()
 	}
 }
 
+void ResizeBuffer(Gdiplus::Bitmap** bitmap, int cx, int cy)
+{
+	if (*bitmap)
+	{
+		delete *bitmap;
+		*bitmap = NULL;
+	}
+	*bitmap = new Gdiplus::Bitmap(cx, cy);
+}
+
 // *********************************************************
 //		ResizeBuffers()
 // *********************************************************
 void CMapView::ResizeBuffers(int cx, int cy)
 {
-	if (_bufferBitmap)
-	{
-		delete _bufferBitmap;
-		_bufferBitmap = NULL;
-	}
-	_bufferBitmap = new Gdiplus::Bitmap(cx, cy);
+	ResizeBuffer(&_bufferBitmap, cx, cy);
+
+	ResizeBuffer(&_tempBitmap, cx, cy);
+
+	ResizeBuffer(&_drawingBitmap, cx, cy);
+
+	ResizeBuffer(&_volatileBitmap, cx, cy);
+
+	ResizeBuffer(&_layerBitmap, cx, cy);
 
 	if (_tilesBitmap)
 	{
@@ -1086,33 +1175,7 @@ void CMapView::ResizeBuffers(int cx, int cy)
 	_tilesBitmap = new Gdiplus::Bitmap(cx, cy);
 	_tileBuffer.Provider = tkTileProvider::ProviderNone;		// buffer can't be reused
 
-	if (_tempBitmap)
-	{
-		delete _tempBitmap;
-		_tempBitmap = NULL;
-	}
-	_tempBitmap = new Gdiplus::Bitmap(cx, cy);
-
-	if (_drawingBitmap)
-	{
-		delete _drawingBitmap;
-		_drawingBitmap = NULL;
-	}
-	_drawingBitmap = new Gdiplus::Bitmap(cx, cy);
-
-	if (_volatileBitmap)
-	{
-		delete _volatileBitmap;
-		_volatileBitmap = NULL;
-	}
-	_volatileBitmap = new Gdiplus::Bitmap(cx, cy);
-
-	if (_layerBitmap)
-	{
-		delete _layerBitmap;
-		_layerBitmap = NULL;
-	}
-	_layerBitmap = new Gdiplus::Bitmap(cx, cy);
+	ResizeWmsLayerBuffers(cx, cy);
 }
 #pragma endregion
 
