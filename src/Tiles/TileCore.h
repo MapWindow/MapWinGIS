@@ -43,6 +43,8 @@ struct TileRequestInfo
 	bool Completed() { return totalCount == count; }
 };
 
+
+
 // ******************************************************
 //    TilePoint
 // ******************************************************
@@ -120,6 +122,7 @@ public:
 	RectLatLng* get_ProjectedBounds() { return &_projectedBounds; }
 	RectLatLng* get_GeographicBounds() { return &_geogBounds; }
 	BaseProjection* get_Projection() { return _projection; }
+	void set_Projection(BaseProjection* projection) { _projection = projection; }
 	CStringW get_Path(CStringW root, CStringW ext);
 	CMemoryBitmap* get_Bitmap(int overlayIndex);
 	int get_ByteSize();
@@ -154,3 +157,4 @@ public:
 	// operators
 	bool TileCore::operator==(const TileCore &t2);
 };
+

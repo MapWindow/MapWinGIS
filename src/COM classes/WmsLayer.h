@@ -24,16 +24,7 @@ public:
 		gReferenceCounter.AddRef(tkInterface::idWmsLayer);
 	}
 
-	~CWmsLayer()
-	{
-		Close();
-
-		::SysFreeString(_key);
-
-		delete _provider;
-
-		gReferenceCounter.Release(tkInterface::idWmsLayer);
-	}
+	virtual ~CWmsLayer();
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_WmsLayer)
 

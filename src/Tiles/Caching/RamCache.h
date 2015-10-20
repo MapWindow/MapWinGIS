@@ -69,5 +69,6 @@ public:
 	// methods
 	void ClearAll(int fromScale, int toScale) { Clear(-1, fromScale, toScale); }
 	void ClearOldest(int sizeToClearBytes);
-	
+	void OnProviderClosed(int providerId);
+
 };

@@ -243,8 +243,6 @@ void RamCache::DeleteMarkedTiles()
 	}
 }
 
-
-
 // ********************************************************
 //		get_Tile()
 // ********************************************************
@@ -253,7 +251,52 @@ TileCore* RamCache::get_Tile(BaseProvider* provider, int scale, int tileX, int t
 {
 	if (!provider) return NULL;
 	
-	return get_TileCore(provider->Id, scale, tileX, tileY);
+	TileCore* tile = get_TileCore(provider->Id, scale, tileX, tileY);
+
+	if (tile) {
+		// original instance of projection might be closed if WMS layer was reopened;
+		// so get_Projection() pointer is invalid, assign a new one
+		tile->set_Projection(provider->get_Projection());
+	}
+
+	return tile;
+}
+
+// ********************************************************
+//		OnProviderClosed()
+// ********************************************************
+void RamCache::OnProviderClosed(int providerId)
+{
+	// set projection for all tiles of this provider to NULL
+	if (_tilesMap.find(providerId) != _tilesMap.end())
+	{
+		std::vector<TilePoints*>* scales = _tilesMap[providerId];
+		for (size_t i = 0; i < scales->size(); i++)
+		{
+			TilePoints* points = (*scales)[i];
+			if (points)
+			{
+				TilePoints::iterator it = points->begin();
+				while (it != points->end())
+				{
+					TilePositions* positions = it->second;
+					if (positions)
+					{
+						TilePositions::iterator it2 = positions->begin();
+						while (it2 != positions->end())
+						{
+							TileCore* tile = it2->second;
+							if (tile) {
+								tile->set_Projection(NULL);
+							}
+							++it2;
+						}
+					}
+					++it;
+				}
+			}
+		}
+	}
 }
 
 // ********************************************************

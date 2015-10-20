@@ -1,6 +1,29 @@
 // WmsLayer.cpp : Implementation of CWmsLayer
 #include "stdafx.h"
 #include "WmsLayer.h"
+#include "RamCache.h"
+
+// *********************************************************************
+//		~CWmsLayer
+// *********************************************************************
+CWmsLayer::~CWmsLayer()
+{
+	Close();
+
+	::SysFreeString(_key);
+
+	// CustomProjection instance of this provider is assigned to all tiles in RAM cache
+	// so pointers will become invalid after closing it. We are solving this by reassigning a pointer 
+	// on extracting a tile from cache. But let's keep it clean and nullify invalid pointers as well.
+	RamCache* cache = dynamic_cast<RamCache*>(_manager.get_RamCache()->cache);
+	if (cache) {
+		cache->OnProviderClosed(_provider->Id);
+	}
+
+	delete _provider;
+
+	gReferenceCounter.Release(tkInterface::idWmsLayer);
+}
 
 // *********************************************************************
 //		Load
