@@ -224,17 +224,23 @@ void CMapView::LockWindow(short LockMode)
 {
 	if( LockMode == lmUnlock )
 	{
+		if (_lockCount == 0)
+		{
+			return;    // no need to schedule more buffer reloads
+		}
+
 		_lockCount--;
-		if( _lockCount <= 0 )
+
+		if( _lockCount == 0 )
 		{
 			_lockCount = 0;
-			DoUpdateTiles();
-			ReloadBuffers();
-			InvalidateControl();
+			RedrawCore(RedrawAll, false, true);
 		}
 	}
-	else if( LockMode == lmLock )
+	else if (LockMode == lmLock) 
+	{
 		_lockCount++;
+	}
 }
 
 // *************************************************
@@ -282,7 +288,7 @@ void CMapView::Redraw2(tkRedrawType redrawType)
 // *************************************************
 void CMapView::ScheduleVolatileRedraw()
 {
-	_canUseVolatileBuffer = FALSE;
+	_canUseVolatileBuffer = false;
 	_canUseMainBuffer = false;
 }
 
@@ -291,34 +297,30 @@ void CMapView::ScheduleVolatileRedraw()
 // *************************************************
 void CMapView::ScheduleLayerRedraw()
 {
-	_canUseLayerBuffer = FALSE;
-	_canUseVolatileBuffer = FALSE;
+	_canUseLayerBuffer = false;
+	_canUseVolatileBuffer = false;
 	_canUseMainBuffer = false;
-}
-
-// *************************************************
-//			RedrawWithTiles()						  
-// *************************************************
-void CMapView::RedrawWithTiles(tkRedrawType redrawType, bool atOnce, bool reloadBuffers)
-{
-	DoUpdateTiles();
-	RedrawCore(redrawType, reloadBuffers);
 }
 
 // *************************************************
 //			RedrawCore()						  
 // *************************************************
-void CMapView::RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadBuffers /*= false */ )
+void CMapView::RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadTiles /*= false */ )
 {
+	if (reloadTiles) 
+	{
+		ReloadTiles();
+	}
+
 	// no breaks are needed; it's intentional; redraw type of higher order leads to redraw of lower levels
 	switch (redrawType)
 	{
 		case tkRedrawType::RedrawAll:
-			_canUseLayerBuffer = FALSE;
+			_canUseLayerBuffer = false;
 			ReloadBuffers();
 
 		case tkRedrawType::RedrawSkipDataLayers:
-			_canUseVolatileBuffer = FALSE;
+			_canUseVolatileBuffer = false;
 
 		case tkRedrawType::RedrawSkipAllLayers:
 			_canUseMainBuffer = false;
@@ -327,8 +329,9 @@ void CMapView::RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadBuff
 			// do nothing, simply invalidate control
 			break;
 	}
+
 	if (atOnce){
-		this->Refresh();
+		Refresh();
 	}
 	else {
 		InvalidateControl();

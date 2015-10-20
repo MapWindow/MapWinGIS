@@ -379,14 +379,13 @@ void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
 }
 
 // ****************************************************************
-//		ReloadImageBuffers()
+//		ReloadBuffers()
 // ****************************************************************
 void CMapView::ReloadBuffers()
 {
 	int zoom = _currentZoom;
 	double scale = GetCurrentScale();
 
-	IImage * iimg = NULL;
 	for(size_t i = 0; i < _activeLayers.size(); i++ )
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
@@ -394,6 +393,7 @@ void CMapView::ReloadBuffers()
 
 		if (l->IsImage())
 		{
+			IImage * iimg = NULL;
 			if (l->QueryImage(&iimg))
 			{	
 				((CImageClass*)iimg)->SetBufferReloadIsNeeded();

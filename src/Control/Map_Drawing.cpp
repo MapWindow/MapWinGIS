@@ -248,7 +248,8 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 			}
 		}
 	}
-	_canUseLayerBuffer = TRUE;
+
+	_canUseLayerBuffer = true;
 	return layersRedraw;
 }
 
@@ -287,8 +288,8 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 {
 	bool hasVolatile = HasVolatileShapefiles();
 
-	bool canUseBuffer = _canUseVolatileBuffer ? true : false;
-	_canUseVolatileBuffer = TRUE;
+	bool canUseBuffer = _canUseVolatileBuffer;
+	_canUseVolatileBuffer = true;
 
 	if (!hasVolatile && !HasDrawLists()) return;
 

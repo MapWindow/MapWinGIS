@@ -71,7 +71,7 @@ private:
 	void DeleteMarkedTilesFromBuffer();
 	void InitializeDiskCache();
 	void UnlockDiskCache();
-	bool GetTileIndices(BaseProvider* provider, CRect& indices, int& zoom);
+	bool GetTileIndices(BaseProvider* provider, CRect& indices, int& zoom, bool isSnapshot);
 
 public:
 	// properties

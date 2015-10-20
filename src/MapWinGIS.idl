@@ -6718,7 +6718,6 @@ library MapWinGIS
 												 float ClipX, float ClipY, float clipWidth, float clipHeight);
 			[id(170)] void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
 			[id(201)] void LoadTilesForSnapshot(IExtents* Extents, long Width, LPCTSTR Key, tkTileProvider provider);
-			[id(204)] INT TilesAreInCache(IExtents* Extents, long Width, tkTileProvider provider);
 #endif			
 
 #define SERIALIZE_API

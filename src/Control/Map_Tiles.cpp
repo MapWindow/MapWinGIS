@@ -263,7 +263,8 @@ void CMapView::SetTileProvider(tkTileProvider provider)
 			_tiles->put_Provider(provider);
 			_tiles->put_Visible(VARIANT_TRUE);
 		}
-		RedrawWithTiles(RedrawMinimal, false, false);
+
+		RedrawCore(RedrawMinimal, false, true);
 	}
 }
 

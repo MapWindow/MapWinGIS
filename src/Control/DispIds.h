@@ -56,7 +56,6 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	dispidZoomBehavior = 207L,
 	dispidClear = 206L,
 	dispidScalebarUnits = 205L,
-	dispidTilesAreInCache = 204L,
 	dispidFindSnapPoint = 203L,
 	dispidSnapShotToDC2 = 202L,
 	dispidLoadTilesForSnapshot = 201L,

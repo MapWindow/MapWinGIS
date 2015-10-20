@@ -532,8 +532,7 @@ public:
 	afx_msg tkUnitsOfMeasure GetMapUnits(void);
 	afx_msg BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, float ClipX, float ClipY, float clipWidth, float clipHeight);
 	afx_msg BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, LONG Width);
-	afx_msg void LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key, tkTileProvider provider);
-	afx_msg INT TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvider provider);
+	afx_msg void LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key);
 	afx_msg void SetMapRotationAngle(float nNewValue);
 	afx_msg float GetMapRotationAngle(void);
 	afx_msg IExtents* GetRotatedExtent(void);
@@ -711,8 +710,8 @@ public:
 	// --------------------------------------------
 	//	  Drawing
 	// --------------------------------------------
-	BOOL _canUseLayerBuffer;			// the data layers can be drawn from buffer
-	BOOL _canUseVolatileBuffer;			// volatile shapefiles can be drawn from buffer
+	bool _canUseLayerBuffer;			// the data layers can be drawn from buffer
+	bool _canUseVolatileBuffer;			// volatile shapefiles can be drawn from buffer
 	bool _canUseMainBuffer;				// all the stuff can taken from buffer (only mouse moves will be drawn above)
 	int _redrawId;					// the ordinal number of redraw request
 	bool _isSnapshot;					// used by SnapShots
@@ -965,7 +964,7 @@ public:
 	IGeoProjection* GetGMercProjection();
 	IGeoProjection* GetMapProjection();
 	
-	void RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadBuffers = false );
+	void RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadTiles = false );
 
 	void ReleaseProjections();
 	void InitProjections();
@@ -1094,7 +1093,7 @@ private:
 	void ClearHotTracking();
 	void UpdateHotTracking(LayerShape info, bool fireEvent);
 	void DoPanning(CPoint point);
-	void DoUpdateTiles(bool isSnapshot = false, CString key = "");
+	void ReloadTiles(bool snapshot = false, CString key = "");
 	bool HandleOnZoombarMouseDown( CPoint point );
 	bool HandleOnZoombarMouseMove( CPoint point );
 	DWORD GetPropertyExchangeVersion();
@@ -1174,7 +1173,6 @@ private:
 	HCURSOR GetCursorIcon();
 	void ScheduleLayerRedraw();
 	void ScheduleVolatileRedraw();
-	void RedrawWithTiles(tkRedrawType redrawType, bool atOnce, bool reloadBuffers);
 	void ClearDrawingLabelFrames();
 	bool ReprojectLayer(Layer* layer, int layerHandle);
 	void StartDragging(DraggingOperation operation);
@@ -1196,6 +1194,7 @@ private:
 	bool ValidatePreviousExtent();
 	bool MapIsEmpty();
 	void UpdateMapTranformation();
+	bool TilesAreInCache();
 
 	// tiles
 	int ChooseZoom(BaseProvider* provider, Extent ext, double scalingRatio, bool limitByProvider);
@@ -1237,6 +1236,7 @@ public:
 	virtual int _ChooseZoom(void* provider, double scalingRatio, bool limitByProvider) { return ChooseZoom(provider, scalingRatio, limitByProvider); }
 	virtual Extent* _GetExtents() { return &_extents; }
 	virtual void _MarkTileBufferChanged() { _tileBuffer.Initialized = false; }
+	
 
 protected:
 

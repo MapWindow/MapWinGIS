@@ -108,77 +108,43 @@ LPDISPATCH CMapView::SnapShot3(double left, double right, double top, double bot
 }
 
 // *********************************************************************
-//    TilesAreInCache()
-// *********************************************************************
-INT CMapView::TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvider provider)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	
-	if (Extents)
-	{
-		// Get the image height based on the box aspect ratio
-		double xMin, xMax, yMin, yMax, zMin, zMax;
-		Extents->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-		
-		// Make sure that the width and height are valid
-		long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
-		if (WidthPixels <= 0 || Height <= 0)
-		{
-			ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
-		}
-		else
-		{
-			SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
-
-			bool tilesInCache = ((CTiles*)_tiles)->TilesAreInCache(this, provider);
-
-			RestoreExtents();
-			return tilesInCache ? 1 : 0;
-		}
-	}
-	return -1;	// error
-}
-
-// *********************************************************************
 //    LoadTilesForSnapshot()
 // *********************************************************************
 // Loads tiles for specified extents
-void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key, tkTileProvider provider)
+void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	
-	if (Extents)
-	{
-		// Get the image height based on the box aspect ratio
-		double xMin, xMax, yMin, yMax, zMin, zMax;
-		Extents->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-		
-		// Make sure that the width and height are valid
-		long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
-		if (WidthPixels <= 0 || Height <= 0)
-		{
-			ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
-		}
-		else
-		{
-			CString key = (char*)Key;
-			SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
 
-			bool tilesInCache =((CTiles*)_tiles)->TilesAreInCache(this, provider);
-			if (!tilesInCache)
-			{
-				((CTiles*)_tiles)->LoadTiles(true, (int)provider, key);
-				RestoreExtents();
-			}
-			else
-			{
-				// they are already here, no loading is needed
-				RestoreExtents();
-				FireTilesLoaded(true, key);
-			}
-		}
+	if (!Extents) 
+	{
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return;
+	}
+	
+	// Get the image height based on the box aspect ratio
+	double xMin, xMax, yMin, yMax, zMin, zMax;
+	Extents->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		
+	// Make sure that the width and height are valid
+	long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
+	if (WidthPixels <= 0 || Height <= 0)
+	{
+		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
+		return;
+	}
+		
+	CString key = (char*)Key;
+	SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
+
+	bool tilesInCache = TilesAreInCache();
+	if (!tilesInCache) {
+		ReloadTiles(true, key);
+	}
+
+	RestoreExtents();
+
+	if (tilesInCache) {
+		FireTilesLoaded(true, key);
 	}
 }
 
@@ -318,16 +284,6 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 
 	SetTempExtents(left, right, top, bottom, Width, Height);
 
-	if (mm_newExtents)
-	{
-		ReloadBuffers();
-
-		get_TileManager()->MarkUndrawn();		// otherwise they will be taken from screen buffer
-	}
-
-	IImage * iimg = NULL;
-	bool tilesInCache = false;
-
 	// create canvas
 	CBitmap * oldBMP = NULL;
 	if (createDC)
@@ -336,17 +292,16 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 		snapDC->CreateCompatibleDC(GetDC());
 		oldBMP = snapDC->SelectObject(bmp);
 	}
-	
+
 	// do the drawing
 	ScheduleLayerRedraw();
 	_isSnapshot = true;
-	
-	// TODO: make sure that WMS layers are loaded as well
-	tilesInCache =((CTiles*)_tiles)->TilesAreInCache(this);
-	if (tilesInCache)
-	{
-		DoUpdateTiles(true);		// simply move the to the screen buffer (is performed synchronously)
+
+	if (mm_newExtents) {
+		ReloadBuffers();
 	}
+
+	ReloadTiles(true);		// simply move them to the screen buffer (is performed synchronously)
 
 	CRect rcBounds(0,0,_viewWidth,_viewHeight);
 	CRect rcClip((int)clipX, (int)clipY, (int)clipWidth, (int)clipHeight);
@@ -359,13 +314,15 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	DrawDynamic(snapDC, rcBounds, *r, false, offsetX, offsetY);
 
 	ScheduleLayerRedraw();
+
 	_isSnapshot = false;
+	IImage * iimg = NULL;
 
 	if (createDC)
 	{
 		// create output
 		VARIANT_BOOL retval;
-		CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&iimg);
+		ComHelper::CreateInstance(idImage, (IDispatch**)&iimg);
 		iimg->SetImageBitsDC((long)snapDC->m_hDC,&retval);
 
 		double dx = (right-left)/(double)(_viewWidth);
@@ -387,15 +344,12 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 
 	if (mm_newExtents)
 	{
-		this->ReloadBuffers();
+		ReloadBuffers();
 		mm_newExtents = false;
 	}
 
-	if (tilesInCache)
-	{
-		// restore former list of tiles in the buffer
-		DoUpdateTiles(false);
-	}
+	// restore former list of tiles in the buffer
+	ReloadTiles(true);
 
 	LockWindow( lmUnlock );
 	return iimg;

@@ -143,7 +143,7 @@ void CustomProjection::get_Bounds(double& xMin, double& xMax, double& yMin, doub
 // ******************************************************
 bool CustomProjection::UpdateBounds()
 {
-	if (!_boundsChanged) return false;
+	if (!_boundsChanged) return true;
 
 	VARIANT_BOOL vb, vb2;
 

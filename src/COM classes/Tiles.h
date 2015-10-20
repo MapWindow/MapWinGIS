@@ -203,8 +203,7 @@ public:
 
 public:
 	void Init(IMapViewCallback* map) {_manager.set_MapCallback(map); }
-	void LoadTiles(bool isSnapshot = false, CString key = "");
-	void LoadTiles(bool isSnapshot, int providerId, CString key = "");
+	void LoadTiles(bool isSnapshot, CString key = "");
 	bool TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId = ProviderNone);
 	bool DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(CString ElementName);

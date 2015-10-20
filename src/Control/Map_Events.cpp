@@ -498,7 +498,6 @@ void CMapView::UpdateShapeEditor()
 // ************************************************************
 void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 {
-
 	if (HasRotation()) {
 		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
 	}
@@ -1273,18 +1272,19 @@ void CMapView::DoPanning(CPoint point)
 	
 	if (_useSeamlessPan)
 	{
-		// complete redraw; bad for performance, especially for large layers
-		// AxMap.LayerScreenBufferMode property should be used instead to mark
-		// layer for immediate redraw
-		ScheduleLayerRedraw();
+		// TODO: rerouted it through RedrawCore; make sure that nothing has broken
+		/*ScheduleLayerRedraw();
 		LockWindow(lmUnlock);	
 		FireExtentsChanged(); 
-		ReloadBuffers(); 
+		ReloadBuffers(); */
+
+		// complete redraw; bad for performance, especially for large layers
+		RedrawCore(RedrawAll, true, true);
 	}	
 	else
 	{
 		// layers stay the same, while all the rest must be updated
-		RedrawWithTiles(RedrawSkipDataLayers, true, true);
+		RedrawCore(RedrawSkipDataLayers, true, true);
 	}
 }
 #pragma endregion

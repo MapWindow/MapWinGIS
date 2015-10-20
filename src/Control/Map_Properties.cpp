@@ -456,10 +456,12 @@ long CMapView::GetZoomBarMinZoom()
 void CMapView::SetZoomBarMinZoom(long nNewValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	if (nNewValue < 1)	nNewValue = -1;
 	if (nNewValue > 25)	nNewValue = 25;
 	_zoomBarMinZoom = nNewValue;
-	RedrawWithTiles(tkRedrawType::RedrawAll, true, false);
+
+	RedrawCore(tkRedrawType::RedrawAll, true, true);
 }
 
 // *****************************************************
@@ -473,8 +475,10 @@ long CMapView::GetZoomBarMaxZoom()
 void CMapView::SetZoomBarMaxZoom(long nNewValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	if (nNewValue < 1)	nNewValue = -1;
 	if (nNewValue > 25)	nNewValue = 25;
 	_zoomBarMaxZoom = nNewValue;
-	RedrawWithTiles(tkRedrawType::RedrawAll, true, false);
+
+	RedrawCore(tkRedrawType::RedrawAll, true, true);
 }

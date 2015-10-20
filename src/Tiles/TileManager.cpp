@@ -46,7 +46,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	CRect indices;
 	int zoom;
 
-	if (!GetTileIndices(provider, indices, zoom)) {
+	if (!GetTileIndices(provider, indices, zoom, isSnapshot)) {
 		return;
 	}
 
@@ -63,10 +63,8 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 
 	//  check which ones we already have, and which ones are to be loaded
 	std::vector<TilePoint*> activeTasks;
-	if (!isSnapshot)
-	{
-		GetActiveTasks(activeTasks, provider->Id, zoom, requestInfo->generation, indices);
-	}
+	GetActiveTasks(activeTasks, provider->Id, zoom, requestInfo->generation, indices);
+
 
 	// loads tiles available in the cache to the buffer
 	// builds list of tiles to be loaded from server
@@ -105,11 +103,11 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 // *********************************************************
 //	     GetTileIndices()
 // *********************************************************
-bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zoom)
+bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zoom, bool isSnapshot)
 {
 	Extent* mapExtents = _map->_GetExtents();
 
-	if (_lastMapExtents == *mapExtents && _lastProvider == provider->Id)
+	if (!isSnapshot && _lastMapExtents == *mapExtents && _lastProvider == provider->Id)
 	{
 		tilesLogger.WriteLine("Duplicate request is dropped.");
 		return false;

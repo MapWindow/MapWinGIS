@@ -280,14 +280,11 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= true*/, bool mapS
 
 	FireExtentsChanged();
 
-	ReloadBuffers();
-	
 	_lastWidthMeters = 0.0;	// extents has changed it must be recalculated
 
 	if( !_lockCount ) 
 	{
-		DoUpdateTiles();
-		InvalidateControl();
+		RedrawCore(RedrawAll, false, true);
 	}
 }
 

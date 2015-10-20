@@ -35,12 +35,6 @@ class Layer;
 // A structure to pass parameters to the background thread
 struct AsyncLoadingParams : CObject
 {
-	IMapViewCallback* map;
-	Extent extents;
-	Layer* layer;
-	vector<CategoriesData*>* categories;
-	OgrLoadingTask* task;  // not owned by this object
-
 	AsyncLoadingParams(IMapViewCallback* m, Extent e, Layer* l, vector<CategoriesData*>* ct, OgrLoadingTask* cback)
 	{
 		map = m;
@@ -60,6 +54,13 @@ struct AsyncLoadingParams : CObject
 			delete categories;
 		}
 	}
+
+public:
+	IMapViewCallback* map;
+	Extent extents;
+	Layer* layer;
+	vector<CategoriesData*>* categories;
+	OgrLoadingTask* task;  // not owned by this object
 };
 
 // **************************************************

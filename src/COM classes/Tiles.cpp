@@ -279,23 +279,13 @@ bool CTiles::TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId)
 }
 
 // *********************************************************
-//	     LoadTiles()
+//	     LoadTiles
 // *********************************************************
 void CTiles::LoadTiles(bool isSnapshot, CString key)
 {
-	// current provider will be used
-	LoadTiles(isSnapshot, _provider->Id, key);
-}
-
-void CTiles::LoadTiles(bool isSnapshot, int providerId, CString key)
-{
-	// any provider can be passed (for caching or snapshot)
 	if (!_visible) return;
-	
-	BaseProvider* provider = get_Provider(providerId);
-	if (provider) {
-		_manager.LoadTiles(provider, isSnapshot, key);
-	}
+
+	_manager.LoadTiles(_provider, isSnapshot, key);
 }
 
 // *********************************************************
