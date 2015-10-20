@@ -319,9 +319,9 @@ void CMapView::RedrawWmsLayers(Gdiplus::Graphics* g)
 					gWms->Clear(Gdiplus::Color::Transparent);
 				}
 
-				TilesDrawer drawer(gWms, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, GetWgs84ToMapTransform());
+				TilesDrawer drawer(gWms, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, PixelsPerMapUnit(), GetWgs84ToMapTransform());
 
-				drawer.DrawTiles(manager, PixelsPerMapUnit(), GetMapProjection(), _isSnapshot, _projectionChangeCount);
+				drawer.DrawTiles(manager, GetMapProjection(), _isSnapshot, _projectionChangeCount);
 
 				g->DrawImage(wmsBuffer, 0.0f, 0.0f);
 			}
@@ -784,9 +784,9 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 		if (_currentZoom < minZoom) return;
 	}
 	
-	TilesDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, GetWgs84ToMapTransform());
+	TilesDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, PixelsPerMapUnit(), GetWgs84ToMapTransform());
 
-	drawer.DrawTiles(get_TileManager(), PixelsPerMapUnit(), GetMapProjection(), _isSnapshot, _projectionChangeCount);
+	drawer.DrawTiles(get_TileManager(), GetMapProjection(), _isSnapshot, _projectionChangeCount);
 }
 
 #pragma region Draw layers

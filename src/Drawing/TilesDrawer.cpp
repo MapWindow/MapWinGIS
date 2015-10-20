@@ -27,7 +27,7 @@ using namespace Gdiplus;
 // ***************************************************************
 //		DrawTiles()
 // ***************************************************************
-void TilesDrawer::DrawTiles( TileManager* manager, double pixelsPerMapUnit, IGeoProjection* mapProjection, bool printing, int projectionChangeCount )
+void TilesDrawer::DrawTiles( TileManager* manager, IGeoProjection* mapProjection, bool printing, int projectionChangeCount )
 {
 	if (!manager) return;
 
@@ -37,7 +37,7 @@ void TilesDrawer::DrawTiles( TileManager* manager, double pixelsPerMapUnit, IGeo
 	bool drawGrid = manager->get_GridLinesVisible();
 	
 	ImageAttributes attr;
-	attr.SetWrapMode(WrapModeTileFlipXY);
+	InitImageAttributes(manager, attr);
 
 	bool isSame = IsSameProjection(mapProjection, provider);
 	
@@ -55,7 +55,7 @@ void TilesDrawer::DrawTiles( TileManager* manager, double pixelsPerMapUnit, IGeo
 			UpdateTileBounds(tile, isSame, projectionChangeCount);
 
 			RectF screenBounds;
-			if (!CalculateScreenBounds(tile, pixelsPerMapUnit, screenBounds)) {
+			if (!CalculateScreenBounds(tile, screenBounds)) {
 				continue;
 			}
 
@@ -67,6 +67,19 @@ void TilesDrawer::DrawTiles( TileManager* manager, double pixelsPerMapUnit, IGeo
 
 			tile->isDrawn(true);	
 		}
+	}
+}
+
+// ***************************************************************
+//		InitImageAttributes()
+// ***************************************************************
+void TilesDrawer::InitImageAttributes(TileManager* manager, ImageAttributes& attr)
+{
+	attr.SetWrapMode(WrapModeTileFlipXY);
+
+	if (manager->get_Alpha() != 255) {
+		Gdiplus::ColorMatrix m = GetColorMatrix(manager->get_Alpha());
+		attr.SetColorMatrix(&m);
 	}
 }
 
@@ -149,9 +162,9 @@ bool TilesDrawer::UpdateTileBounds(TileCore* tile, bool isSameProjection, int pr
 }
 
 // ***************************************************************
-//		TransformToScreen()
+//		CalculateScreenBounds()
 // ***************************************************************
-bool TilesDrawer::CalculateScreenBounds(TileCore* tile, double pixelsPerMapUnit, RectF& screenBounds)
+bool TilesDrawer::CalculateScreenBounds(TileCore* tile, RectF& screenBounds)
 {
 	// convert to screen coordinates
 	double x, y;
@@ -159,8 +172,8 @@ bool TilesDrawer::CalculateScreenBounds(TileCore* tile, double pixelsPerMapUnit,
 	RectLatLng* bounds = tile->get_ProjectedBounds();
 	ProjectionToPixel(bounds->xLng, bounds->yLat, x, y);
 
-	double width = bounds->WidthLng * pixelsPerMapUnit;
-	double height = bounds->HeightLat * pixelsPerMapUnit;
+	double width = bounds->WidthLng * _pixelPerMapUnit;
+	double height = bounds->HeightLat * _pixelPerMapUnit;
 
 	if (width < 0 || height < 0)
 	{

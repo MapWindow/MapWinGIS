@@ -25,7 +25,7 @@ class TileManager
 {
 public:
 	TileManager(bool isBackground)
-		: _map(NULL), _lastZoom(-1), _lastProvider(-1), _isBackground(isBackground), 
+		: _map(NULL), _lastZoom(-1), _lastProvider(-1), _isBackground(isBackground), _alpha(255),
 		_loader(tctSqliteCache), _gridLinesVisible(false), _provider(NULL), _screenBufferChanged(true)
 	{
 		_useServer = true;
@@ -60,6 +60,7 @@ private:
 	int _lastProvider;
 	bool _useServer;
 	bool _gridLinesVisible;
+	byte _alpha;
 
 private:
 	void InitCaches();
@@ -92,7 +93,8 @@ public:
 	void set_GridLinesVisible(bool value) { _gridLinesVisible = value; }
 	BaseProvider* get_Provider() { return _provider; }
 	bool get_ScreenBufferChanged();
-	void ClearBuffer();
+	byte get_Alpha() { return _alpha; }
+	void set_Alpha(byte value) { _alpha = value; }
 
 public:
 	// methods
@@ -110,4 +112,5 @@ public:
 	void TriggerMapRedraw() { _map->_Redraw(tkRedrawType::RedrawSkipDataLayers, false, true); };
 	void FireTilesLoaded(bool isSnapshot, CString key) { _map->_FireTilesLoaded(isSnapshot, key); }
 	bool TilesAreInCache(BaseProvider* provider);
+	void ClearBuffer();
 };

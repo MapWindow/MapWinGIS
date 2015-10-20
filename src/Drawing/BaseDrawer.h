@@ -32,4 +32,16 @@ public:
 		piX = (prX - _extents->left)* _pixelPerProjectionX;
 		piY = (_extents->top - prY) * _pixelPerProjectionY;
 	}
+
+	Gdiplus::ColorMatrix GetColorMatrix(byte alpha)
+	{
+		Gdiplus::ColorMatrix matrix;
+
+		ZeroMemory((void*)&matrix.m, 25 * sizeof(Gdiplus::REAL));
+		for (int i = 0; i < 5; i++) matrix.m[i][i] = 1.0f;
+
+		matrix.m[3][3] = alpha / 255.0f;
+
+		return matrix;
+	}
 };

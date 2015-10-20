@@ -385,3 +385,25 @@ STDMETHODIMP CWmsLayer::get_GeoProjection(IGeoProjection** pVal)
 
 	return S_OK;
 }
+
+// *********************************************************
+//	     Opacity()
+// *********************************************************
+STDMETHODIMP CWmsLayer::get_Opacity(BYTE* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.get_Alpha();
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_Opacity(BYTE newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_manager.MarkUndrawn();
+	_manager.set_Alpha(newVal);
+
+	return S_OK;
+}

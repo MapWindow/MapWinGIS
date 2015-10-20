@@ -93,6 +93,8 @@ public:
 	void ResizeBuffer(int cx, int cy) ;
 	TileManager* get_Manager() { return &_manager; }
 	Gdiplus::Bitmap* get_ScreenBuffer() { return _screenBuffer; }
+	STDMETHOD(get_Opacity)(BYTE* pVal);
+	STDMETHOD(put_Opacity)(BYTE newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(WmsLayer), CWmsLayer)

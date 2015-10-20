@@ -6319,6 +6319,8 @@ interface IWmsLayer : IDispatch{
 	[id(14)] HRESULT Serialize();
 	[id(15)] HRESULT Deserialize([in] BSTR state, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(16)] HRESULT GeoProjection([out, retval] IGeoProjection** pVal);
+	[propget, id(17)] HRESULT Opacity([out, retval] BYTE* pVal);
+	[propput, id(17)] HRESULT Opacity([in] BYTE newVal);
 };
 
 [ 

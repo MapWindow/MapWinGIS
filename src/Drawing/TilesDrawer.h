@@ -24,13 +24,15 @@
 class TilesDrawer : public CBaseDrawer
 {
 public:
-	TilesDrawer(Gdiplus::Graphics* g, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY, IGeoProjection* transform)
-		: _graphics(g) , _transfomation(transform)
+	TilesDrawer(Gdiplus::Graphics* g, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY, 
+				double pixelsPerMapUnit, IGeoProjection* transform)
+		: _graphics(g), _transfomation(transform)
 	{
 		_dc = NULL;
 		_extents = extents;
 		_pixelPerProjectionX = pixelPerProjectionX;
 		_pixelPerProjectionY = pixelPerProjectionY;
+		_pixelPerMapUnit = pixelsPerMapUnit;
 	};
 
 	virtual ~TilesDrawer(void){};
@@ -38,6 +40,7 @@ public:
 private:
 	Gdiplus::Graphics* _graphics;
 	IGeoProjection* _transfomation;
+	double _pixelPerMapUnit;
 
 public:
 	// properties
@@ -48,11 +51,12 @@ private:
 	bool UpdateTileBounds(TileCore* tile, bool isSameProjection, int projectionChangeCount);
 	void DrawGrid(TileCore* tile, Gdiplus::RectF& screenRect);
 	void DrawOverlays(TileCore* tile, Gdiplus::RectF screenBounds, Gdiplus::ImageAttributes& attr);
-	bool CalculateScreenBounds(TileCore* tile, double pixelsPerMapUnit, Gdiplus::RectF& screenBounds);
+	bool CalculateScreenBounds(TileCore* tile, Gdiplus::RectF& screenBounds);
 	void DrawGridText(TileCore* tile, Gdiplus::RectF& screenRect);
+	void InitImageAttributes(TileManager* manager, Gdiplus::ImageAttributes& attr);
 
 public:
 	// methods
-	// TODO: move pixelPerMapUnit to constructor
-	void DrawTiles(TileManager* manager, double pixelsPerMapUnit, IGeoProjection* mapProjection, bool printing, int projectionChangeCount);
+	void DrawTiles(TileManager* manager, IGeoProjection* mapProjection, bool printing, int projectionChangeCount);
+	
 };
