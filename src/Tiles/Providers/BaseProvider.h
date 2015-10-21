@@ -108,7 +108,7 @@ public:
 	BaseProvider()
 		: _minZoom(1), _maxZoom(18), _httpStatus(200),
 		_manager(NULL), _projection(NULL), _isStopped(false),
-		_dynamicOverlay(false),	_initAttemptCount(0)
+		_dynamicOverlay(false), _initAttemptCount(0), Id(-1)
 	{
 		_licenseUrl = "https://mapwingis.codeplex.com/wikipage?title=tiles";
 		LanguageStr = "en";

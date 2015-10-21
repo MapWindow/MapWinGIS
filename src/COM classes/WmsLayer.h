@@ -72,9 +72,11 @@ public:
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_MapExtents)(IExtents** pVal);
 	STDMETHOD(Close)();
-	STDMETHOD(Serialize)();
+	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR state, VARIANT_BOOL* retVal);
 	STDMETHOD(get_GeoProjection)(IGeoProjection** pVal);
+	STDMETHOD(get_Opacity)(BYTE* pVal);
+	STDMETHOD(put_Opacity)(BYTE newVal);
 
 private:	
 	BSTR _key;
@@ -93,8 +95,9 @@ public:
 	void ResizeBuffer(int cx, int cy) ;
 	TileManager* get_Manager() { return &_manager; }
 	Gdiplus::Bitmap* get_ScreenBuffer() { return _screenBuffer; }
-	STDMETHOD(get_Opacity)(BYTE* pVal);
-	STDMETHOD(put_Opacity)(BYTE newVal);
+	CPLXMLNode* SerializeCore(CString ElementName);
+	bool DeserializeCore(CPLXMLNode* node);
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(WmsLayer), CWmsLayer)

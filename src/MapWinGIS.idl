@@ -6316,7 +6316,7 @@ interface IWmsLayer : IDispatch{
 	[propget, id(11)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 	[propget, id(12)] HRESULT MapExtents([out, retval] IExtents** pVal);
 	[id(13)] HRESULT Close();
-	[id(14)] HRESULT Serialize();
+	[id(14)] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(15)] HRESULT Deserialize([in] BSTR state, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(16)] HRESULT GeoProjection([out, retval] IGeoProjection** pVal);
 	[propget, id(17)] HRESULT Opacity([out, retval] BYTE* pVal);

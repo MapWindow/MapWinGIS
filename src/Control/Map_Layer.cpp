@@ -17,6 +17,7 @@
 #include "OgrHelper.h"
 #include "ComHelpers\ProjectionHelper.h"
 #include "TableHelper.h"
+#include "WmsHelper.h"
 
 // ************************************************************
 //		GetNumLayers()
@@ -1315,17 +1316,30 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 	}
 	else if (layerType == OgrLayerSource)
 	{
-		IOgrLayer* layer = NULL;
+		CComPtr<IOgrLayer> layer = NULL;
 		ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
 		if (layer) 
 		{
 			CPLXMLNode* nodeOgrLayer = CPLGetXMLNode(node, "OgrLayerClass");
 			if (nodeOgrLayer)
 			{
-				((COgrLayer*)layer)->DeserializeCore(nodeOgrLayer);
+				OgrHelper::Cast(layer)->DeserializeCore(nodeOgrLayer);
 				layerHandle = AddLayer(layer, (BOOL)visible);
 			}
-			layer->Release();
+		}
+	}
+	else if (layerType == WmsLayerSource)
+	{
+		CComPtr<IWmsLayer> layer = NULL;
+		ComHelper::CreateInstance(idWmsLayer, (IDispatch**)&layer);
+		if (layer)  
+		{
+			CPLXMLNode* nodeWmsLayer = CPLGetXMLNode(node, "WmsLayerClass");
+			if (nodeWmsLayer)
+			{
+				WmsHelper::Cast(layer)->DeserializeCore(nodeWmsLayer);
+				layerHandle = AddLayer(layer, (BOOL)visible);
+			}
 		}
 	}
 	else
@@ -1419,11 +1433,15 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 					break;
 				case ShapefileLayer:
 					s = "Shapefile";
+					break;		
+				case WmsLayerSource:
+					s = "WmsLayer";
 					break;
 				case UndefinedLayer:
 					s = "Undefined";
 					break;
 			}
+
 			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerType", s);
 			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerName", layer->name);
 			
@@ -1450,12 +1468,22 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 			if (layer->maxVisibleZoom != 18)
 				Utility::CPLCreateXMLAttributeAndValue( psLayer, "MaxVisibleZoom", CPLString().Printf("%d", layer->maxVisibleZoom));
 
-			IOgrLayer* ogr = NULL;
+			CComPtr<IWmsLayer> wms = NULL;
+			CComPtr<IOgrLayer> ogr = NULL;
 			layer->QueryOgrLayer(&ogr);
+			layer->QueryWmsLayer(&wms);
+
 			if (ogr)
 			{
-				CPLXMLNode* node = ((COgrLayer*)ogr)->SerializeCore("OgrLayerClass");
-				ogr->Release();
+				CPLXMLNode* node = OgrHelper::Cast(ogr)->SerializeCore("OgrLayerClass");
+				if (node != NULL)
+				{
+					CPLAddXMLChild(psLayer, node);
+				}
+			}
+			else if (wms) 
+			{
+				CPLXMLNode* node = WmsHelper::Cast(wms)->SerializeCore("WmsLayerClass");
 				if (node != NULL)
 				{
 					CPLAddXMLChild(psLayer, node);
@@ -1499,6 +1527,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 			}
 		}
 	}
+
 	return psLayer;
 }
 
@@ -1556,6 +1585,8 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 		layerType = ImageLayer;
 	else if (_stricmp(s.GetString(), "OgrLayer") == 0)
 		layerType = OgrLayerSource;
+	else if (_stricmp(s.GetString(), "WmsLayer") == 0)
+		layerType = WmsLayerSource;
 
 	if (layerType == UndefinedLayer)
 	{
@@ -1618,6 +1649,18 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 				retVal = ((COgrLayer*)ogr)->DeserializeOptions(node);
 			}
 			ogr->Release();
+		}
+	}
+	else if (layerType == WmsLayerSource)
+	{
+		CComPtr<IWmsLayer> wms = NULL;
+		if (layer->QueryWmsLayer(&wms))
+		{
+			node = CPLGetXMLNode(node, "WmsLayerClass");
+			if (node)
+			{
+				WmsHelper::Cast(wms)->DeserializeCore(node);
+			}
 		}
 	}
 	else if (layerType == ShapefileLayer)

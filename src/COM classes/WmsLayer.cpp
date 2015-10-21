@@ -345,11 +345,12 @@ STDMETHODIMP CWmsLayer::Close()
 // *********************************************************
 //	     Serialize()
 // *********************************************************
-STDMETHODIMP CWmsLayer::Serialize()
+STDMETHODIMP CWmsLayer::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// TODO: implement
+	CPLXMLNode* psTree = this->SerializeCore("WmsLayerClass");
+	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 
 	return S_OK;
 }
@@ -361,7 +362,22 @@ STDMETHODIMP CWmsLayer::Deserialize(BSTR state, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// TODO: implement
+	*retVal = VARIANT_FALSE;
+
+	USES_CONVERSION;
+	CString s = OLE2CA(state);
+
+	CPLXMLNode* node = CPLParseXMLString(s.GetString());
+	if (node)
+	{
+		CPLXMLNode* nodeWmsLayer = CPLGetXMLNode(node, "=WmsLayerClass");
+		if (nodeWmsLayer)
+		{
+			*retVal = DeserializeCore(nodeWmsLayer) ? VARIANT_TRUE : VARIANT_FALSE;
+		}
+
+		CPLDestroyXMLNode(node);
+	}
 
 	return S_OK;
 }
@@ -406,4 +422,88 @@ STDMETHODIMP CWmsLayer::put_Opacity(BYTE newVal)
 	_manager.set_Alpha(newVal);
 
 	return S_OK;
+}
+
+// ********************************************************
+//     SerializeCore()
+// ********************************************************
+CPLXMLNode* CWmsLayer::SerializeCore(CString ElementName)
+{
+	USES_CONVERSION;
+	CPLXMLNode* psTree = CPLCreateXMLNode(NULL, CXT_Element, ElementName);
+	
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Id", CPLString().Printf("%d", _provider->Id));
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Name", _provider->Name);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Layers", _provider->get_Layers());
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Url", _provider->get_UrlFormat());
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Format", _provider->get_Format());
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Opactiy", CPLString().Printf("%d", _manager.get_Alpha()));
+
+	long epsg;
+	get_Epsg(&epsg);
+
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Epsg", CPLString().Printf("%d", epsg));
+
+	CComPtr<IExtents> box = NULL;
+	get_BoundingBox(&box);
+
+	double xMin, yMin, zMin, xMax, yMax, zMax;
+	box->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "xMin", CPLString().Printf("%f", xMin));
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "xMax", CPLString().Printf("%f", xMax));
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "yMin", CPLString().Printf("%f", yMin));
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "yMax", CPLString().Printf("%f", yMax));
+
+	return psTree;
+}
+
+// ********************************************************
+//     DeserializeCore()
+// ********************************************************
+bool CWmsLayer::DeserializeCore(CPLXMLNode* node)
+{
+	if (!node)
+		return false;
+
+	CString s = CPLGetXMLValue(node, "Id", NULL);
+	if (s != "") put_Id(atoi(s));
+
+	s = CPLGetXMLValue(node, "Name", NULL);
+	if (s != "") _provider->Name = s;
+
+	s = CPLGetXMLValue(node, "Layers", NULL);
+	if (s != "") _provider->set_Layers(s);
+
+	s = CPLGetXMLValue(node, "Url", NULL);
+	if (s != "") _provider->put_UrlFormat(s);
+
+	s = CPLGetXMLValue(node, "Format", NULL);
+	if (s != "") _provider->set_Format(s);
+
+	s = CPLGetXMLValue(node, "Opacity", NULL);
+	if (s != "") _manager.set_Alpha(atoi(s));
+
+	s = CPLGetXMLValue(node, "Epsg", NULL);
+	if (s != "") put_Epsg(atoi(s));
+	
+	double xMin, xMax, yMin, yMax, zMin = 0.0, zMax = 0.0;
+	s = CPLGetXMLValue(node, "xMin", NULL);
+	if (s != "") xMin = Utility::atof_custom(s);
+
+	s = CPLGetXMLValue(node, "xMax", NULL);
+	if (s != "") xMax = Utility::atof_custom(s);
+
+	s = CPLGetXMLValue(node, "yMin", NULL);
+	if (s != "") yMin = Utility::atof_custom(s);
+
+	s = CPLGetXMLValue(node, "yMax", NULL);
+	if (s != "") yMax = Utility::atof_custom(s);
+
+	CComPtr<IExtents> box = NULL;
+	ComHelper::CreateExtents(&box);
+	box->SetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
+	put_BoundingBox(box);
+
+	return true;
 }

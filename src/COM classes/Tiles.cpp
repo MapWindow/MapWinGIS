@@ -658,7 +658,7 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 	
 	CStringW dbName = _manager.get_DiskCache()->cache->get_Filename();
 	if (dbName.GetLength() != 0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", dbName);
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", Utility::ConvertToUtf8(dbName));
 	
 	// serialization of custom providers
 	CPLXMLNode* psProviders = CPLCreateXMLNode( NULL, CXT_Element, "TileProviders");
