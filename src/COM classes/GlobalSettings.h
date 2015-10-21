@@ -194,6 +194,8 @@ public:
 	STDMETHOD(get_TileLogIsOpened)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_LogTileErrorsOnly)(VARIANT_BOOL* retVal);
 	STDMETHOD(put_LogTileErrorsOnly)(VARIANT_BOOL pVal);
+	STDMETHOD(get_WmsDiskCaching)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_WmsDiskCaching)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

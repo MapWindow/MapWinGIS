@@ -25,13 +25,20 @@ class TileManager
 {
 public:
 	TileManager(bool isBackground)
-		: _map(NULL), _lastZoom(-1), _lastProvider(-1), _isBackground(isBackground), _alpha(255),
+		: _map(NULL), _lastZoom(-1), _lastProvider(-1), _isBackground(isBackground),
 		_loader(tctSqliteCache), _gridLinesVisible(false), _provider(NULL), _screenBufferChanged(true)
 	{
 		_useServer = true;
 		_lastZoom = -1;
 		_lastProvider = tkTileProvider::ProviderNone;
 		_scalingRatio = 1.0;
+
+		_alpha = 255;
+		brightness = 0.0f;
+		contrast = 1.0f;
+		saturation = 1.0f;
+		hue = 0.0f;
+		gamma = 1.0f;
 
 		InitCaches();
 	}
@@ -62,10 +69,16 @@ private:
 	bool _gridLinesVisible;
 	byte _alpha;
 
+public:	
+	float brightness;		// -1, 1
+	float contrast;		// 0, 4
+	float saturation;		// 0, 3
+	float hue;				// -180, 180
+	float gamma;			// 0, 4
+
 private:
 	void InitCaches();
 	void UpdateScreenBuffer();
-	bool IsBackground() { return _isBackground; }
 	void BuildLoadingList(BaseProvider* provider, CRect indices, int zoom, vector<TilePoint*>& activeTasks, vector<TilePoint*>& points);
 	void GetActiveTasks(std::vector<TilePoint*>& activeTasks, int providerId, int zoom, int newGeneration, CRect indices);
 	bool IsNewRequest(Extent& mapExtents, CRect indices, int providerId, int zoom);
@@ -76,6 +89,7 @@ private:
 
 public:
 	// properties
+	bool IsBackground() { return _isBackground; }
 	void set_MapCallback(IMapViewCallback* map);
 	IMapViewCallback* get_MapCallback() { return _map; }
 	bool TileIsInBuffer(int providerId, int zoom, int x, int y);

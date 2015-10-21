@@ -45,7 +45,7 @@ void TileManager::InitCaches()
 	_ramCache.cache = TileCacheManager::get_Cache(tctRamCache);
 	_caches.push_back(&_ramCache);
 
-	_diskCache.doCaching = false;
+	_diskCache.doCaching = m_globalSettings.wmsDiskCaching;
 	_diskCache.useCache = true;
 	_diskCache.cache = TileCacheManager::get_Cache(tctSqliteCache);
 	_caches.push_back(&_diskCache);

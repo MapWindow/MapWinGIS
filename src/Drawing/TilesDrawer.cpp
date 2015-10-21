@@ -21,6 +21,7 @@
 #include "TilesDrawer.h"
 #include "TileHelper.h"
 #include "CustomProjection.h"
+#include "ImageHelper.h"
 
 using namespace Gdiplus;
 
@@ -77,8 +78,16 @@ void TilesDrawer::InitImageAttributes(TileManager* manager, ImageAttributes& att
 {
 	attr.SetWrapMode(WrapModeTileFlipXY);
 
-	if (manager->get_Alpha() != 255) {
-		Gdiplus::ColorMatrix m = GetColorMatrix(manager->get_Alpha());
+	if (!manager->IsBackground())
+	{
+		//Gdiplus::ColorMatrix m = GetColorMatrix(manager->get_Alpha());
+
+		Gdiplus::ColorMatrix m = ImageHelper::CreateMatrix(manager->contrast,
+			manager->brightness,
+			manager->saturation,
+			manager->hue,
+			0.0f, RGB(255, 255, 255), false, manager->get_Alpha() / 255.0f);
+
 		attr.SetColorMatrix(&m);
 	}
 }

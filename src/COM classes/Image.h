@@ -21,15 +21,13 @@
 #include "ImageGroup.h"
 #include "InMemoryBitmap.h"
 
-
 struct DataPixels
 {
 public:
 	colour value;
-	int position; 
+	int position;
 };
 
-// CImageClass
 class ATL_NO_VTABLE CImageClass : 
 	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CImageClass, &CLSID_Image>,

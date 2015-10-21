@@ -425,6 +425,127 @@ STDMETHODIMP CWmsLayer::put_Opacity(BYTE newVal)
 }
 
 // ********************************************************
+//     Brightness
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_Brightness(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.brightness;
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_Brightness(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < -1.0f) newVal = -1.0f;
+	if (newVal > 1.0f) newVal = 1.0f;
+
+	_manager.brightness = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     Contrast
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_Contrast(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.contrast;
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_Contrast(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < 0.0f) newVal = 0.0f;
+	if (newVal > 4.0f) newVal = 4.0f;
+
+	_manager.contrast = newVal;
+
+	return S_OK;
+}
+
+
+// ********************************************************
+//     Saturation
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_Saturation(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.saturation;
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_Saturation(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < 0.0f) newVal = 0.0f;
+	if (newVal > 3.0f) newVal = 3.0f;
+
+	_manager.saturation = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     Hue
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_Hue(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.hue;
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_Hue(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < -180.0f) newVal = -180.0f;
+	if (newVal > 180.0f) newVal = 180.0f;
+
+	_manager.hue = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     Gamma
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_Gamma(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.gamma;
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_Gamma(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < 0.0f) newVal = 0.0f;
+	if (newVal > 4.0f) newVal = 4.0f;
+
+	_manager.gamma = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
 //     SerializeCore()
 // ********************************************************
 CPLXMLNode* CWmsLayer::SerializeCore(CString ElementName)
@@ -437,7 +558,27 @@ CPLXMLNode* CWmsLayer::SerializeCore(CString ElementName)
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Layers", _provider->get_Layers());
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Url", _provider->get_UrlFormat());
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Format", _provider->get_Format());
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "Opactiy", CPLString().Printf("%d", _manager.get_Alpha()));
+
+	if (_manager.get_Alpha() != 255)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Opactiy", CPLString().Printf("%d", _manager.get_Alpha()));
+
+	if (_manager.brightness != 0.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Brightness", CPLString().Printf("%f", _manager.brightness));
+
+	if (_manager.contrast != 1.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Contrast", CPLString().Printf("%f", _manager.contrast));
+
+	if (_manager.saturation != 1.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Saturation", CPLString().Printf("%f", _manager.saturation));
+
+	if (_manager.hue != 0.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Hue", CPLString().Printf("%f", _manager.hue));
+
+	if (_manager.gamma != 1.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Gamma", CPLString().Printf("%f", _manager.gamma));
+
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "UseCache", CPLString().Printf("%d", _manager.get_DiskCache()->useCache));
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "DoCaching", CPLString().Printf("%d", _manager.get_DiskCache()->doCaching));
 
 	long epsg;
 	get_Epsg(&epsg);
@@ -484,6 +625,21 @@ bool CWmsLayer::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue(node, "Opacity", NULL);
 	if (s != "") _manager.set_Alpha(atoi(s));
 
+	s = CPLGetXMLValue(node, "Brightness", NULL);
+	if (s != "") put_Brightness(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "Contrast", NULL);
+	if (s != "") put_Contrast(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "Saturation", NULL);
+	if (s != "") put_Saturation(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "Hue", NULL);
+	if (s != "") put_Hue(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "Gamma", NULL);
+	if (s != "") put_Gamma(static_cast<float>(Utility::atof_custom(s)));
+
 	s = CPLGetXMLValue(node, "Epsg", NULL);
 	if (s != "") put_Epsg(atoi(s));
 	
@@ -500,10 +656,58 @@ bool CWmsLayer::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue(node, "yMax", NULL);
 	if (s != "") yMax = Utility::atof_custom(s);
 
+	s = CPLGetXMLValue(node, "UseCache", NULL);
+	if (s != "") _manager.get_DiskCache()->useCache = atoi(s) != 0;
+
+	s = CPLGetXMLValue(node, "DoCaching", NULL);
+	if (s != "") _manager.get_DiskCache()->doCaching = atoi(s) != 0;
+
 	CComPtr<IExtents> box = NULL;
 	ComHelper::CreateExtents(&box);
 	box->SetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
 	put_BoundingBox(box);
 
 	return true;
+}
+
+// ********************************************************
+//     UseCache()
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_UseCache(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.get_DiskCache()->useCache ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_UseCache(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_manager.get_DiskCache()->useCache = newVal ? true : false;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     DoCaching()
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_DoCaching(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.get_DiskCache()->doCaching ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_DoCaching(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_manager.get_DiskCache()->doCaching = newVal ? true : false;
+
+	return S_OK;
 }

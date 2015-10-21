@@ -77,6 +77,16 @@ public:
 	STDMETHOD(get_GeoProjection)(IGeoProjection** pVal);
 	STDMETHOD(get_Opacity)(BYTE* pVal);
 	STDMETHOD(put_Opacity)(BYTE newVal);
+	STDMETHOD(get_Brightness)(FLOAT* pVal);
+	STDMETHOD(put_Brightness)(FLOAT newVal);
+	STDMETHOD(get_Contrast)(FLOAT* pVal);
+	STDMETHOD(put_Contrast)(FLOAT newVal);
+	STDMETHOD(get_Saturation)(FLOAT* pVal);
+	STDMETHOD(put_Saturation)(FLOAT newVal);
+	STDMETHOD(get_Hue)(FLOAT* pVal);
+	STDMETHOD(put_Hue)(FLOAT newVal);
+	STDMETHOD(get_Gamma)(FLOAT* pVal);
+	STDMETHOD(put_Gamma)(FLOAT newVal);
 
 private:	
 	BSTR _key;
@@ -98,6 +108,10 @@ public:
 	CPLXMLNode* SerializeCore(CString ElementName);
 	bool DeserializeCore(CPLXMLNode* node);
 	
+	STDMETHOD(get_UseCache)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_UseCache)(VARIANT_BOOL newVal);
+	STDMETHOD(get_DoCaching)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_DoCaching)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(WmsLayer), CWmsLayer)

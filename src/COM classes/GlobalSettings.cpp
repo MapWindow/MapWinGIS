@@ -1122,13 +1122,13 @@ STDMETHODIMP CGlobalSettings::put_CacheShapeRenderingData(VARIANT_BOOL newVal)
 STDMETHODIMP CGlobalSettings::get_LogTileErrorsOnly(VARIANT_BOOL *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*retVal = tilesLogger.errorsOnly;
+	*retVal = tilesLogger.errorsOnly;
 	return S_OK;
 }
 STDMETHODIMP CGlobalSettings::put_LogTileErrorsOnly(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		tilesLogger.errorsOnly = newVal ? true : false;
+	tilesLogger.errorsOnly = newVal ? true : false;
 	return S_OK;
 }
 
@@ -1174,5 +1174,26 @@ STDMETHODIMP CGlobalSettings::get_TileLogFilename(BSTR* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
 	*retVal = W2BSTR(tilesLogger.GetFilename());
+	return S_OK;
+}
+
+// *********************************************************
+//	     WmsDiskCaching()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_WmsDiskCaching(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = m_globalSettings.wmsDiskCaching ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_WmsDiskCaching(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_globalSettings.wmsDiskCaching = newVal ? true : false;
+
 	return S_OK;
 }

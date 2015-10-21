@@ -584,12 +584,11 @@ STDMETHODIMP CTiles::get_CacheSize(tkCacheType type, double* retVal)
 // *********************************************************
 //	     get_CacheSize3()
 // *********************************************************
-// TODO: use provider id rather than provider enumeration.
-STDMETHODIMP CTiles::get_CacheSize2(tkCacheType type, tkTileProvider provider, int scale, double* retVal)
+STDMETHODIMP CTiles::get_CacheSize2(tkCacheType type, int providerId, int scale, double* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = _manager.get_Cache(type)->cache->get_SizeMB();
+	*retVal = _manager.get_Cache(type)->cache->get_SizeMB(providerId, scale);
 	
 	return S_OK;
 }

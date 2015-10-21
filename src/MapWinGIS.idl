@@ -5659,6 +5659,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(64)] HRESULT LogTileErrorsOnly([in]VARIANT_BOOL newVal);
 	[id(65)] HRESULT StartLogTileRequests([in]BSTR Filename, [in, defaultvalue(FALSE)]VARIANT_BOOL errorsOnly, [out, retval]VARIANT_BOOL* retVal);
 	[id(66)] HRESULT StopLogTileRequests();
+	[propget, id(67)] HRESULT WmsDiskCaching([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(67)] HRESULT WmsDiskCaching([in] VARIANT_BOOL newVal);
 };
 
 [
@@ -5706,7 +5708,7 @@ interface ITiles : IDispatch{
 	[propput, id(16), helpstring("")] HRESULT Key( [in]BSTR newVal);
 
 	[propget, id(18), helpstring("")] HRESULT CacheSize2([in]tkCacheType cacheType, 
-														 [in, optional, defaultvalue(-1)]tkTileProvider provider, 
+														 [in, optional, defaultvalue(-1)]int provider, 
 														 [in, optional, defaultvalue(-1)]int scale,  
 														 [out, retval] double* retVal);
 	
@@ -6321,6 +6323,20 @@ interface IWmsLayer : IDispatch{
 	[propget, id(16)] HRESULT GeoProjection([out, retval] IGeoProjection** pVal);
 	[propget, id(17)] HRESULT Opacity([out, retval] BYTE* pVal);
 	[propput, id(17)] HRESULT Opacity([in] BYTE newVal);
+	[propget, id(18)] HRESULT Brightness([out, retval] FLOAT* pVal);
+	[propput, id(18)] HRESULT Brightness([in] FLOAT newVal);
+	[propget, id(19)] HRESULT Contrast([out, retval] FLOAT* pVal);
+	[propput, id(19)] HRESULT Contrast([in] FLOAT newVal);
+	[propget, id(20)] HRESULT Saturation([out, retval] FLOAT* pVal);
+	[propput, id(20)] HRESULT Saturation([in] FLOAT newVal);
+	[propget, id(21)] HRESULT Hue([out, retval] FLOAT* pVal);
+	[propput, id(21)] HRESULT Hue([in] FLOAT newVal);
+	[propget, id(22)] HRESULT Gamma([out, retval] FLOAT* pVal);
+	[propput, id(22)] HRESULT Gamma([in] FLOAT newVal);
+	[propget, id(23)] HRESULT UseCache([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(23)] HRESULT UseCache([in] VARIANT_BOOL newVal);
+	[propget, id(24)] HRESULT DoCaching([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(24)] HRESULT DoCaching([in] VARIANT_BOOL newVal);
 };
 
 [ 

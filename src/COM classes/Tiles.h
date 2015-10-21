@@ -144,7 +144,7 @@ public:
 	STDMETHOD(ClearCache)(tkCacheType type);
 	STDMETHOD(ClearCache2)(tkCacheType type, int providerId, int fromScale = 0, int toScale = 100);
 	STDMETHOD(get_CacheSize)(tkCacheType type, double* retVal);
-	STDMETHOD(get_CacheSize2)(tkCacheType type, tkTileProvider provider, int scale, double* retVal);
+	STDMETHOD(get_CacheSize2)(tkCacheType type, int providerId, int scale, double* retVal);
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal);
 	STDMETHOD(SetProxy)(BSTR address, int port, VARIANT_BOOL* retVal);

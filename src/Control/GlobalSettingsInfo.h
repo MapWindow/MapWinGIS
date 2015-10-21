@@ -82,6 +82,7 @@ struct GlobalSettingsInfo
 	bool overrideLocalCallback; 
 	bool cacheDbfRecords;
 	bool cacheShapeRenderingData;
+	bool wmsDiskCaching;
 
 	~GlobalSettingsInfo()
 	{
@@ -93,6 +94,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		wmsDiskCaching = true;
 		cacheShapeRenderingData = false;
 		cacheDbfRecords = true;
 		overrideLocalCallback = true;
