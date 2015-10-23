@@ -21,11 +21,11 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 08 aug 2011 - created the file.
-
+ 
 #include "stdafx.h"
 #include "GlobalSettings.h"
 #include "BingMapProvider.h"
+#include "HttpProxyHelper.h"
 
 // ****************************************************
 //	    get_MinPolygonArea()

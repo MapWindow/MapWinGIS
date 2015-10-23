@@ -307,7 +307,13 @@ void CMapView::ScheduleLayerRedraw()
 // *************************************************
 void CMapView::RedrawCore( tkRedrawType redrawType, bool atOnce, bool forceReloadTiles /*= false */ )
 {
-	ReloadTiles(forceReloadTiles || redrawType == RedrawAll);
+	bool reloaded = ReloadTiles(forceReloadTiles || redrawType == RedrawAll);
+
+	if (reloaded && redrawType == RedrawMinimal)
+	{
+		// we need at least this much to see that tiles are updated
+		redrawType = RedrawSkipDataLayers;
+	}
 
 	// no breaks are needed; it's intentional; redraw type of higher order leads to redraw of lower levels
 	switch (redrawType)

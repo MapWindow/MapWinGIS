@@ -87,6 +87,10 @@ public:
 	STDMETHOD(put_Hue)(FLOAT newVal);
 	STDMETHOD(get_Gamma)(FLOAT* pVal);
 	STDMETHOD(put_Gamma)(FLOAT newVal);
+	STDMETHOD(get_UseCache)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_UseCache)(VARIANT_BOOL newVal);
+	STDMETHOD(get_DoCaching)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_DoCaching)(VARIANT_BOOL newVal);
 
 private:	
 	BSTR _key;
@@ -107,11 +111,6 @@ public:
 	Gdiplus::Bitmap* get_ScreenBuffer() { return _screenBuffer; }
 	CPLXMLNode* SerializeCore(CString ElementName);
 	bool DeserializeCore(CPLXMLNode* node);
-	
-	STDMETHOD(get_UseCache)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_UseCache)(VARIANT_BOOL newVal);
-	STDMETHOD(get_DoCaching)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_DoCaching)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(WmsLayer), CWmsLayer)

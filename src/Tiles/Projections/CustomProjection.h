@@ -58,7 +58,6 @@ public:
 	void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret);
 	void FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret);
 	double GetWidth() {	return _xMax - _xMin;	}
-	void GetTileSizeProj(int zoom, CSize &size);
 	void GetTileSizeProj(int zoom, SizeLatLng &size);
 	long get_Epsg(){ return _epsg; }
 	void put_Epsg(long epsg);

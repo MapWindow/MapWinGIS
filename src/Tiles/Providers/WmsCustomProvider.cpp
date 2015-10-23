@@ -31,6 +31,7 @@ CString WmsCustomProvider::MakeTileImageUrl(CPoint &pos, int zoom)
 	s += "?request=GetMap&service=WMS";  
 	s += "&layers=" + _layers;
 
+	s += "&";
 	CString temp;
 	temp.Format("&srs=EPSG:%d", get_CustomProjection()->get_Epsg());
 	s += temp;
@@ -39,9 +40,8 @@ CString WmsCustomProvider::MakeTileImageUrl(CPoint &pos, int zoom)
 	s += "&format=" + _format;
 	s += "&width=256";
 	s += "&height=256";
-
-	//&version = 1.1.1
-	//&styles = population
+	s += "&version=1.1.1";
+	s += "&styles=";
 
 	return s;
 }

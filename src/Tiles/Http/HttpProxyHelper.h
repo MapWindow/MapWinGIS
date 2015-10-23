@@ -18,36 +18,15 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
 #pragma once
-#include "BaseProvider.h"
-#include "MercatorProjection.h"
 
-// *******************************************************
-//		WmsProviderBase
-// *******************************************************
-// Base class for WMS providers.
-class WmsProviderBase : public BaseProvider
-{
-public:	
-	virtual ~WmsProviderBase() { }
-
-	// gets bounding box in Google mercator projection (meters; EPSG:3857)
-	virtual CString GetBoundingBox(CPoint &pos, int zoom);
-
-	virtual bool IsWms() { return true; }
-};
-
-// *******************************************************
-//		WmsMercatorProvider
-// *******************************************************
-// WMS provider which uses spherical Mercator projection.
-class WmsMercatorProvider : public WmsProviderBase
+class HttpProxyHelper
 {
 public:
-	WmsMercatorProvider() 
-	{
-		_projection = new MercatorProjection();
-	}
+	static CString m_proxyAddress;
+	static short m_proxyPort;
 
-	virtual ~WmsMercatorProvider(void) { };
+public:
+	static bool AutodetectProxy();
+	static CString GetProxyServer();
+	static bool SetProxy(CString address, int port);
 };
-

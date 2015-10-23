@@ -32,6 +32,7 @@
 #endif  // !_ATL_NO_DEFAULT_LIBS
 
 #include <atlspriv.h>
+//#include "SecureSocket.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4625) // copy constructor could not be generated because a base class copy constructor is inaccessible

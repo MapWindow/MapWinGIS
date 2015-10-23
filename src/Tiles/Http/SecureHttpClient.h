@@ -18,36 +18,28 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
 #pragma once
-#include "BaseProvider.h"
-#include "MercatorProjection.h"
 
-// *******************************************************
-//		WmsProviderBase
-// *******************************************************
-// Base class for WMS providers.
-class WmsProviderBase : public BaseProvider
+#include "BasicAuth.h"
+//#include "SecureSocket.h"
+
+class SecureHttpClient : public CAtlHttpClient
+	//public CAtlHttpClientT<CSecureEvtSyncSocket>
 {
-public:	
-	virtual ~WmsProviderBase() { }
+private:
+	BasicAuth basicAuth;
+	CNTLMAuthObject ntlmAuth;
 
-	// gets bounding box in Google mercator projection (meters; EPSG:3857)
-	virtual CString GetBoundingBox(CPoint &pos, int zoom);
-
-	virtual bool IsWms() { return true; }
-};
-
-// *******************************************************
-//		WmsMercatorProvider
-// *******************************************************
-// WMS provider which uses spherical Mercator projection.
-class WmsMercatorProvider : public WmsProviderBase
-{
 public:
-	WmsMercatorProvider() 
-	{
-		_projection = new MercatorProjection();
-	}
+	void LogRequest(int bodyLen, CString shortUrl, CString url);
+	void LogHttpError();
+	TileHttpContentType get_ContentType(int providerId);
+	bool ReadBody(char** body, int& length);
+public:
+	// methods
+	bool SetProxyAndAuthentication(CString userName, CString password, CString domain);
 
-	virtual ~WmsMercatorProvider(void) { };
+public:
+	// static methods
+	static bool CheckConnection(CString url);
+	
 };
-

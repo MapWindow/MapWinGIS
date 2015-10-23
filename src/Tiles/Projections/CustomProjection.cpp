@@ -33,7 +33,7 @@ void CustomProjection::FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 	VARIANT_BOOL vb;
 	_projWGS84->Transform(&lng, &lat, &vb);
 	
-	this->FromProjToXY(lat, lng, zoom, ret);
+	FromProjToXY(lat, lng, zoom, ret);
 }
 
 // *******************************************************
@@ -93,16 +93,6 @@ void CustomProjection::FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret)
 
 	ret.Lat = y;
 	ret.Lng = x;
-}
-
-// *******************************************************
-//		GetTileSizeProj
-// *******************************************************
-void CustomProjection::GetTileSizeProj(int zoom, CSize &size)
-{
-	GetTileMatrixSizeXY(zoom, size);
-	size.cx = (long)((_xMax - _xMin) / (double)size.cx);
-	size.cy = (long)((_yMax - _yMin) / (double)size.cy);
 }
 
 // *******************************************************

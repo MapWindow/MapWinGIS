@@ -22,6 +22,8 @@
 #include "GeoPoint.h"
 #include "BaseProjection.h"
 
+extern Debug::Logger tilesLogger;
+
 // ******************************************************
 //    TileIdentity
 // ******************************************************

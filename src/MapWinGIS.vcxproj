@@ -96,7 +96,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Support\include;$(ProjectDir)..\Support\include\atlhttp;$(ProjectDir)..\Support\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\ComHelpers;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Tiles\Caching;$(ProjectDir)\Tiles\Loaders;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform);$(ProjectDir)\Ogr;$(ProjectDir)\Editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Support\include;$(ProjectDir)..\Support\include\atlhttp;$(ProjectDir)..\Support\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\ComHelpers;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Tiles\Caching;$(ProjectDir)\Tiles\Loaders;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\Tiles\Http;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform);$(ProjectDir)\Ogr;$(ProjectDir)\Editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -377,6 +377,9 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="Tiles\Caching\TileCacheManager.h" />
     <ClInclude Include="Tiles\Caching\TileCacher.h" />
     <ClInclude Include="Tiles\GeoPoint.h" />
+    <ClInclude Include="Tiles\Http\BasicAuth.h" />
+    <ClInclude Include="Tiles\Http\HttpProxyHelper.h" />
+    <ClInclude Include="Tiles\Http\SecureHttpClient.h" />
     <ClInclude Include="Tiles\Loaders\BulkLoadingTask.h" />
     <ClInclude Include="Tiles\Loaders\ILoadingTask.h" />
     <ClInclude Include="Tiles\Loaders\ITileLoader.h" />
@@ -670,6 +673,8 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="Tiles\Caching\SQLiteCache.cpp" />
     <ClCompile Include="Tiles\Caching\TileCacheManager.cpp" />
     <ClCompile Include="Tiles\Caching\TileCacher.cpp" />
+    <ClCompile Include="Tiles\Http\HttpProxyHelper.cpp" />
+    <ClCompile Include="Tiles\Http\SecureHttpClient.cpp" />
     <ClCompile Include="Tiles\Loaders\BulkLoadingTask.cpp" />
     <ClCompile Include="Tiles\Loaders\ILoadingTask.cpp" />
     <ClCompile Include="Tiles\Loaders\ITileLoader.cpp" />

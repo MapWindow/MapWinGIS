@@ -67,16 +67,19 @@ int CMapView::ChooseZoom(BaseProvider* provider, Extent ext, double scalingRatio
 	Point2D center = ext.GetCenter();
 	PointLatLng location(center.y, center.x);
 
-	bool precise = _tileProjectionState == ProjectionMatch;
-	double ratio = precise ? 0.99 : 0.90;		// 0.99 = set some error margin for rounding issues
-
 	int bestZoom = provider->get_MinZoom();
+
+	VARIANT_BOOL isSameProjection = VARIANT_FALSE;
+	IGeoProjection* gp = provider->get_Projection()->get_ServerProjection();
+	if (gp) {
+		_projection->get_IsSame(gp, &isSameProjection);
+	}
+
+	double ratio = isSameProjection ? 0.99 : 0.90;		// 0.99 = set some error margin for rounding issues
 
 	for (int i = provider->get_MinZoom(); i <= (limitByProvider ? provider->get_MaxZoom() : 20); i++)
 	{
-		VARIANT_BOOL isSame = precise ? VARIANT_TRUE : VARIANT_FALSE;
-
-		double tileSize = TileHelper::GetTileSizeProj(isSame, provider, GetWgs84ToMapTransform(), location, i);
+		double tileSize = TileHelper::GetTileSizeProj(isSameProjection, provider, GetWgs84ToMapTransform(), location, i);
 		if (tileSize == -1) {
 			continue;
 		}
@@ -90,10 +93,6 @@ int CMapView::ChooseZoom(BaseProvider* provider, Extent ext, double scalingRatio
 
 		bestZoom = i;
 	}
-
-	CSize s1, s2;
-	provider->get_Projection()->GetTileMatrixMinXY(bestZoom, s1);
-	provider->get_Projection()->GetTileMatrixMaxXY(bestZoom, s2);
 
 	return bestZoom;
 }
@@ -196,8 +195,18 @@ bool CMapView::get_TileProviderBounds(BaseProvider* provider, Extent& retVal)
 // *****************************************************
 void CMapView::UpdateTileProjection()
 {
-	// TODO: use WMS projection instances for zoom selection instead
+	InitTmsProjection();
 
+	TileProjectionState state = GetTmsProjectionState();
+
+	StartTmsProjectionTransform(state);
+}
+
+// ****************************************************************
+//		InitTmsProjection()
+// ****************************************************************
+void CMapView::InitTmsProjection()
+{
 	VARIANT_BOOL vb;
 	_tileProjection->Clear(&vb);
 	_tileReverseProjection->Clear(&vb);
@@ -215,30 +224,19 @@ void CMapView::UpdateTileProjection()
 	}
 
 	_tileReverseProjection->CopyFrom(_projection, &vb);
+}
 
-	if (ProjectionHelper::IsEmpty(_projection))
-	{
-		_tileProjectionState = ProjectionDoTransform;
-		return;
-	}
-
-	_tileProjection->get_IsSame(_projection, &vb);
-	_tileProjectionState = vb ? ProjectionMatch : ProjectionDoTransform;
-
-	VARIANT_BOOL sphericalMercator;
-	_tiles->get_ProjectionIsSphericalMercator(&sphericalMercator);
-	
-	if (_transformationMode == tmWgs84Complied && sphericalMercator)
-	{
-		// transformation is needed, but it leads only to some vertical scaling which is quite acceptable
-		_tileProjectionState = ProjectionCompatible;
-	}
-
-	if (_tileProjectionState == ProjectionDoTransform || _tileProjectionState == ProjectionCompatible)
+// ****************************************************************
+//		StartTmsProjectionTransform()
+// ****************************************************************
+void CMapView::StartTmsProjectionTransform(TileProjectionState state)
+{
+	if (state == ProjectionDoTransform || state == ProjectionCompatible)
 	{
 		CComBSTR bstr;
 		_tileProjection->ExportToProj4(&bstr);
 
+		VARIANT_BOOL vb;
 		_tileProjection->StartTransform(_projection, &vb);
 		if (!vb) {
 			ErrorMessage(tkTILES_MAP_TRANSFORM_FAILED);
@@ -249,6 +247,32 @@ void CMapView::UpdateTileProjection()
 			ErrorMessage(tkMAP_TILES_TRANSFORM_FAILED);
 		}
 	}
+}
+
+// ****************************************************************
+//		GetTmsProjectionState()
+// ****************************************************************
+TileProjectionState CMapView::GetTmsProjectionState()
+{
+	if (ProjectionHelper::IsEmpty(_projection))
+	{
+		return ProjectionDoTransform;
+	}
+
+	VARIANT_BOOL vb;
+	_tileProjection->get_IsSame(_projection, &vb);
+	TileProjectionState state = vb ? ProjectionMatch : ProjectionDoTransform;
+
+	VARIANT_BOOL sphericalMercator;
+	_tiles->get_ProjectionIsSphericalMercator(&sphericalMercator);
+
+	if (_transformationMode == tmWgs84Complied && sphericalMercator)
+	{
+		// transformation is needed, but it leads only to some vertical scaling which is quite acceptable
+		state = ProjectionCompatible;
+	}
+
+	return state;
 }
 
 // ****************************************************************
@@ -292,13 +316,15 @@ tkTileProvider CMapView::GetTileProvider()
 // ***************************************************************
 //		ReloadTiles
 // ***************************************************************
-void CMapView::ReloadTiles(bool force /*= true*/, bool snapshot /*= false*/, CString key /*= ""*/)
+bool CMapView::ReloadTiles(bool force /*= true*/, bool snapshot /*= false*/, CString key /*= ""*/)
 {
 	if (force)
 	{
 		((CTiles*)_tiles)->LoadTiles(snapshot, key);
 
 		ReloadWmsLayers(snapshot, key);
+
+		return true;
 	}
 	else 
 	{
@@ -307,8 +333,11 @@ void CMapView::ReloadTiles(bool force /*= true*/, bool snapshot /*= false*/, CSt
 		if (tiles->get_ReloadNeeded())
 		{
 			tiles->LoadTiles(snapshot, key);
+			return true;
 		}
 	}
+
+	return false;
 }
 
 // ***************************************************************

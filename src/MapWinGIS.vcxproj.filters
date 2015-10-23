@@ -91,6 +91,9 @@
     <Filter Include="Tiles\Loaders">
       <UniqueIdentifier>{74d43682-27e2-4136-b0b9-97eb9f4451f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tiles\Http">
+      <UniqueIdentifier>{8d3a0bb5-5268-4f98-9311-869cdcdbf73a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Structures\BaseLayerInfo.h">
@@ -917,6 +920,15 @@
     </ClInclude>
     <ClInclude Include="Tiles\Loaders\ITileLoader.h">
       <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Http\SecureHttpClient.h">
+      <Filter>Tiles\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Http\BasicAuth.h">
+      <Filter>Tiles\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Http\HttpProxyHelper.h">
+      <Filter>Tiles\Http</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1958,6 +1970,12 @@
     </ClCompile>
     <ClCompile Include="Tiles\Loaders\ITileLoader.cpp">
       <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Http\SecureHttpClient.cpp">
+      <Filter>Tiles\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Http\HttpProxyHelper.cpp">
+      <Filter>Tiles\Http</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

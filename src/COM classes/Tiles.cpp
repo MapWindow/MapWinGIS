@@ -28,6 +28,8 @@
 #include "TileHelper.h"
 #include "CustomTileProvider.h"
 #include "TileCacheManager.h"
+#include "HttpProxyHelper.h"
+#include "SecureHttpClient.h"
 
 // ************************************************************
 //		get_Provider()
@@ -194,7 +196,7 @@ STDMETHODIMP CTiles::AutodetectProxy(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	*retVal = _provider->AutodetectProxy();
+	*retVal = HttpProxyHelper::AutodetectProxy();
 	return S_OK;
 }
 
@@ -205,7 +207,7 @@ STDMETHODIMP CTiles::SetProxy(BSTR address, int port, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
-	*retVal = _provider->SetProxy(OLE2A(address), port);
+	*retVal = HttpProxyHelper::SetProxy(OLE2A(address), port);
 	return S_OK;
 }
 
@@ -216,7 +218,7 @@ STDMETHODIMP CTiles::SetProxyAuthentication(BSTR username, BSTR password, BSTR d
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
-	*retVal = _provider->SetProxyAuthorization(username, password, domain) ? VARIANT_TRUE : VARIANT_FALSE;
+	*retVal = _provider->SetAuthorization(username, password, domain) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -226,7 +228,7 @@ STDMETHODIMP CTiles::SetProxyAuthentication(BSTR username, BSTR password, BSTR d
 STDMETHODIMP CTiles::ClearProxyAuthorization()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_provider->ClearProxyAuthorization();
+	_provider->ClearAuthorization();
 	return S_OK;
 }
 
@@ -239,7 +241,7 @@ STDMETHODIMP CTiles::get_Proxy(BSTR* retVal)
 
 	USES_CONVERSION;
 	CString s;
-	s = _provider->get_ProxyAddress();
+	s = HttpProxyHelper::m_proxyAddress;
 	if (s.GetLength() == 0)
 	{
 		*retVal = A2BSTR("");
@@ -247,7 +249,7 @@ STDMETHODIMP CTiles::get_Proxy(BSTR* retVal)
 	else
 	{
 		CString format = s + ":%d";
-		short num = _provider->get_ProxyPort();
+		short num = HttpProxyHelper::m_proxyPort;
 		s.Format(format, num);
 		*retVal = A2BSTR(s);
 	}
@@ -295,7 +297,7 @@ void CTiles::LoadTiles(bool isSnapshot, CString key)
 {
 	if (!_visible) 
 	{
-		_manager.ClearBuffer();
+		_manager.Clear();
 		return;
 	}
 
@@ -1017,7 +1019,7 @@ STDMETHODIMP CTiles::CheckConnection(BSTR url, VARIANT_BOOL* retVal)
 	if (_provider != NULL)
 	{
 		USES_CONVERSION;
-		*retVal = _provider->CheckConnection(OLE2A(url)) ? VARIANT_TRUE: VARIANT_FALSE;
+		*retVal = SecureHttpClient::CheckConnection(OLE2A(url)) ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 	else {
 		*retVal = VARIANT_FALSE;

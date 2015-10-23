@@ -22,6 +22,7 @@
 #include "TileHelper.h"
 #include "CustomProjection.h"
 #include "ImageHelper.h"
+#include "WmsCustomProvider.h"
 
 using namespace Gdiplus;
 
@@ -69,6 +70,11 @@ void TilesDrawer::DrawTiles( TileManager* manager, IGeoProjection* mapProjection
 			tile->isDrawn(true);	
 		}
 	}
+
+	if (drawGrid)
+	{
+		DrawWmsBounds(provider);
+	}
 }
 
 // ***************************************************************
@@ -80,8 +86,6 @@ void TilesDrawer::InitImageAttributes(TileManager* manager, ImageAttributes& att
 
 	if (!manager->IsBackground())
 	{
-		//Gdiplus::ColorMatrix m = GetColorMatrix(manager->get_Alpha());
-
 		Gdiplus::ColorMatrix m = ImageHelper::CreateMatrix(manager->contrast,
 			manager->brightness,
 			manager->saturation,
@@ -102,12 +106,17 @@ void TilesDrawer::DrawOverlays(TileCore* tile, RectF screenBounds, ImageAttribut
 		Bitmap* bmp = tile->get_Bitmap(i)->m_bitmap;
 		if (bmp)
 		{
+			// to debug the issue with occasional seams
+			// DumpTile
+
 			Status status;
 
 			double ROUNDING_TOLERANCE = 0.1;
+			
+			double dx = abs(screenBounds.Width - bmp->GetWidth());
+			double dy = abs(screenBounds.Height - bmp->GetHeight());
 
-			if (abs(screenBounds.Width - bmp->GetWidth()) < ROUNDING_TOLERANCE &&
-				abs(screenBounds.Height - bmp->GetHeight()) < ROUNDING_TOLERANCE)
+			if (dx < ROUNDING_TOLERANCE && dy < ROUNDING_TOLERANCE)
 			{
 				// TODO: better to check that all tiles have the same size and apply this rendering only then
 				status = _graphics->DrawImage(bmp, Utility::Rint(screenBounds.X), Utility::Rint(screenBounds.Y));
@@ -122,6 +131,19 @@ void TilesDrawer::DrawOverlays(TileCore* tile, RectF screenBounds, ImageAttribut
 				Debug::WriteLine("Failed to draw tile.");
 			}
 		}
+	}
+}
+
+// ***************************************************************
+//		DumpTile()
+// ***************************************************************
+void TilesDrawer::DumpTile(TileCore* tile, Bitmap* bmp)
+{
+	if (tile->tileX() == 0)
+	{
+		CLSID clsid;
+		Utility::GetEncoderClsid(L"image/png", &clsid);
+		bmp->Save(L"D:\\buffer.png", &clsid, NULL);
 	}
 }
 
@@ -211,6 +233,8 @@ void TilesDrawer::DrawGrid(TileCore* tile, RectF& screenRect)
 
 	// draw indices of tiles (for debugging)
 	DrawGridText(tile, screenRect);
+
+	
 }
 
 // ***************************************************************
@@ -233,4 +257,37 @@ void TilesDrawer::DrawGridText(TileCore* tile, RectF& screenRect)
 
 	delete font;
 	delete wStr;
+}
+
+// ***************************************************************
+//		DrawWmsBounds()
+// ***************************************************************
+void TilesDrawer::DrawWmsBounds(BaseProvider* provider)
+{
+	WmsCustomProvider* cp = dynamic_cast<WmsCustomProvider*>(provider);
+	if (!cp) return;
+
+	double xMin, yMin, xMax, yMax;
+
+	CustomProjection* pr = cp->get_CustomProjection();
+	yMin = pr->get_MinLat();
+	yMax = pr->get_MaxLat();
+	xMin = pr->get_MinLong();
+	xMax = pr->get_MaxLong();
+
+	if (_transfomation)
+	{
+		VARIANT_BOOL vb1, vb2;
+		_transfomation->Transform(&xMin, &yMin, &vb1);
+		_transfomation->Transform(&xMax, &yMax, &vb2);
+	}
+
+	double pix, piy, pix2, piy2;
+	ProjectionToPixel(xMin, yMin, pix, piy);
+	ProjectionToPixel(xMax, yMax, pix2, piy2);
+
+	Gdiplus::RectF rect((REAL)MIN(pix, pix2), (REAL)MIN(piy, piy2), (REAL)abs(pix2 - pix), (REAL)abs(piy2 - piy));
+
+	Pen pen(Color::Orange, 3.0f);
+	_graphics->DrawRectangle(&pen, rect);
 }

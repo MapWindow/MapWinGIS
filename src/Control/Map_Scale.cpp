@@ -17,126 +17,178 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 }
 
 // ****************************************************
-//	   ZoomToTileLevelCore()
+//	   GetTilesZoomLevelSize()
 // ****************************************************
-VARIANT_BOOL CMapView::ZoomToTileLevelCore(int zoom, bool logPrevious)
+// returns size of particular zoom level in server projection
+void CMapView::GetTilesZoomLevelSize(int zoom, SizeLatLng& size)
 {
-	if (_transformationMode == tmNotDefined)
-		return VARIANT_FALSE;
-
-	if (_viewWidth == 0 || _viewHeight == 0)
-		return VARIANT_FALSE;
-
 	// we shall make all the calculations in server projection (either GMercator or custom)
 	// and then transform bounds to the current coordinate system
-	double xCentOld = (_extents.left + _extents.right) / 2.0;
-	double yCentOld = (_extents.bottom + _extents.top) / 2.0;
+	Point2D center = _extents.GetCenter();
 
 	double minX, maxX, minY, maxY;	// size of control in pixels
 	PROJECTION_TO_PIXEL(_extents.left, _extents.bottom, minX, minY);
 	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
 
-	// getting screen size
 	double screenHeight = abs(maxY - minY);
 	double screenWidth = abs(maxX - minX);
 
-	// multiplication ratio, to make texts more legible when projection-related scaling is underway
+	// multiplication ratio, to make texts more legible when projection-related scaling is under way
 	double ratio;
 	((CTiles*)_tiles)->get_ScalingRatio(&ratio);	// 1.0 by default
 
 	// half of equator circumference (width and height for Mercator projection)
 	double projWidth = ((CTiles*)_tiles)->get_Provider()->get_Projection()->GetWidth();
+	// TODO: use height as well
 
 	double pxWidth = ratio * 512.0 * pow(2.0, zoom - 1);	// width of map in pixels at the requested zoom
 
-	double w = screenWidth / pxWidth * projWidth;		// requested width in meters (server projection)
-	double h = screenHeight / pxWidth * projWidth;		// requested width in meters (server projection)
+	double w = screenWidth / pxWidth * projWidth;		// requested width in server projection
+	double h = screenHeight / pxWidth * projWidth;		// requested height in server projection
 
-	VARIANT_BOOL vb, vb2;
+	size.WidthLng = w;
+	size.HeightLat = h;
+}
+
+// ****************************************************
+//	   ZoomToTileLevelCore()
+// ****************************************************
+VARIANT_BOOL CMapView::ZoomToTileLevelCore(int zoom, bool logPrevious)
+{
+	if (_transformationMode == tmNotDefined) {
+		return VARIANT_FALSE;
+	}
+
+	if (_viewWidth == 0 || _viewHeight == 0) {
+		return VARIANT_FALSE;
+	}
+
+	SizeLatLng size;
+	GetTilesZoomLevelSize(zoom, size);
 
 	if (_tileProjectionState == ProjectionMatch)
 	{
-		minX = xCentOld - w / 2.0;
-		maxX = xCentOld + w / 2.0;
-		minY = yCentOld - h / 2.0;
-		maxY = yCentOld + h / 2.0;
-		this->SetExtentsCore(Extent(minX, maxX, minY, maxY), logPrevious, false, false);
+		SetMapExtentsSize(size, logPrevious);
 		_currentZoom = zoom;
-		return VARIANT_TRUE;
 	}
 	else
 	{
-		// return back to map projection
-		IGeoProjection* projTemp = GetTilesToMapTransform();
-		if (projTemp)
-		{
-			double xCent = xCentOld, yCent = yCentOld;
-			GetMapToTilesTransform()->Transform(&xCent, &yCent, &vb);
-			minX = xCent - w / 2.0;
-			maxX = xCent + w / 2.0;
-			minY = yCent - h / 2.0;
-			maxY = yCent + h / 2.0;
+		Extent box;
+		MapExtentsForTileBounds(size, box);
 
-			VARIANT_BOOL sphericalMercator;
-			_tiles->get_ProjectionIsSphericalMercator(&sphericalMercator);
-			bool extrapolation = sphericalMercator && _transformationMode == tmWgs84Complied;
-
-			double minLng = 0.0, maxLng = 0.0, minLat = 0.0, maxLat = 0.0;
-			if (extrapolation)		// ding extrapolation for WGS84
-			{
-				// In case we are outside bounds of GMercator, results will incorrect.
-				// Let's use clipping and extrapolation as a remedy.
-				// We shall assume that GMercator meters to map units ratio is constant and doesn't 
-				// depend on latitude or longitude, which is not true.
-				// TODO: do transformation in several points within world bounds for better extrapolation.
-				double MAX_VAL = MERCATOR_MAX_VAL;
-				if (minX < -MAX_VAL)
-					minLng = -MAX_LONGITUDE - abs(minX + MAX_VAL) / MAX_VAL * MAX_LONGITUDE;
-
-				if (maxX > MAX_VAL)
-					maxLng = MAX_LONGITUDE + abs(maxX - MAX_VAL) / MAX_VAL * MAX_LONGITUDE;
-
-				if (minY < -MAX_VAL)
-					minLat = -MAX_LATITUDE - abs(minY + MAX_VAL) / MAX_VAL * MAX_LATITUDE;
-
-				if (maxY > MAX_VAL)
-					maxLat = MAX_LATITUDE + abs(maxY - MAX_VAL) / MAX_VAL * MAX_LATITUDE;
-			}
-
-			projTemp->Transform(&minX, &minY, &vb);
-			projTemp->Transform(&maxX, &maxY, &vb2);
-
-			// substitute with extrapolated values if we are outside bounds
-			if (extrapolation)
-			{
-				if (minLng != 0.0) minX = minLng;
-				if (maxLng != 0.0) maxX = maxLng;
-				if (minLat != 0.0) minY = minLat;
-				if (maxLat != 0.0) maxY = maxLat;
-			}
-
-			if (!vb || !vb2)
-			{
-				ErrorMsg(tkFAILED_TO_REPROJECT);
-			}
-			else
-			{
-				// finally adjust the center to it's initial position
-				Extent ext = Extent(minX, maxX, minY, maxY);
-				ext.MoveTo(xCentOld, yCentOld);
-
-				SetExtentsCore(ext, logPrevious, false, false);
-				_currentZoom = zoom;
-				AdjustZoom(zoom);
-				return VARIANT_TRUE;
-			}
-		}
-		else
-		{
-			ErrorMsg(tkFAILED_TO_REPROJECT);
-		}
+		SetExtentsCore(box, logPrevious, false, false);
+		_currentZoom = zoom;
+		AdjustZoom(zoom);
 	}
+
 	return VARIANT_FALSE;
+}
+
+// ****************************************************
+//	   SetMapExtentsSize()
+// ****************************************************
+void CMapView::SetMapExtentsSize(SizeLatLng size, bool logPrevious)
+{
+	Point2D center = _extents.GetCenter();	
+
+	double minX = center.x - size.WidthLng / 2.0;
+	double maxX = center.x + size.WidthLng / 2.0;
+	double minY = center.y - size.HeightLat / 2.0;
+	double maxY = center.y + size.HeightLat / 2.0;
+
+	SetExtentsCore(Extent(minX, maxX, minY, maxY), logPrevious, false, false);
+}
+
+// ****************************************************
+//	   MapExtentsForZoomLevel()
+// ****************************************************
+// Converts size of new extents defined in tile server projection to map projection
+bool CMapView::MapExtentsForTileBounds(SizeLatLng size, Extent& extents)
+{
+	IGeoProjection* tilesToMapTransform = GetTilesToMapTransform();
+	if (!tilesToMapTransform) {
+		ErrorMsg(tkFAILED_TO_REPROJECT);
+		return false;
+	}
+
+	Point2D center = _extents.GetCenter();
+	double xCent = center.x;
+	double yCent = center.y;
+
+	// bounds defined in tiles projection
+	VARIANT_BOOL vb, vb2;
+	GetMapToTilesTransform()->Transform(&xCent, &yCent, &vb);
+	double minX = xCent - size.WidthLng / 2.0;
+	double maxX = xCent + size.WidthLng / 2.0;
+	double minY = yCent - size.HeightLat / 2.0;
+	double maxY = yCent + size.HeightLat / 2.0;
+
+	Extent extrapolatedBounds;
+	bool extrapolation = ExtrapolateSphericalMercatorToDegrees(minX, maxX, minY, maxY, extrapolatedBounds);
+
+	// transforming to map projection
+	tilesToMapTransform->Transform(&minX, &minY, &vb);
+	tilesToMapTransform->Transform(&maxX, &maxY, &vb2);
+
+	// substitute with extrapolated values if we are outside bounds
+	if (extrapolation)
+	{
+		if (extrapolatedBounds.left != 0.0) minX = extrapolatedBounds.left;
+		if (extrapolatedBounds.right != 0.0) maxX = extrapolatedBounds.right;
+		if (extrapolatedBounds.bottom != 0.0) minY = extrapolatedBounds.bottom;
+		if (extrapolatedBounds.top != 0.0) maxY = extrapolatedBounds.top;
+	}
+
+	if (!vb || !vb2)
+	{
+		ErrorMsg(tkFAILED_TO_REPROJECT);
+		return false;
+	}
+	
+	// finally adjust the center to it's initial position
+	extents = Extent(minX, maxX, minY, maxY);
+	extents.MoveTo(center.x, center.y);
+		
+	return true;
+}
+
+// ****************************************************
+//	   ExtrapolateSphericalMercatorToDegrees()
+// ****************************************************
+bool CMapView::ExtrapolateSphericalMercatorToDegrees(double xMin, double xMax, double yMin, double yMax, Extent& extents)
+{
+	VARIANT_BOOL sphericalMercator;
+	_tiles->get_ProjectionIsSphericalMercator(&sphericalMercator);
+	bool extrapolation = sphericalMercator && _transformationMode == tmWgs84Complied;
+
+	double minLng = 0.0, maxLng = 0.0, minLat = 0.0, maxLat = 0.0;
+	if (extrapolation)		// ding extrapolation for WGS84
+	{
+		// In case we are outside bounds of GMercator, results will be incorrect.
+		// Let's use clipping and extrapolation as a remedy.
+		// We shall assume that GMercator meters to map units ratio is constant and doesn't 
+		// depend on latitude or longitude, which is not true.
+		// TODO: do transformation in several points within world bounds for better extrapolation.
+		double MAX_VAL = MERCATOR_MAX_VAL;
+		if (xMin < -MAX_VAL)
+			minLng = -MAX_LONGITUDE - abs(xMin + MAX_VAL) / MAX_VAL * MAX_LONGITUDE;
+
+		if (xMax > MAX_VAL)
+			maxLng = MAX_LONGITUDE + abs(xMax - MAX_VAL) / MAX_VAL * MAX_LONGITUDE;
+
+		if (yMin < -MAX_VAL)
+			minLat = -MAX_LATITUDE - abs(yMin + MAX_VAL) / MAX_VAL * MAX_LATITUDE;
+
+		if (yMax > MAX_VAL)
+			maxLat = MAX_LATITUDE + abs(yMax - MAX_VAL) / MAX_VAL * MAX_LATITUDE;
+	}
+
+	extents.left = minLng;
+	extents.right = maxLng;
+	extents.top = maxLat;
+	extents.bottom = minLat;
+
+	return extrapolation;
 }
 
 // ****************************************************
@@ -1816,9 +1868,11 @@ void CMapView::SetCurrentZoom(int zoom)
 {
 	SetCurrentZoomCore(zoom, false);
 }
+
 int CMapView::GetCurrentZoom()
 {
-	if (_transformationMode != tmNotDefined) {
+	if (_transformationMode != tmNotDefined) 
+	{
 		if (ForceDiscreteZoom() && _currentZoom != -1)
 		{
 			return _currentZoom;
@@ -1830,11 +1884,9 @@ int CMapView::GetCurrentZoom()
 			return val;
 		}
 	}
-	else
-		return -1;
+	
+	return -1;
 }
-
-
 
 // ****************************************************************
 //		SetInitExtents()

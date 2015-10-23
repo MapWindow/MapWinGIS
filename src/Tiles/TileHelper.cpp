@@ -12,9 +12,9 @@ double TileHelper::GetTileSizeProj(VARIANT_BOOL isSameProjection, BaseProvider* 
 
 	if (isSameProjection && customProj)
 	{
-		CSize size;
+		SizeLatLng size;
 		customProj->GetTileSizeProj(zoom, size);
-		return size.cx;
+		return size.WidthLng;
 	}
 	
 	CPoint point;
@@ -72,17 +72,6 @@ bool TileHelper::Transform(TileCore* tile, IGeoProjection* mapProjection, bool i
 		
 		if (customProj)
 		{
-			if (customProj->get_Epsg() == 4326)
-			{
-				// no need to introduce rounding errors, when we already have the bounds
-				RectLatLng* bounds = tile->get_GeographicBounds();
-				result.WidthLng = bounds->WidthLng;
-				result.HeightLat = bounds->HeightLat;
-				result.xLng = bounds->xLng;
-				result.yLat = bounds->yLat + bounds->HeightLat;
-				return true;
-			}
-
 			customProj->FromXYToProj(CPoint(tile->tileX(), tile->tileY() + 1), tile->zoom(), pnt);
 			SizeLatLng size;
 			customProj->GetTileSizeProj(tile->zoom(), size);

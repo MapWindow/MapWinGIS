@@ -61,13 +61,13 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 		if (hasMouseMoveData) 
 		{
 			// the main drawing will be taken from the buffer as it wasn't passed to output canvas yet
-			this->DrawDynamic(pdc, rcBounds, rcInvalid, true);
+			DrawDynamic(pdc, rcBounds, rcInvalid, true);
 		}
 	}
 	else 
 	{
 		// always draw the main buffer, even if there is no measuring data
-		this->DrawDynamic(pdc, rcBounds, rcInvalid, true); 
+		DrawDynamic(pdc, rcBounds, rcInvalid, true); 
 	}
 	m_drawMutex.Unlock();
 }
@@ -281,13 +281,6 @@ void CMapView::RedrawWmsLayers(Gdiplus::Graphics* g)
 		TileManager* manager = WmsHelper::Cast(wms)->get_Manager();
 		if (!manager) return;
 
-		// TODO: restore
-		/*int minZoom;
-		if (GetTileMismatchMinZoom(minZoom))
-		{
-			if (_currentZoom < minZoom) return;
-		}*/
-
 		Gdiplus::Bitmap* wmsBuffer = WmsHelper::Cast(wms)->get_ScreenBuffer();
 
 		if (wmsBuffer)
@@ -339,14 +332,11 @@ void CMapView::RedrawTiles(Gdiplus::Graphics* g, CDC* dc)
 		CTiles* tiles = (CTiles*)_tiles;
 		if (_isSnapshot)
 		{
-			//if (tiles->TilesAreInScreenBuffer((void*)this))
-			{
-				get_TileManager()->MarkUndrawn();
-				
-				DrawTiles(g);
+			get_TileManager()->MarkUndrawn();
 
-				get_TileManager()->MarkUndrawn();
-			}
+			DrawTiles(g);
+
+			get_TileManager()->MarkUndrawn();
 		}
 		else
 		{

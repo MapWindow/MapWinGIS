@@ -20,6 +20,7 @@
 
 #include "stdafx.h"
 #include "PrefetchManager.h"
+#include "HttpProxyHelper.h"
 
 ::CCriticalSection PrefetchManagerFactory::_lock;
 vector<PrefetchManager*> PrefetchManagerFactory::_managers;

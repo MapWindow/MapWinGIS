@@ -1093,7 +1093,7 @@ private:
 	void ClearHotTracking();
 	void UpdateHotTracking(LayerShape info, bool fireEvent);
 	void DoPanning(CPoint point);
-	void ReloadTiles(bool force = true, bool snapshot = false, CString key = "");
+	bool ReloadTiles(bool force = true, bool snapshot = false, CString key = "");
 	bool HandleOnZoombarMouseDown( CPoint point );
 	bool HandleOnZoombarMouseMove( CPoint point );
 	DWORD GetPropertyExchangeVersion();
@@ -1203,7 +1203,13 @@ private:
 	bool get_TileProviderBounds(BaseProvider* provider, Extent& retVal);
 	bool get_TilesForMap(void* p, double scalingRatio, CRect& indices, int& zoom);
 	TileManager* get_TileManager();
-
+	TileProjectionState GetTmsProjectionState();
+	void StartTmsProjectionTransform(TileProjectionState state);
+	void InitTmsProjection();
+	void GetTilesZoomLevelSize(int zoom, SizeLatLng& size);
+	void SetMapExtentsSize(SizeLatLng size, bool logPrevious);
+	bool MapExtentsForTileBounds(SizeLatLng size, Extent& extents);
+	bool ExtrapolateSphericalMercatorToDegrees(double xMin, double xMax, double yMin, double yMax, Extent& extents);
 	// WMS
 	void ReloadWmsLayers(bool snapshot, CString key);
 	void ResizeWmsLayerBuffers(int cx, int cy);
@@ -1245,7 +1251,6 @@ public:
 	virtual long _GetWidth() { return _viewWidth ; }
 	virtual long _GetHeight() { return _viewHeight; }
 	
-
 protected:
 
 };

@@ -22,81 +22,7 @@
 #include "geopoint.h"
 #include "baseprojection.h"
 #include "TileCore.h"
-#include <atlhttp.h>		// ATL HTTP Client (CAtlHttpClient)
 #include "afxmt.h"
-
-extern Debug::Logger tilesLogger;
-
-// ***************************************************************
-//		HttpClientEx
-// ***************************************************************
-class HttpClientEx: public CAtlHttpClient
-{
-public:
-	bool _inUse;
-
-	HttpClientEx()
-	{
-		_inUse = false;
-	}
-
-	void SetDefaultUrl(CString url)
-	{
-		CAtlHttpClient::SetDefaultUrl(url);
-	}
-};
-
-// ***************************************************************
-//		BasicAuth
-// ***************************************************************
-class BasicAuth : public CBasicAuthObject, public ATL::IAuthInfo
-{
-private:
-	CString _username; 
-	CString _password;
-	CString _domain;
-public:
-	void SetCredentials(CString username, CString password, CString domain)
-	{
-		_username = username;
-		_password = password;
-		_domain = domain;
-	}
-
-	void Init(CAtlHttpClient *pSocket, IAuthInfo *pAuthInfo)
-	{
-		CBasicAuthObject::Init(pSocket, pAuthInfo);
-	}
-
-	bool Authenticate(LPCTSTR szAuthTypes, bool bProxy)
-	{
-		bool result = CBasicAuthObject::Authenticate(szAuthTypes, bProxy);
-		if (!result) {
-			CallbackHelper::ErrorMsg("Tiles proxy authentication failed. Check if proper credentials are set for Tiles.SetProxyAuthentication.");
-		}
-		return result;
-	}
-
-	HRESULT GetPassword(LPTSTR szPwd, DWORD* dwBuffSize)
-	{
-		if (CopyCString(_password, szPwd, dwBuffSize))
-			return S_OK;
-		return E_FAIL;
-	}
-
-	HRESULT GetUsername(LPTSTR szUid, DWORD* dwBuffSize)
-	{
-		if (CopyCString(_username, szUid, dwBuffSize))
-			return S_OK;
-		return E_FAIL;
-	}
-	HRESULT GetDomain(LPTSTR szDomain, DWORD* dwBuffSize)
-	{
-		// MS sample indicates that it's not expected to be called at all
-		// http_://msdn.microsoft.com/en-us/library/f3wxbf3f%28v=vs.80%29.aspx
-		return S_OK;
-	}
-};
 
 // ***************************************************************
 //		BaseProvider
@@ -106,9 +32,9 @@ class BaseProvider
 {
 public:
 	BaseProvider()
-		: _minZoom(1), _maxZoom(18), _httpStatus(200),
+		: Id(-1), _minZoom(1), _maxZoom(18),
 		_manager(NULL), _projection(NULL), _isStopped(false),
-		_dynamicOverlay(false), _initAttemptCount(0), Id(-1)
+		_dynamicOverlay(false), _initAttemptCount(0)
 	{
 		_licenseUrl = "https://mapwingis.codeplex.com/wikipage?title=tiles";
 		LanguageStr = "en";
@@ -116,35 +42,23 @@ public:
 
 	virtual ~BaseProvider(void)
 	{
-		if (_projection != NULL) {
+		if (_projection) {
 			delete _projection;
 		}
-
-		for (size_t i = 0; i < _httpClients.size(); i++)
-		{
-			_httpClients[i]->Close();
-			delete _httpClients[i];
-		}
-
-		_httpClients.clear();
 	};
 
 private:
 	bool _dynamicOverlay;
 	bool _isStopped;
-	int _httpStatus;
 	void* _manager;
 
 protected:
-	static CString m_proxyAddress;
-	static short m_proxyPort;
+	static ::CCriticalSection _clientLock;
 	static CString _proxyUsername;
 	static CString _proxyPassword;
 	static CString _proxyDomain;
-	static ::CCriticalSection _clientLock;
 
 protected:
-	vector<HttpClientEx*> _httpClients;
 	vector<BaseProvider*> _subProviders;	// for complex providers with more than one source bitmap per tile
 	BaseProjection* _projection;
 	CStringW _copyright;
@@ -153,7 +67,6 @@ protected:
 	CString _urlFormat;
 	int _initAttemptCount;
 	CString _serverLetters;
-	
 	int _minZoom;
 	int _maxZoom;
 
@@ -162,15 +75,22 @@ public:
 	CString Name;
 	CString Version;
 	CString LanguageStr;
-
+ 
 private:
-	CMemoryBitmap* GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive = false);
+	CMemoryBitmap* GetTileHttpData(CString urlStr, CString shortUrl, bool recursive = false);
+	void PreventParallelExecution();
+	CMemoryBitmap* ProcessHttpRequest(void* client, CString url, CString shortUrl, bool success);
+	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
+	void ParseServerException(CString s);
 
 protected:
 	virtual CString MakeTileImageUrl(CPoint &pos, int zoom) = 0;
 	int GetServerNum(CPoint &pos, int max) 	{ return (pos.x + 2 * pos.y) % max; }
+	CMemoryBitmap* ReadBitmap(char* body, int bodyLen);
 
 public:
+	// properties
+	virtual bool IsWms() { return false; }
 	virtual CStringW get_Copyright() { return _copyright; }
 	virtual bool Initialize() { return true; };
 
@@ -183,20 +103,12 @@ public:
 	BaseProjection* get_Projection() { return _projection; }
 	CString get_UrlFormat() { return _urlFormat; }
 
-	bool CheckConnection(CString url);
-	bool InitProxy(HttpClientEx& httpClient, BasicAuth& basicAuth, CNTLMAuthObject& ntlmAuth);
-
-	// proxy support
-	short get_ProxyPort() {return m_proxyPort;}
-	CString get_ProxyAddress() {return m_proxyAddress;}
-	bool SetProxy(CString address, int port);
-	bool SetProxyAuthorization(CString username, CString password, CString domain);
-	void ClearProxyAuthorization();
-	bool AutodetectProxy();
+public:
+	// methods
+	bool SetAuthorization(CString username, CString password, CString domain);
+	void ClearAuthorization();
 
 	void AddDynamicOverlay(BaseProvider* p);
 	void ClearSubProviders();
-
-	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
 	TileCore* GetTileImage(CPoint &pos, int zoom);	
 };

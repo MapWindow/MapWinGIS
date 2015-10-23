@@ -40,31 +40,9 @@ public:
 	
 	bool Initialize();
 	CString TileXYToQuadKey(int tileX, int tileY, int levelOfDetail);
-
-	CString MakeTileImageUrl(CPoint &pos, int zoom)
-	{
-		// http://ecn.{subdomain}.tiles.virtualearth.net/tiles/r{quadkey}.jpeg?g=3179&mkt={culture}&shading=hill
-		CString key = TileXYToQuadKey(pos.x, pos.y, zoom);
-		CString subDomain;
-		subDomain.Format("t%d", GetServerNum(pos, 4));
-
-		CString temp = _urlFormat;
-		temp.Replace("{quadkey}", key);
-		temp.Replace("{culture}", LanguageStr);
-		temp.Replace("{subdomain}", subDomain);
-
-		return temp;
-	}
-
-	virtual CStringW GetCopyright()
-	{
-		if (_urlFormat.GetLength() == 0) {
-			return "INVALID BING MAPS API KEY";
-		}
-		else {
-			return _copyright;
-		}
-	}
+	bool ParseUrlFormat(void* secureHttpClient);
+	CString MakeTileImageUrl(CPoint &pos, int zoom);
+	virtual CStringW GetCopyright();
 };
 
 // *******************************************************

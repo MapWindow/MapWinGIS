@@ -1266,6 +1266,82 @@ namespace Utility
 		return pathW;
 	}
 
-	
+	inline BYTE toHex(const BYTE &x)
+	{
+		return x > 9 ? x + 55 : x + 48;
+	}
+
+	// ************************************************
+	//		UrlEncode
+	// ************************************************
+	// http ://www.codeproject.com/Articles/1206/URLEncode
+	CString UrlEncode(CString sIn)
+	{
+		CString sOut;
+
+		const int nLen = sIn.GetLength() + 1;
+
+		register LPBYTE pOutTmp = NULL;
+		LPBYTE pOutBuf = NULL;
+		register LPBYTE pInTmp = NULL;
+		LPBYTE pInBuf = (LPBYTE)sIn.GetBuffer(nLen);
+		BYTE b = 0;
+
+		//alloc out buffer
+		pOutBuf = (LPBYTE)sOut.GetBuffer(nLen * 3 - 2);//new BYTE [nLen  * 3];
+
+		if (pOutBuf)
+		{
+			pInTmp = pInBuf;
+			pOutTmp = pOutBuf;
+
+			// do encoding
+			while (*pInTmp)
+			{
+				if (isalnum(*pInTmp))
+					*pOutTmp++ = *pInTmp;
+				else
+					if (isspace(*pInTmp))
+						*pOutTmp++ = '+';
+					else
+					{
+						*pOutTmp++ = '%';
+						*pOutTmp++ = toHex(*pInTmp >> 4);
+						*pOutTmp++ = toHex(*pInTmp % 16);
+					}
+				pInTmp++;
+			}
+			*pOutTmp = '\0';
+			//sOut=pOutBuf;
+			//delete [] pOutBuf;
+			sOut.ReleaseBuffer();
+		}
+		sIn.ReleaseBuffer();
+		return sOut;
+	}
+
+	// ************************************************
+	//		GetSocketErrorMessage
+	// ************************************************
+	CString GetSocketErrorMessage(DWORD socketError)
+	{
+		// msdn.microsoft.com/en-us/library/windows/desktop/ms680582(v=vs.85).aspx
+		LPVOID lpMsgBuf;
+
+		FormatMessage(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			socketError,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR)&lpMsgBuf,
+			0, NULL);
+
+		CString s = (char*)lpMsgBuf;
+		LocalFree(lpMsgBuf);
+
+		return s;
+	}
 }
 

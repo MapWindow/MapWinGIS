@@ -54,6 +54,8 @@ private:
 	bool CalculateScreenBounds(TileCore* tile, Gdiplus::RectF& screenBounds);
 	void DrawGridText(TileCore* tile, Gdiplus::RectF& screenRect);
 	void InitImageAttributes(TileManager* manager, Gdiplus::ImageAttributes& attr);
+	void DrawWmsBounds(BaseProvider* provider);
+	void DumpTile(TileCore* tile, Gdiplus::Bitmap* bmp);
 
 public:
 	// methods

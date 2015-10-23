@@ -58,10 +58,13 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 {
 	if (!provider) return;
 
+	if (_lastProvider != provider->Id)
+	{
+		ClearBuffer();
+	}
+
 	CRect indices;
 	int zoom;
-
-	ClearBuffer();
 
 	if (!GetTileIndices(provider, indices, zoom, isSnapshot)) {
 		return;
@@ -79,7 +82,6 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	//  check which ones we already have, and which ones are to be loaded
 	std::vector<TilePoint*> activeTasks;
 	GetActiveTasks(activeTasks, provider->Id, zoom, requestInfo->generation, indices);
-
 
 	// loads tiles available in the cache to the buffer
 	// builds list of tiles to be loaded from server
@@ -124,16 +126,19 @@ bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zo
 
 	if (!isSnapshot && _lastMapExtents == *mapExtents && _lastProvider == provider->Id)
 	{
+		// no need to clear buffer
 		tilesLogger.WriteLine("Duplicate request is dropped.");
 		return false;
 	}
 
 	if (!_map->_GetTilesForMap(provider, _scalingRatio, indices, zoom))
 	{
+		Clear();
 		return false;
 	}
 
-	if (!IsNewRequest(*mapExtents, indices, provider->Id, zoom)){
+	if (!IsNewRequest(*mapExtents, indices, provider->Id, zoom))
+	{
 		return false;
 	}
 
@@ -141,7 +146,6 @@ bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zo
 	if (!provider->Initialize())
 	{
 		Clear();
-		UpdateScreenBuffer();
 		return false;
 	}
 
@@ -230,18 +234,7 @@ void TileManager::BuildLoadingList(BaseProvider* provider, CRect indices, int zo
 // *********************************************************
 void TileManager::Clear()
 {
-	_tilesBufferLock.Lock();
-
-	for (size_t i = 0; i < _tiles.size(); i++)
-	{
-		_tiles[i]->isDrawn(false);
-		_tiles[i]->inBuffer(false);
-		_tiles[i]->Release();
-	}
-
-	_tiles.clear();
-
-	_tilesBufferLock.Unlock();
+	ClearBuffer();
 
 	_lastMapExtents.left = 0;
 	_lastMapExtents.right = 0;
@@ -305,7 +298,7 @@ void TileManager::DeleteMarkedTilesFromBuffer()
 }
 
 // *********************************************************
-//	     IsNewRequest()
+//	     ClearBuffer()
 // *********************************************************
 void TileManager::ClearBuffer()
 {
@@ -317,6 +310,8 @@ void TileManager::ClearBuffer()
 		_tiles[i]->inBuffer(false);
 		_tiles[i]->toDelete(true);
 	}
+
+	_tiles.clear();
 
 	_tilesBufferLock.Unlock();
 
