@@ -149,6 +149,9 @@ bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zo
 		return false;
 	}
 
+	// it's not a duplicated request, something has changed
+	ClearBuffer();
+
 	return true;
 }
 
