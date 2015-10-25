@@ -327,25 +327,6 @@ bool Layer::UpdateExtentsFromDatasource()
 		return true;
 	}
 
-	if (IsWmsLayer())
-	{
-		CComPtr<IWmsLayer> wmsLayer = NULL;
-		if (!QueryWmsLayer(&wmsLayer)) {
-			return false;
-		}
-		
-		WmsCustomProvider* provider = WmsHelper::Cast(wmsLayer)->get_InnerProvider();
-		if (provider)
-		{
-			CustomProjection* p = provider->get_CustomProjection();
-			if (p)
-			{
-				// this bounds will be update during each loading of the layer based on map projection;
-				// if no loading was done, the bounds will be invalid (all values set to zero)
-				this->extents = p->MapBounds;
-			}
-		}
-	}
 
 	return FALSE;
 }

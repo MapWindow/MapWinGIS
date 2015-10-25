@@ -1214,7 +1214,9 @@ private:
 	void ReloadWmsLayers(bool snapshot, CString key);
 	void ResizeWmsLayerBuffers(int cx, int cy);
 	void RedrawWmsLayers(Gdiplus::Graphics* g);
-
+	void AdjustWmsLayerVerticalPosition(int layerHandle);
+	void UpdateWmsLayerBounds(IWmsLayer* layer);
+	void UpdateWmsLayerBounds(IWmsLayer* wms, Layer& layer);
 #pragma endregion
 
 public:
@@ -1251,6 +1253,8 @@ public:
 	virtual long _GetWidth() { return _viewWidth ; }
 	virtual long _GetHeight() { return _viewHeight; }
 	
+
+
 protected:
 
 };

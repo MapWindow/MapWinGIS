@@ -555,7 +555,8 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 		l->set_Object(iwms);
 		l->put_LayerType(WmsLayerSource);
 		l->put_Visible(pVisible != FALSE);
-		l->UpdateExtentsFromDatasource();
+
+		UpdateWmsLayerBounds(iwms, *l);
 
 		layerHandle = AddLayerCore(l);
 	}
@@ -600,8 +601,9 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 		}
 	}
 
-	if (l != NULL)
+	if (l != NULL) {
 		FireLayerAdded(layerHandle);
+	}
 
 	// grid opened event
 	if (iimg)
@@ -635,6 +637,77 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 	ScheduleLayerRedraw();
 	LockWindow(lmUnlock);
 	return layerHandle;
+}
+
+// ***************************************************************
+//		UpdateWmsLayerBounds()
+// ***************************************************************
+void CMapView::UpdateWmsLayerBounds(IWmsLayer* wms, Layer& layer)
+{
+	CComPtr<IGeoProjection> gp = NULL;
+	wms->get_GeoProjection(&gp);
+
+	// if there is no projection - no extents either
+	if (ProjectionHelper::IsEmpty(gp))
+	{
+		layer.extents = Extent();
+		return;
+	}
+
+	// extracted bounds in server projection
+	Extent projBox;
+	if (!WmsHelper::GetServerBounds(wms, projBox)) {
+		return;
+	}
+	
+	// same as map ?
+	VARIANT_BOOL isSame;
+	IExtents* mapBox = GetExtents();
+	gp->get_IsSameExt(_projection, mapBox, 10,  &isSame);
+	mapBox->Release();
+
+	if (isSame)
+	{
+		layer.extents = projBox;
+	}
+	else {
+		// need to transform them first
+		VARIANT_BOOL vb, vb2;
+		gp->StartTransform(_projection, &vb);
+		if (vb) 
+		{
+			gp->Transform(&projBox.left, &projBox.top, &vb);
+			gp->Transform(&projBox.right, &projBox.bottom, &vb2);
+
+			if (vb && vb2)  {
+				layer.extents = projBox;
+			}
+		}
+	}
+}
+
+// ***************************************************************
+//		AdjustWmsLayerVerticalPosition()
+// ***************************************************************
+/// Moves new WMS layer below all data layers but above existing WMS layers.
+void CMapView::AdjustWmsLayerVerticalPosition(int layerHandle)
+{
+	Layer* layer = GetLayer(layerHandle);
+	if (!layer) return;
+
+	int position = GetLayerPosition(layerHandle);
+
+	for (long i = 0; i < GetNumLayers() ; i++)
+	{
+		Layer* layer = get_LayerByPosition(i);
+
+		if (!layer || layer->IsEmpty()) continue;
+		
+		if (layer->IsWmsLayer()) continue;
+		
+		MoveLayer(position, i);
+		break;
+	}
 }
 
 // ***************************************************************
