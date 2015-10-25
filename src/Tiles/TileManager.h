@@ -39,6 +39,8 @@ public:
 		saturation = 1.0f;
 		hue = 0.0f;
 		gamma = 1.0f;
+		useTransparentColor = false;
+		transparentColor = RGB(255, 255, 255);
 
 		InitCaches();
 	}
@@ -75,6 +77,8 @@ public:
 	float saturation;		// 0, 3
 	float hue;				// -180, 180
 	float gamma;			// 0, 4
+	OLE_COLOR transparentColor;
+	bool useTransparentColor;
 
 private:
 	void InitCaches();

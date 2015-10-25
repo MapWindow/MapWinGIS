@@ -66,6 +66,21 @@ interface IFunction;
 interface IExpression;
 interface IWmsLayer;
 
+/************************** tkWmsVersion Enumeration **********************/
+typedef
+[
+	uuid(F1045E18-FE93-4172-A7E4-AA67416A93B0),
+	helpstring("tkWmsVersion"),
+]
+enum tkWmsVersion {
+	wvEmpty = 0,
+	wvAuto = 1,
+	wv100 = 2,
+	wv110 = 3,
+	wv111 = 4,
+	wv13 = 5,
+} tkWmsVersion;
+
 /************************** tkCallbackVerbosity Enumeration **********************/
 typedef
 [
@@ -6350,6 +6365,14 @@ interface IWmsLayer : IDispatch{
 	[propput, id(23)] HRESULT UseCache([in] VARIANT_BOOL newVal);
 	[propget, id(24)] HRESULT DoCaching([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(24)] HRESULT DoCaching([in] VARIANT_BOOL newVal);
+	[propget, id(25)] HRESULT TransparentColor([out, retval] OLE_COLOR* pVal);
+	[propput, id(25)] HRESULT TransparentColor([in] OLE_COLOR newVal);
+	[propget, id(26)] HRESULT UseTransparentColor([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(26)] HRESULT UseTransparentColor([in] VARIANT_BOOL newVal);
+	[propget, id(27)] HRESULT Version([out, retval] tkWmsVersion* pVal);
+	[propput, id(27)] HRESULT Version([in] tkWmsVersion newVal);
+	[propget, id(28)] HRESULT Styles([out, retval] BSTR* pVal);
+	[propput, id(28)] HRESULT Styles([in] BSTR newVal);
 };
 
 [ 

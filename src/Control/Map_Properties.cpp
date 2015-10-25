@@ -316,11 +316,6 @@ ITiles* CMapView::GetTiles(void)
 	return _tiles;
 }
 
-ITiles* CMapView::GetTilesNoRef(void)
-{
-	return _tiles;
-}
-
 // *****************************************************
 //		GetFileManager
 // *****************************************************

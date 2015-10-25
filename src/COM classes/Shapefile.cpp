@@ -2369,8 +2369,6 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	s = CPLGetXMLValue( node, "VisibilityExpression", NULL );
 	SysFreeString(_expression);
 	_expression = A2BSTR(s);
-	
-
 
 	s = CPLGetXMLValue( node, "UseQTree", NULL );
 	_useQTree = (s != "") ? (BOOL)atoi(s.GetString()) : FALSE;

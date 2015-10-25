@@ -93,6 +93,15 @@ void TilesDrawer::InitImageAttributes(TileManager* manager, ImageAttributes& att
 			0.0f, RGB(255, 255, 255), false, manager->get_Alpha() / 255.0f);
 
 		attr.SetColorMatrix(&m);
+
+		if (manager->useTransparentColor)
+		{
+			Gdiplus::Color color(GetRValue(manager->transparentColor),
+								 GetGValue(manager->transparentColor),
+								 GetBValue(manager->transparentColor));
+
+			attr.SetColorKey(color, color);
+		}
 	}
 }
 

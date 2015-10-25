@@ -938,7 +938,6 @@ public:
 public:
 	IExtents* GetGeographicExtentsCore(bool clipForTiles, Extent* clipExtents = NULL);
 	bool GetGeographicExtentsInternal(bool clipForTiles, Extent* clipExtents, Extent& result);
-	ITiles* GetTilesNoRef(void);
 	bool SendMouseMove();
 	bool SendSelectBoxDrag();
 	void ErrorMessage(long ErrorCode, tkCallbackVerbosity verbose = cvLimited);

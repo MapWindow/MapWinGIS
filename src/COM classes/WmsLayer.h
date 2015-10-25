@@ -91,6 +91,14 @@ public:
 	STDMETHOD(put_UseCache)(VARIANT_BOOL newVal);
 	STDMETHOD(get_DoCaching)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_DoCaching)(VARIANT_BOOL newVal);
+	STDMETHOD(get_TransparentColor)(OLE_COLOR* pVal);
+	STDMETHOD(put_TransparentColor)(OLE_COLOR newVal);
+	STDMETHOD(get_UseTransparentColor)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_UseTransparentColor)(VARIANT_BOOL newVal);
+	STDMETHOD(get_Version)(tkWmsVersion* pVal);
+	STDMETHOD(put_Version)(tkWmsVersion newVal);
+	STDMETHOD(get_Styles)(BSTR* pVal);
+	STDMETHOD(put_Styles)(BSTR newVal);
 
 private:	
 	BSTR _key;

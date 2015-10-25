@@ -40,10 +40,33 @@ CString WmsCustomProvider::MakeTileImageUrl(CPoint &pos, int zoom)
 	s += "&format=" + _format;
 	s += "&width=256";
 	s += "&height=256";
-	s += "&version=1.1.1";
-	s += "&styles=";
+	s += get_VersionString();
+	s += "&styles=" + get_Styles();
 
 	return s;
+}
+
+// ******************************************************
+//    get_VersionString()
+// ******************************************************
+CString WmsCustomProvider::get_VersionString()
+{
+	switch (_version)
+	{
+		case wvEmpty:
+			return "";
+		case wv100:
+			return "&version=1.0.0";
+		case wv110:
+		case wvAuto:
+			return "&version=1.1.1";
+		case wv111:
+			return "&version=1.1.1";
+		case wv13:
+			return "&version=1.3";
+		default:
+			return "";
+	}
 }
 
 

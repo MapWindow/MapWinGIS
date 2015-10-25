@@ -30,6 +30,7 @@ class WmsCustomProvider : public WmsProviderBase
 public:
 	WmsCustomProvider()
 	{
+		_version = wvAuto;
 		_projection = new CustomProjection();
 		_subProviders.push_back(this);
 	}
@@ -39,14 +40,24 @@ public:
 private:
 	CString _layers;
 	CString _format;
+	CString _styles;
+	tkWmsVersion _version;
 
 public:
-	virtual CString MakeTileImageUrl(CPoint &pos, int zoom);
-
+	// properties
 	CustomProjection* get_CustomProjection() { return dynamic_cast<CustomProjection*>(_projection); }
 	void put_UrlFormat(CString baseUrl) { _urlFormat = baseUrl; }
 	CString get_Layers() { return _layers; }
 	void set_Layers(CString value) { _layers = value; }
 	CString get_Format() { return _format; }
 	void set_Format(CString value) { _format = value; }
+	tkWmsVersion get_Version() { return _version; }
+	void set_Version(tkWmsVersion value) { _version = value; }
+	CString get_Styles() { return _styles; }
+	void set_Styles(CString value) { _styles = value; }
+
+public:	
+	// methods
+	virtual CString MakeTileImageUrl(CPoint &pos, int zoom);
+	CString get_VersionString();
 };

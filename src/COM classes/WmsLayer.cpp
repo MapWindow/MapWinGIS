@@ -555,10 +555,19 @@ CPLXMLNode* CWmsLayer::SerializeCore(CString ElementName)
 	
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Id", CPLString().Printf("%d", _provider->Id));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Name", _provider->Name);
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "Layers", _provider->get_Layers());
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Url", _provider->get_UrlFormat());
+
+	// request parameters
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Layers", _provider->get_Layers());
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Format", _provider->get_Format());
 
+	if (_provider->get_Version() != wvAuto)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Version", CPLString().Printf("%d", _provider->get_Version()));
+
+	if (_provider->get_Styles() != "")
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Styles", _provider->get_Styles());
+
+	// color adjustments
 	if (_manager.get_Alpha() != 255)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Opactiy", CPLString().Printf("%d", _manager.get_Alpha()));
 
@@ -577,6 +586,13 @@ CPLXMLNode* CWmsLayer::SerializeCore(CString ElementName)
 	if (_manager.gamma != 1.0f)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Gamma", CPLString().Printf("%f", _manager.gamma));
 
+	if (_manager.useTransparentColor)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseTransparentColor", CPLString().Printf("%d", _manager.useTransparentColor));
+
+	if (_manager.transparentColor != RGB(255, 255, 255))
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparentColor", CPLString().Printf("%d", _manager.transparentColor));
+
+	// caching
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "UseCache", CPLString().Printf("%d", _manager.get_DiskCache()->useCache));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "DoCaching", CPLString().Printf("%d", _manager.get_DiskCache()->doCaching));
 
@@ -622,6 +638,12 @@ bool CWmsLayer::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue(node, "Format", NULL);
 	if (s != "") _provider->set_Format(s);
 
+	s = CPLGetXMLValue(node, "Styles", NULL);
+	if (s != "") _provider->set_Styles(s);
+
+	s = CPLGetXMLValue(node, "Version", NULL);
+	if (s != "") _provider->set_Version((tkWmsVersion)atoi(s));
+
 	s = CPLGetXMLValue(node, "Opacity", NULL);
 	if (s != "") _manager.set_Alpha(atoi(s));
 
@@ -639,6 +661,12 @@ bool CWmsLayer::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue(node, "Gamma", NULL);
 	if (s != "") put_Gamma(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "TransparentColor", NULL);
+	_manager.transparentColor = (s != "") ? (OLE_COLOR)atoi(s.GetString()) : RGB(255, 255, 255);
+
+	s = CPLGetXMLValue(node, "UseTransparentColor", NULL);
+	_manager.useTransparentColor = (s != "") ? atoi(s.GetString()) != 0 : false;
 
 	s = CPLGetXMLValue(node, "Epsg", NULL);
 	if (s != "") put_Epsg(atoi(s));
@@ -708,6 +736,92 @@ STDMETHODIMP CWmsLayer::put_DoCaching(VARIANT_BOOL newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	_manager.get_DiskCache()->doCaching = newVal ? true : false;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     TransparencyColor()
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_TransparentColor(OLE_COLOR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.transparentColor;
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_TransparentColor(OLE_COLOR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_manager.transparentColor = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     UseTransparencyColor()
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_UseTransparentColor(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _manager.useTransparentColor ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_UseTransparentColor(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_manager.useTransparentColor = newVal ? true : false;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     Version()
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_Version(tkWmsVersion* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	*pVal = _provider->get_Version();
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_Version(tkWmsVersion newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_provider->set_Version(newVal);
+
+	return S_OK;
+}
+
+// ********************************************************
+//     Styles()
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_Styles(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	*pVal = A2BSTR(_provider->get_Styles());
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_Styles(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	_provider->set_Styles(OLE2A(newVal));
 
 	return S_OK;
 }
