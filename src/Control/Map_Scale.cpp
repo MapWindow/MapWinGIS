@@ -1440,12 +1440,12 @@ VARIANT_BOOL CMapView::ZoomToWorld()
 		box.Attach(ExtentsHelper::GetWorldBounds());
 		vb = this->SetGeographicExtents(box);
 		if (vb)  {
-			this->Redraw();
+			Redraw();
 		}
 		return vb;
 	}
 	else {
-		this->ErrorMessage(tkMAP_PROJECTION_NOT_SET);
+		ErrorMessage(tkMAP_PROJECTION_NOT_SET, cvAll);
 	}
 	return false;
 }
@@ -1845,11 +1845,13 @@ void CMapView::SetCurrentZoomCore(int zoom, bool forceUpdate)
 	if (_transformationMode != tmNotDefined)
 	{
 		if (zoom < 0 || zoom > 25) {
-			ErrorMessage(tkINVALID_DATA_TYPE);
+			ErrorMessage(tkINVALID_PARAMETER_VALUE);
 			return;
 		}
+
 		int oldZoom;
 		_tiles->get_CurrentZoom(&oldZoom);
+
 		if (oldZoom != zoom || forceUpdate) {
 			ZoomToTileLevel(zoom);
 			Redraw();
@@ -1857,7 +1859,7 @@ void CMapView::SetCurrentZoomCore(int zoom, bool forceUpdate)
 	}
 	else
 	{
-		ErrorMessage(tkMAP_PROJECTION_NOT_SET);
+		ErrorMessage(tkMAP_PROJECTION_NOT_SET, cvAll);
 	}
 }
 
@@ -1982,16 +1984,17 @@ tkKnownExtents CMapView::GetKnownExtentsCore()
 }
 void CMapView::SetKnownExtentsCore(tkKnownExtents extents)
 {
-	if (_transformationMode != tmNotDefined) {
+	if (_transformationMode != tmNotDefined) 
+	{
 		IExtents* ext = GetKnownExtents(extents);
 		if (ext) {
-			this->SetGeographicExtents(ext);
+			SetGeographicExtents(ext);
 			_knownExtents = extents;
 			ext->Release();
 		}
 	}
 	else {
-		ErrorMessage(tkMAP_PROJECTION_NOT_SET);
+		ErrorMessage(tkMAP_PROJECTION_NOT_SET, cvAll);
 	}
 }
 

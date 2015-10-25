@@ -569,7 +569,6 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation( projSource, projTarget );
 	if (!transf)
 	{
-		ErrorMessage(tkFAILED_TO_REPROJECT);
 		*pVal = VARIANT_FALSE;
 		return S_OK;
 	}
@@ -772,29 +771,41 @@ STDMETHODIMP CGeoProjection::get_IsEmpty(VARIANT_BOOL* retVal)
 STDMETHODIMP CGeoProjection::CopyFrom(IGeoProjection* sourceProj, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = VARIANT_FALSE;
+
 	if (_isFrozen)
 	{
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
-		*retVal = VARIANT_FALSE;
 		return S_OK;
 	}
-	else
+	
+	if (!sourceProj)
 	{
-		if (!sourceProj)
-		{
-			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-			*retVal = VARIANT_FALSE;
-		}
-		else
-		{
-			CComBSTR bstr;
-			sourceProj->ExportToWKT(&bstr);
-			USES_CONVERSION;
-			char* prj = OLE2A(bstr);
-			_projection->importFromWkt(&prj);
-			*retVal = VARIANT_TRUE;
-		}		
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
 	}
+
+	if (ProjectionHelper::IsEmpty(sourceProj))
+	{
+		Clear(retVal);
+		return S_OK;
+	}
+
+	CComBSTR bstr;
+	sourceProj->ExportToWKT(&bstr);
+
+	USES_CONVERSION;
+	char* prj = OLE2A(bstr);
+
+	OGRErr err = _projection->importFromWkt(&prj);
+	if (err != OGRERR_NONE)
+	{
+		CallbackHelper::ErrorMsg("Failed to copy projection");
+	}
+
+	*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
+	
 	return S_OK;
 }
 
@@ -1071,7 +1082,6 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
 		return S_OK;
 	}
-	
 
 	if (!target)
 	{
@@ -1079,18 +1089,15 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 		return S_OK;
 	}
 
-	VARIANT_BOOL vbretval;
-	target->get_IsEmpty(&vbretval);
+	StopTransform();
 
-	if (vbretval)
+	if (ProjectionHelper::IsEmpty(this) || ProjectionHelper::IsEmpty(target))
 	{
 		ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
 		return S_OK;
 	}
 
 	OGRSpatialReference* projTarget = ((CGeoProjection*)target)->get_SpatialReference();
-
-	StopTransform();
 
 	_transformation = OGRCreateCoordinateTransformation(_projection, projTarget);
 
@@ -1304,7 +1311,7 @@ bool CGeoProjection::ParseLinearUnits(CString s, tkUnitsOfMeasure& units)
 	{
 		return false;
 	}
-	else if (s.CompareNoCase("meters") == 0)
+	else if (s.CompareNoCase("meters") == 0 || s.CompareNoCase("metre") == 0)
 	{
 		units = umMeters;
 		return true;
@@ -1314,12 +1321,12 @@ bool CGeoProjection::ParseLinearUnits(CString s, tkUnitsOfMeasure& units)
 		units = umDecimalDegrees;
 		return true;
 	}
-	else if (s.CompareNoCase("feet") == 0)
+	else if (s.CompareNoCase("feet") == 0 || s.CompareNoCase("us survey foot") == 0)
 	{
 		units = umFeets;
 		return true;
 	}
 	
-	Debug::WriteLine("Unrecognized linear units: %s", units);
+	Debug::WriteLine("Unrecognized linear units: %s", s);
 	return false;
 }

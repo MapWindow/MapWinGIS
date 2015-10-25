@@ -83,6 +83,7 @@ struct GlobalSettingsInfo
 	bool cacheDbfRecords;
 	bool cacheShapeRenderingData;
 	bool wmsDiskCaching;
+	tkCallbackVerbosity callbackVerbosity;
 
 	~GlobalSettingsInfo()
 	{
@@ -94,6 +95,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		callbackVerbosity = cvAll;
 		wmsDiskCaching = true;
 		cacheShapeRenderingData = false;
 		cacheDbfRecords = true;

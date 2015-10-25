@@ -106,14 +106,14 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	_projectionChangeCount++;
 	
 	UpdateMapTranformation();
-	
+
+	UpdateTileProjection();	
+
 	((CGeoProjection*)_projection)->SetIsFrozen(true);
-	
-	_unitsOfMeasure = ProjectionHelper::IsGeographic(_projection) ? umDecimalDegrees : umMeters;
+
+	_projection->get_LinearUnits(&_unitsOfMeasure);
 
 	ClearExtentHistory();
-
-	UpdateTileProjection();
 
 	// restore extents
 	if (ext) 

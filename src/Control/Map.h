@@ -941,7 +941,7 @@ public:
 	ITiles* GetTilesNoRef(void);
 	bool SendMouseMove();
 	bool SendSelectBoxDrag();
-	void ErrorMessage(long ErrorCode);
+	void ErrorMessage(long ErrorCode, tkCallbackVerbosity verbose = cvLimited);
 	CString Crypt(CString str);
 	bool VerifySerial(CString str);
 	void DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, bool layerBuffer = true);

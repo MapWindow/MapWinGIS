@@ -1197,3 +1197,24 @@ STDMETHODIMP CGlobalSettings::put_WmsDiskCaching(VARIANT_BOOL newVal)
 
 	return S_OK;
 }
+
+// *********************************************************
+//	     CallbackVerbosity()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_CallbackVerbosity(tkCallbackVerbosity* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = m_globalSettings.callbackVerbosity;
+
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_CallbackVerbosity(tkCallbackVerbosity newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_globalSettings.callbackVerbosity = newVal;
+
+	return S_OK;
+}

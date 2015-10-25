@@ -66,6 +66,17 @@ interface IFunction;
 interface IExpression;
 interface IWmsLayer;
 
+/************************** tkCallbackVerbosity Enumeration **********************/
+typedef
+[
+	uuid(77528AF3-A9F0-4F42-9B89-E55FC7221C6A),
+	helpstring("tkCallbackVerbosity"),
+]
+enum tkCallbackVerbosity {
+	cvAll = 0,
+    cvLimited = 1,
+} tkCallbackVerbosity;
+
 /************************** tkFunctionGroup Enumeration **********************/
 typedef
 [
@@ -5661,6 +5672,8 @@ interface IGlobalSettings : IDispatch{
 	[id(66)] HRESULT StopLogTileRequests();
 	[propget, id(67)] HRESULT WmsDiskCaching([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(67)] HRESULT WmsDiskCaching([in] VARIANT_BOOL newVal);
+	[propget, id(68)] HRESULT CallbackVerbosity([out, retval] tkCallbackVerbosity* pVal);
+	[propput, id(68)] HRESULT CallbackVerbosity([in] tkCallbackVerbosity newVal);
 };
 
 [

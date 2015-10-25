@@ -386,8 +386,12 @@ long CMapView::GetLastErrorCode()
 // *************************************************
 //			ErrorMessage()						  
 // *************************************************
-inline void CMapView::ErrorMessage(long ErrorCode)
+inline void CMapView::ErrorMessage(long ErrorCode, tkCallbackVerbosity verbosity)
 {
+	if (verbosity < m_globalSettings.callbackVerbosity) {
+		return;
+	}
+	
 	_lastErrorCode = ErrorCode;
 	CallbackHelper::ErrorMsg("Map", _globalCallback, m_key, ErrorMsg(_lastErrorCode));
 }

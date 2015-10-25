@@ -58,17 +58,15 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 {
 	if (!provider) return;
 
-	if (_lastProvider != provider->Id)
-	{
-		ClearBuffer();
-	}
-
 	CRect indices;
 	int zoom;
 
 	if (!GetTileIndices(provider, indices, zoom, isSnapshot)) {
 		return;
 	}
+
+	// it's not a duplicated request, something has changed
+	ClearBuffer();
 
 	tilesLogger.WriteLine("\nLOAD TILES: xMin=%d; xMax=%d; yMin=%d; yMax=%d; zoom =%d", indices.left, indices.right, indices.bottom, indices.top, zoom);
 
@@ -148,9 +146,6 @@ bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zo
 		Clear();
 		return false;
 	}
-
-	// it's not a duplicated request, something has changed
-	ClearBuffer();
 
 	return true;
 }
@@ -239,6 +234,8 @@ void TileManager::Clear()
 {
 	ClearBuffer();
 
+	DeleteMarkedTilesFromBuffer();
+
 	_lastMapExtents.left = 0;
 	_lastMapExtents.right = 0;
 	_lastMapExtents.top = 0;
@@ -303,6 +300,8 @@ void TileManager::DeleteMarkedTilesFromBuffer()
 // *********************************************************
 //	     ClearBuffer()
 // *********************************************************
+// Delete marked tiles from buffer must be called after it.
+// This is made for not searching tiles in the cache again.
 void TileManager::ClearBuffer()
 {
 	_tilesBufferLock.Lock();
@@ -313,8 +312,6 @@ void TileManager::ClearBuffer()
 		_tiles[i]->inBuffer(false);
 		_tiles[i]->toDelete(true);
 	}
-
-	_tiles.clear();
 
 	_tilesBufferLock.Unlock();
 

@@ -196,6 +196,8 @@ public:
 	STDMETHOD(put_LogTileErrorsOnly)(VARIANT_BOOL pVal);
 	STDMETHOD(get_WmsDiskCaching)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_WmsDiskCaching)(VARIANT_BOOL newVal);
+	STDMETHOD(get_CallbackVerbosity)(tkCallbackVerbosity* pVal);
+	STDMETHOD(put_CallbackVerbosity)(tkCallbackVerbosity newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

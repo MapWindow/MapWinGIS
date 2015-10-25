@@ -472,7 +472,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkOGR_INVALID_HANDLE:
 			return "OGR: invalid handle.";
 		case tkFAILED_TO_REPROJECT:
-			return "Failed to reproject shapefile.";
+			return "Failed to start coordinate transformation.";
 		case tkPROJECTION_NOT_INITIALIZED:
 			return "Geoprojection is not initialized.";
 		case tkPRJ_FILE_EXISTS:
@@ -514,10 +514,7 @@ const char * ErrorMsg( long ErrorCode )
 			return "Invalid URL pattern.";
 		case tkINVALID_ZOOM_LEVEL:
 			return "Invalid zoom level.";
-		case tkTILES_MAP_TRANSFORM_FAILED:
-			return "Failed to start tiles to map transformation.";
-		case tkMAP_TILES_TRANSFORM_FAILED:
-			return "Failed to start map to tiles transformation.";
+		
 
 		//Default
 		default:

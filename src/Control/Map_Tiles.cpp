@@ -197,9 +197,9 @@ void CMapView::UpdateTileProjection()
 {
 	InitTmsProjection();
 
-	TileProjectionState state = GetTmsProjectionState();
+	_tileProjectionState = GetTmsProjectionState();
 
-	StartTmsProjectionTransform(state);
+	StartTmsProjectionTransform(_tileProjectionState);
 }
 
 // ****************************************************************
@@ -231,20 +231,24 @@ void CMapView::InitTmsProjection()
 // ****************************************************************
 void CMapView::StartTmsProjectionTransform(TileProjectionState state)
 {
-	if (state == ProjectionDoTransform || state == ProjectionCompatible)
+	if (_transformationMode != tmNotDefined && (state == ProjectionDoTransform || state == ProjectionCompatible))
 	{
-		CComBSTR bstr;
-		_tileProjection->ExportToProj4(&bstr);
-
 		VARIANT_BOOL vb;
-		_tileProjection->StartTransform(_projection, &vb);
-		if (!vb) {
-			ErrorMessage(tkTILES_MAP_TRANSFORM_FAILED);
+		
+		if (!ProjectionHelper::IsEmpty(_tileProjection))
+		{
+			_tileProjection->StartTransform(_projection, &vb);
+			if (!vb) {
+				CallbackHelper::ErrorMsg("Failed to start tiles to map transformation.");
+			}
 		}
 
-		_tileReverseProjection->StartTransform(_tileProjection, &vb);
-		if (!vb) {
-			ErrorMessage(tkMAP_TILES_TRANSFORM_FAILED);
+		if (!ProjectionHelper::IsEmpty(_tileReverseProjection))
+		{
+			_tileReverseProjection->StartTransform(_tileProjection, &vb);
+			if (!vb) {
+				CallbackHelper::ErrorMsg("Failed to start map to tiles transformation.");
+			}
 		}
 	}
 }
