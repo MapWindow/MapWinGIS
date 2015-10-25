@@ -99,8 +99,10 @@ STDMETHODIMP CGeoProjection::get_LastErrorCode(long *pVal)
 // **************************************************************
 //		ReportOgrError()
 // **************************************************************
-void CGeoProjection::ReportOgrError(long ErrorCode)
+void CGeoProjection::ReportOgrError(long ErrorCode, tkCallbackVerbosity verbosity)
 {
+	if (verbosity < m_globalSettings.callbackVerbosity) return;
+
 	// converting OGRErr code to MapWinGIS error code
 	long code = tkNO_ERROR;
 	switch (ErrorCode)
@@ -201,23 +203,30 @@ STDMETHODIMP CGeoProjection::ExportToProj4(BSTR* retVal)
 STDMETHODIMP CGeoProjection::ImportFromProj4(BSTR proj, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
+	
 	if (_isFrozen)
 	{
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
 		*retVal = VARIANT_FALSE;
+		return S_OK;
 	}
-	else
+	
+	USES_CONVERSION;
+	CString str = OLE2CA(proj);
+	if (str.GetLength() == 0) 
 	{
-		CString str = OLE2CA(proj);
-		OGRErr err = _projection->importFromProj4(str);
-
-		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
-		if (err != OGRERR_NONE)
-		{
-			ReportOgrError(err);
-		}
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
 	}
+
+	OGRErr err = _projection->importFromProj4(str);
+
+	*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
+	if (err != OGRERR_NONE)
+	{
+		ReportOgrError(err, cvAll);
+	}
+
 	return S_OK;
 }
 

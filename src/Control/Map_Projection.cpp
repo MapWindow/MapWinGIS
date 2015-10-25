@@ -42,6 +42,7 @@ IGeoProjection* CMapView::GetMapProjection() { return _projection; }
 // *****************************************************
 void CMapView::ReleaseProjections()
 {
+	((CGeoProjection*)_projection)->SetIsFrozen(false);
 	VARIANT_BOOL vb;
 	_projection->Clear(&vb);
 	UINT count = _projection->Release();

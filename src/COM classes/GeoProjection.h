@@ -150,7 +150,7 @@ private:
 	bool IsSameProjection(OGRCoordinateTransformation* transf, double x, double y, bool projected);
 	bool ReadFromFileCore(CStringW filename, bool esri);
 	bool WriteToFileCore(CStringW filename, bool esri);
-	void ReportOgrError(long ErrorCode);
+	void ReportOgrError(long ErrorCode, tkCallbackVerbosity verbosity = cvLimited);
 	bool ParseLinearUnits(CString s, tkUnitsOfMeasure& units);
 
 public:
