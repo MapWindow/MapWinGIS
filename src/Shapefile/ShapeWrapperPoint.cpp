@@ -133,8 +133,8 @@ IPoint* CShapeWrapperPoint::get_Point(long Index)
 	{
 		pnt->put_X(_x);
 		pnt->put_Y(_y);
-		pnt->put_Y(_z);
-		pnt->put_Y(_m);
+		pnt->put_Z(_z);
+		pnt->put_M(_m);
 	}
 
 	return pnt;

@@ -21,9 +21,7 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 8 feb 2011 - created the file
-
-#include "stdafx.h"
+ #include "stdafx.h"
 #include "ShapePoint.h"
 
 #pragma region CShapePoint
@@ -35,6 +33,10 @@ IPoint* CShapePoint::get_Point()
 {
 	IPoint* pnt = NULL;
 	CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&pnt);
+	pnt->put_X(_x);
+	pnt->put_Y(_y);
+	pnt->put_Z(_z);
+	pnt->put_M(_m);
 	return pnt;
 }
 
@@ -49,10 +51,10 @@ bool CShapePoint::put_Point(IPoint* newPoint)
 	}
 	else
 	{
-		newPoint->get_X(&x);
-		newPoint->get_Y(&y);
-		newPoint->get_Z(&z);
-		newPoint->get_M(&m);
+		newPoint->get_X(&_x);
+		newPoint->get_Y(&_y);
+		newPoint->get_Z(&_z);
+		newPoint->get_M(&_m);
 		return true;
 	}
 }
@@ -62,8 +64,8 @@ bool CShapePoint::put_Point(IPoint* newPoint)
 // *******************************************************
 void CShapePoint::get_XY(double& X, double& Y)
 {
-	X = x;
-	Y = y;
+	X = _x;
+	Y = _y;
 }
 
 // *******************************************************
@@ -71,8 +73,8 @@ void CShapePoint::get_XY(double& X, double& Y)
 // *******************************************************
 void CShapePoint::put_XY(double X, double Y)
 {
-	x = X;
-	y = Y;
+	_x = X;
+	_y = Y;
 }
 #pragma endregion
 

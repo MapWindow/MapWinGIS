@@ -21,10 +21,12 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 8 feb 2011 - created the file
-
+ 
 #pragma once
 
+// ****************************************************************
+//		IShapePoint
+// ****************************************************************
 class IShapePoint
 {
 public:
@@ -49,42 +51,49 @@ public:
 	virtual void put_XY(double x, double y) = 0;
 };
 
+// ****************************************************************
+//		CShapePoint
+// ****************************************************************
 // Fast point without using COM
 class CShapePoint: public IShapePoint
 {
 public:
 	CShapePoint(void)
 	{
-		x = y = z = m = 0;
-		pointExists = false;
+		_x = _y = _z = _m = 0;
+		_pointExists = false;
 	}
-	~CShapePoint(void);
 
-	double x;
-	double y;
-	double z;
-	double m;
-	CStringW key;
-	bool pointExists;
+	virtual ~CShapePoint(void);
 
+private:
+	double _x;
+	double _y;
+	double _z;
+	double _m;
+	CStringW _key;
+	bool _pointExists;
+
+public:
 	void get_Key(BSTR* pVal)
 	{
 		USES_CONVERSION;
-		BSTR s = OLE2BSTR(key);
+		BSTR s = OLE2BSTR(_key);
 		*pVal = s;
 	}
 	void put_Key(BSTR newVal)
 	{
-		key = newVal;
+		// TODO: the previous value is not released
+		_key = newVal;
 	}
-	double get_X(){return x;}
-	double get_Y(){return y;}
-	double get_Z(){return z;}
-	double get_M(){return m;}
-	void put_X(double newVal){x = newVal;}
-	void put_Y(double newVal){y = newVal;}
-	void put_Z(double newVal){z = newVal;}
-	void put_M(double newVal){m = newVal;}
+	double get_X() {return _x;}
+	double get_Y() {return _y;}
+	double get_Z() {return _z;}
+	double get_M() {return _m;}
+	void put_X(double newVal){_x = newVal;}
+	void put_Y(double newVal){_y = newVal;}
+	void put_Z(double newVal){_z = newVal;}
+	void put_M(double newVal){_m = newVal;}
 	
 	IPoint* get_Point();
 	bool put_Point(IPoint* newPoint);
@@ -92,6 +101,9 @@ public:
 	void put_XY(double x, double y);
 };
 
+// ****************************************************************
+//		CShapePointCOM
+// ****************************************************************
 // Wrapper for COM point
 class CShapePointCOM: public IShapePoint
 {
@@ -100,15 +112,19 @@ public:
 	{
 		CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&pnt);
 	}
-	~CShapePointCOM(void)
+
+	virtual ~CShapePointCOM(void)
 	{
 		if (pnt)
 		{
 			pnt->Release();
 		}
 	}
+
+private:
 	IPoint* pnt;
 
+public:
 	void get_Key(BSTR* pVal);
 	void put_Key(BSTR newVal);
 	double get_X();
