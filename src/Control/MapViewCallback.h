@@ -27,7 +27,7 @@ public:
 	virtual void _StartDragging(DraggingOperation operation) = 0;
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) = 0;
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) = 0;
-	virtual void _FireTilesLoaded(VARIANT_BOOL isSnapshot, CString key) = 0;
+	virtual void _FireTilesLoaded(bool isSnapshot, CString key, bool fromCache) = 0;
 	virtual long _GetWidth() = 0;
 	virtual long _GetHeight() = 0;
 

@@ -128,7 +128,7 @@ public:
 	void AddTileOnlyCaching(TileCore* tile);
 
 	void TriggerMapRedraw() { _map->_Redraw(tkRedrawType::RedrawSkipDataLayers, false, true); };
-	void FireTilesLoaded(bool isSnapshot, CString key) { _map->_FireTilesLoaded(isSnapshot, key); }
+	void FireTilesLoaded(bool isSnapshot, CString key, bool fromCache) { _map->_FireTilesLoaded(isSnapshot, key, fromCache); }
 	bool TilesAreInCache(BaseProvider* provider);
 	void ClearBuffer();
 };

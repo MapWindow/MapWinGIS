@@ -155,6 +155,7 @@ void CMapView::DrawZoombox(Gdiplus::Graphics* g)
 		g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
 		if (selection)
 		{
+			// TODO: can be customized
 			Gdiplus::SolidBrush brush(Gdiplus::Color(100, 255, 255, 0));	// yellow
 			Gdiplus::Pen pen(Gdiplus::Color(255, 255, 255, 0));
 			g->FillRectangle(&brush, rect);

@@ -38,14 +38,10 @@ struct TileRequestInfo
 
 	CString key;
 	bool isSnapshot;	
-	int totalCount;
-	int count;
+	unsigned int totalCount;
+	unsigned int count;
 	int generation;
-
-	bool Completed() { return totalCount == count; }
 };
-
-
 
 // ******************************************************
 //    TilePoint

@@ -532,7 +532,7 @@ public:
 	afx_msg tkUnitsOfMeasure GetMapUnits(void);
 	afx_msg BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, float ClipX, float ClipY, float clipWidth, float clipHeight);
 	afx_msg BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, LONG Width);
-	afx_msg void LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key);
+	afx_msg BOOL LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key);
 	afx_msg void SetMapRotationAngle(float nNewValue);
 	afx_msg float GetMapRotationAngle(void);
 	afx_msg IExtents* GetRotatedExtent(void);
@@ -652,8 +652,12 @@ public:
 		{FireEvent(eventidBeforeDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled);}
 	void FireAfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled)
 		{FireEvent(eventidAfterDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled);}
-	void FireTilesLoaded(VARIANT_BOOL snapshot, LPCTSTR key)
-		{FireEvent(eventidTilesLoaded,EVENT_PARAM(VTS_BOOL VTS_BSTR ), snapshot,key);}
+	void FireTilesLoaded(bool snapshot, LPCTSTR key, bool fromCache)
+		{
+			VARIANT_BOOL isSnapShot = snapshot ? VARIANT_TRUE : VARIANT_FALSE;
+			VARIANT_BOOL isFromCache = fromCache ? VARIANT_TRUE : VARIANT_FALSE;
+			FireEvent(eventidTilesLoaded, EVENT_PARAM(VTS_BOOL VTS_BSTR VTS_BOOL), isSnapShot, key, isFromCache);
+		}
 	void FireMeasuringChanged(tkMeasuringAction action)
 		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_I4), action);}
 	void FireBeforeShapeEdit(LONG layerHandle, LONG shapeIndex, tkMwBoolean* Cancel)
@@ -1244,7 +1248,7 @@ public:
 	virtual void _StartDragging(DraggingOperation operation) {	StartDragging(operation); }
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) {	FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
-	virtual void _FireTilesLoaded(VARIANT_BOOL isSnapshot, CString key) { FireTilesLoaded(isSnapshot, key); }
+	virtual void _FireTilesLoaded(bool isSnapshot, CString key, bool fromCache) { FireTilesLoaded(isSnapshot, key, fromCache); }
 	virtual bool _GetTilesForMap(void* p, double scalingRatio, CRect& indices, int& zoom) { return get_TilesForMap(p, scalingRatio, indices, zoom); }
 	virtual int _ChooseZoom(void* provider, double scalingRatio, bool limitByProvider) { return ChooseZoom(provider, scalingRatio, limitByProvider); }
 	virtual Extent* _GetExtents() { return &_extents; }

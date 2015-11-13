@@ -111,14 +111,14 @@ LPDISPATCH CMapView::SnapShot3(double left, double right, double top, double bot
 //    LoadTilesForSnapshot()
 // *********************************************************************
 // Loads tiles for specified extents
-void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key)
+BOOL CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	if (!Extents) 
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return;
+		return FALSE;
 	}
 	
 	// Get the image height based on the box aspect ratio
@@ -130,7 +130,7 @@ void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR
 	if (WidthPixels <= 0 || Height <= 0)
 	{
 		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
-		return;
+		return FALSE;
 	}
 		
 	CString key = (char*)Key;
@@ -139,13 +139,12 @@ void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR
 	bool tilesInCache = TilesAreInCache();
 	if (!tilesInCache) {
 		ReloadTiles(true, true, key);
+		
 	}
 
 	RestoreExtents();
 
-	if (tilesInCache) {
-		FireTilesLoaded(true, key);
-	}
+	return tilesInCache;
 }
 
 // *********************************************************************

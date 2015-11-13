@@ -75,6 +75,20 @@ CThreadPool<ThreadWorker>* ITileLoader::PreparePool()
 }
 
 // *******************************************************
+//		RegisterTile()
+// *******************************************************
+unsigned int ITileLoader::RegisterTile(int generation)
+{
+	TileRequestInfo* info = FindRequest(generation);
+	if (info)
+	{
+		return InterlockedIncrement(&info->count);
+	}
+
+	return 0;
+}
+
+// *******************************************************
 //		Load()
 // *******************************************************
 //	Creates tasks for tile points and enqueues them in thread pool
@@ -154,18 +168,6 @@ void ITileLoader::CleanRequests()
 		{
 			++it;
 		}
-	}
-}
-
-// *******************************************************
-//		RegisterTile()
-// *******************************************************
-void ITileLoader::RegisterTile(int generation)
-{
-	TileRequestInfo* info = FindRequest(generation);
-	if (info)
-	{
-		info->count++;
 	}
 }
 

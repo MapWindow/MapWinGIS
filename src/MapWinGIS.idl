@@ -6772,7 +6772,7 @@ library MapWinGIS
 			[id(202)] VARIANT_BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, 
 												 float ClipX, float ClipY, float clipWidth, float clipHeight);
 			[id(170)] void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
-			[id(201)] void LoadTilesForSnapshot(IExtents* Extents, long Width, LPCTSTR Key, tkTileProvider provider);
+			[id(201)] VARIANT_BOOL LoadTilesForSnapshot(IExtents* Extents, long Width, LPCTSTR Key);
 #endif			
 
 #define SERIALIZE_API
@@ -6881,7 +6881,7 @@ library MapWinGIS
 			[id(10)] void ShapeHighlighted(long LayerHandle, long ShapeIndex);
 			[id(11)] void BeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
 			[id(12)] void AfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
-			[id(13)] void TilesLoaded(VARIANT_BOOL snapshot, BSTR key);
+			[id(13)] void TilesLoaded(VARIANT_BOOL snapshot, BSTR key, VARIANT_BOOL fromCache);
 			[id(14)] void MeasuringChanged(tkMeasuringAction action);
 			[id(16)] void BeforeShapeEdit(LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
 			[id(17)] void ValidateShape(LONG LayerHandle, IShape* Shape, tkMwBoolean* Cancel);

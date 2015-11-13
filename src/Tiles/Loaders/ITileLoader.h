@@ -94,6 +94,6 @@ public:
 	virtual void Stop();
 	TileRequestInfo* FindRequest(int generation);
 	void Load(vector<TilePoint*> &points, BaseProvider* provider, int zoom, TileRequestInfo* info );
-	void RegisterTile(int generation);
+	unsigned int RegisterTile(int generation);
 };
 

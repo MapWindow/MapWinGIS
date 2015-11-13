@@ -58,6 +58,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 {
 	if (!provider) return;
 
+
 	CRect indices;
 	int zoom;
 
@@ -74,12 +75,22 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 
 	InitializeDiskCache();
 
-	// all incoming tasks will be discarded
-	TileRequestInfo* requestInfo = _loader.CreateNextRequest(key, isSnapshot);
+	// it's pure snapshot call, so we shall only grab only those tiles
+	// the are already in the cache
+	bool cacheOnly = isSnapshot && key.GetLength() == 0;
 
 	//  check which ones we already have, and which ones are to be loaded
 	std::vector<TilePoint*> activeTasks;
-	GetActiveTasks(activeTasks, provider->Id, zoom, requestInfo->generation, indices);
+
+	TileRequestInfo* requestInfo = NULL;
+
+	if (!cacheOnly)
+	{
+		// all incoming tasks will be discarded
+		requestInfo = _loader.CreateNextRequest(key, isSnapshot);
+
+		GetActiveTasks(activeTasks, provider->Id, zoom, requestInfo->generation, indices);
+	}
 
 	// loads tiles available in the cache to the buffer
 	// builds list of tiles to be loaded from server
@@ -87,7 +98,10 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	BuildLoadingList(provider, indices, zoom, activeTasks, points);
 
 	// it will be considered completed when this amount of tiles is loaded
-	requestInfo->totalCount = activeTasks.size() + points.size();
+	if (!cacheOnly)
+	{
+		requestInfo->totalCount = activeTasks.size() + points.size();
+	}
 
 	// delete unused tiles from the screen buffer
 	DeleteMarkedTilesFromBuffer();
@@ -108,7 +122,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, CString key
 	else
 	{
 		// tilesLogger.WriteLine("Tiles loaded event; Were loaded from server (y/n): %d", !nothingToLoad);
-		FireTilesLoaded(isSnapshot, key);
+		FireTilesLoaded(isSnapshot, key, true);
 	}
 
 	TilePoint::ReleaseMemory(activeTasks);
