@@ -82,8 +82,7 @@ char* CShapefileReader::ReadShapeData(int& offset, int& recordLength)
 		if (ret != 0) return NULL;
 		
 		// *2: for conversion from 16-bit words to 8-bit words
-		// -2: skip first 2 int - it's record number and content length;
-		int length = contentLength * 2 - 2 * sizeof(int);
+		int length = contentLength * 2;
 
 		char* shapeData = new char[length];
 		int count = (int)fread(shapeData, sizeof(char), length, _shpfile);
