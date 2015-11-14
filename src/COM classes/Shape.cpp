@@ -79,11 +79,11 @@ CShape::~CShape()
 // **********************************************
 //   put_RawData()
 // **********************************************
-bool CShape::put_RawData(char* data)
+bool CShape::put_RawData(char* data, int recordLength)
 {
 	if (data == NULL) return false;
 
-	IShapeWrapper* wrapper = ShapeUtility::CreateFastWrapper(data);
+	IShapeWrapper* wrapper = ShapeUtility::CreateWrapper(data, recordLength, !_useFastMode);
 	if (!wrapper) {
 		return false;
 	}
@@ -2275,9 +2275,11 @@ STDMETHODIMP CShape::ImportFromBinary(VARIANT bytesArray, VARIANT_BOOL* retVal)
 	
 	unsigned char* p = NULL;
 	SafeArrayAccessData(bytesArray.parray,(void HUGEP* FAR*)(&p));
+
 	char* data = reinterpret_cast<char*>(p);
 	
-	bool result = _shp->put_RawData(data);
+	int recordLength = static_cast<int>(bytesArray.parray->cbElements);
+	bool result = _shp->put_RawData(data, recordLength);
 	
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
 	SafeArrayUnaccessData(bytesArray.parray);

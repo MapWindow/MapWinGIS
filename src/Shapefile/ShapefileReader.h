@@ -51,7 +51,7 @@ private:
 public:
 	// functions
 	bool ReadShapefileIndex(CStringW filename, FILE* shpFile, ::CCriticalSection* readLock);
-	char* ReadShapeData(int& offset);
+	char* ReadShapeData(int& offset, int& length);
 	PolygonData* ReadPolygonData(char* data);
 	PolygonData* ReadMultiPointData(char* data);
 };

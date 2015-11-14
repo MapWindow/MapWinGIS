@@ -60,8 +60,10 @@ void SwapEndian(char* c)
 //		ReadShapeData()
 // ****************************************************************
 // Reads a single shape from the shapefile
-char* CShapefileReader::ReadShapeData(int& offset)
+char* CShapefileReader::ReadShapeData(int& offset, int& recordLength)
 {
+	recordLength = 0;
+
 	// index records are 8 bytes;
 	char* data = _indexData + offset*8;	
 	SwapEndian(data);
@@ -69,7 +71,7 @@ char* CShapefileReader::ReadShapeData(int& offset)
 
 	data = _indexData + offset * 8 + 4;
 	SwapEndian(data);
-	int contentLength = (*(int*)data) * 2;
+	int contentLength = (*(int*)data);
 	
 	if (contentLength > 0)
 	{
@@ -85,9 +87,11 @@ char* CShapefileReader::ReadShapeData(int& offset)
 
 		char* shapeData = new char[length];
 		int count = (int)fread(shapeData, sizeof(char), length, _shpfile);
+
+		recordLength = length;
 		return shapeData;
 	}
-	
+
 	return NULL;
 }
 

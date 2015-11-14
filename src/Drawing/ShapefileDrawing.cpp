@@ -810,7 +810,8 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		std::vector<PointWithId> points;
 		if (! _isEditing)
 		{
-			char* data = _sfReader->ReadShapeData(shapeIndex);
+			int recordLength;
+			char* data = _sfReader->ReadShapeData(shapeIndex, recordLength);
 			if ( data )
 			{
 				if (_shptype == SHP_POINT)
@@ -1272,10 +1273,12 @@ IShapeData* CShapefileDrawer::ReadAndCacheShapeData(int shapeIndex)
 	IShapeData* shapeData = _shapefile->get_ShapeRenderingData(shapeIndex);
 	if (!shapeData)
 	{
-		char* data = _sfReader->ReadShapeData(shapeIndex);
+		int recordLength;
+
+		char* data = _sfReader->ReadShapeData(shapeIndex, recordLength);
 		if (data)
 		{
-			CShapeData* newData = new CShapeData(data);
+			CShapeData* newData = new CShapeData(data, recordLength);
 			_shapefile->put_ShapeRenderingData(shapeIndex, newData);
 			delete[] data;
 
@@ -1317,7 +1320,8 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 		}
 		else
 		{
-			char* data = _sfReader->ReadShapeData(shapeIndex);
+			int recordLength;
+			char* data = _sfReader->ReadShapeData(shapeIndex, recordLength);
 			if (data)
 			{
 				double* bounds = (double*)(data + 4);
@@ -1437,7 +1441,8 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 			}
 			else
 			{
-				char* data = _sfReader->ReadShapeData(shapeIndex);
+				int recordLength;
+				char* data = _sfReader->ReadShapeData(shapeIndex, recordLength);
 				if (data)
 				{
 					double* bounds = (double*)(data + 4);

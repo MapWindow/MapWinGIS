@@ -206,7 +206,7 @@ bool CShapeWrapperPoint::get_Bounds(double& xMin, double& xMax, double& yMin, do
 //		put_Data 
 // **************************************************************
 // Passing the shape data from disk to the memory structures.
-bool CShapeWrapperPoint::put_RawData(char* shapeData)
+bool CShapeWrapperPoint::put_RawData(char* shapeData, int recordLength)
 {
 	ShpfileType shpType = (ShpfileType)*(int*)shapeData;
 		

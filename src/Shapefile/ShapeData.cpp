@@ -230,7 +230,7 @@ void CShapeData::Clear()
 //		put_ShapeData 
 // ******************************************************
 // Passing the shape data from disk to the memory structures.
-bool CShapeData::put_RawData(char* shapeData)
+bool CShapeData::put_RawData(char* shapeData, int recordLength)
 {
 	// type
 	_shapeType = (ShpfileType)*(int*)shapeData;

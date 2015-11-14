@@ -135,7 +135,7 @@ STDMETHODIMP CShapeEditor::get_RawData(IShape** retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = NULL;
 
-	ShpfileType shpType = _activeShape->GetShapeType2D();
+	ShpfileType shpType = _activeShape->GetShapeType();
 	if (shpType == SHP_NULLSHAPE || _activeShape->GetPointCount() == 0) {
 		return S_OK;
 	}

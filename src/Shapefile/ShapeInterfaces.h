@@ -45,7 +45,7 @@ public:
 	virtual int get_PartCount()= 0;
 	virtual int get_LastErrorCode()= 0;
 	virtual bool get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax)= 0;
-	virtual bool put_RawData(char* shapeData)= 0;
+	virtual bool put_RawData(char* shapeData, int length)= 0;
 	virtual int get_PartStartPoint(int PartIndex)= 0;
 	virtual int get_PartEndPoint(int PartIndex)= 0;
 	virtual double* get_PointsXY()= 0;
@@ -116,7 +116,7 @@ public:
 	virtual void ReversePoints(long startIndex, long endIndex) = 0;
 
 	virtual int* get_RawData() = 0;
-	virtual bool put_RawData(char* shapeData) = 0;
+	virtual bool put_RawData(char* shapeData, int length) = 0;
 
 	void CopyTo(IShapeWrapper* target);
 	

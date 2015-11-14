@@ -415,7 +415,7 @@ bool CShapeWrapper::get_Bounds(double& xMin, double& xMax, double& yMin, double&
 //		put_Data 
 // **************************************************************
 // Passing the shape data from disk to the memory structures.
-bool CShapeWrapper::put_RawData(char* shapeData)
+bool CShapeWrapper::put_RawData(char* shapeData, int length)
 {
 	_shapeType = (ShpfileType)*(int*)shapeData;
 	_boundsChanged = true;

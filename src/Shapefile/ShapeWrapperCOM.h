@@ -41,10 +41,10 @@ public:
 		_shapeType = shpType;
 	}
 
-	CShapeWrapperCOM(char* data)
+	CShapeWrapperCOM(char* data, int recordLength)
 		: CShapeWrapperCOM() 	
 	{
-		put_RawData(data);
+		put_RawData(data, recordLength);
 	}
 
 	virtual ~CShapeWrapperCOM()
@@ -121,7 +121,7 @@ public:
 	void ReversePoints(long startIndex, long endIndex);
 
 	int* get_RawData();
-	bool put_RawData(char* shapeData);
+	bool put_RawData(char* shapeData, int length);
 
 	int get_LastErrorCode()
 	{

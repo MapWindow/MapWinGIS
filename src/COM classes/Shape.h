@@ -168,7 +168,7 @@ private:
 public:
 	bool ExplodeCore(std::vector<IShape*>& vShapes);
 	bool FixupShapeCore(ShapeValidityCheck validityCheck);
-	bool put_RawData(char* data);
+	bool put_RawData(char* data, int recordLength);
 	IShapeWrapper* get_ShapeWrapper() { return _shp; }
 	void put_FastMode(bool state);
 	bool get_fastMode() { return _useFastMode; }

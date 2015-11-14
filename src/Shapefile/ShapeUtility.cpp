@@ -175,7 +175,7 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 // **************************************************************
 //		CreateFastWrapper 
 // **************************************************************
-IShapeWrapper* ShapeUtility::CreateFastWrapper(char* data)
+IShapeWrapper* ShapeUtility::CreateWrapper(char* data, int recordLength, bool forceCom)
 {
 	if (!data) {
 		Debug::WriteError("CreateWrapper: shape data was expected.");
@@ -185,21 +185,19 @@ IShapeWrapper* ShapeUtility::CreateFastWrapper(char* data)
 	ShpfileType shpType = (ShpfileType)*(int*)data;
 	ShpfileType shpType2D = ShapeUtility::Convert2D(shpType);
 
-	if (shpType == SHP_NULLSHAPE)
+	ShapeWrapperType wrapperType = GetShapeWrapperType(shpType, forceCom);
+
+	switch (wrapperType)
 	{
-		return new CShapeWrapperEmpty();
-	}
-	else if (shpType2D == SHP_POINT)
-	{
-		return new CShapeWrapperPoint(data);
-	}
-	else 
-	{
-		if (IsM(shpType) || IsZ(shpType)) {
-			return new CShapeWrapperCOM(data);
-		}
-		
-		return new CShapeWrapper(data);
+		case swtPoint:
+			return new CShapeWrapperPoint(data, recordLength);
+		case swtFast:
+			return new CShapeWrapper(data, recordLength);
+		case swtCom:
+			return new CShapeWrapperCOM(data, recordLength);
+		case swtEmpty:
+		default:
+			return new CShapeWrapperEmpty();
 	}
 }
 
@@ -356,7 +354,7 @@ void ShapeUtility::WritePointM(IShapeWrapper* shape, int pointIndex, FILE* file)
 void ShapeUtility::WriteExtentsXY(IShapeWrapper* shape, FILE* file)
 {
 	double xMin, yMin, xMax, yMax;
-	shape->get_BoundsXY(xMin, yMin, xMax, yMax);
+	shape->get_BoundsXY(xMin, xMax, yMin, yMax);
 	fwrite(&xMin, sizeof(double), 1, file);
 	fwrite(&yMin, sizeof(double), 1, file);
 	fwrite(&xMax, sizeof(double), 1, file);

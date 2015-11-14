@@ -29,14 +29,14 @@ class CShapeData: public IShapeData
 {
 public:
 	// Constructors
-	CShapeData(char* shpData)
+	CShapeData(char* shpData, int recordLength)
 	{
 		_shapeType = SHP_NULLSHAPE;
 		_lastErrorCode = tkNO_ERROR;
 		_bounds = NULL;
 		_points = NULL;
 		_parts = NULL;
-		put_RawData(shpData);
+		put_RawData(shpData, recordLength);
 	}
 
 	// Destructor
@@ -81,7 +81,7 @@ public:
 	bool get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax);
 
 	// data
-	bool put_RawData(char* shapeData);
+	bool put_RawData(char* shapeData, int recordLength);
 
 	// parts
 	int get_PartStartPoint(int PartIndex);

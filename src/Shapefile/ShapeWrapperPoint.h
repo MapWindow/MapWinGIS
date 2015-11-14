@@ -39,10 +39,10 @@ public:
 		_shpType = shpType;
 	}
 
-	CShapeWrapperPoint(char* shpData) 
+	CShapeWrapperPoint(char* shpData, int recordLength) 
 		: CShapeWrapperPoint()
 	{
-		put_RawData(shpData);
+		put_RawData(shpData, recordLength);
 	}
 
 private:	
@@ -63,7 +63,7 @@ public:
 	int get_PartCount() { return 0; }
 
 	// shpData
-	bool put_RawData(char* shapeData);
+	bool put_RawData(char* shapeData, int recordLength);
 	int* get_RawData(void);
 	
 	// type

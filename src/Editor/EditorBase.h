@@ -16,6 +16,7 @@ public:
 
 public:
 	ShpfileType GetShapeType2D() { return ShapeUtility::Convert2D(_shpType); }
+	ShpfileType GetShapeType() { return _shpType; }
 	bool DrawAccumalatedLength() { return false; }
 	bool CloseOnPreviousVertex() {	return false; }
 	void UpdatePolyCloseState(bool close, int pointIndex = -1) {}

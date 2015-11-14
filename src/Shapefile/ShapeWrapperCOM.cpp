@@ -667,13 +667,14 @@ void CShapeWrapperCOM::ReversePoints(long startIndex, long endIndex)
 // **************************************************************
 //		put_RawData 
 // **************************************************************
-bool CShapeWrapperCOM::put_RawData(char* shapeData)
+bool CShapeWrapperCOM::put_RawData(char* shapeData, int recordLength)
 {
 	_points.clear();
 	_parts.clear();
 
 	_shapeType = (ShpfileType)*(int*)shapeData;
 	ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
+	bool is25d = _shapeType != shpType2D;
 
 	_boundsChanged = true;
 
@@ -700,8 +701,12 @@ bool CShapeWrapperCOM::put_RawData(char* shapeData)
 		}
 		else if (_shapeType == SHP_POINTZ)
 		{
-			pnt->put_M(ddata[2]);
-			pnt->put_Z(ddata[3]);
+			pnt->put_Z(ddata[2]);
+
+			if (recordLength > 28)  // 4 (shpType) + 3 * 8 (X, Y, Z) 
+			{
+				pnt->put_M(ddata[3]);
+			}
 		}
 
 		_points.push_back(pnt);
@@ -715,7 +720,9 @@ bool CShapeWrapperCOM::put_RawData(char* shapeData)
 		_yMax = bounds[3];					// 36
 
 		numPoints = *(int*)(shapeData + 36);
-		double* points = (double*)(shapeData + 40);
+
+		int readCount = 40;
+		double* points = (double*)(shapeData + readCount);
 
 		// points
 		_points.resize(numPoints);
@@ -728,28 +735,37 @@ bool CShapeWrapperCOM::put_RawData(char* shapeData)
 			_points[i] = pnt;
 		}
 
-		// z values
-		if (_shapeType == SHP_MULTIPOINTZ || _shapeType == SHP_MULTIPOINTM)
+		points += numPoints * 2;   // X, Y
+		readCount += numPoints * 2 * 8;
+
+		if (is25d)
 		{
-			points += numPoints * 2;
-			_mMin = *(points);
-			_mMax = *(points + 1);
-
-			points += 2;
-			
-			for (int i = 0; i < numPoints; i++) {
-				_points[i]->put_M(points[i]);
-			}
-
 			if (_shapeType == SHP_MULTIPOINTZ)
 			{
-				points += numPoints;
 				_zMin = *(points);
 				_zMax = *(points + 1);
+
 				points += 2;
+				readCount += 2 * 8;
 
 				for (int i = 0; i < numPoints; i++) {
 					_points[i]->put_Z(points[i]);
+				}
+
+				points += numPoints;
+				readCount += numPoints * 8;
+			}
+
+			// M values (only if record length is long enough)
+			if (readCount +  (2 + numPoints) * 8 <= recordLength)
+			{
+				_mMin = *(points);
+				_mMax = *(points + 1);
+
+				points += 2;
+
+				for (int i = 0; i < numPoints; i++) {
+					_points[i]->put_M(points[i]);
 				}
 			}
 		}
@@ -775,7 +791,9 @@ bool CShapeWrapperCOM::put_RawData(char* shapeData)
 		}
 
 		// points
-		double* points = (double*)(shapeData + 44 + sizeof(int) * numParts);
+		int readCount = 44 + sizeof(int) * numParts;
+		double* points = (double*)(shapeData + readCount);
+
 		if (numPoints > 0)
 		{
 			_points.resize(numPoints);
@@ -789,34 +807,38 @@ bool CShapeWrapperCOM::put_RawData(char* shapeData)
 			}
 		}
 
-		// z values
-		if (_shapeType == SHP_POLYLINEZ || _shapeType == SHP_POLYGONZ ||
-			_shapeType == SHP_POLYLINEM || _shapeType == SHP_POLYGONM)
+		points += numPoints * 2;  // X and Y
+		readCount += numPoints * 2 * 8;
+
+		if (is25d)
 		{
-			points += numPoints * 2;
-			_mMin = *(points);
-			_mMax = *(points + 1);
-			points += 2;
-
-			if (numPoints > 0)
-			{
-				for (int i = 0; i < numPoints; i++) {
-					_points[i]->put_M(points[i]);
-				}
-			}
-
-			// m values
 			if (_shapeType == SHP_POLYLINEZ || _shapeType == SHP_POLYGONZ)
 			{
-				points += numPoints;
 				_zMin = *(points);
 				_zMax = *(points + 1);
+
+				points += 2;
+				readCount += 2 * 8;
+				
+				for (int i = 0; i < numPoints; i++) {
+					_points[i]->put_Z(points[i]);
+				}
+
+				points += numPoints;
+				readCount += numPoints * 8;
+			}
+
+			// M values (only if record length is long enough)
+			if (readCount + (2 + numPoints) * 8 <= recordLength)
+			{
+				_mMin = *(points);
+				_mMax = *(points + 1);
 				points += 2;
 
 				if (numPoints > 0)
 				{
 					for (int i = 0; i < numPoints; i++) {
-						_points[i]->put_Z(points[i]);
+						_points[i]->put_M(points[i]);
 					}
 				}
 			}
@@ -841,6 +863,8 @@ int* CShapeWrapperCOM::get_RawData()
 	double* ddata;
 
 	ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
+
+	bool is25d = shpType2D != _shapeType;
 
 	if (shpType2D == SHP_NULLSHAPE)
 	{
@@ -889,22 +913,12 @@ int* CShapeWrapperCOM::get_RawData()
 		}
 
 		// z values
-		if (_shapeType == SHP_MULTIPOINTZ || _shapeType == SHP_MULTIPOINTM)
+		if (is25d)
 		{
 			ddata += numPoints * 2;
-			ddata[0] = _mMin;
-			ddata[1] = _mMax;
-			ddata += 2;
 
-			for (int i = 0; i < numPoints; i++)
-			{
-				_points[i]->get_M(&ddata[i]);
-			}
-
-			// m values
 			if (_shapeType == SHP_MULTIPOINTZ)
 			{
-				ddata += numPoints;
 				ddata[0] = _zMin;
 				ddata[1] = _zMax;
 				ddata += 2;
@@ -913,6 +927,17 @@ int* CShapeWrapperCOM::get_RawData()
 				{
 					_points[i]->get_Z(&ddata[i]);
 				}
+
+				ddata += numPoints;
+			}
+
+			ddata[0] = _mMin;
+			ddata[1] = _mMax;
+			ddata += 2;
+
+			for (int i = 0; i < numPoints; i++)
+			{
+				_points[i]->get_M(&ddata[i]);
 			}
 		}
 	}
@@ -944,23 +969,12 @@ int* CShapeWrapperCOM::get_RawData()
 			}
 
 			// z values
-			if (_shapeType == SHP_POLYLINEZ || _shapeType == SHP_POLYGONZ ||
-				_shapeType == SHP_POLYLINEM || _shapeType == SHP_POLYGONM)
+			if (is25d)
 			{
 				ddata += numPoints * 2;
-				ddata[0] = _mMin;
-				ddata[1] = _mMax;
-				ddata += 2;
 
-				for (int i = 0; i < numPoints; i++)
-				{
-					_points[i]->get_M(&ddata[i]);
-				}
-
-				// m values
 				if (_shapeType == SHP_POLYLINEZ || _shapeType == SHP_POLYGONZ)
 				{
-					ddata += numPoints;
 					ddata[0] = _zMin;
 					ddata[1] = _zMax;
 					ddata += 2;
@@ -969,6 +983,17 @@ int* CShapeWrapperCOM::get_RawData()
 					{
 						_points[i]->get_Z(&ddata[i]);
 					}
+
+					ddata += numPoints;
+				}
+
+				ddata[0] = _mMin;
+				ddata[1] = _mMax;
+				ddata += 2;
+
+				for (int i = 0; i < numPoints; i++)
+				{
+					_points[i]->get_M(&ddata[i]);
 				}
 			}
 		}

@@ -35,7 +35,7 @@ public:
 	int get_PartCount() { return 0; }
 
 	// shpData
-	bool put_RawData(char* shapeData) { return false; }
+	bool put_RawData(char* shapeData, int recordLength) { return false; }
 	int* get_ShapeData(void) {return NULL; } 
 	
 	// type

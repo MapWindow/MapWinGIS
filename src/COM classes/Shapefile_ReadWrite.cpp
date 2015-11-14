@@ -102,7 +102,7 @@ IShape* CShapefile::ReadFastModeShape(long ShapeIndex)
 	{
 		ComHelper::CreateShape(&shape);
 		shape->put_GlobalCallback(_globalCallback);
-		((CShape*)shape)->put_RawData(data);
+		((CShape*)shape)->put_RawData(data, contentLength);
 		delete[] data;
 	}
 
@@ -1243,6 +1243,8 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 			// in-memory mode (COM points)
 			ShpfileType shptype = wrapper->get_ShapeType();
 			ShpfileType shptype2D = wrapper->get_ShapeType2D();
+			numPoints = wrapper->get_PointCount();
+			numParts = wrapper->get_PartCount();
 
 			//Write the Record
 			if( shptype2D == SHP_NULLSHAPE )

@@ -98,10 +98,10 @@ public:
 		put_ShapeType(shpType);
 	}
 
-	CShapeWrapper(char* data) 
+	CShapeWrapper(char* data, int length) 
 		: CShapeWrapper()
 	{
-		put_RawData(data);
+		put_RawData(data, length);
 	}
 
 	virtual ~CShapeWrapper()
@@ -136,7 +136,7 @@ public:
 	int get_PartCount(){ return _parts.size(); }
 
 	// shape data
-	bool put_RawData(char* shapeData);
+	bool put_RawData(char* shapeData, int length);
 	virtual int* get_RawData(void);
 	
 	// type
