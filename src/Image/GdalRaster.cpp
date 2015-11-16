@@ -867,7 +867,7 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
     for (int bandIndex = 1; bandIndex <= MAX(_nBands, 4); bandIndex++)
     {
 		int realBandIndex = GetMappedBandIndex(bandIndex);
-		if (realBandIndex == 0)
+		if (realBandIndex == 0 || realBandIndex > _nBands)
 		{
 			continue;
 		}
