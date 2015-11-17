@@ -121,11 +121,11 @@ void CustomProjection::put_Bounds(double xMin, double xMax, double yMin, double 
 	// when WMS layer is the first one added to the map, both projection 
 	// and bounds will be grabbed from it; in other cases bounds will be 
 	// recalculate on first data loading
-	MapBounds.left = xMin;
-	MapBounds.right = xMax;
-	MapBounds.bottom = yMin;
-	MapBounds.top = yMax;
-	MapProjectionCount = -1;	  // bounds should be update on first redraw
+	_mapBounds.left = xMin;
+	_mapBounds.right = xMax;
+	_mapBounds.bottom = yMin;
+	_mapBounds.top = yMax;
+	_mapProjectionCount = -1;	  // bounds should be update on first redraw
 }
 
 // ******************************************************

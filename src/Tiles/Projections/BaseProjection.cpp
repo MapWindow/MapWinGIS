@@ -145,3 +145,33 @@ void BaseProjection::getTileRectXY(Extent extentsWgs84, int zoom, CRect &rect)
 	rect.top = MAX(p1.y, p2.y);
 	rect.bottom = MIN(p1.y, p2.y);
 }
+
+// *******************************************************
+//		SetClipBounds
+// *******************************************************
+void BaseProjection::SetClipBounds(Extent& extents)
+{
+	_minLng = extents.left;
+	_maxLng = extents.right;
+	_minLat = extents.bottom;
+	_maxLat = extents.top;
+	_clipBoundsChanged = true;
+}
+
+// *******************************************************
+//		SetMapBounds
+// *******************************************************
+void BaseProjection::SetMapBounds(Extent bounds, int projectionCount)
+{
+	_mapBounds = bounds;
+	_mapProjectionCount = projectionCount;
+	_clipBoundsChanged = true;
+}
+
+// *******************************************************
+//		GetClipBounds
+// *******************************************************
+Extent BaseProjection::GetClipBounds()
+{
+	return Extent(_minLng, _maxLng, _minLat, _maxLat);
+}

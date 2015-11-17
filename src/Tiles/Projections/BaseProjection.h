@@ -27,14 +27,15 @@ class BaseProjection
 {
 public:
 	BaseProjection()
-		: _yMin(0.0), _yMax(0.0), _xMin(0.0), _xMax(0.0), MapBounds(0.0, 0.0, 0.0, 0.0)
+		: _yMin(0.0), _yMax(0.0), _xMin(0.0), _xMax(0.0), _mapBounds(0.0, 0.0, 0.0, 0.0)
 	{
 		_tileSize = CSize(256, 256);
 		_yInverse = false;
 		_earthRadius = 6378137.0;
 		_worldWide = true;
 		_projected = false;
-		MapProjectionCount = -1;
+		_clipBoundsChanged = true;
+		_mapProjectionCount = -1;
 	};
 
 	virtual ~BaseProjection() 
@@ -48,11 +49,12 @@ protected:
 	double _earthRadius;
 	bool _worldWide;
 
-	// bounds in decimal degrees
+	// clipping bounds in decimal degrees
 	double _minLat;
 	double _maxLat;
 	double _minLng;
 	double _maxLng;
+	bool _clipBoundsChanged;
 
 	// bounds in projected coordinates (server projection)
 	double _yMin;
@@ -60,9 +62,8 @@ protected:
 	double _xMin;
 	double _xMax;
 
-public:
-	Extent MapBounds;        // bounds of the projection in map coordinate system
-	int MapProjectionCount;  // the index of the map projection under which the bounds were calculated	
+	Extent _mapBounds;        // bounds of the projection in map coordinate system
+	int _mapProjectionCount;  // the index of the map projection under which the bounds were calculated	
 
 public:
 	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret) = 0;
@@ -77,6 +78,11 @@ public:
 	double get_MaxLat() { return _maxLat; }
 	double get_MinLong() { return _minLng; }
 	double get_MaxLong() { return _maxLng; }
+	bool get_ClipBoundsChanged() { return _clipBoundsChanged;}
+	Extent get_MapBounds() {return _mapBounds; }
+	int get_MapProjectionCount() { return _mapProjectionCount; }
+
+	void SetMapBounds(Extent bounds, int projectionCount);
 
 	void GetTileMatrixMinXY(int zoom, CSize &size);
 	void GetTileMatrixMaxXY(int zoom, CSize &size);
@@ -88,6 +94,9 @@ public:
 	RectLatLng CalculateGeogBounds(CPoint pnt, int zoom);
 
 	void Clip(CPoint& tilePnt, int zoom);
+
+	Extent GetClipBounds();
+	void SetClipBounds(Extent& extents);
 
 	static double Clip(double n, double minValue, double maxValue) { return MIN(MAX(n, minValue), maxValue); }
 };

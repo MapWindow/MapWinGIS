@@ -5818,6 +5818,8 @@ interface ITileProviders : IDispatch{
 	[propget, id(17), helpstring("")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(18), helpstring("")] HRESULT Language([in] int Index, [out, retval] BSTR* retVal);
 	[propput, id(18), helpstring("")] HRESULT Language([in] int Index, [in] BSTR twoLetterCode);
+	[propget, id(19)] HRESULT GeographicBounds([in] int Index, [out, retval] IExtents** pVal);
+	[propput, id(19)] HRESULT GeographicBounds([in] int Index, [in] IExtents* newVal);
 };
 [
 	object,
@@ -6466,6 +6468,7 @@ library MapWinGIS
 			[id(21)] void Redraw();
 			[id(42)] void LockWindow(tkLockMode LockMode);
 			[id(220)] void Redraw2(tkRedrawType redrawType);
+			[id(260)] void Redraw3(tkRedrawType redrawType, VARIANT_BOOL reloadTiles);
 #endif			
 
 #define COORDINATES_API

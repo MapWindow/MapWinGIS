@@ -284,6 +284,14 @@ void CMapView::Redraw2(tkRedrawType redrawType)
 }
 
 // *************************************************
+//			Redraw3()						  
+// *************************************************
+void CMapView::Redraw3(tkRedrawType redrawType, VARIANT_BOOL reloadTiles)
+{
+	RedrawCore(redrawType, false, reloadTiles ? true : false);
+}
+
+// *************************************************
 //			ScheduleVolatileRedraw()						  
 // *************************************************
 void CMapView::ScheduleVolatileRedraw()

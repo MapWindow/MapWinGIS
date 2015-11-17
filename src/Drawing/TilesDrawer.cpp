@@ -273,12 +273,9 @@ void TilesDrawer::DrawGridText(TileCore* tile, RectF& screenRect)
 // ***************************************************************
 void TilesDrawer::DrawWmsBounds(BaseProvider* provider)
 {
-	WmsCustomProvider* cp = dynamic_cast<WmsCustomProvider*>(provider);
-	if (!cp) return;
-
 	double xMin, yMin, xMax, yMax;
 
-	CustomProjection* pr = cp->get_CustomProjection();
+	BaseProjection* pr = provider->get_Projection();
 	yMin = pr->get_MinLat();
 	yMax = pr->get_MaxLat();
 	xMin = pr->get_MinLong();

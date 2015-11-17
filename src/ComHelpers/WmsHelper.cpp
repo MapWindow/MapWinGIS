@@ -22,7 +22,7 @@ bool WmsHelper::GetServerBounds(IWmsLayer* layer, Extent& extent)
 		{
 			// this bounds will be update during each loading of the layer based on map projection;
 			// if no loading was done, the bounds will be invalid (all values set to zero)
-			extent = p->MapBounds;
+			extent = p->get_MapBounds();
 			return true;
 		}
 	}

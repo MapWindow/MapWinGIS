@@ -92,14 +92,6 @@ bool TileHelper::Transform(TileCore* tile, IGeoProjection* mapProjection, bool i
 			double xMax = bounds->MaxLng();
 			double yMin = bounds->MinLat();
 
-			BaseProjection* pr = tile->get_Projection();
-			if (pr)
-			{
-				xMin = MAX(xMin, pr->get_MinLong());
-				xMax = MIN(xMax, pr->get_MaxLong());
-				yMin = MAX(yMin, pr->get_MinLat());
-				yMax = MIN(yMax, pr->get_MaxLat());
-			}
 
 			double xTL, xTR, xBL, xBR;
 			double yTL, yTR, yBL, yBR;

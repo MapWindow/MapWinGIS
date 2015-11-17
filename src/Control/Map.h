@@ -466,6 +466,7 @@ public:
 
 	// Regular methods
 	#pragma region Methods
+	afx_msg void Redraw3(tkRedrawType redrawType, VARIANT_BOOL reloadTiles);
 	afx_msg void Redraw2(tkRedrawType redrawType);
 	afx_msg void Redraw();
 	afx_msg long AddLayer(LPDISPATCH Object, BOOL Visible);

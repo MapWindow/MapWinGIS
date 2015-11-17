@@ -26,6 +26,7 @@
 #include "GoogleMapProvider.h"
 #include "RosreestrProvider.h"
 #include "CustomTileProvider.h"
+#include "ExtentsHelper.h"
 
 // ************************************************************
 //		get_Provider()
@@ -600,4 +601,47 @@ CString CTileProviders::get_LicenseUrl(tkTileProvider provider)
 	return "";
 }
 
+// *******************************************************
+//			GeographicBounds()
+// *******************************************************
+STDMETHODIMP CTileProviders::get_GeographicBounds(int Index, IExtents** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	*pVal = NULL;
+
+	if (!ValidateProviderIndex(Index)) return S_OK;
+
+	Extent box = _providers[Index]->get_Projection()->GetClipBounds();
+
+	*pVal = ExtentsHelper::Populate(box);
+
+	return S_OK;
+}
+
+STDMETHODIMP CTileProviders::put_GeographicBounds(int Index, IExtents* newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!ValidateProviderIndex(Index)) return S_OK;
+	
+	Extent box(newVal);
+
+	_providers[Index]->get_Projection()->SetClipBounds(box);
+
+	return S_OK;
+}
+
+// *******************************************************
+//			ValidateProviderIndex()
+// *******************************************************
+bool CTileProviders::ValidateProviderIndex(int index)
+{
+	if (index < 0 || index >= (int)_providers.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return false;
+	}
+
+	return true;
+}

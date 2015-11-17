@@ -123,11 +123,11 @@ bool CMapView::get_TileProviderBounds(BaseProvider* provider, Extent& retVal)
 
 	BaseProjection* proj = provider->get_Projection();
 
-	if (_projectionChangeCount == proj->MapProjectionCount)
+	if (_projectionChangeCount == proj->get_MapProjectionCount() && proj->get_ClipBoundsChanged())
 	{
 		// map projection hasn't changed from the last calculation,
 		// bounds can be reused
-		retVal = proj->MapBounds;
+		retVal = proj->get_MapBounds();
 		return true;
 	}
 
@@ -184,8 +184,7 @@ bool CMapView::get_TileProviderBounds(BaseProvider* provider, Extent& retVal)
 	retVal.bottom = bottom;
 
 	// cache bounds for the further reuse
-	proj->MapProjectionCount = _projectionChangeCount;
-	proj->MapBounds = retVal;
+	proj->SetMapBounds(retVal, _projectionChangeCount);
 
 	return true;
 }

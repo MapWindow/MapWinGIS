@@ -136,7 +136,9 @@ bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zo
 {
 	Extent* mapExtents = _map->_GetExtents();
 
-	if (!isSnapshot && _lastMapExtents == *mapExtents && _lastProvider == provider->Id)
+	bool boundsChanged = provider->get_Projection()->get_ClipBoundsChanged();
+
+	if (!isSnapshot && _lastMapExtents == *mapExtents && _lastProvider == provider->Id && !boundsChanged)
 	{
 		// no need to clear buffer
 		tilesLogger.WriteLine("Duplicate request is dropped.");

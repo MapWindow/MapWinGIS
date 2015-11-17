@@ -116,6 +116,8 @@ public:
 	STDMETHOD(get_IndexByProviderId)(int provider, int* retVal);
 	STDMETHOD(get_Language)(int Index, BSTR* retVal);
 	STDMETHOD(put_Language)(int Index, BSTR twoLetterCode);
+	STDMETHOD(get_GeographicBounds)(int Index, IExtents** pVal);
+	STDMETHOD(put_GeographicBounds)(int Index, IExtents* newVal);
 
 private:	
 	ITiles* _tiles;	// reference the parent
@@ -127,6 +129,7 @@ private:
 private:
 	void ErrorMessage(long ErrorCode);
 	BaseProvider* getProviderCore(tkTileProvider providerId);
+	bool ValidateProviderIndex(int index);
 
 public:
 	vector<BaseProvider*>* GetList() { return &_providers;	}

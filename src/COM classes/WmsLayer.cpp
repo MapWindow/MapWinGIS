@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "WmsLayer.h"
 #include "RamCache.h"
+#include "ExtentsHelper.h"
 
 // *********************************************************************
 //		~CWmsLayer
@@ -316,10 +317,7 @@ STDMETHODIMP CWmsLayer::get_MapExtents(IExtents** pVal)
 	BaseProjection* p = _provider->get_Projection();
 	if (p) 
 	{
-		IExtents* ext = NULL;
-		ComHelper::CreateExtents(&ext);
-		ext->SetBounds(p->MapBounds.left, p->MapBounds.bottom, 0.0, p->MapBounds.right, p->MapBounds.top, 0.0);
-		*pVal = ext;
+		*pVal = ExtentsHelper::Populate(p->get_MapBounds());
 	}
 
 	return S_OK;
