@@ -169,6 +169,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 
 	HDC hdc = _graphics->GetHDC();
 	_dc = CDC::FromHandle(hdc);
+	_dc->SetBkMode(TRANSPARENT);
 	_graphics->ReleaseHDC(hdc);
 
 	Gdiplus::Pen pen(Utility::OleColor2GdiPlus(_options->lineColor, (BYTE)_options->transparency));
