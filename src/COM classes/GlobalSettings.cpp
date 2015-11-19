@@ -785,13 +785,13 @@ STDMETHODIMP CGlobalSettings::put_ReprojectLayersOnAdding(VARIANT_BOOL newVal)
 STDMETHODIMP CGlobalSettings::get_MouseTolerance(DOUBLE* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.mouseTolerance ? VARIANT_TRUE : VARIANT_FALSE;
+	*pVal = m_globalSettings.mouseTolerance;
 	return S_OK;
 }
 STDMETHODIMP CGlobalSettings::put_MouseTolerance(DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.mouseTolerance = newVal ? true : false;
+	m_globalSettings.mouseTolerance = newVal;
 	return S_OK;
 }
 

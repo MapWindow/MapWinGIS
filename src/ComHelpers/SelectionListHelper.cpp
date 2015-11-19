@@ -48,7 +48,7 @@ void SelectionListHelper::PopulateShapefile(ISelectionList* list, IShapefile* so
 {
 	if (!source || !target || !list) return;
 
-	ShpfileType shpType = ShapefileHelper::GetShapeType2D(source);
+	ShpfileType shpType = ShapefileHelper::GetShapeType(source);
 
 	VARIANT_BOOL vb;
 	target->EditClear(&vb);
