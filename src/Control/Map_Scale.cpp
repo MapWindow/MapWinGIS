@@ -794,22 +794,18 @@ VARIANT_BOOL CMapView::ZoomToSelected(LONG LayerHandle)
 	IShapefile* sf = this->GetShapefile(LayerHandle);
 	if (sf)
 	{
-		long numShapes;
-		sf->get_NumShapes(&numShapes);
 		sf->get_NumSelected(&numSelected);
 		
 		if (numSelected > 0)
 		{
 			double xMin, yMin, xMax, yMax;
 			ShapefileHelper::GetSelectedExtents(sf, xMin, yMin, xMax, yMax);
-			IExtents* bounds = NULL;
-			ComHelper::CreateExtents(&bounds);
-			bounds->SetBounds(xMin, yMin, 0.0, xMax, yMax, 0.0);
-			this->SetExtents(bounds);
-			bounds->Release();
+			SetExtentsWithPadding(Extent(xMin, xMax, yMin, yMax));
 		}
+
 		sf->Release();
 	}
+
 	return numSelected > 0 ? VARIANT_TRUE : VARIANT_FALSE;
 
 }
