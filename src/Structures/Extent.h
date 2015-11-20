@@ -41,6 +41,14 @@ public:
 		top = Top;
 	}
 
+	Extent::Extent(Point2D center, double width, double height)
+	{
+		left = center.x - width / 2.0;
+		right = center.x + width / 2.0;
+		bottom = center.y - height / 2.0;
+		top = center.y + height / 2.0;
+	}
+
 	Extent(IExtents* box) 
 	{
 		if (!box) return;

@@ -290,7 +290,8 @@ void CMapView::SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn )
 			cBottom = centY + h/2.0;
 		}
 	}
-	this->SetExtentsCore(Extent(cLeft, cRight, cBottom, cTop));
+
+	SetExtentsCore(Extent(cLeft, cRight, cBottom, cTop));
 }
 
 // ****************************************************
@@ -341,38 +342,49 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= true*/, bool mapS
 }
 
 // **********************************************************
+//			GetScreenInfo()
+// **********************************************************
+void CMapView::GetScreenInches(double& sw, double& sh)
+{
+	double minX, maxX, minY, maxY;	// size of map control in pixels
+
+	ProjectionToPixel(_extents.left, _extents.top, minX, minY);
+	ProjectionToPixel(_extents.right, _extents.bottom, maxX, maxY);
+
+	sh = (maxY - minY) / 96.0;	// Number of pixels per logical inch along the screen width.
+	sw = (maxX - minX) / 96.0;	// Number of pixels per logical inch along the screen height
+}
+
+// **********************************************************
+//			GetMapInfo()
+// **********************************************************
+void CMapView::GetMapSizeInches(double& mw, double& mh)
+{
+	double convFact = Utility::GetConversionFactor(_unitsOfMeasure);	
+	mh = _extents.Height() * convFact;
+	mw = _extents.Width() * convFact;
+}
+
+// **********************************************************
 //			CurrentScale()
 // **********************************************************
 DOUBLE CMapView::GetCurrentScale(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	 
-	double minX, maxX, minY, maxY;	// size of map control in pixels
-    PROJECTION_TO_PIXEL(_extents.left, _extents.bottom, minX, minY);
-	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
-	if (minX == maxX && minY == maxY)
+	if (_extents.Width() == 0.0 || _extents.Height() == 0.0 || _viewWidth == 0 || _viewHeight == 0)
 	{
 		return 0.0;
 	}
-	else
-	{
-		long pixX = 96; //m_layerDC->GetDeviceCaps(LOGPIXELSX);	// Number of pixels per logical inch along the screen width.
-		long pixY = 96; //m_layerDC->GetDeviceCaps(LOGPIXELSY);	// Number of pixels per logical inch along the screen height
-		if (pixX == 0.0 || pixY == 0.0)	return 0.0;
-		
-		// logical size of screen, inches
-		double screenHeigth = fabs(maxY - minY)/(double)pixY;
-		double screenWidth =  fabs(maxX - minX)/(double)pixX;
-		
-		// size of map being displayed, inches
-		double convFact = Utility::GetConversionFactor(_unitsOfMeasure);	
-		if (convFact == 0) return 0.0;
-		double mapHeight = (_extents.top - _extents.bottom)*convFact;
-		double mapWidth = (_extents.right - _extents.left)*convFact;
-		
-		// calculate it as diagonal
-		return sqrt(pow(mapWidth, 2) + pow(mapHeight, 2)) / sqrt(pow(screenWidth,2) + pow(screenHeigth,2));
-	}
+
+	double sw, sh, mw, mh;
+	GetScreenInches(sw, sh);
+	GetMapSizeInches(mw, mh);
+
+	double md = sqrt(pow(mw, 2) + pow(mh, 2));
+	double sd = sqrt(pow(sw, 2) + pow(sh, 2));
+
+	return md / sd;
 }
 
 // **********************************************************
@@ -381,47 +393,36 @@ DOUBLE CMapView::GetCurrentScale(void)
 void CMapView::SetCurrentScale(DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (newVal == 0.0) return;
 
-	double xCent = (_extents.left + _extents.right)/2.0;
-	double yCent = (_extents.bottom + _extents.top)/2.0;
+	if (newVal <= 0.0) return;
 	
-	double minX, maxX, minY, maxY;	// size of ap control in pixels
-    PROJECTION_TO_PIXEL(_extents.left, _extents.bottom, minX, minY);
-	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
-	
-	long pixX = 96; //m_layerDC->GetDeviceCaps(LOGPIXELSX);
-	long pixY = 96; //m_layerDC->GetDeviceCaps(LOGPIXELSY);
-	if (pixX == 0.0 || pixY == 0.0)	
-		return;
-	double screenHeight = (maxY - minY)/pixY;	//96.0
-	double screenWidth =  (maxX - minX)/pixX;	//96.0
-	
+	double sw, sh;
+	GetScreenInches(sw, sh);
+
 	// diagonal of map extents in inches
-	double mapDiag = newVal * sqrt(pow(screenWidth,2) + pow(screenHeight,2));
+	double sd = sqrt(pow(sw, 2) + pow(sh, 2));
+	double md = newVal * sd;
 	
-	if (screenHeight == 0.0) return;
-	double a = screenWidth/screenHeight;						// we need width and height, but have diagonal and the sides ratio of triangle only; this makes 2 equations:
-	double mapHeight = sqrt(pow(mapDiag,2)/(pow(a,2) + 1));		// x/y = a
-	double mapWidth = mapHeight * a;							// x^2 + y^2 = b^2		// where b - mapDiag
-																// Taking x from first:
-																// y^2*a^2 + y^2 = b^2
-																// y = sqrt(b^2/(a^2 + 1))
-																// x = y*a
+	double a = sw / sh;								// we need width and height, but have diagonal and the sides ratio of triangle only; this makes 2 equations:
+	double mh = sqrt(pow(md,2)/(pow(a,2) + 1));		// x/y = a
+	double mw = mh * a;								// x^2 + y^2 = b^2		// where b - mapDiag
+													// Taking x from first:
+													// y^2*a^2 + y^2 = b^2
+													// y = sqrt(b^2/(a^2 + 1))
+													// x = y*a
 	// converting to the map units
-	mapHeight /= Utility::GetConversionFactor(_unitsOfMeasure);
-	mapWidth /= Utility::GetConversionFactor(_unitsOfMeasure);
+	mh /= Utility::GetConversionFactor(_unitsOfMeasure);
+	mw /= Utility::GetConversionFactor(_unitsOfMeasure);
+	
+	Point2D center = _extents.GetCenter();	
+	Extent box(center, mw, mh);
 
-	IExtents* box = NULL;
-	ComHelper::CreateExtents(&box);
-	box->SetBounds(xCent - mapWidth/2.0, yCent - mapHeight/2.0, 0.0, xCent + mapWidth/2.0, yCent + mapHeight/2.0, 0.0);
-	this->SetExtents(box);
-	box->Release(); box = NULL;
-	return;
+	SetExtentsCore(box);
 }
 #pragma endregion
 
 #pragma region Extents
+
 // ****************************************************
 //	   GetExtents()
 // ****************************************************
@@ -440,26 +441,15 @@ void CMapView::SetExtents(IExtents* newValue)
 {
 	if( !newValue )
 	{	
-		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return;
 	}
-	else
-	{
-		IExtents * box = NULL;
-		newValue->QueryInterface(IID_IExtents, (void**)&box);
+	
+	Extent box(newValue);
 
-		if( box != NULL )
-		{	
-			double nv = 0;
-			Extent ext;
-			box->GetBounds(&ext.left, &ext.bottom, &nv, &ext.right, &ext.top, &nv);
-			box->Release();
-
-			this->SetExtentsCore(ext);
-		}
-		else
-			ErrorMessage(tkINTERFACE_NOT_SUPPORTED);
-	}
+	SetExtentsCore(box);
 }
+
 #pragma endregion
 
 #pragma region GeographicExtents

@@ -1200,7 +1200,8 @@ private:
 	void UpdateMapTranformation();
 	bool TilesAreInCache();
 	Layer* get_LayerByPosition(int position);
-
+	void GetScreenInches(double& sw, double& sh);
+	void GetMapSizeInches(double& mw, double& mh);
 	// tiles
 	int ChooseZoom(BaseProvider* provider, Extent ext, double scalingRatio, bool limitByProvider);
 	int ChooseZoom(void* baseProvider, double scalingRatio, bool limitByProvider);
