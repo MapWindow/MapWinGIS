@@ -1987,7 +1987,10 @@ STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMetho
 			*retval = VARIANT_TRUE;
 		}
 		else {
-			ErrorMessage(tkUNSUPPORTED_FORMAT);
+			USES_CONVERSION;
+			CString msg = "Failed to build overviews for raster: ";
+			msg += W2A(_fileName);
+			CallbackHelper::ErrorMsg(msg);
 		}
 	}
 	
