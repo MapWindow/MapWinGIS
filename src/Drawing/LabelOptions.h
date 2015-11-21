@@ -220,7 +220,7 @@ public:
 	double x;
 	double y;
 	double rotation;
-	CString text;
+	CStringW text;
 	long category;
 	VARIANT_BOOL isDrawn;
 	short fontSize;

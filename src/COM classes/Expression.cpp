@@ -258,7 +258,7 @@ void CExpression::SetVariant(CExpressionValue* value, VARIANT* result)
 	else if (value->isString())
 	{
 		result->vt = VT_BSTR;
-		result->bstrVal = A2BSTR(value->str());
+		result->bstrVal = W2BSTR(value->str());
 	}
 }
 

@@ -345,7 +345,7 @@ bool Ogr2RawData::GenerateLabels(vector<ShapeRecordData*>& data, vector<CString>
 				}
 				else if (val->isString())
 				{
-					data[i]->LabelText = A2W(val->str());
+					data[i]->LabelText = val->str();
 				}
 			}
 		}

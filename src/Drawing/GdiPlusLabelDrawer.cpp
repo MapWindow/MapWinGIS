@@ -299,7 +299,7 @@ Gdiplus::Font* GdiPlusLabelDrawer::CreateFont(CLabelOptions* options, double fon
 void GdiPlusLabelDrawer::MeasureString(CLabelInfo* lbl, CRect& r)
 {
 	USES_CONVERSION;
-	text = A2W(lbl->text);
+	text = lbl->text;
 	_graphics->MeasureString(text, text.GetLength(), font, PointF(0.0f, 0.0f), &rect);
 
 	// in some case we lose the last letter by clipping; 

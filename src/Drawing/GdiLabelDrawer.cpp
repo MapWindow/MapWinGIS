@@ -72,7 +72,7 @@ void GdiLabelDrawer::DrawLabel(CLabelOptions* options, CLabelInfo* lbl, CRect& r
 	{
 		_dc->SetWindowOrg(-options->shadowOffsetX, -options->shadowOffsetY);
 		_dc->SetTextColor(options->shadowColor);
-		_dc->DrawText(lbl->text, rect, _alignment);
+		DrawTextW(_dc->m_hDC, lbl->text, -1, rect, _alignment);
 		_dc->SetTextColor(options->fontColor);
 		_dc->SetWindowOrg(0, 0);
 	}
@@ -80,7 +80,7 @@ void GdiLabelDrawer::DrawLabel(CLabelOptions* options, CLabelInfo* lbl, CRect& r
 	if (options->haloVisible)
 	{
 		_dc->BeginPath();
-		_dc->DrawText(lbl->text, rect, _alignment);
+		DrawTextW(_dc->m_hDC, lbl->text, -1, rect, _alignment);
 		_dc->EndPath();
 		oldPen = _dc->SelectObject(&_penHalo);
 		_dc->StrokePath();
@@ -90,14 +90,14 @@ void GdiLabelDrawer::DrawLabel(CLabelOptions* options, CLabelInfo* lbl, CRect& r
 	if (options->fontOutlineVisible)
 	{
 		_dc->BeginPath();
-		_dc->DrawText(lbl->text, rect, _alignment);
+		DrawTextW(_dc->m_hDC, lbl->text, -1, rect, _alignment);
 		_dc->EndPath();
 		oldPen = _dc->SelectObject(&_penFontOutline);
 		_dc->StrokePath();
 		_dc->SelectObject(oldPen);
 	}
 
-	_dc->DrawText(lbl->text, rect, _alignment);	// TODO: make a property (left/center/right)
+	DrawTextW(_dc->m_hDC, lbl->text, -1, rect, _alignment);
 }
 
 // ********************************************************************
@@ -170,7 +170,7 @@ CFont* GdiLabelDrawer::CreateFont(CLabelOptions* options, long fontSize, double 
 // *********************************************************************
 void GdiLabelDrawer::MeasureString(CLabelInfo* lbl, CRect& rect)
 {
-	_dc->DrawText(lbl->text, rect, DT_CALCRECT);
+	DrawTextW(_dc->m_hDC, lbl->text, -1, rect, DT_CALCRECT);
 
 	// frame for GDI is very narrow; so we'll enlarge it a bit					
 	rect.left -= rect.Height() / 6;

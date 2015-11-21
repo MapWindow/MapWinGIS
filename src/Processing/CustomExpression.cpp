@@ -386,6 +386,8 @@ TwoArgOperator CustomExpression::GetMatrixOperation(tkOperation op)
 // *************************************************************
 bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& operation) //int left, int operation, int right )
 {
+	USES_CONVERSION;
+
 	CExpressionValue* valLeft = NULL; 
 	CExpressionValue* valRight = NULL; 
 	CElement* elLeft = NULL;
@@ -456,12 +458,12 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 		case operLike:
 			if (valLeft->isString() && valRight->isString())
 			{
-				CString pattern = valRight->str();
-				pattern.Replace("%", ".*");
-				pattern.Replace("_", ".");
-				std::regex reg(pattern);
+				CStringW pattern = valRight->str();
+				pattern.Replace(L"%", L".*");
+				pattern.Replace(L"_", L".");
+				std::wregex reg(pattern);
 
-				const char* s = (LPCTSTR)valLeft->str();
+				const WCHAR* s = (LPCWSTR)valLeft->str();
 				bool result = std::regex_match(s, reg);
 				elLeft->calcVal->bln(result);
 				break;
@@ -599,14 +601,14 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 					}
 					else if ( valLeft->IsDouble() && valRight->isString())
 					{
-						CString s;
-						s.Format(_floatFormat, valLeft->dbl());
+						CStringW s;						
+						s.Format(A2W(_floatFormat), valLeft->dbl());
 						elLeft->calcVal->str(s + valRight->str());
 					}
 					else if ( valLeft->isString() && valRight->IsDouble())
 					{
-						CString s;
-						s.Format(_floatFormat, valRight->dbl());
+						CStringW s;
+						s.Format(A2W(_floatFormat), valRight->dbl());
 						elLeft->calcVal->str(valLeft->str() + s);
 					}
 					else if ( valLeft->isString() && valRight->isString())
@@ -878,8 +880,19 @@ IShape* CustomExpression::get_Shape()
 // *****************************************************************
 //		put_Shape()
 // *****************************************************************
+
 void CustomExpression::put_Shape(IShape* shape)
 {
 	ComHelper::SetRef(shape, (IDispatch**)&_shape, true);
 }
 
+void CustomExpression::put_FieldValue(int FieldId, BSTR newVal) 
+{
+	USES_CONVERSION;
+	_variables[FieldId]->val->str(OLE2W(newVal));
+}
+
+void CustomExpression::put_FieldValue(int FieldId, CString newVal) {
+	USES_CONVERSION;
+	_variables[FieldId]->val->str(A2W(newVal));
+}

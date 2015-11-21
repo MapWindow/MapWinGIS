@@ -52,7 +52,9 @@ void CMapView::SetLayerName(LONG LayerHandle, LPCTSTR newVal)
 	if( IsValidLayer(LayerHandle) )
 	{	
 		USES_CONVERSION;
-		_allLayers[LayerHandle]->name = A2W(newVal);	// TODO: use Unicode
+		WCHAR *buffer = Utility::StringToWideChar(newVal);
+		_allLayers[LayerHandle]->name = buffer;
+		delete[] buffer;
 	}
 	else
 		ErrorMessage(tkINVALID_LAYER_HANDLE);

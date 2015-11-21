@@ -420,6 +420,7 @@ CExpressionPart* ExpressionParser::ParseExpressionPart(CString s)
 // Parses string from the given position
 bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 {
+	USES_CONVERSION;
 	CString sub;		// substring
 	char chr = s[position];
 
@@ -519,7 +520,7 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 				chr = s[position];
 			}
 			element->type = etValue;
-			element->val->str(sub);
+			element->val->str(A2W(sub));
 			break;
 		}
 
@@ -621,7 +622,7 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 				unsigned int index = atoi(LPCTSTR(sub));
 
 				vector<CString>* strings = _expression->GetStrings();
-				element->val->str(index < strings->size() ? (*strings)[index] : "");
+				element->val->str(index < strings->size() ? A2W((*strings)[index]) : L"");
 			}
 			else
 			{

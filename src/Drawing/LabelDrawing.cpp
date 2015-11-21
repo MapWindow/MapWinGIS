@@ -21,8 +21,7 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 25 june 2010 - created the file
-
+ 
 #include "stdafx.h"
 #include "LabelDrawing.h"
 #include <map>
@@ -112,7 +111,7 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 	GdiLabelDrawer gdi;
 	GdiPlusLabelDrawer gdiPlus;
 	CRect rect(0, 0, 0, 0);
-	std::set<CString> uniqueValues;
+	std::set<CStringW> uniqueValues;
 
 	bool useGdiPlus = GetUseGdiPlus(labels);
 	if (useGdiPlus) {

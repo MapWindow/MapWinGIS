@@ -240,12 +240,12 @@ namespace parser
 
 	bool fcnTitle(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
-		CString arg = args[0]->str();
+		CStringW arg = args[0]->str();
 
-		CString r;
+		CStringW r;
 
 		int position = 0;
-		CString word = arg.Tokenize(" ", position);
+		CStringW word = arg.Tokenize(L" ", position);
 
 		while (word.GetLength() > 0)
 		{
@@ -254,7 +254,7 @@ namespace parser
 				r += word.Left(1).MakeUpper() + word.Mid(1).MakeLower() + " ";
 			}
 
-			word = arg.Tokenize(" ", position);
+			word = arg.Tokenize(L" ", position);
 		}
 
 		if (r.GetLength() > 0)
@@ -280,7 +280,7 @@ namespace parser
 
 	bool fcnReplace(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
-		CString s = args[0]->str();
+		CStringW s = args[0]->str();
 		s.Replace(args[1]->str(), args[2]->str());
 		result.str(s);
 		return true;
@@ -288,7 +288,7 @@ namespace parser
 
 	bool fcnSubstr(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
-		CString s = args[0]->str();
+		CStringW s = args[0]->str();
 
 		// TODO: split into separate functions
 		if (args.size() == 2)
@@ -309,7 +309,7 @@ namespace parser
 
 	bool fcnConcat(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
-		CString s;
+		CStringW s;
 
 		for (size_t i = 0; i < args.size(); i++)
 		{
@@ -330,14 +330,14 @@ namespace parser
 
 	bool fcnLeft(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
-		CString s = args[0]->str().Left(static_cast<int>(args[1]->dbl()));
+		CStringW s = args[0]->str().Left(static_cast<int>(args[1]->dbl()));
 		result.str(s);
 		return true;
 	}
 
 	bool fcnRight(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
-		CString s = args[0]->str().Right(static_cast<int>(args[1]->dbl()));
+		CStringW s = args[0]->str().Right(static_cast<int>(args[1]->dbl()));
 		result.str(s);
 		return true;
 	}
@@ -486,7 +486,7 @@ namespace parser
 				result.dbl(args[0]->bln() ? 1.0 : 0.0);
 				break;
 			case tkValueType::vtString:
-				result.dbl(atoi(args[0]->str()));		// if it's not valid string, return 0
+				result.dbl(_wtoi(args[0]->str()));		// if it's not valid string, return 0
 				break;
 			case tkValueType::vtFloatArray:
 				return false;
@@ -506,7 +506,7 @@ namespace parser
 				result.dbl(args[0]->bln() ? 1.0 : 0.0);
 				break;
 			case tkValueType::vtString:
-				result.dbl(Utility::atof_custom(args[0]->str()));
+				result.dbl(Utility::wtof_custom(args[0]->str()));
 				break;
 			case tkValueType::vtFloatArray:
 				return false;
@@ -521,8 +521,8 @@ namespace parser
 		{
 			case tkValueType::vtDouble:
 				{
-					CString s;
-					s.Format("%g", args[0]->dbl());					// set format as a parameter
+					CStringW s;
+					s.Format(L"%g", args[0]->dbl());					// set format as a parameter
 					result.str(s);
 				}
 				break;

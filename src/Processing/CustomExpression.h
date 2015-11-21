@@ -101,8 +101,8 @@ public:
 	CString get_FieldName(int FieldId) { return _variables[FieldId]->fieldName; }
 	CExpressionValue* get_FieldValue(int FieldId) {	return _variables[FieldId]->val;}
 	void put_FieldValue(int FieldId, double newVal) { _variables[FieldId]->val->dbl(newVal); }
-	void put_FieldValue(int FieldId, BSTR newVal) { USES_CONVERSION; _variables[FieldId]->val->str(OLE2CA(newVal));	}
-	void put_FieldValue(int FieldId, CString newVal) { _variables[FieldId]->val->str(newVal); }
+	void put_FieldValue(int FieldId, BSTR newVal);
+	void put_FieldValue(int FieldId, CString newVal);
 	void put_FieldValue(int FieldId, bool newVal) {	_variables[FieldId]->val->bln(newVal);}
 
 	IShape* get_Shape();
