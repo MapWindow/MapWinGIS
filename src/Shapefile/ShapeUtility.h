@@ -9,6 +9,7 @@ public:
 	static bool IsM(ShpfileType shpType);
 	static bool IsZ(ShpfileType shpType);
 	static ShpfileType Convert2D(ShpfileType shpType);
+	static ShpfileType Get25DShapeType(ShpfileType shpTypeBase, bool isZ, bool isM);
 	static IShapeWrapper* CreateWrapper(char* data, int recordLength, bool forceCom);
 	static IShapeWrapper* CreateWrapper(ShpfileType shpType, bool forceCOM);
 	static IShapeWrapper* CreateEmptyWrapper(bool forceCOM);

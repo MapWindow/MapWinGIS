@@ -1554,37 +1554,45 @@ ShpfileType GetClipOperationReturnType(ShpfileType type1, ShpfileType type2, tkC
 	{
 		case clClip:	
 		case clIntersection:
-			// return type is always has the lower dimension of two
-			if (type1 == SHP_POINT || type2 == SHP_POINT || type1 == SHP_MULTIPOINT || type2 == SHP_MULTIPOINT ) 
 			{
-				// TODO: should we return multipoints type? 
-				return SHP_POINT;
-			}
-			else if (type1 == SHP_POLYLINE && type2 == SHP_POLYLINE)
-			{
-				return SHP_POINT;
-			}
-			else if (type1 == SHP_POLYLINE || type2 == SHP_POLYLINE)
-			{
-				return SHP_POLYLINE;
-			}
-			else
-			{
-				return SHP_POLYGON;
+				bool isZ = ShapeUtility::IsZ(type1) || ShapeUtility::IsZ(type2);
+				bool isM = ShapeUtility::IsM(type1) || ShapeUtility::IsM(type2);
+
+				ShpfileType type2D = ShapeUtility::Convert2D(type1);
+				ShpfileType type2D2 = ShapeUtility::Convert2D(type2);
+
+				// return type is always has the lower dimension of two
+				if (type2D == SHP_POINT || type2D2 == SHP_POINT)
+				{
+					return ShapeUtility::Get25DShapeType(SHP_POINT, isZ, isM);
+				}
+				else if (type2D == SHP_MULTIPOINT || type2D2 == SHP_MULTIPOINT)
+				{
+					return ShapeUtility::Get25DShapeType(SHP_MULTIPOINT, isZ, isM);
+				}
+				else if (type2D == SHP_POLYLINE && type2D2 == SHP_POLYLINE)
+				{
+					return ShapeUtility::Get25DShapeType(SHP_POINT, isZ, isM);
+				}
+				else if (type2D == SHP_POLYLINE || type2D2 == SHP_POLYLINE)
+				{
+					return ShapeUtility::Get25DShapeType(SHP_POLYLINE, isZ, isM);
+				}
+				else
+				{
+					return ShapeUtility::Get25DShapeType(SHP_POLYGON, isZ, isM);
+				}
 			}
 			break;
 		case clDifference:
 			// the subject type remains intact
 			return type1;
 		case clSymDifference:
-			// doesn't make sense in case of different types, for example poly vs line returns
-			// part of the polys from the first and part of the lines from the second
-			// we shall return type of subject, but it's arbitrary and can be type2 as well
-			return type1;
 		case clUnion:
-			// what is the result of poly vs line here?
-			break;
+			// both types should be the same			
+			return type1;
 	}
+
 	return type1;
 }
 
@@ -1612,6 +1620,78 @@ CString GetClipOperationName(tkClipOperation operation)
 // ********************************************************************
 //		DoClipOperarion()
 // ********************************************************************
+bool CShapefile::ValidateClippingOutputType(ShpfileType type1, ShpfileType type2, ShpfileType returnType, tkClipOperation operation)
+{
+	switch (operation)
+	{
+		case clSymDifference:
+		case clUnion:
+			if (type1 != type2) {
+				CallbackHelper::ErrorMsg("Types of both input shapefiles for symmetrical difference and union operations must be the same.");
+				return false;
+			}
+			break;
+		case clDifference:
+			if (type1 != returnType)
+			{
+				CallbackHelper::ErrorMsg("The type of output shapefile must be the same as in put for difference operation.");
+				return false;
+			}
+			break;
+		case clIntersection:
+		case clClip:
+			bool isM1 = ShapeUtility::IsM(type1);
+			bool isM2 = ShapeUtility::IsM(type2);
+			bool isM = ShapeUtility::IsM(returnType);
+
+			bool isZ1 = ShapeUtility::IsZ(type1);
+			bool isZ2 = ShapeUtility::IsZ(type2);
+			bool isZ = ShapeUtility::IsZ(returnType);
+
+			if ((isM1 != isM && isM2 != isM) ||
+				isZ1 != isZ && isZ2 != isZ)
+			{
+				// there is no complete certainty how our conversion routines and GEOS will
+				// handle Z, M values, so we let it pass with a warning to see what happens
+				CallbackHelper::ErrorMsg("Suspicious output type for clipping operation (Z, M values must be preserved).");
+			}
+
+			ShpfileType type2D = ShapeUtility::Convert2D(type1);
+			ShpfileType type2D2 = ShapeUtility::Convert2D(type2);
+
+			switch (returnType)
+			{
+				case SHP_POLYGON:
+					if (type2D != SHP_POLYGON || type2D2 != SHP_POLYGON)
+					{
+						ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
+						return false;
+					}
+					break;
+				case SHP_POLYLINE:
+					if ((type2D != SHP_POLYLINE && type2D != SHP_POLYGON) ||
+						(type2D2 != SHP_POLYLINE && type2D2 != SHP_POLYGON))
+					{
+						ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
+						return false;
+					}
+					break;
+				case SHP_POINT:
+				case SHP_MULTIPOINT:
+					// point can be received from any combination of types (even poly vs poly)
+					// not sure how multipoints are handled - so put no limitations for the either
+					break;
+			}
+
+			break;
+	}
+
+	return true;
+}
+
+// ********************************************************************
+//		DoClipOperarion()
+// ********************************************************************
 void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, 
 								 VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval, 
 								 tkClipOperation operation, ShpfileType returnType)
@@ -1626,38 +1706,18 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 	}
 	
 	ShpfileType type1, type2;	
-	type1 = ShapeUtility::Convert2D(_shpfiletype);
+	type1 = _shpfiletype;
 
 	sfOverlay->get_ShapefileType(&type2);	
-	type2 = ShapeUtility::Convert2D(type2);
-	bool canUseClipper = (type1 == SHP_POLYGON && type2 == SHP_POLYGON);
+	bool canUseClipper = type1 == SHP_POLYGON && type2 == SHP_POLYGON;
 	
 	if (returnType == SHP_NULLSHAPE)
 	{
-		// it wasn't specified, therefore autodetect
 		returnType = GetClipOperationReturnType(type1, type2, operation);
 	}
-	else
-	{
-		// check if the return type is valid (intersection operation is the only one where type can specified explicitly)
-		if (returnType == SHP_POLYGON && (type1 != SHP_POLYGON || type2 != SHP_POLYGON))
-		{
-			// both must be polys to return a poly
-			ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
-			return;
-		}
-		else if (returnType == SHP_POLYLINE && ((type1 != SHP_POLYLINE && type1 != SHP_POLYGON) ||
-											   (type2 != SHP_POLYLINE && type2 != SHP_POLYGON)))
-		{
-			// both must be either lines or polys to return a line
-			ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
-			return;
-		}
-		else if (returnType == SHP_POINT || returnType == SHP_MULTIPOINT)
-		{
-			// point can be received from any combination of types (event poly vs poly)
-			// not sure how multipoints are handled - so put no limitations for the either
-		}
+
+	if (!ValidateClippingOutputType(type1, type2, returnType, operation)) {
+		return;
 	}
 
 	if (!ValidateInput(this, GetClipOperationName(operation), "this", SelectedOnlySubject))

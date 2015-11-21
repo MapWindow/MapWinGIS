@@ -383,3 +383,31 @@ void ShapeUtility::WriteExtentsZ(IShapeWrapper* shape, FILE* file)
 	fwrite(&zMax, sizeof(double), 1, file);
 }
 
+// **************************************************************
+//		Get25DShapeType 
+// **************************************************************
+ShpfileType ShapeUtility::Get25DShapeType(ShpfileType shpTypeBase, bool isZ, bool isM)
+{
+	switch (shpTypeBase)
+	{
+		case SHP_POINT:
+			if (isZ) return SHP_POINTZ;
+			if (isM) return SHP_POINTM;
+			return SHP_POINT;
+		case SHP_MULTIPOINT:
+			if (isZ) return SHP_MULTIPOINTZ;
+			if (isM) return SHP_MULTIPOINTM;
+			return SHP_MULTIPOINT;
+		case SHP_POLYLINE:
+			if (isZ) return SHP_POLYLINEZ;
+			if (isM) return SHP_POLYLINEM;
+			return SHP_POLYLINE;
+		case SHP_POLYGON:
+			if (isZ) return SHP_POLYGONZ;
+			if (isM) return SHP_POLYGONM;
+			return SHP_POLYGON;
+	}
+
+	return shpTypeBase;
+}
+
