@@ -3751,6 +3751,7 @@ interface IImage : IDispatch{
 	[propput, id(85), helpstring("property SourceGridBandIndex")] HRESULT SourceGridBandIndex([in] int newVal);
 	[propget, id(86), helpstring("property GridProxyColorScheme")] HRESULT GridProxyColorScheme([out, retval] IGridColorScheme** retVal);
 	[propget, id(87)] HRESULT GeoProjection([out, retval] IGeoProjection** pVal);
+	[propput, id(87)] HRESULT GeoProjection([in] IGeoProjection* newVal);
 	[propget, id(88)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 	[propget, id(89)] HRESULT Band([in]long bandIndex, [out, retval]IGdalRasterBand** retVal);
 	[propget, id(90)] HRESULT PaletteInterpretation2([out, retval] tkPaletteInterpretation* pVal);
@@ -3799,6 +3800,7 @@ interface IImage : IDispatch{
 	[propget, id(116)] HRESULT BufferOffsetX([out, retval] LONG* pVal);
 	[propget, id(117)] HRESULT BufferOffsetY([out, retval] LONG* pVal);
 	[propget, id(118)] HRESULT ActiveColorScheme([out, retval] IGridColorScheme** pVal);
+	
 };
 
 /****************************  Shapefile Interface ***********************/

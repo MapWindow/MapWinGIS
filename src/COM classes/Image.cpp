@@ -4194,3 +4194,27 @@ STDMETHODIMP CImageClass::get_ActiveColorScheme(IGridColorScheme** pVal)
 
 	return S_OK;
 }
+
+// ********************************************************
+//     put_GeoProjection
+// ********************************************************
+STDMETHODIMP CImageClass::put_GeoProjection(IGeoProjection* newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	ComHelper::SetRef((IDispatch*)newVal, (IDispatch**)&_projection, false);
+
+	if (_sourceType == tkImageSourceType::istUninitialized ||
+		_sourceType == tkImageSourceType::istInMemory)
+	{
+		return S_OK;
+	}
+
+	CStringW projectionFilename = Utility::GetProjectionFilename(_fileName);
+	CComBSTR bstr(projectionFilename);
+	
+	VARIANT_BOOL vb;
+	_projection->WriteToFileEx(bstr, VARIANT_FALSE, &vb);
+
+	return S_OK;
+}

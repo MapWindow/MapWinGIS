@@ -443,7 +443,11 @@ STDMETHODIMP CGridHeader::get_GeoProjection(IGeoProjection** pVal)
 STDMETHODIMP CGridHeader::put_GeoProjection(IGeoProjection* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
 	ComHelper::SetRef((IDispatch*)newVal, (IDispatch**)&_projection, false);
+
+	AttemptSave();
+
 	return S_OK;
 }
 

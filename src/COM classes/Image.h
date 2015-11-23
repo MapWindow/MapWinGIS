@@ -285,6 +285,7 @@ public:
 	STDMETHOD(put_SourceGridBandIndex)(int newVal);
 	STDMETHOD(get_GridProxyColorScheme)(IGridColorScheme** retVal);
 	STDMETHOD(get_GeoProjection)(IGeoProjection** pVal);
+	STDMETHOD(put_GeoProjection)(IGeoProjection* newVal);
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_Band)(long bandIndex, IGdalRasterBand** retVal);
 	STDMETHOD(get_PaletteInterpretation2)(tkPaletteInterpretation* pVal);
