@@ -737,6 +737,14 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 	}
 	else
 	{	
+		// deleting the labels
+		VARIANT_BOOL bSynchronized;
+		_labels->get_Synchronized(&bSynchronized);
+		if (bSynchronized)
+		{
+			_labels->Clear();
+		}
+
 		_table->EditClear(retval);
 		if( *retval == VARIANT_FALSE )
 		{	
@@ -754,14 +762,6 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 		{
 			delete _qtree;
 			_qtree = NULL;
-		}
-
-		// deleting the labels
-		VARIANT_BOOL bSynchronized;
-		_labels->get_Synchronized(&bSynchronized);
-		if (bSynchronized)
-		{
-			_labels->Clear();
 		}
 
 		_sortingChanged = true;
