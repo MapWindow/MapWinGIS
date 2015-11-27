@@ -3800,7 +3800,6 @@ interface IImage : IDispatch{
 	[propget, id(116)] HRESULT BufferOffsetX([out, retval] LONG* pVal);
 	[propget, id(117)] HRESULT BufferOffsetY([out, retval] LONG* pVal);
 	[propget, id(118)] HRESULT ActiveColorScheme([out, retval] IGridColorScheme** pVal);
-	
 };
 
 /****************************  Shapefile Interface ***********************/
@@ -6248,6 +6247,10 @@ interface IHistogram : IDispatch{
 interface IGdalDataset : IDispatch {
 	
 	[propget, id(1)] HRESULT Driver([out, retval] IGdalDriver** pVal);
+	[id(2)] HRESULT Open([in] BSTR Filename, [in] VARIANT_BOOL readOnly, [out, retval] VARIANT_BOOL* retVal);
+	[id(3)] HRESULT Close();
+	[id(4)] HRESULT SetGeoTransform([in] DOUBLE xLeft, [in] DOUBLE dX, [in] DOUBLE yProjOnX, [in] DOUBLE yTop, [in] DOUBLE xProjOnY, [in] DOUBLE dY, [out, retval] VARIANT_BOOL* retVal);
+	[id(5)] HRESULT SetProjection([in] BSTR Projection, [out, retval] VARIANT_BOOL* retVal);
 };
 
 [

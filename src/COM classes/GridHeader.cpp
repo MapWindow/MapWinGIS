@@ -466,6 +466,5 @@ STDMETHODIMP CGridHeader::put_Projection(BSTR newVal)
 	VARIANT_BOOL vbretval;
 	_projection->ImportFromAutoDetect(newVal, &vbretval);
 
-	this->AttemptSave();
 	return S_OK;
 }
