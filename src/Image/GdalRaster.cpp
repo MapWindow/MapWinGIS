@@ -161,9 +161,9 @@ void GdalRaster::ComputeBandMinMax(GDALRasterBand* band, BandMinMax& minMax, boo
 	minMax.Min = band->GetMinimum(&gotMin);
 	minMax.Max = band->GetMaximum(&gotMax);
 
-	if (!gotMin || !gotMax)
+	if ((!gotMin || !gotMax) && force)
 	{
-		if (_dataType == GDT_Byte && _imgType != PNG_FILE && _imgType != ADF_FILE && !_hasColorTable == false)
+		if (_dataType == GDT_Byte && _imgType != PNG_FILE && _imgType != ADF_FILE && _hasColorTable)
 		{
 			//For some reason GDAL does not seem to pick up the color table of a PNG binary image		
 			minMax.Min = 0;
