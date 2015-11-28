@@ -251,6 +251,7 @@ void CImageClass::SetImageTypeCore(ImageType fileType)
 		case PNM_FILE:	case PGM_FILE:		case BIL_FILE:	case ADF_FILE:
 		case GRD_FILE:	case IMG_FILE:		case ASC_FILE:	case BT_FILE:
 		case MAP_FILE:	case LF2_FILE:		case KAP_FILE:	case DEM_FILE:
+		case VRT_FILE:
 		{
 			_imgType = fileType;
 			break;
