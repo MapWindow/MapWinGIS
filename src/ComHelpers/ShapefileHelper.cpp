@@ -2,6 +2,8 @@
 #include "ShapefileHelper.h"
 #include "Shapefile.h"
 #include "FieldHelper.h"
+#include "TableClass.h"
+#include "TableHelper.h"
 
 // *****************************************************
 //		GetMWShapeIdIndex()
@@ -503,9 +505,14 @@ void ShapefileHelper::ClearShapefileModifiedFlag(IShapefile* sf)
 	long numShapes = 0;
 	sf->get_NumShapes(&numShapes);
 
+	CComPtr<ITable> table = NULL;
+	sf->get_Table(&table);
+	CTableClass* tableInternal = TableHelper::Cast(table);
+
 	for (int i = 0; i < numShapes; i++)
 	{
 		sf->put_ShapeModified(i, VARIANT_FALSE);
+		tableInternal->MarkRowIsClean(i);
 	}
 }
 

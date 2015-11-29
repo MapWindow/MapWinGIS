@@ -158,6 +158,7 @@ public:
 	STDMETHOD(get_Filename)(BSTR* pVal);
 	STDMETHOD(get_JoinOptions)(LONG joinIndex, BSTR* pVal);
 	STDMETHOD(ClearCache)();
+	STDMETHOD(get_RowIsModified)(LONG RowIndex, VARIANT_BOOL* pVal);
 
 private:
 	struct JoinInfo
@@ -256,12 +257,15 @@ public:
 	bool WriteAppendedRow();
 	void StartAppendMode() { _appendMode = true; _appendStartShapeCount = _rows.size(); };
 	void StopAppendMode();
+	void MarkRowIsClean(long rowIndex);
+	bool ValidateRowIndex(long rowIndex);
 
 public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)
 		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
 	END_CONNECTION_POINT_MAP()
 	
+
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Table), CTableClass)

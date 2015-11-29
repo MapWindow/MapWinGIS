@@ -11,6 +11,7 @@
 #include "FieldClassification.h"
 #include "ShapefileCategories.h"
 #include "Templates.h"
+#include "ShapefileHelper.h"
 
 // *************************************************************
 //		InjectShapefile()
@@ -675,36 +676,41 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 STDMETHODIMP COgrLayer::HasLocalChanges(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_OK;
 
-	if (_shapefile)
+	if (!CheckState() || !_shapefile) return S_OK;
+
+	long numShapes;
+	_shapefile->get_NumShapes(&numShapes);
+
+	CSingleLock lock(&_loader.ProviderLock);
+	if (_dynamicLoading) lock.Lock();
+
+	int featureCount = static_cast<int>(_layer->GetFeatureCount());
+	if (numShapes != featureCount)	   // i.e. deleted or inserted feature
 	{
-		long numShapes;
-		_shapefile->get_NumShapes(&numShapes);
+		*retVal = VARIANT_TRUE;
+		return S_OK;
+	}
 
-		CSingleLock lock(&_loader.ProviderLock);
-		if (_dynamicLoading) lock.Lock();
+	CComPtr<ITable> table = NULL;
+	_shapefile->get_Table(&table);
 
-		int featureCount = static_cast<int>(_layer->GetFeatureCount());
-		if (numShapes != featureCount)	   // i.e. deleted or inserted feature
+	VARIANT_BOOL modified, rowModified;
+
+	for (long i = 0; i < numShapes; i++)
+	{
+		_shapefile->get_ShapeModified(i, &modified);
+		table->get_RowIsModified(i, &rowModified);
+		
+		if (modified || rowModified)
 		{
 			*retVal = VARIANT_TRUE;
-		}
-		else
-		{
-			VARIANT_BOOL modified;
-			for (long i = 0; i < numShapes; i++)
-			{
-				_shapefile->get_ShapeModified(i, &modified);
-				if (modified)
-				{
-					*retVal = VARIANT_TRUE;
-					break;
-				}
-			}
+			break;
 		}
 	}
+
 	return S_OK;
 }
 

@@ -1274,7 +1274,7 @@ bool CTableClass::UpdateTableRow(TableRow* newRow, long rowIndex)
 // *******************************************************************
 void CTableClass::TryClearLastRecord(long rowIndex)
 {
-	if (!m_globalSettings.cacheDbfRecords)
+	if (!m_globalSettings.cacheDbfRecords && _dbfHandle != NULL)
 	{
 		if (_lastRecordIndex != rowIndex &&
 			_lastRecordIndex >= 0 && _lastRecordIndex < RowCount() &&
@@ -3720,3 +3720,48 @@ STDMETHODIMP CTableClass::ClearCache()
 	return S_OK;
 }
 
+// ********************************************************
+//     ValidateRowIndex()
+// ********************************************************
+bool CTableClass::ValidateRowIndex(long rowIndex)
+{
+	if (rowIndex < 0 || rowIndex >= RowCount())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return false;
+	}
+
+	return true;
+}
+
+// ********************************************************
+//     RowIsModified()
+// ********************************************************
+STDMETHODIMP CTableClass::get_RowIsModified(LONG RowIndex, VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!ValidateRowIndex(RowIndex)) {
+		return S_OK;
+	}
+
+	bool modified = _rows[RowIndex].row != NULL && _rows[RowIndex].row->IsModified();
+	*pVal = modified ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+
+// ********************************************************
+//     MarkRowIsClean()
+// ********************************************************
+void CTableClass::MarkRowIsClean(long rowIndex)
+{
+	if (!ValidateRowIndex(rowIndex)) {
+		return;
+	}
+
+	if (_rows[rowIndex].row) {
+		_rows[rowIndex].row->SetDirty(TableRow::DATA_CLEAN);
+	}
+}

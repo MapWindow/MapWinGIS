@@ -174,6 +174,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 
 	CComPtr<ILabels> labels = NULL;
 	sf->get_Labels(&labels);
+
 	OgrLabelsHelper::LabelFields labelFields;
 	if (loadLabels) {
 		if (!OgrLabelsHelper::GetLabelFields(layer, labelFields))
@@ -192,8 +193,6 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 			isTrimmed = true;
 			break;
 		}
-
-		CStringW text;
 
 		OGRGeometry *oGeom = poFeature->GetGeometryRef();
 
@@ -228,44 +227,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 			sf->EditCellValue(0, numShapes, var, &vbretval);
 		}
 
-		double x = 0.0, y = 0.0, rotation = 0;
-
-		for (int iFld = 0; iFld < poFields->GetFieldCount(); iFld++)
-		{
-			OGRFieldDefn* oField = poFields->GetFieldDefn(iFld);
-			OGRFieldType type = oField->GetType();
-
-			CComVariant var;
-			if (type == OFTInteger)
-			{
-				var.vt = VT_I4;
-				var.lVal = poFeature->GetFieldAsInteger(iFld);
-			}
-			else if (type == OFTReal)
-			{
-				var.vt = VT_R8;
-				var.dblVal = poFeature->GetFieldAsDouble(iFld);
-			}
-			else //if (type == OFTString )
-			{
-				var.vt = VT_BSTR;
-				var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
-			}
-			sf->EditCellValue(hasFID ? iFld + 1 : iFld, numShapes, var, &vbretval);
-
-			if (loadLabels)
-			{
-				if (iFld == labelFields.X) x = var.dblVal;
-				if (iFld == labelFields.Y) y = var.dblVal;
-				if (iFld == labelFields.Text) text = OgrHelper::OgrString2Unicode(poFeature->GetFieldAsString(iFld));
-				if (iFld == labelFields.Rotation) rotation = var.dblVal;
-			}
-		}
-
-		if (loadLabels) {
-			CComBSTR bstr(text);
-			labels->AddLabel(bstr, x, y, rotation);
-		}
+		CopyValues(poFields, poFeature, sf, hasFID, numShapes, loadLabels, labelFields);
 
 next_feature:
 		OGRFeature::DestroyFeature(poFeature);
@@ -275,6 +237,61 @@ next_feature:
 	sf->RefreshExtents(&vbretval);
 	ShapefileHelper::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
 	return true;
+}
+
+// *************************************************************
+//		CopyValues()
+// *************************************************************
+void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, IShapefile* sf, bool hasFID, long numShapes, 
+	bool loadLabels, OgrLabelsHelper::LabelFields labelFields)
+{
+	double x = 0.0, y = 0.0, rotation = 0;
+
+	CStringW text;
+
+	for (int iFld = 0; iFld < poFields->GetFieldCount(); iFld++)
+	{
+		OGRFieldDefn* oField = poFields->GetFieldDefn(iFld);
+		OGRFieldType type = oField->GetType();
+
+		CComVariant var;
+		if (type == OFTInteger)
+		{
+			var.vt = VT_I4;
+			var.lVal = poFeature->GetFieldAsInteger(iFld);
+		}
+		else if (type == OFTReal)
+		{
+			var.vt = VT_R8;
+			var.dblVal = poFeature->GetFieldAsDouble(iFld);
+		}
+		else //if (type == OFTString )
+		{
+			var.vt = VT_BSTR;
+			var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+		}
+
+		VARIANT_BOOL vb;
+		sf->EditCellValue(hasFID ? iFld + 1 : iFld, numShapes, var, &vb);
+		
+		if (loadLabels)
+		{
+			if (iFld == labelFields.X) x = var.dblVal;
+			if (iFld == labelFields.Y) y = var.dblVal;
+			if (iFld == labelFields.Text) text = OgrHelper::OgrString2Unicode(poFeature->GetFieldAsString(iFld));
+			if (iFld == labelFields.Rotation) rotation = var.dblVal;
+		}
+	}
+
+	if (loadLabels) 
+	{
+		CComBSTR bstr(text);
+
+		CComPtr<ILabels> labels = NULL;
+		sf->get_Labels(&labels);
+
+		labels->AddLabel(bstr, x, y, rotation);
+	}
 }
 
 // *************************************************************

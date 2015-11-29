@@ -4227,6 +4227,7 @@ interface ITable : IDispatch{
 	[propget, id(52)] HRESULT Filename([out, retval] BSTR* pVal);
 	[propget, id(53)] HRESULT JoinOptions([in] LONG joinIndex, [out, retval] BSTR* pVal);
 	[id(54)] HRESULT ClearCache();
+	[propget, id(55)] HRESULT RowIsModified([in] LONG RowIndex, [out, retval] VARIANT_BOOL* pVal);
 };
 
 
