@@ -1147,7 +1147,7 @@ bool CShapeEditor::TrySaveShape(IShape* shp)
 		return false;
 	}
 
-	// 3) custom validation
+	// custom validation
 	tkMwBoolean cancel = blnFalse;
 	_mapCallback->_FireValidateShape(_layerHandle, shp, &cancel);
 	if (cancel == blnTrue) {
@@ -1169,7 +1169,13 @@ bool CShapeEditor::TrySaveShape(IShape* shp)
 	}
 	else 
 	{
-		sf->EditUpdateShape(shapeIndex, shp, &vb);
+		this->get_HasChanges(&vb);
+
+		if (vb) {
+			// don't update it if there are no changes 
+			// or it will be marked as modified & send to database on saving
+			sf->EditUpdateShape(shapeIndex, shp, &vb);
+		}
 	}
 	_startingUndoCount = -1;	// don't discard states; operation succeeded
 
