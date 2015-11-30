@@ -14,18 +14,17 @@ private:
 	static void ShapesToOgr(IShapefile* sf, OGRLayer* layer, ICallback* callback);
 	static void RecreateFieldsFromShapefile(OGRLayer* layer, IShapefile* sf);
 	static OGRFieldType ShapeFieldType2OgrFieldType(FieldType fieldType);
-	static void CopyRecordAttributes(IShapefile* sf, long shapeIndex, OGRFeature* feature, bool editing, OGRFeatureDefn* fields);
 	static void CopyRecordAttributes(IShapefile* sf, long shapeIndex, OGRFeature* feature, bool editing, OGRFeatureDefn* fields, vector<int>* fieldMap);
 	static bool SaveShape(OGRLayer* poLayer, OGRFeature* ft, OGRFeatureDefn* fields, IShapefile* shapefile, int shapeIndex, long shapeCmnIndex, tkOgrSaveType saveType, bool validateShapes, vector<OgrUpdateError>& errors, vector<int>& fieldMap);
 	static OGRFeature* GetFeature(OGRLayer* poLayer, IShapefile* shapefile, long shapeCmnIndex, long shapeIndex, long& featId);
 	static void CreateField(IField* field, OGRLayer* layer);
-	static void GetUnmodifiedFields(IShapefile* sf, std::set<int>& indices);
+	static void GetOldFields(IShapefile* sf, std::set<int>& indices);
 	static void RemovedStaleFields(OGRLayer* layer, IShapefile* sf, int fieldCount);
 	static void CreateNewFields(OGRLayer* layer, IShapefile* sf);
-	static void GetNewAndModifiedFields(IShapefile* sf, std::set<int>& indices);
+	static void GetNewFields(IShapefile* sf, std::set<int>& indices);
 	static void CopyShapeData(IShapefile* shapefile, OGRLayer* poLayer, long shapeCmnIndex, tkOgrSaveType saveType, bool validateShapes, vector<OgrUpdateError>& errors, int& shapeCount, int& rowCount);
-	static void BuildFieldMap(IShapefile* sf);
 	static void BuildFieldMap(IShapefile* sf, vector<int>& indices);
+	static void UpdateModifiedFields(IShapefile* sf, OGRLayer* layer);
 };
 
 

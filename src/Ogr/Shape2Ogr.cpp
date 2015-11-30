@@ -215,7 +215,7 @@ OGRFieldType Shape2Ogr::ShapeFieldType2OgrFieldType(FieldType fieldType)
 void Shape2Ogr::CreateNewFields(OGRLayer* layer, IShapefile* sf)
 {
 	set<int> indices;
-	GetNewAndModifiedFields(sf, indices);
+	GetNewFields(sf, indices);
 	if (indices.size() == 0) return;
 
 	CComPtr<ITable> table = NULL;
@@ -246,7 +246,7 @@ void Shape2Ogr::CreateNewFields(OGRLayer* layer, IShapefile* sf)
 void Shape2Ogr::RemovedStaleFields(OGRLayer* layer, IShapefile* sf, int maxFieldCount)
 {
 	set<int> indices;
-	GetUnmodifiedFields(sf, indices);
+	GetOldFields(sf, indices);
 
 	OGRFeatureDefn* fields = layer->GetLayerDefn();
 	int fieldCount = fields->GetFieldCount();
@@ -270,10 +270,10 @@ void Shape2Ogr::RemovedStaleFields(OGRLayer* layer, IShapefile* sf, int maxField
 }
 
 // *************************************************************
-//		GetNewAndModifiedFields()
+//		GetNewFields()
 // *************************************************************
 // We are using shapefile indices here
-void Shape2Ogr::GetNewAndModifiedFields(IShapefile* sf, set<int>& indices)
+void Shape2Ogr::GetNewFields(IShapefile* sf, set<int>& indices)
 {
 	indices.clear();
 
@@ -287,10 +287,7 @@ void Shape2Ogr::GetNewAndModifiedFields(IShapefile* sf, set<int>& indices)
 		CComPtr<IField> field = NULL;
 		sf->get_Field(i, &field);
 
-		VARIANT_BOOL modified;
-		field->get_Modified(&modified);
-
-		if (modified || tableInternal->GetFieldSourceIndex(i) == -1)
+		if (tableInternal->GetFieldSourceIndex(i) == -1)
 		{
 			indices.insert(i);
 		}
@@ -298,10 +295,10 @@ void Shape2Ogr::GetNewAndModifiedFields(IShapefile* sf, set<int>& indices)
 }
 
 // *************************************************************
-//		GetUnmodifiedFields()
+//		GetOldFields()
 // *************************************************************
 // We are using OGR indices here
-void Shape2Ogr::GetUnmodifiedFields(IShapefile* sf, set<int>& indices)
+void Shape2Ogr::GetOldFields(IShapefile* sf, set<int>& indices)
 {
 	indices.clear();
 
@@ -315,12 +312,9 @@ void Shape2Ogr::GetUnmodifiedFields(IShapefile* sf, set<int>& indices)
 		CComPtr<IField> field = NULL;
 		sf->get_Field(i, &field);
 
-		VARIANT_BOOL modified;
-		field->get_Modified(&modified);
-
 		int originalIndex = tableInternal->GetFieldSourceIndex(i);
 
-		if (!modified && originalIndex != -1)
+		if (originalIndex != -1)
 		{
 			indices.insert(originalIndex);
 		}
@@ -383,6 +377,8 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* layer, IShapefile* sf, long shapeC
 	OGRFeatureDefn* fields = layer->GetLayerDefn();
 	int fieldCount = fields->GetFieldCount();
 
+	UpdateModifiedFields(sf, layer);
+
 	// create new fields, don't remove yet the stale ones, 
 	// since it will break the indices to which the local fields are mapped
 	CreateNewFields(layer, sf);
@@ -407,6 +403,54 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* layer, IShapefile* sf, long shapeC
 	}
 
 	return shapeCount + rowCount;
+}
+
+// *************************************************************
+//		UpdateModifiedFields()
+// *************************************************************
+void Shape2Ogr::UpdateModifiedFields(IShapefile* sf, OGRLayer* layer)
+{
+	long numFields = ShapefileHelper::GetNumFields(sf);
+
+	CComPtr<ITable> table = NULL;
+	sf->get_Table(&table);
+	CTableClass* tableInternal = TableHelper::Cast(table);
+
+	OGRFeatureDefn* fields = layer->GetLayerDefn();
+	int fieldCount = fields->GetFieldCount();
+	
+	for (long i = 0; i < numFields; i++)
+	{
+		CComPtr<IField> fld = NULL;
+		sf->get_Field(i, &fld);
+
+		VARIANT_BOOL modified;
+		fld->get_Modified(&modified);
+		int sourceIndex = tableInternal->GetFieldSourceIndex(i);
+
+		if (modified && sourceIndex != -1 && sourceIndex < fieldCount)
+		{
+			CComBSTR name;
+			fld->get_Name(&name);
+
+			FieldType fieldType;
+			fld->get_Type(&fieldType);
+
+			USES_CONVERSION;
+			CStringA nameA = Utility::ConvertToUtf8(OLE2W(name));
+
+			OGRFieldType ogrType = ShapeFieldType2OgrFieldType(fieldType);
+
+			OGRFieldDefn* fd = new OGRFieldDefn(nameA, ogrType);
+
+			OGRErr err = layer->AlterFieldDefn(sourceIndex, fd, ALTER_NAME_FLAG);
+
+			if (err != OGRERR_NONE)
+			{
+				CallbackHelper::ErrorMsg("Failed to update OGR field name.");
+			}
+		}
+	}
 }
 
 // *************************************************************
