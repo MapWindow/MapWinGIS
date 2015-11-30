@@ -32,5 +32,6 @@ public:
 	static int GetModifiedCount(IShapefile* sf);
 	static void ClearShapefileModifiedFlag(IShapefile* sf);
 	static bool Delete(CStringW filename);
+	static void MarkFieldsAreUnmodified(IShapefile* table);
 };
 

@@ -4,6 +4,7 @@
 #include "OgrConverter.h"
 #include "GeoProjection.h"
 #include "ShapefileHelper.h"
+#include "TableHelper.h"
 
 // *************************************************************
 //		Layer2Shapefile()
@@ -92,11 +93,24 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer, ShpfileType activeShapeT
 			gp->Release();
 		}
 	}
+	
+	CopyFields(layer, sf);
 
-	/* ----------------------------------------------------------------- */
-	/*		Converting of fields										 */
-	/* ----------------------------------------------------------------- */
+	long numFields = ShapefileHelper::GetNumFields(sf);
+
+	if (numFields == 0)
+		ShapefileHelper::InsertMwShapeIdField(sf);
+
+	return sf;
+}
+
+// *************************************************************
+//		CopyFields()
+// *************************************************************
+void Ogr2Shape::CopyFields(OGRLayer* layer, IShapefile* sf)
+{
 	IField * fld = NULL;
+	VARIANT_BOOL vb;
 
 	// creating FID field to be able to write back to database
 	bool hasFID = false;
@@ -108,7 +122,7 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer, ShpfileType activeShapeT
 		fld->put_Type(INTEGER_FIELD);
 		CComBSTR bstrName(name);
 		fld->put_Name(bstrName);
-		sf->EditInsertField(fld, &fieldIndex, NULL, &vbretval);
+		sf->EditInsertField(fld, &fieldIndex, NULL, &vb);
 		fld->Release();
 		hasFID = true;
 	}
@@ -132,16 +146,22 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer, ShpfileType activeShapeT
 		fld->put_Precision((long)oField->GetPrecision());
 
 		fieldIndex++;
-		sf->EditInsertField(fld, &fieldIndex, NULL, &vbretval);
+		sf->EditInsertField(fld, &fieldIndex, NULL, &vb);
+
 		fld->Release();
 	}
 
+	// we are saving the initial indices to know later on which fields has changed
+	CComPtr<ITable> tbl = NULL;
+	sf->get_Table(&tbl);
+	CTableClass* tableInternal = TableHelper::Cast(tbl);
+
 	long numFields = ShapefileHelper::GetNumFields(sf);
-
-	if (numFields == 0)
-		ShapefileHelper::InsertMwShapeIdField(sf);
-
-	return sf;
+	for (long i = 1; i < numFields; i++) 
+	{
+		// the first one is FID
+		tableInternal->SetFieldSourceIndex(i, i - 1);
+	}
 }
 
 // *************************************************************

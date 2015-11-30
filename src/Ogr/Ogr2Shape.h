@@ -13,5 +13,6 @@ public:
 	static void ReadGeometryTypes(OGRLayer* layer, set<OGRwkbGeometryType>& types);
 private:
 	static void CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, IShapefile* sf, bool hasFID, long numShapes, bool loadLabels, OgrLabelsHelper::LabelFields labelFields);
+	static void CopyFields(OGRLayer* layer, IShapefile* sf);
 };
 

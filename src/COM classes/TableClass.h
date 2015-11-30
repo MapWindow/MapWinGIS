@@ -218,6 +218,8 @@ private:
 	void ClearRows();
 	void TryClearLastRecord(long rowIndex);
 	void ClearFields();
+	bool ValidateFieldIndex(long fieldIndex);
+	bool ValidateRowIndex(long rowIndex);
 
 public:	
 	void DeserializeCore(CPLXMLNode* node);
@@ -258,14 +260,15 @@ public:
 	void StartAppendMode() { _appendMode = true; _appendStartShapeCount = _rows.size(); };
 	void StopAppendMode();
 	void MarkRowIsClean(long rowIndex);
-	bool ValidateRowIndex(long rowIndex);
+	void MarkFieldsAreClean();
+	int GetFieldSourceIndex(int fieldIndex);
+	void SetFieldSourceIndex(int fieldIndex, int sourceIndex);
 
 public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)
 		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
 	END_CONNECTION_POINT_MAP()
 	
-
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Table), CTableClass)

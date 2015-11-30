@@ -3735,6 +3735,20 @@ bool CTableClass::ValidateRowIndex(long rowIndex)
 }
 
 // ********************************************************
+//     ValidateFieldIndex()
+// ********************************************************
+bool CTableClass::ValidateFieldIndex(long fieldIndex)
+{
+	if (fieldIndex < 0 || fieldIndex >= FieldCount())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return false;
+	}
+
+	return true;
+}
+
+// ********************************************************
 //     RowIsModified()
 // ********************************************************
 STDMETHODIMP CTableClass::get_RowIsModified(LONG RowIndex, VARIANT_BOOL* pVal)
@@ -3764,4 +3778,41 @@ void CTableClass::MarkRowIsClean(long rowIndex)
 	if (_rows[rowIndex].row) {
 		_rows[rowIndex].row->SetDirty(TableRow::DATA_CLEAN);
 	}
+}
+
+// ********************************************************
+//     MarkFieldsClean()
+// ********************************************************
+void CTableClass::MarkFieldsAreClean()
+{
+	for (size_t i = 0; i < _fields.size(); i++)
+	{
+		if (_fields[i]) {
+			_fields[i]->oldIndex = i;
+		}
+	}
+}
+
+// ********************************************************
+//     GetFieldOriginalIndex()
+// ********************************************************
+int CTableClass::GetFieldSourceIndex(int fieldIndex)
+{
+	if (!ValidateFieldIndex(fieldIndex)) {
+		return -1;
+	}
+
+	return _fields[fieldIndex]->oldIndex;
+}
+
+// ********************************************************
+//     GetFieldOriginalIndex()
+// ********************************************************
+void CTableClass::SetFieldSourceIndex(int fieldIndex, int sourceIndex)
+{
+	if (!ValidateFieldIndex(fieldIndex)) {
+		return;
+	}
+
+	_fields[fieldIndex]->oldIndex = sourceIndex;
 }

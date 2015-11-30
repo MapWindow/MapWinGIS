@@ -318,3 +318,24 @@ STDMETHODIMP CField::put_Expression(BSTR newVal)
 
 	return S_OK;
 }
+
+// **************************************************************
+//		Modified()
+// **************************************************************
+STDMETHODIMP CField::get_Modified(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _modified;
+
+	return S_OK;
+}
+
+STDMETHODIMP CField::put_Modified(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_modified = newVal;
+
+	return S_OK;
+}

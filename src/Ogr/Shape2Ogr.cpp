@@ -31,9 +31,9 @@ bool Shape2Ogr::ShapefileFieldsToOgr(IShapefile* sf, OGRLayer* poLayer)
 {
 	long numFields;
 	sf->get_NumFields(&numFields);
+
 	for (int i = 0; i < numFields; i++)
 	{
-		// copy field
 		long precision, width;
 		CComBSTR name;
 		CComPtr<IField> fld = NULL;
@@ -49,6 +49,7 @@ bool Shape2Ogr::ShapefileFieldsToOgr(IShapefile* sf, OGRLayer* poLayer)
 		if (poLayer->CreateField(&oField) != OGRERR_NONE)
 			return false;
 	}
+
 	return true;
 }
 
@@ -72,8 +73,9 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 
 	bool saveLabels = true;
 	OgrLabelsHelper::LabelFields labelFields;
-	if (!OgrLabelsHelper::GetLabelFields(poLayer, labelFields))
+	if (!OgrLabelsHelper::GetLabelFields(poLayer, labelFields)) {
 		saveLabels = false;
+	}
 
 	for (long i = 0; i < numShapes; i++)
 	{
@@ -82,7 +84,7 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 		if (((CShapefile*)sf)->ShapeAvailable(i, VARIANT_FALSE))
 		{
 			OGRFeature* poFeature = OGRFeature::CreateFeature(fields);
-			if (ShapeRecord2Feature(sf, i, poFeature, fields, ostSaveAll, false, validationError))
+			if (ShapeRecord2Feature(sf, i, poFeature, fields, ostSaveAll, false, validationError, true, NULL))
 			{
 				if (saveLabels) {
 					OgrLabelsHelper::AddLabel2Feature(labels, i, poFeature, labelFields);
@@ -98,7 +100,8 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 // *************************************************************
 //		CopyRecordAttributes()
 // *************************************************************
-void Shape2Ogr::CopyRecordAttributes(IShapefile* sf, long shapeIndex, OGRFeature* feature, bool editing, OGRFeatureDefn* fields)
+void Shape2Ogr::CopyRecordAttributes(IShapefile* sf, long shapeIndex, OGRFeature* feature, bool editing, 
+									OGRFeatureDefn* fields, vector<int>* fieldMap)
 {
 	CComVariant var;
 	double dval;
@@ -107,24 +110,38 @@ void Shape2Ogr::CopyRecordAttributes(IShapefile* sf, long shapeIndex, OGRFeature
 
 	USES_CONVERSION;
 	int startIndex = editing ? 1 : 0;
-	for (int j = 0; j < numFields - startIndex; j++)
+
+	int sourceFieldCount = fields->GetFieldCount();
+
+	for (int j = startIndex; j < numFields; j++)
 	{
-		sf->get_CellValue(j + startIndex, shapeIndex, &var);
+		sf->get_CellValue(j, shapeIndex, &var);
+
+		int sourceIndex = j - startIndex;
+		if (fieldMap) {
+			sourceIndex = (*fieldMap)[j];
+		}
+
+		if (sourceIndex >= sourceFieldCount) {
+			CallbackHelper::ErrorMsg("Invalid source field index for OGR datasource.");
+			continue;
+		}
+
 		if (var.vt != VT_EMPTY)
 		{
-			OGRFieldType type = fields->GetFieldDefn(j)->GetType();
+			OGRFieldType type = fields->GetFieldDefn(sourceIndex)->GetType();
 			switch (type)
 			{
 				case OGRFieldType::OFTReal:
 					dVal(var, dval);
-					feature->SetField(j, dval);
+					feature->SetField(sourceIndex, dval);
 					break;
 				case OGRFieldType::OFTInteger:
 					lVal(var, lval);
-					feature->SetField(j, lval);
+					feature->SetField(sourceIndex, lval);
 					break;
 				case OGRFieldType::OFTString:
-					feature->SetField(j, OLE2A(var.bstrVal));
+					feature->SetField(sourceIndex, OLE2A(var.bstrVal));
 					break;
 			}
 		}
@@ -135,13 +152,14 @@ void Shape2Ogr::CopyRecordAttributes(IShapefile* sf, long shapeIndex, OGRFeature
 //		ShapeRecord2Feature()
 // *************************************************************
 bool Shape2Ogr::ShapeRecord2Feature(IShapefile* sf, long shapeIndex, OGRFeature* feature,
-	OGRFeatureDefn* fields, tkOgrSaveType saveType, bool editing, CString& validationError, bool validateShape)
+	OGRFeatureDefn* fields, tkOgrSaveType saveType, bool editing, CString& validationError, bool validateShape, 
+	vector<int>* fieldMap)
 {
 	if (!sf || !feature) return false;
 
 	if (saveType != tkOgrSaveType::ostGeometryOnly)
 	{
-		CopyRecordAttributes(sf, shapeIndex, feature, editing, fields);
+		CopyRecordAttributes(sf, shapeIndex, feature, editing, fields, fieldMap);
 	}
 
 	if (saveType != tkOgrSaveType::ostAttributesOnly)
@@ -192,63 +210,152 @@ OGRFieldType Shape2Ogr::ShapeFieldType2OgrFieldType(FieldType fieldType)
 }
 
 // *************************************************************
-//		RecreateFieldsFromShapefile()
+//		CreateNewFields()
 // *************************************************************
-void Shape2Ogr::RecreateFieldsFromShapefile(OGRLayer* layer, OGRFeatureDefn* fields, IShapefile* sf)
+void Shape2Ogr::CreateNewFields(OGRLayer* layer, IShapefile* sf)
 {
-	int fieldCount = fields->GetFieldCount();
+	set<int> indices;
+	GetNewAndModifiedFields(sf, indices);
+	if (indices.size() == 0) return;
 
-	// geometry field is not included in this count
-	for (int i = fieldCount - 1; i >= 0; i--)
-	{
-		OGRErr err = layer->DeleteField(i);
-		if (err != OGRERR_NONE)
-		{
-			Debug::WriteError("Failed to remove field: %d", err);
-		}
-	}
+	CComPtr<ITable> table = NULL;
+	sf->get_Table(&table);
+	CTableClass* tableInternal = TableHelper::Cast(table);
 
-	fieldCount = fields->GetFieldCount();
-	Debug::WriteLine("Field count after: %d", fieldCount);
+	OGRFeatureDefn* fields = layer->GetLayerDefn();
 
 	long numFields;
 	sf->get_NumFields(&numFields);
 
-	// TODO: recreate only those fields that are actually changed and map the others
-	// the first field is geometry one
+	// the first one is FID
+	for (long i = 1; i < numFields; i++)
+	{
+		if (indices.find(i) != indices.end())
+		{
+			CComPtr<IField> field = NULL;
+			sf->get_Field(i, &field);
+			CreateField(field, layer);
+			tableInternal->SetFieldSourceIndex(i, fields->GetFieldCount() - 1);
+		}
+	}
+}
+
+// *************************************************************
+//		RemoveFields()
+// *************************************************************
+void Shape2Ogr::RemovedStaleFields(OGRLayer* layer, IShapefile* sf, int maxFieldCount)
+{
+	set<int> indices;
+	GetUnmodifiedFields(sf, indices);
+
+	OGRFeatureDefn* fields = layer->GetLayerDefn();
+	int fieldCount = fields->GetFieldCount();
+
+	// we must not remove fields that were created during this session
+	fieldCount = MIN(fieldCount, maxFieldCount);
+
+	// we shall remove both those that are no longer present in the local table
+	// and those that were marked as changed
+	for (int i = fieldCount - 1; i >= 0; i--)
+	{
+		if (indices.find(i) == indices.end())
+		{
+			OGRErr err = layer->DeleteField(i);
+			if (err != OGRERR_NONE)
+			{
+				Debug::WriteError("Failed to remove field: %d", err);
+			}
+		}
+	}
+}
+
+// *************************************************************
+//		GetNewAndModifiedFields()
+// *************************************************************
+// We are using shapefile indices here
+void Shape2Ogr::GetNewAndModifiedFields(IShapefile* sf, set<int>& indices)
+{
+	indices.clear();
+
+	CComPtr<ITable> table = NULL;
+	sf->get_Table(&table);
+	CTableClass* tableInternal = TableHelper::Cast(table);
+
+	long numFields = ShapefileHelper::GetNumFields(sf);
 	for (long i = 1; i < numFields; i++)
 	{
 		CComPtr<IField> field = NULL;
 		sf->get_Field(i, &field);
-	
-		CComBSTR bstr;
-		field->get_Name(&bstr);
-		CStringA name = Utility::ConvertToUtf8(OLE2W(bstr));
 
-		FieldType fieldType;
-		field->get_Type(&fieldType);
+		VARIANT_BOOL modified;
+		field->get_Modified(&modified);
 
-		long precision;
-		field->get_Precision(&precision);
-
-		long width;
-		field->get_Width(&width);
-
-		OGRFieldType ogrType = ShapeFieldType2OgrFieldType(fieldType);
-		OGRFieldDefn* ogrField = new OGRFieldDefn(name, ogrType);
-
-		ogrField->SetPrecision(precision);
-		ogrField->SetWidth(width);
-		OGRErr err = layer->CreateField(ogrField);
-
-		if (err != OGRERR_NONE)
+		if (modified || tableInternal->GetFieldSourceIndex(i) == -1)
 		{
-			Debug::WriteError("Failed to create field: %d", err);
+			indices.insert(i);
 		}
 	}
+}
 
-	fieldCount = fields->GetFieldCount();
-	Debug::WriteLine("Field count after: %d", fieldCount);
+// *************************************************************
+//		GetUnmodifiedFields()
+// *************************************************************
+// We are using OGR indices here
+void Shape2Ogr::GetUnmodifiedFields(IShapefile* sf, set<int>& indices)
+{
+	indices.clear();
+
+	CComPtr<ITable> table = NULL;
+	sf->get_Table(&table);
+	CTableClass* tableInternal = TableHelper::Cast(table);
+
+	long numFields = ShapefileHelper::GetNumFields(sf);
+	for (long i = 0; i < numFields; i++)
+	{
+		CComPtr<IField> field = NULL;
+		sf->get_Field(i, &field);
+
+		VARIANT_BOOL modified;
+		field->get_Modified(&modified);
+
+		int originalIndex = tableInternal->GetFieldSourceIndex(i);
+
+		if (!modified && originalIndex != -1)
+		{
+			indices.insert(originalIndex);
+		}
+	}
+}
+
+// *************************************************************
+//		CreateField()
+// *************************************************************
+void Shape2Ogr::CreateField(IField* field, OGRLayer* layer)
+{
+	CComBSTR bstr;
+	field->get_Name(&bstr);
+	CStringA name = Utility::ConvertToUtf8(OLE2W(bstr));
+
+	FieldType fieldType;
+	field->get_Type(&fieldType);
+
+	long precision;
+	field->get_Precision(&precision);
+
+	long width;
+	field->get_Width(&width);
+
+	OGRFieldType ogrType = ShapeFieldType2OgrFieldType(fieldType);
+	OGRFieldDefn* ogrField = new OGRFieldDefn(name, ogrType);
+
+	ogrField->SetPrecision(precision);
+	ogrField->SetWidth(width);
+	OGRErr err = layer->CreateField(ogrField);
+
+	if (err != OGRERR_NONE)
+	{
+		Debug::WriteError("Failed to create field: %d", err);
+	}
 }
 
 // *************************************************************
@@ -266,45 +373,103 @@ OGRFeature* Shape2Ogr::GetFeature(OGRLayer* poLayer, IShapefile* shapefile, long
 // *************************************************************
 //		SaveShapefileChanges()
 // *************************************************************
-int Shape2Ogr::SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, long shapeCmnIndex, tkOgrSaveType saveType,
+int Shape2Ogr::SaveShapefileChanges(OGRLayer* layer, IShapefile* sf, long shapeCmnIndex, tkOgrSaveType saveType,
 	bool validateShapes, vector<OgrUpdateError>& errors)
 {
 	errors.clear();
 
-	if (!shapefile || !poLayer || shapeCmnIndex == -1) return 0;
+	if (!sf || !layer || shapeCmnIndex == -1) return 0;
 
-	// TODO: call only if there changes of fields
-	//RecreateFieldsFromShapefile(poLayer, fields, shapefile);
+	OGRFeatureDefn* fields = layer->GetLayerDefn();
+	int fieldCount = fields->GetFieldCount();
 
-	int rowCount = 0, shapeCount = 0; long lastPercent = 0;
-	long numShapes = ShapefileHelper::GetNumShapes(shapefile);
+	// create new fields, don't remove yet the stale ones, 
+	// since it will break the indices to which the local fields are mapped
+	CreateNewFields(layer, sf);
+
+	int rowCount = 0, shapeCount = 0;
+
+	CopyShapeData(sf, layer, shapeCmnIndex, saveType, validateShapes, errors, shapeCount, rowCount);
+
+	// remove fields that were either removed or changed locally
+	RemovedStaleFields(layer, sf, fieldCount);
+
+	shapeCount += RemoveDeletedFeatures(layer, sf, shapeCmnIndex);
+
+	// the source indices of the fields will still be incorrect
+	// if certain fields were removed, but at least this will help
+	// to pass OgrLayer::HasChanges test
+	ShapefileHelper::MarkFieldsAreUnmodified(sf);
+
+	if (shapeCount > 0 || rowCount > 0) 
+	{
+		layer->SyncToDisk();
+	}
+
+	return shapeCount + rowCount;
+}
+
+// *************************************************************
+//		BuildFieldMap()
+// *************************************************************
+// Let's map indices of fields in the local table to those on the server
+void Shape2Ogr::BuildFieldMap(IShapefile* sf, vector<int>& indices)
+{
+	CComPtr<ITable> table = NULL;
+	sf->get_Table(&table);
+	CTableClass* tableInternal = TableHelper::Cast(table);
+
+	long fieldCount = ShapefileHelper::GetNumFields(sf);
+	if (fieldCount > 0)
+	{
+		indices.resize(fieldCount);
+
+		for (long i = 1; i < fieldCount; i++) 
+		{
+			indices[i] = tableInternal->GetFieldSourceIndex(i);
+		}
+	}
+}
+
+// *************************************************************
+//		SaveShape()
+// *************************************************************
+void Shape2Ogr::CopyShapeData(IShapefile* sf, OGRLayer* layer, long shapeCmnIndex, tkOgrSaveType saveType,
+	bool validateShapes, vector<OgrUpdateError>& errors, int& shapeCount, int& rowCount)
+{
+	long lastPercent = 0;
+	long numShapes = ShapefileHelper::GetNumShapes(sf);
 
 	CComPtr<ITable> table = NULL;
-	shapefile->get_Table(&table);
+	sf->get_Table(&table);
 	CTableClass* tableInternal = TableHelper::Cast(table);
-	OGRFeatureDefn* fields = poLayer->GetLayerDefn();
-	
+
+	OGRFeatureDefn* fields = layer->GetLayerDefn();
+
+	vector<int> fieldMap;
+	BuildFieldMap(sf, fieldMap);
+
 	for (long i = 0; i < numShapes; i++)
 	{
 		CallbackHelper::Progress(NULL, i, numShapes + 1, "Saving changes...", lastPercent);
 
 		VARIANT_BOOL shapeModified, rowModified;
-		shapefile->get_ShapeModified(i, &shapeModified);
+		sf->get_ShapeModified(i, &shapeModified);
 		table->get_RowIsModified(i, &rowModified);
-		
+
 		if (!shapeModified && !rowModified) continue;
 
-		if ((!shapeModified && saveType == ostGeometryOnly) || 
+		if ((!shapeModified && saveType == ostGeometryOnly) ||
 			(!rowModified && saveType == ostAttributesOnly)) {
 			continue;
 		}
 
 		long featId;
-		OGRFeature* ft = GetFeature(poLayer, shapefile, shapeCmnIndex, i, featId);
+		OGRFeature* ft = GetFeature(layer, sf, shapeCmnIndex, i, featId);
 
 		if (shapeModified)
 		{
-			if (SaveShape(poLayer, ft, fields, shapefile, i, shapeCmnIndex, saveType, validateShapes, errors))
+			if (SaveShape(layer, ft, fields, sf, i, shapeCmnIndex, saveType, validateShapes, errors, fieldMap))
 			{
 				shapeCount++;
 			}
@@ -312,7 +477,7 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, lo
 		else
 		{
 			// it's attributes that are modified
-			if (!ft) 
+			if (!ft)
 			{
 				CStringW s;
 				s.Format(L"Failed to find feature with id %d to save attributes.", featId);
@@ -320,15 +485,15 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, lo
 				continue;
 			}
 
-			CopyRecordAttributes(shapefile, i, ft, true, fields);
-			
-			OGRErr err = poLayer->SetFeature(ft);
+			CopyRecordAttributes(sf, i, ft, true, fields, &fieldMap);
+
+			OGRErr err = layer->SetFeature(ft);
 			if (err == OGRERR_NONE)
 			{
 				rowCount++;
 				tableInternal->MarkRowIsClean(i);
 			}
-			else 
+			else
 			{
 				CStringW s = OgrHelper::OgrString2Unicode(CPLGetLastErrorMsg());
 				errors.push_back(OgrUpdateError(i, s));
@@ -341,22 +506,14 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, lo
 	}
 
 	CallbackHelper::ProgressCompleted();
-
-	shapeCount += RemoveDeletedFeatures(poLayer, shapefile, shapeCmnIndex);
-
-	if (shapeCount > 0 || rowCount > 0) 
-	{
-		poLayer->SyncToDisk();
-	}
-
-	return shapeCount + rowCount;
 }
 
 // *************************************************************
 //		SaveShape()
 // *************************************************************
 bool Shape2Ogr::SaveShape(OGRLayer* poLayer, OGRFeature* ft, OGRFeatureDefn* fields, IShapefile* shapefile,
-	int shapeIndex, long shapeCmnIndex, tkOgrSaveType saveType, bool validateShapes, vector<OgrUpdateError>& errors)
+	int shapeIndex, long shapeCmnIndex, tkOgrSaveType saveType, bool validateShapes, 
+	vector<OgrUpdateError>& errors, vector<int>& fieldMap)
 {
 	OGRErr result;
 	CString validationError;   // no need to store it in Unicode, it's almost certain uses ASCII only
@@ -364,7 +521,7 @@ bool Shape2Ogr::SaveShape(OGRLayer* poLayer, OGRFeature* ft, OGRFeatureDefn* fie
 	if (ft)
 	{
 		// update an existing feature
-		if (ShapeRecord2Feature(shapefile, shapeIndex, ft, fields, saveType, true, validationError, validateShapes))
+		if (ShapeRecord2Feature(shapefile, shapeIndex, ft, fields, saveType, true, validationError, validateShapes, &fieldMap))
 		{
 			result = poLayer->SetFeature(ft);
 		}
@@ -375,7 +532,7 @@ bool Shape2Ogr::SaveShape(OGRLayer* poLayer, OGRFeature* ft, OGRFeatureDefn* fie
 	{
 		// we assume that it's a new feature
 		ft = OGRFeature::CreateFeature(fields);
-		if (ShapeRecord2Feature(shapefile, shapeIndex, ft, fields, saveType, true, validationError, validateShapes))
+		if (ShapeRecord2Feature(shapefile, shapeIndex, ft, fields, saveType, true, validationError, validateShapes, &fieldMap))
 		{
 			result = poLayer->CreateFeature(ft);
 
@@ -394,7 +551,6 @@ bool Shape2Ogr::SaveShape(OGRLayer* poLayer, OGRFeature* ft, OGRFeatureDefn* fie
 			OGRFeature::DestroyFeature(ft);
 		}
 	}
-
 
 	bool validation = validationError.GetLength() > 0;
 	if (result == OGRERR_NONE && !validation)

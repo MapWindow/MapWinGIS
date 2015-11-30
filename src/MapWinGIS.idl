@@ -4263,6 +4263,8 @@ interface IField : IDispatch{
 	[propget, id(12)] HRESULT Joined([out, retval] VARIANT_BOOL* pVal);
 	[propget, id(13)] HRESULT Expression([out, retval] BSTR* pVal);
 	[propput, id(13)] HRESULT Expression([in] BSTR newVal);
+	[propget, id(14)] HRESULT Modified([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(14)] HRESULT Modified([in] VARIANT_BOOL newVal);
 };
 
 /****************************  ShapeNetwork Interface ***********************/

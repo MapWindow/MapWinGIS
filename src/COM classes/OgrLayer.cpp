@@ -658,15 +658,14 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 
 	lock.Unlock();
 
-	if (*savedCount == 0)
-	{
-		*retVal = osrNoneSaved;
+	HasLocalChanges(&hasChanges);
+
+	*retVal = (*savedCount == 0) ? osrNoneSaved : osrSomeSaved;
+	
+	if (!hasChanges) {
+		*retVal = osrAllSaved;
 	}
-	else
-	{
-		HasLocalChanges(&hasChanges);
-		*retVal = hasChanges ? osrSomeSaved : osrAllSaved;
-	}
+
 	return S_OK;
 }
 
@@ -697,8 +696,34 @@ STDMETHODIMP COgrLayer::HasLocalChanges(VARIANT_BOOL* retVal)
 	CComPtr<ITable> table = NULL;
 	_shapefile->get_Table(&table);
 
+	long numFields = ShapefileHelper::GetNumFields(_shapefile);
+	long sourceFieldCount = _layer->GetLayerDefn()->GetFieldCount();
+	
+	// removed fields
+	if (sourceFieldCount > numFields - 1)
+	{
+		// if there are both removed and created fields, the total
+		// count may remain the same, but the will be modified records
+		*retVal = VARIANT_TRUE;
+		return S_OK;
+	}
+
+	// modified fields
 	VARIANT_BOOL modified, rowModified;
 
+	for (long i = 1; i < numFields; i++)
+	{
+		CComPtr<IField> field = NULL;
+		_shapefile->get_Field(i, &field);
+		field->get_Modified(&modified);
+
+		if (modified) {
+			*retVal = VARIANT_TRUE;
+			return S_OK;
+		}
+	}
+
+	// modified rows and shapes
 	for (long i = 0; i < numShapes; i++)
 	{
 		_shapefile->get_ShapeModified(i, &modified);

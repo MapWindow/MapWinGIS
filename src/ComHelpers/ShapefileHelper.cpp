@@ -536,3 +536,19 @@ bool ShapefileHelper::Delete(CStringW filename)
 
 	return true;
 }
+
+// **************************************************
+//		MarkFieldsAreUnmodified()
+// **************************************************
+void ShapefileHelper::MarkFieldsAreUnmodified(IShapefile* table)
+{
+	long numFields;
+	table->get_NumFields(&numFields);
+
+	for (long i = 0; i < numFields; i++)
+	{
+		CComPtr<IField> field = NULL;
+		table->get_Field(i, &field);
+		field->put_Modified(VARIANT_FALSE);
+	}
+}
