@@ -56,12 +56,14 @@ public:
 	STDMETHOD(get_LayerType)(LONG index, tkLayerType* pVal);
 	STDMETHOD(get_RasterX)(LONG index, LONG* pVal);
 	STDMETHOD(get_RasterY)(LONG index, LONG* pVal);
-	
+	STDMETHOD(TogglePixel)(LONG layerHandle, LONG rasterX, LONG rasterY);
+
 private:
 	vector<SelectedItem*> _items;
 
 public:
 	void UpdatePixelBounds(long layerHandle, IImage* source, bool polygon);
 	SelectedItem* GetItem(int index);
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(SelectionList), CSelectionList)

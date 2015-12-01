@@ -106,6 +106,27 @@ STDMETHODIMP CSelectionList::AddPixel(LONG layerHandle, LONG rasterX, LONG raste
 }
 
 // ****************************************************************
+//				TogglePixel()						         
+// ****************************************************************
+STDMETHODIMP CSelectionList::TogglePixel(LONG layerHandle, LONG rasterX, LONG rasterY)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	for (size_t i = 0; i < _items.size(); i++)
+	{
+		if (_items[i]->Match(layerHandle, rasterX, rasterY))
+		{
+			_items.erase(_items.begin() + i);
+			return S_OK;
+		}
+	}
+
+	AddPixel(layerHandle, rasterX, rasterY);
+
+	return S_OK;
+}
+
+// ****************************************************************
 //				get_LayerType()						         
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_LayerType(LONG index, tkLayerType* pVal)
@@ -203,3 +224,5 @@ SelectedItem* CSelectionList::GetItem(int index)
 
 	return _items[index];
 }
+
+

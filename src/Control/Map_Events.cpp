@@ -585,7 +585,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				_identifier->get_IdentifierMode(&mode);
 				bool stopOnFirst = mode != tkIdentifierMode::imAllLayers;
 
-				if (DrillDownSelect(projX, projY, _identifiedShapes, stopOnFirst))
+				if (DrillDownSelect(projX, projY, _identifiedShapes, stopOnFirst, ctrl))
 				{
 					long numShapes = SelectionListHelper::GetCount(_identifiedShapes);
 					if (numShapes == 1)

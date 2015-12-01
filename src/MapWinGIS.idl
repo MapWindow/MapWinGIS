@@ -6159,6 +6159,7 @@ interface ISelectionList : IDispatch{
 	[propget, id(8)] HRESULT LayerType([in] LONG index, [out, retval] tkLayerType* pVal);
 	[propget, id(9)] HRESULT RasterX([in] LONG index, [out, retval] LONG* pVal);
 	[propget, id(10)] HRESULT RasterY([in] LONG index, [out, retval] LONG* pVal);
+	[id(11)] HRESULT TogglePixel([in] LONG layerHandle, [in] LONG rasterX, [in] LONG rasterY);
 };
 
 [

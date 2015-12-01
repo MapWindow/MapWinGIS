@@ -304,7 +304,7 @@ bool CMapView::DrillDownSelect(double projX, double projY, long& layerHandle, lo
 // ************************************************************
 //		DrillDownSelect
 // ************************************************************
-bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list, bool stopOnFirst)
+bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list, bool stopOnFirst, bool ctrl)
 {
 	vector<int> handles;
 	SelectLayerHandles(slctIdentify, handles);
@@ -364,7 +364,13 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list,
 			{
 				long rasterX, rasterY;
 				img->ProjectionToImage(projX, projY, &rasterX, &rasterY);
-				list->AddPixel(handles[i], rasterX, rasterY);
+				
+				if (ctrl) {
+					list->TogglePixel(handles[i], rasterX, rasterY);
+				}
+				else {
+					list->AddPixel(handles[i], rasterX, rasterY);
+				}
 			}
 		}
 	}

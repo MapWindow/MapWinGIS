@@ -66,5 +66,10 @@ struct SelectedItem
 		RasterY = -1;
 		Polygon = true;
 	}
+
+	bool Match(long layerHandle, long rasterX, long rasterY)
+	{
+		return LayerHandle == layerHandle && RasterX == rasterX && RasterY == rasterY;
+	}
 };
 

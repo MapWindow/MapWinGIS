@@ -1160,7 +1160,7 @@ private:
 	void HandleLButtonUpZoomBox(long vbflags, long x, long y);
 	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
-	bool DrillDownSelect(double projX, double projY, ISelectionList* list, bool stopOnFirst);
+	bool DrillDownSelect(double projX, double projY, ISelectionList* list, bool stopOnFirst, bool ctrl);
 	bool StartNewBoundShape(long x, long y);
 	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
 	VARIANT_BOOL LoadOgrStyle(Layer* layer, long layerHandle, CStringW name, bool reportError);
