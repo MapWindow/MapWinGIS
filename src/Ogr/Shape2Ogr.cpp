@@ -41,6 +41,7 @@ bool Shape2Ogr::ShapefileFieldsToOgr(IShapefile* sf, OGRLayer* poLayer)
 		fld->get_Name(&name);
 		fld->get_Precision(&precision);
 		fld->get_Width(&width);
+		
 		OGRFieldDefn oField(OgrHelper::Bstr2OgrString(name.m_str), OgrHelper::GetFieldType(fld));
 		oField.SetWidth(width);
 		oField.SetPrecision(precision);
@@ -84,13 +85,19 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 		if (((CShapefile*)sf)->ShapeAvailable(i, VARIANT_FALSE))
 		{
 			OGRFeature* poFeature = OGRFeature::CreateFeature(fields);
+
 			if (ShapeRecord2Feature(sf, i, poFeature, fields, ostSaveAll, false, validationError, true, NULL))
 			{
 				if (saveLabels) {
 					OgrLabelsHelper::AddLabel2Feature(labels, i, poFeature, labelFields);
 				}
-				OGRErr result = poLayer->CreateFeature(poFeature);
+				poLayer->CreateFeature(poFeature);
 			}
+			else {
+				CString s = Debug::Format("Geometry import: %s", validationError);
+				CallbackHelper::ErrorMsg(s);
+			}
+
 			OGRFeature::DestroyFeature(poFeature);
 		}
 	}

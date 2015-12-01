@@ -2852,7 +2852,9 @@ VARIANT_BOOL CShapefile::FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* 
 
 		// failed to fix the shape? skip it.
 		if (!shpNew) {
-			CallbackHelper::ErrorMsg("Shapefile", NULL, "", "Failed to fix shape: %d", i);
+			CString s;
+			s.Format("Failed to fix shape: %d", i);
+			CallbackHelper::ErrorMsg("Shapefile", NULL, "", s);
 			continue;
 		}
 

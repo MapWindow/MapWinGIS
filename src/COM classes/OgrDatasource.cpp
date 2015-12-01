@@ -424,7 +424,11 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 	bool result = Shape2Ogr::Shapefile2OgrLayer(shapefile, layer, m_globalSettings.saveOgrLabels, _globalCallback);
 	if (result)
 	{
-		layer->SyncToDisk();
+		OGRErr err = layer->SyncToDisk();
+		if (err != OGRERR_NONE)
+		{
+			CallbackHelper::ErrorMsg("Failed to synchronize imported layer to disk / database.");
+		}
 	}
 
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;

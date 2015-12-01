@@ -56,8 +56,8 @@ IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidatio
 		if (!canEdit && validationMode == TryFixProceedOnFailure || 
 						validationMode== TryFixProceedOnFailure) {
 			
-			Debug::WriteError("Validation mode demands fixing of invalid shapes, but shapefile isn't in edit mode. "
-							  "Validation without fixing will be performed.");
+			CallbackHelper::ErrorMsg("Validation mode demands fixing of invalid shapes, but shapefile isn't in edit mode. "
+									 "Validation without fixing will be performed.");
 
 			reportOnly = true;
 		}
