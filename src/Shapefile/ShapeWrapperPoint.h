@@ -36,7 +36,7 @@ public:
 	CShapeWrapperPoint(ShpfileType shpType)
 		: CShapeWrapperPoint()
 	{
-		_shpType = shpType;
+		put_ShapeType(shpType);
 	}
 
 	CShapeWrapperPoint(char* shpData, int recordLength) 

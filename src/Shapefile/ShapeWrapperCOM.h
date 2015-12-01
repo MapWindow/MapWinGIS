@@ -38,7 +38,7 @@ public:
 	CShapeWrapperCOM(ShpfileType shpType)
 		: CShapeWrapperCOM() 
 	{
-		_shapeType = shpType;
+		put_ShapeType(shpType);
 	}
 
 	CShapeWrapperCOM(char* data, int recordLength)
