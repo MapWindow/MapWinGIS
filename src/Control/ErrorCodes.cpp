@@ -126,9 +126,9 @@ const char * ErrorMsg( long ErrorCode )
 		case tkINVALID_SHX_FILE:
 			return "Invalid .shx file";
 		case tkSHPFILE_IN_EDIT_MODE:
-			return "Shapefile Function cannot execute in edit mode";
+			return "Shapefile function can not be executed in edit mode";
 		case tkSHPFILE_NOT_IN_EDIT_MODE:
-			return "Shapefile Function cannot execute unless in edit mode";
+			return "Shapefile function can not be executed in non-edit mode";
 		case tkCANT_CREATE_SHP:
 			return "Couldn't create .shp file";
 		case tkCANT_CREATE_SHX:

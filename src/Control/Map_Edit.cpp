@@ -311,7 +311,7 @@ bool CMapView::InitRotationTool()
 // ***************************************************************
 bool CMapView::InitDraggingShapefile()
 {
-	if (!_dragging.Shapefile)
+	if (!_dragging.Shapefile && _dragging.LayerHandle != -1)
 	{
 		CComPtr<IShapefile> sf = NULL;
 		sf.Attach(GetShapefile(_dragging.LayerHandle));
