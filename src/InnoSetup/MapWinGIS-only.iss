@@ -2,23 +2,22 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "4.9.3.4"
+#define MyAppVersion "4.9.3.6"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
-#define SetupLocation "D:\dev\MapwinGIS\MapWinGIS\trunk\InnoSetup"
-#define Bin32Location "D:\dev\MapwinGIS\MapWinGIS\trunk\bin"
-#define DemoLocation "D:\dev\MapwinGIS\NET Assemblies\Demo\MWLite.GUI\bin\x86\Release"
+#define SetupLocation "D:\dev\MapwinGIS\GIT\src\InnoSetup"
+#define BinLocation "D:\dev\MapwinGIS\GIT\src\bin"
 ;#define x64BitVersion
 
 #ifdef x64BitVersion
   #define CPU "x64"
-  #define vcredist "vcredist_x64_2010_sp1.exe"
-  #define MySourceDir "C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\bin\x64\"
+  #define vcredist "vcredist_x64_2013.exe"
+  #define MySourceDir BinLocation + "\x64\"
   #define SystemFlag "64bit"
 #else
   #define CPU "Win32"
-  #define vcredist "vcredist_x86_2010_sp1.exe"
-  #define MySourceDir "D:\dev\MapwinGIS\MapWinGIS\trunk\bin\Win32\"
+  #define vcredist "vcredist_x86-2013.exe"
+  #define MySourceDir BinLocation + "\Win32\"
   #define SystemFlag "32bit"
 #endif
 
@@ -37,64 +36,47 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName=C:\dev\{#MyAppName}
 DisableProgramGroupPage=yes
 DefaultGroupName={#MyAppName}
-LicenseFile={#Bin32Location}\Licenses\MapWinGISLicense.rtf
-InfoBeforeFile={#Bin32Location}\ReleaseNotes.rtf
+LicenseFile={#BinLocation}\Licenses\MapWinGISLicense.rtf
+InfoBeforeFile={#SetupLocation}\ReleaseNotes.rtf
 OutputDir={#SetupLocation}
 OutputBaseFilename=MapWinGIS-only-v{#MyAppVersion}-{#CPU}
-SetupIconFile={#Bin32Location}\MapWindow.ico
+SetupIconFile={#SetupLocation}\MapWindow.ico
 Compression=lzma
 SolidCompression=yes
 WizardImageFile={#SetupLocation}\WizImage-MW.bmp
 WizardSmallImageFile={#SetupLocation}\WizSmallImage-MW.bmp
 AppCopyright={#MyAppPublisher}
-PrivilegesRequired=poweruser
+PrivilegesRequired=admin
 MinVersion=0,5.01sp3   
 ChangesEnvironment=yes
 AlwaysShowDirOnReadyPage=True
 EnableDirDoesntExistWarning=True
-UninstallDisplayName=MapWinGIS uninstall
+;; UninstallDisplayName=MapWinGIS uninstall
 CompressionThreads=2
 LZMANumBlockThreads=2
 UninstallDisplayIcon={uninstallexe}
 AppComments=This package will install {#MyAppName} {#MyAppVersion}
 AppContact=Paul Meems (info@mapwindow.nl)
+VersionInfoCompany=MapWindow Open Source GIS Team [www.mapwindow.org]
+VersionInfoCopyright=Mozilla Public License (MPL) 1.1
+VersionInfoDescription=MapWindow Open Source GIS [www.mapwindow.org]
+VersionInfoProductName={#MyAppName}
+VersionInfoProductVersion={#MyAppVersion}
+#ifdef x64BitVersion
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
+#endif
 
 [Files]
-Source: "{#MySourceDir}\cfitsio.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\gdal200.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\geos.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\geos_c.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\hdf5.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\hdf5_hl.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\iconv.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\libcurl.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\libeay32.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\libexpat.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\libmysql.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\libpq.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\libtiff.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\lti_dsdk_9.0.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\lti_lidar_dsdk_1.1.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
+Source: "{#MySourceDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
 Source: "{#MySourceDir}\MapWinGIS.ocx"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-;Source: "{#MySourceDir}\mfc90.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\NCSEcw.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\netcdf.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\openjp2.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\proj.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\spatialite.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\ssleay32.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\szip.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\tbb.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\xdrdll.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\xerces-c_2_8.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\zlib1.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
 ;; IntelliSense:
-Source: "{#Bin32Location}\AxInterop.MapWinGIS.xml"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
-Source: "{#Bin32Location}\Interop.MapWinGIS.xml"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
+;;Source: "{#BinLocation}\AxInterop.MapWinGIS.xml"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
+;;Source: "{#BinLocation}\Interop.MapWinGIS.xml"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
 ;; Licenses
-Source: "{#Bin32Location}\Licenses\GDALLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
-Source: "{#Bin32Location}\Licenses\GISInternalsLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
-Source: "{#Bin32Location}\Licenses\MapWinGISLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
+Source: "{#BinLocation}\Licenses\GDALLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
+Source: "{#BinLocation}\Licenses\GISInternalsLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
+Source: "{#BinLocation}\Licenses\MapWinGISLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
 ;Source: "Licenses\FileGDBLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
 ;Source: "Licenses\FITSLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
 ;Source: "Licenses\HDF4License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
@@ -103,18 +85,14 @@ Source: "{#Bin32Location}\Licenses\MapWinGISLicense.rtf"; DestDir: "{app}\Licens
 ;Source: "Licenses\SZIPLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
 ;; GDAL Plugins:
 Source: "{#MySourceDir}\gdalplugins\gdal_ECW_JP2ECW.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion recursesubdirs createallsubdirs {#SystemFlag}; Components: ECW
-Source: "{#Bin32Location}\Licenses\ECW5License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: ECW
+Source: "{#BinLocation}\Licenses\ECW5License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: ECW
 Source: "{#MySourceDir}\gdalplugins\gdal_MrSID.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: MrSID
-Source: "{#Bin32Location}\Licenses\MRSIDLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MrSID
+Source: "{#BinLocation}\Licenses\MRSIDLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MrSID
 Source: "{#MySourceDir}\gdalplugins\gdal_netCDF.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: NetCDF
-Source: "{#Bin32Location}\Licenses\NetCDFLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: NetCDF
+Source: "{#BinLocation}\Licenses\NetCDFLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: NetCDF
 ;; GDAL data
 Source: "{#MySourceDir}\gdal-data\*"; DestDir: "{app}\gdal-data"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: MapWinGIS_Core
-Source: "{#Bin32Location}\PROJ_NAD\*"; DestDir: "{app}\PROJ_NAD"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: MapWinGIS_Core
-;; Demo application:
-Source: "{#DemoLocation}\*.dll"; DestDir: "{app}\MapWindowLite\"; Flags: ignoreversion {#SystemFlag}; Components: DemoApp
-Source: "{#DemoLocation}\*.exe"; DestDir: "{app}\MapWindowLite\"; Flags: ignoreversion {#SystemFlag}; Components: DemoApp
-Source: "{#DemoLocation}\*.exe.config"; DestDir: "{app}\MapWindowLite\"; Flags: ignoreversion {#SystemFlag}; Components: DemoApp
+Source: "{#BinLocation}\PROJ_NAD\*"; DestDir: "{app}\PROJ_NAD"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: MapWinGIS_Core
 
 ;; To register the ocx:
 Source: "{#SetupLocation}\regMapWinGIS.cmd"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
@@ -132,7 +110,6 @@ Name: "MapWinGIS_Core"; Description: "Core files for MapWinGIS"; Types: full cus
 Name: "NetCDF"; Description: "Add NetCDF support"; Types: full custom
 Name: "ECW"; Description: "Add ECW & JPEG2000 support"; Types: full custom
 Name: "MrSID"; Description: "Add MrSID support"; Types: full custom
-Name: "DemoApp"; Description: "Small demo application to showcase the new features"; Types: full custom
 
 [Run]
 ; Install VC++ 2010 if needed:
@@ -143,7 +120,6 @@ Filename: "{tmp}\{#vcredist}"; Parameters: "/qb"; Flags: waituntilterminated; Ch
 #endif
 ;Run some command files:
 Filename: "{app}\regMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runhidden
-Filename: "{app}\MapWindowLite\MapWindowLite.exe"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Start MapWindowLite, the demo application"
 Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/getting_started.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGv493Installer"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Go to the online documentation"
 Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/MapWindow49.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGv493Installer"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the future of MapWinGIS/MapWindow v5"
 Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/version_history.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGv493Installer"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the changes in this version"
@@ -190,6 +166,10 @@ const
   VC_2010_SP1_REDIST_X64 = '{1D8E6291-B0D5-35EC-8441-6616F567A0F7}';
   VC_2010_SP1_REDIST_IA64 = '{88C73C1C-2DE5-3B01-AFB8-B46EF4AB41CD}';
 
+  // http://stackoverflow.com/questions/27582762/inno-setup-for-visual-c-redistributable-package-for-visual-studio-2013
+  VC_2013_REDIST_X86 = '{13A4EE12-23EA-3371-91EE-EFB36DDFFF3E}'; //Microsoft.VS.VC_RuntimeMinimumVSU_x86,v12
+  VC_2013_REDIST_X64 = '{A749D8E6-B613-3BE3-8F5F-045C84EBA29B}'; //Microsoft.VS.VC_RuntimeMinimumVSU_amd64,v12
+
 function MsiQueryProductState(szProduct: string): INSTALLSTATE; 
   external 'MsiQueryProductState{#AW}@msi.dll stdcall';
 
@@ -205,7 +185,7 @@ begin
   // this statement, the following won't install your VC redist only when
   // the Visual C++ 2008 Redist (x86) and Visual C++ 2008 SP1 Redist(x86)
   // are installed for the current user
-  Result := not (VCVersionInstalled(VC_2010_SP1_REDIST_X86));
+  Result := not (VCVersionInstalled(VC_2013_REDIST_X86));
 end;
 
 function VCRedistNeedsInstall_x64(): Boolean;
@@ -215,7 +195,7 @@ begin
   // this statement, the following won't install your VC redist only when
   // the Visual C++ 2008 Redist (x86) and Visual C++ 2008 SP1 Redist(x86)
   // are installed for the current user
-  Result := not (VCVersionInstalled(VC_2010_SP1_REDIST_X64));
+  Result := not (VCVersionInstalled(VC_2013_REDIST_X64));
 end;
 
 function NeedsAddPath(Param: string): boolean;
