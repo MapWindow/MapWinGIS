@@ -552,3 +552,25 @@ void ShapefileHelper::MarkFieldsAreUnmodified(IShapefile* table)
 		field->put_Modified(VARIANT_FALSE);
 	}
 }
+
+// **************************************************
+//		MarkShapeRecordIsUnmodified()
+// **************************************************
+void ShapefileHelper::MarkShapeRecordIsUnmodified(IShapefile* sf, long shapeIndex)
+{
+	if (!sf) return;
+
+	CComPtr<ITable> table = NULL;
+	sf->get_Table(&table);
+	CTableClass* tableInternal = TableHelper::Cast(table);
+
+	long numShapes = ShapefileHelper::GetNumShapes(sf);
+	if (shapeIndex >= 0 && shapeIndex < numShapes)
+	{
+		sf->put_ShapeModified(shapeIndex, VARIANT_FALSE);
+		tableInternal->MarkRowIsClean(shapeIndex);
+	}
+	else {
+		CallbackHelper::ErrorMsg("Failed to mark shape as clean. Invalid shape index.");
+	}
+}

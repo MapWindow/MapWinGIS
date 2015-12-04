@@ -364,11 +364,14 @@ void Shape2Ogr::CreateField(IField* field, OGRLayer* layer)
 // *************************************************************
 OGRFeature* Shape2Ogr::GetFeature(OGRLayer* poLayer, IShapefile* shapefile, long shapeCmnIndex, long shapeIndex, long& featId)
 {
+	featId = -1;	
+
 	CComVariant var;
 	shapefile->get_CellValue(shapeCmnIndex, shapeIndex, &var);
 
 	lVal(var, featId);
-	return poLayer->GetFeature(featId);
+	
+	return featId != -1 ? poLayer->GetFeature(featId): NULL;
 }
 
 // *************************************************************
@@ -606,7 +609,7 @@ bool Shape2Ogr::SaveShape(OGRLayer* poLayer, OGRFeature* ft, OGRFeatureDefn* fie
 	bool validation = validationError.GetLength() > 0;
 	if (result == OGRERR_NONE && !validation)
 	{
-		shapefile->put_ShapeModified(shapeIndex, VARIANT_FALSE);
+		ShapefileHelper::MarkShapeRecordIsUnmodified(shapefile, shapeIndex);
 		return true;
 	}
 	else
