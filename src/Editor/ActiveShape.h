@@ -168,5 +168,5 @@ public:
 	CStringW FormatLength(double length, CStringW format, bool unknownUnits);
 	void PrepareSegmentBearing(Gdiplus::Graphics* g, int segmentIndex, double dx, double dy, CStringW& sBearing, Gdiplus::RectF& rect);
 	void DrawSegmentLabel(Gdiplus::Graphics* g, CStringW text, Gdiplus::RectF rect, double screenLength, bool aboveLine);
-	
+	int GetSelectedVertex() { return _selectedVertex; }
 };

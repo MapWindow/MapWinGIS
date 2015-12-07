@@ -647,10 +647,24 @@ bool CShapeEditor::InsertVertex(double xProj, double yProj)
 // *******************************************************
 bool CShapeEditor::RemoveVertex()
 {
+	int index = _activeShape->GetSelectedVertex();
+	
 	SaveState();
-	if (_activeShape->RemoveSelectedVertex()) return true;
-	DiscardState();
-	return false;
+
+	if (!_activeShape->RemoveSelectedVertex())
+	{
+		DiscardState();
+		return false;
+	}
+
+	if (index == _activeShape->GetPointCount())
+	{
+		index--;
+	}
+	
+	_activeShape->SetSelectedVertex(index);
+
+	return true;
 }
 
 // *******************************************************
