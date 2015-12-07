@@ -305,6 +305,8 @@ enum FunctionId
 	fnStrpos,
 	fnLeft,
 	fnRight,
+	fnLPad,
+	fnRPad,
 	fnSqrt,
 	fnAbs,
 	fnCos,

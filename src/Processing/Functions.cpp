@@ -286,6 +286,40 @@ namespace parser
 		return true;
 	}
 
+	bool fcnPadCore(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result, bool left)
+	{
+		CStringW s = args[0]->str();
+
+		int length = static_cast<int>(args[1]->dbl());
+
+		int dif = length - s.GetLength();
+		if (dif > 0 && args[2]->str().GetLength() > 0)
+		{
+			CStringW pad(args[2]->str()[0], dif);
+			if (left) {
+				result.str(pad + s);
+			}
+			else {
+				result.str(s + pad);
+			}
+		}
+		else {
+			result.str(s);
+		}
+
+		return true;
+	}
+
+	bool fcnLPad(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		return fcnPadCore(args, shape, result, true);
+	}
+
+	bool fcnRPad(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		return fcnPadCore(args, shape, result, false);
+	}
+
 	bool fcnSubstr(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
 		CStringW s = args[0]->str();
@@ -600,6 +634,8 @@ namespace parser
 		functions.push_back(new CustomFunction(fnStrpos, "strpos", 2, fcnStrpos, fgStrings));
 		functions.push_back(new CustomFunction(fnLeft, "left", 2, fcnLeft, fgStrings));
 		functions.push_back(new CustomFunction(fnRight, "right", 2, fcnRight, fgStrings));
+		functions.push_back(new CustomFunction(fnLPad, "lpad", 3, fcnLPad, fgStrings));
+		functions.push_back(new CustomFunction(fnRPad, "rpad", 3, fcnRPad, fgStrings));
 		/*functions.push_back(new CFunction("regexp_replace", 3, fcnRegexpReplace, fgStrings));
 		functions.push_back(new CFunction("wordwrap", -1, fcnWordwrap, fgStrings));
 		functions.push_back(new CFunction("regexp_substr", 2, fcnRegexpSubstr, fgStrings));

@@ -121,7 +121,7 @@ bool CustomExpression::EvaluateFunction(CExpressionPart* part)
 		CExpressionPart* arg = part->arguments[i];
 		if (arg->activeCount != 1)
 		{
-			_errorMessage = "Argument isn't evalulated: " + arg->expression;
+			_errorMessage = "Argument was not evaluated: " + arg->expression;
 			return false;
 		}
 	}
@@ -133,6 +133,14 @@ bool CustomExpression::EvaluateFunction(CExpressionPart* part)
 		args.push_back(part->arguments[i]->val);
 	}
 
+	if ((int)args.size() < part->function->numParams())
+	{
+		_errorMessage = "Not enough arguments for the function: ";
+		_errorMessage += part->function->GetName();
+		return false;
+	}
+
+	// TODO: validate that number of names parameters equals the initial number specified in constructor
 	// TODO: validate type of arguments depending on function
 
 	// calculating

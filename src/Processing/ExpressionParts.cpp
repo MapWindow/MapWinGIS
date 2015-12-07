@@ -136,6 +136,18 @@ void CustomFunction::InitOverloads()
 			description("Returns a substring that contains the n rightmost characters of the string.");
 			AddParameter("input", "The input string.");
 			AddParameter("length", "The number of characters from the right to return.");
+			break;	
+		case fnLPad:
+			description("Adds specified character to the left of the string until it reaches specified length.");
+			AddParameter("input", "The input string.");
+			AddParameter("length", "New length of the string.");
+			AddParameter("pad", "Character to pad with.");
+			break;
+		case fnRPad:
+			description("Adds specified character to the right of the string until it reaches specified length.");
+			AddParameter("input", "The input string.");
+			AddParameter("length", "New length of the string.");
+			AddParameter("pad", "Character to pad with.");
 			break;
 		case fnSqrt: 
 			description("Returns the square root of x.");
