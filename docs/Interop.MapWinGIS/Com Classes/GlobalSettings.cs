@@ -48,6 +48,11 @@ namespace MapWinGIS
             set { throw new NotImplementedException(); }
         }
 
+        public void StopLogTileRequests()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Gets or sets the minimal area of polygon which will be passed to the output by geoprocessing routines.
         /// </summary>
@@ -545,14 +550,13 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public string GdalPluginPath { get; set;}
 
-
         /// <summary>
         /// Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available. See 
         /// <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
         /// </summary>
         /// \new493 Added in version 4.9.3
         public string BingApiKey { get; set;}
-       
+
         /// <summary>
         /// Sets application credentials for Here Maps online tiles. 
         /// Without these credentials Here Maps providers are not available. See 
@@ -573,6 +577,90 @@ namespace MapWinGIS
         /// <returns>True if the Url for downloading for obtained.</returns>
         /// \new493 Added in version 4.9.3
         public bool TestBingApiKey(string Key)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets or sets the value indicating which compression mode will be used to compress image overviews.
+        /// </summary>
+        /// <value>
+        /// The compress overviews.
+        /// </value>
+        /// \new494 Added in version 4.9.4
+        public tkTiffCompression CompressOverviews { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether greyscale or color scheme rendering will be used for grids by default.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool GridFavorGreyscale { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether histogram will be computed and news for grid by default.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool GridUseHistogram { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether instances of ICallback assigned to particular classes will be overriden by 
+        /// global callback assined to GlobalSettings.ApplicationCallback property.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if [override local callback]; otherwise, <c>false</c>.
+        /// </value>
+        /// \new494 Added in version 4.9.4
+        public bool OverrideLocalCallback { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether caching DBF records is on.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool CacheDbfRecords { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether caching of rendering data for shapes is on.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool CacheShapeRenderingData { get; set; }
+
+        /// <summary>
+        /// Gets the filename of the file to log TMS/WMS requests to.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public string TileLogFilename { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether tile log is opened.
+        /// </summary>
+        public bool TileLogIsOpened { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether only errors will be logged to the for TMS/WMS requests.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool LogTileErrorsOnly { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether WMS data will cached to the disk by default.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool WmsDiskCaching { get; set; }
+
+        /// <summary>
+        /// Gets or sets the callback verbosity.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public tkCallbackVerbosity CallbackVerbosity { get; set; }
+
+        /// <summary>
+        /// Starts logging of tile requests.
+        /// </summary>
+        /// <param name="Filename">The filename.</param>
+        /// <param name="errorsOnly">If set to <c>true</c> only errors will be logged.</param>
+        /// <returns>True on success.</returns>
+        /// \new494 Added in version 4.9.4
+        public bool StartLogTileRequests(string Filename, bool errorsOnly = false)
         {
             throw new NotImplementedException();
         }

@@ -947,6 +947,23 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets datasource band with specified index.
+        /// </summary>
+        /// <param name="bandIndex">Index of the band.</param>
+        /// <returns>The band or null if index is not valid.</returns>
+        /// \new494 Added in version 4.9.4
+        public GdalRasterBand get_Band(int bandIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the active band of the datasource.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public GdalRasterBand ActiveBand { get; private set; }
     }
 #if nsp
 }

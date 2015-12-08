@@ -1186,6 +1186,246 @@ namespace MapWinGIS
                 {
                     get { throw new NotImplementedException(); }
                 }
+
+        /// @}
+
+        #endregion
+
+        #region New members
+
+        /// \addtogroup image_newmembers New members
+        /// Here is a list of properties and methods added in the version 4.9.4.
+        /// The properties and methods described here belong to Image class.\n\n
+        /// @{
+
+            /// <summary>
+            /// Gets the band with the specified index.
+            /// </summary>
+            /// <param name="bandIndex">Index of the band.</param>
+            /// <returns>Raster band.</returns>
+            /// \new494 Added in version 4.9.4
+            public GdalRasterBand get_Band(int bandIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <summary>
+            /// Gets the GDAL driver which manages the current datasource.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public GdalDriver GdalDriver { get; private set; }
+
+            /// <summary>
+            /// Gets the active band (the one used for rendering when grid rendering is on).
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public GdalRasterBand ActiveBand { get; private set; }
+
+            /// <summary>
+            /// Gets the palette interpretation for the image.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public tkPaletteInterpretation PaletteInterpretation2 { get; private set; }
+
+            /// <summary>
+            /// Gets or sets the brightness of the image.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public float Brightness { get; set; }
+
+            /// <summary>
+            /// Gets or sets the contrast of the image.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public float Contrast { get; set; }
+
+            /// <summary>
+            /// Gets or sets the saturation of the image.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public float Saturation { get; set; }
+
+            /// <summary>
+            /// Gets or sets the hue of the image.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public float Hue { get; set; }
+
+            /// <summary>
+            /// Gets or sets the gamma correction value for the image.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public float Gamma { get; set; }
+
+            /// <summary>
+            /// Gets or sets the colorize intensity.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public float ColorizeIntensity { get; set; }
+
+            /// <summary>
+            /// Gets or sets the color of the colorize.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public uint ColorizeColor { get; set; }
+
+            /// <summary>
+            /// Gets or sets the index of the red band (used when RGB rendering is chosen).
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public int RedBandIndex { get; set; }
+
+            /// <summary>
+            /// Gets or sets the index of the green band (used when RGB rendering is chosen).
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public int GreenBandIndex { get; set; }
+
+            /// <summary>
+            /// Gets or sets the index of the blue band (used when RGB rendering is chosen).
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public int BlueBandIndex { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether RGB band mapping will be used.
+            /// </summary>
+            /// \see RedBandIndex, GreenBandIndex, BlueBandIndex, AlphaBandIndex
+            /// \new494 Added in version 4.9.4
+            public bool UseRgbBandMapping { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether the band 
+            /// set by Image.ActiveBandIndex will be used rather then RGB rendering.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public bool ForceSingleBandRendering { get; set; }
+
+            /// <summary>
+            /// Gets or sets the index of the alpha band.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public int AlphaBandIndex { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether to use active band as an alpha band as well.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public bool UseActiveBandAsAlpha { get; set; }
+
+            /// <summary>
+            /// Gets the minimum value for the specified band.
+            /// </summary>
+            /// <param name="bandIndex">Index of the band.</param>
+            /// \new494 Added in version 4.9.4
+            public double get_BandMinimum(int bandIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <summary>
+            /// Gets the maximum value for the specified band.
+            /// </summary>
+            /// <param name="bandIndex">Index of the band.</param>
+            /// \new494 Added in version 4.9.4
+            public double get_BandMaximum(int bandIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether colors should be reversed during gray scale rendering (i.e. the smallest values are white).
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public bool ReverseGreyscale { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether built-in color table of the image will be ignored.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public bool IgnoreColorTable { get; set; }
+
+            /// <summary>
+            /// Gets the current rendering mode for the image (depends on the values of other properties).
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public tkRasterRendering RenderingMode { get; private set; }
+
+            /// <summary>
+            /// Gets the value of the specified pixel including the alpha component.
+            /// </summary>
+            /// <param name="Row">The row.</param>
+            /// <param name="col">The column.</param>
+            /// <returns>32bit unsigned integer value.</returns>
+            /// \new494 Added in version 4.9.4
+            public uint get_ValueWithAlpha(int Row, int col)            
+            {
+                
+            }
+
+            /// <summary>
+            /// Sets the value of the specified pixel including the alpha component.
+            /// </summary>
+            /// <param name="Row">The row.</param>
+            /// <param name="col">The column.</param>
+            /// <param name="pVal">The value to set.</param>
+            /// \new494 Added in version 4.9.4
+            public void set_ValueWithAlpha(int Row, int col, uint pVal)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <summary>
+            /// Gets the index of the left most pixel of the original image that was included in the current buffer.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public int BufferOffsetX { get; private set; }
+
+            /// <summary>
+            /// Gets the index of the top most pixel of the original image that was included in the current buffer.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public int BufferOffsetY { get; private set; }
+
+            /// <summary>
+            /// Gets the active color scheme used for the rendering, it may be either default or custom one.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public GridColorScheme ActiveColorScheme { get; private set; }
+
+            /// <summary>
+            /// Clears the overviews for the datasource.
+            /// </summary>
+            /// \new494 Added in version 4.9.4
+            public bool ClearOverviews()
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <summary>
+            /// Sets the band minimum maximum values for the band. Values outside of this range will not be rendered.
+            /// </summary>
+            /// <param name="bandIndex">Index of the band.</param>
+            /// <param name="min">The minimum.</param>
+            /// <param name="max">The maximum.</param>
+            /// <returns>True on success.</returns>
+            /// \new494 Added in version 4.9.4
+            public bool SetBandMinMax(int bandIndex, double min, double max)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <summary>
+            /// Calculates the minimum and maximum values for the specified band and caches them for further use.
+            /// </summary>
+            /// <param name="bandIndex">Index of the band.</param>
+            /// <returns>True on success.</returns>
+            /// \new494 Added in version 4.9.4
+            public bool SetDefaultMinMax(int bandIndex)
+            {
+                throw new NotImplementedException();
+            }
+
         /// @}
         #endregion
 

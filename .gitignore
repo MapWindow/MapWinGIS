@@ -164,3 +164,4 @@ $RECYCLE.BIN/
 # Custom
 *.dll
 support/GDAL_SDK/*
+docs/output

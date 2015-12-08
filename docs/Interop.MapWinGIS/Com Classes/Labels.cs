@@ -73,6 +73,35 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Marks that values of size field have changed and the size of labels should be recalculated on the next redraw.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public void UpdateSizeField()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum font size for labels (when size field is used).
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public int FontSize2 { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether variable size for labels should be used 
+        /// (in the range between Labels.FontSize, Labels.FontSize2).
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool UseVariableSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether logarithmic scale will be used to calculate the size of labels.
+        /// </summary>
+        /// \see Labels.UseVariableSize
+        /// \new494 Added in version 4.9.4
+        public bool LogScaleForSize { get; set; }
+
+        /// <summary>
         /// Returns the code of the last error which has occurred within the instance of class.
         /// </summary>
         public int LastErrorCode
@@ -922,6 +951,16 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Gets or sets the minimum zoom at which labels are visible on the map.
+        /// </summary>
+        public int MinVisibleZoom { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum zoom at which labels are visible on the map.
+        /// </summary>
+        public int MaxVisibleZoom { get; set; }
+
+        /// <summary>
         /// Gets or sets the value which affects the collision avoidance routine.
         /// Two labels are considered overlapping when the distance between their bounding rectangles
         /// is less then this value.
@@ -1301,8 +1340,6 @@ namespace MapWinGIS
         #endregion
 
         /// @}
-
-
         
     }
 #if nsp

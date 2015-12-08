@@ -219,6 +219,18 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Inserts a category at the specified index in the collection.
+        /// </summary>
+        /// <param name="Index">The index.</param>
+        /// <param name="Category">The category to be inserted.</param>
+        /// <returns>True on success.</returns>
+        /// \new494 Added in version 4.9.4
+        public bool Insert2(int Index, ShapefileCategory Category)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Retrieves the numeric code of the last error that took place in the class.
         /// </summary>
         /// <remarks>The usage of this property clears the error code.</remarks>
@@ -345,6 +357,29 @@ namespace MapWinGIS
         /// <returns>True on success.</returns>
         /// \new492 Added in version 4.9.2
         public bool GeneratePolygonColors(ColorScheme Scheme = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Generates categories based on specified field.
+        /// </summary>
+        /// <param name="FieldName">Name of the field.</param>
+        /// <param name="ClassificationType">Type of the classification.</param>
+        /// <param name="numClasses">The number classes.</param>
+        /// <returns>True on success.</returns>
+        /// \new494 Added in version 4.9.4
+        public bool Generate2(string FieldName, tkClassificationType ClassificationType, int numClasses)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Adds the category to the collection.
+        /// </summary>
+        /// <param name="Category">The category.</param>
+        /// \new494 Added in version 4.9.4
+        public void Add2(ShapefileCategory Category)
         {
             throw new NotImplementedException();
         }

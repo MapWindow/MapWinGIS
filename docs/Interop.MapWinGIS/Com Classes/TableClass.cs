@@ -697,6 +697,54 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Clears the cache (cell values already loaded in the memory).
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public void ClearCache()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets string with the names of fields which were used in join operation.
+        /// </summary>
+        /// <param name="joinIndex">Index of the join.</param>
+        /// <returns>The string with names.</returns>
+        /// \new494 Added in version 4.9.4
+        public string get_JoinFields(int joinIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the filename of the DBF file if the table is bound to one.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public string Filename { get; private set; }
+
+        /// <summary>
+        /// Gets the options of the join operation.
+        /// </summary>
+        /// <param name="joinIndex">Index of the join.</param>
+        /// <returns>The string with join options.</returns>
+        /// \new494 Added in version 4.9.4
+        public string get_JoinOptions(int joinIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the row values have been modified.
+        /// </summary>
+        /// <param name="RowIndex">Index of the row.</param>
+        /// <returns>True if the row is modified.</returns>
+        /// \new494 Added in version 4.9.4
+        public bool get_RowIsModified(int RowIndex)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }

@@ -541,6 +541,12 @@ namespace MapWinGIS
             set { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Gets or sets the maximum font size fo the category.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public int FontSize2 { get; set; }
+
         #endregion
     }
 #if nsp

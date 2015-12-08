@@ -461,9 +461,21 @@ namespace MapWinGIS
         /// Gets name of the driver which is used to access layer datasource.
         /// </summary>
         public string DriverName
-       {
+        {
             get { throw new NotImplementedException(); }
         }
+
+        /// <summary>
+        /// Gets the array of available shape types inside OGR layer (should be cast to ShpfileType[]).
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public object AvailableShapeTypes { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the type of the active shape type for the layer (is used in OgrLayer.GetBuffer for example).
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public ShpfileType ActiveShapeType { get; set; }
 
         /// <summary>
         /// Gets layer name or SQL query which was used to open this layer.

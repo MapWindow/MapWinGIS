@@ -277,6 +277,17 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Fixes the shape in case it is not valid.
+        /// </summary>
+        /// <param name="units">The units of measure of the coordinate system.</param>
+        /// <returns>The fixed shape.</returns>
+        /// \new494 Added in version 4.9.4
+        public Shape FixUp2(tkUnitsOfMeasure units)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Calculates the intersection of 2 shapes.
         /// </summary>
         /// <remarks>In comparison with Shape.Clip this function returns all the results of intersection
@@ -808,6 +819,15 @@ namespace MapWinGIS
         /// <returns>True on success.</returns>
         /// \new493 Added in version 4.9.3
         public bool SplitByPolyline(Shape polyline, ref object Results)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Removes all the points and parts.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public void Clear()
         {
             throw new NotImplementedException();
         }

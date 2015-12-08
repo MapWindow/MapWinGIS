@@ -247,6 +247,28 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets the geographic bounds of the specified provider.
+        /// </summary>
+        /// <param name="Index">The index of the provider.</param>
+        /// <returns>Geographic bounds in decimal degrees.</returns>
+        /// \new494 Added in version 4.9.4
+        public Extents get_GeographicBounds(int Index)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the geographic bounds of the specified provider.
+        /// </summary>
+        /// <param name="Index">The index.</param>
+        /// <param name="pVal">The p value.</param>
+        /// \new494 Added in version 4.9.4
+        public void set_GeographicBounds(int Index, Extents pVal)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }

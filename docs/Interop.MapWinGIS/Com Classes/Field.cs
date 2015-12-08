@@ -77,6 +77,40 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the field is visible. 
+        /// For use in application only, not used by MapWinGIS internally.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool Visible { get; set; }
+
+        /// <summary>
+        /// Gets or sets the alias for the field.
+        /// For use in application only, not used by MapWinGIS internally.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public string Alias { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this field is joined.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool Joined { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the expression for the field.
+        /// For use in application only, not used by MapWinGIS internally.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public string Expression { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this field is modified.
+        /// It is used during saving of changes for OgrLayer. The flag should be set by application code.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool Modified { get; set; }
+
+        /// <summary>
         /// Retrieves the last error generated in the object.
         /// </summary>
         public int LastErrorCode

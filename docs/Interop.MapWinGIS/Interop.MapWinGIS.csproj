@@ -113,6 +113,15 @@
     <Compile Include="Com Classes\ChartField.cs" />
     <Compile Include="Com Classes\Charts.cs" />
     <Compile Include="Com Classes\ColorScheme.cs" />
+    <Compile Include="Com Classes\WmsLayer.cs" />
+    <Compile Include="Com Classes\SelectionList.cs" />
+    <Compile Include="Com Classes\GdalRasterBand.cs" />
+    <Compile Include="Com Classes\GdalDriverManager.cs" />
+    <Compile Include="Com Classes\GdalDriver.cs" />
+    <Compile Include="Com Classes\GdalDataset.cs" />
+    <Compile Include="Com Classes\Function.cs" />
+    <Compile Include="Com Classes\Expression.cs" />
+    <Compile Include="Com Classes\DrawRectangle.cs" />
     <Compile Include="Com Classes\ESRIGridManager.cs" />
     <Compile Include="Com Classes\Extents.cs" />
     <Compile Include="Com Classes\Identifier.cs" />

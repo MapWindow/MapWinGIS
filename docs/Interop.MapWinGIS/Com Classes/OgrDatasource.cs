@@ -353,6 +353,16 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Gets the array with schema names in the datasources.
+        /// </summary>
+        /// <returns>Boxed string array.</returns>
+        /// \new494 Added in version 4.9.4
+        public object GetSchemas()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets the description of the specific error code.
         /// </summary>
         /// <param name="ErrorCode">The error code returned by LastErrorCode property.</param>

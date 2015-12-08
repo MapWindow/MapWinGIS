@@ -83,6 +83,15 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Reverses the order of color breaks in the color scheme.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public void Reverse()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets or set the callback object to report errors.
         /// </summary>
         /// \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.

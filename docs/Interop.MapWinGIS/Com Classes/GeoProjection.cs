@@ -550,6 +550,46 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets the linear units from projection definition.
+        /// </summary>
+        public tkUnitsOfMeasure LinearUnits { get; private set; }
+
+        /// <summary>
+        /// Writes projection string to a file.
+        /// </summary>
+        /// <param name="Filename">The filename.</param>
+        /// <param name="esri">If set to <c>true</c> ESRI WKT format is used.</param>
+        /// <returns>True on success.</returns>
+        /// \new494 Added in version 4.9.4
+        public bool WriteToFileEx(string Filename, bool esri)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Reads projection string from a file.
+        /// </summary>
+        /// <param name="Filename">The filename.</param>
+        /// <param name="esri">If set to <c>true</c> ESRI WKT format is used.</param>
+        /// <returns>True on success.</returns>
+        /// \new494 Added in version 4.9.4
+        public bool ReadFromFileEx(string Filename, bool esri)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Exports projection string to ESRI WKT format.
+        /// </summary>
+        /// <returns>Resulting string.</returns>
+        /// \new494 Added in version 4.9.4
+		public string ExportToEsri()
+        {
+            throw new NotImplementedException();
+        }
+
     }
 #if nsp
 }

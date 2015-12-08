@@ -119,6 +119,12 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the break is visible.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool Visible { get; set; }
+
         #endregion
     }
 #if nsp

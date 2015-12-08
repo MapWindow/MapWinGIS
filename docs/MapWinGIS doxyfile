@@ -208,6 +208,7 @@ ALIASES                = "new48=\xrefitem newpage48 \"New API 4.8\" \"New API 4.
                          "new491=\xrefitem newpage491 \"New API 4.9.1\" \"New API 4.9.1\"" \
                          "new492=\xrefitem newpage492 \"New API 4.9.2\" \"New API 4.9.2\"" \
                          "new493=\xrefitem newpage493 \"New API 4.9.3\" \"New API 4.9.3\"" \
+                         "new494=\xrefitem newpage494 \"New API 4.9.4\" \"New API 4.9.4\"" \
                          "removed493=\xrefitem removed493 \"Removed in 4.9.3\" \"Removed in 4.9.3\""
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only). 

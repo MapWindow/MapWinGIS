@@ -451,8 +451,6 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
-
-
         /// <summary>
         /// Serializes the state shapefile object, but not the data itself.
         /// </summary>
@@ -530,6 +528,66 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Stops append mode for the shapefile.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public void StopAppendMode()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Starts append mode for the shapefile.
+        /// </summary>
+        /// <returns>True on success</returns>
+        /// \new494 Added in version 4.9.4
+        public bool StartAppendMode()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether shapefile is in append mode. 
+        /// Any shapes added with Shapefile.EditAddShape will be immediately written to the disk.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool AppendMode { get; private set; }
+
+        /// <summary>
+        /// The sorting of the shapefile will be reapplied before next redraw after calling this method.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public void UpdateSortField()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Fixes invalid shapes in the shapefile.
+        /// </summary>
+        /// <param name="SelectedOnly">Only selected shapes will be fixed.</param>
+        /// <param name="result">The resulting shapefile.</param>
+        /// <returns>True if the operations was successful.</returns>
+        /// \new494 Added in version 4.9.4
+        public bool FixUpShapes2(bool SelectedOnly, out Shapefile result)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// The name of the field to be used to determine the drawing order of point shapes and labels.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public string SortField { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether shapes will be sorted in ascending order.
+        /// </summary>
+        /// \see SortField
+        /// \new494 Added in version 4.9.4
+        public bool SortAscending { get; set; }
 
         #endregion
 
@@ -1387,6 +1445,19 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Saves shapefile to the disk.
+        /// </summary>
+        /// <param name="newFilename">The new filename.</param>
+        /// <param name="stopEditing">If set to <c>true</c> the editing for shapefile will be stopped.</param>
+        /// <param name="unboundFile">If set to <c>true</c> the file will not be assigned as a source of this instance.</param>
+        /// <returns>True on success.</returns>
+        /// \new494 Added in version 4.9.4
+        public bool SaveAsEx(string newFilename, bool stopEditing, bool unboundFile)
+        {
+            throw new NotImplementedException();
+        }
+
         /// @}
         #endregion
 
@@ -1839,7 +1910,7 @@ namespace MapWinGIS
         /// Spatial index ensures faster access to the shapes while a small portion of shapefile
         /// is being displayed. On the contrary when substantial part of shapefile is being displayed 
         /// spatial index can decrease the performance. This property blocks the usage of 
-        /// spatial index when it is inefficient.
+        /// spatial index when it is inefficient.</remarks>
         public double SpatialIndexMaxAreaPercent
         {
             get { throw new NotImplementedException(); }

@@ -250,6 +250,20 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Applies specified colors to the exiting breaks of GridColorScheme.
+        /// </summary>
+        /// <param name="schemeType">Type of the scheme.</param>
+        /// <param name="scheme">Colors to apply.</param>
+        /// <param name="gradientWithinCategories">If <c>true</c> gradient within each category will be set.</param>
+        /// <returns>True on suceess.</returns>
+        /// \new494 Added in version 4.9.4
+        public bool ApplyColors(tkColorSchemeType schemeType, ColorScheme scheme, bool gradientWithinCategories)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 #if nsp
 }

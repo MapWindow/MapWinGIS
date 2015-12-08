@@ -2617,6 +2617,166 @@ namespace MapWinGIS
         afSeconds = 2,
         afRadians = 3,
     }
+    
+    /// <summary>
+    /// Possible values of the version parameter for WMS requests.
+    /// </summary>
+    public enum tkWmsVersion
+    {
+        wvEmpty = 0,
+        wvAuto = 1,
+        wv100 = 2,
+        wv110 = 3,
+        wv111 = 4,
+        wv13 = 5,
+    }
+    
+    /// <summary>
+    /// Possible levels of the callback verbosity.
+    /// </summary>
+    public enum tkCallbackVerbosity
+    {
+        cvAll = 0,
+        cvLimited = 1,
+    }
+    
+    /// <summary>
+    /// The function groups.
+    /// </summary>
+    public enum tkFunctionGroup
+    {
+        fgMath = 0,
+        fgStrings = 1,
+        fgGeometry = 2,
+        fgBranching = 3,
+        fgConversion = 4,
+    }
+    
+    /// <summary>
+    /// The layer types.
+    /// </summary>
+    public enum tkLayerType
+    {
+        ltUndefined = 0,
+        ltVector = 1,
+        ltRaster = 2,
+    }
+    
+    /// <summary>
+    /// Types of rendering for GDAL raster datasource.
+    /// </summary>
+    public enum tkRasterRendering
+    {        
+        /// <summary>
+        /// Unknown (when no datasource is opened).
+        /// </summary>
+        rrUnknown = 0,
+                
+        /// <summary>
+        /// Gray scale rendering based on a single band.
+        /// </summary>
+        rrSingleBand = 1,
+        
+        /// <summary>
+        /// RGB rendering based on at least 3 bands with possible addition of alpha band.
+        /// </summary>
+        rrRGB = 2,
+        
+        /// <summary>
+        /// Rendering based on a single band and custom color scheme.
+        /// </summary>
+        rrColorScheme = 3,
+        
+        /// <summary>
+        /// Rendering based on a single band and built-in color scheme.
+        /// </summary>
+        rrBuiltInColorTable = 4,
+    }
+    
+    /// <summary>
+    /// A bit mask which defines custom events that will be fired during the rendering process.
+    /// </summary>
+    public enum tkCustomDrawingFlags
+    {
+        CustomDrawingNone = 0,
+        OnDrawBackBufferHdc = 1,
+        OnDrawBackBufferBitmapData = 2,
+        BeforeAfterDrawing = 4,
+    }
+    
+    /// <summary>
+    /// GDAL data types.
+    /// </summary>
+    public enum tkGdalDataType
+    {
+        gdtUnknown = 0,
+        gdtByte = 1,
+        gdtUInt16 = 2,
+        gdtInt16 = 3,
+        gdtUInt32 = 4,
+        gdtInt32 = 5,
+        gdtFloat32 = 6,
+        gdtFloat64 = 7,
+        gdtCInt16 = 8,
+        gdtCInt32 = 9,
+        gdtCFloat32 = 10,
+        gdtCFloat64 = 11,
+    }
+    
+    /// <summary>
+    /// Possible palette interpretations for a raster datasource.
+    /// </summary>
+    public enum tkPaletteInterpretation
+    {
+        piGray = 0,
+        piRGB = 1,
+        piCMYK = 2,
+        piHLS = 3,
+    }
+    
+    /// <summary>
+    /// Possible color interpretations for a raster band.
+    /// </summary>
+    public enum tkColorInterpretation
+    {
+        ciUndefined = 0,
+        ciGrayIndex = 1,
+        ciPaletteIndex = 2,
+        ciRedBand = 3,
+        ciGreenBand = 4,
+        ciBlueBand = 5,
+        ciAlphaBand = 6,
+        ciHueBand = 7,
+        ciSaturationBand = 8,
+        ciLightnessBand = 9,
+        ciCyanBand = 10,
+        ciMagentaBand = 11,
+        ciYellowBand = 12,
+        ciBlackBand = 13,
+        ciYCbCr_YBand = 14,
+        ciYCbCr_CbBand = 15,
+        ciYCbCr_CrBand = 16,
+    }
+    
+    /// <summary>
+    /// Types of proxy authentication.
+    /// </summary>
+    public enum tkProxyAuthentication
+    {
+        asBasic = 0,
+        asNtlm = 1,
+    }
+    
+    /// <summary>
+    /// Possible values of pixel offset mode (GDI+ rendering).
+    /// </summary>
+    public enum tkPixelOffsetMode
+    {
+        pomDefault = 0,
+        pomHighPerformance = 1,
+        pomHighQuality = 2,
+    }
+}
 
 #if nsp
 }
