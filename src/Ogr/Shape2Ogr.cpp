@@ -41,8 +41,17 @@ bool Shape2Ogr::ShapefileFieldsToOgr(IShapefile* sf, OGRLayer* poLayer)
 		fld->get_Name(&name);
 		fld->get_Precision(&precision);
 		fld->get_Width(&width);
-		
-		OGRFieldDefn oField(OgrHelper::Bstr2OgrString(name.m_str), OgrHelper::GetFieldType(fld));
+
+		OGRFieldType fieldType = OgrHelper::GetFieldType(fld);
+
+		OGRFieldDefn oField(OgrHelper::Bstr2OgrString(name.m_str), fieldType);
+
+		// see https://mapwindow.atlassian.net/browse/CORE-81 for details
+		if (fieldType == OFTReal && width - precision < 10)
+		{
+			width = 10 + precision;
+		}
+
 		oField.SetWidth(width);
 		oField.SetPrecision(precision);
 
@@ -91,7 +100,12 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 				if (saveLabels) {
 					OgrLabelsHelper::AddLabel2Feature(labels, i, poFeature, labelFields);
 				}
-				poLayer->CreateFeature(poFeature);
+				
+				OGRErr err = poLayer->CreateFeature(poFeature);
+				if (err != OGRERR_NONE)
+				{
+					CallbackHelper::ErrorMsg("Failed to add feature to OGR layer.");
+				}
 			}
 			else {
 				CString s = Debug::Format("Geometry import: %s", validationError);
@@ -101,6 +115,7 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 			OGRFeature::DestroyFeature(poFeature);
 		}
 	}
+
 	CallbackHelper::ProgressCompleted(callback);
 }
 
