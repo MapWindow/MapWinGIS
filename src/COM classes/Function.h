@@ -14,6 +14,13 @@ public:
 	CFunction()
 	{
 		_pUnkMarshaler = NULL;
+
+		gReferenceCounter.AddRef(idFunction);
+	}
+
+	~CFunction()
+	{
+		gReferenceCounter.Release(idFunction);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_FUNCTION)

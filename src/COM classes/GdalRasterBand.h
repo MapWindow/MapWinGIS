@@ -15,6 +15,13 @@ public:
 	{
 		_pUnkMarshaler = NULL;
 		_band = NULL;
+
+		gReferenceCounter.AddRef(idGdalRasterBand);
+	}
+
+	~CGdalRasterBand()
+	{
+		gReferenceCounter.Release(idGdalRasterBand);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_GDALRASTERBAND)

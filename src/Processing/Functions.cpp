@@ -594,6 +594,7 @@ namespace parser
 	// *****************************************************************
 	//		CreateFunctions()
 	// *****************************************************************
+	// See ExpressionParts.cpp for the description of functions
 	void CreateFunctions()
 	{
 		functions.clear();
@@ -611,7 +612,7 @@ namespace parser
 		functions.push_back(new CustomFunction(fnLn, "ln", 1, fcnLn, fgMath));
 		functions.push_back(new CustomFunction(fnLog10, "log10", 1, fcnLog10, fgMath));
 		functions.push_back(new CustomFunction(fnLog, "log", 2, fcnLog, fgMath));
-		functions.push_back(new CustomFunction(fnRound, "round", -1, fcnRound, fgMath));
+		functions.push_back(new CustomFunction(fnRound, "round", 1, fcnRound, fgMath));
 		functions.push_back(new CustomFunction(fnRand, "rand", 2, fcnRand, fgMath));
 		functions.push_back(new CustomFunction(fnRandf, "randf", 2, fcnRandF, fgMath));
 		functions.push_back(new CustomFunction(fnMax, "max", -1, fcnMax, fgMath));
@@ -629,7 +630,7 @@ namespace parser
 		functions.push_back(new CustomFunction(fnTrim, "trim", 1, fcnTrim, fgStrings));
 		functions.push_back(new CustomFunction(fnLen,"length", 1, fcnLength, fgStrings));
 		functions.push_back(new CustomFunction(fnReplace, "replace", 3, fcnReplace, fgStrings));
-		functions.push_back(new CustomFunction(fnSubstr, "substr", 3, fcnSubstr, fgStrings));
+		functions.push_back(new CustomFunction(fnSubstr, "substr", 2, fcnSubstr, fgStrings));
 		functions.push_back(new CustomFunction(fnConcat, "concat", -1, fcnConcat, fgStrings));
 		functions.push_back(new CustomFunction(fnStrpos, "strpos", 2, fcnStrpos, fgStrings));
 		functions.push_back(new CustomFunction(fnLeft, "left", 2, fcnLeft, fgStrings));

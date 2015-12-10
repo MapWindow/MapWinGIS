@@ -57,6 +57,14 @@ public:
 	int left;				// id of the left operand (element)
 	int right;				// id of the right operand (element)
 	bool binaryOperation;   // whether it's binary operation, i.e. with 2 operands
+
+	void CopyFrom(COperation& source)
+	{
+		id = source.id;
+		left = source.left;
+		right = source.right;
+		binaryOperation = source.binaryOperation;
+	}
 };
 
 // ********************************************************
@@ -255,11 +263,29 @@ public:
 		ParseName(name);
 
 		InitOverloads();
+
+		CheckNumParams(numParams);
 	}
 
 	~CustomFunction()
 	{
 		Clear();
+	}
+
+	bool CheckNumParams(int expectedCount)
+	{
+		// let's add it as a precaution that Functions.cpp and ExpressionParts.cpp are in sync
+		// -1 - for an array of parameters
+		if (_params.size() != expectedCount && expectedCount != -1)
+		{
+			CString name;
+			name = _aliases.size() > 0 ? _aliases[0] : "name n/d";
+			CallbackHelper::ErrorMsg(Debug::Format("Invalid number of named parameters for the the function: %s", name));
+
+			return false;
+		}
+
+		return true;
 	}
 
 	void Clear();
@@ -335,15 +361,11 @@ public:
 		ClearElements();
 	}
 
-	bool isFunction() { return function != NULL; }
-
 private:
-	void ClearElements()
-	{
-		for (size_t i = 0; i < elements.size(); i++) {
-			delete elements[i];
-		}
+	void ClearElements();
+	void ReleaseValue();
 
-		elements.clear();
-	}
+public:
+	bool isFunction() { return function != NULL; }
+	void Reset();
 };

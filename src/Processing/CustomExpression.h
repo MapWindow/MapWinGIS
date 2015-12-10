@@ -39,7 +39,6 @@ public:
 
 	~CustomExpression()
 	{
-		// TODO: operations are leaking!
 		Clear();
 	}
 
@@ -104,10 +103,13 @@ public:
 	void put_FieldValue(int FieldId, BSTR newVal);
 	void put_FieldValue(int FieldId, CString newVal);
 	void put_FieldValue(int FieldId, bool newVal) {	_variables[FieldId]->val->bln(newVal);}
+	int get_PartCount() { return _parts.size(); }
 
 	IShape* get_Shape();
 	void put_Shape(IShape* shape);
 
 	void SetErrorMessage(CString msg) { _errorMessage = msg; }
 	void SetErrorPosition(int position){ _errorPosition = position; }
+	void ClearOperations();
+	void CacheOperation(COperation& operation);
 };

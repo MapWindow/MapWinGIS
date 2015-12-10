@@ -15,11 +15,15 @@ public:
 		: _lastErrorPosition(-1), _table(NULL)
 	{
 		_pUnkMarshaler = NULL;
+
+		gReferenceCounter.AddRef(idExpression);
 	}
 
 	~CExpression()
 	{
 		Clear();
+
+		gReferenceCounter.Release(idExpression);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_EXPRESSION)

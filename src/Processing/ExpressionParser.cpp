@@ -104,7 +104,7 @@ bool ExpressionParser::IsOperator(char s)
 // *******************************************************************
 bool ExpressionParser::IsFunctionName(char s)
 {
-	return isalnum(s) || s == '$';
+	return isalnum(s) || s == '$' || s == '_';
 }
 
 // *******************************************************************
@@ -158,15 +158,14 @@ bool ExpressionParser::Parse(CustomExpression* expression, CString s, bool useFi
 		return false;
 	}
 
-	int partCount = 0;
-	if (!ReplaceParameterlessFunctions(s, partCount))
+	if (!ReplaceParameterlessFunctions(s))
 	{
 		return false;
 	}
 
 	s.Replace(" ", "");
 
-	if (!ParseTree(s, partCount))
+	if (!ParseTree(s))
 	{
 		return false;
 	}
@@ -177,7 +176,7 @@ bool ExpressionParser::Parse(CustomExpression* expression, CString s, bool useFi
 // *****************************************************************
 //		ParseTree()
 // *****************************************************************
-bool ExpressionParser::ParseTree(CString s, int partCount)
+bool ExpressionParser::ParseTree(CString s)
 {
 	bool found = true;
 	CString temp;
@@ -202,7 +201,7 @@ bool ExpressionParser::ParseTree(CString s, int partCount)
 
 				bool finish = fnBegin == 0 && end == s.GetLength() - 1;      // there is nothing but function left
 
-				ReplacePart(s, fnBegin, end, partCount);
+				ReplacePart(s, fnBegin, end);
 
 				if (finish)
 				{
@@ -228,7 +227,7 @@ bool ExpressionParser::ParseTree(CString s, int partCount)
 
 		if (found)
 		{
-			ReplacePart(s, begin, end, partCount);
+			ReplacePart(s, begin, end);
 		}
 	}
 
@@ -950,12 +949,12 @@ bool ExpressionParser::ReplaceFieldNames(CString& s, int& count)
 // *****************************************************************
 //		ReplacePart()
 // *****************************************************************
-void ExpressionParser::ReplacePart(CString& s, int begin, int end, int& count)
+void ExpressionParser::ReplacePart(CString& s, int begin, int end)
 {
+	int partCount = _expression->get_PartCount();
 	CString strReplace;
-	strReplace.Format("#%i", count);
+	strReplace.Format("#%i", partCount - 1);   // refer to previously added part
 	ReplaceSubString(s, begin, end - begin + 1, strReplace);
-	count++;
 }
 
 // ************************************************************
@@ -977,7 +976,7 @@ void ExpressionParser::ReplaceSubString(CString& s, int begin, int length, CStri
 // ************************************************************
 //	 ReplaceParameterlessFunctions()
 //************************************************************
-bool ExpressionParser::ReplaceParameterlessFunctions(CString& s, int& partCount)
+bool ExpressionParser::ReplaceParameterlessFunctions(CString& s)
 {
 	int pos = s.Find("$");
 	
@@ -1007,7 +1006,7 @@ bool ExpressionParser::ReplaceParameterlessFunctions(CString& s, int& partCount)
 
 			_expression->AddPart(part); 
 
-			ReplacePart(s, pos, i - 1, partCount);
+			ReplacePart(s, pos, i - 1);
 		}
 		else
 		{

@@ -16,6 +16,13 @@ public:
 		GDALAllRegister(); 
 		_manager = GetGDALDriverManager();
 		_manager->AutoLoadDrivers();
+
+		gReferenceCounter.AddRef(idGdalDriverManager);
+	}
+
+	~CGdalDriverManager()
+	{
+		gReferenceCounter.Release(idGdalDriverManager);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_GDALDRIVERMANAGER)

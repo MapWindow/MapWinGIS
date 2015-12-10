@@ -40,7 +40,7 @@ CExpressionValue* CustomExpression::Calculate(CString& errorMessage)
 	// if the operations should be cached we'll ensure that there is no obsolete data in vector
 	if (_saveOperations)
 	{
-		_operations.clear();
+		ClearOperations();
 	}
 
 	ResetActiveCountForParts();
@@ -140,15 +140,13 @@ bool CustomExpression::EvaluateFunction(CExpressionPart* part)
 		return false;
 	}
 
-	// TODO: validate that number of names parameters equals the initial number specified in constructor
+	// TODO: validate that number of named parameters equals the initial number specified in constructor
 	// TODO: validate type of arguments depending on function
 
-	// calculating
-	
-	// TODO: this value must be deleted;
-	// in other cases val holds reference to element value, therefore it's deleted along with its parent element
+	// this value will be deleted in destructor
 	part->val = new CExpressionValue();	
-	
+
+	// calculating
 	return part->function->call(args, _shape, *(part->val));
 }
 
@@ -157,7 +155,8 @@ bool CustomExpression::EvaluateFunction(CExpressionPart* part)
 // *******************************************************************
 bool CustomExpression::CalculateNextOperationWithinPart(CExpressionPart* part, CString& errorMessage, int& operationCount)
 {
-	COperation* operation = NULL;
+	bool needReleaseOperation = false;
+	COperation operation;
 
 	// if there is more then one element, then definitely some operation must be present
 	if (part->elements.size() > 1)
@@ -166,20 +165,18 @@ bool CustomExpression::CalculateNextOperationWithinPart(CExpressionPart* part, C
 		bool found = false;
 		if (!_saveOperations)
 		{
-			operation = _operations[operationCount];
+			operation.CopyFrom(*_operations[operationCount]);
 			operationCount++;
 			found = true;
 		}
 		else
 		{
-			if (!operation)
-				operation = new COperation();
-			found = FindOperation(part, *operation);
+			found = FindOperation(part, operation);
 		}
 
 		if (found)
 		{
-			if (!CalculateOperation(part, *operation))
+			if (!CalculateOperation(part, operation))
 			{
 				errorMessage = _errorMessage;
 				return false;
@@ -191,7 +188,7 @@ bool CustomExpression::CalculateNextOperationWithinPart(CExpressionPart* part, C
 			return false;
 		}
 
-		part->activeCount -= operation->binaryOperation ? 2 : 1;
+		part->activeCount -= operation.binaryOperation ? 2 : 1;
 	}
 
 	return true;
@@ -247,13 +244,7 @@ void CustomExpression::Reset()
 	{
 		CExpressionPart* part = _parts[i];
 	
-		int size = part->elements.size();
-		for (int j = 0; j < size; j++)
-		{
-			CElement* el = part->elements[j];
-			el->wasCalculated = false;
-			el->turnedOff = false;
-		}
+		part->Reset();
 	}
 }
 
@@ -346,15 +337,23 @@ bool CustomExpression::FindOperation(CExpressionPart* part, COperation& operatio
 	// caching operations
 	if (_saveOperations)
 	{
-		COperation* op = new COperation();
-		op->left = operation.left;
-		op->right = operation.right;
-		op->id = operation.id;
-		op->binaryOperation = operation.binaryOperation;
-		_operations.push_back(op);
+		CacheOperation(operation);
 	}
 
     return true;
+}
+
+// *************************************************************
+//	 CacheOperation()
+// *************************************************************
+void CustomExpression::CacheOperation(COperation& operation)
+{
+	COperation* op = new COperation();
+	op->left = operation.left;
+	op->right = operation.right;
+	op->id = operation.id;
+	op->binaryOperation = operation.binaryOperation;
+	_operations.push_back(op);
 }
 
 // *************************************************************
@@ -811,14 +810,11 @@ void CustomExpression::Clear()
 		delete _parts[i];
 	}
 
-	for (size_t i = 0; i < _operations.size(); i++)
-	{
-		delete _operations[i];
-	}
+	ClearOperations();
 
 	_variables.clear();
 	_parts.clear();
-	_operations.clear();
+	
 	_strings.clear();
 
 	if (_shape)
@@ -826,6 +822,19 @@ void CustomExpression::Clear()
 		_shape->Release();
 		_shape = NULL;
 	}
+}
+
+// *****************************************************************
+//		ClearOperations()
+// *****************************************************************
+void CustomExpression::ClearOperations()
+{
+	for (size_t i = 0; i < _operations.size(); i++)
+	{
+		delete _operations[i];
+	}
+
+	_operations.clear();
 }
 
 // *****************************************************************
@@ -859,6 +868,8 @@ void CustomExpression::ReleaseArrays()
 // false - variables, the values of which must be set
 bool CustomExpression::Parse(CString s, bool useFields, CString& errorMessage)
 {
+	Clear();
+
 	_saveOperations = true;
 	_useFields = useFields;
 
@@ -866,8 +877,6 @@ bool CustomExpression::Parse(CString s, bool useFields, CString& errorMessage)
 	bool result = parser.Parse(this, s, useFields);
 
 	errorMessage = _errorMessage;
-
-	_strings.clear();
 
 	if (result)
 	{

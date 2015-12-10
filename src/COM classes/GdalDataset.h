@@ -16,6 +16,8 @@ public:
 	{
 		_pUnkMarshaler = NULL;
 		_proxy = false;
+
+		gReferenceCounter.AddRef(idGdalDataset);
 	}
 
 	~CGdalDataset() 
@@ -23,6 +25,8 @@ public:
 		if (!_proxy) {
 			Close();
 		}
+
+		gReferenceCounter.Release(idGdalDataset);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_GDALDATASET)

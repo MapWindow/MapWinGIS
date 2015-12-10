@@ -23,7 +23,7 @@ private:
 	bool IsOperator(CString s);
 	bool IsFunctionName(char s);
 
-	bool ParseTree(CString s, int partCount);
+	bool ParseTree(CString s);
 	CustomFunction* ParseFunction(CString& s, int begin, int& fnBegin);
 	bool ParseArgumentList(CString s, CustomFunction* fn);
 
@@ -34,7 +34,7 @@ private:
 	bool ReadValue(CString s, int& position, CElement* element);
 	bool ReadOperation(CString s, int& position, CElement& element);
 	
-	void ReplacePart(CString& s, int begin, int end, int& count);
+	void ReplacePart(CString& s, int begin, int end);
 	bool ReplaceStringLiterals(CString& s, int& count);
 	bool ReplaceFieldNames(CString& s, int& count);
 	void ReplaceSubString(CString& s, int begin, int length, CString replacement);
@@ -43,7 +43,7 @@ private:
 	void SetErrorPosition(int position) { _expression->SetErrorPosition(position); }
 public:
 	bool Parse(CustomExpression* expression, CString s, bool useFields);
-	bool ReplaceParameterlessFunctions(CString& s, int& partCount);
+	bool ReplaceParameterlessFunctions(CString& s);
 
 };
 

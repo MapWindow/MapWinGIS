@@ -202,7 +202,7 @@ STDMETHODIMP CExpression::CalculateForTableRow(LONG rowIndex, LONG targetFieldIn
 		return S_OK;
 	}
 
-	if (targetFieldIndex < 0 || targetFieldIndex >= TableHelper::GetNumRows(_table))
+	if (targetFieldIndex < 0 || targetFieldIndex >= TableHelper::GetNumFields(_table))
 	{
 		CallbackHelper::ErrorMsg("CExpression::CalculateForTableRow: targetFieldIndex is out of bounds.");
 		return S_OK;

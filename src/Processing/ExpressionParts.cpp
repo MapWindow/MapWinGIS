@@ -276,3 +276,47 @@ CStringW CustomFunction::GetSignature()
 
 	return name;
 }
+
+// ***********************************************************
+//	 ClearElements()
+//************************************************************
+void CExpressionPart::ClearElements()
+{
+	ReleaseValue();
+
+	for (size_t i = 0; i < elements.size(); i++) {
+		delete elements[i];
+	}
+
+	elements.clear();
+}
+
+// ***********************************************************
+//	 ReleaseValue()
+//************************************************************
+void CExpressionPart::ReleaseValue()
+{
+	if (function && val)
+	{
+		// functions don't have nested elements, only parts,
+		// so we own the element, and must release it
+		delete val;
+		val = NULL;
+	}
+}
+
+// ***********************************************************
+//	 Reset()
+//************************************************************
+void CExpressionPart::Reset()
+{
+	int size = elements.size();
+	for (int j = 0; j < size; j++)
+	{
+		CElement* el = elements[j];
+		el->wasCalculated = false;
+		el->turnedOff = false;
+	}
+
+	ReleaseValue();
+}
