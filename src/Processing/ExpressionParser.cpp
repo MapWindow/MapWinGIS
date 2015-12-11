@@ -346,10 +346,10 @@ bool ExpressionParser::ParseArgumentList(CString s, CustomFunction* fn)
 		ct = s.Tokenize(";", pos);
 	};
 
-	if (part->arguments.size() != fn->numParams())
+	CString errorMessage;
+	if (!fn->CheckArguments(part->arguments.size(), errorMessage))
 	{
-		CString s = Debug::Format("Invalid number of parameters: %s: %d; expected %d", fn->GetName(), part->arguments.size(), fn->numParams());
-		SetErrorMessage(s);
+		SetErrorMessage(errorMessage);
 		delete part;
 		return false;
 	}

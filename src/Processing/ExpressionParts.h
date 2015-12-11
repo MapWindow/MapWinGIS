@@ -248,6 +248,7 @@ public:
 class CustomFunction
 {
 private:
+	int _numParams;
 	bool _useGeometry;
 	tkFunctionGroup _group;
 	ExpressionFunction _fn;
@@ -260,11 +261,13 @@ public:
 	CustomFunction(FunctionId fnId, CString name, int numParams, ExpressionFunction function, tkFunctionGroup group, bool useGeometry = false)
 		: _fnId(fnId), _useGeometry(useGeometry), _group(group), _fn(function)
 	{
+		_numParams = numParams;
+
 		ParseName(name);
 
 		InitOverloads();
 
-		CheckNumParams(numParams);
+		CheckNumParams();
 	}
 
 	~CustomFunction()
@@ -272,21 +275,7 @@ public:
 		Clear();
 	}
 
-	bool CheckNumParams(int expectedCount)
-	{
-		// let's add it as a precaution that Functions.cpp and ExpressionParts.cpp are in sync
-		// -1 - for an array of parameters
-		if (_params.size() != expectedCount && expectedCount != -1)
-		{
-			CString name;
-			name = _aliases.size() > 0 ? _aliases[0] : "name n/d";
-			CallbackHelper::ErrorMsg(Debug::Format("Invalid number of named parameters for the the function: %s", name));
-
-			return false;
-		}
-
-		return true;
-	}
+	bool CheckNumParams();
 
 	void Clear();
 
@@ -310,6 +299,10 @@ public:
 	FunctionId FunctionId() { return _fnId;	}
 
 	CStringW GetSignature();
+
+	// optionally type of parameters can be checked as well, 
+	// provided we define all the types in CustomFunction.InitOverloads
+	bool CheckArguments(int argSize, CString& errorMessage);
 
 	void AddParameter(CStringW name, CStringW description) 
 	{

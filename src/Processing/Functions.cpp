@@ -99,18 +99,22 @@ namespace parser
 
 	bool fcnRound(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
-		// TODO: split into separate functions
+		if (args.size() == 1)
+		{
+			result.dbl(round(args[0]->dbl()));
+			return true;
+		}
+
+		return false;
+	}
+
+	bool fcnRound2(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
 		if (args.size() == 2)
 		{
 			double number = args[0]->dbl();
 			double scaler = pow(10.0, args[1]->dbl());
 			result.dbl(round(number * scaler) / scaler);
-			return true;
-		}
-
-		if (args.size() == 1)
-		{
-			result.dbl(round(args[0]->dbl()));
 			return true;
 		}
 
@@ -324,21 +328,26 @@ namespace parser
 	{
 		CStringW s = args[0]->str();
 
-		// TODO: split into separate functions
 		if (args.size() == 2)
 		{
 			result.str(s.Mid(static_cast<int>(args[1]->dbl())));
-		}
-		else if (args.size() == 3)
-		{
-			result.str(s.Mid(static_cast<int>(args[1]->dbl()), static_cast<int>(args[2]->dbl())));
-		}
-		else 
-		{
-			return false;
+			return true;
 		}
 		
-		return true;
+		return false;
+	}
+
+	bool fcnSubstr2(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		CStringW s = args[0]->str();
+
+		if (args.size() == 3)
+		{
+			result.str(s.Mid(static_cast<int>(args[1]->dbl()), static_cast<int>(args[2]->dbl())));
+			return true;
+		}
+
+		return false;
 	}
 
 	bool fcnConcat(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
@@ -613,6 +622,7 @@ namespace parser
 		functions.push_back(new CustomFunction(fnLog10, "log10", 1, fcnLog10, fgMath));
 		functions.push_back(new CustomFunction(fnLog, "log", 2, fcnLog, fgMath));
 		functions.push_back(new CustomFunction(fnRound, "round", 1, fcnRound, fgMath));
+		functions.push_back(new CustomFunction(fnRound2, "round2", 2, fcnRound2, fgMath));
 		functions.push_back(new CustomFunction(fnRand, "rand", 2, fcnRand, fgMath));
 		functions.push_back(new CustomFunction(fnRandf, "randf", 2, fcnRandF, fgMath));
 		functions.push_back(new CustomFunction(fnMax, "max", -1, fcnMax, fgMath));
@@ -631,6 +641,7 @@ namespace parser
 		functions.push_back(new CustomFunction(fnLen,"length", 1, fcnLength, fgStrings));
 		functions.push_back(new CustomFunction(fnReplace, "replace", 3, fcnReplace, fgStrings));
 		functions.push_back(new CustomFunction(fnSubstr, "substr", 2, fcnSubstr, fgStrings));
+		functions.push_back(new CustomFunction(fnSubstr2, "substr2", 3, fcnSubstr2, fgStrings));
 		functions.push_back(new CustomFunction(fnConcat, "concat", -1, fcnConcat, fgStrings));
 		functions.push_back(new CustomFunction(fnStrpos, "strpos", 2, fcnStrpos, fgStrings));
 		functions.push_back(new CustomFunction(fnLeft, "left", 2, fcnLeft, fgStrings));

@@ -133,15 +133,12 @@ bool CustomExpression::EvaluateFunction(CExpressionPart* part)
 		args.push_back(part->arguments[i]->val);
 	}
 
-	if ((int)args.size() < part->function->numParams())
+	// we did the same check during parsing,
+	// but still let's leave it as additional safeguard
+	if (!part->function->CheckArguments((int)args.size(), _errorMessage))
 	{
-		_errorMessage = "Not enough arguments for the function: ";
-		_errorMessage += part->function->GetName();
 		return false;
 	}
-
-	// TODO: validate that number of named parameters equals the initial number specified in constructor
-	// TODO: validate type of arguments depending on function
 
 	// this value will be deleted in destructor
 	part->val = new CExpressionValue();	

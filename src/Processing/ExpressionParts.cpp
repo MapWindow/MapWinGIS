@@ -35,6 +35,45 @@ void CustomFunction::ParseName(CString name)
 }
 
 // ************************************************************
+//	 CheckNumParams()
+//************************************************************
+bool CustomFunction::CheckNumParams()
+{
+	// let's add it as a precaution that Functions.cpp and ExpressionParts.cpp are in sync
+	// -1 - for an array of parameters
+	if (_params.size() != _numParams && _numParams != -1)
+	{
+		CString name;
+		name = _aliases.size() > 0 ? _aliases[0] : "name n/d";
+		CallbackHelper::ErrorMsg(Debug::Format("Invalid number of named parameters for the function: %s", name));
+
+		return false;
+	}
+
+	return true;
+}
+
+// ************************************************************
+//	 CheckArguments()
+//************************************************************
+bool CustomFunction::CheckArguments(int argSize, CString& errorMessage)
+{
+	if (numParams() != argSize && _numParams != -1)
+	{
+		errorMessage = Debug::Format("Invalid number of args (%s): %d; expected %d", GetName(), argSize, numParams());
+		return false;
+	}
+
+	if (_numParams == -1 && argSize == 0)
+	{
+		errorMessage = Debug::Format("At least one argument is expected (%s)", GetName());
+		return false;
+	}
+
+	return true;
+}
+
+// ************************************************************
 //	 InitOverloads()
 //************************************************************
 void CustomFunction::InitOverloads()
@@ -112,10 +151,16 @@ void CustomFunction::InitOverloads()
 			AddParameter("after", "The new string to replace the old one with.");
 			break;
 		case fnSubstr: 
-			description("Return a part of a string.");
+			description("Returns a part of a string.");
 			AddParameter("input", "The input string.");
 			AddParameter("pos", "The start position to extract from.");
 			//The length of the string to extract.
+			break;
+		case fnSubstr2:
+			description("Returns a part of a string.");
+			AddParameter("input", "The input string.");
+			AddParameter("pos", "The start position to extract from.");
+			AddParameter("length", "The length of the string.");
 			break;
 		case fnConcat: 
 			description("Concatenates several strings to one.");
@@ -207,6 +252,11 @@ void CustomFunction::InitOverloads()
 			description("Returns the integral value that is nearest to x, with halfway cases rounded away from zero.");
 			AddParameter("base", "Value to round.");
 			break;
+		case fnRound2:
+			description("Returns the integral value that is nearest to x, with halfway cases rounded away from zero.");
+			AddParameter("base", "Value to round.");
+			AddParameter("precision", "Number of decimal points.");
+			break;
 		case fnRand: 
 			description("Returns a pseudo-random integral number in the range between min and max.");
 			AddParameter("min", "Minimum value.");
@@ -242,7 +292,7 @@ void CustomFunction::InitOverloads()
 			AddParameter("x", "The value of x rounded upward.");
 			break;
 		case fnPi:
-			description("Rounds value of pi constant (3.14159265359).");
+			description("Returns rounded value of pi constant (3.14159265359).");
 			break;
 	}
 }
