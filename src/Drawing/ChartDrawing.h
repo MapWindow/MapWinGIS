@@ -21,17 +21,18 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 25 june 2010 - created the file.
 
 #pragma once
 #include "BaseDrawer.h"
 #include "CollisionList.h"
+#include "Charts.h"
 
 class CChartDrawer: public CBaseDrawer
 {
 public:
 	// constructor
-	CChartDrawer(Gdiplus::Graphics* graphics, Extent* extents, double dx, double dy, double currentScale, CCollisionList* collisionList)
+	CChartDrawer(Gdiplus::Graphics* graphics, Extent* extents, double dx, double dy, double currentScale, CCollisionList* collisionList,
+				bool printing)
 	{
 		_dc = NULL;
 		_extents = extents;
@@ -40,9 +41,17 @@ public:
 		_collisionList = collisionList;
 		_currentScale = currentScale;
 		_graphics = graphics;
+		
+		// TODO: restore!!!
+		_printing = true; //printing;	
 	}
 	
-	~CChartDrawer(void){}
+	~CChartDrawer(void)
+	{
+	}
+
+private:
+	bool _printing;
 
 protected:	
 	double _currentScale;
@@ -54,7 +63,15 @@ private:
 		return 	
 			!(xMin > _extents->right || xMax < _extents->left || yMin > _extents->top || yMax < _extents->bottom);
 	};
-
+	
+	void DrawLabels(Gdiplus::Font* font, ChartOptions* options, std::vector<ValueRectangle>& labels, bool addToCollisionList, bool vertical);
+	Gdiplus::Font* CreateGdiPlusFont(ChartOptions* options);
+	bool CheckVisibility(ICharts* charts);
+	bool PrepareValues(IShapefile* sf, ICharts* charts, ChartOptions* options, std::vector<long>& arr, std::vector<double*>& values);
+	void PrepareBrushes(long numBars, ICharts* charts, ChartOptions* options, std::vector<Gdiplus::Brush*>& brushes, std::vector<Gdiplus::Brush*>& brushesDimmed);
+	void DrawPieCharts(IShapefile* sf, ICharts* charts, ChartOptions* options, std::vector<double*>& values, std::vector<long>& arr, std::vector<Gdiplus::Brush*>& brushes, std::vector<Gdiplus::Brush*>& brushesDimmed, long numBars, Gdiplus::Pen& pen, CString sFormat, CBrush& brushFrame, CPen& penFrame, Gdiplus::Font* gdiPlusFont);
+	void DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* options, std::vector<double*>& values, std::vector<long>& arr, std::vector<Gdiplus::Brush*>& brushes, std::vector<Gdiplus::Brush*>& brushesDimmed, long numBars, Gdiplus::Pen& pen, CString sFormat, bool vertical, CBrush& brushFrame, CPen& penFrame, Gdiplus::Font* gdiPlusFont);
+	bool NormalizeValues(ICharts* charts, IShapefile* sf, ChartOptions* options, vector<double*> values);
 public:
 	void DrawCharts(IShapefile* sf);
 };

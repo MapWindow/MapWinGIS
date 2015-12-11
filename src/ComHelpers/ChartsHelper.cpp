@@ -116,3 +116,33 @@ bool ChartsHelper::ReadChartField(IShapefile* sf, std::vector<double>* values, i
 	VariantClear(&val);
 	return true;
 }
+
+// *************************************************************
+//		GetCollisionBuffer()
+// *************************************************************
+long ChartsHelper::GetCollisionBuffer(ICharts* charts)
+{
+	long collisionBuffer;
+	charts->get_CollisionBuffer(&collisionBuffer);
+	return collisionBuffer;
+}
+
+// *************************************************************
+//		GetOffsetX()
+// *************************************************************
+long ChartsHelper::GetOffsetX(ICharts* charts)
+{
+	long offsetX;
+	charts->get_OffsetX(&offsetX);
+	return offsetX;
+}
+
+// *************************************************************
+//		GetOffsetY()
+// *************************************************************
+long ChartsHelper::GetOffsetY(ICharts* charts)
+{
+	long offsetY;
+	charts->get_OffsetY(&offsetY);
+	return offsetY;
+}
