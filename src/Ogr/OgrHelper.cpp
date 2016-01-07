@@ -193,6 +193,15 @@ bool OgrHelper::IsPostGisDatasource(GDALDataset* ds)
 }
 
 // *************************************************************
+//		IsMsSqlDatasource()
+// *************************************************************
+bool OgrHelper::IsMsSqlDatasource(GDALDataset* ds)
+{
+	const char* driver = ds->GetDriverName();
+	return _stricmp(driver, "MsSqlSpatial") == 0;
+}
+
+// *************************************************************
 //		GetFieldList()
 // *************************************************************
 bool OgrHelper::GetFieldList(OGRLayer* layer, vector<CString>& fields)

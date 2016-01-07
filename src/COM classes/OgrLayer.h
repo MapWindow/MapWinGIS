@@ -31,6 +31,7 @@ public:
 		_envelope = NULL;
 		_featureCount = -1;
 		_activeShapeType = SHP_NULLSHAPE;
+		_externalDatasource = VARIANT_FALSE;
 		_loader.SetMaxCacheCount(m_globalSettings.ogrLayerMaxFeatureCount);
 		gReferenceCounter.AddRef(tkInterface::idOgrLayer);
 	}
@@ -127,8 +128,10 @@ public:
 	STDMETHOD(get_AvailableShapeTypes)(VARIANT* pVal);
 	STDMETHOD(get_ActiveShapeType)(ShpfileType* pVal);
 	STDMETHOD(put_ActiveShapeType)(ShpfileType newVal);
+	STDMETHOD(get_IsExternalDatasource)(VARIANT_BOOL* pVal);
 
 private:
+	VARIANT_BOOL _externalDatasource;	// we don't own this datasource, so must not close in destructor
 	VARIANT_BOOL _dynamicLoading;
 	tkOgrSourceType _sourceType;
 	IShapefile* _shapefile;
@@ -164,6 +167,8 @@ private:
 	CStringW GetLayerName();
 	CStringW GetStyleTableName();
 	void GetFieldValues(OGRFieldType fieldType, BSTR& fieldName, vector<VARIANT*>& values);
+	bool OpenDatabaseLayerCore(GDALDataset* ds, CStringW connectionString, int layerIndex, VARIANT_BOOL forUpdate, 
+							   VARIANT_BOOL externalDatasource);
 
 public:
 	void InjectShapefile(IShapefile* sfNew);
@@ -175,6 +180,6 @@ public:
 	CStringW LoadStyleXML(CStringW name);
 	GDALDataset* GetDataset() { return _dataset; }
 	bool DeserializeOptions(CPLXMLNode* node);
-
+	bool InjectLayer(GDALDataset* ds, int layerIndex, CStringW connection, VARIANT_BOOL forUpdate);
 };
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)

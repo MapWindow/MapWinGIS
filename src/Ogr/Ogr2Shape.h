@@ -14,5 +14,6 @@ public:
 private:
 	static void CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, IShapefile* sf, bool hasFID, long numShapes, bool loadLabels, OgrLabelsHelper::LabelFields labelFields);
 	static void CopyFields(OGRLayer* layer, IShapefile* sf);
+	static void ReadShapeTypes(OGRLayer* layer, set<ShpfileType>& types);
 };
 

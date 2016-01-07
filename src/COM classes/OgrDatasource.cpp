@@ -155,20 +155,34 @@ STDMETHODIMP COgrDatasource::GetLayerByName(BSTR name, VARIANT_BOOL forUpdate, I
 STDMETHODIMP COgrDatasource::GetLayer(int index, VARIANT_BOOL forUpdate, IOgrLayer** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
+	return GetLayer2(index, forUpdate, VARIANT_TRUE, retVal);
+}
+
+// *************************************************************
+//		GetLayer2()
+// *************************************************************
+STDMETHODIMP COgrDatasource::GetLayer2(LONG index, VARIANT_BOOL forUpdate, VARIANT_BOOL newConnection, IOgrLayer** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*retVal = NULL;
 	if (!CheckState()) return S_OK;
+
 	if (index < 0 && index >= _dataset->GetLayerCount())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
-	else
+	
+	IOgrLayer* layer = NULL;
+	ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
+
+	if (newConnection)
 	{
-		IOgrLayer* layer = NULL;
-		ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
-		
 		VARIANT_BOOL vb;
 		CComBSTR bstrConnection(_connectionString);
+
 		((COgrLayer*)layer)->OpenDatabaseLayer(bstrConnection, index, forUpdate, &vb);
 		if (!vb)
 		{
@@ -181,8 +195,14 @@ STDMETHODIMP COgrDatasource::GetLayer(int index, VARIANT_BOOL forUpdate, IOgrLay
 		{
 			*retVal = layer;
 		}
-		return S_OK;
 	}
+	else
+	{
+		((COgrLayer*)layer)->InjectLayer(_dataset, index, _connectionString, forUpdate);
+		*retVal = layer;
+	}
+
+	return S_OK;
 }
 
 // *************************************************************

@@ -6032,6 +6032,7 @@ interface IOgrDatasource : IDispatch{
 	[id(21)] HRESULT ExecuteSQL([in]BSTR sql, [out]BSTR* errorMessage, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(22)] HRESULT GdalLastErrorMsg([out, retval]BSTR* retVal);
 	[id(23)] HRESULT GetSchemas([out, retval] VARIANT* retVal);
+	[id(24)] HRESULT GetLayer2([in] LONG index, [in] VARIANT_BOOL forUpdate, [in] VARIANT_BOOL newConnection, [out, retval] IOgrLayer** retVal);
 };
 [
 	object,
@@ -6099,6 +6100,7 @@ interface IOgrLayer : IDispatch{
 	[propget, id(48)] HRESULT AvailableShapeTypes([out, retval] VARIANT* pVal);
 	[propget, id(49)] HRESULT ActiveShapeType([out, retval] ShpfileType* pVal);
 	[propput, id(49)] HRESULT ActiveShapeType([in] ShpfileType newVal);
+	[propget, id(50)] HRESULT IsExternalDatasource([out, retval] VARIANT_BOOL* pVal);
 };
 
 [

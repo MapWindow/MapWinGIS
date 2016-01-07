@@ -11,7 +11,8 @@ public:
 	static CStringA Bstr2OgrString(BSTR& inputString);
 	static CStringA String2OgrString(CStringW inputString);
 	static CStringW OgrString2Unicode(const char* outputString);
-	static bool IsPostGisDatasource(GDALDataset* ds);
+	static bool IsPostGisDatasource(GDALDataset* ds); 
+	static bool IsMsSqlDatasource(GDALDataset* ds);
 	static OGRFieldType GetFieldType(IField* fld);
 	static FieldType GetFieldType(OGRFieldType ogrType);
 	static bool GetFieldList(OGRLayer* layer, vector<CString>& fields);
@@ -28,5 +29,6 @@ private:
 	static CStringA Bstr2OgrString(BSTR& inputString, tkOgrEncoding encoding);
 	static CStringW OgrString2Unicode(const char* outputString, tkOgrEncoding encoding);
 	
+
 };
 

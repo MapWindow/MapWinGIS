@@ -82,6 +82,7 @@ public:
 	STDMETHOD(ExecuteSQL)(BSTR sql, BSTR* errorMessage, VARIANT_BOOL* retVal);
 	STDMETHOD(get_GdalLastErrorMsg)(BSTR* pVal);
 	STDMETHOD(GetSchemas)(VARIANT* retVal);
+	STDMETHOD(GetLayer2)(LONG index, VARIANT_BOOL forUpdate, VARIANT_BOOL newConnection, IOgrLayer** retVal);
 
 private:
 	ICallback * _globalCallback;
@@ -101,6 +102,7 @@ private:
 
 public:
 	GDALDataset* GetDataset() { return _dataset; }
+	
 	
 };
 

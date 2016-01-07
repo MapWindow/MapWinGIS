@@ -190,9 +190,13 @@ STDMETHODIMP COgrLayer::Close()
 		if (_sourceType == ogrQuery && _layer) {
 			_dataset->ReleaseResultSet(_layer);
 		}
-	
-		// this will release memory for table layer as well
-		GDALClose(_dataset);
+
+		if (!_externalDatasource)
+		{
+			// this will release memory for table layer as well
+			GDALClose(_dataset);
+		}
+
 		_dataset = NULL;
 		_layer = NULL;
 	}
@@ -204,6 +208,7 @@ STDMETHODIMP COgrLayer::Close()
 	_sourceQuery = L"";
 	_forUpdate = false;
 	_activeShapeType = SHP_NULLSHAPE;
+	_externalDatasource = VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -242,39 +247,63 @@ STDMETHODIMP COgrLayer::OpenDatabaseLayer(BSTR connectionString, int layerIndex,
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
+
+	GDALDataset* ds = OpenDataset(connectionString, forUpdate ? true : false);
+
+	*retVal = OpenDatabaseLayerCore(ds, OLE2W(connectionString), layerIndex, forUpdate, VARIANT_FALSE) ? VARIANT_TRUE : VARIANT_FALSE;
+
+	if (!(*retVal))
+	{
+		GDALClose(ds);
+	}
+
+	return S_OK;
+}
+
+// *************************************************************
+//		OpenDatabaseLayerCore()
+// *************************************************************
+bool COgrLayer::OpenDatabaseLayerCore(GDALDataset* ds, CStringW connectionString, int layerIndex, VARIANT_BOOL forUpdate, VARIANT_BOOL externalDatasource)
+{
 	Close();
 
-	GDALDataset* ds = OpenDataset(connectionString, forUpdate ? true: false);
-	if (ds)
-	{
-		if (layerIndex < 0 || layerIndex >= ds->GetLayerCount())
-		{
-			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-			GDALClose(ds);
-			return S_OK;
-		}
-		
-		OGRLayer* layer = ds->GetLayer(layerIndex);
-		if (!layer)
-		{
-			ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
-			GDALClose(ds);
-			return S_OK;
-		}
-	
-		USES_CONVERSION;
-		_connectionString = OLE2W(connectionString);
-		_sourceQuery = OgrHelper::OgrString2Unicode(layer->GetName());
-		_dataset = ds;
-		_layer = layer;
-		_forUpdate = forUpdate == VARIANT_TRUE;
-		_sourceType = ogrDbTable;
-		InitOpenedLayer();
+	if (!ds) {
+		return false;
+	}
 
-		*retVal = VARIANT_TRUE;
+	if (layerIndex < 0 || layerIndex >= ds->GetLayerCount())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
-	return S_OK;
+
+	OGRLayer* layer = ds->GetLayer(layerIndex);
+	if (!layer)
+	{
+		ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
+		return S_OK;
+	}
+
+	USES_CONVERSION;
+	_connectionString = connectionString;
+	_sourceQuery = OgrHelper::OgrString2Unicode(layer->GetName());
+	_dataset = ds;
+	_layer = layer;
+	_forUpdate = forUpdate == VARIANT_TRUE;
+	_sourceType = ogrDbTable;
+	_externalDatasource = externalDatasource;
+
+	InitOpenedLayer();
+
+	return true;
+}
+
+// *************************************************************
+//		InjectLayer()
+// *************************************************************
+bool COgrLayer::InjectLayer(GDALDataset* ds, int layerIndex, CStringW connection, VARIANT_BOOL forUpdate)
+{
+	return OpenDatabaseLayerCore(ds, connection, layerIndex, forUpdate, VARIANT_TRUE);
 }
 
 // *************************************************************
@@ -305,7 +334,7 @@ STDMETHODIMP COgrLayer::OpenFromQuery(BSTR connectionString, BSTR sql, VARIANT_B
 		else
 		{
 			ErrorMessage(tkOGR_QUERY_FAILED);
-			GDALClose(_dataset);
+			GDALClose(ds);
 		}
 	}
 	return S_OK;
@@ -339,7 +368,7 @@ STDMETHODIMP COgrLayer::OpenFromDatabase(BSTR connectionString, BSTR layerName, 
 		else
 		{
 			ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
-			GDALClose(_dataset);
+			GDALClose(ds);
 		}
 	}
 	return S_OK;
@@ -374,7 +403,7 @@ STDMETHODIMP COgrLayer::OpenFromFile(BSTR Filename, VARIANT_BOOL forUpdate, VARI
 		else
 		{
 			ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
-			GDALClose(_dataset);
+			GDALClose(ds);
 		}
 	}
 	return S_OK;
@@ -1590,3 +1619,16 @@ STDMETHODIMP COgrLayer::put_ActiveShapeType(ShpfileType newVal)
 
 	return S_OK;
 }
+
+// *************************************************************
+//		IsExternalDatasource()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_IsExternalDatasource(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _externalDatasource;
+
+	return S_OK;
+}
+
