@@ -293,6 +293,38 @@ tkOgrSourceType OgrHelper::GetSourceType(IOgrLayer* layer)
 }
 
 // *************************************************************
+//		OgcType2ShapeType()
+// *************************************************************
+ShpfileType OgrHelper::OgcType2ShapeType(CStringW type)
+{
+	if (type.CompareNoCase(L"Point") == 0)
+	{
+		return ShpfileType::SHP_POINT;
+	}
+	else if (type.CompareNoCase(L"MultiPoint") == 0)
+	{
+		return ShpfileType::SHP_MULTIPOINT;
+	}
+	else if (type.CompareNoCase(L"LineString") == 0 ||
+		type.CompareNoCase(L"MultiLineString") == 0)
+	{
+		return ShpfileType::SHP_POLYLINE;
+	}
+	else if (type.CompareNoCase(L"Polygon") == 0 ||
+		type.CompareNoCase(L"MultiPolygon") == 0)
+	{
+		return ShpfileType::SHP_POLYGON;
+	}
+	else
+	{
+		// this types are currently ignored
+		// CircularString, CompoundCurve, CurvePolygon, GeometryCollection 
+		// https ://msdn.microsoft.com/en-us/library/bb933825.aspx
+		return ShpfileType::SHP_NULLSHAPE;
+	}
+}
+
+// *************************************************************
 //		CastDatasource()
 // *************************************************************
 COgrDatasource* CastDatasource(CComPtr<IOgrDatasource>& ds)

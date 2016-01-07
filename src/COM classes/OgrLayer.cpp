@@ -1551,7 +1551,7 @@ STDMETHODIMP COgrLayer::get_AvailableShapeTypes(VARIANT* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	vector<int> shpTypes;
+	vector<int> result;
 	if (!CheckState()) 
 	{
 		// return empty array
@@ -1562,28 +1562,77 @@ STDMETHODIMP COgrLayer::get_AvailableShapeTypes(VARIANT* pVal)
 		if (shpType != SHP_NULLSHAPE)
 		{
 			// return a single type
-			shpTypes.push_back(shpType);
-			return S_OK;
+			result.push_back(shpType);
 		}
 		else
 		{
-			// read and return all the types
-			set<OGRwkbGeometryType> types;
-			Ogr2Shape::ReadGeometryTypes(_layer, types);
+			vector<ShpfileType> shapeTypes;
 
-			set<OGRwkbGeometryType>::iterator it = types.begin();
-			while (it != types.end())
+			if (OgrHelper::IsMsSqlDatasource(_dataset))
 			{
-				shpType = OgrConverter::GeometryType2ShapeType(*it);
-				shpTypes.push_back(shpType);
-				it++;
+				GetMsSqlShapeTypes(shapeTypes);
+			}
+			else
+			{
+				// read and return all the types
+				set<OGRwkbGeometryType> types;
+				Ogr2Shape::ReadGeometryTypes(_layer, types);
+				Ogr2Shape::GeometryTypesToShapeTypes(types, shapeTypes);
+			}
+
+			for (size_t i = 0; i < shapeTypes.size(); i++)
+			{
+				result.push_back((int)shapeTypes[i]);
 			}
 		}
 	}
 
-	Templates::Vector2SafeArray(&shpTypes, VT_I4, pVal);
+	Templates::Vector2SafeArray(&result, VT_I4, pVal);
 
 	return S_OK;
+}
+
+// *************************************************************
+//		GetMsSqlGeometryTypes()
+// *************************************************************
+void COgrLayer::GetMsSqlShapeTypes(vector<ShpfileType>& result)
+{
+	CStringW cmnName = Utility::ConvertFromUtf8(_layer->GetGeometryColumn());
+	CStringW layerName = Utility::ConvertFromUtf8(_layer->GetName());
+	CStringW sql;
+
+	sql.Format(L"SELECT DISTINCT [%s].STGeometryType() FROM %s", cmnName, layerName);
+
+	set<ShpfileType> types;
+
+	OGRLayer* lyr = _dataset->ExecuteSQL(Utility::ConvertToUtf8(sql), NULL, NULL);
+	if (lyr)
+	{
+		lyr->ResetReading();
+
+		OGRFeature* ft = NULL;
+		while ((ft = lyr->GetNextFeature()) != NULL)
+		{
+			CStringW s = Utility::ConvertFromUtf8(ft->GetFieldAsString(0));
+			ShpfileType shpType = OgrHelper::OgcType2ShapeType(s);
+
+			if (types.find(shpType) == types.end())
+			{
+				types.insert(shpType);
+			}
+
+			OGRFeature::DestroyFeature(ft);
+		}
+
+		_dataset->ReleaseResultSet(lyr);
+	}
+
+	Templates::SetToVector(types, result);
+
+	if (CPLGetLastErrorNo() != OGRERR_NONE)
+	{
+		CallbackHelper::ErrorMsg("Failed to retrieve the list of geometry types for MS SQL layer.");
+	}
 }
 
 // *************************************************************

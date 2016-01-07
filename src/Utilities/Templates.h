@@ -106,4 +106,18 @@ namespace Templates
 		copy(V->begin(), V->end(), std::inserter(vResult, vResult.end()));
 		return Templates::Vector2SafeArray(&vResult, varType, arr);		//VT_I4
 	}	
+
+	/***********************************************************************/
+	/*		Templates::SetToVector()
+	/***********************************************************************/
+	template <typename T>
+	void SetToVector(set<T>& source, vector<T>& result)
+	{
+		result.clear();
+		if (source.size() > 0)
+		{
+			result.reserve(source.size());
+			std::copy(source.begin(), source.end(), std::back_inserter(result));
+		}
+	}
 }

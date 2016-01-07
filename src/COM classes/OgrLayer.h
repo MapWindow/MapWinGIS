@@ -181,5 +181,6 @@ public:
 	GDALDataset* GetDataset() { return _dataset; }
 	bool DeserializeOptions(CPLXMLNode* node);
 	bool InjectLayer(GDALDataset* ds, int layerIndex, CStringW connection, VARIANT_BOOL forUpdate);
+	void GetMsSqlShapeTypes(vector<ShpfileType>& types);
 };
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)

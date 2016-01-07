@@ -5,6 +5,7 @@
 #include "GeoProjection.h"
 #include "ShapefileHelper.h"
 #include "TableHelper.h"
+#include "Templates.h"
 
 // *************************************************************
 //		Layer2Shapefile()
@@ -342,3 +343,24 @@ void Ogr2Shape::ReadGeometryTypes(OGRLayer* layer, set<OGRwkbGeometryType>& type
 		OGRFeature::DestroyFeature(poFeature);
 	}
 }
+
+// *************************************************************
+//		GeometryTypesToShapeTypes()
+// *************************************************************
+void Ogr2Shape::GeometryTypesToShapeTypes(set<OGRwkbGeometryType>& types, vector<ShpfileType>& result)
+{
+	set<ShpfileType> shapeTypes;
+	set<OGRwkbGeometryType>::iterator it = types.begin();
+	while (it != types.end())
+	{
+		ShpfileType shpType = OgrConverter::GeometryType2ShapeType(*it);
+		if (shapeTypes.find(shpType) == shapeTypes.end())
+		{
+			shapeTypes.insert(shpType);
+		}
+		it++;
+	}
+
+	Templates::SetToVector(shapeTypes, result);
+}
+

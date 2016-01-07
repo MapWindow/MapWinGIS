@@ -24,6 +24,7 @@ public:
 	static COgrDatasource* CastDatasource(CComPtr<IOgrDatasource>& ds);
 	static IOgrLayer* ChooseLayerByShapeType(IOgrDatasource* ds, ShpfileType shpType, VARIANT_BOOL forUpdate = VARIANT_FALSE);
 	static int GetLayerCount(IOgrDatasource* ds);
+	static ShpfileType OgcType2ShapeType(CStringW type);
 
 private:	
 	static CStringA Bstr2OgrString(BSTR& inputString, tkOgrEncoding encoding);
