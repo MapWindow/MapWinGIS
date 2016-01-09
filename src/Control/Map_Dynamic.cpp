@@ -241,8 +241,19 @@ void CMapView::DrawCoordinates(Gdiplus::Graphics* g)
 				IGeoProjection* p = GetMapToWgs84Transform();
 				if (p) {
 					VARIANT_BOOL vb;
-					p->Transform(&prX, &prY, &vb);
-					if (vb) canUseDegrees = true;
+
+					// in some cases transform can change values on failure
+					// therefore we shall use temp variables to preserve them
+					double tempX = prX;
+					double tempY = prY;
+
+					p->Transform(&tempX, &tempY, &vb);
+					if (vb) 
+					{
+						canUseDegrees = true;
+						prX = tempX;
+						prY = tempY;
+					}
 				}
 			}
 

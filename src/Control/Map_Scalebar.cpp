@@ -149,12 +149,16 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 			bool skipTransform = false;
 			if (_transformationMode == tkTransformationMode::tmDoTransformation)
 			{
-				VARIANT_BOOL vb;
+				VARIANT_BOOL vb1, vb2;
 				IGeoProjection* projTemp = GetMapToWgs84Transform();
 				if (projTemp)
 				{
-					projTemp->Transform(&xMin, &yMin, &vb);
-					projTemp->Transform(&xMax, &yMax, &vb);
+					projTemp->Transform(&xMin, &yMin, &vb1);
+					projTemp->Transform(&xMax, &yMax, &vb2);
+					if (!vb1 || !vb2)
+					{
+						skipTransform = true;
+					}
 				}
 				else {
 					skipTransform = true;
