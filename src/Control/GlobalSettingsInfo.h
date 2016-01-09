@@ -97,7 +97,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
-		ogrListAllGeometryTypes = false;
+		ogrListAllGeometryTypes = true;
 		ogrShareConnection = false;
 		callbackVerbosity = cvAll;
 		wmsDiskCaching = true;
