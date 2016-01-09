@@ -191,10 +191,17 @@ STDMETHODIMP COgrLayer::Close()
 			_dataset->ReleaseResultSet(_layer);
 		}
 
-		if (!_externalDatasource)
+		if (m_globalSettings.ogrShareConnection)
 		{
-			// this will release memory for table layer as well
-			GDALClose(_dataset);
+			GdalHelper::CloseSharedOgrDataset(_dataset);
+		}
+		else
+		{
+			if (!_externalDatasource)
+			{
+				// this will release memory for table layer as well
+				GDALClose(_dataset);
+			}
 		}
 
 		_dataset = NULL;
@@ -231,7 +238,7 @@ void COgrLayer::CloseShapefile()
 // *************************************************************
 GDALDataset* COgrLayer::OpenDataset(BSTR connectionString, bool forUpdate)
 {
-	GDALDataset* ds = GdalHelper::OpenOgrDatasetW(OLE2W(connectionString), forUpdate);
+	GDALDataset* ds = GdalHelper::OpenOgrDatasetW(OLE2W(connectionString), forUpdate, true);
 	if (!ds)
 	{
 		// clients should extract last GDAL error
@@ -254,7 +261,7 @@ STDMETHODIMP COgrLayer::OpenDatabaseLayer(BSTR connectionString, int layerIndex,
 
 	if (!(*retVal))
 	{
-		GDALClose(ds);
+		GdalHelper::CloseSharedOgrDataset(ds);
 	}
 
 	return S_OK;
@@ -334,7 +341,7 @@ STDMETHODIMP COgrLayer::OpenFromQuery(BSTR connectionString, BSTR sql, VARIANT_B
 		else
 		{
 			ErrorMessage(tkOGR_QUERY_FAILED);
-			GDALClose(ds);
+			GdalHelper::CloseSharedOgrDataset(ds);
 		}
 	}
 	return S_OK;
@@ -368,7 +375,7 @@ STDMETHODIMP COgrLayer::OpenFromDatabase(BSTR connectionString, BSTR layerName, 
 		else
 		{
 			ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
-			GDALClose(ds);
+			GdalHelper::CloseSharedOgrDataset(ds);
 		}
 	}
 	return S_OK;
@@ -403,7 +410,7 @@ STDMETHODIMP COgrLayer::OpenFromFile(BSTR Filename, VARIANT_BOOL forUpdate, VARI
 		else
 		{
 			ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
-			GDALClose(ds);
+			GdalHelper::CloseSharedOgrDataset(ds);
 		}
 	}
 	return S_OK;
@@ -1568,7 +1575,8 @@ STDMETHODIMP COgrLayer::get_AvailableShapeTypes(VARIANT* pVal)
 		{
 			vector<ShpfileType> shapeTypes;
 
-			if (OgrHelper::IsMsSqlDatasource(_dataset))
+			if (m_globalSettings.ogrListAllGeometryTypes && 
+				OgrHelper::IsMsSqlDatasource(_dataset))
 			{
 				GetMsSqlShapeTypes(shapeTypes);
 			}
@@ -1576,7 +1584,7 @@ STDMETHODIMP COgrLayer::get_AvailableShapeTypes(VARIANT* pVal)
 			{
 				// read and return all the types
 				set<OGRwkbGeometryType> types;
-				Ogr2Shape::ReadGeometryTypes(_layer, types);
+				Ogr2Shape::ReadGeometryTypes(_layer, types, m_globalSettings.ogrListAllGeometryTypes);
 				Ogr2Shape::GeometryTypesToShapeTypes(types, shapeTypes);
 			}
 

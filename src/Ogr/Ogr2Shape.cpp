@@ -318,15 +318,13 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 // *************************************************************
 //		ReadGeometryTypes()
 // *************************************************************
-void Ogr2Shape::ReadGeometryTypes(OGRLayer* layer, set<OGRwkbGeometryType>& types)
+void Ogr2Shape::ReadGeometryTypes(OGRLayer* layer, set<OGRwkbGeometryType>& types, bool readAll)
 {
 	types.clear();	
 
 	layer->ResetReading();
 
 	OGRFeature *poFeature;
-
-	GIntBig count = layer->GetFeatureCount();
 
 	OGRFeatureDefn* defn = layer->GetLayerDefn();
 	while ((poFeature = layer->GetNextFeature()) != NULL)
@@ -341,7 +339,13 @@ void Ogr2Shape::ReadGeometryTypes(OGRLayer* layer, set<OGRwkbGeometryType>& type
 			}
 		}
 		OGRFeature::DestroyFeature(poFeature);
+
+		if (!readAll && types.size() > 0) {
+			break;
+		}
 	}
+
+	layer->ResetReading();
 }
 
 // *************************************************************

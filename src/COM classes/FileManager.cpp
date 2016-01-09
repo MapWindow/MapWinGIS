@@ -104,16 +104,16 @@ tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename)
 
 	// OGR vector
 	tkFileOpenStrategy strategy = fosNotSupported;
-	GDALDataset* dt = GdalHelper::OpenOgrDatasetW(filenameW, false);
+	GDALDataset* dt = GdalHelper::OpenOgrDatasetW(filenameW, false, true);
 	if (dt)
 	{
 		int layerCount = dt->GetLayerCount();
 		if (layerCount > 0) {
 			strategy = layerCount == 1? fosVectorLayer : fosVectorDatasource;
 		}
-		dt->Dereference();
-		delete dt;
+		GdalHelper::CloseSharedOgrDataset(dt);
 	}
+
 	return strategy;
 }
 

@@ -6,6 +6,8 @@
 #include "GdalDriverHelper.h"
 #include "RasterBandHelper.h"
 
+map<CStringA, GDALDataset*> GdalHelper::m_ogrDatasets;
+
 // **************************************************************
 //		OpenOgrDatasetA
 // **************************************************************
@@ -34,10 +36,85 @@ GDALDataset* GdalHelper::OpenOgrDatasetA(char* filenameUtf8, bool forUpdate)
 // **************************************************************
 //		OpenOgrDatasetW
 // **************************************************************
-GDALDataset* GdalHelper::OpenOgrDatasetW(CStringW filenameW, bool forUpdate)
+GDALDataset* GdalHelper::OpenOgrDatasetW(CStringW filenameW, bool forUpdate, bool allowShared)
 {
 	CStringA filenameA = Utility::ConvertToUtf8(filenameW);
+
+	if (allowShared && m_globalSettings.ogrShareConnection)
+	{
+		CStringA key = filenameA;
+		key += forUpdate ? "1" : "0";
+
+		if (m_ogrDatasets.find(key) != m_ogrDatasets.end())
+		{
+			// it is opened already, try to reuse
+			GDALDataset* ds = m_ogrDatasets[key];
+
+			int count = ds->Reference();
+			//Debug::WriteLine("Referencing shared datasource: %d", count);
+			return ds;
+		}
+
+		GDALDataset* ds = OpenOgrDatasetA(filenameA.GetBuffer(), forUpdate);
+		if (ds)
+		{
+			// let's cache it for further reuse of connection
+			if (m_ogrDatasets.find(key) == m_ogrDatasets.end());
+			{
+				m_ogrDatasets[key] = ds;
+			}
+		}
+
+		return ds;
+	}
+
 	return OpenOgrDatasetA(filenameA.GetBuffer(), forUpdate);
+}
+
+// **************************************************************
+//		CloseSharedOgrDataset
+// **************************************************************
+int GdalHelper::CloseSharedOgrDataset(GDALDataset* ds)
+{
+	if (m_globalSettings.ogrShareConnection)
+	{
+		int count = ds->Dereference();
+		if (count == 0)
+		{
+			//Debug::WriteLine("Shared datasource is closed.");
+			RemoveCachedOgrDataset(ds);
+			GDALClose(ds);
+		}
+		else
+		{
+			//Debug::WriteLine("Dereferencing shared datasource: %d", count);
+		}
+
+		return count;
+	}
+	else
+	{
+		GDALClose(ds);
+		return 0;
+	}
+}
+
+// **************************************************************
+//		RemoveCachedOgrDataset
+// **************************************************************
+void GdalHelper::RemoveCachedOgrDataset(GDALDataset* ds)
+{
+	map<CStringA, GDALDataset*>::iterator it = m_ogrDatasets.begin();
+	while (it != m_ogrDatasets.end())
+	{
+		if (it->second == ds)
+		{
+			m_ogrDatasets.erase(it->first);
+			break;
+		}
+
+		it++;
+	}
 }
 
 // **************************************************************
@@ -48,7 +125,7 @@ bool GdalHelper::CanOpenAsOgrDataset(CStringW filename)
 	bool forceUpdate = m_globalSettings.ogrLayerForceUpdateMode;
 	m_globalSettings.ogrLayerForceUpdateMode = false;
 
-	GDALDataset* dt = GdalHelper::OpenOgrDatasetW(filename, false);
+	GDALDataset* dt = GdalHelper::OpenOgrDatasetW(filename, false, true);
 
 	m_globalSettings.ogrLayerForceUpdateMode = forceUpdate;
 
@@ -182,10 +259,12 @@ void GdalHelper::CloseDataset(GDALDataset* dt)
 {
 	if (dt)
 	{
-		int count = dt->Dereference();
-		dt->Reference();
-		if (count > 0)
+		int count = dt->GetRefCount();
+
+		if (count > 0) {
 			Debug::WriteLine("References remain on closing dataset: %d", count);
+		}
+
 		GDALClose(dt);
 	}
 }
@@ -784,3 +863,4 @@ CString GdalHelper::TiffCompressionToString(tkTiffCompression compression)
 			return "JPEG";
 	}
 }
+

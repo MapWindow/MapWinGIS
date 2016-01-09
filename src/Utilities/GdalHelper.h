@@ -6,9 +6,10 @@ int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage,
 class GdalHelper
 {
 public:
-	static GDALDataset* OpenOgrDatasetW(CStringW filenameW, bool forUpdate);
+	static GDALDataset* OpenOgrDatasetW(CStringW filenameW, bool forUpdate, bool allowShared);
 	static GDALDataset* OpenOgrDatasetA(char* filenameUtf8, bool forUpdate);
 	static bool CanOpenAsOgrDataset(CStringW filename);
+	static int CloseSharedOgrDataset(GDALDataset* dataset);
 
 	static GDALDataset* OpenRasterDatasetA( char* filenameUtf8 );
 	static GDALDataset* OpenRasterDatasetA( CStringA& filenameUtf8 );
@@ -62,5 +63,8 @@ public:
 
 	static CString TiffCompressionToString(tkTiffCompression compression);
 	static tkTiffCompression ParseTiffCompression(CString option);
-	
+
+private:
+	static void RemoveCachedOgrDataset(GDALDataset* ds);
+	static map<CStringA, GDALDataset*> m_ogrDatasets;
 };

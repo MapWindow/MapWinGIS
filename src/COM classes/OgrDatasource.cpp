@@ -80,7 +80,7 @@ STDMETHODIMP COgrDatasource::Open(BSTR connectionString, VARIANT_BOOL* retVal)
 	Close();
 	*retVal = VARIANT_FALSE;
 
-	GDALDataset* ds = GdalHelper::OpenOgrDatasetW(OLE2W(connectionString), false);
+	GDALDataset* ds = GdalHelper::OpenOgrDatasetW(OLE2W(connectionString), false, true);
 	if (!ds)
 	{
 		// clients should extract last GDAL error
@@ -104,7 +104,7 @@ STDMETHODIMP COgrDatasource::Close()
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_dataset)
 	{
-		GDALClose(_dataset);
+		GdalHelper::CloseSharedOgrDataset(_dataset);
 		_dataset = NULL;
 	}
 	return S_OK;

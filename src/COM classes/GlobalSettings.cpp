@@ -1218,3 +1218,24 @@ STDMETHODIMP CGlobalSettings::put_CallbackVerbosity(tkCallbackVerbosity newVal)
 
 	return S_OK;
 }
+
+// *********************************************************
+//	     OgrShareDatasources()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_OgrShareConnection(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = m_globalSettings.ogrShareConnection ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_OgrShareConnection(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_globalSettings.ogrShareConnection  = newVal ? true : false;
+
+	return S_OK;
+}

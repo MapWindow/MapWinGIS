@@ -84,6 +84,8 @@ struct GlobalSettingsInfo
 	bool cacheShapeRenderingData;
 	bool wmsDiskCaching;
 	tkCallbackVerbosity callbackVerbosity;
+	bool ogrShareConnection;	
+	bool ogrListAllGeometryTypes;
 
 	~GlobalSettingsInfo()
 	{
@@ -95,6 +97,8 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		ogrListAllGeometryTypes = false;
+		ogrShareConnection = false;
 		callbackVerbosity = cvAll;
 		wmsDiskCaching = true;
 		cacheShapeRenderingData = false;

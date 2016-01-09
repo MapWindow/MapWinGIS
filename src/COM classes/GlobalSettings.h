@@ -198,6 +198,8 @@ public:
 	STDMETHOD(put_WmsDiskCaching)(VARIANT_BOOL newVal);
 	STDMETHOD(get_CallbackVerbosity)(tkCallbackVerbosity* pVal);
 	STDMETHOD(put_CallbackVerbosity)(tkCallbackVerbosity newVal);
+	STDMETHOD(get_OgrShareConnection)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_OgrShareConnection)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

@@ -650,7 +650,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 IShapefile* OgrConverter::ReadOgrLayer(BSTR Filename, ICallback* callback)
 {
 	IShapefile* sf = NULL;
-	GDALDataset* ds = GdalHelper::OpenOgrDatasetW(OLE2W(Filename), false);
+	GDALDataset* ds = GdalHelper::OpenOgrDatasetW(OLE2W(Filename), false, false);
 	if (!ds)
 	{
 		return NULL;
@@ -665,6 +665,7 @@ IShapefile* OgrConverter::ReadOgrLayer(BSTR Filename, ICallback* callback)
 			Ogr2Shape::FillShapefile(layer, sf, m_globalSettings.ogrLayerMaxFeatureCount, false, callback, isTrimmed);
 		}
 	}
+
 	GDALClose(ds);
 
 	return sf;

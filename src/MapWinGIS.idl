@@ -5693,6 +5693,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(67)] HRESULT WmsDiskCaching([in] VARIANT_BOOL newVal);
 	[propget, id(68)] HRESULT CallbackVerbosity([out, retval] tkCallbackVerbosity* pVal);
 	[propput, id(68)] HRESULT CallbackVerbosity([in] tkCallbackVerbosity newVal);
+	[propget, id(69)] HRESULT OgrShareConnection([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(69)] HRESULT OgrShareConnection([in] VARIANT_BOOL newVal);
 };
 
 [
