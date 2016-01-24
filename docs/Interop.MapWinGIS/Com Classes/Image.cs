@@ -1358,9 +1358,9 @@ namespace MapWinGIS
             /// <param name="col">The column.</param>
             /// <returns>32bit unsigned integer value.</returns>
             /// \new494 Added in version 4.9.4
-            public uint get_ValueWithAlpha(int Row, int col)            
+            public uint get_ValueWithAlpha(int Row, int col)
             {
-                
+                return 1;
             }
 
             /// <summary>
