@@ -2,12 +2,12 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "4.9.3.6"
+#define MyAppVersion "4.9.4.0"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapwinGIS\GIT\src\InnoSetup"
 #define BinLocation "D:\dev\MapwinGIS\GIT\src\bin"
-;#define x64BitVersion
+#define x64BitVersion
 
 #ifdef x64BitVersion
   #define CPU "x64"
@@ -71,8 +71,8 @@ ArchitecturesInstallIn64BitMode=x64
 Source: "{#MySourceDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
 Source: "{#MySourceDir}\MapWinGIS.ocx"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
 ;; IntelliSense:
-;;Source: "{#BinLocation}\AxInterop.MapWinGIS.xml"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
-;;Source: "{#BinLocation}\Interop.MapWinGIS.xml"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
+Source: "{#SetupLocation}\AxInterop.MapWinGIS.XML"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
+Source: "{#SetupLocation}\Interop.MapWinGIS.XML"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
 ;; Licenses
 Source: "{#BinLocation}\Licenses\GDALLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
 Source: "{#BinLocation}\Licenses\GISInternalsLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
@@ -97,7 +97,7 @@ Source: "{#BinLocation}\PROJ_NAD\*"; DestDir: "{app}\PROJ_NAD"; Flags: ignorever
 ;; To register the ocx:
 Source: "{#SetupLocation}\regMapWinGIS.cmd"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
 Source: "{#SetupLocation}\unregMapWinGIS.cmd"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
-Source: "{#SetupLocation}\SetEnv.exe"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
+;;Source: "{#SetupLocation}\SetEnv.exe"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
 ;; VC++ files
 Source: "{#SetupLocation}\{#vcredist}"; DestDir: "{tmp}"; Flags: deleteafterinstall ignoreversion {#SystemFlag};
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -249,7 +249,7 @@ Name: "lithuanian"; MessagesFile: "compiler:Languages\Lithuanian.isl"
 Name: "luxemburgish"; MessagesFile: "compiler:Languages\Luxemburgish.isl"
 Name: "macedonian"; MessagesFile: "compiler:Languages\Macedonian.isl"
 Name: "malaysian"; MessagesFile: "compiler:Languages\Malaysian.isl"
-Name: "nepali"; MessagesFile: "compiler:Languages\Nepali.islu"
+;;Name: "nepali"; MessagesFile: "compiler:Languages\Nepali.islu"
 Name: "norwegian"; MessagesFile: "compiler:Languages\Norwegian.isl"
 Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"
 Name: "portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
