@@ -68,7 +68,10 @@ ScreenBitmap* CImageDrawer::DrawImage(const CRect & rcBounds, IImage* img, bool 
 
 		IImage* imgTemp = CreateSmallerProxyForGdalRaster(specs, img, rcBounds, bitsPerPixel / 8);
 
-		DrawGdalRaster(imgTemp != NULL ? imgTemp : img, specs, imgAttr, rcBounds, bitsPerPixel, returnBitmap);
+		ScreenBitmap* screenBitmap = DrawGdalRaster(imgTemp != NULL ? imgTemp : img, specs, imgAttr, rcBounds, bitsPerPixel, returnBitmap);
+		if (screenBitmap) {
+			delete screenBitmap;
+		}
 
 		if (imgTemp) {
 			imgTemp->Release();
@@ -218,7 +221,7 @@ void CImageDrawer::DrawGdalImage(Gdiplus::Graphics* g, Gdiplus::Image* img, Gdip
 // ******************************************************************
 ScreenBitmap* CImageDrawer::CreateScreenBitmap(double dstL, double dstT, double dstW, double dstH)
 {
-	ScreenBitmap* screenBitmap = new ScreenBitmap();		// TODO: where is it released?
+	ScreenBitmap* screenBitmap = new ScreenBitmap();
 	screenBitmap->left = int(dstL);
 	screenBitmap->top = int(dstT);
 	screenBitmap->pixelPerProjectionX = _pixelPerProjectionX;
