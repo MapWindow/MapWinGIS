@@ -318,9 +318,9 @@ IImage* CImageDrawer::CreateSmallerProxyForGdalRaster(ImageSpecs& specs, IImage*
 	pDataTemp = reinterpret_cast<unsigned char*>(pColours);
 	for (int n = 0; n < imgH; n++)
 	{
-		memcpy(pDataTemp + (imgH - 1 - n) * imgW * bytesPerPixel, 
-			   pData + (specs.height - n - 1 - imgY) * specs.width * bytesPerPixel + imgX * bytesPerPixel, 
-			   imgW * bytesPerPixel);
+		memcpy(pDataTemp + n * imgW * bytesPerPixel,
+			pData + (imgY + n) * specs.width * bytesPerPixel + imgX * bytesPerPixel,
+			imgW * bytesPerPixel);
 	}
 
 	// ---------------------------------------------------------
