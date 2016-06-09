@@ -1,0 +1,18 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# Select text file with on every line the location of a shapefile and every second line the field index
+
+# counties (polygons) on statename
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
+1
+
+# roads (lines) on route
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+6
+
+# cities (points) on state
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+3
+

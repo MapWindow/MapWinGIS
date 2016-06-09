@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.ShapeEditor.1 = s 'ShapeEditor Class'
+	{
+		CLSID = s '{130B7AEB-0350-437F-B044-4839AEC92F22}'
+	}
+	MapWinGIS.ShapeEditor = s 'ShapeEditor Class'
+	{
+		CLSID = s '{130B7AEB-0350-437F-B044-4839AEC92F22}'
+		CurVer = s 'MapWinGIS.ShapeEditor.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {130B7AEB-0350-437F-B044-4839AEC92F22} = s 'ShapeEditor Class'
+		{
+			ProgID = s 'MapWinGIS.ShapeEditor.1'
+			VersionIndependentProgID = s 'MapWinGIS.ShapeEditor'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

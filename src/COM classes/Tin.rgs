@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.Tin.1 = s 'Tin Class'
+	{
+		CLSID = s '{677B1AF6-A28D-4FAB-8A5F-0F8763D88638}'
+	}
+	MapWinGIS.Tin = s 'Tin Class'
+	{
+		CLSID = s '{677B1AF6-A28D-4FAB-8A5F-0F8763D88638}'
+		CurVer = s 'MapWinGIS.Tin.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {677B1AF6-A28D-4FAB-8A5F-0F8763D88638} = s 'Tin Class'
+		{
+			ProgID = s 'MapWinGIS.Tin.1'
+			VersionIndependentProgID = s 'MapWinGIS.Tin'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

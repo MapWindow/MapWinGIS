@@ -1,0 +1,14 @@
+Place somewhere in code:
+
+
+// cdm 1/27/2006
+#ifdef _DEBUG
+#include "../debugging/MemLeakDetect.h"
+#pragma warning(disable:4100)
+CMemLeakDetect gMemLeakDetect;
+#endif
+
+
+Remove when done! Don't compile an OCX for real-world use with the above code in place.
+
+Note: When the code first loads, it'll die with an unhandled exception -- just resume and continue normally and all will be well for memory testing purposes.

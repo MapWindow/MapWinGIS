@@ -1,0 +1,104 @@
+***************************************************
+* How to build MapWinGIS.ocx
+*
+* Paul Meems
+* October 19, 2014
+***************************************************
+Since MapWinGIS v4.9.1 we use the pre-build binaries
+of Tamas (http://www.gisinternals.com/).
+This has dramatically simplyfied the build process.
+First download the bins and libs from GisInternals.
+Since MapWinGIS v4.9.3 we use the GDALv2 library.
+At this moment it is not yet formally released so we now use the -development files.
+Browse to http://www.gisinternals.com/query.html?content=filelist&file=release-1600-gdal-mapserver.zip (this is a link not a file!)
+and download 
+http://download.gisinternals.com/sdk/downloads/release-1600-gdal-mapserver.zip
+http://download.gisinternals.com/sdk/downloads/release-1600-gdal-mapserver-libs.zip
+Because Tamas does not yet provide VS2013 binaries we use his VS2010 (1600) binaries.
+Unzip these files in \MapWinGIS\trunk\SupportingLibraries\GDAL_SDK\{VS-version}\bin\{platform}\
+\MapWinGIS\trunk\SupportingLibraries\GDAL_SDK\{VS-version}\lib\{platform}\
+and \MapWinGIS\trunk\SupportingLibraries\GDAL_SDK\{VS-version}\include
+
+Now you can compile the ocx, using VS2010.
+Don't forget to register it using \MapWinGIS\trunk\bin\Win32\regMapWinGIS.cmd and you are
+ready to go.
+Don't forget you also need the 32-Bit version if you want to use the ocx in Visual Studio in your forms.
+Visual Studio (even VS2013) doesn't support 64-Bit ActiveX controls.
+If you have any questions regarding MapWinGIS you can post them at:
+https://mapwingis.codeplex.com/discussions
+
+
+
+***************************************************
+* How to build the supporting libraries for MapWinGIS
+*
+* Paul Meems
+* October 4, 2013
+***************************************************
+
+## Proj4 ##
+Do the steps mentioned in BuildProj4.txt
+
+
+## GEOS ##
+Do the steps mentioned in BuildGeos.txt
+
+
+## ERDAS ECW JPEG2000 ##
+Download the SDK from 
+http://geospatial.intergraph.com/products/other/ecw/ERDASECWJPEG2000SDK/Downloads.aspx
+Install it on another computer and copy the following folders to your dev environment:
+* include
+* lib
+* redistributable
+
+
+## LizardTech MrSid ##
+Download the 32Bit and 64Bit SDKs from
+https://www.lizardtech.com/developer/
+You'll need to register first.
+
+
+## NetCDF ##
+Download the netCDF libs and binaries from Tamas his site:
+http://vbkto.dyndns.org:1280/sdk/PackageList.aspx?file=release-1500-gdal-mapserver.zip
+* release-1500-gdal-mapserver.zip
+* release-1500-gdal-mapserver-libs.zip
+and place them in the general bin, lib and include folders:
+C:\dev\SupportingLibraries\GDAL\bin /lib and /include
+### TODO ###
+We need to update to the latest stable version available
+
+
+## GDAL ##
+Copy nmake.local to your GDAL-folder and check the paths in this file.
+Also compare the settings with [GDAL-folder]/nmake.opt
+
+In [GDAL-folder]/nmake.opt
+Change DLLBUILD=1 to DLLBUILD=0
+In [GDAL-folder]/makefile.vc
+at the end in the devinstall macro add
+	copy frmts\gtiff\libgeotiff\*.h $(INCDIR)
+	copy frmts\gtiff\libgeotiff\*.inc $(INCDIR)
+	copy frmts\gtiff\libtiff\*.h $(INCDIR)
+and change copy gdal_i.lib $(LIBDIR) to copy gdal.lib $(LIBDIR)
+
+[geos-folder]capi\geos_c.h (this file is restored during build of GEOS): 
+Change #include <geos/version.h> to #include <geos_version.h>
+Change #include <geos/export.h> to #include <geos_export.h>
+
+[gdal-folder]gcore\gdaldllmain.cpp:
+Remove (or comment) the dllmain implementation, because this doesn't work
+with static libraries.
+
+
+## SpatialIndex ##
+## For now keep using the 'old' version because the new version of this
+## Library isn't compiling
+Replace the used extentions "idx" with "mwx" and "dat" with "mwd" 
+in storagemanager\DiskStorageManager.cc (lines 36 and 140) and capi\Utility.cc (line 140)
+Run makeSpatialIndex-32Bit.bat in a Visual Studio Command Prompt.
+
+
+## Copy needed files to MapWinGIS folder ##
+Run Copy2MapWinGIS.bat

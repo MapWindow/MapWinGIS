@@ -1,0 +1,58 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# JPEG
+%MW_SAMPLEDATA%\Images\Formats\JPEG-JPEG-JFIF.jpg
+
+# BMP
+%MW_SAMPLEDATA%\Images\Formats\BMP-MS-Windows-Device-Independent-Bitmap.bmp
+%MW_SAMPLEDATA%\Images\Formats\libecwj2-3.3.bmp
+
+#GIF
+%MW_SAMPLEDATA%\Images\Formats\GIF-Graphics-Interchange-Format.gif
+
+#PNG
+%MW_SAMPLEDATA%\Images\Formats\wmsResult.png
+
+# KAP
+%MW_SAMPLEDATA%\Images\Formats\18665_1.KAP
+
+#BT/VTP .bt (Binary Terrain) 1.3 Format
+%MW_SAMPLEDATA%\Images\Formats\coiba_20m_2k.bt
+
+# ECW
+%MW_SAMPLEDATA%\Images\Formats\ECW-ERMapper-Compressed-Wavelets.ecw
+%MW_SAMPLEDATA%\Images\Formats\Greyscale.ecw
+%MW_SAMPLEDATA%\Images\Formats\RGBImage.ecw
+%MW_SAMPLEDATA%\Images\Formats\workitem-20972.ecw
+
+#MrSid
+%MW_SAMPLEDATA%\Images\Formats\mercator.sid
+%MW_SAMPLEDATA%\Images\Formats\meg_cr20_MG2.sid
+%MW_SAMPLEDATA%\Images\Formats\sht_124.sid
+
+#GeoTIFF
+%MW_SAMPLEDATA%\Images\Formats\GTiff-GeoTIFF.tif
+
+#EHdr/ESRI .hdr Labelled
+#Not Supported %MW_SAMPLEDATA%\Images\Formats\EHdr-ESRI-BIL.bil
+
+#HFA/Erdas Imagine Images
+%MW_SAMPLEDATA%\Images\Formats\HFA-Erdas-Imagine-Image.img
+
+#VRT
+%MW_SAMPLEDATA%\Images\Formats\vrt\testTool.vrt
+
+#Other
+%MW_SAMPLEDATA%\Images\Formats\PNM-Portable-Pixmap-Format.pgm
+%MW_SAMPLEDATA%\Images\Formats\PNM-Portable-Pixmap-Format.ppm
+%MW_SAMPLEDATA%\Images\Formats\snail2-P6-PPMB.pnm
+
+#NITF/National Imagery Transmission Format
+%MW_SAMPLEDATA%\Images\Formats\Greyscale2.ntf
+%MW_SAMPLEDATA%\Images\Formats\NITF-National-Imagery-Transmission-Format.LF2
+
+#JPEG2000
+%MW_SAMPLEDATA%\Images\Formats\Greyscale2.jp2
+%MW_SAMPLEDATA%\Images\Formats\JP2ECW-ERMapper-JPEG2000.jp2

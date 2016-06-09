@@ -1,0 +1,365 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2513E52F-2479-43C6-9D62-807B960BD323}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MWLite.GUI</RootNamespace>
+    <AssemblyName>MapWindowLite</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\MapWindow.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.9.0.0, Culture=neutral, PublicKeyToken=5cded1a1a0a7b481, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\DockPanelSuite.2.9.0.0\lib\net40\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App.cs" />
+    <Compile Include="Classes\AppSettings.cs" />
+    <Compile Include="Classes\MapCallback.cs" />
+    <Compile Include="Classes\ProjectBase.cs" />
+    <Compile Include="Classes\Project.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Controls\IdentifierContextMenu.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\IdentifierContextMenu.Designer.cs">
+      <DependentUpon>IdentifierContextMenu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\LocationControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\LocationControl.Designer.cs">
+      <DependentUpon>LocationControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\BingApiKeyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BingApiKeyForm.Designer.cs">
+      <DependentUpon>BingApiKeyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\DonationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DonationForm.Designer.cs">
+      <DependentUpon>DonationForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ImagePropertiesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ImagePropertiesForm.Designer.cs">
+      <DependentUpon>ImagePropertiesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\LoaderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\LoaderForm.Designer.cs">
+      <DependentUpon>LoaderForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MeasuringForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MeasuringForm.Designer.cs">
+      <DependentUpon>MeasuringForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\ComboBoxEnumItem.cs" />
+    <Compile Include="Helpers\ComboBoxHelper.cs" />
+    <Compile Include="Helpers\EnumHelper.cs" />
+    <Compile Include="MapLegend\LegendCommand.cs" />
+    <Compile Include="MapLegend\LegendDispatcher.cs" />
+    <Compile Include="Forms\GeoLocationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\GeoLocationForm.Designer.cs">
+      <DependentUpon>GeoLocationForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SetProjectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SetProjectionForm.Designer.cs">
+      <DependentUpon>SetProjectionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\AssemblyHelper.cs" />
+    <Compile Include="Helpers\MapHelper.cs" />
+    <Compile Include="Helpers\PluginHelper.cs" />
+    <Compile Include="Helpers\TilesHelper.cs" />
+    <Compile Include="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MapForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MapForm.Designer.cs">
+      <DependentUpon>MapForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MapLegend\LegendDockForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MapLegend\LegendDockForm.Designer.cs">
+      <DependentUpon>LegendDockForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\AppDispatcher.cs" />
+    <Compile Include="Helpers\LayerHelper.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Controls\IdentifierContextMenu.resx">
+      <DependentUpon>IdentifierContextMenu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\LocationControl.resx">
+      <DependentUpon>LocationControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\BingApiKeyForm.resx">
+      <DependentUpon>BingApiKeyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\DonationForm.resx">
+      <DependentUpon>DonationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\GeoLocationForm.resx">
+      <DependentUpon>GeoLocationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ImagePropertiesForm.resx">
+      <DependentUpon>ImagePropertiesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\LoaderForm.resx">
+      <DependentUpon>LoaderForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MeasuringForm.resx">
+      <DependentUpon>MeasuringForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SetProjectionForm.resx">
+      <DependentUpon>SetProjectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MapForm.resx">
+      <DependentUpon>MapForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MapLegend\LegendDockForm.resx">
+      <DependentUpon>LegendDockForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MWLite.Symbology\MWLite.Symbology.csproj">
+      <Project>{4a169101-b908-4f1e-bf5a-ff2b551926b7}</Project>
+      <Name>MWLite.Symbology</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MWLite.Core\MWLite.Core.csproj">
+      <Project>{d34e2ea4-6b09-40ee-9829-208c2f27ed8e}</Project>
+      <Name>MWLite.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MWLite.Databases\MWLite.Databases.csproj">
+      <Project>{59bbc0b6-0f82-4f27-b77f-1176a98d3f80}</Project>
+      <Name>MWLite.Databases</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MWLite.ShapeEditor\MWLite.ShapeEditor.csproj">
+      <Project>{c1b26cf0-f7af-49e1-88f7-cb0c5500643e}</Project>
+      <Name>MWLite.ShapeEditor</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="AxMapWinGIS">
+      <Guid>{C368D713-CC5F-40ED-9F53-F84FE197B96A}</Guid>
+      <VersionMajor>4</VersionMajor>
+      <VersionMinor>9</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>aximp</WrapperTool>
+      <Isolated>False</Isolated>
+      <Private>True</Private>
+    </COMReference>
+    <COMReference Include="MapWinGIS">
+      <Guid>{C368D713-CC5F-40ED-9F53-F84FE197B96A}</Guid>
+      <VersionMajor>4</VersionMajor>
+      <VersionMinor>9</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <Private>True</Private>
+    </COMReference>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pan.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\area-measure.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\attribute-show.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\layer-add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\layer-delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\layer-remove.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\layer-sqlite-add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\measure.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\vertex.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\element-add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\select.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pan1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\zoom-extent.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\zoom-in.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\zoom-out.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\zoom-layer.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="license.txt" />
+    <Content Include="obj\x86\Debug\AxInterop.MapWinGIS.dll" />
+    <Content Include="obj\x86\Debug\AxInterop.MapWinGIS.XML" />
+    <Content Include="obj\x86\Debug\Interop.MapWinGIS.dll" />
+    <Content Include="obj\x86\Debug\Interop.MapWinGIS.XML" />
+    <Content Include="Resources\MapWindow.ico" />
+    <None Include="Resources\Snapshot.png" />
+    <None Include="Resources\layer-db-add.png" />
+    <None Include="Resources\select_by_polygon.png" />
+    <None Include="Resources\layer-create.png" />
+    <None Include="Resources\folder1.png" />
+    <None Include="Resources\open1.png" />
+    <None Include="Resources\search.png" />
+    <None Include="Resources\quit.png" />
+    <None Include="Resources\map.png" />
+    <None Include="Resources\save-as.png" />
+    <None Include="Resources\save.png" />
+    <None Include="Resources\crs-change.png" />
+    <None Include="Resources\layer-more.png" />
+    <None Include="Resources\layer-vector-thematic-add.png" />
+    <None Include="Resources\label-add.png" />
+    <None Include="Resources\save1.png" />
+    <None Include="Resources\zoom-selection.png" />
+    <None Include="Resources\selected-delete.png" />
+    <None Include="Resources\layer-vector-add.png" />
+    <None Include="Resources\layer-raster-add.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(PlatformName) == x64 (
+xcopy /Y $(TargetDir)Interop.MapWinGIS.dll $(ProjectDir)..\..\src\bin\$(PlatformName)\
+xcopy /Y $(TargetDir)AxInterop.MapWinGIS.dll $(ProjectDir)..\..\src\bin\$(PlatformName)\
+)
+
+if $(PlatformName) == x86 (
+xcopy /Y $(TargetDir)Interop.MapWinGIS.dll $(ProjectDir)..\..\src\bin\Win32\
+xcopy /Y $(TargetDir)AxInterop.MapWinGIS.dll $(ProjectDir)..\..\src\bin\Win32\
+)</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

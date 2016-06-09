@@ -1,0 +1,46 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# First line is the shapefile, second line the the provider ID or UrlPattern:
+
+# OpenStreetMap
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+0
+
+# OpenCycleMap
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
+2
+
+# BingSatellite
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\lakes.shp
+4
+
+# GoogleTerrain
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
+9
+
+# YandexMaps
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+14
+
+# GoogleHybrid
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+8
+
+# Reproject OSM to Amersfoort
+%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\provincies.shp
+0
+
+# brtachtergrondkaart
+%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\provincies.shp
+http://geodata.nationaalgeoregister.nl/tiles/service/tms/1.0.0/brtachtergrondkaart/{zoom}/{x}/{y}.png8
+
+# TODO
+#%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\provincies.shp
+#http://geodata1.nationaalgeoregister.nl/luchtfoto/tms/1.0.0/luchtfoto/EPSG28992/{zoom}/{x}/{y}.jpeg
+
+# Own server TODO
+#%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\provincies.shp
+#http://5.79.21.216:8080/geoserver/gwc/service/tms/1.0.0/Dakscan-Assen:Luchtfoto-hybrid/{zoom}/{x}/{y}.png8
+

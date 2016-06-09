@@ -1,0 +1,40 @@
+// Callback.idl : IDL source for Callback.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (Callback.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+	[
+		object,
+		uuid(26899FE5-6834-4B7A-8C28-BBA5F45BE462),
+		dual,
+		helpstring("ItkCallback Interface"),
+		pointer_default(unique)
+	]
+	interface ItkCallback : IDispatch
+	{
+		[id(1), helpstring("method Progress")] HRESULT Progress([in]BSTR Key,[in]long Percent,[in]BSTR Message);
+		[id(2), helpstring("method Error")] HRESULT Error([in]BSTR Key,[in]long ErrorCode,[in]BSTR ErrorMsg);
+	};
+
+[
+	uuid(5863687C-726A-47CE-8BF0-7E8E0D2FDE43),
+	version(1.0),
+	helpstring("Callback 1.0 Type Library")
+]
+library CALLBACKLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	[
+		uuid(2B97634D-A3F9-4351-9008-8151CBE188D6),
+		helpstring("tkCallback Class")
+	]
+	coclass tkCallback
+	{
+		[default] interface ItkCallback;
+	};
+};
