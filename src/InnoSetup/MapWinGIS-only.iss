@@ -90,6 +90,13 @@ Source: "{#MySourceDir}\gdalplugins\gdal_MrSID.dll"; DestDir: "{app}\gdalplugins
 Source: "{#BinLocation}\Licenses\MRSIDLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MrSID
 Source: "{#MySourceDir}\gdalplugins\gdal_netCDF.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: NetCDF
 Source: "{#BinLocation}\Licenses\NetCDFLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: NetCDF
+Source: "{#MySourceDir}\gdalplugins\gdal_HDF5.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF5
+Source: "{#MySourceDir}\gdalplugins\gdal_HDF5Image.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF5
+Source: "{#BinLocation}\Licenses\HDF5License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: HDF5
+Source: "{#MySourceDir}\gdalplugins\gdal_HDF4.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF4
+Source: "{#MySourceDir}\gdalplugins\gdal_HDF4Image.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF4
+Source: "{#BinLocation}\Licenses\HDF4License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: HDF4
+
 ;; GDAL data
 Source: "{#MySourceDir}\gdal-data\*"; DestDir: "{app}\gdal-data"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: MapWinGIS_Core
 Source: "{#BinLocation}\PROJ_NAD\*"; DestDir: "{app}\PROJ_NAD"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: MapWinGIS_Core
@@ -110,6 +117,8 @@ Name: "MapWinGIS_Core"; Description: "Core files for MapWinGIS"; Types: full cus
 Name: "NetCDF"; Description: "Add NetCDF support"; Types: full custom
 Name: "ECW"; Description: "Add ECW & JPEG2000 support"; Types: full custom
 Name: "MrSID"; Description: "Add MrSID support"; Types: full custom
+Name: "HDF4"; Description: "Add Hierarchical Data Format Release 4 support"; Types: full custom
+Name: "HDF5"; Description: "Add Hierarchical Data Format Release 5 support"; Types: full custom
 
 [Run]
 ; Install VC++ 2010 if needed:
@@ -120,9 +129,9 @@ Filename: "{tmp}\{#vcredist}"; Parameters: "/qb"; Flags: waituntilterminated; Ch
 #endif
 ;Run some command files:
 Filename: "{app}\regMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runhidden
-Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/getting_started.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGv493Installer"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Go to the online documentation"
-Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/MapWindow49.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGv493Installer"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the future of MapWinGIS/MapWindow v5"
-Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/version_history.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGv493Installer"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the changes in this version"
+Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/getting_started.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGvInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Go to the online documentation"
+Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/MapWindow49.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the future of MapWinGIS/MapWindow v5"
+Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/version_history.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the changes in this version"
 
 [UninstallRun]
 Filename: "{app}\unregMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runhidden
