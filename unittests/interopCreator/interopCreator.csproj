@@ -187,8 +187,8 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PreBuildEvent>del /F /S /Q $(ProjectDir)\bin\*.*
+del /F /S /Q $(ProjectDir)\obj\*.*</PreBuildEvent>
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>

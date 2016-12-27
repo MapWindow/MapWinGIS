@@ -9,6 +9,14 @@ namespace MapWinGISTests
     [DeploymentItem("Testdata")]
     public class GdalTests
     {
+
+        [TestInitialize]
+        public void Start()
+        {
+            Debug.WriteLine("Start unit tests");
+            Debug.WriteLine(DateTime.Now);
+        }
+        
         [TestMethod]
         public void OpenSQLiteTest()
         {
@@ -37,15 +45,6 @@ namespace MapWinGISTests
 
                 TestLayers(ogrDatasource);
             }
-            catch (AssertFailedException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                Assert.Fail();
-            }
             finally
             {
                 ogrDatasource.Close();
@@ -60,6 +59,7 @@ namespace MapWinGISTests
             {
                 var result = ogrDatasource.Open(@"sqlite\onepoint.sqlite");
                 Assert.IsTrue(result, "Cannot open SQLite file: " + ogrDatasource.GdalLastErrorMsg);
+                var settings = new GlobalSettings { OgrLayerForceUpdateMode = true };
 
                 var capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateLayer);
                 Debug.WriteLine("odcCreateLayer: " + capability);
@@ -70,21 +70,25 @@ namespace MapWinGISTests
                 var projection = new GeoProjectionClass();
                 Assert.IsTrue(projection.SetWgs84(), "Cannot set projection");
 
-                var layerCreated = ogrDatasource.CreateLayer("Test", ShpfileType.SHP_POINT, projection, "");
+                var layerCreated = ogrDatasource.CreateLayer("Test", ShpfileType.SHP_POINT, projection, "OVERWRITE=YES");
                 Assert.IsTrue(layerCreated, "Cannot create layer");
+                Debug.WriteLine(ogrDatasource.GdalLastErrorMsg);
 
                 Assert.AreEqual(originalLayerCount + 1, ogrDatasource.LayerCount, "New layer isn't created");
+                Debug.WriteLine("GetLayerName: " + ogrDatasource.GetLayerName(ogrDatasource.LayerCount - 1));
+
+                var firstLayer = ogrDatasource.GetLayer(0);
+                Assert.IsNotNull(firstLayer, $"Could not get first layer: {ogrDatasource.GdalLastErrorMsg}");
+
+                // Get layer:
+                var newLayer = ogrDatasource.GetLayer(ogrDatasource.LayerCount - 1, true);
+                // var newLayer = ogrDatasource.GetLayerByName("test", true);
+                Assert.IsNotNull(newLayer, $"Could not get new layer: {ogrDatasource.GdalLastErrorMsg}");
+                // Add field:
+                var numFeatures = newLayer.FeatureCount[true];
+                Debug.WriteLine("numFeatures: " + numFeatures);
 
                 TestLayers(ogrDatasource);
-            }
-            catch (AssertFailedException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                Assert.Fail();
             }
             finally
             {
@@ -94,7 +98,7 @@ namespace MapWinGISTests
             }
         }
 
-        private void TestLayers(OgrDatasourceClass ogrDatasource)
+        private static void TestLayers(IOgrDatasource ogrDatasource)
         {
             // Get layers:
             var lastLayername = string.Empty;
@@ -102,6 +106,7 @@ namespace MapWinGISTests
             for (var i = 0; i < ogrDatasource.LayerCount; i++)
             {
                 var layer = ogrDatasource.GetLayer(i, true);
+                Assert.IsNotNull(layer, "Layer is null");
                 lastLayername = layer.Name;
                 Debug.WriteLine("Layer name: " + layer.Name);
                 Debug.WriteLine("Driver Name: " + layer.DriverName);
@@ -117,6 +122,7 @@ namespace MapWinGISTests
                 Assert.IsTrue(capability, "Cannot sequential write");
             }
 
+            Debug.WriteLine("Last layer name: " + lastLayername);
             if (!string.IsNullOrEmpty(lastLayername))
             {
                 var layer = ogrDatasource.GetLayerByName(lastLayername, true);
