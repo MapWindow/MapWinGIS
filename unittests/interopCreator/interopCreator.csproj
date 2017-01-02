@@ -189,7 +189,8 @@
   <PropertyGroup>
     <PreBuildEvent>del /F /S /Q $(ProjectDir)\bin\*.*
 del /F /S /Q $(ProjectDir)\obj\*.*</PreBuildEvent>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>if $(PlatformName) == x64 xcopy /C /Q /R /Y $(ProjectDir)\bin\$(PlatformName)\$(ConfigurationName)\*.dll $(ProjectDir)\..\..\src\bin\$(PlatformName)\
+if $(PlatformName) == x86 xcopy /C /Q /R /Y $(ProjectDir)\bin\$(PlatformName)\$(ConfigurationName)\*.dll $(ProjectDir)\..\..\src\bin\Win32\
+</PostBuildEvent>
   </PropertyGroup>
 </Project>
