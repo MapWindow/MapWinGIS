@@ -107,6 +107,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Testdata\HDF5\test.h5">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Testdata\sf\onepoint.dbf" />
     <None Include="Testdata\sf\onepoint.prj" />
     <None Include="Testdata\sf\onepoint.shp" />
@@ -115,6 +118,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

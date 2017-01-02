@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -98,6 +99,32 @@ namespace MapWinGISTests
             }
         }
 
+        /// <summary>
+        /// Opens the HDF5 file
+        /// </summary>
+        /// <remarks>https://mapwindow.atlassian.net/browse/MWGIS-56</remarks>
+        [TestMethod]
+        public void OpenHdf5()
+        {
+            const string filename = "HDF5/test.h5";
+            // Check if GDAL can open it:
+            var utils = new UtilsClass();
+            var settings = new GlobalSettings();
+            var info = utils.GDALInfo(filename, string.Empty);
+            Assert.IsNotNull(info, "Could not read gdalinfo: " + settings.GdalLastErrorMsg);
+            Debug.WriteLine(info);
+            Assert.IsTrue(info.Contains("Driver: HDF5/Hierarchical Data Format Release 5"), "File is not recognized");
+
+            // Open HDF file using subset:
+            var subset = $"HDF5:\"{filename}\"://image1/image_data";
+            info = utils.GDALInfo(subset, string.Empty);
+            Assert.IsNotNull(info, "Could not read gdalinfo: " + settings.GdalLastErrorMsg);
+            Debug.WriteLine(info);
+            Assert.IsTrue(info.Contains("Driver: HDF5Image/HDF5 Dataset"), "File is not recognized");
+
+            // TODO: Open subdataset as grid:
+        }
+
         private static void TestLayers(IOgrDatasource ogrDatasource)
         {
             // Get layers:
@@ -134,6 +161,5 @@ namespace MapWinGISTests
                 Debug.WriteLine("olcSequentialWrite: " + layerCapability);
             }
         }
-
     }
 }
