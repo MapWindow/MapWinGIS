@@ -29,11 +29,11 @@ namespace MapWinGISTests
                 Assert.IsTrue(sf.EditingTable, "Shapefile is not in edit table mode");
 
                 // Add fields:
-                var fieldIndex = sf.EditAddField("date", FieldType.STRING_FIELD, 50, 0);
+                var fieldIndex = sf.EditAddField("date", FieldType.STRING_FIELD, 0, 50);
                 Assert.AreEqual(1, fieldIndex, "Could not add field");
-                fieldIndex = sf.EditAddField("remarks", FieldType.STRING_FIELD, 100, 0);
+                fieldIndex = sf.EditAddField("remarks", FieldType.STRING_FIELD, 0, 100);
                 Assert.AreEqual(2, fieldIndex, "Could not add field");
-                fieldIndex = sf.EditAddField("amount", FieldType.INTEGER_FIELD, 3, 0);
+                fieldIndex = sf.EditAddField("amount", FieldType.INTEGER_FIELD, 0, 3);
                 Assert.AreEqual(3, fieldIndex, "Could not add field");
                 Assert.AreEqual(fieldIndex + 1, sf.NumFields, "Number of fields are incorrect");
 
@@ -68,11 +68,11 @@ namespace MapWinGISTests
                 Assert.IsTrue(sf.EditingTable, "Shapefile is not in edit table mode");
 
                 // Add fields:
-                var fieldIndex = sf.EditAddField("date", FieldType.STRING_FIELD, 50, 0);
+                var fieldIndex = sf.EditAddField("date", FieldType.STRING_FIELD, 0, 50);
                 Assert.AreEqual(1, fieldIndex, "Could not add field");
-                fieldIndex = sf.EditAddField("remarks", FieldType.STRING_FIELD, 100, 0);
+                fieldIndex = sf.EditAddField("remarks", FieldType.STRING_FIELD, 0, 100);
                 Assert.AreEqual(2, fieldIndex, "Could not add field");
-                fieldIndex = sf.EditAddField("amount", FieldType.INTEGER_FIELD, 3, 0);
+                fieldIndex = sf.EditAddField("amount", FieldType.INTEGER_FIELD, 0, 3);
                 Assert.AreEqual(3, fieldIndex, "Could not add field");
                 Assert.AreEqual(fieldIndex + 1, sf.NumFields, "Number of fields are incorrect");
 

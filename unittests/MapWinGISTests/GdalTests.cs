@@ -58,7 +58,7 @@ namespace MapWinGISTests
             var ogrDatasource = new OgrDatasourceClass();
             try
             {
-                var result = ogrDatasource.Open(@"sqlite\onepoint.sqlite");
+                var result = ogrDatasource.Open2(@"sqlite\onepoint.sqlite", true);
                 Assert.IsTrue(result, "Cannot open SQLite file: " + ogrDatasource.GdalLastErrorMsg);
                 var settings = new GlobalSettings { OgrLayerForceUpdateMode = true };
 

@@ -6035,6 +6035,7 @@ interface IOgrDatasource : IDispatch{
 	[propget, id(22)] HRESULT GdalLastErrorMsg([out, retval]BSTR* retVal);
 	[id(23)] HRESULT GetSchemas([out, retval] VARIANT* retVal);
 	[id(24)] HRESULT GetLayer2([in] LONG index, [in] VARIANT_BOOL forUpdate, [in] VARIANT_BOOL newConnection, [out, retval] IOgrLayer** retVal);
+	[id(25)] HRESULT Open2([in]BSTR connectionString, [in]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
 };
 [
 	object,
