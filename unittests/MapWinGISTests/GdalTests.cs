@@ -171,7 +171,7 @@ namespace MapWinGISTests
         /// <summary>
         /// Reads the attributes from a postGIS layer.
         /// </summary>
-        /// <remarks>https://mapwindow.atlassian.net/browse/CORE-177</remarks>
+        /// <remarks>See https://mapwindow.atlassian.net/browse/CORE-177 for the create table script.</remarks>
         [TestMethod]
         public void ReadAttributesFromPostGISLayer()
         {
