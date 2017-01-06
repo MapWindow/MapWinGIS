@@ -276,20 +276,29 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 		OGRFieldType type = oField->GetType();
 
 		CComVariant var;
-		if (type == OFTInteger)
+
+		// https://mapwindow.atlassian.net/browse/CORE-177:
+		if (poFeature->IsFieldSet(iFld))
 		{
-			var.vt = VT_I4;
-			var.lVal = poFeature->GetFieldAsInteger(iFld);
+			if (type == OFTInteger)
+			{
+				var.vt = VT_I4;
+				var.lVal = poFeature->GetFieldAsInteger(iFld);
+			}
+			else if (type == OFTReal)
+			{
+				var.vt = VT_R8;
+				var.dblVal = poFeature->GetFieldAsDouble(iFld);
+			}
+			else //if (type == OFTString )
+			{
+				var.vt = VT_BSTR;
+				var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+			}
 		}
-		else if (type == OFTReal)
+		else
 		{
-			var.vt = VT_R8;
-			var.dblVal = poFeature->GetFieldAsDouble(iFld);
-		}
-		else //if (type == OFTString )
-		{
-			var.vt = VT_BSTR;
-			var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+			var.vt = VT_NULL;
 		}
 
 		VARIANT_BOOL vb;

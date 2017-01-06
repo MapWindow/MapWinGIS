@@ -204,6 +204,9 @@ namespace MapWinGISTests
                 var numFields = sf.NumFields;
                 Assert.IsTrue(numFields>0, "No fields found");
 
+                var fidColumn = attributeLayer.FIDColumnName;
+                Debug.WriteLine("fidColumn: " + fidColumn);
+
                 // First shape has all attributes filled:
                 Debug.WriteLine("Testing first shape");
                 for (var fieldIndex = 0; fieldIndex < numFields; fieldIndex++)
@@ -220,7 +223,9 @@ namespace MapWinGISTests
                 {
                     var value = sf.CellValue[fieldIndex, 1];
                     Debug.WriteLine($"{sf.Field[fieldIndex].Name}: {value}");
-                    if (!string.IsNullOrEmpty(value.ToString())) numNonNulls++;
+                    // Skip FID because it always has a value:
+                    if (sf.Field[fieldIndex].Name == fidColumn) continue;
+                    if (value != null) numNonNulls++;
                 }
                 if (numNonNulls > 0) Debug.WriteLine($"Error! Second shape has {numNonNulls} non NULL fields!");
 
@@ -231,7 +236,9 @@ namespace MapWinGISTests
                 {
                     var value = sf.CellValue[fieldIndex, 2];
                     Debug.WriteLine($"{sf.Field[fieldIndex].Name}: {value}");
-                    if (!string.IsNullOrEmpty(value.ToString())) numNonNulls++;
+                    // Skip FID because it always has a value:
+                    if (sf.Field[fieldIndex].Name == fidColumn) continue;
+                    if (value != null) numNonNulls++;
                 }
                 Assert.AreEqual(0, numNonNulls, $"Third shape has {numNonNulls} non NULL fields!");
             }
