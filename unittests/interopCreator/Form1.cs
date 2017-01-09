@@ -266,7 +266,7 @@ namespace interopCreator
                 Debug.WriteLine(utils.ErrorMsg[utils.LastErrorCode]);
                 Debug.WriteLine(settings.GdalLastErrorMsg);
             }
-            
+
             txtResults.Text = @"OGR2OGR result: " + result;
             if (!result) return;
 
@@ -319,6 +319,36 @@ namespace interopCreator
             txtResults.Text = @" GDAL Error: " + settings.GdalLastErrorMsg
                               + @" GdalPluginPath: " + settings.GdalPluginPath;
 
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            var settings = new GlobalSettings { OgrStringEncoding = tkOgrEncoding.oseUtf8 };
+
+            var sf = new ShapefileClass();
+            if (!sf.Open(@"D:\dev\GIS-Data\Issues\Persian\roads.shp"))
+            {
+                Debug.WriteLine(DateTime.Now + " Could not open shapefile. Reason " + sf.ErrorMsg[sf.LastErrorCode]);
+                return;
+            }
+
+            if (sf.Labels.Count == 0)
+            {
+                Debug.WriteLine("Create labels");
+                sf.GenerateLabels(1, tkLabelPositioning.lpLongestSegement, true);
+            }
+
+            // Add shapefile to map:
+            var hndl = axMap1.AddLayer(sf, true);
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            const string filename = @"D:\dev\MapwinGIS\GitHub\unittests\MapWinGISTests\Testdata\HDF5\test.h5";
+            var subset = $"HDF5:\"{filename}\"://image1/image_data";
+            // Open subdataset as grid:
+            var grd = new GridClass();
+            if (grd.Open(subset)) axMap1.AddLayer(grd, true);
         }
     }
 }

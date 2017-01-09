@@ -24,16 +24,16 @@ namespace MapWinGISTests
             var ogrDatasource = new OgrDatasourceClass();
             try
             {
-                var result = ogrDatasource.Open(@"sqlite\onepoint.sqlite");
+                var result = ogrDatasource.Open2(@"sqlite\onepoint.sqlite", true);
                 Assert.IsTrue(result, "Cannot open SQLite file: " + ogrDatasource.GdalLastErrorMsg);
                 var settings = new GlobalSettings { OgrLayerForceUpdateMode = true };
 
                 var capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateLayer);
                 Debug.WriteLine("odcCreateLayer: " + capability);
-                // Assert.IsTrue(capability, "Cannot create layer");
+                Assert.IsTrue(capability, "Cannot create layer");
                 capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcDeleteLayer);
                 Debug.WriteLine("odcDeleteLayer: " + capability);
-                // Assert.IsTrue(capability, "Cannot delete layer");
+                Assert.IsTrue(capability, "Cannot delete layer");
                 capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateDataSource);
                 Debug.WriteLine("odcCreateDataSource: " + capability);
                 //Assert.IsTrue(capability), "Cannot create datasource");
@@ -42,7 +42,7 @@ namespace MapWinGISTests
                 //Assert.IsTrue(capability, "Cannot delete datasource");
                 capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateGeomFieldAfterCreateLayer);
                 Debug.WriteLine("odcCreateGeomFieldAfterCreateLayer: " + capability);
-                // Assert.IsTrue(capability, "Cannot create GeomField After CreateLayer");
+                Assert.IsTrue(capability, "Cannot create GeomField After CreateLayer");
 
                 TestSQLiteLayers(ogrDatasource);
             }
@@ -160,12 +160,21 @@ namespace MapWinGISTests
 
             // Open HDF file using subset:
             var subset = $"HDF5:\"{filename}\"://image1/image_data";
-            info = utils.GDALInfo(subset, string.Empty);
-            Assert.IsNotNull(info, "Could not read gdalinfo: " + settings.GdalLastErrorMsg);
-            Debug.WriteLine(info);
-            Assert.IsTrue(info.Contains("Driver: HDF5Image/HDF5 Dataset"), "File is not recognized");
+            var infoSubset = utils.GDALInfo(subset, string.Empty);
+            Assert.IsNotNull(infoSubset, "Could not read gdalinfo: " + settings.GdalLastErrorMsg);
+            Debug.WriteLine(infoSubset);
+            Assert.IsTrue(infoSubset.Contains("Driver: HDF5Image/HDF5 Dataset"), "File is not recognized");
 
-            // TODO: Open subdataset as grid:
+            // Open subdataset as grid:
+            var grd = new GridClass();
+            var result = grd.Open(subset);
+            Assert.IsTrue(result, "Could not open HDF5 subset as grid");
+
+            Debug.WriteLine(grd.NumBands);
+            Debug.WriteLine(grd.Extents.ToDebugString());
+            Debug.WriteLine(grd.Minimum.ToString());
+            Debug.WriteLine(grd.Maximum.ToString());
+
         }
 
         /// <summary>
@@ -278,10 +287,13 @@ namespace MapWinGISTests
                 var layer = ogrDatasource.GetLayerByName(lastLayername, true);
                 var layerCapability = layer.TestCapability(tkOgrLayerCapability.olcRandomRead);
                 Debug.WriteLine("olcRandomRead: " + layerCapability);
+                Assert.IsTrue(layerCapability, "Cannot random read");
                 layerCapability = layer.TestCapability(tkOgrLayerCapability.olcRandomWrite);
                 Debug.WriteLine("olcRandomWrite: " + layerCapability);
+                Assert.IsTrue(layerCapability, "Cannot random write");
                 layerCapability = layer.TestCapability(tkOgrLayerCapability.olcSequentialWrite);
                 Debug.WriteLine("olcSequentialWrite: " + layerCapability);
+                Assert.IsTrue(layerCapability, "Cannot sequential write");
             }
         }
     }
