@@ -214,12 +214,20 @@ namespace MapWinGISTests
                 Assert.IsTrue(sf.Table.EditingTable, "Table is not in edit table mode");
                 // This should work:
                 var fieldIndex = sf.Table.EditAddField("date", FieldType.STRING_FIELD, 0, 50);
-                Assert.AreEqual(1, fieldIndex, "Could not add field");
+                Assert.AreEqual(sf.NumFields - 1, fieldIndex, "Could not add string field");
+                // This should work:
+                fieldIndex = sf.Table.EditAddField("double", FieldType.DOUBLE_FIELD, 10, 20);
+                Assert.AreEqual(sf.NumFields - 1, fieldIndex, "Could not add double field");
 
                 // This should fail, because width cannot be 0:
                 fieldIndex = sf.Table.EditAddField("date", FieldType.STRING_FIELD, 50, 0);
-                Debug.WriteLine("sf.NumFields: " + sf.NumFields);
-                Assert.AreEqual(-1, fieldIndex, "Field is not added but -1 is not returned.");
+                Assert.AreEqual(-1, fieldIndex, "Field is not added but -1 is not returned. ");
+                Debug.WriteLine(sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
+
+                // This should fail, because precsion cannot be 0 when type is double:
+                fieldIndex = sf.Table.EditAddField("date", FieldType.DOUBLE_FIELD, 0, 20);
+                Assert.AreEqual(-1, fieldIndex, "Field is not added but -1 is not returned. ");
+                Debug.WriteLine(sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
             }
             finally
             {

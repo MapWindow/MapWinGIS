@@ -2644,6 +2644,21 @@ bool CTableClass::set_IndexValue(int rowIndex)
 STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision, int width, long* fieldIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	// MWGIS-55: Check inputs:
+	if (width < 1)
+	{
+		*fieldIndex = -1;
+		ErrorMessage(tkDBF_WIDTH_TOO_SMALL);
+		return S_OK;
+	}
+
+	if (type == DOUBLE_FIELD && precision < 1)
+	{
+		*fieldIndex = -1;
+		ErrorMessage(tkDBF_PRECISION_TOO_SMALL);
+		return S_OK;
+	}
+
 	IField* field = NULL;
 	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
 	field->put_Name(name);

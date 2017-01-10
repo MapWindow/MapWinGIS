@@ -357,6 +357,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "Failed to write DBF record to the disk.";
 		case tkDBF_NO_EDIT_MODE_WHEN_APPENDING:
 			return "Can't start editing mode for DBF table when append mode is on (call Shapefile.StopAppendMode).";
+		case tkDBF_WIDTH_TOO_SMALL:
+			return "Can't add the field because the width is too small.";
+		case tkDBF_PRECISION_TOO_SMALL:
+			return "Can't add the field because the precision is too small.";
 
 		//1001-1200 = tkutils
 		case tkOUT_OF_RANGE_0_TO_180:

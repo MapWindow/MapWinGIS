@@ -184,6 +184,8 @@ const char * ErrorMsg( long ErrorCode );
 # define tkDBF_RECORDS_SHAPES_MISMATCH 811
 # define tkDBF_CANT_WRITE_ROW 812
 # define tkDBF_NO_EDIT_MODE_WHEN_APPENDING 813
+# define tkDBF_WIDTH_TOO_SMALL 814
+# define tkDBF_PRECISION_TOO_SMALL 815
 
 //1001-1200 = tkutils
 # define tkOUT_OF_RANGE_0_TO_180 1001
