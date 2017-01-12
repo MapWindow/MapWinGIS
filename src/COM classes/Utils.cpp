@@ -5369,7 +5369,9 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 		}
 		else
 		{
+			ErrorMessage(tkINVALID_EXPRESSION);
 			err.Format("Invalid formula field: %s; no dataset with such name in input names", name);
+			*errorMsg = A2BSTR(err);
 			goto cleaning;
 		}
 	}
