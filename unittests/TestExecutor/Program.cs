@@ -20,8 +20,12 @@ namespace ConsoleApplication1
             Directory.SetCurrentDirectory(path);
             Debug.WriteLine("Current path: " + Directory.GetCurrentDirectory());
 
-            var t = new GdalTests();
-            t.CreateLayerSQLiteTest();
+            // var t = new GdalTests();
+            // t.CreateLayerSQLiteTest();
+
+            var t = new UtilTests();
+            t.CalculateRaster();
+
             Console.ReadLine();
         }
     }
