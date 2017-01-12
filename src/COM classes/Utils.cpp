@@ -5210,6 +5210,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 
 	CustomExpression expr;	
 	CString err;
+	GDALDataset* dtOutput = NULL; // used in clean-up when something false, throws an exception when is it not yet created.
 
 	// --------------------------------------------------------
 	//   Open input
@@ -5303,9 +5304,9 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	
 	// --------------------------------------------------------
 	//   Creating output
-	// --------------------------------------------------------
-	GDALDataset* dtOutput = NULL;
+	// --------------------------------------------------------	
 	GDALDriverH driver = OpenOutputDriver(OLE2A(gdalOutputFormat));
+	// GDALDataset* dtOutput = NULL; Moved up, because it fails on clean up
 	if (driver != NULL)
 	{
 		dtOutput = OpenOutputFile(driver, OLE2W(outputFilename), xSize, ySize, datasets.begin()->second);
