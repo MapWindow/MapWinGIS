@@ -17,7 +17,7 @@ namespace MapWinGISTests
             Debug.WriteLine("Start Gdal tests");
             Debug.WriteLine(DateTime.Now);
         }
-        
+
         [TestMethod]
         public void OpenSQLiteTest()
         {
@@ -132,6 +132,21 @@ namespace MapWinGISTests
             Debug.WriteLine(grd.Minimum.ToString());
             Debug.WriteLine(grd.Maximum.ToString());
 
+        }
+
+        /// <summary>
+        /// Get the supported formats
+        /// </summary>
+        /// <remarks>https://mapwindow.atlassian.net/browse/MWGIS-50</remarks>
+        [TestMethod]
+        public void GdalInfoFormats()
+        {
+            var utils = new UtilsClass();
+            var result = utils.GDALInfo("", "--formats");
+            Assert.IsNotNull(result, "GdalInfo returned null");
+            Debug.WriteLine(result);
+            Assert.IsTrue(result.Contains("Supported Formats:"), "result is invalid");
+            Assert.IsTrue(result.Contains("GTiff (rw+): GeoTIFF"), "result is invalid");
         }
 
         private static void TestSQLiteLayers(IOgrDatasource ogrDatasource)
