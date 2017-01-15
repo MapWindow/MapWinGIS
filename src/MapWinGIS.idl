@@ -6260,6 +6260,8 @@ interface IGdalDataset : IDispatch {
 	[id(3)] HRESULT Close();
 	[id(4)] HRESULT SetGeoTransform([in] DOUBLE xLeft, [in] DOUBLE dX, [in] DOUBLE yProjOnX, [in] DOUBLE yTop, [in] DOUBLE xProjOnY, [in] DOUBLE dY, [out, retval] VARIANT_BOOL* retVal);
 	[id(5)] HRESULT SetProjection([in] BSTR Projection, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(6)] HRESULT SubDatasetCount([out, retval] LONG* retVal);
+	[id(7)] HRESULT GetSubDatasetName([in]int subDatasetIndex, [out, retval] BSTR* retVal);
 };
 
 [

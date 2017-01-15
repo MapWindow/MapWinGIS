@@ -115,6 +115,18 @@ namespace MapWinGISTests
             Debug.WriteLine(info);
             Assert.IsTrue(info.Contains("Driver: HDF5/Hierarchical Data Format Release 5"), "File is not recognized");
 
+            var ds = new GdalDataset();
+            if (ds.Open(filename, true))
+            {
+                Debug.Print("Sub datasets");
+
+                for (int i = 0; i < ds.SubDatasetCount; i++)
+                {
+                    string name = ds.GetSubDatasetName(i);
+                    Debug.Print(name);
+                }
+            }
+
             // Open HDF file using subset:
             var subset = $"HDF5:\"{filename}\"://image1/image_data";
             var infoSubset = utils.GDALInfo(subset, string.Empty);
