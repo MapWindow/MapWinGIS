@@ -132,6 +132,18 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Opens particular type of datasource supported by GDAL/OGR.
+        /// </summary>
+        /// <remarks>See details about connection strings here: http://www.gdal.org/ogr_formats.html</remarks>
+        /// <param name="connectionString">Connection string for RDMSs or filename for file-based formats.</param>
+        /// <param name="forUpdate">Indicates whether datasource will be opened with update flag.</param>
+        /// <returns>True on success.</returns>
+        public bool Open2(string connectionString, bool forUpdate)
+        {
+            throw new NotImplementedException();
+        }
         
         /// <summary>
         /// Gets a layer with specified index from datasource.
