@@ -49,6 +49,9 @@ namespace interopCreator
             utils.GDALBuildVrt(string.Empty, string.Empty, null);
             utils.GDALRasterize(string.Empty, string.Empty, string.Empty, null);
             utils.GDALWarp(string.Empty, string.Empty, string.Empty, null);
+
+            var ds = new GdalDataset();
+            var subDatasetCount = ds.SubDatasetCount;
         }
 
         private void ClipGridWithPolygon()

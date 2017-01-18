@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -7,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace MapWinGISTests
 {
     [TestClass]
+    [DeploymentItem("Testdata")]
     public class ShapefileTests
     {
 
@@ -15,11 +15,11 @@ namespace MapWinGISTests
         {
             var tempFolder = Path.GetTempPath();
             var tempFilename = Path.Combine(tempFolder, "CreateShapefileTest.shp");
-            DeleteShapefile(tempFilename);
+            Helper.DeleteShapefile(tempFilename);
 
             bool result;
             // Create shapefile
-            var sf = new ShapefileClass();
+            var sf = new Shapefile();
             try
             {
                 result = sf.CreateNewWithShapeID(tempFilename, ShpfileType.SHP_POINT);
@@ -54,11 +54,11 @@ namespace MapWinGISTests
         {
             var tempFolder = Path.GetTempPath();
             var tempFilename = Path.Combine(tempFolder, "CreateShapefileTest.shp");
-            DeleteShapefile(tempFilename);
+            Helper.DeleteShapefile(tempFilename);
 
             bool result;
             // Create shapefile
-            var sf = new ShapefileClass();
+            var sf = new Shapefile();
             try
             {
                 result = sf.CreateNewWithShapeID(tempFilename, ShpfileType.SHP_POINT);
@@ -82,7 +82,7 @@ namespace MapWinGISTests
                 Assert.AreEqual(fieldIndex + 1, sf.NumFields, "Number of fields are incorrect");
 
                 // Create shape:
-                var shp = new ShapeClass();
+                var shp = new Shape();
                 result = shp.Create(sf.ShapefileType);
                 Assert.IsTrue(result, "Could not create shape");
                 // Create point:
@@ -135,7 +135,7 @@ namespace MapWinGISTests
         public void CheckNullValueTableData()
         {
             bool result;
-            var sf = new ShapefileClass();
+            var sf = new Shapefile();
 
             try
             {
@@ -150,13 +150,16 @@ namespace MapWinGISTests
                 fieldIndex = sf.Table.EditAddField("integer", FieldType.INTEGER_FIELD, 0, 50);
                 Assert.AreEqual(2, fieldIndex, "Could not add field");
 
-                fieldIndex = sf.Table.EditAddField("double", FieldType.DOUBLE_FIELD, 0, 50);
+                fieldIndex = sf.Table.EditAddField("double", FieldType.DOUBLE_FIELD, 2, 50);
                 Assert.AreEqual(3, fieldIndex, "Could not add field");
+
+                fieldIndex = sf.Table.EditAddField("double", FieldType.DOUBLE_FIELD, 0, 50);
+                Assert.AreEqual(-1, fieldIndex, "Field was added. This is not correct.");
 
                 Assert.AreEqual(4, sf.NumFields, "Wrong number of fields");
 
                 // Create shape:
-                var shp = new ShapeClass();
+                var shp = new Shape();
                 result = shp.Create(ShpfileType.SHP_POINT);
                 Assert.IsTrue(result, "Could not create point shape");
                 // Create point:
@@ -199,7 +202,7 @@ namespace MapWinGISTests
         public void AddField()
         {
             bool result;
-            var sf = new ShapefileClass();
+            var sf = new Shapefile();
 
             try
             {
@@ -237,15 +240,30 @@ namespace MapWinGISTests
             }
         }
 
-        private static void DeleteShapefile(string filename)
+        [TestMethod]
+        public void FixUpShapes()
         {
-            var folder = Path.GetDirectoryName(filename);
-            if (folder == null) return;
-            var filenameBody = Path.GetFileNameWithoutExtension(filename);
-            foreach (var f in Directory.EnumerateFiles(folder, filenameBody + ".*"))
+            // Open shapefile:
+            var sfInvalid = new Shapefile();
+            Shapefile sfFixed = null;
+            try
             {
-                Debug.WriteLine("deleting " + f);
-                File.Delete(f);
+                var result = sfInvalid.Open(@"sf\invalid.shp");
+                Assert.IsTrue(result, "Could not open shapefile");
+
+                result = sfInvalid.HasInvalidShapes();
+                Assert.IsTrue(result, "Shapefile has no invalid shapes");
+                Helper.PrintExtents(sfInvalid.Extents);
+
+                result = sfInvalid.FixUpShapes(out sfFixed);
+                Assert.IsTrue(result, "Could not fix shapefile");
+                Assert.AreEqual(sfInvalid.NumShapes, sfFixed.NumShapes, "Number of shapes are not equal");
+                Helper.PrintExtents(sfFixed.Extents);
+            }
+            finally
+            {
+                sfInvalid.Close();
+                sfFixed?.Close();
             }
         }
     }

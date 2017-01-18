@@ -155,7 +155,7 @@
       <Lcid>0</Lcid>
       <WrapperTool>tlbimp</WrapperTool>
       <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </COMReference>
     <COMReference Include="stdole">
       <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
@@ -187,7 +187,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>del /F /S /Q $(ProjectDir)\bin\*.*
+    <PreBuildEvent>del /F /S /Q $(OutDir)
 del /F /S /Q $(ProjectDir)\obj\*.*</PreBuildEvent>
     <PostBuildEvent>if $(PlatformName) == x64 xcopy /C /Q /R /Y $(ProjectDir)\bin\$(PlatformName)\$(ConfigurationName)\*.dll $(ProjectDir)\..\..\src\bin\$(PlatformName)\
 if $(PlatformName) == x86 xcopy /C /Q /R /Y $(ProjectDir)\bin\$(PlatformName)\$(ConfigurationName)\*.dll $(ProjectDir)\..\..\src\bin\Win32\

@@ -22,9 +22,10 @@ namespace ConsoleApplication1
 
             // var t = new GdalTests();
             // t.CreateLayerSQLiteTest();
-            
-            var t = new GdalTests();
-            t.GdalInfoHdf5();
+            // t.GdalInfoHdf5();
+
+            var t = new ShapefileTests();
+            t.FixUpShapes();
 
             Console.ReadLine();
         }

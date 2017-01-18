@@ -2426,7 +2426,10 @@ IShape* CShape::FixupByBuffer(tkUnitsOfMeasure units)
 	}
 	else
 	{
-		Buffer(m_globalSettings.GetInvalidShapeBufferDistance(units), 30, &result);
+		// Fixing MWGIS-59: Fixup makes new shape larger: 
+		// Buffer(m_globalSettings.GetInvalidShapeBufferDistance(units), 30, &result);
+		// Copied from GeosConverter.GeomToShapes():
+		Buffer(m_globalSettings.GetInvalidShapeBufferDistance(umMeters) / 1000.0, 30, &result);
 	}
 
 	// did we allocate memory for the fixed shape?
