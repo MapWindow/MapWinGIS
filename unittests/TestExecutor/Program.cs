@@ -12,11 +12,11 @@ namespace ConsoleApplication1
     /// <summary>
     /// This program is used as Debug target for MapWinGIS project. 
     /// </summary>
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\TestData\";
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\TestData\";
             Directory.SetCurrentDirectory(path);
             Debug.WriteLine("Current path: " + Directory.GetCurrentDirectory());
 
@@ -24,8 +24,8 @@ namespace ConsoleApplication1
             // t.CreateLayerSQLiteTest();
             // t.GdalInfoHdf5();
 
-            var t = new ShapefileTests();
-            t.FixUpShapes();
+            var t = new OgrDatasourceTests();
+            t.ImportShapefileTest();
 
             Console.ReadLine();
         }
