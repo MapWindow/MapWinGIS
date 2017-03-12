@@ -62,6 +62,15 @@ namespace MapWinGISTests
                 Assert.IsTrue(result, "Shapefile has no invalid shapes");
                 Helper.PrintExtents(sfInvalid.Extents);
 
+                for (var i = 0; i < sfInvalid.NumShapes; i++)
+                {
+                    var shp = sfInvalid.Shape[i];
+                    Assert.IsFalse(shp.IsValid, "Shape should be invalid");
+                    var reason = shp.IsValidReason;
+                    Debug.WriteLine(reason);
+                    Assert.IsFalse(string.IsNullOrEmpty(reason), "Cannot get validation reason");
+                }
+
                 var newFilename = Path.Combine(Path.GetTempPath(), "FixUpShapes.shp");
                 result = utils.FixUpShapes(sfInvalid, false, newFilename, true);
                 Assert.IsTrue(result, "Could not fix shapefile");

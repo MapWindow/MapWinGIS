@@ -119,7 +119,6 @@ namespace MapWinGISTests
             if (ds.Open(filename, true))
             {
                 Debug.Print("Sub datasets");
-
                 for (int i = 0; i < ds.SubDatasetCount; i++)
                 {
                     string name = ds.GetSubDatasetName(i);
