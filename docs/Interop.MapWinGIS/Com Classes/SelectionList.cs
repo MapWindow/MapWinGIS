@@ -49,24 +49,25 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Adds a pixel to list.
+        /// Adds a pixel to the list.
+        /// Updated in v4.9.5
         /// </summary>
         /// <param name="LayerHandle">The layer handle.</param>
-        /// <param name="rasterPixelX">X coordinate of the pixel.</param>
-        /// <param name="rasterPixelY">Y coordinate of the pixel.</param>
-        public void AddPixel(int LayerHandle, int rasterPixelX, int rasterPixelY)
+        /// <param name="Column">The column.</param>
+        /// <param name="Row">The row.</param>
+        public void AddPixel(int LayerHandle, int Column, int Row)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
         /// Toggles the state of the specified pixel (add it to the list if it is not present there, and removes otherwise).
+        /// Updated in v4.9.5
         /// </summary>
         /// <param name="LayerHandle">The layer handle.</param>
-        /// <param name="RasterX">X coordinate of the pixel.</param>
-        /// <param name="RasterY">Y coordinate of the pixel.</param>
-        /// <exception cref="System.NotImplementedException"></exception>
-        public void TogglePixel(int LayerHandle, int RasterX, int RasterY)
+        /// <param name="Column">The column.</param>
+        /// <param name="Row">The row.</param>
+        public void TogglePixel(int LayerHandle, int Column, int Row)
         {
             throw new NotImplementedException();
         }
@@ -112,6 +113,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="Index">The index of the item.</param>
         /// <returns>X coordinate or -1 if the specified item is a shape.</returns>
+        [Obsolete("get_RasterX is deprecated, please use get_Column instead.")]
         public int get_RasterX(int Index)
         {
             throw new NotImplementedException();
@@ -122,7 +124,30 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="Index">The index of the item.</param>
         /// <returns>Y coordinate or -1 if the specified item is a shape.</returns>
+        [Obsolete("get_RasterY is deprecated, please use get_Row instead.")]
         public int get_RasterY(int Index)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the row.
+        /// </summary>
+        /// <param name="Index">The index of the item.</param>
+        /// <returns>Row index or -1 if the specified item is a shape.</returns>
+        /// \new495 Added in version 4.9.5
+        public int get_Row(int Index)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the column.
+        /// </summary>
+        /// <param name="Index">The index of the item.</param>
+        /// <returns>Column index or -1 if the specified item is a shape.</returns>
+        /// \new495 Added in version 4.9.5
+        public int get_Column(int Index)
         {
             throw new NotImplementedException();
         }

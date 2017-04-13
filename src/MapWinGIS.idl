@@ -3714,8 +3714,8 @@ interface IImage : IDispatch{
 	[propget, id(56), helpstring("property Labels")] HRESULT Labels([out, retval] ILabels** pVal);
 	[propput, id(56), helpstring("property Labels")] HRESULT Labels([in] ILabels* newVal);
 	[propget, id(57), helpstring("property Extents")] HRESULT Extents([out, retval] IExtents** pVal);
-	[id(58), helpstring("method ProjectionToImage")] HRESULT ProjectionToImage([in]double ProjX, [in]double ProjY, [out]long* ImageX, [out]long* ImageY);
-	[id(59), helpstring("method ImageToProjection")] HRESULT ImageToProjection([in]long ImageX, [in]long ImageY, [out]double* ProjX, [out]double* ProjY);
+	[id(58), helpstring("method ProjectionToImage")] HRESULT ProjectionToImage([in]double ProjX, [in]double ProjY, [out]long* Column, [out]long* Row);
+	[id(59), helpstring("method ImageToProjection")] HRESULT ImageToProjection([in]long Column, [in]long Row, [out]double* ProjX, [out]double* ProjY);
 	[id(60), helpstring("method ProjectionToBuffer")] HRESULT ProjectionToBuffer([in]double ProjX, [in]double ProjY, [out]long* BufferX, [out]long* BufferY);
 	[id(61), helpstring("method BufferToProjection")] HRESULT BufferToProjection([in]long BufferX, [in]long BufferY, [out]double* ProjX, [out] double* ProjY);
 	[propget, id(62), helpstring("property CanUseGrouping")] HRESULT CanUseGrouping([out, retval] VARIANT_BOOL* pVal);
@@ -6160,11 +6160,13 @@ interface ISelectionList : IDispatch{
 	[propget, id(4)] HRESULT ShapeIndex([in] LONG index, [out, retval] LONG* pVal);
 	[id(5)] HRESULT Clear();
 	[id(6)] HRESULT RemoveByLayerHandle([in]LONG layerHandle);
-	[id(7)] HRESULT AddPixel([in] LONG layerHandle, [in] LONG rasterPixelX, [in] LONG rasterPixelY);
+	[id(7)] HRESULT AddPixel([in] LONG layerHandle, [in] LONG column, [in] LONG row);
 	[propget, id(8)] HRESULT LayerType([in] LONG index, [out, retval] tkLayerType* pVal);
 	[propget, id(9)] HRESULT RasterX([in] LONG index, [out, retval] LONG* pVal);
 	[propget, id(10)] HRESULT RasterY([in] LONG index, [out, retval] LONG* pVal);
-	[id(11)] HRESULT TogglePixel([in] LONG layerHandle, [in] LONG rasterX, [in] LONG rasterY);
+	[id(11)] HRESULT TogglePixel([in] LONG layerHandle, [in] LONG column, [in] LONG row);
+	[propget, id(12)] HRESULT Row([in] LONG index, [out, retval] LONG* pVal);
+	[propget, id(13)] HRESULT Column([in] LONG index, [out, retval] LONG* pVal);
 };
 
 [

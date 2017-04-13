@@ -96,11 +96,11 @@ STDMETHODIMP CSelectionList::RemoveByLayerHandle(LONG layerHandle)
 // ****************************************************************
 //				AddPixel()						         
 // ****************************************************************
-STDMETHODIMP CSelectionList::AddPixel(LONG layerHandle, LONG rasterX, LONG rasterY)
+STDMETHODIMP CSelectionList::AddPixel(LONG layerHandle, LONG column, LONG row)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	_items.push_back(new SelectedItem(layerHandle, rasterX, rasterY));
+	_items.push_back(new SelectedItem(layerHandle, row, column));
 
 	return S_OK;
 }
@@ -108,20 +108,20 @@ STDMETHODIMP CSelectionList::AddPixel(LONG layerHandle, LONG rasterX, LONG raste
 // ****************************************************************
 //				TogglePixel()						         
 // ****************************************************************
-STDMETHODIMP CSelectionList::TogglePixel(LONG layerHandle, LONG rasterX, LONG rasterY)
+STDMETHODIMP CSelectionList::TogglePixel(LONG layerHandle, LONG column, LONG row)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	for (size_t i = 0; i < _items.size(); i++)
 	{
-		if (_items[i]->Match(layerHandle, rasterX, rasterY))
+		if (_items[i]->Match(layerHandle, row, column))
 		{
 			_items.erase(_items.begin() + i);
 			return S_OK;
 		}
 	}
-
-	AddPixel(layerHandle, rasterX, rasterY);
+	
+	AddPixel(layerHandle, column, row);
 
 	return S_OK;
 }
@@ -149,15 +149,17 @@ STDMETHODIMP CSelectionList::get_LayerType(LONG index, tkLayerType* pVal)
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_RasterX(LONG index, LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (index < 0 || index >= (long)_items.size())
-	{
-		*pVal = tkLayerType::ltUndefined;
-		return S_OK;
-	}
+	//if (index < 0 || index >= (long)_items.size())
+	//{
+	//	*pVal = tkLayerType::ltUndefined;
+	//	return S_OK;
+	//}
 
-	*pVal = _items[index]->RasterX;
+	//*pVal = _items[index]->RasterX;
+
+	get_Column(index, pVal);
 
 	return S_OK;
 }
@@ -169,13 +171,51 @@ STDMETHODIMP CSelectionList::get_RasterY(LONG index, LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	//if (index < 0 || index >= (long)_items.size())
+	//{
+	//	*pVal = tkLayerType::ltUndefined;
+	//	return S_OK;
+	//}
+
+	//*pVal = _items[index]->RasterY;
+
+	get_Row(index, pVal);
+
+	return S_OK;
+}
+
+
+// ****************************************************************
+//				get_Row()						         
+// ****************************************************************
+STDMETHODIMP CSelectionList::get_Row(LONG index, LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	if (index < 0 || index >= (long)_items.size())
 	{
 		*pVal = tkLayerType::ltUndefined;
 		return S_OK;
 	}
 
-	*pVal = _items[index]->RasterY;
+	*pVal = _items[index]->Row;
+
+	return S_OK;
+}
+// ****************************************************************
+//				get_Column()						         
+// ****************************************************************
+STDMETHODIMP CSelectionList::get_Column(LONG index, LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (index < 0 || index >= (long)_items.size())
+	{
+		*pVal = tkLayerType::ltUndefined;
+		return S_OK;
+	}
+
+	*pVal = _items[index]->Column;
 
 	return S_OK;
 }
@@ -196,14 +236,14 @@ void CSelectionList::UpdatePixelBounds(long layerHandle, IImage* source, bool po
 
 		if (_items[i]->LayerHandle == layerHandle && !_items[i]->Calculated)
 		{
-			long rasterX = _items[i]->RasterX;
-			long rasterY = _items[i]->RasterY;
+			long row = _items[i]->Row;
+			long column = _items[i]->Column;
 
 			double x, y;
-			source->ImageToProjection(rasterX, rasterY, &x, &y);
+			source->ImageToProjection(column, row, &x, &y);
 
 			double x2, y2;
-			source->ImageToProjection(rasterX + 1, rasterY + 1, &x2, &y2);
+			source->ImageToProjection(column + 1, row + 1, &x2, &y2);
 
 			_items[i]->AssignShapePixel(x, y, x2, y2);
 

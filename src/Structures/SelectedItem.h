@@ -6,8 +6,8 @@ struct SelectedItem
 	long LayerHandle;
 	long ShapeIndex;
 	tkLayerType LayerType;
-	long RasterX;
-	long RasterY;
+	long Row;
+	long Column;
 	bool Calculated;
 	bool Polygon;
 	IShape* ShapePixel;
@@ -20,13 +20,13 @@ struct SelectedItem
 		ShapeIndex = shapeIndex;
 	}
 
-	SelectedItem(long layerHandle, long rasterX, long rasterY)
+	SelectedItem(long layerHandle, long row, long column)
 	{
 		Init();
 		LayerType = ltRaster;
 		LayerHandle = layerHandle;
-		RasterX = rasterX;
-		RasterY = rasterY;
+		Row = row;
+		Column = column;
 	}
 
 	~SelectedItem()
@@ -62,14 +62,14 @@ struct SelectedItem
 		Calculated = false;
 		ShapePixel = NULL;
 		ShapeIndex = -1;
-		RasterX = -1;
-		RasterY = -1;
+		Row = -1;
+		Column = -1;
 		Polygon = true;
 	}
 
-	bool Match(long layerHandle, long rasterX, long rasterY)
+	bool Match(long layerHandle, long row, long column)
 	{
-		return LayerHandle == layerHandle && RasterX == rasterX && RasterY == rasterY;
+		return LayerHandle == layerHandle && Row == row && Column == column;
 	}
 };
 

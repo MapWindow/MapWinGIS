@@ -52,11 +52,13 @@ public:
 	STDMETHOD(get_ShapeIndex)(LONG index, LONG* pVal);
 	STDMETHOD(Clear)();
 	STDMETHOD(RemoveByLayerHandle)(LONG layerHandle);
-	STDMETHOD(AddPixel)(LONG layerHandle, LONG rasterX, LONG rasterY);
+	STDMETHOD(AddPixel)(LONG layerHandle, LONG column, LONG row);
 	STDMETHOD(get_LayerType)(LONG index, tkLayerType* pVal);
 	STDMETHOD(get_RasterX)(LONG index, LONG* pVal);
 	STDMETHOD(get_RasterY)(LONG index, LONG* pVal);
-	STDMETHOD(TogglePixel)(LONG layerHandle, LONG rasterX, LONG rasterY);
+	STDMETHOD(get_Row)(LONG index, LONG* pVal);
+	STDMETHOD(get_Column)(LONG index, LONG* pVal);
+	STDMETHOD(TogglePixel)(LONG layerHandle, LONG column, LONG row);
 
 private:
 	vector<SelectedItem*> _items;

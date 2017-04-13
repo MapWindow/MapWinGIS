@@ -88,6 +88,7 @@
     <Compile Include="ShapefileTests.cs" />
     <Compile Include="PostGisTest.cs" />
     <Compile Include="OgrDatasourceTests.cs" />
+    <Compile Include="ImageTests.cs" />
     <Compile Include="UtilTests.cs" />
   </ItemGroup>
   <ItemGroup>

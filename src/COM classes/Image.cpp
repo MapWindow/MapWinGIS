@@ -2210,18 +2210,18 @@ void CImageClass::ErrorMessage(long ErrorCode)
 //		ProjectionToImage
 // **************************************************************
 // Returns image coordinates to the given map coordinates
-STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* ImageX, long* ImageY)
+STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* Column, long* Row)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (_gdal)
 	{
-		*ImageX = Utility::Rint((ProjX - _raster->GetOrigXllCenter())/_raster->GetOrigDx());
-		*ImageY = Utility::Rint((double)_raster->GetOrigHeight() - 1 - (((ProjY - _raster->GetOrigYllCenter())/_raster->GetOrigDy())));
+		*Column = Utility::Rint((ProjX - _raster->GetOrigXllCenter()) / _raster->GetOrigDx());
+		*Row = Utility::Rint((double)_raster->GetOrigHeight() - 1 - (((ProjY - _raster->GetOrigYllCenter()) / _raster->GetOrigDy())));
 	}
 	else
 	{
-		*ImageX = Utility::Rint((ProjX - _xllCenter)/_dX);
-		*ImageY = Utility::Rint((double)_height - 1 - ((ProjY - _yllCenter)/_dY));
+		*Column = Utility::Rint((ProjX - _xllCenter) / _dX);
+		*Row = Utility::Rint((double)_height - 1 - ((ProjY - _yllCenter) / _dY));
 	}
 	return S_OK;
 }
@@ -2231,19 +2231,19 @@ STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* Im
 // **************************************************************
 // Returns map coordinates of the given image pixel (top left corner)
 // !!! Don't check that input pixel is within width / height bounds !!!
-STDMETHODIMP CImageClass::ImageToProjection(long ImageX, long ImageY, double* ProjX, double* ProjY)
+STDMETHODIMP CImageClass::ImageToProjection(long Column, long Row, double* ProjX, double* ProjY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	if (_gdal)
 	{
-		*ProjX = _raster->GetOrigXllCenter() + (ImageX - 0.5) * _raster->GetOrigDx();
-		*ProjY = _raster->GetOrigYllCenter() + (_raster->GetOrigHeight() - 1 - ImageY + 0.5) * _raster->GetOrigDy();
+		*ProjX = _raster->GetOrigXllCenter() + (Column - 0.5) * _raster->GetOrigDx();
+		*ProjY = _raster->GetOrigYllCenter() + (_raster->GetOrigHeight() - 1 - Row + 0.5) * _raster->GetOrigDy();
 	}
 	else
 	{
-		*ProjX = _xllCenter + (ImageX - 0.5) * _dX;
-		*ProjY = _yllCenter + (_height - 1 - ImageY + 0.5) * _dY;
+		*ProjX = _xllCenter + (Column - 0.5) * _dX;
+		*ProjY = _yllCenter + (_height - 1 - Row + 0.5) * _dY;
 	}
 	return S_OK;
 }

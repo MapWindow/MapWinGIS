@@ -362,14 +362,14 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list,
 			img.Attach(GetImage(handles[i]));
 			if (img)
 			{
-				long rasterX, rasterY;
-				img->ProjectionToImage(projX, projY, &rasterX, &rasterY);
+				long row, column;
+				img->ProjectionToImage(projX, projY, &column, &row);
 				
 				if (ctrl) {
-					list->TogglePixel(handles[i], rasterX, rasterY);
+					list->TogglePixel(handles[i], column, row);
 				}
 				else {
-					list->AddPixel(handles[i], rasterX, rasterY);
+					list->AddPixel(handles[i], column, row);
 				}
 			}
 		}
