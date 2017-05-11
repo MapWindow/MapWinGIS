@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Remoting;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -118,6 +119,19 @@ namespace MapWinGISTests
             {
                 Assert.Fail("GridStatisticsToShapefile failed: " + utils.ErrorMsg[utils.LastErrorCode]);
             }
+
+            var newShapefileFile = Path.Combine(Path.GetTempPath(), "ZonalStatistics.shp");
+            if (File.Exists(newShapefileFile))
+            {
+                foreach (var f in Directory.EnumerateFiles(Path.GetDirectoryName(newShapefileFile), "ZonalStatistics.*"))
+                {
+                    File.Delete(f);
+                }
+            }
+
+            Assert.IsTrue(sf.SaveAs(newShapefileFile), "Could not save resulting shapefile");
+
+            Console.WriteLine("Saved as " + newShapefileFile);
         }
     }
 }
