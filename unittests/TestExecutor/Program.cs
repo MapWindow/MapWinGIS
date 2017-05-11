@@ -34,8 +34,11 @@ namespace ConsoleApplication1
             // var t = new OgrDatasourceTests();
             // t.ImportShapefileTest();
 
-            var t = new ShapefileTests();
-            t.Reproject2280Test();
+            //var t = new ShapefileTests();
+            //t.Reproject2280Test();
+
+            var t = new UtilTests();
+            t.ZonalStatistics();
 
             Console.ReadLine();
         }

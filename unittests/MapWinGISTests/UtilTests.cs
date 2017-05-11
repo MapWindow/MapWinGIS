@@ -88,5 +88,36 @@ namespace MapWinGISTests
                 sfFixed.Close();
             }
         }
+
+        /// <summary>
+        /// Test for https://mapwindow.atlassian.net/browse/MWGIS-65
+        /// </summary>
+        [TestMethod]
+        public void ZonalStatistics()
+        {
+            const string rasterFile = @"GeoTiff\MWGIS-65.tif";
+            if (!File.Exists(rasterFile)) throw new FileNotFoundException("Can't open " + rasterFile);
+
+            const string shapefileFile = @"sf\MWGIS-65.shp";
+            if (!File.Exists(shapefileFile)) throw new FileNotFoundException("Can't open " + shapefileFile);
+
+            var grd = new Grid();
+            if (!grd.Open(rasterFile, GridDataType.FloatDataType))
+            {
+                Assert.Fail("Can't open grid file: " + grd.ErrorMsg[grd.LastErrorCode]);
+            }
+            var sf = new Shapefile();
+            if (!sf.Open(shapefileFile))
+            {
+                Assert.Fail("Can't open shapefile file: " + sf.ErrorMsg[sf.LastErrorCode]);
+            }
+
+            var utils = new Utils();
+            Console.WriteLine("Before utils.GridStatisticsToShapefile");
+            if (!utils.GridStatisticsToShapefile(grd, sf, false, true))
+            {
+                Assert.Fail("GridStatisticsToShapefile failed: " + utils.ErrorMsg[utils.LastErrorCode]);
+            }
+        }
     }
 }
