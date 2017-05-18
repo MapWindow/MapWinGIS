@@ -41,7 +41,8 @@ STDMETHODIMP CLabelClass::put_Text(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	_label->text = OLE2CA(newVal);
+	// _label->text = OLE2CA(newVal);
+	_label->text = newVal;
 	return S_OK;
 };
 
