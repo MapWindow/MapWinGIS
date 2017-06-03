@@ -4156,7 +4156,9 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 				double xllWindow = xll + firstCol * dx;
 				std::map<float, int> values;	// value; count
 
-				GridScanMethod method = cmnCount * rowCount > 10 ? GridScanMethod::CenterWithin : GridScanMethod::Intersection;
+				// GridScanMethod method = cmnCount * rowCount > 10 ? GridScanMethod::CenterWithin : GridScanMethod::Intersection;
+				// MWGIS-66: Always use CenterWithin. Todo: Make it a parameter
+				GridScanMethod method = GridScanMethod::CenterWithin;
 
 				if (method == GridScanMethod::CenterWithin)
 				{
@@ -4168,7 +4170,8 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 							grid->GetFloatWindow(i, i, firstCol, lastCol, vals, &vb);
 								
 							if (vb) {
-								double y = yllWindow + dy * (rowCount - row - 1.5);	  // (rowCount - 1) - row;  -0.5 - center of cell
+								// double y = yllWindow + dy * (rowCount - row - 1.5);	  // (rowCount - 1) - row;  -0.5 - center of cell
+								double y = yllWindow + dy * (rowCount - row - 1.0); // MWGIS-65: yllWindow already use the center of the first cell.
 								pip.PrepareScanLine(y);
 									
 								// checking values within row
@@ -4177,7 +4180,8 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 									if (vals[j] == noData)
 										continue;
 
-									double x = xllWindow + dx * (j + 0.5);
+									// double x = xllWindow + dx * (j + 0.5);
+									double x = xllWindow + dx * (j); // MWGIS-65: xllWindow already use the center of the first cell.
 									if (pip.ScanPoint(x))
 									{
 										if (vals[j] < min) {
