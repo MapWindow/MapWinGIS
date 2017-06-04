@@ -510,7 +510,7 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// Calculates statistics for grid cells within each polygon of the specified shapefile. Writes results to attribute table of shapefile.
         /// </summary>
@@ -520,11 +520,13 @@ namespace MapWinGIS
         /// When set to false, calculation will be made for all polygons in shapefile.</param>
         /// <param name="overwriteFields">If true output fields will be overwritten (if the fields with such names already exist). 
         /// Otherwise new set of output fields will be created with numerical indices added to their names.</param>
+        /// <param name="useCenterWithinMethod">If true (default) the center of the pixel needs to be inside the polygon. 
+        /// If set to false Intersection method is used meaning each pixel boundary that intersects with the polygon is used. Added in v4.9.4.3.</param>
         /// <returns>True on success.</returns>
         /// <remarks>The default names for output fields: "Mean", "Median", "Majority", "Minority", "Minimum", "Maximum", 
         /// "Range", "StD", "Sum", "MinX", "MinY", "Variety", "Count"</remarks>
         /// \new490 Added in version 4.9.0
-        public bool GridStatisticsToShapefile(Grid Grid, Shapefile sf, bool SelectedOnly, bool overwriteFields)
+        public bool GridStatisticsToShapefile(Grid Grid, Shapefile sf, bool SelectedOnly, bool overwriteFields, bool useCenterWithinMethod = true)
         {
             throw new NotImplementedException();
         }

@@ -4021,7 +4021,7 @@ STDMETHODIMP CUtils::GridStatisticsForPolygon(IGrid* grid, IGridHeader* header, 
 // ********************************************************
 //		GridStatisticsToShapefile()
 // ********************************************************
-STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VARIANT_BOOL selectedOnly, VARIANT_BOOL overwriteFields, VARIANT_BOOL* retVal) 
+STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARIANT_BOOL selectedOnly, VARIANT_BOOL overwriteFields, VARIANT_BOOL useCenterWithinMethod, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -4116,13 +4116,6 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 			grid->ProjToCell(xMin, yMin, &firstCol, &firstRow);
 			grid->ProjToCell(xMax, yMax, &lastCol, &lastRow);
 
-			// MWGIS-65: It is possible the polygon is partially outside the boundary of the grid,
-			// then grid->ProjToCell returns -1 for the value:
-			/*firstRow = MAX(firstRow, 0);
-			firstCol = MAX(firstCol, 0);
-			lastRow = MIN(lastRow, gridRowCount);
-			lastCol = MIN(lastCol, gridColumnCount);*/
-
 			long minRow = MIN(firstRow, lastRow);
 			long maxRow = MAX(firstRow, lastRow);
 
@@ -4156,9 +4149,8 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 				double xllWindow = xll + firstCol * dx;
 				std::map<float, int> values;	// value; count
 
-				// GridScanMethod method = cmnCount * rowCount > 10 ? GridScanMethod::CenterWithin : GridScanMethod::Intersection;
-				// MWGIS-66: Always use CenterWithin. Todo: Make it a parameter
-				GridScanMethod method = GridScanMethod::CenterWithin;
+				// MWGIS-66:
+				GridScanMethod method = useCenterWithinMethod ? GridScanMethod::CenterWithin : GridScanMethod::Intersection;
 
 				if (method == GridScanMethod::CenterWithin)
 				{
