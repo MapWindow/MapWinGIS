@@ -396,5 +396,23 @@ namespace MapWinGISTests
             // Save:
             if (!sfFishnet.Save()) Assert.Fail("Saving fishnet sf failed: " + sfFishnet.ErrorMsg[sfFishnet.LastErrorCode]);
         }
+
+        [TestMethod]
+        public void SaveAs()
+        {
+            var filename = @"D:\dev\GIS-Data\MapWindow-Projects\UnitedStates\Shapefiles\states.shp";
+
+            // Check file:
+            if (!File.Exists(filename)) Assert.Fail(filename + " does not exists.");
+            // Open shapefile:
+            var sf = new Shapefile();
+            if (!sf.Open(filename))
+                Assert.Fail("Failed to open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+            // Save shapefile:
+            var tmpFilename = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), ".shp");
+            if (!sf.SaveAs(tmpFilename))
+                Assert.Fail("Failed to save shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
+        }
     }
 }

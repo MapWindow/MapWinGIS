@@ -31,14 +31,14 @@ namespace ConsoleApplication1
             // t.CreateLayerSQLiteTest();
             // t.GdalInfoHdf5();
 
-            // var t = new OgrDatasourceTests();
-            // t.ImportShapefileTest();
+            var t = new OgrDatasourceTests();
+            t.ImportShapefileTest();
 
             //var t = new ShapefileTests();
             //t.Reproject2280Test();
 
-            var t = new UtilTests();
-            t.ZonalStatistics();
+            //var t = new UtilTests();
+            //t.ZonalStatistics();
 
             Console.ReadLine();
         }

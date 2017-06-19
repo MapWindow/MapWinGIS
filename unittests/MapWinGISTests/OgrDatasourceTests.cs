@@ -24,7 +24,7 @@ namespace MapWinGISTests
                 }
 
                 // Point shapefile:
-                // ImportShapefile(ds, @"D:\dev\GIS-Data\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp", "cities_points");
+                ImportShapefile(ds, @"D:\dev\GIS-Data\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp", "cities_points");
 
                 // Polygon shapefile:
                 ImportShapefile(ds, @"D:\dev\GIS-Data\MapWindow-Projects\UnitedStates\Shapefiles\states.shp", "states_polygon");
@@ -37,6 +37,7 @@ namespace MapWinGISTests
                 ds.Close();
             }
         }
+
 
         [TestMethod]
         public void MWGIS61Test()
@@ -86,6 +87,7 @@ namespace MapWinGISTests
 
             // Save shapefile:
             var tmpFilename = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), ".shp");
+            DeleteShapefile(tmpFilename);
             if (!sfFromBuffer.SaveAs(tmpFilename))
                 Assert.Fail("Failed to save shapefile: " + sfFromBuffer.ErrorMsg[sfFromBuffer.LastErrorCode]);
 
@@ -94,6 +96,54 @@ namespace MapWinGISTests
                 Assert.Fail("Failed to import buffered shapefile");
 
             layer.Close();
+        }
+
+        [TestMethod]
+        public void GetBuffer()
+        {
+            var ds = new OgrDatasource();
+            try
+            {
+                if (!ds.Open(CONNECTION_STRING))
+                {
+                    Assert.Fail("Failed to establish connection: " + ds.GdalLastErrorMsg);
+                }
+
+                // Get layer using buffer:
+                var layer = ds.GetLayerByName("states_polygon");
+                Assert.IsNotNull(layer, "layer is null");
+
+                var sfFromBuffer = layer.GetBuffer();
+                Debug.WriteLine("NumShapes: " + sfFromBuffer.NumShapes);
+
+                var tmpFilename = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), ".shp");
+                if (!sfFromBuffer.SaveAs(tmpFilename))
+                    Assert.Fail("Failed to save shapefile: " + sfFromBuffer.ErrorMsg[sfFromBuffer.LastErrorCode]);
+
+            }
+            finally
+            {
+                ds.Close();
+            }
+        }
+
+        private static void DeleteShapefile(string fileLocation)
+        {
+            if (!File.Exists(fileLocation))
+            {
+                Debug.WriteLine("In DeleteShapefile. Cannot find " + fileLocation);
+                return;
+            }
+
+            var myDirectory = Path.GetDirectoryName(fileLocation);
+            if (myDirectory == null) return;
+
+            var baseName = Path.GetFileNameWithoutExtension(fileLocation);
+            foreach (var f in Directory.EnumerateFiles(myDirectory, baseName + ".*"))
+            {
+                File.Delete(f);
+                Debug.WriteLine("Deleting " + f);
+            }
         }
     }
 }
