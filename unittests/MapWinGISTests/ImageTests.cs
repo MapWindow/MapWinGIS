@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,17 +18,17 @@ namespace MapWinGISTests
             Debug.WriteLine($"img.Width: {img.OriginalWidth}, img.Height: {img.OriginalHeight}");
             int row, column;
 
-            img.ProjectionToImage(img.Extents.xMin, img.Extents.yMax - img.OriginalDY / 2, out row, out column);
+            img.ProjectionToImage(img.Extents.xMin, img.Extents.yMax - img.OriginalDY / 2, out column, out row);
             Debug.WriteLine($"Row: {row}, Column: {column}");
             Assert.AreEqual(0, row, "Row has unexpected value");
             Assert.AreEqual(0, column, "Column has unexpected value");
 
-            img.ProjectionToImage(img.Extents.xMax, img.Extents.yMax - img.OriginalDY / 2, out row, out column);
+            img.ProjectionToImage(img.Extents.xMax, img.Extents.yMax - img.OriginalDY / 2, out column, out row);
             Debug.WriteLine($"Row: {row}, Column: {column}");
             Assert.AreEqual(0, row, "Row has unexpected value");
             Assert.AreEqual(img.OriginalWidth, column, "Column has unexpected value");
 
-            img.ProjectionToImage(img.Extents.xMax, img.Extents.yMin, out row, out column);
+            img.ProjectionToImage(img.Extents.xMax, img.Extents.yMin, out column, out row);
             Debug.WriteLine($"Row: {row}, Column: {column}");
             Assert.AreEqual(img.OriginalHeight, row, "Row has unexpected value");
             Assert.AreEqual(img.OriginalWidth, column, "Column has unexpected value");
@@ -62,7 +61,7 @@ namespace MapWinGISTests
             Assert.AreEqual(img.Extents.yMin, projY, "projY has unexpected value");
         }
 
-        private Image LoadImage(string filename)
+        private static Image LoadImage(string filename)
         {
             if (!File.Exists(filename)) Assert.Fail("Input file does not exist: " + filename);
 

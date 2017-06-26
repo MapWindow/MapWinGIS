@@ -27,12 +27,13 @@ namespace ConsoleApplication1
              * debug MapWinGIS and set break points
              * *******************************************/
 
-            // var t = new GdalTests();
+            var t = new GdalTests();
             // t.CreateLayerSQLiteTest();
             // t.GdalInfoHdf5();
+            t.GdalWarp();
 
-            var t = new OgrDatasourceTests();
-            t.ImportShapefileTest();
+            //var t = new OgrDatasourceTests();
+            //t.ImportShapefileTest();
 
             //var t = new ShapefileTests();
             //t.Reproject2280Test();

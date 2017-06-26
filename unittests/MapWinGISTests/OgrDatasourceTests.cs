@@ -119,6 +119,29 @@ namespace MapWinGISTests
                 var tmpFilename = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), ".shp");
                 if (!sfFromBuffer.SaveAs(tmpFilename))
                     Assert.Fail("Failed to save shapefile: " + sfFromBuffer.ErrorMsg[sfFromBuffer.LastErrorCode]);
+            }
+            finally
+            {
+                ds.Close();
+            }
+        }
+
+        [TestMethod]
+        public void ListAllLayers()
+        {
+            var ds = new OgrDatasource();
+            try
+            {
+                if (!ds.Open(CONNECTION_STRING))
+                {
+                    Assert.Fail("Failed to establish connection: " + ds.GdalLastErrorMsg);
+                }
+                Debug.WriteLine("ds.LayerCount: " + ds.LayerCount);
+                for (var i = 0; i < ds.LayerCount; i++)
+                {
+                    var layer = ds.GetLayer2(i, false, false);
+                    Debug.WriteLine(layer.Name + " has " + layer.FeatureCount + " features. Projection is " + layer.GeoProjection.Name);
+                }
 
             }
             finally

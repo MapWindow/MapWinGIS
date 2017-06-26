@@ -387,5 +387,57 @@ namespace interopCreator
             axMap1.AddLayer(sfPolygon, true);
             axMap1.AddLayer(sfPoint, true);
         }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            const string filename = @"J:\Akkerweb.Shared\tmp\ndre-copied.tif";
+            // axMap1.AddLayerFromFilename(filename, tkFileOpenStrategy.fosAutoDetect, true);
+            var fm = new FileManager();
+            var obj = fm.Open(filename, tkFileOpenStrategy.fosAutoDetect, null);
+            if (obj != null && fm.LastOpenIsSuccess)
+            {
+                var handle = axMap1.AddLayer(obj, true);
+                if (handle == -1)
+                {
+                    MessageBox.Show(@"Failed to add layer to the map: " + axMap1.get_ErrorMsg(axMap1.LastErrorCode));
+                }
+            }
+            else
+            {
+                MessageBox.Show(@"Failed to open datasource: " + fm.ErrorMsg[fm.LastErrorCode]);
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            var utils = new Utils();
+            var grd = new Grid();
+            if (!grd.Open(@"J:\Akkerweb.Shared\tmp\ndre-copied.tif", GridDataType.FloatDataType))
+            {
+                throw new Exception("Can't open grid file: " + grd.ErrorMsg[grd.LastErrorCode]);
+            }
+            var sf = new Shapefile();
+            if (!sf.Open(@"J:\Akkerweb.Shared\tmp\Fishnet.shp"))
+            {
+                throw new Exception("Can't open shapefile file: " + sf.ErrorMsg[sf.LastErrorCode]);
+            }
+            if (!utils.GridStatisticsToShapefile(grd, sf, false, true))
+            {
+                throw new Exception("GridStatisticsToShapefile failed: " + utils.ErrorMsg[utils.LastErrorCode]);
+            }
+
+            axMap1.AddLayer(grd, true);
+            axMap1.AddLayer(sf, true);
+        }
+
+        private void axMap1_ShapeIdentified(object sender, AxMapWinGIS._DMapEvents_ShapeIdentifiedEvent e)
+        {
+            axMap1.ZoomToShape(e.layerHandle, e.shapeIndex);
+        }
+
+        private void axMap1_FileDropped(object sender, AxMapWinGIS._DMapEvents_FileDroppedEvent e)
+        {
+            axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
+        }
     }
 }
