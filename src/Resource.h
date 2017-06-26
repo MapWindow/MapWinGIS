@@ -2,6 +2,9 @@
 // Microsoft Visual C++ generated include file.
 // Used by MapWinGIS.rc
 //
+// june 2017 PaulM - Added IDR_GdalUtils and #pragma once
+
+#pragma once
 #define IDS_MAP                         1
 #define IDB_MAP                         1
 #define IDS_MAP_PPG                     2
@@ -59,7 +62,8 @@
 #define IDR_GDALDRIVERMANAGER           157
 #define IDR_FUNCTION                    158
 #define IDR_EXPRESSION                  159
-#define IDR_WmsLayer                 160
+#define IDR_WmsLayer                    160
+#define IDR_GdalUtils                   161
 #define IDS_MAP_PPG_CAPTION             200
 #define IDD_PROPPAGE_MAP                200
 #define IDC_ZOOMIN                      203
