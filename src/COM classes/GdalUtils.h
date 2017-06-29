@@ -71,7 +71,7 @@ public:
 public:
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
-	STDMETHOD(GdalWarp)(VARIANT_BOOL* retVal);
+	STDMETHOD(GdalWarp)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[out, retval]*/ VARIANT_BOOL* retVal);
 
 private:	
 	long _lastErrorCode;
@@ -81,6 +81,7 @@ public:
 
 public:
 	// methods
+	inline void ErrorMessage(long ErrorCode);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GdalUtils), CGdalUtils)

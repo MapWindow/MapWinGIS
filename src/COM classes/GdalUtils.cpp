@@ -60,13 +60,29 @@ STDMETHODIMP CGdalUtils::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 // *********************************************************
 //	     Deserialize()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalWarp(VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
 	*retVal = VARIANT_FALSE;
+
+	USES_CONVERSION;
+	CStringW srcFilename = OLE2W(bstrSrcFilename);
+	if (!Utility::FileExistsW(srcFilename))
+	{
+		ErrorMessage(tkINVALID_FILENAME);
+		return S_OK;
+	}	
 	
 	// TODO: Implement
 
 	return S_OK;
+}
+
+// **********************************************************
+//		ErrorMessage()
+// **********************************************************
+inline void CGdalUtils::ErrorMessage(long ErrorCode)
+{
+	_lastErrorCode = ErrorCode;
+	// TODO: CallbackHelper::ErrorMsg("Charts", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
