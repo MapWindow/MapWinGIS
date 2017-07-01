@@ -25,6 +25,7 @@
 
 #include "stdafx.h"
 #include "GdalUtils.h"
+#include "GdalDataset.h"
 
 // *********************************************************************
 //		~CGdalUtils
@@ -41,7 +42,7 @@ CGdalUtils::~CGdalUtils()
 STDMETHODIMP CGdalUtils::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _lastErrorCode;
+		*pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
@@ -52,7 +53,7 @@ STDMETHODIMP CGdalUtils::get_LastErrorCode(long *pVal)
 STDMETHODIMP CGdalUtils::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
 	return S_OK;
 }
@@ -60,20 +61,62 @@ STDMETHODIMP CGdalUtils::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 // *********************************************************
 //	     Deserialize()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
 	USES_CONVERSION;
 	CStringW srcFilename = OLE2W(bstrSrcFilename);
-	if (!Utility::FileExistsW(srcFilename))
+	if (!Utility::FileExistsUnicode(bstrSrcFilename))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
-	}	
-	
-	// TODO: Implement
+	}
+
+	// Open file as GdalDataset:
+	GDALDatasetH dt = GdalHelper::OpenRasterDatasetW(srcFilename, GA_ReadOnly);
+	if (dt)
+	{
+		// Make options:		
+		if (SafeArrayGetDim(options) != 1)
+		{
+			ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+			return S_OK;
+		}
+		
+		char** warpOptions = NULL;
+		LONG lLBound, lUBound;
+		BSTR HUGEP *pbstr;
+		HRESULT hr1 = SafeArrayGetLBound(options, 1, &lLBound);
+		HRESULT hr2 = SafeArrayGetUBound(options, 1, &lUBound);
+		HRESULT hr3 = SafeArrayAccessData(options, (void HUGEP* FAR*)&pbstr);
+		if (!FAILED(hr1) && !FAILED(hr2) && !FAILED(hr3))
+		{
+			LONG count = lUBound - lLBound + 1;
+			for (int i = 0; i < count; i++){
+				// Create array:
+				warpOptions = CSLAddString(warpOptions, OLE2A(pbstr[i]));
+			}
+		}
+
+		GDALWarpAppOptions* gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, NULL);
+
+		// Call the gdalWarp function:
+		auto dtNew = GDALWarp(OLE2A(bstrDstFilename), NULL, 1, &dt, gdalWarpOptions, NULL);
+		if (dtNew)
+		{
+			*retVal = VARIANT_TRUE;
+			GDALClose(dtNew);
+		}
+
+		// Free options:
+		GDALWarpAppOptionsFree(gdalWarpOptions);
+
+		// Close the dataset:
+		// GdalHelper::CloseDataset(dt);		
+		GDALClose(dt);		
+	}
 
 	return S_OK;
 }

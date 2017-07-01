@@ -6409,7 +6409,7 @@ interface IWmsLayer : IDispatch{
 interface IGdalUtils : IDispatch{
 	[propget, id(1)] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(2)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[id(3)] HRESULT GdalWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [out, retval] VARIANT_BOOL* retVal);
+	[id(3)] HRESULT GdalWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [out, retval] VARIANT_BOOL* retVal);
 }
 
 [ 
