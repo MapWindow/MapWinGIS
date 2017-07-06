@@ -68,7 +68,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 
 	USES_CONVERSION;
 	CStringW srcFilename = OLE2W(bstrSrcFilename);
-	if (!Utility::FileExistsUnicode(bstrSrcFilename))
+	if (!Utility::FileExistsW(srcFilename))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
@@ -85,6 +85,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 			return S_OK;
 		}
 		
+		// TODO: Move to seperate function:
 		char** warpOptions = NULL;
 		LONG lLBound, lUBound;
 		BSTR HUGEP *pbstr;
@@ -102,6 +103,8 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 
 		GDALWarpAppOptions* gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, NULL);
 
+		// TODO: Callback and error handling
+
 		// Call the gdalWarp function:
 		auto dtNew = GDALWarp(OLE2A(bstrDstFilename), NULL, 1, &dt, gdalWarpOptions, NULL);
 		if (dtNew)
@@ -112,9 +115,9 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 
 		// Free options:
 		GDALWarpAppOptionsFree(gdalWarpOptions);
+		CSLDestroy(warpOptions);
 
 		// Close the dataset:
-		// GdalHelper::CloseDataset(dt);		
 		GDALClose(dt);		
 	}
 
