@@ -85,22 +85,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 			return S_OK;
 		}
 		
-		// TODO: Move to seperate function:
-		char** warpOptions = NULL;
-		LONG lLBound, lUBound;
-		BSTR HUGEP *pbstr;
-		HRESULT hr1 = SafeArrayGetLBound(options, 1, &lLBound);
-		HRESULT hr2 = SafeArrayGetUBound(options, 1, &lUBound);
-		HRESULT hr3 = SafeArrayAccessData(options, (void HUGEP* FAR*)&pbstr);
-		if (!FAILED(hr1) && !FAILED(hr2) && !FAILED(hr3))
-		{
-			LONG count = lUBound - lLBound + 1;
-			for (int i = 0; i < count; i++){
-				// Create array:
-				warpOptions = CSLAddString(warpOptions, OLE2A(pbstr[i]));
-			}
-		}
-
+		char** warpOptions = ConvertSafeArray(options);
 		GDALWarpAppOptions* gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, NULL);
 
 		// TODO: Callback and error handling
@@ -131,4 +116,29 @@ inline void CGdalUtils::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
 	// TODO: CallbackHelper::ErrorMsg("Charts", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+}
+
+// ***************************************************************************************
+//		ConvertSafeArray()
+//      Convert a safearray (coming outside the ocx) to char** (used internal) 
+// ***************************************************************************************
+char** CGdalUtils::ConvertSafeArray(SAFEARRAY* safeArray)
+{
+	USES_CONVERSION;
+	char** papsz_str_list = NULL;
+	LONG lLBound, lUBound;
+	BSTR HUGEP *pbstr;
+	HRESULT hr1 = SafeArrayGetLBound(safeArray, 1, &lLBound);
+	HRESULT hr2 = SafeArrayGetUBound(safeArray, 1, &lUBound);
+	HRESULT hr3 = SafeArrayAccessData(safeArray, (void HUGEP* FAR*)&pbstr);
+	if (!FAILED(hr1) && !FAILED(hr2) && !FAILED(hr3))
+	{
+		LONG count = lUBound - lLBound + 1;
+		for (int i = 0; i < count; i++){
+			// Create array:
+			papsz_str_list = CSLAddString(papsz_str_list, OLE2A(pbstr[i]));
+		}
+	}
+
+	return papsz_str_list;
 }

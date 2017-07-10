@@ -76,6 +76,7 @@ public:
 
 private:	
 	long _lastErrorCode;
+	char** ConvertSafeArray(SAFEARRAY* safeArray);
 	
 public:
 	// properties
