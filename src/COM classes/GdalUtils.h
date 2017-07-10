@@ -36,10 +36,13 @@ class ATL_NO_VTABLE CGdalUtils :
 	public IDispatchImpl<IGdalUtils, &IID_IGdalUtils, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
-	CGdalUtils(): _lastErrorCode(0)
+	CGdalUtils()
 	{
 		m_pUnkMarshaler = NULL;
-
+		_lastErrorCode = tkNO_ERROR;
+		_globalCallback = NULL;
+		_key = SysAllocString(L"");
+		
 		gReferenceCounter.AddRef(tkInterface::idGdalUtils);
 	}
 
@@ -72,10 +75,17 @@ public:
 public:
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
+	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
+	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
+	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
+	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(GdalWarp)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal);
 
 private:	
 	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BSTR _key;
+
 	char** ConvertSafeArray(SAFEARRAY* safeArray);
 	
 public:

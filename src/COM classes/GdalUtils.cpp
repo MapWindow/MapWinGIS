@@ -25,14 +25,13 @@
 
 #include "stdafx.h"
 #include "GdalUtils.h"
-#include "GdalDataset.h"
+// #include "GdalDataset.h"
 
 // *********************************************************************
 //		~CGdalUtils
 // *********************************************************************
 CGdalUtils::~CGdalUtils()
 {
-
 	gReferenceCounter.Release(tkInterface::idGdalUtils);
 }
 
@@ -58,8 +57,50 @@ STDMETHODIMP CGdalUtils::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 	return S_OK;
 }
 
+// *********************************************************************
+//		GlobalCallback
+// *********************************************************************
+STDMETHODIMP CGdalUtils::get_GlobalCallback(ICallback **pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
+		*pVal = _globalCallback;
+	if (_globalCallback != NULL)
+	{
+		_globalCallback->AddRef();
+	}
+	return S_OK;
+}
+
+STDMETHODIMP CGdalUtils::put_GlobalCallback(ICallback *newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
+	return S_OK;
+}
+
+STDMETHODIMP CGdalUtils::get_Key(BSTR *pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		USES_CONVERSION;
+
+	*pVal = OLE2BSTR(_key);
+
+	return S_OK;
+}
+
+STDMETHODIMP CGdalUtils::put_Key(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		USES_CONVERSION;
+
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
+
+	return S_OK;
+}
 // *********************************************************
-//	     Deserialize()
+//	     GdalWarp()
 // *********************************************************
 STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
 {
@@ -70,41 +111,61 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 	CStringW srcFilename = OLE2W(bstrSrcFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
-		ErrorMessage(tkINVALID_FILENAME);
+		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", srcFilename));
+		ErrorMessage(tkINVALID_FILENAME);		
 		return S_OK;
 	}
 
 	// Open file as GdalDataset:
+	CallbackHelper::Progress(_globalCallback, 0, "Open source file as raster", _key);
 	GDALDatasetH dt = GdalHelper::OpenRasterDatasetW(srcFilename, GA_ReadOnly);
-	if (dt)
+	if (!dt)
 	{
-		// Make options:		
-		if (SafeArrayGetDim(options) != 1)
-		{
-			ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
-			return S_OK;
-		}
-		
-		char** warpOptions = ConvertSafeArray(options);
-		GDALWarpAppOptions* gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, NULL);
+		CallbackHelper::ErrorMsg(Debug::Format("Can't open %s as a raster file.", srcFilename));
+		ErrorMsg(tkINVALID_FILENAME);
+		goto cleaning;
+	}
 
-		// TODO: Callback and error handling
+	// Make options:		
+	if (SafeArrayGetDim(options) != 1)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("The warp option are invalid."));
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		goto cleaning;
+	}
 
-		// Call the gdalWarp function:
-		auto dtNew = GDALWarp(OLE2A(bstrDstFilename), NULL, 1, &dt, gdalWarpOptions, NULL);
-		if (dtNew)
-		{
-			*retVal = VARIANT_TRUE;
-			GDALClose(dtNew);
-		}
+	char** warpOptions = ConvertSafeArray(options);
+	GDALWarpAppOptions* gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, NULL);
 
-		// Free options:
+	// Call the gdalWarp function:
+	CallbackHelper::Progress(_globalCallback, 50, "Start warping", _key);
+	GDALWarpAppOptionsSetProgress(gdalWarpOptions, GDALProgressCallback, NULL); // TODO: Is this the correct implementation?
+	auto dtNew = GDALWarp(OLE2A(bstrDstFilename), NULL, 1, &dt, gdalWarpOptions, NULL);
+	CallbackHelper::Progress(_globalCallback, 75, "Finished warping", _key);
+	if (dtNew)
+	{
+		*retVal = VARIANT_TRUE;
+		GDALClose(dtNew);
+	}
+	else
+	{
+		CallbackHelper::ErrorMsg("GdalUtils", _globalCallback, _key, "Warping failed");
+	}
+
+cleaning:
+	// ------------------------------------------------------
+	//	Cleaning
+	// ------------------------------------------------------
+	if (gdalWarpOptions)
 		GDALWarpAppOptionsFree(gdalWarpOptions);
+
+	if (warpOptions)
 		CSLDestroy(warpOptions);
 
-		// Close the dataset:
-		GDALClose(dt);		
-	}
+	if (dt)
+		GDALClose(dt);
+
+	CallbackHelper::ProgressCompleted(_globalCallback);
 
 	return S_OK;
 }
@@ -115,7 +176,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 inline void CGdalUtils::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	// TODO: CallbackHelper::ErrorMsg("Charts", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("GdalUtils", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ***************************************************************************************
