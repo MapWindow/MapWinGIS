@@ -41,7 +41,7 @@ public:
 		_refererUrl.Format("http://maps.%s/", server);
 		_licenseUrl = "https://mapwingis.codeplex.com/wikipage?title=googletiles";
 		int year = Utility::GetCurrentYear();
-		_copyright.Format(L"©%d Google (FOR PRIVATE USE ONLY)", year);
+		_copyright.Format(L"Â©%d Google (FOR PRIVATE USE ONLY)", year);
 		this->_projection = new MercatorProjection();
 		this->_maxZoom = 20;
 	}
@@ -49,8 +49,8 @@ public:
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
 		CString sec1 = "";
-        CString sec2 = "";
-        GetSecureWords(pos, sec1, sec2);
+		CString sec2 = "";
+		GetSecureWords(pos, sec1, sec2);
 		
 		CString s;
 		s.Format(_urlFormat, UrlFormatServer, GetServerNum(pos, 4), server, UrlFormatRequest, Version, LanguageStr, pos.x, sec1, pos.y, zoom, sec2);
