@@ -1,9 +1,9 @@
 /**************************************************************************************
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -14,8 +14,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
@@ -24,12 +24,12 @@
 // *******************************************************
 //			OpenStreetMapProvider
 // *******************************************************
-class OpenStreetMapProvider: public BaseProvider
+class OpenStreetMapProvider : public BaseProvider
 {
 public:
 	int count;
 
-	OpenStreetMapProvider() 
+	OpenStreetMapProvider()
 	{
 		count = 0;
 		Id = tkTileProvider::OpenStreetMap;
@@ -48,16 +48,16 @@ public:
 	{
 		char letter = _serverLetters[count % 3];
 		count++;
-		CString s; 
+		CString s;
 		s.Format(_urlFormat, letter, zoom, pos.x, pos.y);
 		return s;
 	}
 };
 
-class OpenCycleMapProvider: public OpenStreetMapProvider
+class OpenCycleMapProvider : public OpenStreetMapProvider
 {
-public:	
-	OpenCycleMapProvider() 
+public:
+	OpenCycleMapProvider()
 	{
 		Id = tkTileProvider::OpenCycleMap;
 		Name = "OpenCycleMap";
@@ -67,10 +67,10 @@ public:
 	}
 };
 
-class OpenTransportMapProvider: public OpenStreetMapProvider
+class OpenTransportMapProvider : public OpenStreetMapProvider
 {
-public:	
-	OpenTransportMapProvider() 
+public:
+	OpenTransportMapProvider()
 	{
 		Id = tkTileProvider::OpenTransportMap;
 		Name = "OpenTransportMap";
@@ -80,10 +80,10 @@ public:
 };
 
 
-class OpenHumanitarianMapProvider: public OpenStreetMapProvider
+class OpenHumanitarianMapProvider : public OpenStreetMapProvider
 {
-public:	
-	OpenHumanitarianMapProvider() 
+public:
+	OpenHumanitarianMapProvider()
 	{
 		Id = tkTileProvider::OpenHumanitarianMap;
 		Name = "OpenHumanitarianMap";
