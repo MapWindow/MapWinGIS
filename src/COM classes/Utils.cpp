@@ -5526,11 +5526,11 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 		return S_OK;
 	}
 
-	if (Utility::FileExistsW(outName))
-	{
-		ErrorMessage(tkFILE_EXISTS);
-		return S_OK;
-	}
+	//if (Utility::FileExistsW(outName))
+	//{
+	//	ErrorMessage(tkFILE_EXISTS);
+	//	return S_OK;
+	//}
 	
 	double* lows, *highs, *vals;
 	LONG lb1, ub1, lb2, ub2, lb3, ub3; 
@@ -5557,7 +5557,7 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 	}
 	
 	std::deque<BreakVal> breaks;
-	for (int i = 0; i < length; i++)
+	for (int i = 0; i <= length; i++)
 	{
 		BreakVal b;
 		b.highVal = highs[i];
