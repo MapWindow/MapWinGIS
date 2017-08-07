@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -59,6 +60,23 @@ namespace MapWinGISTests
             Debug.WriteLine($"projX: {projX}, projY: {projY}");
             Assert.AreEqual(img.Extents.xMax - img.OriginalDX / 2, projX, "projX has unexpected value");
             Assert.AreEqual(img.Extents.yMin, projY, "projY has unexpected value");
+        }
+
+        [TestMethod, Timeout(30000)]
+        //[TestMethod]
+        public void LargeEcwFile()
+        {
+            // Timout after 30 seconds:
+            var img = LoadImage(@"D:\dev\GIS-Data\Issues\MWGIS-70 ECW-crash\TK25.ecw");
+            Assert.IsNotNull(img, "Could not open ECW file.");
+        }
+
+        [TestMethod]
+        public void SmallEcwFile()
+        {
+            // Timout after 30 seconds:
+            var img = LoadImage(@"D:\dev\GIS-Data\Raster\ecw\ECW-ERMapper-Compressed-Wavelets.ecw");
+            Assert.IsNotNull(img, "Loaded object is not an image");
         }
 
         private static Image LoadImage(string filename)

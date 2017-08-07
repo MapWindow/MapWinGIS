@@ -31,18 +31,25 @@ namespace ConsoleApplication1
             // t.CreateLayerSQLiteTest();
             // t.GdalInfoHdf5();
             
-            var t = new GdalUtilsTests();
-            t.GdalWarp();
+            //var t = new GdalUtilsTests();
+            //t.GdalWarp();
 
             //var t = new OgrDatasourceTests();
             //t.ImportShapefileTest();
 
             //var t = new ShapefileTests();
             //t.Reproject2280Test();
+            //t.ReadRussionDataFromTable();
+            //t.CreateRussionCategories();
+
+            var t = new ImageTests();
+            t.LargeEcwFile();
 
             //var t = new UtilTests();
             //t.ZonalStatistics();
+            //t.ReclassifyRaster();
 
+            Console.WriteLine("Finished");
             Console.ReadLine();
         }
     }
