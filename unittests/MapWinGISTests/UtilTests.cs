@@ -141,6 +141,7 @@ namespace MapWinGISTests
             var utils = new Utils();
             var retVal = utils.GDALInfo(@"D:\dev\GIS-Data\Issues\ECW-crash\TK25.ecw", string.Empty);
             Debug.WriteLine(retVal);
+            Assert.IsTrue(retVal.Contains("Driver: ECW/ERDAS Compressed Wavelets (SDK 5."), "Wrong ECW driver");
         }
 
         [TestMethod]
@@ -167,11 +168,11 @@ namespace MapWinGISTests
             Console.WriteLine($"Input statistics: {min} - {max}");
             var newMax = 0.9 * max;
             var newMin = 1.2 * min;
-            
+
             var arr = new[]
             {
-                new {Low = nodataValue + 1, High = newMin, NewValue = newMin}, 
-                new {Low = newMax, High = max + 1, NewValue = newMax} 
+                new {Low = nodataValue + 1, High = newMin, NewValue = newMin},
+                new {Low = newMax, High = max + 1, NewValue = newMax}
             };
             var utils = new Utils();
             retVal = utils.ReclassifyRaster(input, 1, output, arr.Select(i => i.Low).ToArray(),
