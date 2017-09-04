@@ -14,7 +14,7 @@
             ranksep = 0.3;
             splines = ortho;
             
-            node [shape= "component", peripheries = 1, fontname=Helvetica, fontsize=9, color = lightsalmon, style = filled, height = 0.3, width = 1.0];
+            node [shape= "polygon", peripheries = 1, fontname=Helvetica, fontsize=9, color = lightsalmon, style = filled, height = 0.3, width = 1.0];
             map [ label="AxMap" URL="\ref AxMap"];
             
             node [shape = "polygon", color = gray, peripheries = 3, style = filled, height = 0.2, width = 0.8]
@@ -26,15 +26,17 @@
             meas [ label="Measuring" URL="\ref Measuring"];
             tiles [ label="Tiles" URL="\ref Tiles"];
             fm [ label="FileManager" URL="\ref FileManager"];
+            se [ label="ShapeEditor" URL="\ref ShapeEditor"];
             
             edge [ dir = "none", style = solid, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060", labeldistance = 0.6 ]
             map -> sf [ URL="\ref AxMap.get_Shapefile()", tooltip = "AxMap.get_Shapefile()", headlabel = "   n"];
             map -> img [URL="\ref AxMap.get_Image()", tooltip = "AxMap.get_Image()", headlabel = "   n"]
             
-            gp -> map [ URL="\ref AxMap.GeoProjection", tooltip = "AxMap.GeoProjection", taillabel = "1"];
-            meas -> map [URL="\ref AxMap.Measuring", tooltip = "AxMap.Measuring", headlabel = "   1"]
-            tiles -> map [URL="\ref AxMap.Tiles", tooltip = "AxMap.Tiles", headlabel = "   1"]
-            fm -> map [URL="\ref AxMap.FileManager", tooltip = "AxMap.FileManager", taillabel = "1"]
+            gp -> map [ URL="\ref AxMap.GeoProjection", tooltip = "AxMap.GeoProjection", taillabel = "1 "];
+            meas -> map [URL="\ref AxMap.Measuring", tooltip = "AxMap.Measuring", taillabel = "1 "]
+            tiles -> map [URL="\ref AxMap.Tiles", tooltip = "AxMap.Tiles", taillabel = "1 "]
+            fm -> map [URL="\ref AxMap.FileManager", tooltip = "AxMap.FileManager", taillabel = "1 "]
+            se -> map [URL="\ref AxMap.ShapeEditor", tooltip = "AxMap.ShapeEditor", taillabel = "1 "]
             
             }
             \enddot
@@ -147,23 +149,21 @@
             for printing.</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMapWinGIS.AxMap.TilesAreInCache(MapWinGIS.Extents,System.Int32,MapWinGIS.tkTileProvider)">
-            <summary>
-            Checks whether tiles for specified extents and provider are already present in cache.
-            </summary>
-            <param name="extents">Extents to check for (map coordinates).</param>
-            <param name="width">Width of the canvas on which the extents will be displayed.</param>
-            <param name="provider">Provider to load tiles from.</param>
-            <returns>1 if tiles are in cache, 0 if not, -1 if an there was an error.</returns>
-            <remarks>The main purpose: loading of tiles for printing.</remarks>
-            \new491 Added in version 4.9.1
-        </member>
         <member name="M:AxMapWinGIS.AxMap.Redraw2(MapWinGIS.tkRedrawType)">
             <summary>
             Performs specific type of map redraw. 
             </summary>
             <param name="redrawType">Type of redraw.</param>
-            <remarks>Map.Redraw is the same as AxMap.Redraw(tkRedrawType.RedrawAll).</remarks>
+            <remarks>Different types of redraw are necessary for performance reasons. If it's known that
+            only a specific part of map content has changed there is no need to run the full rendering, 
+            screen buffer can be used instead. According to the amount of content being redrawn the different 
+            types can be ordered like this (from minimum to the full one):  
+            RedrawMinimal -> RedrawSkipAllLayers -> RedrawSkipDataLayers -> RedrawAll.
+            Each subsequent type includes preceding types, so it's never necessary to call two types in a row. 
+            If it's not clear which type of redraw is appropriate for particular situation,
+            start with the minimal one and then go to the subsequent types until the changes 
+            which were made are rendered. Also if datasource being used are small it's easier to ignore this method
+            altogether and call AxMap.Redraw instead ( equivalent to AxMap.Redraw2(tkRedrawType.RedrawAll)). </remarks>
             \new491 Added in version 4.9.1
         </member>
         <member name="M:AxMapWinGIS.AxMap.ZoomToSelected(System.Int32)">
@@ -559,7 +559,8 @@
             <summary>
             Adds layer from the specified datasource.
             </summary>
-            <remarks>Additional information on failure can be obtained through AxMap.FileManager property.</remarks>
+            <remarks>Additional information on failure can be obtained through AxMap.FileManager property. 
+            </remarks>
             <param name="filename">Filename of datasource</param>
             <param name="openStrategy">Open strategy (fosAutoDetect the default recommended value).</param>
             <param name="visible">A value indicating whether a new layer will be visible.</param>
@@ -570,7 +571,10 @@
             <summary>
             Adds a layer to the map.
             </summary>
-            <param name="Object">The object (either Image or Shapefile) to add to the map.</param>
+            <remarks>In case of OgrDatasource all layers will be added to the map. For grid datasources 
+            an instance of Image class created with Grid.OpenAsImage will be used for rendering.</remarks>
+            <param name="Object">The object to add to the map. The following types are supported: 
+            Shapefile, Image, Grid, OgrLayer, OgrDatasource.</param>
             <param name="Visible">Sets whether the layer is visible after being added to the map.</param>
             <returns>Returns the integer handle for the layer added to the map.</returns>
         </member>
@@ -1260,6 +1264,11 @@
             <returns>Length of polyline or perimeter of polygon in meters or 0.0 if current map projection doesn't support transformation to WGS84.</returns>
             \new493 Added in version 4.9.3
         </member>
+        <member name="P:AxMapWinGIS.AxMap.UDCursorHandle">
+            <summary>
+            Gets or sets the user defined cursor handle. The handle is a windows cursor handle. 
+            </summary>
+        </member>
         <member name="P:AxMapWinGIS.AxMap.Tiles">
             <summary>
             Gets or sets the object of Tiles class associated with map.
@@ -1353,11 +1362,6 @@
             Gets instance of shape editor class associated with map which stores data entered by interactive editing tools.
             </summary>
             \new493 Added in version 4.9.3
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.UDCursorHandle">
-            <summary>
-            Gets or sets the user defined cursor handle. The handle is a windows cursor handle. 
-            </summary>
         </member>
         <member name="P:AxMapWinGIS.AxMap.UseSeamlessPan">
             <summary>

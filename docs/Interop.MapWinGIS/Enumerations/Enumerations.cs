@@ -2776,7 +2776,7 @@ namespace MapWinGIS
         pomHighPerformance = 1,
         pomHighQuality = 2,
     }
-}
+
 
 #if nsp
 }
