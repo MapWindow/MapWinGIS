@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.Remoting;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -132,6 +133,66 @@ namespace MapWinGISTests
             Assert.IsTrue(sf.SaveAs(newShapefileFile), "Could not save resulting shapefile");
 
             Console.WriteLine("Saved as " + newShapefileFile);
+        }
+
+        [TestMethod]
+        public void GdalInfoEcw()
+        {
+            var utils = new Utils();
+            var retVal = utils.GDALInfo(@"D:\dev\GIS-Data\Issues\ECW-crash\TK25.ecw", string.Empty);
+            Debug.WriteLine(retVal);
+            Assert.IsTrue(retVal.Contains("Driver: ECW/ERDAS Compressed Wavelets (SDK 5."), "Wrong ECW driver");
+        }
+
+        [TestMethod]
+        public void GdalFormats()
+        {
+            var utils = new Utils();
+            var retVal = utils.GDALInfo(@"D:\dev\GIS-Data\Issues\ECW-crash\TK25.ecw", "--formats");
+            Debug.WriteLine(retVal);
+        }
+
+        [TestMethod]
+        public void ReclassifyRaster()
+        {
+            const string input = @"D:\dev\TopX\TopX-Agri\TestData\Chlorofyl-index.clipped.optimized.tif";
+            const string output = @"D:\dev\TopX\TopX-Agri\TestData\Chlorofyl-index.clipped.optimized.reclassified.tif";
+            var gridSource = new GridClass();
+            gridSource.Open(input);
+
+            var nodataValue = (double)gridSource.Header.NodataValue;
+            double min, max, mean, stdDev;
+            var retVal = gridSource.ActiveBand.GetStatistics(false, true, out min, out max, out mean, out stdDev);
+            Assert.IsTrue(retVal, "Could not get statistics: " + gridSource.ErrorMsg[gridSource.LastErrorCode]);
+            gridSource.Close();
+            Console.WriteLine($"Input statistics: {min} - {max}");
+            var newMax = 0.9 * max;
+            var newMin = 1.2 * min;
+
+            var arr = new[]
+            {
+                new {Low = nodataValue + 1, High = newMin, NewValue = newMin},
+                new {Low = newMax, High = max + 1, NewValue = newMax}
+            };
+            var utils = new Utils();
+            retVal = utils.ReclassifyRaster(input, 1, output, arr.Select(i => i.Low).ToArray(),
+                arr.Select(i => i.High).ToArray(), arr.Select(i => i.NewValue).ToArray(), "GTiff", null);
+            Assert.IsTrue(retVal, "ReclassifyRaster failed: " + utils.ErrorMsg[utils.LastErrorCode]);
+
+            gridSource = new GridClass();
+            gridSource.Open(output);
+
+            var nodataValueOutput = (double)gridSource.Header.NodataValue;
+            double minOutput, maxOutput, meanOutput, stdDevOutput;
+            retVal = gridSource.ActiveBand.GetStatistics(false, true, out minOutput, out maxOutput, out meanOutput, out stdDevOutput);
+            Assert.IsTrue(retVal, "Could not get statistics: " + gridSource.ErrorMsg[gridSource.LastErrorCode]);
+            gridSource.Close();
+            Console.WriteLine($"Output statistics: {minOutput} - {maxOutput}");
+
+            // Checks:
+            Assert.AreEqual(nodataValue, nodataValueOutput, "Nodata values are different");
+            Assert.IsTrue(Math.Round(minOutput, 4) >= Math.Round(newMin, 4), $"New minimum is incorrect. got {minOutput} expected {newMin}");
+            Assert.IsTrue(Math.Round(maxOutput, 4) <= Math.Round(newMax, 4), $"New maximum is incorrect. got {maxOutput} expected {newMax}");
         }
     }
 }

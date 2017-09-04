@@ -1,9 +1,9 @@
 /**************************************************************************************
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -14,10 +14,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
- 
+
 #pragma once
 #include "BaseProvider.h"
 #include "WmsProviderBase.h"
@@ -25,10 +25,10 @@
 // ************************************************************
 //		RosreestrProvider()
 // ************************************************************
-class RosreestrProvider: public BaseProvider
+class RosreestrProvider : public BaseProvider
 {
 public:
-	RosreestrProvider(bool labels) 
+	RosreestrProvider(bool labels)
 	{
 		Id = tkTileProvider::Rosreestr;
 		Name = "Rosreestr";
@@ -44,8 +44,8 @@ public:
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
 		char letter = _serverLetters[GetServerNum(pos, 3)];
-		CString s; 
-		s.Format(_urlFormat, letter, zoom,  pos.y, pos.x);
+		CString s;
+		s.Format(_urlFormat, letter, zoom, pos.y, pos.x);
 		return s;
 	}
 };
@@ -53,12 +53,12 @@ public:
 // ************************************************************
 //		RosreestrBordersProvider()
 // ************************************************************
-class RosreestrBordersProvider: public WmsMercatorProvider
+class RosreestrBordersProvider : public WmsMercatorProvider
 {
-private:	
+private:
 	CString _url2;
 public:
-	RosreestrBordersProvider() 
+	RosreestrBordersProvider()
 	{
 		Id = tkTileProvider::Rosreestr;
 		Name = "Rosreestr";
@@ -72,7 +72,7 @@ public:
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
-		CString s = _urlFormat + GetBoundingBox(pos, zoom) + _url2; 
+		CString s = _urlFormat + GetBoundingBox(pos, zoom) + _url2;
 		return s;
 	}
 };

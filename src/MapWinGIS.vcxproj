@@ -218,6 +218,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="COM classes\GdalDriver.h" />
     <ClInclude Include="COM classes\GdalDriverManager.h" />
     <ClInclude Include="COM classes\GdalRasterBand.h" />
+    <ClInclude Include="COM classes\GdalUtils.h" />
     <ClInclude Include="COM classes\Histogram.h" />
     <ClInclude Include="COM classes\Identifier.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
@@ -501,6 +502,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="COM classes\GdalDriver.cpp" />
     <ClCompile Include="COM classes\GdalDriverManager.cpp" />
     <ClCompile Include="COM classes\GdalRasterBand.cpp" />
+    <ClCompile Include="COM classes\GdalUtils.cpp" />
     <ClCompile Include="COM classes\Histogram.cpp" />
     <ClCompile Include="COM classes\Identifier.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
@@ -870,6 +872,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <None Include="COM classes\GdalDriver.rgs" />
     <None Include="COM classes\GdalDriverManager.rgs" />
     <None Include="COM classes\GdalRasterBand.rgs" />
+    <None Include="COM classes\GdalUtils.rgs" />
     <None Include="COM classes\GeoProjection.rgs" />
     <None Include="COM classes\GlobalSettings.rgs" />
     <None Include="COM classes\Grid.rgs" />

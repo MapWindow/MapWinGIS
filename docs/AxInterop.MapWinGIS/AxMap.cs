@@ -325,10 +325,11 @@ namespace AxMapWinGIS
         /// <returns>1 if tiles are in cache, 0 if not, -1 if an there was an error.</returns>
         /// <remarks>The main purpose: loading of tiles for printing.</remarks>
         /// \new491 Added in version 4.9.1
-        public int TilesAreInCache(Extents extents, int width, tkTileProvider provider)
-        {
-            throw new NotImplementedException();
-        }
+        // Removed in v4.9.4 again
+        //public int TilesAreInCache(Extents extents, int width, tkTileProvider provider)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         /// <summary>
         /// Performs specific type of map redraw. 

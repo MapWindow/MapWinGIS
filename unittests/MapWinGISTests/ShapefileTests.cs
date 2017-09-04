@@ -279,7 +279,7 @@ namespace MapWinGISTests
             }
             Assert.IsTrue(sf.NumShapes == 1, "Unexpected number of shapes in " + filename);
             Debug.WriteLine(sf.GeoProjection.ProjectionName);
-            
+
             var proj = new GeoProjection();
             proj.ImportFromEPSG(32612); // WGS 84 / UTM zone 12N
             var numShps = 0;
@@ -346,7 +346,7 @@ namespace MapWinGISTests
             var startY = shp.Extents.yMin - blockSizeY;
             var numPoints = 0;
             // Use diagonal for total size of fishnet:
-            var width = (int) Math.Ceiling(
+            var width = (int)Math.Ceiling(
                     Math.Sqrt(Math.Pow(shp.Extents.xMax - shp.Extents.xMin, 2) +
                               Math.Pow(shp.Extents.yMax - shp.Extents.yMin, 2)));
             width += blockSizeX;
@@ -359,16 +359,16 @@ namespace MapWinGISTests
                     Assert.Fail("Create a new shape failed: " + shp.ErrorMsg[shp.LastErrorCode]);
 
                 // First point:
-                if (!shpBlock.InsertPoint(new Point {x = startX, y = startY}, ref numPoints))
+                if (!shpBlock.InsertPoint(new Point { x = startX, y = startY }, ref numPoints))
                     Assert.Fail("Inserting a point failed: " + shp.ErrorMsg[shp.LastErrorCode]);
                 // Second point:
-                if (!shpBlock.InsertPoint(new Point {x = startX + blockSizeX, y = startY}, ref numPoints))
+                if (!shpBlock.InsertPoint(new Point { x = startX + blockSizeX, y = startY }, ref numPoints))
                     Assert.Fail("Inserting a point failed: " + shp.ErrorMsg[shp.LastErrorCode]);
                 // Third point:
-                if (!shpBlock.InsertPoint(new Point {x = startX + blockSizeX, y = startY + blockSizeY}, ref numPoints))
+                if (!shpBlock.InsertPoint(new Point { x = startX + blockSizeX, y = startY + blockSizeY }, ref numPoints))
                     Assert.Fail("Inserting a point failed: " + shp.ErrorMsg[shp.LastErrorCode]);
                 // Fourth point:
-                if (!shpBlock.InsertPoint(new Point {x = startX, y = startY + blockSizeY}, ref numPoints))
+                if (!shpBlock.InsertPoint(new Point { x = startX, y = startY + blockSizeY }, ref numPoints))
                     Assert.Fail("Inserting a point failed: " + shp.ErrorMsg[shp.LastErrorCode]);
                 // Closing:
                 if (!shpBlock.InsertPoint(new Point { x = startX, y = startY }, ref numPoints))
@@ -413,6 +413,108 @@ namespace MapWinGISTests
             var tmpFilename = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), ".shp");
             if (!sf.SaveAs(tmpFilename))
                 Assert.Fail("Failed to save shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
+        }
+
+        /// <summary>
+        /// Merges the sf.
+        /// </summary>
+        /// <remarks>MWGIS-69</remarks>
+        [TestMethod]
+        public void MergeSf()
+        {
+            const string sf3Location = @"D:\dev\GIS-Data\Issues\0031 Merge M\shp3_point\SHP3_POINT.shp";
+            const string sf4Location = @"D:\dev\GIS-Data\Issues\0031 Merge M\shp4_point\SHP4_POINT.shp";
+
+            var sf3 = new Shapefile();
+            if (!sf3.Open(sf3Location)) Assert.Fail("Can't open " + sf3Location + " Error: " + sf3.ErrorMsg[sf3.LastErrorCode]);
+
+            var sf4 = new Shapefile();
+            if (!sf4.Open(sf4Location)) Assert.Fail("Can't open " + sf4Location + " Error: " + sf4.ErrorMsg[sf4.LastErrorCode]);
+
+            var sfMerged = sf3.Merge(false, sf4, false);
+            Assert.IsNotNull(sfMerged, "Merge failed");
+            Assert.AreEqual(2, sfMerged.NumShapes, "Incorrect number of shapes");
+        }
+
+        /// <summary>
+        /// Merges the M shapefiles
+        /// </summary>
+        /// <remarks>MWGIS-69</remarks>
+        [TestMethod]
+        public void MergeM()
+        {
+            const string sf1Location = @"D:\dev\GIS-Data\Issues\MWGIS-69 Merge M\shp1_point_m\SHP1_POINT_M.shp";
+            const string sf2Location = @"D:\dev\GIS-Data\Issues\MWGIS-69 Merge M\shp2_point_m\SHP2_POINT_M.shp";
+
+            var sf1 = new Shapefile();
+            if (!sf1.Open(sf1Location)) Assert.Fail("Can't open " + sf1Location + " Error: " + sf1.ErrorMsg[sf1.LastErrorCode]);
+
+            var sf2 = new Shapefile();
+            if (!sf2.Open(sf2Location)) Assert.Fail("Can't open " + sf2Location + " Error: " + sf2.ErrorMsg[sf2.LastErrorCode]);
+
+            Debug.WriteLine("Before merge");
+            var sfMerged = sf1.Merge(false, sf2, false);
+            Assert.IsNotNull(sfMerged, "Merge failed");
+            Assert.AreEqual(2, sfMerged.NumShapes, "Incorrect number of shapes");
+        }
+
+        [TestMethod]
+        public void LoadAmericanData()
+        {
+            const string sfLocation = @"D:\dev\GIS-Data\MapWindow-Projects\UnitedStates\Shapefiles\states.shp";
+
+            var sf = new Shapefile();
+            if (!sf.Open(sfLocation)) Assert.Fail("Can't open " + sfLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+            var value = sf.CellValue[1, 0] as string;
+            sf.Close();
+            Debug.WriteLine(value);
+            // Value should be Washington
+            Assert.AreEqual('h', value[3]);
+        }
+
+        [TestMethod]
+        public void ReadRussionDataFromTable()
+        {
+            const string sfLocation = @"D:\dev\GIS-Data\Issues\CORE-199 Russian\point.shp";
+            const int fieldIndex = 2;
+
+            var sf = new Shapefile();
+            if (!sf.Open(sfLocation))
+                Assert.Fail("Can't open " + sfLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+            var value = sf.CellValue[fieldIndex, 0] as string;
+            Assert.IsNotNull(value, "No value returned");
+            sf.Close();
+            Debug.WriteLine(value);
+            // Value should be Воздух
+            Assert.AreEqual('д', value[3]);
+        }
+
+        [TestMethod]
+        public void CreateRussionCategories()
+        {
+            const string sfLocation = @"D:\dev\GIS-Data\Issues\CORE-199 Russian\point.shp";
+            const int fieldIndex = 2;
+
+            var sf = new Shapefile();
+            if (!sf.Open(sfLocation))
+                Assert.Fail("Can't open " + sfLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+            // create visualization categories
+            sf.DefaultDrawingOptions.FillType = tkFillType.ftStandard;
+            sf.Categories.Generate(fieldIndex, tkClassificationType.ctUniqueValues, 0);
+            sf.Categories.ApplyExpressions();
+
+            // apply color scheme
+            var scheme = new ColorScheme();
+            scheme.SetColors2(tkMapColor.LightBlue, tkMapColor.LightYellow);
+            sf.Categories.ApplyColorScheme(tkColorSchemeType.ctSchemeGraduated, scheme);
+            Assert.IsTrue(sf.Categories.Count > 0, "No categories were made");
+
+            var cat = sf.Categories.Item[0];
+            Console.WriteLine(cat.Name);
+            Assert.AreNotEqual(cat.Name[0], '?', "The category name is invalid");
         }
     }
 }

@@ -165,3 +165,5 @@ $RECYCLE.BIN/
 *.dll
 support/GDAL_SDK/*
 docs/output
+demo/.nuget/
+*.zip

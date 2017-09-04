@@ -437,7 +437,17 @@ namespace interopCreator
 
         private void axMap1_FileDropped(object sender, AxMapWinGIS._DMapEvents_FileDroppedEvent e)
         {
-            axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
+            if (Path.GetExtension(e.filename).ToLower() == ".ecw")
+            {
+                var img = new ImageClass();
+                if (!img.Open(e.filename))
+                    throw new Exception("Cannot open ECW file: " + img.ErrorMsg[img.LastErrorCode], new Exception("Working with " + e.filename));
+                axMap1.AddLayer(img, true);
+            }
+            else
+            {
+                axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
+            }
         }
     }
 }

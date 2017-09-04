@@ -1343,9 +1343,11 @@ bool CTableClass::ReadRecord(long RowIndex)
 			    {	
 					val->vt = VT_BSTR;
 					const char* v = DBFReadStringAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
-					WCHAR *buffer = Utility::StringToWideChar(v);
-					val->bstrVal = W2BSTR(buffer);
-					delete[] buffer;				    
+					// MWGIS-72: Support Russian encoding
+					//WCHAR *buffer = Utility::StringToWideChar(v);
+					//val->bstrVal = W2BSTR(buffer);
+					//delete[] buffer;				    
+					val->bstrVal = W2BSTR(Utility::ConvertFromUtf8(v));
 			    }
 		    }
 		    else if( type == INTEGER_FIELD )
@@ -2342,6 +2344,8 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 			//CString strExpression;
 			CString strValue;
 			CComVariant* val = &(*result)[i].minValue;
+			// TODO: MWGIS-72: Support Russian encoding
+			// https://stackoverflow.com/questions/45484130/how-to-convert-ccomvariant-bstr-to-cstring
 			switch (val->vt)
 			{
 				case VT_BSTR:	

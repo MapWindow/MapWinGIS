@@ -1842,7 +1842,7 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
-        /// @}
+        // @}
 
         #endregion
 
@@ -2085,7 +2085,7 @@ namespace MapWinGIS
         /// @}
         #endregion
 
-        /// @}
+        // @}
     }
 #if nsp
 }

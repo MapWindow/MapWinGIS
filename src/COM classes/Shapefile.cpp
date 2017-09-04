@@ -490,45 +490,43 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 		ErrorMessage(tkINMEMORY_SHAPEFILE_EXPECTED);
 		return S_OK;
 	}
-	else
+	
+	if (OpenCore(OLE2CA(ShapefileName), cBack))
 	{
-		if (OpenCore(OLE2CA(ShapefileName), cBack))
+		// loading data in-memory
+		VARIANT_BOOL vb;
+		_isEditingShapes = false;
+		StartEditingShapes(VARIANT_TRUE, cBack, &vb);
+			
+		// this will trigger loading of all DBF values into the memory
+		long numFields;
+		this->get_NumFields(&numFields);
+		if (numFields > 0)
 		{
-			// loading data in-memory
-			VARIANT_BOOL vb;
-			_isEditingShapes = false;
-			StartEditingShapes(VARIANT_TRUE, cBack, &vb);
-			
-			// this will trigger loading of all DBF values into the memory
-			long numFields;
-			this->get_NumFields(&numFields);
-			if (numFields > 0)
+			CComVariant var;
+			for(size_t i = 0; i < _shapeData.size(); i++)
 			{
-				CComVariant var;
-				for(size_t i = 0; i < _shapeData.size(); i++)
-				{
-					_table->get_CellValue(0, i, &var);
-				}
+				_table->get_CellValue(0, i, &var);
 			}
-			
-			// closing disk file despite the result success or failure
-			_shpfileName = "";
-			_shxfileName = "";
-			_dbffileName = "";
-
-			if( _shpfile != NULL) 
-				fclose(_shpfile);
-			_shpfile = NULL;
-			
-			if( _shxfile != NULL) 
-				fclose(_shxfile);
-			_shxfile = NULL;
-			
-			if( _table != NULL )
-				((CTableClass*)_table)->CloseUnderlyingFile();
-			
-			*retval = vb;
 		}
+			
+		// closing disk file despite the result success or failure
+		_shpfileName = "";
+		_shxfileName = "";
+		_dbffileName = "";
+
+		if( _shpfile != NULL) 
+			fclose(_shpfile);
+		_shpfile = NULL;
+			
+		if( _shxfile != NULL) 
+			fclose(_shxfile);
+		_shxfile = NULL;
+			
+		if( _table != NULL )
+			((CTableClass*)_table)->CloseUnderlyingFile();
+			
+		*retval = vb;
 	}
 	return S_OK;
 }

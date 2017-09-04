@@ -586,6 +586,12 @@
             Clears all the breaks from the colour scheme.
             </summary>
         </member>
+        <member name="M:MapWinGIS.IColorScheme.Reverse">
+            <summary>
+            Reverses the order of color breaks in the color scheme.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="M:MapWinGIS.IColorScheme.Remove(System.Int32)">
             <summary>
             Removes colour break with specified index.
@@ -694,6 +700,750 @@
         <member name="P:MapWinGIS.IColorScheme.NumBreaks">
             <summary>
             Returns the number of breaks within colour scheme.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.IWmsLayer">
+            <summary>
+            Represents a layer downloading and displaying the data from the particular WMS Server.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IWmsLayer.Close">
+            <summary>
+            Closes the layer.
+            </summary>
+        </member>
+        <member name="M:MapWinGIS.IWmsLayer.Serialize">
+            <summary>
+            Serializes the state of the layer.
+            </summary>
+            <returns>The string with serialized state.</returns>
+        </member>
+        <member name="M:MapWinGIS.IWmsLayer.Deserialize(System.String)">
+            <summary>
+            Restores the state of the layer from the string.
+            </summary>
+            <param name="state">String with the previous state of the layer.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IWmsLayer.get_ErrorMsg(System.Int32)">
+            <summary>
+            Gets error message for the specific error code.
+            </summary>
+            <param name="ErrorCode">The error code.</param>
+            <returns>The error message.</returns>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.LastErrorCode">
+            <summary>
+            Gets the code of the last error which occurred inside this instance.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Key">
+            <summary>
+            Gets or sets a key associated with this instance (any data can be stored in it by applications).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Name">
+            <summary>
+            Gets or sets the name of the layer.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.BoundingBox">
+            <summary>
+            Gets or sets the bounding box of the layer (server coordinate system).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Epsg">
+            <summary>
+            Gets or sets the EPSG code of the coordinate system to be used to request data from the server.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Layers">
+            <summary>
+            Gets or sets the string with the layers to be requested from server (several comma separated layers are can be specified).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.BaseUrl">
+            <summary>
+            Gets or sets the base URL of the WMS layer.
+            </summary>
+            <remarks>For example, http://demo.lizardtech.com/lizardtech/iserv/ows. The other parts of the request will 
+            be generated dynamically.</remarks>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Id">
+            <summary>
+            Gets or sets the unique identifier of the layer. It is used to cache the data locally.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Format">
+            <summary>
+            Gets or sets the format parameter of the request.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.IsEmpty">
+            <summary>
+            Gets a value indicating whether this instance is initialized (bound to particular server).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.MapExtents">
+            <summary>
+            Gets the bounding box for the layer in map coordinates.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.GeoProjection">
+            <summary>
+            Gets the projection of the layer.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Opacity">
+            <summary>
+            Gets or sets the opacity of the layer which is used during rendering.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Brightness">
+            <summary>
+            Gets or sets the brightness of layer (color adjustment to be used during rendering).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Contrast">
+            <summary>
+            Gets or sets the contrast of layer (color adjustment to be used during rendering).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Saturation">
+            <summary>
+            Gets or sets the contrast of layer (color adjustment to be used during rendering).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Hue">
+            <summary>
+            Gets or sets the hue of layer (color adjustment to be used during rendering).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Gamma">
+            <summary>
+            Gets or sets the gamma of layer (color adjustment to be used during rendering).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.UseCache">
+            <summary>
+            Gets or sets a value indicating whether data from the local cache will be used.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.DoCaching">
+            <summary>
+            Gets or sets a value indicating whether the data will be cached locally.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.TransparentColor">
+            <summary>
+            Gets or sets the color which be treated as transparent during rendering.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.UseTransparentColor">
+            <summary>
+            Gets or sets a value indicating whether transparent color should be used.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Version">
+            <summary>
+            Gets or sets the version parameter which will be included in the request.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IWmsLayer.Styles">
+            <summary>
+            Gets or sets the styles parameter which will be included in the request.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.ISelectionList">
+            <summary>
+            Holds list of shapes and pixels which where identified by user with Identify tool.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.AddShape(System.Int32,System.Int32)">
+            <summary>
+            Adds the shape from the specified layer to the list.
+            </summary>
+            <param name="LayerHandle">The layer handle.</param>
+            <param name="ShapeIndex">Index of the shape.</param>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.Clear">
+            <summary>
+            Clears all the shapes and pixels from the list.
+            </summary>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.RemoveByLayerHandle(System.Int32)">
+            <summary>
+            Removes all items from the list which belong to specified layer.
+            </summary>
+            <param name="LayerHandle">The layer handle.</param>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.AddPixel(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Adds a pixel to the list.
+            Updated in v4.9.5
+            </summary>
+            <param name="LayerHandle">The layer handle.</param>
+            <param name="Column">The column.</param>
+            <param name="Row">The row.</param>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.TogglePixel(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Toggles the state of the specified pixel (add it to the list if it is not present there, and removes otherwise).
+            Updated in v4.9.5
+            </summary>
+            <param name="LayerHandle">The layer handle.</param>
+            <param name="Column">The column.</param>
+            <param name="Row">The row.</param>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.get_LayerHandle(System.Int32)">
+            <summary>
+            Gets the layer handle for the item with specified pixel.
+            </summary>
+            <param name="Index">The index of the item (either shape or pixels).</param>
+            <returns>The layer handle.</returns>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.get_ShapeIndex(System.Int32)">
+            <summary>
+            Gets the index of the shape for the specified item.
+            </summary>
+            <param name="Index">The index of the item.</param>
+            <returns>The index of the shape or -1, if this item is a pixel.</returns>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.get_LayerType(System.Int32)">
+            <summary>
+            Gets the type of the layer for the specified pixel.
+            </summary>
+            <param name="Index">The index of the item.</param>
+            <returns>The type of the layer.</returns>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.get_RasterX(System.Int32)">
+            <summary>
+            Gets X coordinate pixel.
+            </summary>
+            <param name="Index">The index of the item.</param>
+            <returns>X coordinate or -1 if the specified item is a shape.</returns>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.get_RasterY(System.Int32)">
+            <summary>
+            Gets Y coordinate pixel.
+            </summary>
+            <param name="Index">The index of the item.</param>
+            <returns>Y coordinate or -1 if the specified item is a shape.</returns>
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.get_Row(System.Int32)">
+            <summary>
+            Gets the row.
+            </summary>
+            <param name="Index">The index of the item.</param>
+            <returns>Row index or -1 if the specified item is a shape.</returns>
+            \new495 Added in version 4.9.5
+        </member>
+        <member name="M:MapWinGIS.ISelectionList.get_Column(System.Int32)">
+            <summary>
+            Gets the column.
+            </summary>
+            <param name="Index">The index of the item.</param>
+            <returns>Column index or -1 if the specified item is a shape.</returns>
+            \new495 Added in version 4.9.5
+        </member>
+        <member name="P:MapWinGIS.ISelectionList.Count">
+            <summary>
+            Gets the count.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.IGdalRasterBand">
+            <summary>
+            Represents a single band of raster datasource. 
+            Please refer to GDAL documentation for more details information.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.GetUniqueValues(System.Int32,System.Object@)">
+            <summary>
+            Gets unique values of the band.
+            </summary>
+            <param name="maxCount">The maximum count of values to be returned.</param>
+            <param name="arr">The array with values.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.GetDefaultHistogram(System.Boolean)">
+            <summary>
+            Gets the default histogram.
+            </summary>
+            <param name="forceCalculate">If set to <c>true</c> and there is no dialog available, it will be calculated.</param>
+            <returns>The histogram.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.GetHistogram(System.Double,System.Double,System.Int32,System.Boolean,System.Boolean)">
+            <summary>
+            Gets custom histogram for the raster band.
+            </summary>
+            <param name="MinValue">The minimum value.</param>
+            <param name="MaxValue">The maximum value.</param>
+            <param name="NumBuckets">The number buckets.</param>
+            <param name="includeOutOfRange">If set to <c>true</c> the values outside the specified range will be included in outer buckets.</param>
+            <param name="allowApproximate">If set to <c>true</c> the approximate calculation will be allowed.</param>
+            <returns></returns>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.GetStatistics(System.Boolean,System.Boolean,System.Double@,System.Double@,System.Double@,System.Double@)">
+            <summary>
+            Gets statistics for the raster band.
+            </summary>
+            <param name="allowApproximate">If set to <c>true</c> the approximate calculation will be allowed.</param>
+            <param name="forceCalculation">if set to <c>true</c> the calculation will be performed even if there are no cached values.</param>
+            <param name="Minimum">The minimum value.</param>
+            <param name="Maximum">The maximum value.</param>
+            <param name="mean">The mean.</param>
+            <param name="stdDev">The standard deviation.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.Classify(System.Double,System.Double,MapWinGIS.tkClassificationType,System.Int32)">
+            <summary>
+            Builds classification for the raster band.
+            </summary>
+            <param name="MinValue">The minimum value.</param>
+            <param name="MaxValue">The maximum value.</param>
+            <param name="classification">The classification type.</param>
+            <param name="NumCategories">The number of categories.</param>
+            <returns>Resulting classification.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.ComputeMinMax(System.Boolean,System.Double@,System.Double@)">
+            <summary>
+            Computes the minimum and maximum value for the raster band.
+            </summary>
+            <param name="allowApproximate">If set to <c>true</c> the approximate calculation will be allowed.</param>
+            <param name="Minimum">The minimum value.</param>
+            <param name="Maximum">The maximum value.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.ComputeLocalStatistics(System.Int32,System.Int32,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@,System.Int32@)">
+            <summary>
+            Computes local statistics for the data in the vicinity of particular pixel.
+            </summary>
+            <param name="Column">The column.</param>
+            <param name="Row">The row.</param>
+            <param name="range">Number of pixel on each side to be included in calculation.</param>
+            <param name="Minimum">The minimum value.</param>
+            <param name="Maximum">The maximum value.</param>
+            <param name="mean">The mean.</param>
+            <param name="stdDev">The standard deviation.</param>
+            <param name="Count">The count.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.get_MetadataItem(System.Int32)">
+            <summary>
+            Gets the specified metadata item.
+            </summary>
+            <param name="itemIndex">Index of the item.</param>
+            <returns>String with metadata.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.get_Overview(System.Int32)">
+            <summary>
+            Gets specified overview of the raster band.
+            </summary>
+            <param name="overviewIndex">Index of the overview.</param>
+            <returns>The overview as another instance of GdalRasterBand.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalRasterBand.get_Value(System.Int32,System.Int32,System.Double@)">
+            <summary>
+            Gets the value of the specified pixel.
+            </summary>
+            <param name="Column">The column.</param>
+            <param name="Row">The row.</param>
+            <param name="pVal">The value.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.NodataValue">
+            <summary>
+            Gets no data value.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.Minimum">
+            <summary>
+            Gets the minimum.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.Maximum">
+            <summary>
+            Gets the maximum.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.OverviewCount">
+            <summary>
+            Gets the number of overviews for the raster band.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.ColorInterpretation">
+            <summary>
+            Gets or sets the color interpretation for the raster band.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.DataType">
+            <summary>
+            Gets the data type of the raster band.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.XSize">
+            <summary>
+            Gets the width of the raster band in pixels.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.YSize">
+            <summary>
+            Gets the height of the raster band in pixels.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.BlockSizeX">
+            <summary>
+            Gets the size of horizontal block for the raster (in pixels).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.BlockSizeY">
+            <summary>
+            Gets the size of vertical block for the raster (in pixels).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.UnitType">
+            <summary>
+            Gets the type of the unit.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.Scale">
+            <summary>
+            Gets the raster value scale (is used for coordinate transformation).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.Offset">
+            <summary>
+            Gets the raster value offset (is used for coordinate transformation).
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.HasColorTable">
+            <summary>
+            Gets a value indicating whether the raster band has color table.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.MetadataCount">
+            <summary>
+            Gets the number of metadata items associated with the band.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalRasterBand.ColorTable">
+            <summary>
+            Gets the color table associated with the band.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.IGdalDriverManager">
+            <summary>
+            Holds all available GDAL drivers.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IGdalDriverManager.get_Driver(System.Int32)">
+            <summary>
+            Gets the specified driver.
+            </summary>
+            <param name="driverIndex">Index of the driver.</param>
+            <returns>The driver.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalDriverManager.get_DriverByName(System.String)">
+            <summary>
+            Gets driver with the specified name.
+            </summary>
+            <param name="DriverName">Name of the driver.</param>
+            <returns>The driver.</returns>
+        </member>
+        <member name="P:MapWinGIS.IGdalDriverManager.DriverCount">
+            <summary>
+            Gets the number of drivers.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.IGdalDriver">
+            <summary>
+            Represents a single GDAL driver.
+            Please refer to GDAL documentation for more details information.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IGdalDriver.get_Metadata(MapWinGIS.tkGdalDriverMetadata)">
+            <summary>
+            Gets particular metadata associated with the driver.
+            </summary>
+            <param name="Metadata">The metadata.</param>
+            <returns>String with metadata.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalDriver.get_MetadataItem(System.Int32)">
+            <summary>
+            Gets specified metadata item.
+            </summary>
+            <param name="metadataIndex">Index of the metadata item.</param>
+            <returns>String with metadata.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalDriver.get_MetadataItemType(System.Int32)">
+            <summary>
+            Gets the type of the specified metadata item.
+            </summary>
+            <param name="metadataIndex">Index of the metadata item.</param>
+            <returns>Type of the metadata item.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalDriver.get_MetadataItemValue(System.Int32)">
+            <summary>
+            Gets the value of the specified metadata item.
+            </summary>
+            <param name="metadataIndex">Index of the metadata.</param>
+            <returns>String with metadata.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalDriver.get_MetadataItemKey(System.Int32)">
+            <summary>
+            Gets the key of the specified metadata item.
+            </summary>
+            <param name="metadataIndex">Index of the metadata item.</param>
+            <returns>Metadata item key.</returns>
+        </member>
+        <member name="P:MapWinGIS.IGdalDriver.MetadataCount">
+            <summary>
+            Gets the the number of metadata items associated with the driver.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalDriver.Name">
+            <summary>
+            Gets the name of the driver.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalDriver.IsVector">
+            <summary>
+            Gets a value indicating whether the driver works vector data.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGdalDriver.IsRaster">
+            <summary>
+            Gets a value indicating whether the driver works raster data.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.IGdalDataset">
+            <summary>
+            Represents a light wrapper around GDAL raster dataset which allows to perform some 
+            operations without using more advanced classes like RasterSource or GridSource.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IGdalDataset.Open(System.String,System.Boolean)">
+            <summary>
+            Opens datasource from the specified filename.
+            </summary>
+            <param name="Filename">The filename.</param>
+            <param name="readOnly">If set to <c>true</c> the datasource will be opened in read only mode.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IGdalDataset.Close">
+            <summary>
+            Closes the datasource.
+            </summary>
+        </member>
+        <member name="M:MapWinGIS.IGdalDataset.SetGeoTransform(System.Double,System.Double,System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Sets transformation parameters for GDAL datasource.
+            </summary>
+            <param name="xLeft">The x coordinate of the top left pixel.</param>
+            <param name="dX">The width of a pixel.</param>
+            <param name="yProjOnX">The projection of Y on X axis.</param>
+            <param name="yTop">The y coordinate of the top left pixel.</param>
+            <param name="xProjOnY">The projection of X on Y axis.</param>
+            <param name="dY">The height of a pixel.</param>
+            <returns></returns>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
+        <member name="M:MapWinGIS.IGdalDataset.SetProjection(System.String)">
+            <summary>
+            Sets projection of the datasource
+            </summary>
+            <param name="Projection">The projection.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="P:MapWinGIS.IGdalDataset.Driver">
+            <summary>
+            Gets the driver which manages this datasource.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.IFunction">
+            <summary>
+            Represents a function supported by built-in expression parser.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IFunction.get_Alias(System.Int32)">
+            <summary>
+            Gets the alias of the function.
+            </summary>
+            <param name="aliasIndex">Index of the alias.</param>
+        </member>
+        <member name="M:MapWinGIS.IFunction.get_ParameterName(System.Int32)">
+            <summary>
+            Gets the name of the specified parameter.
+            </summary>
+            <param name="parameterIndex">Index of the parameter.</param>
+            <returns>The name of the parameter.</returns>
+        </member>
+        <member name="M:MapWinGIS.IFunction.get_ParameterDescription(System.Int32)">
+            <summary>
+            Gets the description of the specified parameter of the function.
+            </summary>
+            <param name="parameterIndex">Index of the parameter.</param>
+            <returns>The description of the parameter.</returns>
+        </member>
+        <member name="P:MapWinGIS.IFunction.Name">
+            <summary>
+            Gets the name of the function.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IFunction.NumAliases">
+            <summary>
+            Gets the number of aliases that the function has.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IFunction.NumParameters">
+            <summary>
+            Gets the number of parameters of the function.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IFunction.Group">
+            <summary>
+            Gets the group to which this function belongs.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IFunction.Description">
+            <summary>
+            Gets the description of the function.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IFunction.Signature">
+            <summary>
+            Gets the signature of the function.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.IExpression">
+            <summary>
+            Represents expression parser and evaluator.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IExpression.Parse(System.String)">
+            <summary>
+            Parses the specifies string and build an expression out of it.
+            </summary>
+            <param name="expr">The string with expression.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IExpression.Calculate(System.Object@)">
+            <summary>
+            Calculates the expression.
+            </summary>
+            <param name="result">The result.</param>
+            <returns>Result which is of string, double, or boolean type.</returns>
+        </member>
+        <member name="M:MapWinGIS.IExpression.ParseForTable(System.String,MapWinGIS.Table)">
+            <summary>
+            Parses expression seeking for fields in the specified table.
+            </summary>
+            <param name="expr">The expression to parse.</param>
+            <param name="tbl">The table.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IExpression.CalculateForTableRow(System.Int32,System.Int32)">
+            <summary>
+            Calculates the expression for the given table row and writes the result to the specified field.
+            </summary>
+            <param name="RowIndex">Index of the row.</param>
+            <param name="targetFieldIndex">Index of the target field.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IExpression.CalculateForTableRow2(System.Int32,System.Object@)">
+            <summary>
+            Calculates the expression for the given table row.
+            </summary>
+            <param name="RowIndex">Index of the row.</param>
+            <param name="result">The result of calculation (string, double, or boolean).</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IExpression.get_SupportedFunction(System.Int32)">
+            <summary>
+            Gets the specified function from the list of function recognized by the expression parser.
+            </summary>
+            <param name="functionIndex">Index of the function.</param>
+            <returns>The function object with metadata.</returns>
+        </member>
+        <member name="P:MapWinGIS.IExpression.LastErrorMessage">
+            <summary>
+            Gets the last error message.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IExpression.LastErrorPosition">
+            <summary>
+            Gets the position of the last error.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IExpression.NumSupportedFunctions">
+            <summary>
+            Gets the number of functions recognized by the expression parser.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IExpression.Table">
+            <summary>
+            Gets the table associated with the current expression.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.IDrawingRectangle">
+            <summary>
+            Represents a rectangle that can be rendered on the map.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IDrawingRectangle.x">
+            <summary>
+            The X coordinate of the top-left corner of the rectangle.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IDrawingRectangle.y">
+            <summary>
+            The Y coordinate of the top-left corner of the rectangle.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IDrawingRectangle.Width">
+            <summary>
+            The width of the rectangle.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IDrawingRectangle.Height">
+            <summary>
+            The height of the rectangle.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IDrawingRectangle.Visible">
+            <summary>
+            Gets or sets a value indicating whether rectangle is visible.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IDrawingRectangle.ReferenceType">
+            <summary>
+            Type of coordinates which are used to specify the position and size of the rectangle.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IDrawingRectangle.FillTransparency">
+            <summary>
+            Gets or sets the opacity of the rectangle.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IDrawingRectangle.Color">
+            <summary>
+            Gets or sets the color of the rectangle.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IDrawingRectangle.LineWidth">
+            <summary>
+            Gets or sets the width of the rectangle's border.
             </summary>
         </member>
         <member name="T:MapWinGIS.IESRIGridManager">
@@ -992,6 +1742,15 @@
             <remarks>This method is called internally by OgrDatasource.RunQuery.</remarks>
             <param name="connectionString">Connection string or filename.</param>
             <param name="sql">SQL query.</param>
+            <returns>True on success.</returns>
+        </member>
+        <member name="M:MapWinGIS.IOgrLayer.OpenFromFile(System.String,System.Boolean)">
+            <summary>
+            Opens OGR layer from specified file. If the datasource holds several layers only the first one will be opened.
+            </summary>
+            <param name="Filename">Filename of the datasource to open.</param>
+            <param name="forUpdate">Indicates whether the returned layer will support saving of changes back to source
+            (the functionality should be supported by particular driver).</param>
             <returns>True on success.</returns>
         </member>
         <member name="M:MapWinGIS.IOgrLayer.RedefineQuery(System.String)">
@@ -1295,6 +2054,18 @@
             Gets name of the driver which is used to access layer datasource.
             </summary>
         </member>
+        <member name="P:MapWinGIS.IOgrLayer.AvailableShapeTypes">
+            <summary>
+            Gets the array of available shape types inside OGR layer (should be cast to ShpfileType[]).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IOgrLayer.ActiveShapeType">
+            <summary>
+            Gets or sets the type of the active shape type for the layer (is used in OgrLayer.GetBuffer for example).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="P:MapWinGIS.IOgrLayer.SourceType">
             <summary>
             Gets source type of the layer. 
@@ -1388,7 +2159,7 @@
             Gets a value indicating whether underlying data ( OgrLayer.GetBuffer ) was reprojected.
             </summary>
             <remarks>
-            This may happen because of projection mismatch on adding it to the map. See AxMap.ProjectionMismatchBehavior for details.
+            This may happen because of projection mismatch on adding it to the map. See GlobalSettings.ReprojectLayersOnAdding for details.
             </remarks>
         </member>
         <member name="T:MapWinGIS.IShapeEditor">
@@ -1536,6 +2307,19 @@
             <returns>True on success.</returns>
             \see AxMap.CursorMode, ShapeEditor.EditorState
         </member>
+        <member name="M:MapWinGIS.IShapeEditor.Serialize">
+            <summary>
+            Saves the state of the class to the string
+            </summary>
+            <returns>A string with the state or an empty string on failure.</returns>
+        </member>
+        <member name="M:MapWinGIS.IShapeEditor.Deserialize(System.String)">
+            <summary>
+            Restores the state of object from the string.
+            </summary>
+            <param name="state">A string generated by ShapeEditor.Serialize() method</param>
+            <returns>True on success.</returns>
+        </member>
         <member name="M:MapWinGIS.IShapeEditor.StartEdit(System.Int32,System.Int32)">
             <summary>
             Starts editing of a given shape in specified shapefile.
@@ -1612,17 +2396,18 @@
             <remarks>If map projection is set and compatible with WGS84 geodesic distance will be returned.
             Otherwise Euclidean geometry will be used.</remarks>
         </member>
-        <member name="P:MapWinGIS.IShapeEditor.AngleDisplayMode">
-            <summary>
-            Gets or sets angle display mode. The default value is AngleNone.
-            </summary>
-        </member>
         <member name="P:MapWinGIS.IShapeEditor.Area">
             <summary>
             Calculates the area of polygon being edited. 
             </summary>
             <remarks>Precise calculations on ellipsoid will be used if map projection is set and compatible
             with WGS84. Otherwise simply Euclidean geometry will be used.</remarks>
+        </member>
+        <member name="P:MapWinGIS.IShapeEditor.BearingType">
+            <summary>
+            Gets or sets type of the bearing to be display for line segments.
+            </summary>
+            \new493 Added in version 4.9.3
         </member>
         <member name="P:MapWinGIS.IShapeEditor.AreaDisplayMode">
             <summary>
@@ -1671,6 +2456,48 @@
             Gets the length of measured path (in meters if WGS84 compatible projection is set for map and in current map units otherwise).
             </summary>
         </member>
+        <member name="P:MapWinGIS.IShapeEditor.ShowArea">
+            <summary>
+            Gets or sets a value indicating whether area will be displayed during creation or editing of polygons.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IShapeEditor.AreaPrecision">
+            <summary>
+            Gets or sets the number of decimal degrees to be used to display area.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IShapeEditor.LengthPrecision">
+            <summary>
+            Gets or sets the number of decimal degrees to be used to display length.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IShapeEditor.AngleFormat">
+            <summary>
+            Gets or sets angle format to be used to display bearing.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IShapeEditor.AnglePrecision">
+            <summary>
+            Gets or sets the number of decimal degrees to be used to display bearing.
+            </summary>
+            <remarks>This setting is not used when AngleFormat is set to minutes or seconds.</remarks>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IShapeEditor.ShowBearing">
+            <summary>
+            Gets or sets a value indicating whether bearing of the line segments will be displayed.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IShapeEditor.ShowLength">
+            <summary>
+            Gets or sets a value indicating whether length of the line segments will be displayed.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
         <member name="P:MapWinGIS.IShapeEditor.HighlightVertices">
             <summary>
             Gets or sets value indicating whether vertices of shapes will be highlighted 
@@ -1690,7 +2517,7 @@
             Returns true if the editor is empty.
             </summary>
             <remarks>Empty means that its underlying shape object has no points. However 
-            ShapeEditor.EditorState can be differnt from esNone.</remarks>
+            ShapeEditor.EditorState can be different from esNone.</remarks>
         </member>
         <member name="P:MapWinGIS.IShapeEditor.Key">
             <summary>
@@ -2230,6 +3057,40 @@
             The key may be used by the programmer to store any string data associated with the object.
             </summary>
         </member>
+        <member name="P:MapWinGIS.IField.Visible">
+            <summary>
+            Gets or sets a value indicating whether the field is visible. 
+            For use in application only, not used by MapWinGIS internally.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IField.Alias">
+            <summary>
+            Gets or sets the alias for the field.
+            For use in application only, not used by MapWinGIS internally.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IField.Joined">
+            <summary>
+            Gets a value indicating whether this field is joined.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IField.Expression">
+            <summary>
+            Gets or sets the expression for the field.
+            For use in application only, not used by MapWinGIS internally.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IField.Modified">
+            <summary>
+            Gets or sets a value indicating whether this field is modified.
+            It is used during saving of changes for OgrLayer. The flag should be set by application code.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="P:MapWinGIS.IField.LastErrorCode">
             <summary>
             Retrieves the last error generated in the object.
@@ -2543,6 +3404,31 @@
             <returns>True on success.</returns>
             \new491 Added in version 4.9.1
         </member>
+        <member name="M:MapWinGIS.IGeoProjection.WriteToFileEx(System.String,System.Boolean)">
+            <summary>
+            Writes projection string to a file.
+            </summary>
+            <param name="Filename">The filename.</param>
+            <param name="esri">If set to <c>true</c> ESRI WKT format is used.</param>
+            <returns>True on success.</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IGeoProjection.ReadFromFileEx(System.String,System.Boolean)">
+            <summary>
+            Reads projection string from a file.
+            </summary>
+            <param name="Filename">The filename.</param>
+            <param name="esri">If set to <c>true</c> ESRI WKT format is used.</param>
+            <returns>True on success.</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IGeoProjection.ExportToEsri">
+            <summary>
+            Exports projection string to ESRI WKT format.
+            </summary>
+            <returns>Resulting string.</returns>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="P:MapWinGIS.IGeoProjection.GeogCSName">
             <summary>
             Returns the name of the coordinate system.
@@ -2629,6 +3515,11 @@
             </remarks>
             \new491 Added in version 4.9.1
         </member>
+        <member name="P:MapWinGIS.IGeoProjection.LinearUnits">
+            <summary>
+            Gets the linear units from projection definition.
+            </summary>
+        </member>
         <member name="T:MapWinGIS.ICallback">
             <summary>
             An interface for callback objects which can be used to return information about progress and errors.     
@@ -2701,6 +3592,33 @@
             <param name="str">String to set localized version for.</param>
             <param name="retVal">Localized string.</param>
             \new491 Added in version 4.9.1
+        </member>
+        <member name="M:MapWinGIS.IGlobalSettings.SetHereMapsApiKey(System.String,System.String)">
+            <summary>
+            Sets application credentials for Here Maps online tiles. 
+            Without these credentials Here Maps providers are not available. See 
+            <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+            </summary>
+            <param name="appId">Application Id. Can be obtained by registering on the site of the service.</param>
+            <param name="appCode">Application code. Can be obtained by registering on the site of the service.</param>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="M:MapWinGIS.IGlobalSettings.TestBingApiKey(System.String)">
+            <summary>
+            Requests URL address for tiles download from Bing Maps server. 
+            </summary>
+            <param name="Key">API key to test.</param>
+            <returns>True if the Url for downloading for obtained.</returns>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="M:MapWinGIS.IGlobalSettings.StartLogTileRequests(System.String,System.Boolean)">
+            <summary>
+            Starts logging of tile requests.
+            </summary>
+            <param name="Filename">The filename.</param>
+            <param name="errorsOnly">If set to <c>true</c> only errors will be logged.</param>
+            <returns>True on success.</returns>
+            \new494 Added in version 4.9.4
         </member>
         <member name="P:MapWinGIS.IGlobalSettings.ClipperGcsMultiplicationFactor">
             <summary>
@@ -3047,7 +3965,7 @@
             Gets or sets the path where data necessary for GDAL coordinate systems / projections will be searched for.
             </summary>
             <remarks>This property effectively overrides GDAL_DATA environment variable. By default
-            it's set to \gdal-data folder in the directory where MapWinGIS is installed.</remarks>
+            it's set to gdal-data folder in the directory where MapWinGIS is installed.</remarks>
             \new493 Added in version 4.9.3
         </member>
         <member name="P:MapWinGIS.IGlobalSettings.GdalPluginPath">
@@ -3055,8 +3973,87 @@
             Gets or sets the path where GDAL plug-ins will be searched for.
             </summary>
             <remarks>This property effectively overrides GDAL_DRIVER_PATH environment variable. By default
-            it's set to \gdalplugins folder in the directory where MapWinGIS is installed.</remarks>
+            it's set to gdalplugins folder in the directory where MapWinGIS is installed.</remarks>
             \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.BingApiKey">
+            <summary>
+            Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available. See 
+            <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.CompressOverviews">
+            <summary>
+            Gets or sets the value indicating which compression mode will be used to compress image overviews.
+            </summary>
+            <value>
+            The compress overviews.
+            </value>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.GridFavorGreyscale">
+            <summary>
+            Gets or sets a value indicating whether greyscale or color scheme rendering will be used for grids by default.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.GridUseHistogram">
+            <summary>
+            Gets or sets a value indicating whether histogram will be computed and news for grid by default.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.OverrideLocalCallback">
+            <summary>
+            Gets or sets a value indicating whether instances of ICallback assigned to particular classes will be overriden by 
+            global callback assined to GlobalSettings.ApplicationCallback property.
+            </summary>
+            <value>
+            <c>true</c> if [override local callback]; otherwise, <c>false</c>.
+            </value>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.CacheDbfRecords">
+            <summary>
+            Gets or sets a value indicating whether caching DBF records is on.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.CacheShapeRenderingData">
+            <summary>
+            Gets or sets a value indicating whether caching of rendering data for shapes is on.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.TileLogFilename">
+            <summary>
+            Gets the filename of the file to log TMS/WMS requests to.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.TileLogIsOpened">
+            <summary>
+            Gets a value indicating whether tile log is opened.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.LogTileErrorsOnly">
+            <summary>
+            Gets or sets a value indicating whether only errors will be logged to the for TMS/WMS requests.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.WmsDiskCaching">
+            <summary>
+            Gets or sets a value indicating whether WMS data will cached to the disk by default.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IGlobalSettings.CallbackVerbosity">
+            <summary>
+            Gets or sets the callback verbosity.
+            </summary>
+            \new494 Added in version 4.9.4
         </member>
         <!-- Badly formed XML comment ignored for member "T:MapWinGIS.IGrid" -->
         <member name="M:MapWinGIS.IGrid.AssignNewProjection(System.String)">
@@ -3344,6 +4341,14 @@
             <returns>True on success.</returns>
             \new491 Added in version 4.9.1
         </member>
+        <member name="M:MapWinGIS.IGrid.get_Band(System.Int32)">
+            <summary>
+            Gets datasource band with specified index.
+            </summary>
+            <param name="bandIndex">Index of the band.</param>
+            <returns>The band or null if index is not valid.</returns>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="P:MapWinGIS.IGrid.CdlgFilter">
             <summary>
             Returns the common dialog filter containing all supported file extensions in string format. 
@@ -3450,6 +4455,12 @@
             <remarks>The functionality and behaviour of various source types may differ.</remarks>
             \new490 Added in version 4.9.0
         </member>
+        <member name="P:MapWinGIS.IGrid.ActiveBand">
+            <summary>
+            Gets the active band of the datasource.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="T:MapWinGIS.IGridColorBreak">
             <summary>
             A grid color break object defines how a specified region of a grid will be colored. 
@@ -3513,6 +4524,12 @@
             <summary>
             Gets or sets the lowest value in the color break. 
             </summary>
+        </member>
+        <member name="P:MapWinGIS.IGridColorBreak.Visible">
+            <summary>
+            Gets or sets a value indicating whether the break is visible.
+            </summary>
+            \new494 Added in version 4.9.4
         </member>
         <member name="T:MapWinGIS.IGridColorScheme">
             <summary>
@@ -3626,6 +4643,16 @@
             <param name="bandIndex">Band index the color scheme was created for. Default value is 1.</param>
             <returns>True on success.</returns>
             \new491 Added in version 4.9.1
+        </member>
+        <member name="M:MapWinGIS.IGridColorScheme.ApplyColors(MapWinGIS.tkColorSchemeType,MapWinGIS.ColorScheme,System.Boolean)">
+            <summary>
+            Applies specified colors to the exiting breaks of GridColorScheme.
+            </summary>
+            <param name="schemeType">Type of the scheme.</param>
+            <param name="scheme">Colors to apply.</param>
+            <param name="gradientWithinCategories">If <c>true</c> gradient within each category will be set.</param>
+            <returns>True on suceess.</returns>
+            \new494 Added in version 4.9.4
         </member>
         <member name="P:MapWinGIS.IGridColorScheme.AmbientIntensity">
             <summary>
@@ -3899,7 +4926,7 @@
             <summary>
             Restores the properties of the image object from the serialized string.
             </summary>
-            <param name="newVal">The serialized string generated by Image.Serialize() method.</param>
+            <param name="NewVal">The serialized string generated by Image.Serialize() method.</param>
             \new48 Added in version 4.8
         </member>
         <member name="M:MapWinGIS.IImage.Open(System.String,MapWinGIS.ImageType,System.Boolean,MapWinGIS.ICallback)">
@@ -3918,7 +4945,7 @@
             <summary>
             Changes the data source of the image object without the its closing.
             </summary>
-            <param name="newImgPath">The new file to serve as a datasource for the image object.</param>
+            <param name="NewImgPath">The new file to serve as a datasource for the image object.</param>
             <returns>True on success and false otherwise.</returns>
         </member>
         <member name="M:MapWinGIS.IImage.Save(System.String,System.Boolean,MapWinGIS.ImageType,MapWinGIS.ICallback)">
@@ -3927,7 +4954,7 @@
             </summary>
             <param name="ImageFileName">The filename to use to save the image.</param>
             <param name="WriteWorldFile">Optional. A boolean value representing whether a world file is also written. The default is false.</param>
-            <param name="fileType">Optional. The file type to use to save the image. Default is "USE_FILE_EXTENSION".</param>
+            <param name="FileType">Optional. The file type to use to save the image. Default is "USE_FILE_EXTENSION".</param>
             <param name="cBack">Optional. The ICallback object which will receive the progress and error messages while the image is being saved.</param>
             <returns>A boolean value representing the success or failure of saving the image.</returns>
         </member>
@@ -3964,18 +4991,18 @@
             <summary>
             Converts coordinates of image's pixel to the screen coordinates.
             </summary>
-            <param name="ImageX">The x coordinate of the image.</param>
-            <param name="ImageY">The y coordinate of the image.</param>
-            <param name="projX">The resulting x coordinate of the map.</param>
-            <param name="projY">The resulting y coordinate of the map.</param>
+            <param name="Column">The column.</param>
+            <param name="Row">The row.</param>
+            <param name="ProjX">The resulting x coordinate of the map.</param>
+            <param name="ProjY">The resulting y coordinate of the map.</param>
             \new48 Added in version 4.8
         </member>
         <member name="M:MapWinGIS.IImage.ProjectionToBuffer(System.Double,System.Double,System.Int32@,System.Int32@)">
             <summary>
             Returns the coordinates of pixel in image buffer which correspond to the given point on the map.
             </summary>
-            <param name="projX">X coordinate of the point in map units.</param>
-            <param name="projY">Y coordinate of the point in map units.</param>
+            <param name="ProjX">X coordinate of the point in map units.</param>
+            <param name="ProjY">Y coordinate of the point in map units.</param>
             <param name="BufferX">The resulting x coordinate of pixel in the image buffer.</param>
             <param name="BufferY">The resulting y coordinate of pixel in the image buffer.</param>
             \new48 Added in version 4.8
@@ -3984,10 +5011,10 @@
             <summary>
             Returns the coordinates of image pixel which correspond to the given point on the map.
             </summary>
-            <param name="projX">X coordinate of the point in map units.</param>
-            <param name="projY">Y coordinate of the point in map units.</param>
-            <param name="ImageX">The resulting x coordinate of image pixel.</param>
-            <param name="ImageY">The resulting y coordinate of image pixel.</param>
+            <param name="ProjX">X coordinate of the point in map units.</param>
+            <param name="ProjY">Y coordinate of the point in map units.</param>
+            <param name="Column">The column.</param>
+            <param name="Row">The row.</param>
             \new48 Added in version 4.8
         </member>
         <member name="M:MapWinGIS.IImage.SetTransparentColor(System.UInt32)">
@@ -4043,7 +5070,7 @@
             Gets the value of a pixel in the image. 
             </summary>
             <param name="Row">The row in the image for which the value is required.</param>
-            <param name="col">The column in the image for which the value is required.</param>
+            <param name="Column">The column in the image for which the value is required.</param>
             <returns>The value of the specified pixel in the image.</returns>
         </member>
         <member name="M:MapWinGIS.IImage.set_Value(System.Int32,System.Int32,System.Int32)">
@@ -4051,7 +5078,7 @@
             Sets the value of a pixel in the image. 
             </summary>
             <param name="Row">The row in the image for which the value is required.</param>
-            <param name="col">The column in the image for which the value is required.</param>
+            <param name="Column">The column in the image for which the value is required.</param>
             <param name="pVal">The value of the specified pixel in the image.</param>
         </member>
         <member name="M:MapWinGIS.IImage.OpenAsGrid">
@@ -4069,6 +5096,70 @@
             </summary>
             <param name="cScheme">The color scheme.</param>
             <returns>True on success and false otherwise.</returns>
+        </member>
+        <member name="M:MapWinGIS.IImage.get_Band(System.Int32)">
+            <summary>
+            Gets the band with the specified index.
+            </summary>
+            <param name="bandIndex">Index of the band.</param>
+            <returns>Raster band.</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IImage.get_BandMinimum(System.Int32)">
+            <summary>
+            Gets the minimum value for the specified band.
+            </summary>
+            <param name="bandIndex">Index of the band.</param>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IImage.get_BandMaximum(System.Int32)">
+            <summary>
+            Gets the maximum value for the specified band.
+            </summary>
+            <param name="bandIndex">Index of the band.</param>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IImage.get_ValueWithAlpha(System.Int32,System.Int32)">
+            <summary>
+            Gets the value of the specified pixel including the alpha component.
+            </summary>
+            <param name="Row">The row.</param>
+            <param name="Column">The column.</param>
+            <returns>32bit unsigned integer value.</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IImage.set_ValueWithAlpha(System.Int32,System.Int32,System.UInt32)">
+            <summary>
+            Sets the value of the specified pixel including the alpha component.
+            </summary>
+            <param name="Row">The row.</param>
+            <param name="Column">The column.</param>
+            <param name="pVal">The value to set.</param>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IImage.ClearOverviews">
+            <summary>
+            Clears the overviews for the datasource.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IImage.SetBandMinMax(System.Int32,System.Double,System.Double)">
+            <summary>
+            Sets the band minimum maximum values for the band. Values outside of this range will not be rendered.
+            </summary>
+            <param name="bandIndex">Index of the band.</param>
+            <param name="min">The minimum.</param>
+            <param name="max">The maximum.</param>
+            <returns>True on success.</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IImage.SetDefaultMinMax(System.Int32)">
+            <summary>
+            Calculates the minimum and maximum values for the specified band and caches them for further use.
+            </summary>
+            <param name="bandIndex">Index of the band.</param>
+            <returns>True on success.</returns>
+            \new494 Added in version 4.9.4
         </member>
         <member name="P:MapWinGIS.IImage.BufferSize">
             <summary>
@@ -4367,7 +5458,7 @@
         </member>
         <member name="P:MapWinGIS.IImage.SourceGridName">
             <summary>
-            Gets the name of the source grid in case the image representation a visualization proxy for a grid.
+            Gets the name of the source grid in case the image represent a visualization proxy for a grid.
             </summary>
             \new490 Added in version 4.9.0
         </member>
@@ -4397,6 +5488,146 @@
             Gets grid color scheme this proxy image was generated with. The method should be called for proxy images only: Image.IsGridProxy = true.
             </summary>
             <remarks>Color scheme will be read from .mwleg XML file on the disk.</remarks>
+        </member>
+        <member name="P:MapWinGIS.IImage.GdalDriver">
+            <summary>
+            Gets the GDAL driver which manages the current datasource.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.ActiveBand">
+            <summary>
+            Gets the active band (the one used for rendering when grid rendering is on).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.PaletteInterpretation2">
+            <summary>
+            Gets the palette interpretation for the image.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.Brightness">
+            <summary>
+            Gets or sets the brightness of the image.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.Contrast">
+            <summary>
+            Gets or sets the contrast of the image.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.Saturation">
+            <summary>
+            Gets or sets the saturation of the image.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.Hue">
+            <summary>
+            Gets or sets the hue of the image.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.Gamma">
+            <summary>
+            Gets or sets the gamma correction value for the image.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.ColorizeIntensity">
+            <summary>
+            Gets or sets the colorize intensity.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.ColorizeColor">
+            <summary>
+            Gets or sets the color of the colorize.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.RedBandIndex">
+            <summary>
+            Gets or sets the index of the red band (used when RGB rendering is chosen).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.GreenBandIndex">
+            <summary>
+            Gets or sets the index of the green band (used when RGB rendering is chosen).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.BlueBandIndex">
+            <summary>
+            Gets or sets the index of the blue band (used when RGB rendering is chosen).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.UseRgbBandMapping">
+            <summary>
+            Gets or sets a value indicating whether RGB band mapping will be used.
+            </summary>
+            \see RedBandIndex, GreenBandIndex, BlueBandIndex, AlphaBandIndex
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.ForceSingleBandRendering">
+            <summary>
+            Gets or sets a value indicating whether the band 
+            set by Image.ActiveBandIndex will be used rather then RGB rendering.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.AlphaBandIndex">
+            <summary>
+            Gets or sets the index of the alpha band.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.UseActiveBandAsAlpha">
+            <summary>
+            Gets or sets a value indicating whether to use active band as an alpha band as well.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.ReverseGreyscale">
+            <summary>
+            Gets or sets a value indicating whether colors should be reversed during gray scale rendering (i.e. the smallest values are white).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.IgnoreColorTable">
+            <summary>
+            Gets or sets a value indicating whether built-in color table of the image will be ignored.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.RenderingMode">
+            <summary>
+            Gets the current rendering mode for the image (depends on the values of other properties).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.BufferOffsetX">
+            <summary>
+            Gets the index of the left most pixel of the original image that was included in the current buffer.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.BufferOffsetY">
+            <summary>
+            Gets the index of the top most pixel of the original image that was included in the current buffer.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IImage.ActiveColorScheme">
+            <summary>
+            Gets the active color scheme used for the rendering, it may be either default or custom one.
+            </summary>
+            \new494 Added in version 4.9.4
         </member>
         <!-- Badly formed XML comment ignored for member "T:MapWinGIS.ILabelCategory" -->
         <member name="M:MapWinGIS.ILabelCategory.Deserialize(System.String)">
@@ -4648,6 +5879,12 @@
             will be visible.
             </summary>
         </member>
+        <member name="P:MapWinGIS.ILabelCategory.FontSize2">
+            <summary>
+            Gets or sets the maximum font size fo the category.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="T:MapWinGIS.ILabel">
             <summary>
             Represents a single label on the map.
@@ -4778,12 +6015,25 @@
             <a href = "diagrams.html">Graph description</a>
             \new48 Added in version 4.8
         </member>
+        <member name="M:MapWinGIS.ILabels.UpdateSizeField">
+            <summary>
+            Marks that values of size field have changed and the size of labels should be recalculated on the next redraw.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="M:MapWinGIS.ILabels.get_ErrorMsg(System.Int32)">
             <summary>
             Gets the description of the specific error code.
             </summary>
             <param name="ErrorCode">The error code returned by Labels.LastErrorCode.</param>
             <returns>The string with the description.</returns>
+        </member>
+        <member name="M:MapWinGIS.ILabels.ForceRecalculateExpression">
+            <summary>
+            For labels attached to shapefile layer updates the text of each label based on Expression property.
+            </summary>
+            <remarks>The method is necessary when the values in underlying DBF table have changed, 
+            since Labels class doesn't track these changes automatically.</remarks>
         </member>
         <member name="M:MapWinGIS.ILabels.get_Category(System.Int32)">
             <summary>
@@ -5083,6 +6333,26 @@
             A text string associated with the instance of the class. Any value can be stored by developer in this property.
             </summary>
         </member>
+        <member name="P:MapWinGIS.ILabels.FontSize2">
+            <summary>
+            Gets or sets the maximum font size for labels (when size field is used).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.ILabels.UseVariableSize">
+            <summary>
+            Gets or sets a value indicating whether variable size for labels should be used 
+            (in the range between Labels.FontSize, Labels.FontSize2).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.ILabels.LogScaleForSize">
+            <summary>
+            Gets or sets a value indicating whether logarithmic scale will be used to calculate the size of labels.
+            </summary>
+            \see Labels.UseVariableSize
+            \new494 Added in version 4.9.4
+        </member>
         <member name="P:MapWinGIS.ILabels.LastErrorCode">
             <summary>
             Returns the code of the last error which has occurred within the instance of class.
@@ -5249,6 +6519,16 @@
             Get or sets the minimum scale at which labels are visible on the map.
             </summary>
             \see Labels.DynamicVisibility, AxMap.CurrentScale
+        </member>
+        <member name="P:MapWinGIS.ILabels.MinVisibleZoom">
+            <summary>
+            Gets or sets the minimum zoom at which labels are visible on the map.
+            </summary>
+        </member>
+        <member name="P:MapWinGIS.ILabels.MaxVisibleZoom">
+            <summary>
+            Gets or sets the maximum zoom at which labels are visible on the map.
+            </summary>
         </member>
         <member name="P:MapWinGIS.ILabels.CollisionBuffer">
             <summary>
@@ -5747,6 +7027,21 @@
             Clears all measurements.
             </summary>
         </member>
+        <member name="M:MapWinGIS.IMeasuring.Serialize">
+            <summary>
+            Saves the state of the class to the string
+            </summary>
+            <returns>A string with the state or an empty string on failure.</returns>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="M:MapWinGIS.IMeasuring.Deserialize(System.String)">
+            <summary>
+            Restores the state of object from the string.
+            </summary>
+            <param name="state">A string generated by Measuring.Serialize() method</param>
+            <returns>True on success.</returns>
+            \new493 Added in version 4.9.3
+        </member>
         <member name="M:MapWinGIS.IMeasuring.FinishMeasuring">
             <summary>
             Finishes measuring. The measured path won't be cleared from map immediately.
@@ -5809,14 +7104,15 @@
             when map cursor changes to something other than cmMeasure. 
             </summary>
         </member>
+        <member name="P:MapWinGIS.IMeasuring.ShowBearing">
+            <summary>
+            Gets or sets a value indicating whether bearing of the line segments will be displayed.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
         <member name="P:MapWinGIS.IMeasuring.PointCount">
             <summary>
             Gets number of points in the measured path.
-            </summary>
-        </member>
-        <member name="P:MapWinGIS.IMeasuring.DisplayAngles">
-            <summary>
-            Gets or sets a value indicating whether directional angles should be displayed during distance measuring.
             </summary>
         </member>
         <member name="P:MapWinGIS.IMeasuring.IsUsingEllipsoid">
@@ -5836,6 +7132,109 @@
         <member name="P:MapWinGIS.IMeasuring.IsEmpty">
             <summary>
             Returns true if measured path contains at least one point.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.BearingType">
+            <summary>
+            Gets or sets type of the bearing to be display for line segments.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.ShowLength">
+            <summary>
+            Gets or sets a value indicating whether length of the line segments will be displayed.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.LengthUnits">
+            <summary>
+            Gets or sets type of the length units to be displayed.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.AreaUnits">
+            <summary>
+            Gets or sets the area units to be displayed.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.AngleFormat">
+            <summary>
+            Gets or sets angle format to be used to display bearing.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.AnglePrecision">
+            <summary>
+            Gets or sets the number of decimal degrees to be used to display bearing.
+            </summary>
+            <remarks>This setting is not used when AngleFormat is set to minutes or seconds.</remarks>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.AreaPrecision">
+            <summary>
+            Gets or sets the number of decimal degrees to be used to display area.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.LengthPrecision">
+            <summary>
+            Gets or sets the number of decimal degrees to be used to display length.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.PointsVisible">
+            <summary>
+            Gets or sets a value indicating whether vertices of the measured path will be visible.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.LineColor">
+            <summary>
+            Gets or sets line color to display measured path.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.FillColor">
+            <summary>
+            Gets or sets fill color for polygon display.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.FillTransparency">
+            <summary>
+            Gets or sets fill transparency for polygon display.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.LineWidth">
+            <summary>
+            Gets or sets line width to display measured path.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.LineStyle">
+            <summary>
+            Gets or sets line style to display measured path.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.PointLabelsVisible">
+            <summary>
+            Gets or sets a value indicating whether labels with indices of points will be visible near the vertices.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.ShowTotalLength">
+            <summary>
+            Gets or sets a value indicating whether accumulated length will be shown in brackets for each line segment.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:MapWinGIS.IMeasuring.UndoButton">
+            <summary>
+            Gets or sets the type of user input to be used to undo the last point of the measured path.
             </summary>
             \new493 Added in version 4.9.3
         </member>
@@ -6095,6 +7494,14 @@
             Call Shape.IsValid to find out the invalid shapes.</remarks>
             <param name="retval">The fixed shape.</param>
             \new48 Added in version 4.8
+        </member>
+        <member name="M:MapWinGIS.IShape.FixUp2(MapWinGIS.tkUnitsOfMeasure)">
+            <summary>
+            Fixes the shape in case it is not valid.
+            </summary>
+            <param name="units">The units of measure of the coordinate system.</param>
+            <returns>The fixed shape.</returns>
+            \new494 Added in version 4.9.4
         </member>
         <member name="M:MapWinGIS.IShape.GetIntersection(MapWinGIS.Shape,System.Object@)">
             <summary>
@@ -6404,6 +7811,12 @@
             <param name="Results">An array of Shape type.</param>
             <returns>True on success.</returns>
             \new493 Added in version 4.9.3
+        </member>
+        <member name="M:MapWinGIS.IShape.Clear">
+            <summary>
+            Removes all the points and parts.
+            </summary>
+            \new494 Added in version 4.9.4
         </member>
         <member name="P:MapWinGIS.IShape.Area">
             <summary>
@@ -7082,6 +8495,15 @@
             <param name="Name">The name of the new category.</param>
             <returns>Reference to the new category or NULL reference on failure.</returns>
         </member>
+        <member name="M:MapWinGIS.IShapefileCategories.Insert2(System.Int32,MapWinGIS.ShapefileCategory)">
+            <summary>
+            Inserts a category at the specified index in the collection.
+            </summary>
+            <param name="Index">The index.</param>
+            <param name="Category">The category to be inserted.</param>
+            <returns>True on success.</returns>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="M:MapWinGIS.IShapefileCategories.MoveDown(System.Int32)">
             <summary>
             Moves the specified category down the list by swapping it with the succeeding category.
@@ -7162,6 +8584,23 @@
             </remarks>
             <returns>True on success.</returns>
             \new492 Added in version 4.9.2
+        </member>
+        <member name="M:MapWinGIS.IShapefileCategories.Generate2(System.String,MapWinGIS.tkClassificationType,System.Int32)">
+            <summary>
+            Generates categories based on specified field.
+            </summary>
+            <param name="FieldName">Name of the field.</param>
+            <param name="ClassificationType">Type of the classification.</param>
+            <param name="numClasses">The number classes.</param>
+            <returns>True on success.</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IShapefileCategories.Add2(MapWinGIS.ShapefileCategory)">
+            <summary>
+            Adds the category to the collection.
+            </summary>
+            <param name="Category">The category.</param>
+            \new494 Added in version 4.9.4
         </member>
         <member name="P:MapWinGIS.IShapefileCategories.Caption">
             <summary>
@@ -7926,6 +9365,36 @@
             <returns>Name of ToField in this table.</returns>
             \new490 Added in version 4.9.0
         </member>
+        <member name="M:MapWinGIS.ITable.ClearCache">
+            <summary>
+            Clears the cache (cell values already loaded in the memory).
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.ITable.get_JoinFields(System.Int32)">
+            <summary>
+            Gets string with the names of fields which were used in join operation.
+            </summary>
+            <param name="joinIndex">Index of the join.</param>
+            <returns>The string with names.</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.ITable.get_JoinOptions(System.Int32)">
+            <summary>
+            Gets the options of the join operation.
+            </summary>
+            <param name="joinIndex">Index of the join.</param>
+            <returns>The string with join options.</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.ITable.get_RowIsModified(System.Int32)">
+            <summary>
+            Gets a value indicating whether the row values have been modified.
+            </summary>
+            <param name="RowIndex">Index of the row.</param>
+            <returns>True if the row is modified.</returns>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="P:MapWinGIS.ITable.CdlgFilter">
             <summary>
             Returns the common dialog filter containing all supported file extensions in string format. 
@@ -7973,6 +9442,12 @@
             Gets number of joins for the table.
             </summary>
             \new490 Added in version 4.9.0
+        </member>
+        <member name="P:MapWinGIS.ITable.Filename">
+            <summary>
+            Gets the filename of the DBF file if the table is bound to one.
+            </summary>
+            \new494 Added in version 4.9.4
         </member>
         <member name="T:MapWinGIS.ITileProviders">
             <summary>
@@ -8128,6 +9603,22 @@
             <remarks>The setting will be included in http request and if supported by tile provider 
             it may actually change language information is displayed on map with.</remarks>
             \new491 Added in version 4.9.1
+        </member>
+        <member name="M:MapWinGIS.ITileProviders.get_GeographicBounds(System.Int32)">
+            <summary>
+            Gets the geographic bounds of the specified provider.
+            </summary>
+            <param name="Index">The index of the provider.</param>
+            <returns>Geographic bounds in decimal degrees.</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.ITileProviders.set_GeographicBounds(System.Int32,MapWinGIS.Extents)">
+            <summary>
+            Sets the geographic bounds of the specified provider.
+            </summary>
+            <param name="Index">The index.</param>
+            <param name="pVal">The p value.</param>
+            \new494 Added in version 4.9.4
         </member>
         <member name="P:MapWinGIS.ITileProviders.Count">
             <summary>
@@ -9116,7 +10607,7 @@
             only ones in case the function is called multiple times for each polygon in shapefile.</remarks>
             \new490 Added in version 4.9.0
         </member>
-        <member name="M:MapWinGIS.IUtils.GridStatisticsToShapefile(MapWinGIS.Grid,MapWinGIS.Shapefile,System.Boolean,System.Boolean)">
+        <member name="M:MapWinGIS.IUtils.GridStatisticsToShapefile(MapWinGIS.Grid,MapWinGIS.Shapefile,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Calculates statistics for grid cells within each polygon of the specified shapefile. Writes results to attribute table of shapefile.
             </summary>
@@ -9126,6 +10617,8 @@
             When set to false, calculation will be made for all polygons in shapefile.</param>
             <param name="overwriteFields">If true output fields will be overwritten (if the fields with such names already exist). 
             Otherwise new set of output fields will be created with numerical indices added to their names.</param>
+            <param name="useCenterWithinMethod">If true (default) the center of the pixel needs to be inside the polygon. 
+            If set to false Intersection method is used meaning each pixel boundary that intersects with the polygon is used. Added in v4.9.4.3.</param>
             <returns>True on success.</returns>
             <remarks>The default names for output fields: "Mean", "Median", "Majority", "Minority", "Minimum", "Maximum", 
             "Range", "StD", "Sum", "MinX", "MinY", "Variety", "Count"</remarks>
@@ -9418,6 +10911,15 @@
             <param name="connectionString">Connection string for RDMSs or filename for file-based formats.</param>
             <returns>True on success.</returns>
         </member>
+        <member name="M:MapWinGIS.IOgrDatasource.Open2(System.String,System.Boolean)">
+            <summary>
+            Opens particular type of datasource supported by GDAL/OGR.
+            </summary>
+            <remarks>See details about connection strings here: http://www.gdal.org/ogr_formats.html</remarks>
+            <param name="connectionString">Connection string for RDMSs or filename for file-based formats.</param>
+            <param name="forUpdate">Indicates whether datasource will be opened with update flag.</param>
+            <returns>True on success.</returns>
+        </member>
         <!-- Badly formed XML comment ignored for member "M:MapWinGIS.IOgrDatasource.GetLayer(System.Int32,System.Boolean)" -->
         <member name="M:MapWinGIS.IOgrDatasource.GetLayerName(System.Int32)">
             <summary>
@@ -9560,6 +11062,13 @@
                 ds.Close();
             }
             \endcode
+        </member>
+        <member name="M:MapWinGIS.IOgrDatasource.GetSchemas">
+            <summary>
+            Gets the array with schema names in the datasources.
+            </summary>
+            <returns>Boxed string array.</returns>
+            \new494 Added in version 4.9.4
         </member>
         <member name="M:MapWinGIS.IOgrDatasource.get_ErrorMsg(System.Int32)">
             <summary>
@@ -9834,6 +11343,67 @@
         <member name="F:MapWinGIS.tkCursorMode.cmMeasure">
             <summary>
             Measuring of area or distance will take place. See Measuring class for details.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmAddShape">
+            <summary>
+            Allows to add shapes to vector layers (Shapefile or OgrLayer) in interactive mode. 
+            See description of ShapeEditor class.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmEditShape">
+            <summary>
+            Allows to edit shapes of vector layers (Shapefile or OgrLayer) in interactive mode. 
+            See description of ShapeEditor class.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmSplitByPolyline">
+            <summary>
+            Splits polylines or polygons of a single layers with interactive drawn polyline.
+            AxMap.ChooseLayer event must be handled to select the layer.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmIdentify">
+            <summary>
+            Fires AxMap.ShapeHighlighted and AxMap.ShapeIdentified events. Optionally visually 
+            highlights shapes under cursor. See Identifier class for available options. 
+            The functioning can be tested in the Demo app.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmMoveShapes">
+            <summary>
+            Allows to moves selected shapes of a single vector layers. AxMap.ChooseLayer event must be handled to 
+            select the layer.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmRotateShapes">
+            <summary>
+            Allows to rotates selected shapes of a single vector layers. AxMap.ChooseLayer event must be handled to 
+            select the layer.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmSelectByPolygon">
+            <summary>
+            Selects shapes of a single vector layer with interactively drawn polygon. 
+            AxMap.ChooseLayer event must be handled to select the layer.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmEraseByPolygon">
+            <summary>
+            Erases parts of shapes shapes of a single vector that intersects with interactive drawn polygon.
+            AxMap.ChooseLayer event must be handled to select the layer.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmSplitByPolygon">
+            <summary>
+            Splits polygons or polylines of a single layer with interactively drawn polygon.
+            AxMap.ChooseLayer event must be handled to select the layer.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkCursorMode.cmClipByPolygon">
+            <summary>
+            Removes all shapes of a selected layers which don't intersect with interactively drawn polygon.
+            AxMap.ChooseLayer event must be handled to select the layer.
             </summary>
         </member>
         <member name="T:MapWinGIS.tkDashStyle">
@@ -10669,9 +12239,14 @@
             Data layers will be rendered from screen buffer. Everything else will be redrawn a new.
             </summary>
         </member>
-        <member name="F:MapWinGIS.tkRedrawType.RedrawTempObjectsOnly">
+        <member name="F:MapWinGIS.tkRedrawType.RedrawSkipAllLayers">
             <summary>
-            All map will be rendered from the main buffer. Only are measurements and coordinate display will be rendered anew.
+            Updates shape editor and measuring tool. Data layers, drawing layers and layers in interactive editing mode will be rendered from screen buffer.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkRedrawType.RedrawMinimal">
+            <summary>
+            Map will be rendered from the main buffer. Only measurements and coordinate display will be rendered anew.
             </summary>
             <remarks>Corresponds to AxMap.Refresh/AxMap.Invalidate.</remarks>
         </member>
@@ -10791,7 +12366,15 @@
         </member>
         <member name="F:MapWinGIS.tkFileOpenStrategy.fosVectorLayer">
             <summary>
-            Datasource will be opened as vector layer (i.e. Shapefile; as in current version no other vector formats are supported).
+            A single layer from vector datasource will be opened 
+            (for shapefiles Shapefile class will be used; for other vector formats - OgrLayer; for multilayer datasources a first layer 
+            will be returned).
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkFileOpenStrategy.fosVectorDatasource">
+            <summary>
+            Opens vector datasource using OgrDatasource class. Should be used with multi-layer vector formats, like KML to add all layers 
+            to the map with a single call.
             </summary>
         </member>
         <member name="T:MapWinGIS.tkFieldOperationValidity">
@@ -11053,39 +12636,6 @@
         <member name="F:MapWinGIS.tkCustomState.csAuto">
             <summary>
             The behaviour will be selected automatically. It may differ from just true/false options.
-            </summary>
-        </member>
-        <member name="T:MapWinGIS.tkMismatchBehavior">
-            <summary>
-            Possible behaviours to be used when a layer with different or missing projection is added to the map.
-            </summary>
-            \new492 Added in version 4.9.2
-        </member>
-        <member name="F:MapWinGIS.tkMismatchBehavior.mbIgnore">
-            <summary>
-            Absence or difference of projection is ignored, layer is added regardless of it. Default one.
-            </summary>
-        </member>
-        <member name="F:MapWinGIS.tkMismatchBehavior.mbCheckLoose">
-            <summary>
-            Layer won't be added to the map if it has different projection, however it will in case projection metadata is missing.
-            </summary>
-        </member>
-        <member name="F:MapWinGIS.tkMismatchBehavior.mbCheckStrict">
-            <summary>
-            Layer won't be added to the map in case of both missing or different projections.
-            </summary>
-        </member>
-        <member name="F:MapWinGIS.tkMismatchBehavior.mbCheckLooseAndReproject">
-            <summary>
-            The same as mbCheckLoose, only an attempt will be made to transform coordinates to the target projection.
-            Transformation can be performed shapefiles only. New instance of shapefile is created as in-memory one.
-            </summary>
-        </member>
-        <member name="F:MapWinGIS.tkMismatchBehavior.mbCheckStrictAndReproject">
-            <summary>
-            The same as mbCheckStrict, only an attempt will be made to transform coordinates to the target projection.
-            Transformation can be performed shapefiles only. New instance of shapefile is created as in-memory one.
             </summary>
         </member>
         <member name="T:MapWinGIS.tkZoomBarVerbosity">
@@ -11356,7 +12906,17 @@
         </member>
         <member name="T:MapWinGIS.tkLengthDisplayMode">
             <summary>
-            Possible ways to display length of segments for Shape Editor.
+            Possible ways to display length of segments for measuring tool and shape editor.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkLengthDisplayMode.ldmMetric">
+            <summary>
+            Depending on length either meters or kilometers will be used.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkLengthDisplayMode.ldmAmerican">
+            <summary>
+            Depending on length either feet or miles will be used. These units are defined according to International yard and pound agreement (1959).
             </summary>
         </member>
         <member name="T:MapWinGIS.tkEditorState">
@@ -11447,14 +13007,150 @@
             <remarks>Some erratic behavior was observed when passing VARIANT_BOOL values through dispatch interface by reference. 
             Hence this enumeration is used.</remarks>
         </member>
-        <member name="T:MapWinGIS.tkAngleDisplay">
+        <member name="T:MapWinGIS.tkBearingType">
             <summary>
-            Possible mode / format for angles (bearings) displayed by the measuring tool and shape editor.
+            Possible ways to display bearing of lines.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkBearingType.btAbsolute">
+            <summary>
+            Absolute bearing (aka full circle bearing or azimuth). Calculated clockwise from the north direction. Range of values [0, 360] degrees.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkBearingType.btReducedNDE">
+            <summary>
+            Reduced bearing (US army definition of bearing). Absolute bearing split into 4 quadrants (NE, SE, SW, NW). 
+            Calculated either from north (NE, NW quadrants) or south (SE, SW quadrants) direction. Range of values within quadrant is [0, 90] degrees.
+            Displayed like "N 45.0° E".
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkBearingType.btReducedNED">
+            <summary>
+            Same as btReducedNDE, apart from a bit different format: "NE: 45.0°".
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkBearingType.btRelative">
+            <summary>
+            Relative bearing, represents clockwise angle between direction of the previous line and the next line. Range of values [-180, 180] degrees. 
+            If the next line turns to the left the value is negative, to the right - positive.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkBearingType.btLeftAngle">
+            <summary>
+            Left inner angle formed by the previous line and next line. Range of values [0, 360] degrees. If the next line has the same direction
+            as the previous one, the value is 180°.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkBearingType.btRightAngle">
+            <summary>
+            Right inner angle formed by the previous line and the next line. Range of values [0, 360] degrees. If the next line has the same direction
+            as the previous one, the value is 180°.
             </summary>
         </member>
         <member name="T:MapWinGIS.tkAreaDisplayMode">
             <summary>
-            Possible mode / format for area displayed by the measuring tool and shape editor.
+            Possible ways to display area.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkAreaDisplayMode.admMetric">
+            <summary>
+            Depending on area either square meters, hectares or square kilometers will be used.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkAreaDisplayMode.admHectars">
+            <summary>
+            Hectares only will be used.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkAreaDisplayMode.admAmerican">
+            <summary>
+            Depending on area either square feet, acres or square miles will be used. 
+            These units are defined according to International yard and pound agreement (1959).
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkAngleFormat">
+            <summary>
+            Possible formats to display angles.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkWmsVersion">
+            <summary>
+            Possible values of the version parameter for WMS requests.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkCallbackVerbosity">
+            <summary>
+            Possible levels of the callback verbosity.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkFunctionGroup">
+            <summary>
+            The function groups.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkLayerType">
+            <summary>
+            The layer types.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkRasterRendering">
+            <summary>
+            Types of rendering for GDAL raster datasource.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkRasterRendering.rrUnknown">
+            <summary>
+            Unknown (when no datasource is opened).
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkRasterRendering.rrSingleBand">
+            <summary>
+            Gray scale rendering based on a single band.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkRasterRendering.rrRGB">
+            <summary>
+            RGB rendering based on at least 3 bands with possible addition of alpha band.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkRasterRendering.rrColorScheme">
+            <summary>
+            Rendering based on a single band and custom color scheme.
+            </summary>
+        </member>
+        <member name="F:MapWinGIS.tkRasterRendering.rrBuiltInColorTable">
+            <summary>
+            Rendering based on a single band and built-in color scheme.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkCustomDrawingFlags">
+            <summary>
+            A bit mask which defines custom events that will be fired during the rendering process.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkGdalDataType">
+            <summary>
+            GDAL data types.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkPaletteInterpretation">
+            <summary>
+            Possible palette interpretations for a raster datasource.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkColorInterpretation">
+            <summary>
+            Possible color interpretations for a raster band.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkProxyAuthentication">
+            <summary>
+            Types of proxy authentication.
+            </summary>
+        </member>
+        <member name="T:MapWinGIS.tkPixelOffsetMode">
+            <summary>
+            Possible values of pixel offset mode (GDI+ rendering).
             </summary>
         </member>
         <member name="T:MapWinGIS.Properties.Resources">
@@ -11710,6 +13406,34 @@
             it accounts for all possible ways for a certain shape to be hidden, like collision 
             avoidance for point symbols or dynamic visibility for categories.</remarks>
             \new493 Added in version 4.9.3
+        </member>
+        <member name="M:MapWinGIS.IShapefile.StopAppendMode">
+            <summary>
+            Stops append mode for the shapefile.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IShapefile.StartAppendMode">
+            <summary>
+            Starts append mode for the shapefile.
+            </summary>
+            <returns>True on success</returns>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IShapefile.UpdateSortField">
+            <summary>
+            The sorting of the shapefile will be reapplied before next redraw after calling this method.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="M:MapWinGIS.IShapefile.FixUpShapes2(System.Boolean,MapWinGIS.Shapefile@)">
+            <summary>
+            Fixes invalid shapes in the shapefile.
+            </summary>
+            <param name="SelectedOnly">Only selected shapes will be fixed.</param>
+            <param name="result">The resulting shapefile.</param>
+            <returns>True if the operations was successful.</returns>
+            \new494 Added in version 4.9.4
         </member>
         <!-- Badly formed XML comment ignored for member "M:MapWinGIS.IShapefile.get_CellValue(System.Int32,System.Int32)" -->
         <member name="M:MapWinGIS.IShapefile.get_Field(System.Int32)">
@@ -12219,6 +13943,16 @@
             <param name="cBack">A callback object to report errors and progress information.</param>
             <returns>True on successful saving and false otherwise.</returns>
         </member>
+        <member name="M:MapWinGIS.IShapefile.SaveAsEx(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Saves shapefile to the disk.
+            </summary>
+            <param name="newFilename">The new filename.</param>
+            <param name="stopEditing">If set to <c>true</c> the editing for shapefile will be stopped.</param>
+            <param name="unboundFile">If set to <c>true</c> the file will not be assigned as a source of this instance.</param>
+            <returns>True on success.</returns>
+            \new494 Added in version 4.9.4
+        </member>
         <member name="M:MapWinGIS.IShapefile.BeginPointInShapefile">
             <summary>
             Caches the coordinates of shapefile points for faster point in shape test.
@@ -12563,6 +14297,26 @@
             \see AxMap.CursorMode
             \new493 Added in version 4.9.3
         </member>
+        <member name="P:MapWinGIS.IShapefile.AppendMode">
+            <summary>
+            Gets a value indicating whether shapefile is in append mode. 
+            Any shapes added with Shapefile.EditAddShape will be immediately written to the disk.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IShapefile.SortField">
+            <summary>
+            The name of the field to be used to determine the drawing order of point shapes and labels.
+            </summary>
+            \new494 Added in version 4.9.4
+        </member>
+        <member name="P:MapWinGIS.IShapefile.SortAscending">
+            <summary>
+            Gets or sets a value indicating whether shapes will be sorted in ascending order.
+            </summary>
+            \see SortField
+            \new494 Added in version 4.9.4
+        </member>
         <member name="P:MapWinGIS.IShapefile.EditingTable">
             <summary>
             Gets the value indicating whether editing operations are allowed for shapefile attribute table.
@@ -12712,7 +14466,16 @@
             </summary>
             <remarks>The set part of property does nothing. Use Shapefile.CreateSpatialIndex instead to create a new index.</remarks>
         </member>
-        <!-- Badly formed XML comment ignored for member "P:MapWinGIS.IShapefile.SpatialIndexMaxAreaPercent" -->
+        <member name="P:MapWinGIS.IShapefile.SpatialIndexMaxAreaPercent">
+            <summary>
+            Gets or sets the value which affects the usage of spatial index. 
+            </summary>
+            <remarks>Spatial index won't be used while drawing a part of shapefile larger then specified percent. 
+            Spatial index ensures faster access to the shapes while a small portion of shapefile
+            is being displayed. On the contrary when substantial part of shapefile is being displayed 
+            spatial index can decrease the performance. This property blocks the usage of 
+            spatial index when it is inefficient.</remarks>
+        </member>
         <member name="P:MapWinGIS.IShapefile.UseQTree">
             <summary>
             Gets or sets a value which indicates whether built-in quad-tree spatial index should be used for shapefile.

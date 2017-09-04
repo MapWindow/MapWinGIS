@@ -1,9 +1,9 @@
 /**************************************************************************************
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -14,10 +14,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
-  
+
 #include "stdafx.h"
 #include "WmsCustomProvider.h"
 
@@ -28,7 +28,7 @@ CString WmsCustomProvider::MakeTileImageUrl(CPoint &pos, int zoom)
 {
 	CString s = _urlFormat;
 
-	s += "?request=GetMap&service=WMS";  
+	s += "?request=GetMap&service=WMS";
 	s += "&layers=" + _layers;
 
 	s += "&";
@@ -53,19 +53,19 @@ CString WmsCustomProvider::get_VersionString()
 {
 	switch (_version)
 	{
-		case wvEmpty:
-			return "";
-		case wv100:
-			return "&version=1.0.0";
-		case wv110:
-		case wvAuto:
-			return "&version=1.1.1";
-		case wv111:
-			return "&version=1.1.1";
-		case wv13:
-			return "&version=1.3";
-		default:
-			return "";
+	case wvEmpty:
+		return "";
+	case wv100:
+		return "&version=1.0.0";
+	case wv110:
+	case wvAuto:
+		return "&version=1.1.1";
+	case wv111:
+		return "&version=1.1.1";
+	case wv13:
+		return "&version=1.3";
+	default:
+		return "";
 	}
 }
 

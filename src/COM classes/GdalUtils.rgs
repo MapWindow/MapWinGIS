@@ -1,0 +1,16 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {7DDFE06A-0461-4F72-9865-8274A91EB052} = s 'GdalUtils Class'
+		{
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+			Version = s '4.9'
+		}
+	}
+}
