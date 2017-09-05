@@ -1560,7 +1560,7 @@ bool CImageClass::DCBitsToImageBuffer(HDC hDC)
 // ****************************************************************
 void CImageClass::DCBitsToImageBufferWithPadding(HDC hdc, HBITMAP hBMP, int bitsPerPixel)
 {
-	int bytesPerPixel = bitsPerPixel * 8;
+	int bytesPerPixel = bitsPerPixel / 8;
 
 	int pad = ImageHelper::GetRowBytePad(_width, bitsPerPixel);
 	long sizeBMP = (_width* bytesPerPixel + pad)*_height;
@@ -1569,7 +1569,7 @@ void CImageClass::DCBitsToImageBufferWithPadding(HDC hdc, HBITMAP hBMP, int bits
 	BITMAPINFOHEADER bih;
 	bih.biBitCount = bitsPerPixel;
 	bih.biWidth = _width;
-	bih.biHeight = _height;
+	bih.biHeight = -_height; // negate to prevent upside-down image
 	bih.biPlanes = 1;
 	bih.biSize = sizeof(BITMAPINFOHEADER);
 	bih.biCompression = 0;
