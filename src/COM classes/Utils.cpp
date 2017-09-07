@@ -5742,6 +5742,7 @@ STDMETHODIMP CUtils::EPSGUnitConversion(int EPSGUnitCode, tkUnitsOfMeasure* retV
 		break;
 	default:
 		// not sure the best default, using Degrees
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		*retVal = umDecimalDegrees;
 	}
 
