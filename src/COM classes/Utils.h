@@ -181,6 +181,7 @@ public:
 		VARIANT_BOOL MergeResults, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal);
 	STDMETHOD(ExplodeShapes)(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal);
 	STDMETHOD(ExportSelection)(IShapefile* subject, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal);
+	STDMETHOD(EPSGUnitConversion)(int EPSGUnitCode, tkUnitsOfMeasure* retVal);
 
 private:
 	struct RasterPoint

@@ -8,6 +8,7 @@
 //5-15-2009 Andrew Purkis (ajp) - define tkHJustification = hjRaw (draw rotated lines correctly)  
 //27 aug 2009 lsu - added ShapeDrawingOptions class
 // june 2017 PaulM - Added IGdalUtils
+// sep 2017 jfaust - Extend interfaces of IExtents and IPoint
 
 #include <olectl.h>
 #include <idispids.h>
@@ -4124,6 +4125,9 @@ interface IExtents : IDispatch{
 		//[id(13), helpstring("method Disjoint")] HRESULT Disjoint([in]IExtents* ext, [out, retval]VARIANT_BOOL* retval);
 		//[id(15), helpstring("method Union")] HRESULT Union([in]IExtents* ext);
 		//[id(16), helpstring("method GetIntersection")] HRESULT GetIntersection([in]IExtents* ext, [out, retval]IExtents** retval);
+		[propget, id(18), helpstring("property Width")] HRESULT Width([out, retval]double* pVal);
+		[propget, id(19), helpstring("property Height")] HRESULT Height([out, retval]double* pVal);
+		[propget, id(20), helpstring("property Depth")] HRESULT Depth([out, retval]double* pVal);
 };
 
 /****************************  Point Interface ***********************/
@@ -4151,6 +4155,7 @@ interface IPoint : IDispatch{
 	[propget, id(8), helpstring("property M")] HRESULT M([out, retval] double *pVal);
 	[propput, id(8), helpstring("property M")] HRESULT M([in] double newVal);
 	[id(9), helpstring("method Clone")] HRESULT Clone([out, retval] IPoint** retVal);
+	[id(10), helpstring("Sets X, Y, and optionally Z component")] HRESULT Set([in] double newX, [in] double newY, [in, optional, defaultvalue(0.0)] double newZ);
 };
 
 /****************************  Table Interface ***********************/
@@ -4414,6 +4419,7 @@ interface IUtils : IDispatch{
 	[id(56)] HRESULT BufferByDistance([in] IShapefile* subject, [in] DOUBLE Distance, [in] LONG nSegments, [in] VARIANT_BOOL SelectedOnly, [in] VARIANT_BOOL MergeResults, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval]VARIANT_BOOL* retVal);
 	[id(57)] HRESULT ExplodeShapes([in] IShapefile* subject, [in] VARIANT_BOOL SelectedOnly, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
 	[id(58)] HRESULT ExportSelection([in] IShapefile* subject, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
+	[id(59), helpstring("method EPSGUnitConversion")] HRESULT EPSGUnitConversion([in] int EPSGUnitCode, [out, retval] tkUnitsOfMeasure* retVal);
 };
 
 /****************************  Vector Interface ***********************/

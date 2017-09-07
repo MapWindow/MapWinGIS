@@ -21,7 +21,8 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- 
+// 09-04-2017 jfaust - Add Set method to set X, Y, and Z in one step
+
 #include "stdafx.h"
 #include "PointClass.h"
 
@@ -133,5 +134,16 @@ STDMETHODIMP CPointClass::Clone(IPoint** retVal)
 	(*retVal)->put_Y(_y);
 	(*retVal)->put_Z(_z);
 	(*retVal)->put_M(_m);
+	return S_OK;
+}
+
+// ************************************************************
+//		Set()
+// ************************************************************
+STDMETHODIMP CPointClass::Set(double newX, double newY, double newZ)
+{
+	_x = newX;
+	_y = newY;
+	_z = newZ;
 	return S_OK;
 }

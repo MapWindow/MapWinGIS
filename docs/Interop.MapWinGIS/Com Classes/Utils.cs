@@ -755,6 +755,23 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets the tkUnitsOfMeasure enumeration associated with the specified EPSG Unit Code
+        /// </summary>
+        /// <param name="EPSGUnitCode">EPSG-defined Unit of Measure constant</param>
+        /// <returns>The internal enumeration associated with the specified EPSG code</returns>
+        /// <remarks>
+        /// Supports the more common EPSG-defined Unit constants; specifically those that can be mapped to 
+        /// the currently defined tkUnitsOfMeasure enumeration values. If the EPSG code cannot be mapped, 
+        /// an Error will be submitted to the global callback with error code tkINVALID_PARAMETER_VALUE, 
+        /// and return the default value of umDecimalDegrees.
+        /// </remarks>
+        public tkUnitsOfMeasure EPSGUnitConversion(int EPSGUnitCode)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 #if nsp
 }
