@@ -47,14 +47,55 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
+        public void DrawCircleEx()
+        {
+            axMap1.ClearDrawings();
+            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            var utils = new UtilsClass();
+            axMap1.DrawCircleEx(dhandle, 24.0, 57.0, 0.1, utils.ColorByName(tkMapColor.IndianRed), true);
+            SaveSnapshot("DrawCircleEx.jpg");
+        }
+
+        [TestMethod]
         public void DrawLabel()
         {
-            Debug.WriteLine("num layers: " + axMap1.NumLayers);
             axMap1.ClearDrawings();
             var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
             var retVal = axMap1.DrawLabel("label", 24.0, 57.0, 0.0);
             Assert.AreEqual(dhandle, retVal, "Unexpected handle");
+            retVal = axMap1.DrawLabel("Воздух", 24.05, 57.05, 0.0);
+            Assert.AreEqual(dhandle, retVal, "Unexpected handle");
             SaveSnapshot("DrawLabel.jpg");
+        }
+
+        [TestMethod]
+        public void DrawLabelEx()
+        {
+            axMap1.ClearDrawings();
+            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            var retVal = axMap1.DrawLabelEx(dhandle, "Воздух", 24.0, 57.0, 45.0);
+            Assert.AreEqual(dhandle, retVal, "Unexpected handle");
+            SaveSnapshot("DrawLabelEx.jpg");
+        }
+
+        [TestMethod]
+        public void CheckUnicodeLabelText()
+        {
+            // https://mapwindow.atlassian.net/browse/MWGIS-81
+            axMap1.ClearDrawings();
+            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            const string labelText = "Воздух";
+            const double rotation = 45.0;
+            var retVal = axMap1.DrawLabelEx(dhandle, labelText, 24.0, 57.0, rotation);
+            Assert.AreEqual(dhandle, retVal, "Unexpected handle");
+            var labels = axMap1.get_DrawingLabels(dhandle);
+            for (var i = 0; i < labels.Count; i++)
+            {
+                var label = labels.Label[i, 0];
+                Assert.AreEqual(rotation, label.Rotation);
+                DebugMsg(label.Text);
+                Assert.AreEqual(labelText, label.Text);
+            }
         }
 
         [TestMethod]
@@ -93,17 +134,19 @@ namespace MapWinGISTests
 
             var shp = new Shape();
             shp.Create(sf.ShapefileType);
-            shp.AddPoint(23, 56);
-            shp.AddPoint(23, 58);
-            shp.AddPoint(25, 58);
-            shp.AddPoint(25, 56);
-            shp.AddPoint(23, 56);
+            // 24.0, 57.0
+            shp.AddPoint(23.8, 56.8);
+            shp.AddPoint(23.8, 57.2);
+            shp.AddPoint(24.2, 57.2);
+            shp.AddPoint(24.2, 56.8);
+            shp.AddPoint(23.8, 56.8);
             Debug.WriteLine("IsValid: " + shp.IsValid);
 
             sf.EditAddShape(shp);
             axMap1.AddLayer(sf, true);
             axMap1.ZoomToShape(0, 0);
             axMap1.ZoomOut(0.5);
+            axMap1.ZoomToTileLevel(axMap1.Tiles.CurrentZoom);
         }
 
         private void DebugMsg(string msg)
