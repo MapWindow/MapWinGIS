@@ -11,6 +11,7 @@ namespace ConsoleApplication1
     /// </summary>
     public class Program
     {
+        [STAThread]
         public static void Main(string[] args)
         {
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\TestData\";
@@ -42,8 +43,12 @@ namespace ConsoleApplication1
             //t.ReadRussionDataFromTable();
             //t.CreateRussionCategories();
 
-            var t = new ImageTests();
-            t.LargeEcwFile();
+            //var t = new ImageTests();
+            //t.SaveImageShouldFail();
+
+            var t = new DrawingTests();
+            t.Init();
+            t.DrawLabel();
 
             //var t = new UtilTests();
             //t.ZonalStatistics();
