@@ -2195,6 +2195,9 @@
     <None Include="COM classes\GdalUtils.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
+    <None Include="Resource\pan_alt.cur">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MapWinGIS.rc" />

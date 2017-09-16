@@ -77,7 +77,7 @@ HCURSOR CMapView::GetCursorIcon()
 					break;
 
 				case cmPan:
-					newCursor = _cursorPan;
+					newCursor = (_useAlternatePanCursor == TRUE) ? _cursorAlternatePan : _cursorPan;
 					break;
 
 				case cmSelection:

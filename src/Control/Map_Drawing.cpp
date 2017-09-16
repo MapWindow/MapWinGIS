@@ -238,6 +238,15 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 				gLayers->Clear(Gdiplus::Color::Transparent);
 				gLayers->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
 
+				// fire external before layer drawing code
+				if (_customDrawingFlags & BeforeAfterLayers)
+				{
+					HDC hdc = g->GetHDC();
+					tkMwBoolean retVal = blnFalse;
+					this->FireBeforeLayers((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+					g->ReleaseHDC(hdc);
+				}
+
 				bool useRotation = false;	// not implemented
 				if (useRotation) {
 					DrawLayersRotated(dc, gLayers, rcBounds);
@@ -248,6 +257,15 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 
 				// passing layer buffer to the main buffer
 				g->DrawImage(_layerBitmap, 0.0f, 0.0f);
+
+				// fire external after layer drawing code
+				if (_customDrawingFlags & BeforeAfterLayers)
+				{
+					HDC hdc = g->GetHDC();
+					tkMwBoolean retVal = blnFalse;
+					this->FireAfterLayers((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+					g->ReleaseHDC(hdc);
+				}
 			}
 		}
 	}

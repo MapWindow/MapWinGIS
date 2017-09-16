@@ -146,6 +146,7 @@ enum tkCustomDrawingFlags {
 	OnDrawBackBufferHdc = 1,
 	OnDrawBackBufferBitmapData = 2,
 	BeforeAfterDrawing = 4,
+	BeforeAfterLayers = 8,
 }tkCustomDrawingFlags;
 
 /************************** tkGdalDataType Enumeration **********************/
@@ -4155,7 +4156,7 @@ interface IPoint : IDispatch{
 	[propget, id(8), helpstring("property M")] HRESULT M([out, retval] double *pVal);
 	[propput, id(8), helpstring("property M")] HRESULT M([in] double newVal);
 	[id(9), helpstring("method Clone")] HRESULT Clone([out, retval] IPoint** retVal);
-	[id(10), helpstring("Sets X, Y, and optionally Z component")] HRESULT Set([in] double newX, [in] double newY, [in, optional, defaultvalue(0.0)] double newZ);
+	[id(10), helpstring("Sets X, Y, and Z values")] HRESULT Set([in] double newX, [in] double newY, [in, optional, defaultvalue(0.0)] double newZ);
 };
 
 /****************************  Table Interface ***********************/
@@ -6873,6 +6874,8 @@ library MapWinGIS
 			[id(227), propget] tkCustomState AnimationOnZooming();
 			[id(231), propput] void ZoomBoxStyle(tkZoomBoxStyle nNewValue);
 			[id(231), propget] tkZoomBoxStyle ZoomBoxStyle();
+			[id(261), propget] VARIANT_BOOL UseAlternatePanCursor();
+			[id(261), propput] void UseAlternatePanCursor(VARIANT_BOOL nNewValue);
 #endif			
 
 			[id(43)] void Resize(long Width, long Height);
@@ -6952,7 +6955,9 @@ library MapWinGIS
 			[id(34)] void GridOpened(LONG LayerHandle, BSTR gridFilename, LONG bandIndex, VARIANT_BOOL isUsingProxy);
 			[id(35)] void ShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY);
 			[id(36)] void OnDrawBackBuffer2(LONG height, LONG Width, LONG Stride, LONG pixelFormat, LONG scan0);
-		//}}AFX_ODL_EVENT
+			[id(37)] void BeforeLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
+			[id(38)] void AfterLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
+			//}}AFX_ODL_EVENT
 			
 	};
 

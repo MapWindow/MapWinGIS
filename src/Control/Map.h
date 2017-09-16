@@ -618,7 +618,11 @@ public:
 	afx_msg void ClearExtentHistory();
 	afx_msg long GetExtentHistoryUndoCount();
 	afx_msg long GetExtentHistoryRedoCount();
-	#pragma endregion
+
+	afx_msg void SetUseAlternatePanCursor(BOOL nNewValue);
+	afx_msg BOOL GetUseAlternatePanCursor();
+
+#pragma endregion
 
 	//}}AFX_DISPATCH
 	DECLARE_DISPATCH_MAP()
@@ -705,6 +709,10 @@ public:
 	    { FireEvent(eventidShapesIdentified, EVENT_PARAM(VTS_DISPATCH VTS_R8 VTS_R8), selectedShapes, projX, projY); }
 	void FireOnDrawBackBuffer2(LONG height, LONG Width, LONG Stride, LONG pixelFormat, LONG scan0)
 		{ FireEvent(eventidOnDrawBackBuffer2, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), height, Width, Stride, pixelFormat, scan0); }
+	void FireBeforeLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled)
+		{ FireEvent(eventidBeforeLayers, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled); }
+	void FireAfterLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled)
+		{ FireEvent(eventidAfterLayers, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled); }
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -758,6 +766,7 @@ public:
 	HCURSOR _cursorIdentify;
 	HCURSOR _cursorRotate;
 	HCURSOR _cursorMove;
+	HCURSOR _cursorAlternatePan;
 
 	HCURSOR _udCursor;
 
@@ -808,6 +817,7 @@ public:
 	BOOL _grabProjectionFromData;
 	BOOL _zoombarVisible;
 	BOOL _canUseImageGrouping;
+	BOOL _useAlternatePanCursor;		// use traditional Hand cursor for panning rather than NSEW cursor
 	tkCustomState _panningInertia;			
 	BOOL _reuseTileBuffer;			
 	tkCustomState _zoomAnimation;			

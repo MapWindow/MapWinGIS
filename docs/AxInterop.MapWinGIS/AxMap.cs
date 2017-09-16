@@ -679,6 +679,13 @@ namespace AxMapWinGIS
         public bool ReuseTileBuffer { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the legacy 'hand' cursor should be used
+        /// for map panning rather than the standard 'NSEW' four-point cursor.
+        /// </summary>
+        /// \new495 Added in version 4.9.5
+        public bool UseAlternatePanCursor { get; set; }
+
+        /// <summary>
         /// Gets or sets the amount of information to be displayed in zoom bar tool tip.
         /// </summary>
         /// \new492 Added in version 4.9.2
@@ -2629,6 +2636,18 @@ namespace AxMapWinGIS
         public event _DMapEvents_AfterDrawingEventHandler AfterDrawing;
 
         /// <summary>
+        /// This event is fired after the rendering of standard layers. Handle of device context is passed to allow the user to implement custom drawing. 
+        /// </summary>
+        /// <param name="hdc">Handle of device context of screen buffer.</param>
+        /// <param name="xMin">Minimum X coordinate of the rectangle being rendered.</param>
+        /// <param name="xMax">Maximum X coordinate of the rectangle being rendered.</param>
+        /// <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
+        /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
+        /// <param name="handled">Passed by reference. 
+        /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        public event _DMapEvents_AfterLayersEventHandler AfterLayers;
+
+        /// <summary>
         /// This event is fired after interactive editing of shape is finished (AxMap.CursorMode is set to cmEditShape).
         /// </summary>
         /// <param name="operation">The type of editing operation that was performed.</param>
@@ -2686,6 +2705,18 @@ namespace AxMapWinGIS
         /// <param name="handled">Passed by reference. 
         /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
         public event _DMapEvents_BeforeDrawingEventHandler BeforeDrawing;
+
+        /// <summary>
+        /// This event is fired before the rendering of standard layers. Handle of device context is passed to allow the user to implement custom drawing. 
+        /// </summary>
+        /// <param name="hdc">Handle of device context of screen buffer.</param>
+        /// <param name="xMin">Minimum X coordinate of the rectangle being rendered.</param>
+        /// <param name="xMax">Maximum X coordinate of the rectangle being rendered.</param>
+        /// <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
+        /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
+        /// <param name="handled">Passed by reference. 
+        /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        public event _DMapEvents_BeforeLayersEventHandler BeforeLayers;
 
         /// <summary>
         /// This event is fired before editing starts for particular shape (after user click on the shape when map cursor is set to cmEditShape). 

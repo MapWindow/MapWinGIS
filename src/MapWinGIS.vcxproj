@@ -914,6 +914,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <None Include="Grid\fip\readme.123" />
     <None Include="MapWinGIS.def" />
     <None Include="MapWinGIS.rgs" />
+    <None Include="resource\cur00001.cur" />
     <None Include="Resource\cursor1.cur" />
     <None Include="Resource\cursor2.cur" />
     <None Include="Resource\cursor3.cur" />
@@ -924,6 +925,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <None Include="Resource\Map.bmp" />
     <None Include="ReadMe.txt" />
     <None Include="Resource\move_cursor.cur" />
+    <None Include="Resource\pan_alt.cur" />
     <None Include="Resource\rotate_cursor.cur" />
     <None Include="Resource\select_cursor.cur" />
     <None Include="Resource\vertex_cursor.cur" />

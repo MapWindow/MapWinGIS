@@ -84,12 +84,13 @@
 #define IDC_MOVE_CURSOR                 219
 #define IDC_SELECT2_CURSOR              220
 #define IDC_IDENTIFY_CURSOR             221
+#define IDC_PAN_ALTERNATE               222
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        216
+#define _APS_NEXT_RESOURCE_VALUE        223
 #define _APS_NEXT_COMMAND_VALUE         32768
 #define _APS_NEXT_CONTROL_VALUE         201
 #define _APS_NEXT_SYMED_VALUE           161
