@@ -449,5 +449,16 @@ namespace interopCreator
                 axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
             }
         }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            axMap1.Projection = tkMapProjection.PROJECTION_WGS84;
+            axMap1.KnownExtents = tkKnownExtents.keLatvia;
+
+            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            axMap1.DrawCircle(24.0, 57.0, 0.1, 0, false);
+            axMap1.DrawLabel("My label", 20.0, 54.0, 0.0);
+            axMap1.DrawLabel("Воздух", 24.0, 57.0, 0.0);
+        }
     }
 }

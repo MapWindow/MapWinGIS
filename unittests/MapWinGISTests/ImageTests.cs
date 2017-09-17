@@ -79,6 +79,35 @@ namespace MapWinGISTests
             Assert.IsNotNull(img, "Loaded object is not an image");
         }
 
+        [TestMethod]
+        public void SaveImageShouldWork()
+        {
+            // MWGIS-80
+            var img = new ImageClass();
+            img.Open(@"GeoTiff/5band.tif");
+            Assert.IsNotNull(img, "Loaded object is not an image");
+            var filename = Path.Combine(Path.GetTempPath(), "SaveImage.jpg");
+            if (File.Exists(filename)) File.Delete(filename);
+            var retVal = img.Save(filename);
+            Assert.IsTrue(retVal, "Image could not be saved: " + img.ErrorMsg[img.LastErrorCode]);
+            Assert.IsTrue(File.Exists(filename), "The file doesn't exists.");
+            Debug.WriteLine(filename);
+        }
+
+        [TestMethod]
+        public void SaveImageShouldFail()
+        {
+            // MWGIS-80
+            var img = new ImageClass();
+            img.Open(@"GeoTiff/5band.tif");
+            Assert.IsNotNull(img, "Loaded object is not an image");
+            var filename = Path.Combine(Path.GetTempPath(), "SaveImage");
+            if (File.Exists(filename)) File.Delete(filename);
+            var retVal = img.Save(filename);
+            Debug.WriteLine("Error: " + img.ErrorMsg[img.LastErrorCode]);
+            Assert.IsFalse(retVal, "Image could be saved. This is unexpected.");
+        }
+
         private static Image LoadImage(string filename)
         {
             if (!File.Exists(filename)) Assert.Fail("Input file does not exist: " + filename);
