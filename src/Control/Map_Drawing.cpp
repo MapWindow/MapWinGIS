@@ -257,15 +257,18 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 
 				// passing layer buffer to the main buffer
 				g->DrawImage(_layerBitmap, 0.0f, 0.0f);
+			}
 
-				// fire external after layer drawing code
-				if (_customDrawingFlags & BeforeAfterLayers)
-				{
-					HDC hdc = g->GetHDC();
-					tkMwBoolean retVal = blnFalse;
-					this->FireAfterLayers((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
-					g->ReleaseHDC(hdc);
-				}
+			// fire external after layer drawing code
+			// NOTE that we want to do this even if drawing from layer buffer (tkRedrawType::RedrawSkipDataLayers)
+			// since even that erases any custom drawing done through the hDC.  We still should consider whether 
+			// or not to allow After Layer drawing for the Snapshot (which is not done for the After Drawing draw)
+			if (_customDrawingFlags & BeforeAfterLayers)
+			{
+				HDC hdc = g->GetHDC();
+				tkMwBoolean retVal = blnFalse;
+				this->FireAfterLayers((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+				g->ReleaseHDC(hdc);
 			}
 		}
 	}
