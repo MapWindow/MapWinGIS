@@ -154,6 +154,39 @@ namespace MapWinGISTests
             Debug.WriteLine(msg);
             Console.WriteLine(msg);
         }
+
+        [TestMethod]
+        public void CaptureSnapshot()
+        {
+            // clear map
+            axMap1.ClearDrawings();
+            axMap1.RemoveAllLayers();
+            // create layer
+            CreateLayer();
+            //
+            int bpp = Screen.PrimaryScreen.BitsPerPixel;
+            DebugMsg(string.Format("Current color depth is {0} bits per pixel", bpp));
+            // test is only valid when not in 32 bit color depth
+            if (bpp == 32)
+                DebugMsg("  Test is only valid for color depth less than 32 bpp");
+            try
+            {
+                DebugMsg("Calling AxMap.Snapshot() method.  Watch for Access Violation Exception if color depth is less than 32 bpp.");
+                axMap1.SnapShot(axMap1.Extents);
+                DebugMsg(string.Format("Successfully called Snapshot() with color depth = {0}.", bpp));
+                if (bpp != 32)
+                    DebugMsg("  Test verified.");
+            }
+            catch (AccessViolationException avex)
+            {
+                DebugMsg(avex.ToString());
+            }
+            catch (Exception ex)
+            {
+                DebugMsg(ex.ToString());
+            }
+        }
+
     }
 }
 
