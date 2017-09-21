@@ -321,10 +321,14 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list,
 			continue;
 		}
 
-		if (!layer->PointWithinExtents(projX, projY))		// TODO: use tolerance
-		{
-			continue;
-		}
+		// ************************************************************************************
+		// jfaust: until tolerance is determined/implemented, I am commenting out this pre-test
+		// since it often results in the exclusion of points that define the edge of the extent
+		//if (!layer->PointWithinExtents(projX, projY))		// TODO: use tolerance
+		//{
+		//	continue;
+		//}
+		// ************************************************************************************
 
 		if (layer->IsShapefile())
 		{

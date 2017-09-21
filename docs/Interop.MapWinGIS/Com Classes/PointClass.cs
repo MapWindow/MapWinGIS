@@ -124,6 +124,17 @@ namespace MapWinGIS
             set { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Sets the X, Y, and Z values of this point.
+        /// </summary>
+        /// <param name="newX">The new X value.</param>
+        /// <param name="newY">The new Y value.</param>
+        /// <param name="newZ">Optional. The new Z value. Defaults to 0.0 if not specified.</param>
+        public void Set(double newX, double newY, double newZ)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 #if nsp

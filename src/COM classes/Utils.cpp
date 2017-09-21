@@ -16,6 +16,7 @@
 //public domain in March 2004.  
 //********************************************************************************************************
 //Contributor(s): dpa, angela, cdm, Rob Cairns, lsu
+// 09-06-2017 jfaust - Add EPSGUnitConversion, return tkUnitsOfMeasure associated with specified EPSG code
 //********************************************************************************************************
 
 #include "stdafx.h"
@@ -5704,6 +5705,47 @@ STDMETHODIMP CUtils::IsTiffGrid(BSTR Filename, VARIANT_BOOL* retVal)
 	{
 		CallbackHelper::ErrorMsg("Exception in Utils.IsTiffGrid");
 	}
+	return S_OK;
+}
+
+// *************************************************
+//			EPSGUnitConversion()						  
+// *************************************************
+STDMETHODIMP CUtils::EPSGUnitConversion(int EPSGUnitCode, tkUnitsOfMeasure* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// convert common EPSG codes to internal enumeration
+	switch (EPSGUnitCode)
+	{
+	case 9001:
+		// International Meter
+		*retVal = umMeters;
+		break;
+	case 9002:
+	case 9003:
+	case 9004:
+		// International Foot, US Survey Foot, and American Foot
+		*retVal = umFeets;
+		break;
+	case 9035:
+		// US Survey Mile
+		*retVal = umMiles;
+		break;
+	case 9036:
+		// Kilometer
+		*retVal = umKilometers;
+		break;
+	case 9102:
+		// Degree
+		*retVal = umDecimalDegrees;
+		break;
+	default:
+		// not sure the best default, using Degrees
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		*retVal = umDecimalDegrees;
+	}
+
 	return S_OK;
 }
 

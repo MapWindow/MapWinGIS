@@ -127,7 +127,7 @@ bool ShapeStyleHelper::GetPointBounds(IShapeDrawingOptions* options, Extent& ext
 			options->get_PictureScaleY(&scaleY);
 
 			extents.right = width / 2.0 * scaleX;
-			extents.left = -extents.left;
+			extents.left = -extents.right;
 
 			VARIANT_BOOL alignByBottom;
 			options->get_AlignPictureByBottom(&alignByBottom);

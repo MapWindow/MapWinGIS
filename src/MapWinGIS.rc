@@ -25,7 +25,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 IDR_SHAPEFILELEGEND     REGISTRY                "COM Classes/ShapefileColorScheme.rgs"
-IDR_SHAPEFILELEGENDBREAK REGISTRY               "COM Classes/ShapefileColorBreak.rgs"
+IDR_SHAPEFILELEGENDBREAK REGISTRY                "COM Classes/ShapefileColorBreak.rgs"
 IDR_GRID                REGISTRY                "COM Classes/Grid.rgs"
 IDR_GRIDHEADER          REGISTRY                "COM Classes/GridHeader.rgs"
 IDR_ESRIGRIDMANAGER     REGISTRY                "COM Classes/ESRIGridManager.rgs"
@@ -202,6 +202,7 @@ IDC_ROTATE_CURSOR       CURSOR                  "Resource/rotate_cursor.cur"
 IDC_MOVE_CURSOR         CURSOR                  "Resource/move_cursor.cur"
 IDC_SELECT2_CURSOR      CURSOR                  "Resource/select_cursor.cur"
 IDC_IDENTIFY_CURSOR     CURSOR                  "Resource/identify_cursor.cur"
+IDC_PAN_ALTERNATE       CURSOR                  "Resource/pan_alt.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

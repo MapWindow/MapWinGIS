@@ -2702,6 +2702,7 @@ namespace MapWinGIS
         OnDrawBackBufferHdc = 1,
         OnDrawBackBufferBitmapData = 2,
         BeforeAfterDrawing = 4,
+        BeforeAfterLayers = 8,
     }
     
     /// <summary>

@@ -155,12 +155,21 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX,
 		// drawing outlines
 		if (options->shadowVisible)
 		{
-			Gdiplus::Matrix mtx1;
-			mtx1.Translate((Gdiplus::REAL)options->shadowOffsetX, (Gdiplus::REAL)options->shadowOffsetY);
-			gp->Transform(&mtx1);
-			_graphics->FillPath(_brushShadow, gp);
-			mtx1.Translate(Gdiplus::REAL(-2 * options->shadowOffsetX), Gdiplus::REAL(-2 * options->shadowOffsetY));
-			gp->Transform(&mtx1);
+			//Gdiplus::Matrix mtx1;
+			//mtx1.Translate((Gdiplus::REAL)options->shadowOffsetX, (Gdiplus::REAL)options->shadowOffsetY);
+			//gp->Transform(&mtx1);
+			//_graphics->FillPath(_brushShadow, gp);
+			//mtx1.Translate(Gdiplus::REAL(-2 * options->shadowOffsetX), Gdiplus::REAL(-2 * options->shadowOffsetY));
+			//gp->Transform(&mtx1);
+
+			// jfaust: The FillPath calls used for Halo, Outline, and Shadow are not properly filling the full area.
+			// for shadowing, we don't need the fill, so I am using the concept borrowed from DrawStringWithShade()
+			// (which is used to draw the coordinates in the upper corner of the map).  I will revisit the FillPath
+			// option for Halo and Outline affects, but for now, I wanted to at least get the Shadow working.
+			_graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushShadow);
+			rect.X -= 1.0f;
+			rect.Y -= 1.0f;
+			// foreground text will be drawn below, as it is for all affects (so as not to alter previous behavior)
 		}
 
 		if (options && options->haloVisible)

@@ -92,6 +92,7 @@ public:
 	STDMETHOD(get_X)(/*[out, retval]*/ double *pVal);
 	STDMETHOD(put_X)(/*[in]*/ double newVal);
 	STDMETHOD(Clone)(IPoint** retVal);
+	STDMETHOD(Set)(/*[in]*/ double newX, /*[in]*/ double newY, /*[in, optional]*/ double newZ);
 
 private:
 	double _x;

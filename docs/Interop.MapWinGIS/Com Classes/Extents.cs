@@ -215,6 +215,31 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets the Width of the extents object (xMax - xMin).
+        /// </summary>
+        public double Width
+        {
+            get { throw new NotImplementedException(); }            
+        }
+
+        /// <summary>
+        /// Gets the Height of the extents object (yMax - yMin).
+        /// </summary>
+        public double Height
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets the Depth of the extents object (zMax - zMin).
+        /// </summary>
+        public double Depth
+        {
+            get { throw new NotImplementedException(); }
+        }
+
     }
 #if nsp
 }

@@ -48,7 +48,8 @@ namespace ConsoleApplication1
 
             var t = new DrawingTests();
             t.Init();
-            t.DrawLabel();
+            //t.DrawLabel();
+            t.CaptureSnapshot();
 
             //var t = new UtilTests();
             //t.ZonalStatistics();
