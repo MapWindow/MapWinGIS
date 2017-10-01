@@ -46,10 +46,13 @@ namespace ConsoleApplication1
             //var t = new ImageTests();
             //t.SaveImageShouldFail();
 
-            var t = new DrawingTests();
-            t.Init();
+            //var t = new DrawingTests();
+            //t.Init();
             //t.DrawLabel();
-            t.CaptureSnapshot();
+            //t.CaptureSnapshot();
+
+            var t= new ClipperTests();
+            t.DissolveSmallfileClipper();
 
             //var t = new UtilTests();
             //t.ZonalStatistics();
