@@ -2,12 +2,12 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "4.9.4.2"
+#define MyAppVersion "4.9.4.3"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapwinGIS\GitHub\src\InnoSetup"
 #define BinLocation "D:\dev\MapwinGIS\GitHub\src\bin"
-#define x64BitVersion
+;;#define x64BitVersion
 
 #ifdef x64BitVersion
   #define CPU "x64"
@@ -68,7 +68,7 @@ ArchitecturesInstallIn64BitMode=x64
 #endif
 
 [Files]
-Source: "{#MySourceDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
+Source: "{#MySourceDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core; Excludes: "libecwj2.dll"
 Source: "{#MySourceDir}\MapWinGIS.ocx"; DestDir: "{app}"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
 ;; IntelliSense:
 Source: "{#SetupLocation}\AxInterop.MapWinGIS.XML"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
@@ -93,9 +93,9 @@ Source: "{#BinLocation}\Licenses\NetCDFLicense.rtf"; DestDir: "{app}\Licenses\";
 Source: "{#MySourceDir}\gdalplugins\gdal_HDF5.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF5
 Source: "{#MySourceDir}\gdalplugins\gdal_HDF5Image.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF5
 Source: "{#BinLocation}\Licenses\HDF5License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: HDF5
-Source: "{#MySourceDir}\gdalplugins\gdal_HDF4.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF4
-Source: "{#MySourceDir}\gdalplugins\gdal_HDF4Image.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF4
-Source: "{#BinLocation}\Licenses\HDF4License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: HDF4
+;;Source: "{#MySourceDir}\gdalplugins\gdal_HDF4.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF4
+;;Source: "{#MySourceDir}\gdalplugins\gdal_HDF4Image.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF4
+;;Source: "{#BinLocation}\Licenses\HDF4License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: HDF4
 
 ;; GDAL data
 Source: "{#MySourceDir}\gdal-data\*"; DestDir: "{app}\gdal-data"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: MapWinGIS_Core
@@ -117,7 +117,7 @@ Name: "MapWinGIS_Core"; Description: "Core files for MapWinGIS"; Types: full cus
 Name: "NetCDF"; Description: "Add NetCDF support"; Types: full custom
 Name: "ECW"; Description: "Add ECW & JPEG2000 support"; Types: full custom
 Name: "MrSID"; Description: "Add MrSID support"; Types: full custom
-Name: "HDF4"; Description: "Add Hierarchical Data Format Release 4 support"; Types: full custom
+;; Name: "HDF4"; Description: "Add Hierarchical Data Format Release 4 support"; Types: full custom
 Name: "HDF5"; Description: "Add Hierarchical Data Format Release 5 support"; Types: full custom
 
 [Run]
@@ -139,6 +139,10 @@ Filename: "{app}\unregMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runhidden
 [Registry]
 ;; Add location of MapWinGIS to path, needed for netcdf.dll
 ;; Root: "HKLM"; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: "expandsz"; ValueName: "Path"; ValueData: "{olddata};{app}"; Check: NeedsAddPath(ExpandConstant('{app}'))
+
+[InstallDelete]
+;; Old ECW driver, conflicts with new driver:
+Type: files; Name: "{app}\libecwj2.dll"; Components: MapWinGIS_Core
 
 [Code]
 #IFDEF UNICODE
