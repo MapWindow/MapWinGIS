@@ -126,6 +126,42 @@ namespace MapWinGISTests
                 Assert.IsFalse(retVal, "Image could be saved. This is unexpected.");
             }
         }
+        [TestMethod]
+        public void CaptureSnapshot()
+        {
+            // clear map
+            axMap1.ClearDrawings();
+            axMap1.RemoveAllLayers();
+            // create layer
+            CreateLayer();
+            
+            //
+            var bpp = Screen.PrimaryScreen.BitsPerPixel;
+            DebugMsg($"Current color depth is {bpp} bits per pixel");
+            // test is only valid when not in 32 bit color depth
+            if (bpp == 32)
+                DebugMsg("  Test is only valid for color depth less than 32 bpp");
+            try
+            {
+                DebugMsg("Calling AxMap.Snapshot() method.  Watch for Access Violation Exception if color depth is less than 32 bpp.");
+                var img = axMap1.SnapShot(axMap1.Extents);
+                Assert.IsNotNull(img, "axMap1.SnapShot returned null");
+                DebugMsg($"Successfully called Snapshot() with color depth = {bpp}.");
+                if (bpp != 32)
+                {
+                    DebugMsg("  Test verified.");
+                }
+            }
+            catch (AccessViolationException avex)
+            {
+                Assert.Fail(avex.ToString());
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.ToString());
+            }
+        }
+
 
         private void CreateLayer()
         {
@@ -140,7 +176,7 @@ namespace MapWinGISTests
             shp.AddPoint(24.2, 57.2);
             shp.AddPoint(24.2, 56.8);
             shp.AddPoint(23.8, 56.8);
-            Debug.WriteLine("IsValid: " + shp.IsValid);
+            Assert.IsTrue(shp.IsValid, "Shape is invalid");
 
             sf.EditAddShape(shp);
             axMap1.AddLayer(sf, true);
@@ -153,38 +189,6 @@ namespace MapWinGISTests
         {
             Debug.WriteLine(msg);
             Console.WriteLine(msg);
-        }
-
-        [TestMethod]
-        public void CaptureSnapshot()
-        {
-            // clear map
-            axMap1.ClearDrawings();
-            axMap1.RemoveAllLayers();
-            // create layer
-            CreateLayer();
-            //
-            int bpp = Screen.PrimaryScreen.BitsPerPixel;
-            DebugMsg(string.Format("Current color depth is {0} bits per pixel", bpp));
-            // test is only valid when not in 32 bit color depth
-            if (bpp == 32)
-                DebugMsg("  Test is only valid for color depth less than 32 bpp");
-            try
-            {
-                DebugMsg("Calling AxMap.Snapshot() method.  Watch for Access Violation Exception if color depth is less than 32 bpp.");
-                axMap1.SnapShot(axMap1.Extents);
-                DebugMsg(string.Format("Successfully called Snapshot() with color depth = {0}.", bpp));
-                if (bpp != 32)
-                    DebugMsg("  Test verified.");
-            }
-            catch (AccessViolationException avex)
-            {
-                DebugMsg(avex.ToString());
-            }
-            catch (Exception ex)
-            {
-                DebugMsg(ex.ToString());
-            }
         }
 
     }

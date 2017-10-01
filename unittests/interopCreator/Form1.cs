@@ -457,8 +457,8 @@ namespace interopCreator
 
             var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
             axMap1.DrawCircle(24.0, 57.0, 0.1, 0, false);
-            axMap1.DrawLabel("My label", 20.0, 54.0, 0.0);
-            axMap1.DrawLabel("Воздух", 24.0, 57.0, 0.0);
+            axMap1.DrawLabel("Label", 24.0, 57.0, 0.0);
+            axMap1.DrawLabel("Воздух", 24.1, 57.1, 0.0);
         }
     }
 }
