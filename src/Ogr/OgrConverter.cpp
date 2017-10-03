@@ -34,8 +34,7 @@ void ClipperConverter::SetConversionFactor(IShapefile* sf)
 	{
 		VARIANT_BOOL vb;
 		proj->get_IsGeographic(&vb);
-		this->conversionFactor = vb ? m_globalSettings.clipperGcsMultiplicationFactor : 1.0;;
-		
+		this->conversionFactor = vb ? m_globalSettings.clipperGcsMultiplicationFactor : 1000.0;		
 	}
 }
 

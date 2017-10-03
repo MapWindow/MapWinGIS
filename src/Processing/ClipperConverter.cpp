@@ -38,7 +38,10 @@ ClipperLib::Paths* ClipperConverter::Shape2ClipperPolygon(IShape* shp)
 		shp->get_EndOfPart(i, &end);
 
 		VARIANT_BOOL vbretval;
-		for (int j = begin; j <= end; j++ )
+		// The new Clipper doesn't need to be closed, so skip 
+		// the last point which is the same as the first point
+		// to not waste memory.
+		for (int j = begin; j < end; j++ )
 		{
 			ClipperLib::IntPoint pnt;
 			shp->get_XY(j, &x, &y, &vbretval);
@@ -163,6 +166,7 @@ IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Paths* polygon)
 			}
 		}
 	}
+	// TODO: Check if is invalid, fix if so:
 	return shp;
 }
 
