@@ -271,8 +271,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool DrawLine(IntPtr hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor)
+        public bool DrawLine(IntPtr hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }
@@ -291,8 +293,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool DrawLineVB(int hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor)
+        public bool DrawLineVB(int hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }
@@ -308,8 +312,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool DrawPoint(IntPtr hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor)
+        public bool DrawPoint(IntPtr hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }
@@ -325,8 +331,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool DrawPointVB(int hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor)
+        public bool DrawPointVB(int hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }
@@ -345,8 +353,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool DrawRectangle(IntPtr hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor)
+        public bool DrawRectangle(IntPtr hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }
@@ -365,8 +375,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool DrawRectangleVB(int hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor)
+        public bool DrawRectangleVB(int hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }
@@ -384,8 +396,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool DrawShape(IntPtr hdc, float x, float y, Shape Shape, bool drawVertices, int clipWidth, int clipHeight, uint BackColor)
+        public bool DrawShape(IntPtr hdc, float x, float y, Shape Shape, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }
@@ -403,8 +417,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool DrawShapeVB(int hdc, float x, float y, Shape Shape, bool drawVertices, int clipWidth, int clipHeight, uint BackColor)
+        public bool DrawShapeVB(int hdc, float x, float y, Shape Shape, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }

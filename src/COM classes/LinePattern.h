@@ -102,8 +102,8 @@ public:
 	STDMETHOD(get_Line)(int Index, ILineSegment** retVal);
 	STDMETHOD(put_Line)(int Index, ILineSegment* retVal);
 	
-	STDMETHOD(Draw)(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal);
-	STDMETHOD(DrawVB)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal);
+	STDMETHOD(Draw)(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
+	STDMETHOD(DrawVB)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
 
 	STDMETHOD(get_Transparency)(BYTE *retVal);
 	STDMETHOD(put_Transparency)(BYTE newVal);
@@ -124,7 +124,7 @@ private:
 public:
 	bool DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(CString ElementName);
-	VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor);
+	VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LinePattern), CLinePattern)
