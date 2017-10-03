@@ -102,8 +102,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on successful drawing and false on failure.</returns>
-        public bool Draw(IntPtr hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor)
+        public bool Draw(IntPtr hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }
@@ -119,8 +121,10 @@ namespace MapWinGIS
         /// <param name="clipHeight">The height of the clipping rectangle.</param>
         /// <param name="BackColor">The back color of the device context the drawing is performed at.
         /// The value should be specified to ensure correct blending when semi-transparent colors are used.</param>
+        /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
+        /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on successful drawing and false on failure.</returns>
-        public bool DrawVB(int hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor)
+        public bool DrawVB(int hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
         }

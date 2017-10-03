@@ -4644,7 +4644,8 @@ interface IShapeDrawingOptions : IDispatch{
 
 	[id(28), helpstring("method DrawShape")] HRESULT DrawShape([in]int** hdc, [in]float x, [in]float y, [in]IShape* shape, [in]VARIANT_BOOL drawVertices, 
 															   [in]int clipWidth, [in]int clipHeight, 
-															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+															   [out, retval] VARIANT_BOOL* retVal);
 	
 	[propget, id(29), helpstring("property PointCharacter")] HRESULT PointCharacter([out, retval] short *pVal);
 	[propput, id(29), helpstring("property PointCharacter")] HRESULT PointCharacter([in] short newVal);
@@ -4659,11 +4660,13 @@ interface IShapeDrawingOptions : IDispatch{
 
 	[id(34), helpstring("method DrawRectangle")] HRESULT DrawRectangle([in]int** hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices, 
 																	   [in, optional, defaultvalue(0)]int clipWidth, [in, optional, defaultvalue(0)]int clipHeight, 
-																	   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+																	   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+																	   [out, retval] VARIANT_BOOL* retVal);
 	
 	[id(35), helpstring("method DrawPoint")] HRESULT DrawPoint([in]int** hdc,  [in]float x, [in]float y,
 															   [in, optional, defaultvalue(0)]int clipWidth, [in, optional, defaultvalue(0)]int clipHeight, 
-															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+															   [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(36), helpstring("property VerticesVisible")] HRESULT VerticesVisible([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(36), helpstring("property VerticesVisible")] HRESULT VerticesVisible([in] VARIANT_BOOL newVal);
@@ -4678,7 +4681,8 @@ interface IShapeDrawingOptions : IDispatch{
 	
 	[id(45), helpstring("method DrawLine")] HRESULT DrawLine([in]int** hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices,
 															 [in]int clipWidth, [in]int clipHeight, 
-															 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+															 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+															 [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(46), helpstring("property LinePattern")] HRESULT LinePattern([out, retval] ILinePattern** pVal);
 	[propput, id(46), helpstring("property LinePattern")] HRESULT LinePattern([in] ILinePattern* newVal);
@@ -4696,22 +4700,26 @@ interface IShapeDrawingOptions : IDispatch{
 	
 	[id(54), helpstring("method DrawPointVB")] HRESULT DrawPointVB([in]int hdc, [in]float x, [in]float y, 
 																   [in, optional, defaultvalue(0)] int clipWidth, [in, optional, defaultvalue(0)] int clipHeight,  
-																   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+																   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+																   [out, retval] VARIANT_BOOL* retVal);
 
 	[id(55), helpstring("method DrawLineVB")] HRESULT DrawLineVB([in]int hdc, [in]float x, [in]float y, [in]int width, [in]int height,
 																 [in]VARIANT_BOOL drawVertices,														 
 																 [in] int clipWidth, [in] int clipHeight,
-																 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+																 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+																 [out, retval] VARIANT_BOOL* retVal);
 	
 	[id(56), helpstring("method DrawRectangleVB")] HRESULT DrawRectangleVB([in] int hdc, [in] float x, [in] float y, [in] int width, [in] int height,
 														   [in] VARIANT_BOOL drawVertices, 
 														   [in, optional, defaultvalue(0)] int clipWidth, [in, optional, defaultvalue(0)] int clipHeight,   
-														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														   [out, retval] VARIANT_BOOL* retVal);
 	
 	[id(57), helpstring("method DrawShapeVB")] HRESULT DrawShapeVB([in]int hdc, [in]float x, [in]float y, [in]IShape* shape,
 														   [in]VARIANT_BOOL drawVertices, 
 														   [in] int clipWidth, [in] int clipHeight,   
-														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														   [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(58), helpstring("property DynamicVisibility")] HRESULT DynamicVisibility([out, retval]VARIANT_BOOL* retval);
 	[propput, id(58), helpstring("property DynamicVisibility")] HRESULT DynamicVisibility([in]VARIANT_BOOL newVal);
@@ -5455,7 +5463,8 @@ interface ILinePattern : IDispatch{
 	[id(11), helpstring("method RemoveItem")] HRESULT RemoveItem([in]int Index, [out, retval]VARIANT_BOOL* retVal);
 	[id(12), helpstring("method Clear")] HRESULT Clear();
 	[id(13), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
-													 [in, optional, defaultvalue(16777215) ]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
+													[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+													[out, retval]VARIANT_BOOL* retVal);
 	
 	[propget, id(14), helpstring("property Transparency")] HRESULT Transparency( [out, retval]BYTE* retVal);
 	[propput, id(14), helpstring("property Transparency")] HRESULT Transparency( [in]BYTE newVal);
@@ -5464,7 +5473,8 @@ interface ILinePattern : IDispatch{
 	[id(16), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
 
 	[id(17), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
-													 [in, optional, defaultvalue(16777215) ]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
+														[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														[out, retval]VARIANT_BOOL* retVal);
 };
 
 /***************************  LineSegment Interface  ********************************/
@@ -5498,11 +5508,13 @@ interface ILineSegment : IDispatch{
 	[propget, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [out, retval]float* retVal);
 	[propput, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [in]float newVal);
 	[id(11), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
-													 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
+													[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+													[out, retval]VARIANT_BOOL* retVal);
 	[propget, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [out, retval]OLE_COLOR* retVal);
 	[propput, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [in]OLE_COLOR newVal);
 	[id(13), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
-													 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
+														[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														[out, retval]VARIANT_BOOL* retVal);
 };
 
 /************************************  MapWinGIS Library  ********************************/

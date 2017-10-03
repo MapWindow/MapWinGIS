@@ -111,8 +111,8 @@ public:
 	STDMETHOD(put_MarkerOffset)(float newVal);
 	STDMETHOD(get_MarkerOutlineColor)(OLE_COLOR* retVal);
 	STDMETHOD(put_MarkerOutlineColor)(OLE_COLOR newVal);
-	STDMETHOD(Draw)(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal);
-	STDMETHOD(DrawVB)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal);
+	STDMETHOD(Draw)(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
+	STDMETHOD(DrawVB)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
 	STDMETHOD(Draw)(Gdiplus::Graphics& g, BYTE transparency, int ImageWidth, int ImageHeight, int xOrigin, int yOrigin, VARIANT_BOOL* retVal);
 
 private:
@@ -129,7 +129,7 @@ private:
 	VARIANT_BOOL _markerFlipFirst;
 
 public:
-	VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor);
+	VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha);
 
 };
 OBJECT_ENTRY_AUTO(__uuidof(LineSegment), CLineSegment)
