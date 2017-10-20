@@ -28,14 +28,15 @@
 void ClipperConverter::SetConversionFactor(IShapefile* sf)
 {
 	if (!sf) return;
-	CComPtr<IGeoProjection> proj = NULL;
-	sf->get_GeoProjection(&proj);
-	if (proj)
-	{
-		VARIANT_BOOL vb;
-		proj->get_IsGeographic(&vb);
-		this->conversionFactor = vb ? m_globalSettings.clipperGcsMultiplicationFactor : 1000.0;		
-	}
+	//CComPtr<IGeoProjection> proj = NULL;
+	//sf->get_GeoProjection(&proj);
+	//if (proj)
+	//{
+	//	VARIANT_BOOL vb;
+	//	proj->get_IsGeographic(&vb);
+	//	this->conversionFactor = vb ? m_globalSettings.clipperGcsMultiplicationFactor : 100000.0;		
+	//}
+	this->conversionFactor = m_globalSettings.clipperGcsMultiplicationFactor;
 }
 
 //**********************************************************************

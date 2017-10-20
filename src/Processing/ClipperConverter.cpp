@@ -100,6 +100,11 @@ IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Paths* polygon)
 	
 	VARIANT_BOOL vbretval;
 	shp->Create(SHP_POLYGON, &vbretval);
+	if (!vbretval)
+	{
+		shp->Release();
+		return NULL;
+	}
 
 	double x, y;
 
@@ -166,7 +171,6 @@ IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Paths* polygon)
 			}
 		}
 	}
-	// TODO: Check if is invalid, fix if so:
 	return shp;
 }
 

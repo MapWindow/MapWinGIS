@@ -52,7 +52,8 @@ namespace ConsoleApplication1
             //t.CaptureSnapshot();
 
             var t = new ClipperTests();
-            t.DissolveSmallfileClipper();
+            // t.DissolveSmallfileClipper();
+            t.VerySmallClipClipper();
 
             //var t = new UtilTests();
             //t.ZonalStatistics();
