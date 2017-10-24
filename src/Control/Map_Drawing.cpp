@@ -257,6 +257,9 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 
 				// passing layer buffer to the main buffer
 				g->DrawImage(_layerBitmap, 0.0f, 0.0f);
+
+				// clean up
+				delete gLayers;
 			}
 
 			// fire external after layer drawing code
@@ -338,6 +341,9 @@ void CMapView::RedrawWmsLayers(Gdiplus::Graphics* g)
 				drawer.DrawTiles(manager, GetMapProjection(), _isSnapshot, _projectionChangeCount);
 
 				g->DrawImage(wmsBuffer, 0.0f, 0.0f);
+
+				// clean up
+				delete gWms;
 			}
 		}
 	}
@@ -645,8 +651,9 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 					gTiles->Flush();
 					wasReused = true;
 				}
-				delete gTemp;
 			}
+			// clean up
+			delete gTemp;
 		}
 		
 		if (!wasReused) {
@@ -667,6 +674,9 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 	if (initialization || get_TileManager()->UndrawnTilesExist()) {
 		DrawTiles(gTiles);		
 	}
+
+	// clean up
+	delete gTiles;
 }
 
 // ***************************************************************

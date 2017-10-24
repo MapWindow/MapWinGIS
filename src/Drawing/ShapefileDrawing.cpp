@@ -1246,19 +1246,22 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 				}
 				else if ( options->drawingMode == vdmGDIMixed )
 				{
-					m_hdc = _graphics->GetHDC();
+					//m_hdc = _graphics->GetHDC();
 					_dc->EndPath();
 					_dc->StrokePath();
-					_graphics->ReleaseHDC(m_hdc);
+					//_graphics->ReleaseHDC(m_hdc);
 				}
 			}
 		}
 		
-		m_hdc = _graphics->GetHDC();
-		options->ReleaseGdiBrushAndPen(_dc);
-		_graphics->ReleaseHDC(m_hdc);
-		_dc = NULL;
-		
+		if (drawingMode == vdmGDIMixed)
+		{
+			//m_hdc = _graphics->GetHDC();
+			options->ReleaseGdiBrushAndPen(_dc);
+			//_graphics->ReleaseHDC(m_hdc);
+			_dc = NULL;
+		}
+
 		// selection drawing: GDI+
 		if (drawSelection && m_selectionTransparency > 0)
 		{
