@@ -884,13 +884,26 @@ void CDrawingOptionsEx::DrawPointSymbol(Gdiplus::Graphics& g, CDC* dc, Gdiplus::
 					mtx.Rotate(-angles[j]);
 				}
 
+				// if reflecting
+				if (this->pointReflectionType != prtNone)
+				{
+					Gdiplus::Matrix flipMatrix;
+					// set up appropriate matrix
+					if (this->pointReflectionType == prtLeftToRight)
+						flipMatrix.SetElements(-1, 0, 0, 1, 0, 0);
+					else if (this->pointReflectionType == prtTopToBottom)
+						flipMatrix.SetElements(1, 0, 0, -1, 0, 0);
+					// flip the matrix
+					mtx.Multiply(&flipMatrix);
+				}
+
 				g.SetTransform(&mtx);
 
 				if (this->bitmapPlus && this->fillVisible)
 				{
 					Gdiplus::Rect rect(-newWidth/2, -newHeight/2, newWidth, newHeight);
 					g.DrawImage(this->bitmapPlus, rect, 0, 0, this->bitmapPlus->GetWidth(), 
-										 this->bitmapPlus->GetHeight(), Gdiplus::UnitPixel, this->imgAttributes);
+								this->bitmapPlus->GetHeight(), Gdiplus::UnitPixel, this->imgAttributes);
 				}
 				mtx.Reset();
 			}
@@ -955,7 +968,20 @@ void CDrawingOptionsEx::DrawPointSymbol(Gdiplus::Graphics& g, CDC* dc, Gdiplus::
 				mtx.Rotate((float)this->rotation);
 				if (angles) 
 					mtx.Rotate(-angles[j]);
-				
+
+				// if reflecting
+				if (this->pointReflectionType != prtNone)
+				{
+					Gdiplus::Matrix flipMatrix;
+					// set up appropriate matrix
+					if (this->pointReflectionType == prtLeftToRight)
+						flipMatrix.SetElements(-1, 0, 0, 1, 0, 0);
+					else if (this->pointReflectionType == prtTopToBottom)
+						flipMatrix.SetElements(1, 0, 0, -1, 0, 0);
+					// flip the matrix
+					mtx.Multiply(&flipMatrix);
+				}
+
 				g.SetTransform(&mtx);
 				
 				if (path2)

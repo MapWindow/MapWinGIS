@@ -666,6 +666,16 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Gets or sets the type of reflection to apply to the point symbol.
+        /// </summary>
+        /// <remarks>Applies when ShapeDrawingOptions.PointType is equal to ptSymbolFontCharacter or ptSymbolPicture.</remarks>
+        public tkPointReflectionType PointReflection
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
         /// Gets or sets the predefined shape for the point symbol.
         /// </summary>
         /// <remarks>It is used when ShapeDrawingOptions.PointType is equal to ptSymbolStandard.</remarks>

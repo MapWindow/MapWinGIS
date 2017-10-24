@@ -956,6 +956,19 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 
 				_graphics->RotateTransform(angle);
 					
+				// if reflecting
+				if (options->pointReflectionType != prtNone)
+				{
+					Gdiplus::Matrix flipMatrix;
+					// set up appropriate transformation
+					if (options->pointReflectionType == prtLeftToRight)
+						flipMatrix.SetElements(-1, 0, 0, 1, 0, 0);
+					else if (options->pointReflectionType == prtTopToBottom)
+						flipMatrix.SetElements(1, 0, 0, -1, 0, 0);
+					// flip the matrix
+					_graphics->MultiplyTransform(&flipMatrix);
+				}
+
 				if (!options->alignIconByBottom)
 				{
 					_graphics->TranslateTransform((float)-wd, (float)-ht);
@@ -992,6 +1005,19 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					_graphics->GetTransform(&mtxInit);
 						
 					_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
+
+					// if reflecting
+					if (options->pointReflectionType != prtNone)
+					{
+						Gdiplus::Matrix flipMatrix;
+						// set up appropriate transformation
+						if (options->pointReflectionType == prtLeftToRight)
+							flipMatrix.SetElements(-1, 0, 0, 1, 0, 0);
+						else if (options->pointReflectionType == prtTopToBottom)
+							flipMatrix.SetElements(1, 0, 0, -1, 0, 0);
+						// flip the matrix
+						_graphics->MultiplyTransform(&flipMatrix);
+					}
 
 					if (!drawSelection || m_selectionTransparency < 255)
 					{
