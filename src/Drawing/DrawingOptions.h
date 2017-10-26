@@ -165,6 +165,7 @@ public:
 		fillGradientType = gtLinear;
 		fillType = ftStandard;
 		pointShapeType = ptShapeRegular;
+		pointReflectionType = prtNone;
 		fillGradientBounds = gbPerShape;
 		frameType = lfRectangle;
 
