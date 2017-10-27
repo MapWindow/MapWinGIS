@@ -1287,6 +1287,29 @@ STDMETHODIMP CShapeDrawingOptions::put_PointRotation (double newVal)
 }
 
 // ****************************************************************
+//		get_PointReflection
+// ****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_PointReflection(tkPointReflectionType* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _options.pointReflectionType;
+	return S_OK;
+}
+STDMETHODIMP CShapeDrawingOptions::put_PointReflection(tkPointReflectionType newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (newVal >= 0 && newVal <= 2)
+	{
+		_options.pointReflectionType = newVal;
+	}
+	else
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+	}
+	return S_OK;
+}
+
+// ****************************************************************
 //		get_PointSidesCount
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointSidesCount (long *pVal)
@@ -1537,6 +1560,9 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 	if (opt->rotation != _options.rotation)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Rotation", CPLString().Printf("%f", _options.rotation));
 	
+	if (opt->pointReflectionType != _options.pointReflectionType)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointReflectionType", CPLString().Printf("%d", (int)_options.pointReflectionType));
+
 	if (opt->scaleX != _options.scaleX)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ScaleX", CPLString().Printf("%f", _options.scaleX));
 	
@@ -1692,6 +1718,9 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	
 	s = CPLGetXMLValue( node, "Rotation", NULL );
 	_options.rotation = (s == "") ? opt->rotation : Utility::atof_custom(s);
+	
+	s = CPLGetXMLValue( node, "PointReflectionType", NULL );
+	_options.pointReflectionType = (s == "") ? opt->pointReflectionType : (tkPointReflectionType)atoi(s.GetString());
 	
 	s = CPLGetXMLValue( node, "ScaleX", NULL );
 	_options.scaleX = (s == "") ? opt->scaleX : Utility::atof_custom(s);

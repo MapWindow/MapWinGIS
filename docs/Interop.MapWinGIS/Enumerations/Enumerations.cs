@@ -1171,6 +1171,27 @@ namespace MapWinGIS
     }
 
     /// <summary>
+    /// Available options applicable to point reflection
+    /// </summary>
+    public enum tkPointReflectionType
+    {
+        /// <summary>
+        /// No reflection is applied
+        /// </summary>
+        prtNone = 0,
+
+        /// <summary>
+        /// Symbol is flipped left-to-right
+        /// </summary>
+        prtLeftToRight = 1, 
+
+        /// <summary>
+        /// Symbol is flipped top-to-bottom
+        /// </summary>
+        prtTopToBottom = 2,
+    }
+
+    /// <summary>
     /// The available parameters for the projections.
     /// </summary>
     /// \new48 Added in version 4.8

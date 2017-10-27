@@ -88,7 +88,8 @@ void GdiPlusLabelDrawer::TryAutoSetRenderingHint(CLabelOptions* options, bool ha
 	if (m_globalSettings.autoChooseRenderingHintForLabels)
 	{
 		Gdiplus::TextRenderingHint hint = TextRenderingHintSingleBitPerPixelGridFit;
-		if (hasRotation)
+		// JIRA MWGIS-74: not only rotation, but GraphicsPath-related functions also require AntiAliasing
+		if (hasRotation || options->shadowVisible || options->haloVisible || options->fontOutlineVisible)
 		{
 			if (options->frameVisible && options->frameTransparency == 255) {
 				hint = TextRenderingHintClearTypeGridFit;
@@ -148,28 +149,21 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX,
 			gp->StartFigure();
 			FontFamily fam;
 			font->GetFamily(&fam);
-			gp->AddString(text, text.GetLength(), &fam, font->GetStyle(), font->GetSize(), rect, &stringFormat);
+			// JIRA MWGIS-74: GraphicsPath font units are 'em's rather than Points
+			Gdiplus::REAL factor = _graphics->GetDpiX() / 72; // 4.0 / 3.0;
+			gp->AddString(text, text.GetLength(), &fam, font->GetStyle(), (font->GetSize() * factor), rect, &stringFormat);
 			gp->CloseFigure();
 		}
 
 		// drawing outlines
 		if (options->shadowVisible)
 		{
-			//Gdiplus::Matrix mtx1;
-			//mtx1.Translate((Gdiplus::REAL)options->shadowOffsetX, (Gdiplus::REAL)options->shadowOffsetY);
-			//gp->Transform(&mtx1);
-			//_graphics->FillPath(_brushShadow, gp);
-			//mtx1.Translate(Gdiplus::REAL(-2 * options->shadowOffsetX), Gdiplus::REAL(-2 * options->shadowOffsetY));
-			//gp->Transform(&mtx1);
-
-			// jfaust: The FillPath calls used for Halo, Outline, and Shadow are not properly filling the full area.
-			// for shadowing, we don't need the fill, so I am using the concept borrowed from DrawStringWithShade()
-			// (which is used to draw the coordinates in the upper corner of the map).  I will revisit the FillPath
-			// option for Halo and Outline affects, but for now, I wanted to at least get the Shadow working.
-			_graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushShadow);
-			rect.X -= 1.0f;
-			rect.Y -= 1.0f;
-			// foreground text will be drawn below, as it is for all affects (so as not to alter previous behavior)
+			Gdiplus::Matrix mtx1;
+			mtx1.Translate((Gdiplus::REAL)options->shadowOffsetX, (Gdiplus::REAL)options->shadowOffsetY);
+			gp->Transform(&mtx1);
+			_graphics->FillPath(_brushShadow, gp);
+			mtx1.Translate(Gdiplus::REAL(-1 * options->shadowOffsetX), Gdiplus::REAL(-1 * options->shadowOffsetY));
+			gp->Transform(&mtx1);
 		}
 
 		if (options && options->haloVisible)

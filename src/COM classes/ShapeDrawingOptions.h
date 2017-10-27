@@ -126,11 +126,13 @@ public:
 	STDMETHOD(get_FillGradientType)(tkGradientType* pVal);
 	STDMETHOD(put_FillGradientType)(tkGradientType newVal);
 	STDMETHOD(get_PointType)(tkPointSymbolType* pVal);
-	STDMETHOD(put_PointType)(tkPointSymbolType newVal);			
+	STDMETHOD(put_PointType)(tkPointSymbolType newVal);
 	STDMETHOD(get_FillColor2)(OLE_COLOR *pVal);
 	STDMETHOD(put_FillColor2)(OLE_COLOR newVal);
 	STDMETHOD(get_PointRotation)(double *pVal);
 	STDMETHOD(put_PointRotation)(double newVal);
+	STDMETHOD(get_PointReflection)(tkPointReflectionType* pVal);
+	STDMETHOD(put_PointReflection)(tkPointReflectionType newVal);
 
 	STDMETHOD(get_PointSidesCount)(long *pVal);
 	STDMETHOD(put_PointSidesCount)(long newVal);

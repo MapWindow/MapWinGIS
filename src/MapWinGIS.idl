@@ -1815,6 +1815,17 @@ enum tkScalebarUnits
 	}tkDefaultPointSymbol;
 
 	typedef
+		[uuid (D763CF97-9280-4CAA-9C22-9CDC422357B8),
+		helpstring("tkPointReflectionType enumeration"),
+		]
+	enum tkPointReflectionType
+	{
+		prtNone = 0,
+		prtLeftToRight = 1,
+		prtTopToBottom = 2,
+	}tkPointReflectionType;
+
+	typedef
 	[	uuid  (FB3763C2-1D27-419f-A7CF-5A7B350E00E1),
 		helpstring("tkGradientBounds enumeration"),
 	]
@@ -4738,6 +4749,9 @@ interface IShapeDrawingOptions : IDispatch{
 
 	[propget, id(64), helpstring("property FrameType")] HRESULT FrameType([out, retval] tkLabelFrameType* pVal);
 	[propput, id(64), helpstring("property FrameType")] HRESULT FrameType([in] tkLabelFrameType newVal);
+
+	[propget, id(65), helpstring("property PointReflection")] HRESULT PointReflection([out, retval] tkPointReflectionType* pVal);
+	[propput, id(65), helpstring("property PointReflection")] HRESULT PointReflection([in] tkPointReflectionType newVal);
 };
 
 // ***********************************  Label Interface  **********************************
