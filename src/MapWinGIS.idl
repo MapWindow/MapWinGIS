@@ -6533,8 +6533,8 @@ library MapWinGIS
 			//{{AFX_ODL_METHOD(CMapView)
 			[id(15), propput, nonbrowsable] void GlobalCallback(IDispatch* nNewValue);
 			[id(15), propget, nonbrowsable] IDispatch* GlobalCallback();
-			[id(17), propput, nonbrowsable] void Extents(IDispatch* nNewValue);
-			[id(17), propget, nonbrowsable] IDispatch* Extents();
+			[id(17), propput, nonbrowsable] void Extents(IExtents* nNewValue);
+			[id(17), propget, nonbrowsable] IExtents* Extents();
 
 #define REDRAW_API		
 #ifdef REDRAW_API	
