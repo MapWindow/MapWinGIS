@@ -2238,7 +2238,7 @@ namespace AxMapWinGIS
         /// Gets or sets the extents of the map using an Extents object. 
         /// </summary>
         /// <remarks>If the given extents do not fit the aspect ratio of the map, the map will fit the given extents as well as possible.</remarks>
-        public object Extents
+        public MapWinGIS.Extents Extents
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
