@@ -974,7 +974,8 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 						// can't be used with associative containers
 	long percent = 0;
 	int size = (int)_shapeData.size();
-	std::vector<ClipperLib::Polygons*> polygons;
+	// std::vector<ClipperLib::Polygons*> polygons;
+	std::vector<ClipperLib::Paths*> polygons;
 	polygons.resize(size, NULL);
 
 	ClipperConverter ogr(this);
@@ -998,7 +999,8 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 		this->GetValidatedShape(i, &shp);
 		if (!shp) continue;
 		
-		ClipperLib::Polygons* poly = ogr.Shape2ClipperPolygon(shp);
+		// ClipperLib::Polygons* poly = ogr.Shape2ClipperPolygon(shp);
+		ClipperLib::Paths* poly = ogr.Shape2ClipperPolygon(shp);
 		shp->Release();
 
 		if (poly == NULL) continue;
@@ -1007,7 +1009,8 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 		
 		if(shapeMap.find(val) != shapeMap.end())
 		{
-			shapeMap[val]->AddPolygons(*poly, ClipperLib::ptClip);
+			// shapeMap[val]->AddPolygons(*poly, ClipperLib::ptClip);
+			shapeMap[val]->AddPaths(*poly, ClipperLib::ptClip, true);
 			polygons[i] = poly;
 			if (calcStats) {
 				indicesMap[val]->push_back(i);
@@ -1016,7 +1019,8 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 		else
 		{
 			shapeMap[val] = new ClipperLib::Clipper();
-			shapeMap[val]->AddPolygons(*poly, ClipperLib::ptClip);
+			// shapeMap[val]->AddPolygons(*poly, ClipperLib::ptClip);
+			shapeMap[val]->AddPaths(*poly, ClipperLib::ptClip, true);
 			polygons[i] = poly;
 
 			if (calcStats) {
@@ -1034,7 +1038,8 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 	while(p != shapeMap.end())
 	{
 		IShape* shp = NULL; 
-		ClipperLib::Polygons result;
+		// ClipperLib::Polygons result;
+		ClipperLib::Paths result;
 		ClipperLib::Clipper* clip = p->second;
 		if (clip)
 		{
@@ -1965,8 +1970,9 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 	this->get_NumShapes(&numShapesSubject);		
 	sfOverlay->get_NumShapes(&numShapesClip);	
 	
-	vector<ClipperLib::Polygons*> vPolygons;		// we shall create vectors for both clipper and GEOS 
-	vPolygons.assign(numShapesClip, NULL);	// this won't take much RAM or time
+	// vector<ClipperLib::Polygons*> vPolygons;	// we shall create vectors for both clipper and GEOS 
+	vector<ClipperLib::Paths*> vPolygons;	// we shall create vectors for both clipper and GEOS 
+	vPolygons.assign(numShapesClip, NULL);		// this won't take much RAM or time
 	
 	ClipperLib::Clipper clp; 
 	ClipperConverter ogr(this);
@@ -1990,7 +1996,8 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 			IShape* shp1 = NULL;
 			this->GetValidatedShape(subjectId, &shp1);
 			if (!shp1) continue;
-			ClipperLib::Polygons* poly1 = ogr.Shape2ClipperPolygon(shp1);
+			// ClipperLib::Polygons* poly1 = ogr.Shape2ClipperPolygon(shp1);
+			ClipperLib::Paths* poly1 = ogr.Shape2ClipperPolygon(shp1);
 			shp1->Release();
 
 			if (poly1)
@@ -2018,7 +2025,8 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 
 					vector<IShape* > vShapes;
 					
-					ClipperLib::Polygons* poly2 = NULL;
+					// ClipperLib::Polygons* poly2 = NULL;
+					ClipperLib::Paths* poly2 = NULL;
 					if (vPolygons[clipId] == NULL)
 					{
 						IShape* shp2 = NULL;
@@ -2034,24 +2042,32 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 					}
 					
 					if (poly2)
-						clp.AddPolygons(*poly2, ClipperLib::ptClip);
+					{
+						// clp.AddPolygons(*poly2, ClipperLib::ptClip);
+						clp.AddPaths(*poly2, ClipperLib::ptClip, true);
+					}
 				}
 				
 				// in case there are several input polygons, they should be merged before clipping
 				if (shapeIds.size() > 1)
 				{
-					ClipperLib::Polygons polyUnion;
+					// ClipperLib::Polygons polyUnion;
+					ClipperLib::Paths polyUnion;
 					clp.Execute(ClipperLib::ctUnion, polyUnion);
 					clp.Clear();
-					clp.AddPolygons(polyUnion, ClipperLib::ptClip);
+					// clp.AddPolygons(polyUnion, ClipperLib::ptClip);
+					clp.AddPaths(polyUnion, ClipperLib::ptClip, true);
 				}
 				
 				// adding subject polygon
-				if (poly1)
-					clp.AddPolygons(*poly1, ClipperLib::ptSubject);
+				if (poly1){
+					// clp.AddPolygons(*poly1, ClipperLib::ptSubject);
+					clp.AddPaths(*poly1, ClipperLib::ptSubject, true);
+				}
 
 				// do clipping
-				ClipperLib::Polygons polyResult;
+				// ClipperLib::Polygons polyResult;
+				ClipperLib::Paths polyResult;
 				if (clp.Execute(ClipperLib::ctIntersection, polyResult))
 				{
 					IShape* shp = ogr.ClipperPolygon2Shape(&polyResult);
@@ -2181,7 +2197,8 @@ IShapefile* CShapefile::IntersectionClipperNoAttributes(VARIANT_BOOL SelectedOnl
 	ClipperConverter::AddPolygons(this, clp, ClipperLib::PolyType::ptSubject, SelectedOnlySubject == VARIANT_TRUE);
 	ClipperConverter::AddPolygons(sfClip, clp, ClipperLib::PolyType::ptClip, SelectedOnlyClip == VARIANT_TRUE);
 	
-	ClipperLib::Polygons polyResult;
+	// ClipperLib::Polygons polyResult;
+	ClipperLib::Paths polyResult;
 	if (clp.Execute(ClipperLib::ClipType::ctIntersection, polyResult)) {
 		
 		ClipperConverter converter(sfResult);
@@ -2211,8 +2228,9 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 	this->get_NumShapes(&numShapesSubject);		
 	sfClip->get_NumShapes(&numShapesClip);	
 	
-	vector<ClipperLib::Polygons*> vPolygons;		// we shall create vectors for both clipper and GEOS 
-	vPolygons.assign(numShapesClip, NULL);	// this won't take much RAM or time
+	// vector<ClipperLib::Polygons*> vPolygons;	// we shall create vectors for both clipper and GEOS 
+	vector<ClipperLib::Paths*> vPolygons;	// we shall create vectors for both clipper and GEOS 
+	vPolygons.assign(numShapesClip, NULL);		// this won't take much RAM or time
 	
 	ClipperLib::Clipper clp; 
 	ClipperConverter converter(this);
@@ -2264,7 +2282,8 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 			IShape* shp1 = NULL;
 			this->GetValidatedShape(subjectId, &shp1);
 			if (!shp1) continue;
-			ClipperLib::Polygons* poly1 = converter.Shape2ClipperPolygon(shp1);
+			// ClipperLib::Polygons* poly1 = converter.Shape2ClipperPolygon(shp1);
+			ClipperLib::Paths* poly1 = converter.Shape2ClipperPolygon(shp1);
 
 			double initArea = 0.0;
 			shp1->get_Area(&initArea);
@@ -2297,8 +2316,9 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 
 					vector<IShape* > vShapes;
 					
-					// processng with Clipper
-					ClipperLib::Polygons* poly2 = NULL;
+					// Processing with Clipper
+					// ClipperLib::Polygons* poly2 = NULL;
+					ClipperLib::Paths* poly2 = NULL;
 
 					if (vPolygons[clipId] == NULL)
 					{
@@ -2325,12 +2345,19 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 					if (poly2)
 					{
 						if (poly1)
-							clp.AddPolygons(*poly1, ClipperLib::ptSubject);
+						{
+							// clp.AddPolygons(*poly1, ClipperLib::ptSubject);
+							clp.AddPaths(*poly1, ClipperLib::ptSubject, true);
+						}
 						if (poly2)
-							clp.AddPolygons(*poly2, ClipperLib::ptClip);
+						{
+							// clp.AddPolygons(*poly2, ClipperLib::ptClip);
+							clp.AddPaths(*poly2, ClipperLib::ptClip, true);
+						}
 
 						// do clipping
-						ClipperLib::Polygons polyResult;
+						// ClipperLib::Polygons polyResult;
+						ClipperLib::Paths polyResult;
 						if (clp.Execute(ClipperLib::ctIntersection, polyResult))
 						{
 							IShape* shp = converter.ClipperPolygon2Shape(&polyResult);
@@ -2562,8 +2589,9 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 	sfSubject->get_NumShapes(&numShapesSubject);		
 	sfClip->get_NumShapes(&numShapesClip);	
 	
-	vector<ClipperLib::Polygons*> vPolygons;		// we shall create vectors for both clipper and GEOS 
-	vPolygons.assign(numShapesClip, NULL);	// this won't take much RAM or time
+	// vector<ClipperLib::Polygons*> vPolygons;	// we shall create vectors for both clipper and GEOS 
+	vector<ClipperLib::Paths*> vPolygons;		// we shall create vectors for both clipper and GEOS 
+	vPolygons.assign(numShapesClip, NULL);		// this won't take much RAM or time
 	
 	ClipperConverter ogr(sfSubject);
 	
@@ -2592,7 +2620,8 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 			IShape* shp1 = NULL;
 			((CShapefile*)sfSubject)->GetValidatedShape(subjectId, &shp1);
 			if (!shp1) continue;
-			ClipperLib::Polygons* poly1 = ogr.Shape2ClipperPolygon(shp1);
+			// ClipperLib::Polygons* poly1 = ogr.Shape2ClipperPolygon(shp1);
+			ClipperLib::Paths* poly1 = ogr.Shape2ClipperPolygon(shp1);
 			shp1->Release();
 
 			if (poly1)
@@ -2600,7 +2629,8 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 				ClipperLib::Clipper* clp = new ClipperLib::Clipper; 
 
 				// extracting clipping polygons
-				ClipperLib::Polygons* poly2 = NULL;
+				// ClipperLib::Polygons* poly2 = NULL;
+				ClipperLib::Paths* poly2 = NULL;
 				for (int j = 0; j < (int)shapeIds.size(); j++)
 				{
 					// user can abort the operation in any time
@@ -2639,7 +2669,10 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 					}
 					
 					if (poly2)
-						clp->AddPolygons(*poly2, ClipperLib::ptClip);
+					{
+						// clp->AddPolygons(*poly2, ClipperLib::ptClip);
+						clp->AddPaths(*poly2, ClipperLib::ptClip, true);
+					}
 					
 					#ifdef SERIALIZE_POLYGONS
 					SerializePolygon(out, poly2);
@@ -2647,14 +2680,18 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 				}
 				
 				if (poly1)
-					clp->AddPolygons(*poly1, ClipperLib::ptSubject);
+				{
+					// clp->AddPolygons(*poly1, ClipperLib::ptSubject);
+					clp->AddPaths(*poly1, ClipperLib::ptSubject, true);
+				}
 
 				#ifdef SERIALIZE_POLYGONS
 				SerializePolygon(out, poly1);
 				#endif
 
 				// do clipping
-				ClipperLib::Polygons polyResult;
+				// ClipperLib::Polygons polyResult;
+				ClipperLib::Paths polyResult;
 				if (clp->Execute(ClipperLib::ctDifference, polyResult))
 				{
 					IShape* shp = ogr.ClipperPolygon2Shape(&polyResult);

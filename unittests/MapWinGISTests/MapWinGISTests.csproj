@@ -109,6 +109,8 @@
     <Compile Include="ImageTests.cs" />
     <Compile Include="GdalUtilsTests.cs" />
     <Compile Include="DrawingTests.cs" />
+    <Compile Include="ClipperTests.cs" />
+    <Compile Include="AkkerwebTests.cs" />
     <Compile Include="UtilTests.cs" />
   </ItemGroup>
   <ItemGroup>

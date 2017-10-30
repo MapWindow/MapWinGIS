@@ -31,7 +31,7 @@ namespace ConsoleApplication1
             // var t = new GdalTests();
             // t.CreateLayerSQLiteTest();
             // t.GdalInfoHdf5();
-            
+
             //var t = new GdalUtilsTests();
             //t.GdalWarp();
 
@@ -46,14 +46,19 @@ namespace ConsoleApplication1
             //var t = new ImageTests();
             //t.SaveImageShouldFail();
 
-            var t = new DrawingTests();
-            t.Init();
+            //var t = new DrawingTests();
+            //t.Init();
             //t.DrawLabel();
-            t.CaptureSnapshot();
+            //t.CaptureSnapshot();
+
+            var t = new ClipperTests();
+            // t.DissolveSmallfileClipper();
+            t.DissolveLargefileClipper();
 
             //var t = new UtilTests();
             //t.ZonalStatistics();
             //t.ReclassifyRaster();
+            //t.ClipPolygon();
 
             Console.WriteLine("Finished");
             Console.ReadLine();

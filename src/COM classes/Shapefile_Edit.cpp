@@ -193,6 +193,7 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 				}
 			}
 		}
+		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 	
