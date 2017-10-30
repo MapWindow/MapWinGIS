@@ -10,16 +10,18 @@ namespace MapWinGISTests
     [TestClass]
     public class ClipperTests
     {
-        [TestInitialize]
-        public void Init()
+        private static GlobalSettings _settings;
+
+        public ClipperTests()
         {
-            var settings = new GlobalSettings
+            _settings = new GlobalSettings
             {
-                ClipperGcsMultiplicationFactor = 10000000.0, 
+                ClipperGcsMultiplicationFactor = 10000000.0,
                 MinAreaToPerimeterRatio = 0.0001, // Default value
-                MinPolygonArea = 0.1, // Important, default is 1.0
+                MinPolygonArea = 0.01, // Important, default is 1.0
                 ShapeOutputValidationMode = tkShapeValidationMode.TryFixProceedOnFailure
             };
+            Helper.DebugMsg("Test was run at " + DateTime.Now);
         }
 
         #region Dissolve
@@ -40,23 +42,18 @@ namespace MapWinGISTests
             var tempFolder = Helper.WorkingFolder("DissolveLargefile");
             const string sfLocation = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\FishnetClipped_fix.shp";
             var sfOutput = Path.Combine(tempFolder, $"FishnetDissolved-{geometryEngine.ToString()}.shp");
+            if (File.Exists(sfOutput)) Helper.DeleteShapefile(sfOutput);
             const int fieldIndex = 5;
 
-            var sf = new Shapefile();
-            if (!sf.Open(sfLocation))
-                Assert.Fail("Can't open " + sfLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
-            if (sf.HasInvalidShapes()) Debug.WriteLine("Input has invalid shapes");
+            var sf = Helper.OpenShapefile(sfLocation);
 
-            if (File.Exists(sfOutput)) Helper.DeleteShapefile(sfOutput);
-
-            sf.FastMode = true;
             sf.GeometryEngine = geometryEngine;
-            Debug.WriteLine("numShapes Input: " + sf.NumShapes);
+            Helper.DebugMsg("numShapes Input: " + sf.NumShapes);
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var sfDissolved = sf.Dissolve(fieldIndex, false);
-            stopWatch.Stop();
             Helper.DebugMsg("Time it took to dissolve: " + stopWatch.Elapsed);
+            stopWatch.Restart();
 
             Assert.IsNotNull(sfDissolved, "sfDissolved is null: " + sf.ErrorMsg[sf.LastErrorCode]);
 
@@ -64,6 +61,29 @@ namespace MapWinGISTests
             Helper.DebugMsg("NumShapes: " + sfDissolved.NumShapes);
             Helper.CheckValidity(sfDissolved);
             Assert.IsFalse(sfDissolved.HasInvalidShapes(), "Result has invalid shapes");
+            if (!sfDissolved.Close())
+                Assert.Fail("Can't close sfDissolved Error: " + sfDissolved.ErrorMsg[sfDissolved.LastErrorCode]); ;
+            if (!sf.Close())
+                Assert.Fail("Can't close sf Error: " + sf.ErrorMsg[sf.LastErrorCode]); ;
+        }
+
+        [TestCategory("Dissolve"), TestMethod]
+        public void OpenShapefile()
+        {
+            const string sfLocation = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\FishnetClipped_fix.shp";
+            var sf = Helper.OpenShapefile(sfLocation);
+            sf.GeometryEngine = tkGeometryEngine.engineGeos;
+            Helper.DebugMsg("numShapes Input: " + sf.NumShapes);
+
+            // Before closing this shapefile open the file again:
+            var sf2 = Helper.OpenShapefile(sfLocation);
+            sf2.GeometryEngine = tkGeometryEngine.engineGeos;
+            Helper.DebugMsg("numShapes Input: " + sf2.NumShapes);
+
+            if (!sf2.Close())
+                Assert.Fail("Can't close sf2 Error: " + sf2.ErrorMsg[sf2.LastErrorCode]); ;
+            if (!sf.Close())
+                Assert.Fail("Can't close sf Error: " + sf.ErrorMsg[sf.LastErrorCode]); ;
         }
 
         [TestCategory("Dissolve"), TestMethod]
@@ -73,20 +93,14 @@ namespace MapWinGISTests
             const string sfOutput = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\FishnetDissolved_invalid-clipper.shp";
             const int fieldIndex = 5;
 
-            var sf = new Shapefile();
-            if (!sf.Open(sfLocation))
-                Assert.Fail("Can't open " + sfLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
-            if (sf.HasInvalidShapes()) Debug.WriteLine("Input has invalid shapes");
-
+            var sf = Helper.OpenShapefile(sfLocation);
             if (File.Exists(sfOutput)) Helper.DeleteShapefile(sfOutput);
 
-            sf.FastMode = true;
             sf.GeometryEngine = tkGeometryEngine.engineClipper;
-            Debug.WriteLine("numShapes Input: " + sf.NumShapes);
+            Helper.DebugMsg("numShapes Input: " + sf.NumShapes);
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var sfDissolved = sf.Dissolve(fieldIndex, false);
-            stopWatch.Stop();
             Helper.DebugMsg("Time it took to dissolve: " + stopWatch.Elapsed);
             stopWatch.Reset();
 
@@ -95,11 +109,13 @@ namespace MapWinGISTests
             Helper.SaveShapefile(sfDissolved, sfOutput);
             Helper.DebugMsg("NumShapes: " + sfDissolved.NumShapes);
 
-            stopWatch.Start();
-
             Helper.CheckValidity(sfDissolved);
-
             Assert.IsFalse(sfDissolved.HasInvalidShapes(), "Result has invalid shapes");
+
+            if (!sfDissolved.Close())
+                Assert.Fail("Can't close dissolved shapefile Error: " + sfDissolved.ErrorMsg[sfDissolved.LastErrorCode]); ;
+            if (!sf.Close())
+                Assert.Fail("Can't close input shapefile Error: " + sf.ErrorMsg[sf.LastErrorCode]);
         }
 
         [TestCategory("Dissolve"), TestMethod]
@@ -113,7 +129,8 @@ namespace MapWinGISTests
         {
             DissolveSmallfile(tkGeometryEngine.engineGeos);
         }
-        public void DissolveSmallfile(tkGeometryEngine geometryEngine)
+
+        private static void DissolveSmallfile(tkGeometryEngine geometryEngine)
         {
             var tempFolder = Helper.WorkingFolder("DissolveSmallfile");
             // const string sfLocation = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\FewPolygons.shp";
@@ -121,20 +138,15 @@ namespace MapWinGISTests
             var sfOutput = Path.Combine(tempFolder, $"FewPolygons-Dissolved_{geometryEngine.ToString()}.shp");
             const int fieldIndex = 5;
 
-            var sf = new Shapefile();
-            if (!sf.Open(sfLocation))
-                Assert.Fail("Can't open " + sfLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
-            if (sf.HasInvalidShapes()) Debug.WriteLine("Input has invalid shapes");
-
+            var sf = Helper.OpenShapefile(sfLocation);
             if (File.Exists(sfOutput)) Helper.DeleteShapefile(sfOutput);
 
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            sf.FastMode = true;
             sf.GeometryEngine = geometryEngine;
             var sfDissolved = sf.Dissolve(fieldIndex, false);
-            stopWatch.Stop();
             Helper.DebugMsg("Time it took: " + stopWatch.Elapsed);
+            stopWatch.Restart();
             Assert.IsNotNull(sfDissolved, "sfDissolved is null: " + sf.ErrorMsg[sf.LastErrorCode]);
 
             Helper.SaveShapefile(sfDissolved, sfOutput);
@@ -142,7 +154,6 @@ namespace MapWinGISTests
             Assert.AreEqual(12, sfDissolved.NumShapes, 1, "Too few shapes");
 
             Helper.CheckValidity(sfDissolved);
-
             Assert.IsFalse(sfDissolved.HasInvalidShapes(), "Result has invalid shapes");
         }
 
@@ -188,6 +199,11 @@ namespace MapWinGISTests
             Assert.IsFalse(sfClipped.HasInvalidShapes(), "Output file has invalid shapes");
 
             Helper.SaveShapefile(sfClipped, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_FailingClipClipper.shp"));
+
+            if (!sfSubject.Close())
+                Assert.Fail("Can't close sfSubject Error: " + sfSubject.ErrorMsg[sfSubject.LastErrorCode]);
+            if (!sfClipped.Close())
+                Assert.Fail("Can't close sfClipped Error: " + sfClipped.ErrorMsg[sfClipped.LastErrorCode]);
         }
 
         [TestCategory("Clip"), TestMethod]
@@ -205,13 +221,13 @@ namespace MapWinGISTests
         [TestCategory("Clip"), TestMethod]
         public void ClipLargefileClipper()
         {
-            Clipfile(tkGeometryEngine.engineClipper, 5, 1);
+            Clipfile(tkGeometryEngine.engineClipper, 5, 0.5);
         }
 
         [TestCategory("Clip"), TestMethod]
         public void ClipLargefileGeos()
         {
-            Clipfile(tkGeometryEngine.engineGeos, 5, 1);
+            Clipfile(tkGeometryEngine.engineGeos, 5, 0.5);
         }
 
         [TestCategory("Clip"), TestMethod]
@@ -220,7 +236,7 @@ namespace MapWinGISTests
             var tempFolder = Helper.WorkingFolder("CreateFishnet");
             const double multiplier = 1d;
             var sfBorder = CreateBorder(multiplier);
-            Debug.WriteLine("Size of border " + sfBorder.Shape[0].Area);
+            Helper.DebugMsg("Size of border " + sfBorder.Shape[0].Area);
             Helper.SaveShapefile(sfBorder, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_border_{multiplier.ToString(CultureInfo.InvariantCulture)}.shp"));
 
             const double size = 0.5d;
@@ -228,14 +244,22 @@ namespace MapWinGISTests
             sfFishnet.GeoProjection = sfBorder.GeoProjection;
             Helper.SaveShapefile(sfFishnet, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_smallFishnet_{size.ToString(CultureInfo.InvariantCulture)}.shp"));
 
-            if (sfBorder.HasInvalidShapes()) Debug.WriteLine("Border has invalid shapes");
-            if (sfFishnet.HasInvalidShapes()) Debug.WriteLine("Fishnet has invalid shapes");
+            if (sfBorder.HasInvalidShapes()) Helper.DebugMsg("Border has invalid shapes");
+            if (sfFishnet.HasInvalidShapes()) Helper.DebugMsg("Fishnet has invalid shapes");
+
+            if (!sfBorder.Close())
+                Assert.Fail("Can't close sfBorder Error: " + sfBorder.ErrorMsg[sfBorder.LastErrorCode]);
+            if (!sfFishnet.Close())
+                Assert.Fail("Can't close sfClipped Error: " + sfFishnet.ErrorMsg[sfFishnet.LastErrorCode]);
         }
 
         private static void Clipfile(tkGeometryEngine geometryEngine, double multiplier, double size)
         {
+            if (_settings == null) Assert.Fail("Settings are not set");
             var tempFolder = Helper.WorkingFolder("Clipfile");
             var stopWatch = new Stopwatch();
+
+            _settings.MinPolygonArea = Math.Min(_settings.MinPolygonArea, size * size / 4);
 
             stopWatch.Start();
             var sfBorder = CreateBorder(multiplier);
@@ -250,8 +274,8 @@ namespace MapWinGISTests
             sfFishnet.GeoProjection = sfBorder.GeoProjection;
             Helper.SaveShapefile(sfFishnet, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_smallFishnet_{geometryEngine.ToString()}_{size}.shp"));
             
-            if (sfBorder.HasInvalidShapes()) Debug.WriteLine("Border has invalid shapes");
-            if (sfFishnet.HasInvalidShapes()) Debug.WriteLine("Fishnet has invalid shapes");
+            if (sfBorder.HasInvalidShapes()) Helper.DebugMsg("Border has invalid shapes");
+            if (sfFishnet.HasInvalidShapes()) Helper.DebugMsg("Fishnet has invalid shapes");
             
             sfFishnet.GeometryEngine = geometryEngine;
             var sfClipped = sfFishnet.Clip(false, sfBorder, false);
@@ -259,10 +283,19 @@ namespace MapWinGISTests
             stopWatch.Restart();
 
             Assert.IsNotNull(sfClipped, "sfClipped is null: " + sfFishnet.ErrorMsg[sfFishnet.LastErrorCode]);
-            Assert.IsFalse(sfClipped.HasInvalidShapes(), "Output file has invalid shapes");
 
             var sfOutputFile = Path.Combine(tempFolder, $"{DateTime.Now.Ticks}  FishnetClipped_{geometryEngine.ToString()}_{multiplier}_{size}.shp");
             Helper.SaveShapefile(sfClipped, sfOutputFile);
+
+            if (!sfBorder.Close())
+                Assert.Fail("Can't close sfBorder Error: " + sfBorder.ErrorMsg[sfBorder.LastErrorCode]);
+            if (!sfFishnet.Close())
+                Assert.Fail("Can't close sfClipped Error: " + sfFishnet.ErrorMsg[sfFishnet.LastErrorCode]);
+
+            Helper.DebugMsg("Checking if the output file has any invalid shapes .... ");
+            Assert.IsFalse(sfClipped.HasInvalidShapes(), "Output file has invalid shapes");
+            if (!sfClipped.Close())
+                Assert.Fail("Can't close sfClipped Error: " + sfClipped.ErrorMsg[sfClipped.LastErrorCode]);
         }
 
         [TestCategory("Clip"), TestMethod]
@@ -279,34 +312,42 @@ namespace MapWinGISTests
 
         private static void ClipLargefile(tkGeometryEngine geometryEngine)
         {
+            // When not calles
+            if (_settings == null) Assert.Fail("Settings are not set");
+
             // ogr2ogr -clipsrc "Droog-Sloefweg.WGS 84 - UTM zone 31N.shp" clipped.shp Fishnet.shp
             var tempFolder = Helper.WorkingFolder("ClipLargefile");
 
             const string sfFishnetFile = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\Fishnet.shp";
             const string sfBorderFile = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\border.shp";
-            var sfOutputFile = Path.Combine(tempFolder, $"FishnetClipped_{geometryEngine.ToString()}.shp");
+            var sfOutputFile = Path.Combine(tempFolder, $"{DateTime.Now.Ticks} FishnetClipped_{geometryEngine.ToString()}.shp");
 
-            var sfFishnet = new Shapefile();
-            if (!sfFishnet.Open(sfFishnetFile))
-                Assert.Fail("Can't open " + sfFishnetFile + " Error: " + sfFishnet.ErrorMsg[sfFishnet.LastErrorCode]);
-            if (sfFishnet.HasInvalidShapes()) Debug.WriteLine("Fishnet has invalid shapes");
-
-            var sfBorder = new Shapefile();
-            if (!sfBorder.Open(sfBorderFile))
-                Assert.Fail("Can't open " + sfBorderFile + " Error: " + sfBorder.ErrorMsg[sfBorder.LastErrorCode]);
-            if (sfBorder.HasInvalidShapes()) Debug.WriteLine("Border has invalid shapes");
+            var sfFishnet = Helper.OpenShapefile(sfFishnetFile, false);
+            var sfBorder = Helper.OpenShapefile(sfBorderFile, false);
 
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             sfFishnet.GeometryEngine = geometryEngine;
             var sfClipped = sfFishnet.Clip(false, sfBorder, false);
-            stopWatch.Stop();
-            Helper.DebugMsg("Time it took: " + stopWatch.Elapsed);
-            Assert.IsNotNull(sfClipped, "sfClipped is null: " + sfFishnet.ErrorMsg[sfFishnet.LastErrorCode]);
+            Helper.DebugMsg("Time it took to clip: " + stopWatch.Elapsed);
+            stopWatch.Restart();
+            Helper.DebugMsg("sfBorder.ErrorMsg: " + sfBorder.ErrorMsg[sfBorder.LastErrorCode]);
+            Helper.DebugMsg("sfFishnet.ErrorMsg: " + sfFishnet.ErrorMsg[sfFishnet.LastErrorCode]);
+            Helper.DebugMsg("sfClipped.ErrorMsg: " + sfClipped.ErrorMsg[sfClipped.LastErrorCode]);
+            Assert.IsNotNull(sfClipped, "sfClipped is null: " + sfClipped.ErrorMsg[sfClipped.LastErrorCode]);
 
             Helper.SaveShapefile(sfClipped, sfOutputFile);
             Helper.DebugMsg("NumShapes: " + sfClipped.NumShapes);
+
+            if (!sfBorder.Close())
+                Assert.Fail("Can't close sfBorder Error: " + sfBorder.ErrorMsg[sfBorder.LastErrorCode]);
+            if (!sfFishnet.Close())
+                Assert.Fail("Can't close sfClipped Error: " + sfFishnet.ErrorMsg[sfFishnet.LastErrorCode]);
+
+            Helper.DebugMsg("Checking if the output file has any invalid shapes .... ");
             Assert.IsFalse(sfClipped.HasInvalidShapes(), "Output file has invalid shapes");
+            if (!sfClipped.Close())
+                Assert.Fail("Can't close sfClipped Error: " + sfClipped.ErrorMsg[sfClipped.LastErrorCode]);
         }
         #endregion
 
@@ -330,15 +371,11 @@ namespace MapWinGISTests
             const string sfInputfile = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\FewPolygons.shp";
             var sfOutputFile = Path.Combine(tempFolder, $"FewPolygons_Merged_{geometryEngine.ToString()}.shp");
 
-            var sfInput = new Shapefile();
-            if (!sfInput.Open(sfInputfile))
-                Assert.Fail("Can't open " + sfInputfile + " Error: " + sfInput.ErrorMsg[sfInput.LastErrorCode]);
-
+            var sfInput = Helper.OpenShapefile(sfInputfile);
             if (File.Exists(sfOutputFile)) Helper.DeleteShapefile(sfOutputFile);
 
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            sfInput.FastMode = true;
             sfInput.GeometryEngine = geometryEngine;
             var newShape = sfInput.Shape[0];
             for (var i = 1; i < sfInput.NumShapes; i++)
@@ -346,8 +383,8 @@ namespace MapWinGISTests
                 // Union all shapes together:
                 newShape = newShape.Clip(sfInput.Shape[i], tkClipOperation.clUnion);
             }
-            stopWatch.Stop();
             Helper.DebugMsg("Time it took: " + stopWatch.Elapsed);
+            stopWatch.Restart();
             Assert.IsNotNull(newShape, "newShape is null: " + newShape.ErrorMsg[newShape.LastErrorCode]);
 
             var sfOutput = new Shapefile();
@@ -362,6 +399,11 @@ namespace MapWinGISTests
 
             Helper.DebugMsg("NumShapes: " + sfOutput.NumShapes);
             Assert.AreEqual(sfOutput.NumShapes, 1);
+
+            if (!sfInput.Close())
+                Assert.Fail("Can't close sfBorder Error: " + sfInput.ErrorMsg[sfInput.LastErrorCode]);
+            if (!sfOutput.Close())
+                Assert.Fail("Can't close sfClipped Error: " + sfOutput.ErrorMsg[sfOutput.LastErrorCode]);
         }
         #endregion
 
@@ -424,6 +466,7 @@ namespace MapWinGISTests
             if (!sf.EditInsertShape(shp, ref numShapes))
                 Assert.Fail("Can't insert shape Error: " + sf.ErrorMsg[sf.LastErrorCode]);
 
+            Assert.IsFalse(sf.HasInvalidShapes(), "Created border file has invalid shapes");
             return sf;
         }
 

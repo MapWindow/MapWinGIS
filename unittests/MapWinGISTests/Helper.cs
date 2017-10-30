@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using MapWinGIS;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MapWinGISTests
 {
@@ -25,7 +24,7 @@ namespace MapWinGISTests
             var filenameBody = Path.GetFileNameWithoutExtension(filename);
             foreach (var f in Directory.EnumerateFiles(folder, filenameBody + ".*"))
             {
-                Debug.WriteLine("deleting " + f);
+                DebugMsg("deleting " + f);
                 File.Delete(f);
             }
         }
@@ -91,13 +90,18 @@ namespace MapWinGISTests
 
         public static void SaveShapefile(IShapefile sf, string filename)
         {
+            DebugMsg("Saving shapefile ...");
             DeleteShapefile(filename);
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
             if (!sf.SaveAs(Path.Combine(filename)))
                 throw new Exception("Can't save shapefile Error: " + sf.ErrorMsg[sf.LastErrorCode]);
+            stopWatch.Stop();
+            DebugMsg("Time it took to save shapefile: " + stopWatch.Elapsed);
             if (!File.Exists(filename))
                 throw new Exception($"Output file [{filename}] does not exists");
 
-            Debug.WriteLine(filename + " is saved");
+            DebugMsg(filename + " is saved");
         }
 
         public static Shapefile CreateSfFromWkt(string wkt, int epsgCode)
@@ -124,13 +128,37 @@ namespace MapWinGISTests
             return sf;
         }
 
+        public static Shapefile OpenShapefile(string fileLocation, bool checkInvalidShapes = true)
+        {
+            if (!File.Exists(fileLocation))
+                throw new Exception($"Input file [{fileLocation}] does not exists");
+
+            DebugMsg("Opening " + fileLocation);
+
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var sf = new Shapefile();
+            if (!sf.Open(fileLocation))
+                throw new Exception("Can't open " + fileLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
+            stopWatch.Stop();
+            DebugMsg("Time it took to open shapefile: " + stopWatch.Elapsed);
+
+            if (!checkInvalidShapes) return sf;
+
+            if (sf.HasInvalidShapes())
+                DebugMsg("Input has invalid shapes");
+            return sf;
+        }
+
+
         public static void CheckValidity(IShapefile sf)
         {
-            if (sf.NumShapes == 0) Assert.Fail("Shapefile has no shapes");
+            if (sf.NumShapes == 0)
+                throw new Exception("Shapefile has no shapes");
 
             if (!sf.HasInvalidShapes())
             {
-                Debug.WriteLine("Shapefile has no invalid shapes");
+                DebugMsg("Shapefile has no invalid shapes");
                 return;
             }
 
@@ -148,12 +176,12 @@ namespace MapWinGISTests
                     var shp = sf.Shape[i];
                     if (!shp.IsValid)
                     {
-                        Debug.WriteLine($"Invalid shape with id: {i}. Reason: {shp.IsValidReason}");
+                        DebugMsg($"Invalid shape with id: {i}. Reason: {shp.IsValidReason}");
                     }
                 }
             });
             stopwatch.Stop();
-            Debug.WriteLine("Logging invalid shapes using partioner took: " + stopwatch.Elapsed);
+            DebugMsg("Logging invalid shapes using partioner took: " + stopwatch.Elapsed);
         }
 
         public static void DebugMsg(string msg)

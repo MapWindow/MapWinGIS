@@ -10,6 +10,11 @@ namespace MapWinGISTests
     [DeploymentItem("Testdata")]
     public class ShapefileTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            Helper.DebugMsg("Test was run at " + DateTime.Now);
+        }
 
         [TestMethod]
         public void SaveShapefileTest()
@@ -226,12 +231,12 @@ namespace MapWinGISTests
                 // This should fail, because width cannot be 0:
                 fieldIndex = sf.Table.EditAddField("date", FieldType.STRING_FIELD, 50, 0);
                 Assert.AreEqual(-1, fieldIndex, "Field is not added but -1 is not returned. ");
-                Debug.WriteLine(sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
+                Debug.WriteLine("Expected error: " + sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
 
                 // This should fail, because precsion cannot be 0 when type is double:
                 fieldIndex = sf.Table.EditAddField("date", FieldType.DOUBLE_FIELD, 0, 20);
                 Assert.AreEqual(-1, fieldIndex, "Field is not added but -1 is not returned. ");
-                Debug.WriteLine(sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
+                Debug.WriteLine("Expected error: " + sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
             }
             finally
             {
@@ -408,7 +413,7 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
-        public void ReadRussionDataFromTable()
+        public void ReadRussianDataFromTable()
         {
             const string sfLocation = @"D:\dev\GIS-Data\Issues\CORE-199 Russian\point.shp";
             const int fieldIndex = 2;
