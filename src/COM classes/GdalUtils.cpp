@@ -26,14 +26,16 @@
 
 #include "stdafx.h"
 #include "GdalUtils.h"
+#include <atlsafe.h>
 // #include "GdalDataset.h"
+
 
 // *********************************************************************
 //		~CGdalUtils
 // *********************************************************************
 CGdalUtils::~CGdalUtils()
 {
-	gReferenceCounter.Release(tkInterface::idGdalUtils);
+	gReferenceCounter.Release(idGdalUtils);
 }
 
 // *********************************************************
@@ -187,6 +189,43 @@ cleaning:
 		GDALClose(dt);
 
 	CallbackHelper::ProgressCompleted(_globalCallback);
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     ClipVectorWithVector()
+// *********************************************************
+STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR bstrSubjectFilename, BSTR bstrOverlayFilename, BSTR bstrDstFilename, VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	USES_CONVERSION;
+	CStringW subjectFilename = OLE2W(bstrSubjectFilename);
+	if (!Utility::FileExistsW(subjectFilename))
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("Subject file %s does not exists.", subjectFilename));
+		ErrorMessage(tkINVALID_FILENAME);
+		return S_OK;
+	}
+
+	CStringW overlayFilename = OLE2W(bstrOverlayFilename);
+	if (!Utility::FileExistsW(overlayFilename))
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("Overlay file %s does not exists.", overlayFilename));
+		ErrorMessage(tkINVALID_FILENAME);
+		return S_OK;
+	}
+	
+	// Call VectorTranslate:
+	CComSafeArray<BSTR> translateOptions(10);
+	translateOptions[0] = "-f";
+	translateOptions[1] = "ESRI Shapefile";
+	translateOptions[2] = "-overwrite";
+	translateOptions[3] = "-clipsrc";
+	translateOptions[4] = bstrOverlayFilename;
+	this->GdalVectorTranslate(bstrSubjectFilename, bstrDstFilename, translateOptions, useSharedConnection, retVal);	
 
 	return S_OK;
 }

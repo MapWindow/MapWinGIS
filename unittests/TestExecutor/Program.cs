@@ -34,7 +34,7 @@ namespace ConsoleApplication1
 
             var t = new GdalUtilsTests();
             // t.Shapefile2Gml();
-            t.Shapefile2Gml();
+            t.VerySmallClip();
 
             //var t = new OgrDatasourceTests();
             //t.ImportShapefileTest();

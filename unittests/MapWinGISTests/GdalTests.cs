@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
