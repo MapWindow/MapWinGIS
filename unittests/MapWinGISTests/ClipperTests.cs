@@ -183,9 +183,9 @@ namespace MapWinGISTests
                     32631);
             Helper.SaveShapefile(sfBorder, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} border.shp"));
 
-            var shpSubject = new ShapeClass();
-            if (!shpSubject.ImportFromWKT("POLYGON ((693395.4 5840980.6,693395.4 5840995.6,693410.4 5840995.6,693410.4 5840980.6,693395.4 5840980.6))"))
-                Assert.Fail("Could not import wkt" + shpSubject.ErrorMsg[shpSubject.LastErrorCode]);
+            //var shpSubject = new Shape();
+            //if (!shpSubject.ImportFromWKT("POLYGON ((693395.4 5840980.6,693395.4 5840995.6,693410.4 5840995.6,693410.4 5840980.6,693395.4 5840980.6))"))
+            //    Assert.Fail("Could not import wkt" + shpSubject.ErrorMsg[shpSubject.LastErrorCode]);
 
             var sfSubject = Helper.CreateSfFromWkt(
                 "POLYGON ((693395.4 5840980.6,693395.4 5840995.6,693410.4 5840995.6,693410.4 5840980.6,693395.4 5840980.6))",
@@ -430,11 +430,11 @@ namespace MapWinGISTests
 
         private static Shapefile CreateBorder(double multiplier = 1d)
         {
-            var sf = new ShapefileClass();
+            var sf = new Shapefile();
             if (!sf.CreateNewWithShapeID("", ShpfileType.SHP_POLYGON))
                 Assert.Fail("Can't create shapefile Error: " + sf.ErrorMsg[sf.LastErrorCode]);
 
-            var geoProjection = new GeoProjectionClass();
+            var geoProjection = new GeoProjection();
             // WGS 84 / UTM zone 31N
             if (!geoProjection.ImportFromEPSG(32631))
                 Assert.Fail("Can't ImportFromEPSG Error: " + geoProjection.ErrorMsg[geoProjection.LastErrorCode]);
@@ -443,20 +443,20 @@ namespace MapWinGISTests
             const double startX = 693502.4;
             const double startY = 5841019.6;
 
-            var shp = new ShapeClass();
+            var shp = new Shape();
             if (!shp.Create(ShpfileType.SHP_POLYGON))
                 Assert.Fail("Can't create shape Error: " + shp.ErrorMsg[shp.LastErrorCode]);
 
             var numPoints = 0;
-            if (!shp.InsertPoint(new PointClass { x = startX, y = startY }, ref numPoints))
+            if (!shp.InsertPoint(new Point { x = startX, y = startY }, ref numPoints))
                 Assert.Fail($"Can't insert point with id: {numPoints} Error: {shp.ErrorMsg[shp.LastErrorCode]}");
-            if (!shp.InsertPoint(new PointClass { x = startX - 107 * multiplier, y = startY - 12 * multiplier }, ref numPoints))
+            if (!shp.InsertPoint(new Point { x = startX - 107 * multiplier, y = startY - 12 * multiplier }, ref numPoints))
                 Assert.Fail($"Can't insert point with id: {numPoints} Error: {shp.ErrorMsg[shp.LastErrorCode]}");
-            if (!shp.InsertPoint(new PointClass { x = startX - 9 * multiplier, y = startY - 99 * multiplier }, ref numPoints))
+            if (!shp.InsertPoint(new Point { x = startX - 9 * multiplier, y = startY - 99 * multiplier }, ref numPoints))
                 Assert.Fail($"Can't insert point with id: {numPoints} Error: {shp.ErrorMsg[shp.LastErrorCode]}");
-            if (!shp.InsertPoint(new PointClass { x = startX + 11 * multiplier, y = startY - 83 * multiplier }, ref numPoints))
+            if (!shp.InsertPoint(new Point { x = startX + 11 * multiplier, y = startY - 83 * multiplier }, ref numPoints))
                 Assert.Fail($"Can't insert point with id: {numPoints} Error: {shp.ErrorMsg[shp.LastErrorCode]}");
-            if (!shp.InsertPoint(new PointClass { x = startX, y = startY }, ref numPoints))
+            if (!shp.InsertPoint(new Point { x = startX, y = startY }, ref numPoints))
                 Assert.Fail($"Can't insert point with id: {numPoints} Error: {shp.ErrorMsg[shp.LastErrorCode]}");
 
             if (!shp.IsValid)

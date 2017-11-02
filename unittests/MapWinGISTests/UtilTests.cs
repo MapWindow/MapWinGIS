@@ -32,11 +32,11 @@ namespace MapWinGISTests
             Assert.IsTrue(result, "utils.CalculateRaster was unsuccessful: " + errorMsg);
             Debug.WriteLine(tmpFile);
 
-            var tiffIn = new ImageClass();
+            var tiffIn = new Image();
             result = tiffIn.Open(tiffInput);
             Assert.IsTrue(result, "Cannot open input tiff: " + tiffIn.ErrorMsg[tiffIn.LastErrorCode]);
 
-            var tiffOut = new ImageClass();
+            var tiffOut = new Image();
             result = tiffOut.Open(tmpFile, ImageType.TIFF_FILE);
             Assert.IsTrue(result, "Cannot open output tiff: " + tiffOut.ErrorMsg[tiffOut.LastErrorCode]);
 
@@ -157,7 +157,7 @@ namespace MapWinGISTests
         {
             const string input = @"D:\dev\TopX\TopX-Agri\TestData\Chlorofyl-index.clipped.optimized.tif";
             const string output = @"D:\dev\TopX\TopX-Agri\TestData\Chlorofyl-index.clipped.optimized.reclassified.tif";
-            var gridSource = new GridClass();
+            var gridSource = new Grid();
             gridSource.Open(input);
 
             var nodataValue = (double)gridSource.Header.NodataValue;
@@ -179,7 +179,7 @@ namespace MapWinGISTests
                 arr.Select(i => i.High).ToArray(), arr.Select(i => i.NewValue).ToArray(), "GTiff", null);
             Assert.IsTrue(retVal, "ReclassifyRaster failed: " + utils.ErrorMsg[utils.LastErrorCode]);
 
-            gridSource = new GridClass();
+            gridSource = new Grid();
             gridSource.Open(output);
 
             var nodataValueOutput = (double)gridSource.Header.NodataValue;

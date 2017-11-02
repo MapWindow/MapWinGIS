@@ -106,18 +106,18 @@ namespace MapWinGISTests
 
         public static Shapefile CreateSfFromWkt(string wkt, int epsgCode)
         {
-            var sf = new ShapefileClass();
+            var sf = new Shapefile();
             if (!sf.CreateNewWithShapeID("", ShpfileType.SHP_POLYGON))
                 throw new Exception("Can't create shapefile. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
 
-            var shp = new ShapeClass();
+            var shp = new Shape();
             if (!shp.ImportFromWKT(wkt))
                 throw new Exception("Could not import wkt" + shp.ErrorMsg[shp.LastErrorCode]);
 
             if (sf.EditAddShape(shp) == -1)
                 throw new Exception("Can't EditAddShape. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
 
-            var geoProjection = new GeoProjectionClass();
+            var geoProjection = new GeoProjection();
             if (!geoProjection.ImportFromEPSG(epsgCode))
                 throw new Exception("Can't ImportFromEPSG Error: " + geoProjection.ErrorMsg[geoProjection.LastErrorCode]);
             sf.GeoProjection = geoProjection;

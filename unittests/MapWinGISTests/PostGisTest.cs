@@ -23,7 +23,7 @@ namespace MapWinGISTests
         // [TestMethod]
         public void OpenPostGISDifferentPortTest()
         {
-            var ogrDatasource = new OgrDatasourceClass();
+            var ogrDatasource = new OgrDatasource();
             try
             {
                 var result = ogrDatasource.Open("PG:host=127.0.0.1 port=55432 dbname=aw_croppingscheme user=aw_croppingschem password=test123");
@@ -67,7 +67,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void ReadAttributesFromPostGISLayer()
         {
-            var ogrDatasource = new OgrDatasourceClass();
+            var ogrDatasource = new OgrDatasource();
             try
             {
                 var result = ogrDatasource.Open("PG:host=127.0.0.1 port=5432 dbname=mw_test user=mapwindow password=test123");
@@ -145,7 +145,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void ReadSchemaNamesFromPostGIS()
         {
-            var ogrDatasource = new OgrDatasourceClass();
+            var ogrDatasource = new OgrDatasource();
             try
             {
                 var result = ogrDatasource.Open("PG:host=127.0.0.1 port=5432 dbname=mw_test user=mapwindow password=test123");

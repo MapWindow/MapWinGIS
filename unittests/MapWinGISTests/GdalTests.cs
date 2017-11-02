@@ -22,7 +22,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void OpenSQLiteTest()
         {
-            var ogrDatasource = new OgrDatasourceClass();
+            var ogrDatasource = new OgrDatasource();
             try
             {
                 var result = ogrDatasource.Open2(@"sqlite\onepoint.sqlite", true);
@@ -56,7 +56,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void CreateLayerSQLiteTest()
         {
-            var ogrDatasource = new OgrDatasourceClass();
+            var ogrDatasource = new OgrDatasource();
             try
             {
                 var result = ogrDatasource.Open2(@"sqlite\onepoint.sqlite", true);
@@ -69,7 +69,7 @@ namespace MapWinGISTests
 
                 var originalLayerCount = ogrDatasource.LayerCount;
 
-                var projection = new GeoProjectionClass();
+                var projection = new GeoProjection();
                 Assert.IsTrue(projection.SetWgs84(), "Cannot set projection");
 
                 var layerCreated = ogrDatasource.CreateLayer("Test", ShpfileType.SHP_POINT, projection, "OVERWRITE=YES");
@@ -109,7 +109,7 @@ namespace MapWinGISTests
         {
             const string filename = @"HDF5\test.h5";
             // Check if GDAL can open it:
-            var utils = new UtilsClass();
+            var utils = new Utils();
             var settings = new GlobalSettings();
             var info = utils.GDALInfo(filename, string.Empty);
             Assert.IsNotNull(info, "Could not read gdalinfo: " + settings.GdalLastErrorMsg);
@@ -135,7 +135,7 @@ namespace MapWinGISTests
             Assert.IsTrue(infoSubset.Contains("Driver: HDF5Image/HDF5 Dataset"), "File is not recognized");
 
             // Open subdataset as grid:
-            var grd = new GridClass();
+            var grd = new Grid();
             var result = grd.Open(subset);
             Assert.IsTrue(result, "Could not open HDF5 subset as grid");
 
@@ -153,7 +153,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void GdalInfoFormats()
         {
-            var utils = new UtilsClass();
+            var utils = new Utils();
             var result = utils.GDALInfo("", "--formats");
             Assert.IsNotNull(result, "GdalInfo returned null");
             Debug.WriteLine(result);

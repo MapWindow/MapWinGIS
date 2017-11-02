@@ -51,7 +51,7 @@ namespace MapWinGISTests
         {
             axMap1.ClearDrawings();
             var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
-            var utils = new UtilsClass();
+            var utils = new Utils();
             axMap1.DrawCircleEx(dhandle, 24.0, 57.0, 0.1, utils.ColorByName(tkMapColor.IndianRed), true);
             SaveSnapshot("DrawCircleEx.jpg");
         }
