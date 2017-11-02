@@ -3222,7 +3222,7 @@ char *SanitizeSRS( const char *pszUserInput )
 /************************************************************************/
 /*                                GDALWarp()                            */
 /************************************************************************/
-
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalWarp instead"))
 STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 							  BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
 {
@@ -3259,7 +3259,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     int                  bHasGotErr = FALSE;
     int                  bCropToCutline = FALSE;
     int                  bOverwrite = FALSE;
-	struct CallbackParams params(GetCallback(), "Warping");
+	struct CallbackParams params(GetCallback(), "Warping");	
 
 /* -------------------------------------------------------------------- */
 /*      Register standard GDAL drivers, and process generic GDAL        */

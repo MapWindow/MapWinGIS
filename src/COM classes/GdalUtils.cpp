@@ -22,6 +22,7 @@
 * Contributor(s):
 * (Open source contributors should list themselves and their modifications here). */
 // june 2017 PaulM - Initial creation of this file
+// november 2017 PaulM - Added GdalVectorTranslate
 
 #include "stdafx.h"
 #include "GdalUtils.h"
@@ -33,6 +34,161 @@
 CGdalUtils::~CGdalUtils()
 {
 	gReferenceCounter.Release(tkInterface::idGdalUtils);
+}
+
+// *********************************************************
+//	     GdalWarp()
+// *********************************************************
+STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	USES_CONVERSION;
+	CStringW srcFilename = OLE2W(bstrSrcFilename);
+	if (!Utility::FileExistsW(srcFilename))
+	{
+		ErrorMessage(tkINVALID_FILENAME);		
+		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", srcFilename));
+		return S_OK;
+	}
+
+	// Open file as GdalDataset:
+	CallbackHelper::Progress(_globalCallback, 0, "Open source file as raster", _key);
+	GDALDatasetH dt = GdalHelper::OpenRasterDatasetW(srcFilename, GA_ReadOnly);
+	if (!dt)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("Can't open %s as a raster file.", srcFilename));
+		ErrorMsg(tkINVALID_FILENAME);
+		goto cleaning;
+	}
+
+	// Make options:		
+	if (SafeArrayGetDim(options) != 1)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("The warp options are invalid."));
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		goto cleaning;
+	}
+
+	char** warpOptions = ConvertSafeArray(options);
+	GDALWarpAppOptions* gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, NULL);
+	if (!gdalWarpOptions)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("The warp options are invalid."));
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		goto cleaning;
+	}
+
+	// Call the gdalWarp function:
+	CallbackHelper::Progress(_globalCallback, 50, "Start warping", _key);
+	GDALWarpAppOptionsSetProgress(gdalWarpOptions, GDALProgressCallback, NULL);
+	auto dtNew = GDALWarp(OLE2A(bstrDstFilename), NULL, 1, &dt, gdalWarpOptions, NULL);
+	CallbackHelper::Progress(_globalCallback, 75, "Finished warping", _key);
+	if (dtNew)
+	{
+		*retVal = VARIANT_TRUE;
+		GDALClose(dtNew);
+	}
+	else
+	{
+		CallbackHelper::ErrorMsg("GdalUtils", _globalCallback, _key, "Warping failed");
+	}
+
+cleaning:
+	// ------------------------------------------------------
+	//	Cleaning
+	// ------------------------------------------------------
+	if (gdalWarpOptions)
+		GDALWarpAppOptionsFree(gdalWarpOptions);
+
+	if (warpOptions)
+		CSLDestroy(warpOptions);
+
+	if (dt)
+		GDALClose(dt);
+
+	CallbackHelper::ProgressCompleted(_globalCallback);
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     GdalVectorTranslate()
+// *********************************************************
+STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	USES_CONVERSION;
+	CStringW srcFilename = OLE2W(bstrSrcFilename);
+	if (!Utility::FileExistsW(srcFilename))
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", srcFilename));
+		ErrorMessage(tkINVALID_FILENAME);
+		return S_OK;
+	}
+
+	// Open file as GdalDataset:
+	CallbackHelper::Progress(_globalCallback, 0, "Open source file as vector", _key);
+
+	GDALDatasetH dt = GdalHelper::OpenOgrDatasetW(srcFilename, GA_ReadOnly, useSharedConnection);
+	if (!dt)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("Can't open %s as a vector file.", srcFilename));
+		ErrorMsg(tkINVALID_FILENAME);
+		goto cleaning;
+	}
+
+	// Make options:		
+	if (SafeArrayGetDim(options) != 1)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("The vector translate options are invalid."));
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		goto cleaning;
+	}
+
+	char** translateOptions = ConvertSafeArray(options);
+	GDALVectorTranslateOptions* gdalVectorTranslateOptions = GDALVectorTranslateOptionsNew(translateOptions, NULL);
+	if (!gdalVectorTranslateOptions)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("The vector translate options are invalid."));
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		goto cleaning;
+	}
+
+	// Call the gdalWarp function:
+	CallbackHelper::Progress(_globalCallback, 50, "Start translating", _key);
+	GDALVectorTranslateOptionsSetProgress(gdalVectorTranslateOptions, GDALProgressCallback, NULL);
+	auto dtNew = GDALVectorTranslate(OLE2A(bstrDstFilename), NULL, 1, &dt, gdalVectorTranslateOptions, NULL);
+	CallbackHelper::Progress(_globalCallback, 75, "Finished translating", _key);
+	if (dtNew)
+	{
+		*retVal = VARIANT_TRUE;
+		GDALClose(dtNew);
+	}
+	else
+	{
+		CallbackHelper::ErrorMsg("GdalUtils", _globalCallback, _key, "Translating failed");
+	}
+
+cleaning:
+	// ------------------------------------------------------
+	//	Cleaning
+	// ------------------------------------------------------
+	if (gdalVectorTranslateOptions)
+		GDALVectorTranslateOptionsFree(gdalVectorTranslateOptions);
+
+	if (translateOptions)
+		CSLDestroy(translateOptions);
+
+	if (dt)
+		GDALClose(dt);
+
+	CallbackHelper::ProgressCompleted(_globalCallback);
+
+	return S_OK;
 }
 
 // *********************************************************************
@@ -96,76 +252,6 @@ STDMETHODIMP CGdalUtils::put_Key(BSTR newVal)
 
 	::SysFreeString(_key);
 	_key = OLE2BSTR(newVal);
-
-	return S_OK;
-}
-// *********************************************************
-//	     GdalWarp()
-// *********************************************************
-STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = VARIANT_FALSE;
-
-	USES_CONVERSION;
-	CStringW srcFilename = OLE2W(bstrSrcFilename);
-	if (!Utility::FileExistsW(srcFilename))
-	{
-		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", srcFilename));
-		ErrorMessage(tkINVALID_FILENAME);		
-		return S_OK;
-	}
-
-	// Open file as GdalDataset:
-	CallbackHelper::Progress(_globalCallback, 0, "Open source file as raster", _key);
-	GDALDatasetH dt = GdalHelper::OpenRasterDatasetW(srcFilename, GA_ReadOnly);
-	if (!dt)
-	{
-		CallbackHelper::ErrorMsg(Debug::Format("Can't open %s as a raster file.", srcFilename));
-		ErrorMsg(tkINVALID_FILENAME);
-		goto cleaning;
-	}
-
-	// Make options:		
-	if (SafeArrayGetDim(options) != 1)
-	{
-		CallbackHelper::ErrorMsg(Debug::Format("The warp option are invalid."));
-		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
-		goto cleaning;
-	}
-
-	char** warpOptions = ConvertSafeArray(options);
-	GDALWarpAppOptions* gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, NULL);
-
-	// Call the gdalWarp function:
-	CallbackHelper::Progress(_globalCallback, 50, "Start warping", _key);
-	GDALWarpAppOptionsSetProgress(gdalWarpOptions, GDALProgressCallback, NULL); // TODO: Is this the correct implementation?
-	auto dtNew = GDALWarp(OLE2A(bstrDstFilename), NULL, 1, &dt, gdalWarpOptions, NULL);
-	CallbackHelper::Progress(_globalCallback, 75, "Finished warping", _key);
-	if (dtNew)
-	{
-		*retVal = VARIANT_TRUE;
-		GDALClose(dtNew);
-	}
-	else
-	{
-		CallbackHelper::ErrorMsg("GdalUtils", _globalCallback, _key, "Warping failed");
-	}
-
-cleaning:
-	// ------------------------------------------------------
-	//	Cleaning
-	// ------------------------------------------------------
-	if (gdalWarpOptions)
-		GDALWarpAppOptionsFree(gdalWarpOptions);
-
-	if (warpOptions)
-		CSLDestroy(warpOptions);
-
-	if (dt)
-		GDALClose(dt);
-
-	CallbackHelper::ProgressCompleted(_globalCallback);
 
 	return S_OK;
 }

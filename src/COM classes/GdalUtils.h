@@ -80,6 +80,7 @@ public:
 	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(GdalWarp)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal);
+	STDMETHOD(GdalVectorTranslate)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal);
 
 private:	
 	long _lastErrorCode;
