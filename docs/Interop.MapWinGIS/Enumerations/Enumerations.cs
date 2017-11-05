@@ -1173,6 +1173,7 @@ namespace MapWinGIS
     /// <summary>
     /// Available options applicable to point reflection
     /// </summary>
+    /// \new500 Added in version 5.0.0
     public enum tkPointReflectionType
     {
         /// <summary>

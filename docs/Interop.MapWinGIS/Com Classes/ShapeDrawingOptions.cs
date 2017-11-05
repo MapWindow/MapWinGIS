@@ -274,6 +274,7 @@ namespace MapWinGIS
         /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
         /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \new500 Optional backAlpha parameter added in version 5.0.0
         public bool DrawLine(IntPtr hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
@@ -296,6 +297,7 @@ namespace MapWinGIS
         /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
         /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \new500 Optional backAlpha parameter added in version 5.0.0
         public bool DrawLineVB(int hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
@@ -315,6 +317,7 @@ namespace MapWinGIS
         /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
         /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \new500 Optional backAlpha parameter added in version 5.0.0
         public bool DrawPoint(IntPtr hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
@@ -334,6 +337,7 @@ namespace MapWinGIS
         /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
         /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \new500 Optional backAlpha parameter added in version 5.0.0
         public bool DrawPointVB(int hdc, float x, float y, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
@@ -356,6 +360,7 @@ namespace MapWinGIS
         /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
         /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \new500 Optional backAlpha parameter added in version 5.0.0
         public bool DrawRectangle(IntPtr hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
@@ -378,6 +383,7 @@ namespace MapWinGIS
         /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
         /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \new500 Optional backAlpha parameter added in version 5.0.0
         public bool DrawRectangleVB(int hdc, float x, float y, int Width, int Height, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
@@ -399,6 +405,7 @@ namespace MapWinGIS
         /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
         /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \new500 Optional backAlpha parameter added in version 5.0.0
         public bool DrawShape(IntPtr hdc, float x, float y, Shape Shape, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
@@ -420,6 +427,7 @@ namespace MapWinGIS
         /// <param name="backAlpha">The alpha component of the back color of the device context the drawing is performed at.
         /// Specify a value of 255 for the background color to be fully opaque, and 0 for the background to be transparent.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \new500 Optional backAlpha parameter added in version 5.0.0
         public bool DrawShapeVB(int hdc, float x, float y, Shape Shape, bool drawVertices, int clipWidth, int clipHeight, uint BackColor, byte backAlpha)
         {
             throw new NotImplementedException();
@@ -668,7 +676,8 @@ namespace MapWinGIS
         /// <summary>
         /// Gets or sets the type of reflection to apply to the point symbol.
         /// </summary>
-        /// <remarks>Applies when ShapeDrawingOptions.PointType is equal to ptSymbolFontCharacter or ptSymbolPicture.</remarks>
+        /// <remarks>This value is used when ShapeDrawingOptions.PointType is equal to ptSymbolFontCharacter or ptSymbolPicture.</remarks>
+        /// \new500 Added in version 5.0.0
         public tkPointReflectionType PointReflection
         {
             get { throw new NotImplementedException(); }

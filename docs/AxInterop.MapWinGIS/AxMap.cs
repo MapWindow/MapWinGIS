@@ -682,7 +682,7 @@ namespace AxMapWinGIS
         /// Gets or sets a value indicating whether the legacy 'hand' cursor should be used
         /// for map panning rather than the standard 'NSEW' four-point cursor.
         /// </summary>
-        /// \new495 Added in version 4.9.5
+        /// \new500 Added in version 5.0.0
         public bool UseAlternatePanCursor { get; set; }
 
         /// <summary>
@@ -2238,6 +2238,7 @@ namespace AxMapWinGIS
         /// Gets or sets the extents of the map using an Extents object. 
         /// </summary>
         /// <remarks>If the given extents do not fit the aspect ratio of the map, the map will fit the given extents as well as possible.</remarks>
+        /// \new500 Return value changed to IExtents in version 5.0.0
         public MapWinGIS.Extents Extents
         {
             get { throw new NotImplementedException(); }
@@ -2645,6 +2646,7 @@ namespace AxMapWinGIS
         /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
         /// <param name="handled">Passed by reference. 
         /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        /// \new500 Added in version 5.0.0
         public event _DMapEvents_AfterLayersEventHandler AfterLayers;
 
         /// <summary>
@@ -2716,6 +2718,7 @@ namespace AxMapWinGIS
         /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
         /// <param name="handled">Passed by reference. 
         /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        /// \new500 Added in version 5.0.0
         public event _DMapEvents_BeforeLayersEventHandler BeforeLayers;
 
         /// <summary>
