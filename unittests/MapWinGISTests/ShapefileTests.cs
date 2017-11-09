@@ -293,7 +293,7 @@ namespace MapWinGISTests
             Assert.IsNotNull(reprojectedSf, "reprojectedSf == null");
             Assert.AreEqual(sf.NumShapes, reprojectedSf.NumShapes);
 
-            Helper.SaveShapefile(reprojectedSf, Path.ChangeExtension(filename, ".WGS84-UTM12N.shp"));
+            Helper.SaveAsShapefile(reprojectedSf, Path.ChangeExtension(filename, ".WGS84-UTM12N.shp"));
         }
 
         [TestMethod]
@@ -316,7 +316,7 @@ namespace MapWinGISTests
             Assert.IsNotNull(reprojectedSf, "reprojectedSf == null");
             Assert.AreEqual(sf.NumShapes, reprojectedSf.NumShapes);
 
-            Helper.SaveShapefile(reprojectedSf, Path.ChangeExtension(filename, ".WGS84-UTM12N.shp"));
+            Helper.SaveAsShapefile(reprojectedSf, Path.ChangeExtension(filename, ".WGS84-UTM12N.shp"));
         }
 
         [TestMethod]
@@ -331,7 +331,7 @@ namespace MapWinGISTests
             // Create fishnet for bounds of shape:
             var sf = Helper.CreateFishnet(shp.Extents, 20, 20);
             const string fishnetFilename = @"D:\dev\GIS-Data\MarcelBonder\Ortho\ndvi\Prototype\Fishnet.shp";
-            Helper.SaveShapefile(sf, fishnetFilename);
+            Helper.SaveAsShapefile(sf, fishnetFilename);
             Debug.WriteLine(fishnetFilename);
         }
 

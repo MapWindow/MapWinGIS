@@ -32,11 +32,11 @@ namespace MapWinGISTests
             Assert.IsTrue(result, "utils.CalculateRaster was unsuccessful: " + errorMsg);
             Debug.WriteLine(tmpFile);
 
-            var tiffIn = new ImageClass();
+            var tiffIn = new Image();
             result = tiffIn.Open(tiffInput);
             Assert.IsTrue(result, "Cannot open input tiff: " + tiffIn.ErrorMsg[tiffIn.LastErrorCode]);
 
-            var tiffOut = new ImageClass();
+            var tiffOut = new Image();
             result = tiffOut.Open(tmpFile, ImageType.TIFF_FILE);
             Assert.IsTrue(result, "Cannot open output tiff: " + tiffOut.ErrorMsg[tiffOut.LastErrorCode]);
 
@@ -157,7 +157,7 @@ namespace MapWinGISTests
         {
             const string input = @"D:\dev\TopX\TopX-Agri\TestData\Chlorofyl-index.clipped.optimized.tif";
             const string output = @"D:\dev\TopX\TopX-Agri\TestData\Chlorofyl-index.clipped.optimized.reclassified.tif";
-            var gridSource = new GridClass();
+            var gridSource = new Grid();
             gridSource.Open(input);
 
             var nodataValue = (double)gridSource.Header.NodataValue;
@@ -179,7 +179,7 @@ namespace MapWinGISTests
                 arr.Select(i => i.High).ToArray(), arr.Select(i => i.NewValue).ToArray(), "GTiff", null);
             Assert.IsTrue(retVal, "ReclassifyRaster failed: " + utils.ErrorMsg[utils.LastErrorCode]);
 
-            gridSource = new GridClass();
+            gridSource = new Grid();
             gridSource.Open(output);
 
             var nodataValueOutput = (double)gridSource.Header.NodataValue;
@@ -195,64 +195,5 @@ namespace MapWinGISTests
             Assert.IsTrue(Math.Round(maxOutput, 4) <= Math.Round(newMax, 4), $"New maximum is incorrect. got {maxOutput} expected {newMax}");
         }
 
-        [TestMethod]
-        public void ClipPolygon()
-        {
-            const string folder = @"D:\dev\GIS-Data\Issues\ClipGridWithPolygon\";
-
-            // Create new in-memory shapefile:
-            var sf = new Shapefile();
-            var retVal = sf.CreateNewWithShapeID("", ShpfileType.SHP_POLYGON);
-            Assert.IsTrue(retVal, "Could not CreateNewWithShapeID: " + sf.ErrorMsg[sf.LastErrorCode]);
-
-            // Assign projection:
-            var projection = new GeoProjection();
-            retVal = projection.ImportFromEPSG(4326);
-            Assert.IsTrue(retVal, "Could not ImportFromEPSG(4326): " + projection.ErrorMsg[projection.LastErrorCode]);
-            sf.GeoProjection = projection;
-
-            // Create shape:
-            var shp = new Shape();
-            retVal = shp.Create(ShpfileType.SHP_POLYGON);
-            Assert.IsTrue(retVal, "Could not shp.Create: " + shp.ErrorMsg[shp.LastErrorCode]);
-
-            // Add point of polygon:
-            var numPoints = 0;
-            shp.InsertPoint(new Point { y = 38.25853, x = 15.7033983 }, ref numPoints);
-            shp.InsertPoint(new Point { y = 38.248108, x = 15.7033983 }, ref numPoints);
-            shp.InsertPoint(new Point { y = 38.248108, x = 15.7245293 }, ref numPoints);
-            shp.InsertPoint(new Point { y = 38.25853, x = 15.7245293 }, ref numPoints);
-            // Make sure the polygon is closed by adding the first point as last:
-            shp.InsertPoint(new Point { y = 38.25853, x = 15.7033983 }, ref numPoints);
-            Assert.IsTrue(shp.IsValid, "Shape is invalid: " + shp.IsValidReason);
-
-            // Add shape to shapefile:
-            sf.EditAddShape(shp);
-
-            // Save to file:
-            retVal = sf.SaveAs(Path.Combine(folder, "ClippingArea-4326.shp"));
-            Assert.IsTrue(retVal, "Could not SaveAs: " + sf.ErrorMsg[sf.LastErrorCode]);
-
-            // Clip grid, using Utils.ClipGridWithPolygon fails on the LandSat data, probably because it is in UInt16.
-            var gdalUtils = new GdalUtils();
-            var input = Path.Combine(folder, "LC08_L1TP_188033_20170919_20170920_01_RT_B4.TIF");
-            Assert.IsTrue(File.Exists(input), "Input file does not exists");
-            var output = Path.Combine(folder, "clipped.tif");
-            if (File.Exists(output)) File.Delete(output);
-            var cutline = Path.Combine(folder, "ClippingArea-4326.shp");
-            Assert.IsTrue(File.Exists(cutline), "Cutline file does not exists");
-
-            var options = new[]
-            {
-                "-overwrite",
-                "-crop_to_cutline",
-                "-cutline", cutline
-            };
-            retVal = gdalUtils.GDALWarp(input, output, options);
-
-            Assert.IsTrue(retVal, "Could not ClipGridWithPolygon: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode]);
-            Assert.IsTrue(File.Exists(output), "Output file does not exists");
-            Debug.WriteLine(output);
-        }
     }
 }

@@ -59,7 +59,7 @@ GDALDataset* GdalHelper::OpenOgrDatasetW(CStringW filenameW, bool forUpdate, boo
 		if (ds)
 		{
 			// let's cache it for further reuse of connection
-			if (m_ogrDatasets.find(key) == m_ogrDatasets.end());
+			if (m_ogrDatasets.find(key) == m_ogrDatasets.end())
 			{
 				m_ogrDatasets[key] = ds;
 			}

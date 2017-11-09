@@ -32,8 +32,9 @@ namespace ConsoleApplication1
             // t.CreateLayerSQLiteTest();
             // t.GdalInfoHdf5();
 
-            //var t = new GdalUtilsTests();
-            //t.GdalWarp();
+            var t = new GdalUtilsTests();
+            // t.Shapefile2Gml();
+            t.VerySmallClip();
 
             //var t = new OgrDatasourceTests();
             //t.ImportShapefileTest();
@@ -51,9 +52,9 @@ namespace ConsoleApplication1
             //t.DrawLabel();
             //t.CaptureSnapshot();
 
-            var t = new ClipperTests();
+            //var t = new ClipperTests();
             // t.DissolveSmallfileClipper();
-            t.DissolveLargefileClipper();
+            //t.DissolveLargefileClipper();
 
             //var t = new UtilTests();
             //t.ZonalStatistics();

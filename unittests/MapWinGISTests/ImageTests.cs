@@ -83,7 +83,7 @@ namespace MapWinGISTests
         public void SaveImageShouldWork()
         {
             // MWGIS-80
-            var img = new ImageClass();
+            var img = new Image();
             img.Open(@"GeoTiff/5band.tif");
             Assert.IsNotNull(img, "Loaded object is not an image");
             var filename = Path.Combine(Path.GetTempPath(), "SaveImage.jpg");
@@ -98,7 +98,7 @@ namespace MapWinGISTests
         public void SaveImageShouldFail()
         {
             // MWGIS-80
-            var img = new ImageClass();
+            var img = new Image();
             img.Open(@"GeoTiff/5band.tif");
             Assert.IsNotNull(img, "Loaded object is not an image");
             var filename = Path.Combine(Path.GetTempPath(), "SaveImage");

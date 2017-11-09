@@ -4398,12 +4398,12 @@ interface IUtils : IDispatch{
 	[id(32), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useCenterWithinMethod, [out, retval]VARIANT_BOOL* retVal);
 	[id(33), helpstring("method Polygonize")] HRESULT Polygonize([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in, optional, defaultvalue(1)] int iSrcBand, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL NoMask, [in, optional, defaultvalue(NULL)] BSTR pszMaskFilename, [in, optional, defaultvalue("GML")] BSTR pszOGRFormat, [in, optional, defaultvalue("out")] BSTR pszDstLayerName, [in, optional, defaultvalue("DN")] BSTR pszPixValFieldName, [in, optional, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(36), helpstring("method GDALInfo")] HRESULT GDALInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
-	[id(37), helpstring("method GDALWarp")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(37), helpstring("Deprecated method GDALWarp")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(38), helpstring("method GDALBuildVrt")] HRESULT GDALBuildVrt([in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(39), helpstring("method GDALAddOverviews")] HRESULT GDALAddOverviews([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in] BSTR bstrLevels, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(40), helpstring("method GDALRasterize")] HRESULT GDALRasterize([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(41), helpstring("method OGRInfo")] HRESULT OGRInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] BSTR bstrLayers, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
-	[id(42), helpstring("method OGR2OGR")] HRESULT OGR2OGR([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(42), helpstring("Deprecated method OGR2OGR")] HRESULT OGR2OGR([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	/**** 4.9 only ****/
 	[id(29), helpstring("method ConvertDistance")] HRESULT ConvertDistance([in] tkUnitsOfMeasure sourceUnit, [in] tkUnitsOfMeasure targetUnit, [in,out] DOUBLE* Value, [out,retval] VARIANT_BOOL* retval);
 	[id(34), helpstring("method CreateInstance")] HRESULT CreateInstance([in]tkInterface interfaceId, [out, retval]IDispatch** retVal);
@@ -6447,7 +6447,8 @@ interface IGdalUtils : IDispatch{
 	[propput, id(4), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
 	[propget, id(5), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(5), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-
+	[id(6), helpstring("method GdalVectorTranslate")] HRESULT GdalVectorTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
+	[id(7), helpstring("method ClipVectorWithVector")] HRESULT ClipVectorWithVector([in] BSTR bstrSubjectFilename, [in] BSTR bstrOverlayFilename, [in] BSTR bstrDstFilename, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
 }
 
 [ 

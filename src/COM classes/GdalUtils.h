@@ -41,9 +41,9 @@ public:
 		m_pUnkMarshaler = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
-		_key = SysAllocString(L"");
-		
-		gReferenceCounter.AddRef(tkInterface::idGdalUtils);
+		_key = SysAllocString(L"");		
+		gReferenceCounter.AddRef(idGdalUtils);
+		CPLSetConfigOption("GDAL_NUM_THREADS", "ALL_CPUS");
 	}
 
 	virtual ~CGdalUtils();
@@ -80,6 +80,8 @@ public:
 	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(GdalWarp)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal);
+	STDMETHOD(GdalVectorTranslate)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal);
+	STDMETHOD(ClipVectorWithVector)(/*[in]*/ BSTR bstrSubjectFilename, /*[in]*/ BSTR bstrOverlayFilename, /*[in]*/ BSTR bstrDstFilename, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal);
 
 private:	
 	long _lastErrorCode;
