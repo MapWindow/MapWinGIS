@@ -88,7 +88,7 @@ namespace MapWinGISTests
             return sfFishnet;
         }
 
-        public static void SaveShapefile(IShapefile sf, string filename)
+        public static void SaveAsShapefile(IShapefile sf, string filename)
         {
             DebugMsg("Saving shapefile ...");
             DeleteShapefile(filename);

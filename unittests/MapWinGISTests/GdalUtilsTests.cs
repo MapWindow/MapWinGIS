@@ -10,12 +10,12 @@ namespace MapWinGISTests
     [DeploymentItem("Testdata")]
     public class GdalUtilsTests : ICallback
     {
-        private GdalUtils _gdalUtils;
+        private readonly GdalUtils _gdalUtils;
 
         public GdalUtilsTests()
         {
             // https://github.com/dwtkns/gdal-cheat-sheet
-            _gdalUtils = new GdalUtils { GlobalCallback = this };
+            _gdalUtils = new GdalUtilsClass { GlobalCallback = this };
         }
 
         [TestMethod]
@@ -45,6 +45,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void ClipPolygon()
         {
+            var settings = new GlobalSettings { OgrShareConnection = true };
             const string folder = @"D:\dev\GIS-Data\Issues\ClipGridWithPolygon\";
 
             // Create new in-memory shapefile:
@@ -77,8 +78,7 @@ namespace MapWinGISTests
             sf.EditAddShape(shp);
 
             // Save to file:
-            retVal = sf.SaveAs(Path.Combine(folder, "ClippingArea-4326.shp"));
-            Assert.IsTrue(retVal, "Could not SaveAs: " + sf.ErrorMsg[sf.LastErrorCode]);
+            Helper.SaveAsShapefile(sf, Path.Combine(folder, "ClippingArea-4326.shp"));
 
             // Clip grid, using Utils.ClipGridWithPolygon fails on the LandSat data, probably because it is in UInt16.
             var input = Path.Combine(folder, "LC08_L1TP_188033_20170919_20170920_01_RT_B4.TIF");
@@ -123,19 +123,20 @@ namespace MapWinGISTests
         [TestMethod]
         public void VerySmallClip()
         {
+            var settings = new GlobalSettings { OgrShareConnection = true };
             var tempFolder = Helper.WorkingFolder("VerySmallClip");
             var sfBorder = Helper.CreateSfFromWkt(
                 "POLYGON ((693416.416338362 5841003.20610673,693424.331109333 5840997.77042745,693415.26280084 5840989.96669721,693403.190049054 5841000.68434421,693416.416338362 5841003.20610673))",
                 32631);
             var borderFilename = Path.Combine(tempFolder, $"{DateTime.Now.Ticks} border.shp");
-            Helper.SaveShapefile(sfBorder, borderFilename);
+            Helper.SaveAsShapefile(sfBorder, borderFilename);
             sfBorder.Close();
 
             var sfSubject = Helper.CreateSfFromWkt(
                 "POLYGON ((693395.4 5840980.6,693395.4 5840995.6,693410.4 5840995.6,693410.4 5840980.6,693395.4 5840980.6))",
                 32631);
             var subjectFilename = Path.Combine(tempFolder, $"{DateTime.Now.Ticks} subject.shp");
-            Helper.SaveShapefile(sfSubject, subjectFilename);
+            Helper.SaveAsShapefile(sfSubject, subjectFilename);
             sfSubject.Close();
 
             var outputFilename = Path.Combine(tempFolder, $"{DateTime.Now.Ticks} GdalVectorTranslate.shp");
@@ -156,6 +157,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void VeryLargeClip()
         {
+            var settings = new GlobalSettings { OgrShareConnection = true };
             var tempFolder = Helper.WorkingFolder("VeryLargeClip");
             const string subjectFilename = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\Fishnet.shp";
             const string borderFilename = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\border.shp";

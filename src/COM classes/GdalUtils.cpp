@@ -50,7 +50,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 	CStringW srcFilename = OLE2W(bstrSrcFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
-		ErrorMessage(tkINVALID_FILENAME);		
+		ErrorMessage(tkINVALID_FILENAME);
 		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", srcFilename));
 		return S_OK;
 	}
@@ -135,7 +135,7 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstF
 	// Open file as GdalDataset:
 	CallbackHelper::Progress(_globalCallback, 0, "Open source file as vector", _key);
 
-	GDALDatasetH dt = GdalHelper::OpenOgrDatasetW(srcFilename, GA_ReadOnly, useSharedConnection);
+	GDALDatasetH dt = GdalHelper::OpenOgrDatasetW(srcFilename, GA_ReadOnly, useSharedConnection == VARIANT_TRUE);
 	if (!dt)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Can't open %s as a vector file.", srcFilename));
@@ -186,7 +186,7 @@ cleaning:
 		CSLDestroy(translateOptions);
 
 	if (dt)
-		GDALClose(dt);
+		GdalHelper::CloseSharedOgrDataset((GDALDataset*)dt);
 
 	CallbackHelper::ProgressCompleted(_globalCallback);
 
@@ -217,7 +217,7 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR bstrSubjectFilename, BSTR bst
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
 	}
-	
+
 	// Call VectorTranslate:
 	CComSafeArray<BSTR> translateOptions(10);
 	translateOptions[0] = "-f";
@@ -225,7 +225,7 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR bstrSubjectFilename, BSTR bst
 	translateOptions[2] = "-overwrite";
 	translateOptions[3] = "-clipsrc";
 	translateOptions[4] = bstrOverlayFilename;
-	this->GdalVectorTranslate(bstrSubjectFilename, bstrDstFilename, translateOptions, useSharedConnection, retVal);	
+	this->GdalVectorTranslate(bstrSubjectFilename, bstrDstFilename, translateOptions, useSharedConnection, retVal);
 
 	return S_OK;
 }

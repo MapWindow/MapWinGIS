@@ -76,7 +76,7 @@
     </Reference>
     <Reference Include="Interop.MapWinGIS">
       <HintPath>..\interopCreator\bin\x86\Debug\Interop.MapWinGIS.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />

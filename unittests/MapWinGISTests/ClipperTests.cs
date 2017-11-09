@@ -57,7 +57,7 @@ namespace MapWinGISTests
 
             Assert.IsNotNull(sfDissolved, "sfDissolved is null: " + sf.ErrorMsg[sf.LastErrorCode]);
 
-            Helper.SaveShapefile(sfDissolved, sfOutput);
+            Helper.SaveAsShapefile(sfDissolved, sfOutput);
             Helper.DebugMsg("NumShapes: " + sfDissolved.NumShapes);
             Helper.CheckValidity(sfDissolved);
             Assert.IsFalse(sfDissolved.HasInvalidShapes(), "Result has invalid shapes");
@@ -106,7 +106,7 @@ namespace MapWinGISTests
 
             Assert.IsNotNull(sfDissolved, "sfDissolved is null: " + sf.ErrorMsg[sf.LastErrorCode]);
 
-            Helper.SaveShapefile(sfDissolved, sfOutput);
+            Helper.SaveAsShapefile(sfDissolved, sfOutput);
             Helper.DebugMsg("NumShapes: " + sfDissolved.NumShapes);
 
             Helper.CheckValidity(sfDissolved);
@@ -149,7 +149,7 @@ namespace MapWinGISTests
             stopWatch.Restart();
             Assert.IsNotNull(sfDissolved, "sfDissolved is null: " + sf.ErrorMsg[sf.LastErrorCode]);
 
-            Helper.SaveShapefile(sfDissolved, sfOutput);
+            Helper.SaveAsShapefile(sfDissolved, sfOutput);
             Helper.DebugMsg("NumShapes: " + sfDissolved.NumShapes);
             Assert.AreEqual(12, sfDissolved.NumShapes, 1, "Too few shapes");
 
@@ -181,7 +181,7 @@ namespace MapWinGISTests
             var sfBorder = Helper.CreateSfFromWkt(
                     "POLYGON ((693416.416338362 5841003.20610673,693424.331109333 5840997.77042745,693415.26280084 5840989.96669721,693403.190049054 5841000.68434421,693416.416338362 5841003.20610673))",
                     32631);
-            Helper.SaveShapefile(sfBorder, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} border.shp"));
+            Helper.SaveAsShapefile(sfBorder, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} border.shp"));
 
             //var shpSubject = new Shape();
             //if (!shpSubject.ImportFromWKT("POLYGON ((693395.4 5840980.6,693395.4 5840995.6,693410.4 5840995.6,693410.4 5840980.6,693395.4 5840980.6))"))
@@ -192,13 +192,13 @@ namespace MapWinGISTests
                 32631);
 
             sfSubject.GeometryEngine = geometryEngine;
-            Helper.SaveShapefile(sfSubject, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} subject.shp"));
+            Helper.SaveAsShapefile(sfSubject, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} subject.shp"));
 
             var sfClipped = sfSubject.Clip(false, sfBorder, false);
             Assert.IsNotNull(sfClipped, "sfClipped is null: " + sfSubject.ErrorMsg[sfSubject.LastErrorCode]);
             Assert.IsFalse(sfClipped.HasInvalidShapes(), "Output file has invalid shapes");
 
-            Helper.SaveShapefile(sfClipped, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_FailingClipClipper.shp"));
+            Helper.SaveAsShapefile(sfClipped, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_FailingClipClipper.shp"));
 
             if (!sfSubject.Close())
                 Assert.Fail("Can't close sfSubject Error: " + sfSubject.ErrorMsg[sfSubject.LastErrorCode]);
@@ -237,12 +237,12 @@ namespace MapWinGISTests
             const double multiplier = 1d;
             var sfBorder = CreateBorder(multiplier);
             Helper.DebugMsg("Size of border " + sfBorder.Shape[0].Area);
-            Helper.SaveShapefile(sfBorder, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_border_{multiplier.ToString(CultureInfo.InvariantCulture)}.shp"));
+            Helper.SaveAsShapefile(sfBorder, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_border_{multiplier.ToString(CultureInfo.InvariantCulture)}.shp"));
 
             const double size = 0.5d;
             var sfFishnet = Helper.CreateFishnet(sfBorder.Extents, size, size);
             sfFishnet.GeoProjection = sfBorder.GeoProjection;
-            Helper.SaveShapefile(sfFishnet, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_smallFishnet_{size.ToString(CultureInfo.InvariantCulture)}.shp"));
+            Helper.SaveAsShapefile(sfFishnet, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_smallFishnet_{size.ToString(CultureInfo.InvariantCulture)}.shp"));
 
             if (sfBorder.HasInvalidShapes()) Helper.DebugMsg("Border has invalid shapes");
             if (sfFishnet.HasInvalidShapes()) Helper.DebugMsg("Fishnet has invalid shapes");
@@ -266,13 +266,13 @@ namespace MapWinGISTests
             Helper.DebugMsg("Time it took to create the border: " + stopWatch.Elapsed);
             stopWatch.Restart();
 
-            Helper.SaveShapefile(sfBorder, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_border_{geometryEngine.ToString()}_{multiplier}.shp"));
+            Helper.SaveAsShapefile(sfBorder, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_border_{geometryEngine.ToString()}_{multiplier}.shp"));
             var sfFishnet = Helper.CreateFishnet(sfBorder.Extents, size, size);
             Helper.DebugMsg("Time it took to create the fishnet: " + stopWatch.Elapsed);
             stopWatch.Restart();
 
             sfFishnet.GeoProjection = sfBorder.GeoProjection;
-            Helper.SaveShapefile(sfFishnet, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_smallFishnet_{geometryEngine.ToString()}_{size}.shp"));
+            Helper.SaveAsShapefile(sfFishnet, Path.Combine(tempFolder, $"{DateTime.Now.Ticks} clip_smallFishnet_{geometryEngine.ToString()}_{size}.shp"));
             
             if (sfBorder.HasInvalidShapes()) Helper.DebugMsg("Border has invalid shapes");
             if (sfFishnet.HasInvalidShapes()) Helper.DebugMsg("Fishnet has invalid shapes");
@@ -285,7 +285,7 @@ namespace MapWinGISTests
             Assert.IsNotNull(sfClipped, "sfClipped is null: " + sfFishnet.ErrorMsg[sfFishnet.LastErrorCode]);
 
             var sfOutputFile = Path.Combine(tempFolder, $"{DateTime.Now.Ticks}  FishnetClipped_{geometryEngine.ToString()}_{multiplier}_{size}.shp");
-            Helper.SaveShapefile(sfClipped, sfOutputFile);
+            Helper.SaveAsShapefile(sfClipped, sfOutputFile);
 
             if (!sfBorder.Close())
                 Assert.Fail("Can't close sfBorder Error: " + sfBorder.ErrorMsg[sfBorder.LastErrorCode]);
@@ -336,7 +336,7 @@ namespace MapWinGISTests
             Helper.DebugMsg("sfClipped.ErrorMsg: " + sfClipped.ErrorMsg[sfClipped.LastErrorCode]);
             Assert.IsNotNull(sfClipped, "sfClipped is null: " + sfClipped.ErrorMsg[sfClipped.LastErrorCode]);
 
-            Helper.SaveShapefile(sfClipped, sfOutputFile);
+            Helper.SaveAsShapefile(sfClipped, sfOutputFile);
             Helper.DebugMsg("NumShapes: " + sfClipped.NumShapes);
 
             if (!sfBorder.Close())
@@ -415,7 +415,7 @@ namespace MapWinGISTests
             var sf = CreateBorder();
             var tempFolder = Path.GetTempPath();
             var filename = Path.Combine(tempFolder, "smallBorder.shp");
-            Helper.SaveShapefile(sf, filename);
+            Helper.SaveAsShapefile(sf, filename);
         }
 
         [TestMethod]
@@ -425,7 +425,7 @@ namespace MapWinGISTests
             var tempFolder = Path.GetTempPath();
             var filename = Path.Combine(tempFolder, "largeBorder.shp");
             if (File.Exists(filename)) Helper.DeleteShapefile(filename);
-            Helper.SaveShapefile(sf, filename);
+            Helper.SaveAsShapefile(sf, filename);
         }
 
         private static Shapefile CreateBorder(double multiplier = 1d)
