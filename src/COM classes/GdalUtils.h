@@ -75,6 +75,7 @@ public:
 public:
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
+	STDMETHOD(get_DetailedErrorMsg)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
 	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
@@ -87,6 +88,7 @@ private:
 	long _lastErrorCode;
 	ICallback * _globalCallback;
 	BSTR _key;
+	CString _detailedError;
 
 	char** ConvertSafeArray(SAFEARRAY* safeArray);
 	

@@ -45,6 +45,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
+	_detailedError = "No error";
 
 	USES_CONVERSION;
 	CStringW srcFilename = OLE2W(bstrSrcFilename);
@@ -52,6 +53,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", srcFilename));
+		_detailedError = "Source file " + srcFilename + " does not exists.";
 		return S_OK;
 	}
 
@@ -61,6 +63,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 	if (!dt)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Can't open %s as a raster file.", srcFilename));
+		_detailedError = "Can't open " + srcFilename + " as a raster file.";
 		ErrorMsg(tkINVALID_FILENAME);
 		goto cleaning;
 	}
@@ -69,6 +72,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 	if (SafeArrayGetDim(options) != 1)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("The warp options are invalid."));
+		_detailedError = "The option array doesn't have 1 dimension";
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
 		goto cleaning;
 	}
@@ -78,6 +82,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 	if (!gdalWarpOptions)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("The warp options are invalid."));
+		_detailedError = "Can't convert the option array to GDALWarpAppOptions";
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
 		goto cleaning;
 	}
@@ -122,12 +127,14 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstF
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
+	_detailedError = "No error";
 
 	USES_CONVERSION;
 	CStringW srcFilename = OLE2W(bstrSrcFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", srcFilename));
+		_detailedError = "Subject file " + srcFilename + " does not exists.";
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
 	}
@@ -139,6 +146,7 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstF
 	if (!dt)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Can't open %s as a vector file.", srcFilename));
+		_detailedError = "Can't open " + srcFilename + " as a vector file.";
 		ErrorMsg(tkINVALID_FILENAME);
 		goto cleaning;
 	}
@@ -147,6 +155,7 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstF
 	if (SafeArrayGetDim(options) != 1)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("The vector translate options are invalid."));
+		_detailedError = "The option array doesn't have 1 dimension";
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
 		goto cleaning;
 	}
@@ -156,6 +165,7 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstF
 	if (!gdalVectorTranslateOptions)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("The vector translate options are invalid."));
+		_detailedError = "Can't convert the option array to GDALVectorTranslateOptions";
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
 		goto cleaning;
 	}
@@ -200,12 +210,14 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR bstrSubjectFilename, BSTR bst
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
+	_detailedError = "No error";
 
 	USES_CONVERSION;
 	CStringW subjectFilename = OLE2W(bstrSubjectFilename);
 	if (!Utility::FileExistsW(subjectFilename))
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Subject file %s does not exists.", subjectFilename));
+		_detailedError = "Subject file " + subjectFilename + " does not exists.";
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
 	}
@@ -214,6 +226,7 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR bstrSubjectFilename, BSTR bst
 	if (!Utility::FileExistsW(overlayFilename))
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Overlay file %s does not exists.", overlayFilename));
+		_detailedError = "Overlay file " + overlayFilename + " does not exists.";
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
 	}
@@ -249,6 +262,18 @@ STDMETHODIMP CGdalUtils::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
+	return S_OK;
+}
+
+// *********************************************************************
+//		get_DetailedErrorMsg
+// *********************************************************************
+STDMETHODIMP CGdalUtils::get_DetailedErrorMsg(BSTR *pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		USES_CONVERSION;
+
+	*pVal = A2BSTR((LPCSTR)_detailedError);
 	return S_OK;
 }
 

@@ -148,6 +148,7 @@ namespace MapWinGISTests
             var retVal = _gdalUtils.ClipVectorWithVector(subjectFilename, borderFilename, outputFilename);
             stopWatch.Stop();
             WriteLine("VerySmallClip took " + stopWatch.Elapsed);
+            WriteLine("Detailed error: " + _gdalUtils.DetailedErrorMsg);
 
             Assert.IsTrue(retVal, "gdalUtils.GdalVectorTranslate() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode]);
             Assert.IsTrue(File.Exists(outputFilename), "Can't find the output file");

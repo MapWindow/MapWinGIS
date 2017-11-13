@@ -6449,6 +6449,7 @@ interface IGdalUtils : IDispatch{
 	[propput, id(5), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[id(6), helpstring("method GdalVectorTranslate")] HRESULT GdalVectorTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
 	[id(7), helpstring("method ClipVectorWithVector")] HRESULT ClipVectorWithVector([in] BSTR bstrSubjectFilename, [in] BSTR bstrOverlayFilename, [in] BSTR bstrDstFilename, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(8)] HRESULT DetailedErrorMsg([out, retval] BSTR *pVal);
 }
 
 [ 
