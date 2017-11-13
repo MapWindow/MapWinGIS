@@ -101,6 +101,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void GetBuffer()
         {
+            // MWGIS-67
             var ds = new OgrDatasource();
             try
             {
@@ -112,8 +113,10 @@ namespace MapWinGISTests
                 // Get layer using buffer:
                 var layer = ds.GetLayerByName("states_polygon");
                 Assert.IsNotNull(layer, "layer is null");
+                Console.WriteLine("Layer type is " + layer.ShapeType);
 
                 var sfFromBuffer = layer.GetBuffer();
+                Assert.IsNotNull(sfFromBuffer, "sfFromBuffer is null");
                 Debug.WriteLine("NumShapes: " + sfFromBuffer.NumShapes);
 
                 var tmpFilename = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), ".shp");

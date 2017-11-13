@@ -32,12 +32,13 @@ namespace ConsoleApplication1
             // t.CreateLayerSQLiteTest();
             // t.GdalInfoHdf5();
 
-            var t = new GdalUtilsTests();
+            //var t = new GdalUtilsTests();
             // t.Shapefile2Gml();
-            t.VerySmallClip();
+            // t.VerySmallClip();
 
-            //var t = new OgrDatasourceTests();
+            var t = new OgrDatasourceTests();
             //t.ImportShapefileTest();
+            t.GetBuffer();
 
             //var t = new ShapefileTests();
             //t.Reproject2280Test();

@@ -139,7 +139,8 @@ namespace MapWinGISTests
         public void GdalInfoEcw()
         {
             var utils = new Utils();
-            var retVal = utils.GDALInfo(@"D:\dev\GIS-Data\Issues\ECW-crash\TK25.ecw", string.Empty);
+            var retVal = utils.GDALInfo(@"D:\dev\GIS-Data\Issues\MWGIS-70 ECW-crash\TK25.ecw", string.Empty);
+            Assert.IsNotNull(retVal, "GDALInfo failed: " + utils.ErrorMsg[utils.LastErrorCode]);
             Debug.WriteLine(retVal);
             Assert.IsTrue(retVal.Contains("Driver: ECW/ERDAS Compressed Wavelets (SDK 5."), "Wrong ECW driver");
         }
