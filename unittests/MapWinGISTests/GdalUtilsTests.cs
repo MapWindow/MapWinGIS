@@ -43,6 +43,49 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
+        public void GdalWarp2()
+        {
+            // Comes from GdalTests.GdalWarp, which uses the old
+            // utils.gdalwarp (now deprecated)
+
+            var output = Path.GetTempPath() + "GdalWarp.vrt";
+            if (File.Exists(output)) File.Delete(output);
+
+            var options = new[]
+            {
+                "-of", "vrt",
+                "-overwrite"
+            };
+            var retVal = _gdalUtils.GDALWarp(@"GeoTiff/5band.tif", output, options);
+            Assert.IsTrue(retVal, "GdalWarp failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode]);
+            Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
+            Debug.WriteLine(output);
+        }
+
+        [TestMethod]
+        public void GdalWarpCutline()
+        {
+            // Comes from GdalTests.GdalWarpCutline, which uses the old
+            // utils.gdalwarp (now deprecated)
+
+            var output = Path.GetTempPath() + "GdalWarpCutline.vrt";
+            if (File.Exists(output)) File.Delete(output);
+            const string border = @"J:\_testdata\Haulmkilling2\20171019-Agrifac-586-Prinzen-wdvi\Prinzen - Dinxperlo.shp";
+
+            var options = new[]
+            {
+                "-of", "vrt",
+                "-overwrite",
+                "-crop_to_cutline",
+                "-cutline", border
+            };
+            var retVal = _gdalUtils.GDALWarp(@"J:\_testdata\Haulmkilling2\20171019-Agrifac-586-Prinzen-wdvi\7da7d241-aa4f-4955-861e-62efbe85adf8_index_wdvi.tif", output, options);
+            Assert.IsTrue(retVal, "GdalWarp failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
+            Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
+            Debug.WriteLine(output);
+        }
+
+        [TestMethod]
         public void ClipPolygon()
         {
             var settings = new GlobalSettings { OgrShareConnection = true };

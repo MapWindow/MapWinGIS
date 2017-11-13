@@ -200,7 +200,7 @@ namespace MapWinGISTests
             }
         }
 
-        [TestMethod]
+        [Obsolete("utils.GDALWarp is deprecated, please use gdalUtils.GDALWarp instead.")]
         public void GdalWarp()
         {
             var utils = new Utils();
@@ -213,7 +213,7 @@ namespace MapWinGISTests
             Debug.WriteLine(output);
         }
 
-        [TestMethod]
+        [Obsolete("utils.GDALWarp is deprecated, please use gdalUtils.GDALWarp instead.")]
         public void GdalWarpCutline()
         {
             var utils = new Utils();

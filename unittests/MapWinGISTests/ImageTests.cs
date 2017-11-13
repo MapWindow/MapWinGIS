@@ -13,7 +13,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void ProjectionToImage()
         {
-            var img = LoadImage(@"GeoTiff\5band.tif");
+            var img = LoadImageUsingFileManager(@"GeoTiff\5band.tif");
             Assert.IsNotNull(img, "Loaded object is not an image");
 
             Debug.WriteLine($"img.Width: {img.OriginalWidth}, img.Height: {img.OriginalHeight}");
@@ -39,7 +39,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void ImageToProjection()
         {
-            var img = LoadImage(@"GeoTiff\5band.tif");
+            var img = LoadImageUsingFileManager(@"GeoTiff\5band.tif");
             Assert.IsNotNull(img, "Loaded object is not an image");
 
             Debug.WriteLine($"xMin: {img.Extents.xMin}, yMax: {img.Extents.yMax}");
@@ -62,20 +62,31 @@ namespace MapWinGISTests
             Assert.AreEqual(img.Extents.yMin, projY, "projY has unexpected value");
         }
 
-        [TestMethod, Timeout(30000)]
-        //[TestMethod]
+        [TestMethod, Timeout(20000)]
         public void LargeEcwFile()
         {
-            // Timout after 30 seconds:
-            var img = LoadImage(@"D:\dev\GIS-Data\Issues\MWGIS-70 ECW-crash\TK25.ecw");
+            // Timout after 20 seconds:
+            var img = LoadImageUsingFileManager(@"D:\dev\GIS-Data\Issues\MWGIS-70 ECW-crash\TK25.ecw");
             Assert.IsNotNull(img, "Could not open ECW file.");
+        }
+
+        [TestMethod]
+        public void LargeEcwFileAsImage()
+        {
+            var img = new Image();
+            const string filename = @"D:\dev\GIS-Data\Issues\MWGIS-70 ECW-crash\TK25.ecw";
+            if (!img.Open(filename))
+            {
+                Assert.Fail("Failed to open datasource: " + img.ErrorMsg[img.LastErrorCode]);
+            }
+            Assert.IsNotNull(img, "Could not open ECW file as image");
         }
 
         [TestMethod]
         public void SmallEcwFile()
         {
             // Timout after 30 seconds:
-            var img = LoadImage(@"D:\dev\GIS-Data\Raster\ecw\ECW-ERMapper-Compressed-Wavelets.ecw");
+            var img = LoadImageUsingFileManager(@"D:\dev\GIS-Data\Raster\ecw\ECW-ERMapper-Compressed-Wavelets.ecw");
             Assert.IsNotNull(img, "Loaded object is not an image");
         }
 
@@ -108,9 +119,10 @@ namespace MapWinGISTests
             Assert.IsFalse(retVal, "Image could be saved. This is unexpected.");
         }
 
-        private static Image LoadImage(string filename)
+        private static Image LoadImageUsingFileManager(string filename)
         {
-            if (!File.Exists(filename)) Assert.Fail("Input file does not exist: " + filename);
+            if (!File.Exists(filename))
+                Assert.Fail("Input file does not exist: " + filename);
 
             var fm = new FileManager();
             var obj = fm.Open(filename, tkFileOpenStrategy.fosAutoDetect, null);
