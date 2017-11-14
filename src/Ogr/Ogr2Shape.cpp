@@ -277,13 +277,19 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 
 		CComVariant var;
 
-		// https://mapwindow.atlassian.net/browse/CORE-177:
-		if (poFeature->IsFieldSet(iFld))
+		// https://mapwindow.atlassian.net/browse/MWGIS-57:		
+		if (poFeature->IsFieldSetAndNotNull(iFld))
 		{
+			// TODO: Support date type
 			if (type == OFTInteger)
 			{
 				var.vt = VT_I4;
 				var.lVal = poFeature->GetFieldAsInteger(iFld);
+			}
+			else if (type == OFTInteger64)
+			{
+				var.vt = VT_I8;
+				var.llVal = poFeature->GetFieldAsInteger64(iFld);
 			}
 			else if (type == OFTReal)
 			{

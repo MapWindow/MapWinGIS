@@ -12,8 +12,8 @@ namespace MapWinGISTests
         [TestInitialize]
         public void Start()
         {
-            Debug.WriteLine("Start PostGIS tests");
-            Debug.WriteLine(DateTime.Now);
+            Console.WriteLine("Start PostGIS tests");
+            Console.WriteLine(DateTime.Now);
         }
 
         /// <summary>
@@ -31,19 +31,19 @@ namespace MapWinGISTests
                 var settings = new GlobalSettings();
 
                 var capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateLayer);
-                Debug.WriteLine("odcCreateLayer: " + capability);
+                Console.WriteLine("odcCreateLayer: " + capability);
                 Assert.IsTrue(capability, "Cannot create layer");
                 capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcDeleteLayer);
-                Debug.WriteLine("odcDeleteLayer: " + capability);
+                Console.WriteLine("odcDeleteLayer: " + capability);
                 Assert.IsTrue(capability, "Cannot delete layer");
                 capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateDataSource);
-                Debug.WriteLine("odcCreateDataSource: " + capability);
+                Console.WriteLine("odcCreateDataSource: " + capability);
                 //Assert.IsTrue(capability), "Cannot create datasource");
                 capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcDeleteDataSource);
-                Debug.WriteLine("odcDeleteDataSource: " + capability);
+                Console.WriteLine("odcDeleteDataSource: " + capability);
                 //Assert.IsTrue(capability, "Cannot delete datasource");
                 capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateGeomFieldAfterCreateLayer);
-                Debug.WriteLine("odcCreateGeomFieldAfterCreateLayer: " + capability);
+                Console.WriteLine("odcCreateGeomFieldAfterCreateLayer: " + capability);
                 Assert.IsTrue(capability, "Cannot create GeomField After CreateLayer");
 
                 Assert.IsTrue(ogrDatasource.LayerCount > 1, "No layers found");
@@ -51,7 +51,7 @@ namespace MapWinGISTests
                 for (var i = 0; i < ogrDatasource.LayerCount; i++)
                 {
                     var layer = ogrDatasource.GetLayer(i);
-                    Debug.WriteLine(layer.Name);
+                    Console.WriteLine(layer.Name);
                 }
             }
             finally
@@ -78,12 +78,12 @@ namespace MapWinGISTests
                 for (var i = 0; i < ogrDatasource.LayerCount; i++)
                 {
                     var layer = ogrDatasource.GetLayer(i);
-                    Debug.WriteLine(layer.Name);
+                    Console.WriteLine(layer.Name);
                     if (layer.Name == "attributes") attributeLayer = layer;
                 }
 
                 Assert.IsNotNull(attributeLayer, "Couldn't find the attribute layer");
-                Debug.WriteLine("Working with attributes layer");
+                Console.WriteLine("Working with attributes layer");
 
                 var sf = attributeLayer.GetBuffer();
                 Assert.IsNotNull(sf, "Could not get buffer");
@@ -95,37 +95,41 @@ namespace MapWinGISTests
                 Assert.IsTrue(numFields > 0, "No fields found");
 
                 var fidColumn = attributeLayer.FIDColumnName;
-                Debug.WriteLine("fidColumn: " + fidColumn);
+                Console.WriteLine("fidColumn: " + fidColumn);
 
                 // First shape has all attributes filled:
-                Debug.WriteLine("Testing first shape");
+                Console.WriteLine("Testing first shape, all filled");
                 for (var fieldIndex = 0; fieldIndex < numFields; fieldIndex++)
                 {
                     var value = sf.CellValue[fieldIndex, 0];
-                    Debug.WriteLine($"{sf.Field[fieldIndex].Name}: {value}");
+                    Console.WriteLine($"{sf.Field[fieldIndex].Name}: {value}");
                     Assert.IsNotNull(value, $"{sf.Field[fieldIndex].Name} should not be null");
                 }
 
                 // Second shape has only the geometry filled and the rest default values (which should be NULL):
-                Debug.WriteLine("Testing second shape");
+                Console.WriteLine("Testing second shape, default values");
                 var numNonNulls = 0;
                 for (var fieldIndex = 0; fieldIndex < numFields; fieldIndex++)
                 {
                     var value = sf.CellValue[fieldIndex, 1];
-                    Debug.WriteLine($"{sf.Field[fieldIndex].Name}: {value}");
+                    Console.WriteLine($"{sf.Field[fieldIndex].Name}: {value}");
                     // Skip FID because it always has a value:
                     if (sf.Field[fieldIndex].Name == fidColumn) continue;
                     if (value != null) numNonNulls++;
                 }
-                if (numNonNulls > 0) Debug.WriteLine($"Error! Second shape has {numNonNulls} non NULL fields!");
+                if (numNonNulls > 0)
+                {
+                    // No assert, need to check the third shape as well:
+                    Console.WriteLine($"Error! Second shape has {numNonNulls} non NULL fields!");
+                }
 
                 // Third shape has all fields explicitly NULL:
-                Debug.WriteLine("Testing third shape");
+                Console.WriteLine("Testing third shape, all null");
                 numNonNulls = 0;
                 for (var fieldIndex = 0; fieldIndex < numFields; fieldIndex++)
                 {
                     var value = sf.CellValue[fieldIndex, 2];
-                    Debug.WriteLine($"{sf.Field[fieldIndex].Name}: {value}");
+                    Console.WriteLine($"{sf.Field[fieldIndex].Name}: {value}");
                     // Skip FID because it always has a value:
                     if (sf.Field[fieldIndex].Name == fidColumn) continue;
                     if (value != null) numNonNulls++;
@@ -155,14 +159,14 @@ namespace MapWinGISTests
                 var stopwatch = new Stopwatch();
 
                 stopwatch.Start();
-                Debug.WriteLine("Using GetLayer:");
+                Console.WriteLine("Using GetLayer:");
                 for (var i = 0; i < ogrDatasource.LayerCount; i++)
                 {
                     var layer = ogrDatasource.GetLayer(i);
-                    Debug.WriteLine(layer.Name);
+                    Console.WriteLine(layer.Name);
                 }
                 stopwatch.Stop();
-                Debug.WriteLine("GetLayer took " + stopwatch.Elapsed);
+                Console.WriteLine("GetLayer took " + stopwatch.Elapsed);
 
                 // TODO Get layername with schema name
             }
