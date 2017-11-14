@@ -2722,8 +2722,8 @@ STDMETHODIMP CImageClass::LoadBuffer(double maxBufferSize, VARIANT_BOOL* retVal)
 		if (this->IsGdalImageAvailable())
 		{
 			*retVal = _raster->LoadBufferFull(&(_imageData), _fileName, maxBufferSize);
-			_height = _raster->GetWidth();
-			_width = _raster->GetHeight();
+			_width = _raster->GetWidth();
+			_height = _raster->GetHeight();
 			_dataLoaded = true;
 		}
 	}
