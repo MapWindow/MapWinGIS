@@ -2791,7 +2791,7 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	FixUpShapes2(VARIANT_TRUE, retVal, fixed);
+	FixUpShapes2(VARIANT_FALSE, retVal, fixed);
 	
 	return S_OK;
 }

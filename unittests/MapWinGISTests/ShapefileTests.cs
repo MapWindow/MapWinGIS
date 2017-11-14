@@ -249,6 +249,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void FixUpShapes()
         {
+            // MWGIS-90
             // Open shapefile:
             var sfInvalid = new Shapefile();
             Shapefile sfFixed = null;
@@ -257,12 +258,13 @@ namespace MapWinGISTests
                 var result = sfInvalid.Open(@"sf\invalid.shp");
                 Assert.IsTrue(result, "Could not open shapefile");
 
-                result = sfInvalid.HasInvalidShapes();
-                Assert.IsTrue(result, "Shapefile has no invalid shapes");
+                Assert.IsTrue(sfInvalid.HasInvalidShapes(), "Shapefile has no invalid shapes");
                 Helper.PrintExtents(sfInvalid.Extents);
 
                 result = sfInvalid.FixUpShapes(out sfFixed);
                 Assert.IsTrue(result, "Could not fix shapefile");
+                Assert.IsFalse(sfFixed.HasInvalidShapes(), "Returning shapefile has invalid shapes");
+
                 Assert.AreEqual(sfInvalid.NumShapes, sfFixed.NumShapes, "Number of shapes are not equal");
                 Helper.PrintExtents(sfFixed.Extents);
             }
