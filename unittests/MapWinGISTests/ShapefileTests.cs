@@ -274,25 +274,24 @@ namespace MapWinGISTests
             }
         }
 
-        [TestMethod]
+        // Missing data: [TestMethod]
         public void Reproject2281Test()
         {
             var sf = new Shapefile();
-            const string filename = @"sf/utah_central_arcs.shp"; // In NAD83 / Utah Central (ft), EPSG:2281
-            if (!sf.Open(filename))
-            {
-                Assert.Fail("Could not open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
-            }
+            const string filename = @"Issues/MWGIS-91/utah_central_arcs.shp"; // In NAD83 / Utah Central (ft), EPSG:2281
+            if (!sf.Open(filename)) Assert.Fail("Could not open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
             Assert.IsTrue(sf.NumShapes == 1, "Unexpected number of shapes in " + filename);
             Console.WriteLine(sf.GeoProjection.ProjectionName);
+            Helper.PrintExtents(sf.Extents);
 
             var proj = new GeoProjection();
             proj.ImportFromEPSG(32612); // WGS 84 / UTM zone 12N
             var numShps = 0;
             var reprojectedSf = sf.Reproject(proj, numShps);
-            Assert.IsTrue(numShps > 0, "Nothing is reprojected");
+            Assert.IsTrue(numShps > 0, "Nothing is reprojected. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
             Assert.IsNotNull(reprojectedSf, "reprojectedSf == null");
             Assert.AreEqual(sf.NumShapes, reprojectedSf.NumShapes);
+            Helper.PrintExtents(reprojectedSf.Extents);
 
             Helper.SaveAsShapefile(reprojectedSf, Path.ChangeExtension(filename, ".WGS84-UTM12N.shp"));
         }
@@ -301,23 +300,25 @@ namespace MapWinGISTests
         public void Reproject2280Test()
         {
             var sf = new Shapefile();
-            const string filename = @"sf/utah_north_arcs.shp"; // In NAD83 / Utah North (ft), EPSG:2280
-            if (!sf.Open(filename))
-            {
-                Assert.Fail("Could not open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
-            }
+            const string filename = @"Issues/MWGIS-91/utah_north_arcs.shp"; // In NAD83 / Utah North (ft), EPSG:2280
+            if (!sf.Open(filename)) Assert.Fail("Could not open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
             Assert.IsTrue(sf.NumShapes == 1, "Unexpected number of shapes in " + filename);
             Console.WriteLine(sf.GeoProjection.ProjectionName);
+            Helper.PrintExtents(sf.Extents);
 
             var proj = new GeoProjection();
             proj.ImportFromEPSG(32612); // WGS 84 / UTM zone 12N
             var numShps = 0;
             var reprojectedSf = sf.Reproject(proj, ref numShps);
-            Assert.IsTrue(numShps > 0, "Nothing is reprojected");
-            Assert.IsNotNull(reprojectedSf, "reprojectedSf == null");
+            Assert.IsTrue(numShps > 0, "Nothing is reprojected. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
+            Assert.IsNotNull(reprojectedSf, "reprojectedSf == null. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
             Assert.AreEqual(sf.NumShapes, reprojectedSf.NumShapes);
+            Helper.PrintExtents(reprojectedSf.Extents);
 
-            Helper.SaveAsShapefile(reprojectedSf, Path.ChangeExtension(filename, ".WGS84-UTM12N.shp"));
+            Helper.SaveAsShapefile(reprojectedSf, Path.Combine(Path.GetTempPath(), "Reproject2280Test.shp"));
+
+            Assert.AreNotEqual(Math.Round(sf.Extents.xMin, MidpointRounding.AwayFromZero),
+                Math.Round(reprojectedSf.Extents.xMin, MidpointRounding.AwayFromZero), "xMin are the same, no projection has happened.");
         }
 
         [TestMethod]
@@ -332,8 +333,7 @@ namespace MapWinGISTests
             // Create fishnet for bounds of shape:
             var sf = Helper.CreateFishnet(shp.Extents, 20, 20);
             const string fishnetFilename = @"D:\dev\GIS-Data\MarcelBonder\Ortho\ndvi\Prototype\Fishnet.shp";
-            Helper.SaveAsShapefile(sf, fishnetFilename);
-            Console.WriteLine(fishnetFilename);
+            Helper.SaveAsShapefile(sf, Path.Combine(Path.GetTempPath(), "CreateFishnet.shp"));
         }
 
 

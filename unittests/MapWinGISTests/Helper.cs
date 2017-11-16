@@ -11,10 +11,10 @@ namespace MapWinGISTests
     {
         public static void PrintExtents(Extents extents)
         {
-            Debug.Write(extents.xMin + "; ");
-            Debug.Write(extents.xMax + "; ");
-            Debug.Write(extents.yMin + "; ");
-            Debug.WriteLine(extents.yMax);
+            Console.Write(extents.xMin + "; ");
+            Console.Write(extents.xMax + "; ");
+            Console.Write(extents.yMin + "; ");
+            Console.WriteLine(extents.yMax);
         }
 
         public static void DeleteShapefile(string filename)
@@ -186,7 +186,7 @@ namespace MapWinGISTests
 
         public static void DebugMsg(string msg)
         {
-            Debug.WriteLine(msg);
+            Console.WriteLine(msg);
             Console.WriteLine(msg);
         }
 

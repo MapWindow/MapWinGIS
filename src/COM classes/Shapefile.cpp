@@ -2748,20 +2748,24 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		OGRCoordinateTransformation::DestroyCT(transf);
 		transf = NULL;
 	}
-
-	// setting new projection
-	if (reprojectInPlace)
+	
+	// When creating the new shapefile was successfull:
+	if (vb) 
 	{
-		_geoProjection->CopyFrom(newProjection, &vb);
-	}
-	else
-	{
-		IGeoProjection* proj = NULL;
-		(*retVal)->get_GeoProjection(&proj);
-		if (proj)
+		// setting new projection
+		if (reprojectInPlace)
 		{
-			proj->CopyFrom(newProjection, &vb);
-			proj->Release();
+			_geoProjection->CopyFrom(newProjection, &vb);
+		}
+		else
+		{
+			IGeoProjection* proj = NULL;
+			(*retVal)->get_GeoProjection(&proj);
+			if (proj)
+			{
+				proj->CopyFrom(newProjection, &vb);
+				proj->Release();
+			}
 		}
 	}
 	

@@ -133,6 +133,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 	int contentLength = intbuf * 2;//(32 bit words)
 
 	fread(&intbuf, sizeof(int), 1, _shpfile);
+
 	ShpfileType shpType = (ShpfileType)intbuf;
 
 	IShape * shape = NULL;
@@ -143,6 +144,10 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 	// ------------------------------------------------------
 	//	  Shape specific record contents
 	// ------------------------------------------------------
+	
+	// MWGIS-91
+	ShpfileType shpType2D = ShapeUtility::Convert2D(shpType);
+	
 	if (_shpfiletype == SHP_NULLSHAPE)
 	{
 		if (shpType != SHP_NULLSHAPE)
@@ -157,7 +162,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			return shape;
 		}
 	}
-	else if (shpType != SHP_NULLSHAPE && shpType != _shpfiletype)
+	else if (shpType != SHP_NULLSHAPE && shpType2D != _shpfiletype)
 	{
 		ErrorMessage(tkINVALID_SHP_FILE);
 		return NULL;
@@ -274,7 +279,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_POLYLINE)
+		if (shpType2D == SHP_POLYLINE)
 		{
 			VARIANT_BOOL retval;
 			double bx, by;
