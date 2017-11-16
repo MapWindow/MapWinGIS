@@ -3358,7 +3358,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	ShpfileType type1, type2;
 	type1 = _shpfiletype;
 	sf->get_ShapefileType(&type2);	
-	if (type1  != type2 )
+	if (type1 != type2 )
 	{
 		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
 		return S_OK;
@@ -3375,7 +3375,16 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	// -----------------------------------------------
 	//	 Creating output
 	// -----------------------------------------------
-	ShapefileHelper::CloneNoFields(this, retval);
+	if (!ShapefileHelper::CloneNoFields2(this, retval))
+	{
+		// Get errorcode and pass the source:
+		long errorCode;
+		(*retval)->get_LastErrorCode(&errorCode);
+		*retval = NULL;
+		ErrorMessage(errorCode);
+		return S_OK;
+	}
+
 	VARIANT_BOOL vbretval;
 
 	// copying fields from both shapefiles
