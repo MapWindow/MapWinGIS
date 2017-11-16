@@ -421,7 +421,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void ReadRussianDataFromTable()
         {
-            const string sfLocation = @"D:\dev\GIS-Data\Issues\CORE-199 Russian\point.shp";
+            const string sfLocation = @"Issues\MWGIS-72\point.shp";
             const int fieldIndex = 2;
 
             var sf = new Shapefile();
@@ -439,7 +439,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void CreateRussianCategories()
         {
-            const string sfLocation = @"D:\dev\GIS-Data\Issues\CORE-199 Russian\point.shp";
+            const string sfLocation = @"Issues\MWGIS-72\point.shp";
             const int fieldIndex = 2;
 
             var sf = new Shapefile();
