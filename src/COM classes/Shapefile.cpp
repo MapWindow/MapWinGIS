@@ -684,8 +684,7 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 STDMETHODIMP CShapefile::CreateNew(BSTR ShapefileName, ShpfileType ShapefileType, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	return this->CreateNewCore(ShapefileName, ShapefileType, true ,retval);
-	return S_OK;
+		return this->CreateNewCore(ShapefileName, ShapefileType, true, retval);
 }
 
 // *********************************************************
@@ -706,6 +705,7 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 		ShapefileType != SHP_POLYGONZ &&
 		ShapefileType != SHP_MULTIPOINT &&
 		ShapefileType != SHP_MULTIPOINTZ &&
+		ShapefileType != SHP_POINTM &&   // MWGIS-69
 		ShapefileType != SHP_POLYLINEM &&
 		ShapefileType != SHP_POLYGONM &&
 		ShapefileType != SHP_MULTIPOINTM )
@@ -2791,6 +2791,7 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
+	// MWGIS-90: default to all shapes:
 	FixUpShapes2(VARIANT_FALSE, retVal, fixed);
 	
 	return S_OK;
