@@ -574,10 +574,13 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 	Shape->get_ShapeType(&shapetype);
 	
 	// MWGIS-91
-	ShpfileType shptype2D = ShapeUtility::Convert2D(shapetype);
+	bool areEqualTypes = shapetype == _shpfiletype;
+	if (!areEqualTypes){
+		areEqualTypes = ShapeUtility::Convert2D(shapetype) == ShapeUtility::Convert2D(_shpfiletype);
+	}
 				
 	// if( shapetype != SHP_NULLSHAPE && shapetype != _shpfiletype)
-	if (shapetype != SHP_NULLSHAPE && shptype2D != _shpfiletype)
+	if (shapetype != SHP_NULLSHAPE && !areEqualTypes)
 	{	
 		ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
 		return S_OK;
@@ -893,7 +896,6 @@ BOOL CShapefile::ReleaseMemoryShapes()
 BOOL CShapefile::VerifyMemShapes(ICallback * cBack)
 {
 	ShpfileType shapetype;
-	ShpfileType shptype2D;
 	long numPoints;
 	long numParts;
 	IPoint * firstPnt = NULL;
@@ -913,12 +915,15 @@ BOOL CShapefile::VerifyMemShapes(ICallback * cBack)
 			continue;
 		
 		shp->get_ShapeType(&shapetype);
-		// MWGIS-91:
-		shptype2D = ShapeUtility::Convert2D(shapetype);
+		// MWGIS-91
+		bool areEqualTypes = shapetype == _shpfiletype;
+		if (!areEqualTypes){
+			areEqualTypes = ShapeUtility::Convert2D(shapetype) == ShapeUtility::Convert2D(_shpfiletype);
+		}
 		shp->get_NumPoints(&numPoints);
 		shp->get_NumParts(&numParts);
 
-		if (shapetype != SHP_NULLSHAPE && shptype2D != _shpfiletype)
+		if (shapetype != SHP_NULLSHAPE && !areEqualTypes)
 		{	
 			
 			ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
