@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -187,7 +186,7 @@ namespace MapWinGISTests
                 {
                     var value = sf.CellValue[i, 0];
                     var field = sf.Field[i];
-                    Debug.WriteLine($"Is the value of fieldId {i} NULL: {value == null} Type of field is {field.Type}");
+                    Console.WriteLine($"Is the value of fieldId {i} NULL: {value == null} Type of field is {field.Type}");
                     // Assert.IsNull(value, $"Value with fieldId {i} is not null, but is '{value}'");
                 }
             }
@@ -231,12 +230,12 @@ namespace MapWinGISTests
                 // This should fail, because width cannot be 0:
                 fieldIndex = sf.Table.EditAddField("date", FieldType.STRING_FIELD, 50, 0);
                 Assert.AreEqual(-1, fieldIndex, "Field is not added but -1 is not returned. ");
-                Debug.WriteLine("Expected error: " + sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
+                Console.WriteLine("Expected error: " + sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
 
                 // This should fail, because precsion cannot be 0 when type is double:
                 fieldIndex = sf.Table.EditAddField("date", FieldType.DOUBLE_FIELD, 0, 20);
                 Assert.AreEqual(-1, fieldIndex, "Field is not added but -1 is not returned. ");
-                Debug.WriteLine("Expected error: " + sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
+                Console.WriteLine("Expected error: " + sf.Table.ErrorMsg[sf.Table.LastErrorCode]);
             }
             finally
             {
@@ -285,7 +284,7 @@ namespace MapWinGISTests
                 Assert.Fail("Could not open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
             }
             Assert.IsTrue(sf.NumShapes == 1, "Unexpected number of shapes in " + filename);
-            Debug.WriteLine(sf.GeoProjection.ProjectionName);
+            Console.WriteLine(sf.GeoProjection.ProjectionName);
 
             var proj = new GeoProjection();
             proj.ImportFromEPSG(32612); // WGS 84 / UTM zone 12N
@@ -308,7 +307,7 @@ namespace MapWinGISTests
                 Assert.Fail("Could not open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
             }
             Assert.IsTrue(sf.NumShapes == 1, "Unexpected number of shapes in " + filename);
-            Debug.WriteLine(sf.GeoProjection.ProjectionName);
+            Console.WriteLine(sf.GeoProjection.ProjectionName);
 
             var proj = new GeoProjection();
             proj.ImportFromEPSG(32612); // WGS 84 / UTM zone 12N
@@ -334,7 +333,7 @@ namespace MapWinGISTests
             var sf = Helper.CreateFishnet(shp.Extents, 20, 20);
             const string fishnetFilename = @"D:\dev\GIS-Data\MarcelBonder\Ortho\ndvi\Prototype\Fishnet.shp";
             Helper.SaveAsShapefile(sf, fishnetFilename);
-            Debug.WriteLine(fishnetFilename);
+            Console.WriteLine(fishnetFilename);
         }
 
 
@@ -363,8 +362,8 @@ namespace MapWinGISTests
         [TestMethod]
         public void MergeSf()
         {
-            const string sf3Location = @"D:\dev\GIS-Data\Issues\0031 Merge M\shp3_point\SHP3_POINT.shp";
-            const string sf4Location = @"D:\dev\GIS-Data\Issues\0031 Merge M\shp4_point\SHP4_POINT.shp";
+            const string sf3Location = @"Issues\MWGIS-69\SHP3_POINT.shp";
+            const string sf4Location = @"Issues\MWGIS-69\SHP4_POINT.shp";
 
             var sf3 = new Shapefile();
             if (!sf3.Open(sf3Location)) Assert.Fail("Can't open " + sf3Location + " Error: " + sf3.ErrorMsg[sf3.LastErrorCode]);
@@ -373,8 +372,9 @@ namespace MapWinGISTests
             if (!sf4.Open(sf4Location)) Assert.Fail("Can't open " + sf4Location + " Error: " + sf4.ErrorMsg[sf4.LastErrorCode]);
 
             var sfMerged = sf3.Merge(false, sf4, false);
-            Assert.IsNotNull(sfMerged, "Merge failed");
+            Assert.IsNotNull(sfMerged, "Merge failed. Error: " + sf3.ErrorMsg[sf3.LastErrorCode]);
             Assert.AreEqual(2, sfMerged.NumShapes, "Incorrect number of shapes");
+            Helper.SaveAsShapefile(sfMerged, Path.Combine(Path.GetTempPath(), "MergeSf.shp"));
         }
 
         /// <summary>
@@ -384,19 +384,22 @@ namespace MapWinGISTests
         [TestMethod]
         public void MergeM()
         {
-            const string sf1Location = @"D:\dev\GIS-Data\Issues\MWGIS-69 Merge M\shp1_point_m\SHP1_POINT_M.shp";
-            const string sf2Location = @"D:\dev\GIS-Data\Issues\MWGIS-69 Merge M\shp2_point_m\SHP2_POINT_M.shp";
+            const string sf1Location = @"Issues\MWGIS-69\SHP1_POINT_M.shp";
+            const string sf2Location = @"Issues\MWGIS-69\SHP2_POINT_M.shp";
 
             var sf1 = new Shapefile();
             if (!sf1.Open(sf1Location)) Assert.Fail("Can't open " + sf1Location + " Error: " + sf1.ErrorMsg[sf1.LastErrorCode]);
+            Console.WriteLine("num shapes in sf1: " + sf1.NumShapes);
 
             var sf2 = new Shapefile();
             if (!sf2.Open(sf2Location)) Assert.Fail("Can't open " + sf2Location + " Error: " + sf2.ErrorMsg[sf2.LastErrorCode]);
+            Console.WriteLine("num shapes in sf2: " + sf2.NumShapes);
 
-            Debug.WriteLine("Before merge");
+            Console.WriteLine("Before merge");
             var sfMerged = sf1.Merge(false, sf2, false);
-            Assert.IsNotNull(sfMerged, "Merge failed");
+            Assert.IsNotNull(sfMerged, "Merge failed. Error: " + sf1.ErrorMsg[sf1.LastErrorCode]);
             Assert.AreEqual(2, sfMerged.NumShapes, "Incorrect number of shapes");
+            Helper.SaveAsShapefile(sfMerged, Path.Combine(Path.GetTempPath(), "MergeM.shp"));
         }
 
         [TestMethod]
@@ -409,9 +412,10 @@ namespace MapWinGISTests
 
             var value = sf.CellValue[1, 0] as string;
             sf.Close();
-            Debug.WriteLine(value);
+            Console.WriteLine(value);
+            Assert.IsNotNull(value, "CellValue failed");
             // Value should be Washington
-            Assert.AreEqual('h', value[3]);
+            Assert.AreEqual("washington", value.ToLower());
         }
 
         [TestMethod]
@@ -427,7 +431,7 @@ namespace MapWinGISTests
             var value = sf.CellValue[fieldIndex, 0] as string;
             Assert.IsNotNull(value, "No value returned");
             sf.Close();
-            Debug.WriteLine(value);
+            Console.WriteLine(value);
             // Value should be Воздух
             Assert.AreEqual('д', value[3]);
         }
