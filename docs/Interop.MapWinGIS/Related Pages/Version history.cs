@@ -1,7 +1,7 @@
 ﻿/// \page version_history Version history
 /// 
 /// \section apichanges API changes.
-/// -  New API in version \link newpage500 5.0.0 \endlink
+/// -  New API in version \link newpage495 4.9.5 \endlink
 /// -  New API in version \link newpage494 4.9.4 \endlink
 /// -  New API in version \link newpage493 4.9.3 \endlink
 /// -  New API in version \link newpage492 4.9.2 \endlink

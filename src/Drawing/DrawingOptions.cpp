@@ -580,7 +580,9 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 		LoadIcon();
 	}
 
+	VARIANT_BOOL useTransparency;
 	OLE_COLOR transpColor1, transpColor2;
+	this->picture->get_UseTransparencyColor(&useTransparency);
 	this->picture->get_TransparencyColor(&transpColor1);
 	this->picture->get_TransparencyColor2(&transpColor2);
 
@@ -591,7 +593,7 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 	}
 
 	double alpha = fillTransparency/255.0;
-	imgAttributes = ImageHelper::GetImageAttributes(static_cast<float>(alpha), true, transpColor1, transpColor2);
+	imgAttributes = ImageHelper::GetImageAttributes(static_cast<float>(alpha), (useTransparency == VARIANT_TRUE), transpColor1, transpColor2);
 }
 
 // ***************************************************************
