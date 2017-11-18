@@ -494,23 +494,30 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 					}
 					else
 					{
-						// we want grid; however there are couple of ways to open it
-						// let's make a choice based on whether we already have color scheme
-						CComPtr<IGridColorScheme> scheme = NULL;
-						img->get_CustomColorScheme(&scheme);
+						// MWGIS-70: special handling to bypass ECW files, since there are cases in which the calling
+						// thread will hang while trying to process as a grid, but knowing the file has been opened
+						// successfully; so we will leave well-enough alone until we better understand what to do...
+						CStringW filenameW = OLE2W(Filename);
+						if (filenameW.Right(3).MakeLower() != "ecw")
+						{
+							// we want grid; however there are couple of ways to open it
+							// let's make a choice based on whether we already have color scheme
+							CComPtr<IGridColorScheme> scheme = NULL;
+							img->get_CustomColorScheme(&scheme);
 
-						if (scheme || !m_globalSettings.gridFavorGreyScale)
-						{
-							PredefinedColorScheme coloring = m_globalSettings.GetGridColorScheme();
-							img->put_ImageColorScheme(coloring);
-							img->put_ForceSingleBandRendering(VARIANT_FALSE);
-							img->put_AllowGridRendering(tkGridRendering::grForceForAllFormats);
-						}
-						else 
-						{
-							img->put_UseHistogram(m_globalSettings.gridUseHistogram ? VARIANT_TRUE : VARIANT_FALSE);
-							img->put_ForceSingleBandRendering(VARIANT_TRUE);
-							img->put_AllowGridRendering(grNever);
+							if (scheme || !m_globalSettings.gridFavorGreyScale)
+							{
+								PredefinedColorScheme coloring = m_globalSettings.GetGridColorScheme();
+								img->put_ImageColorScheme(coloring);
+								img->put_ForceSingleBandRendering(VARIANT_FALSE);
+								img->put_AllowGridRendering(tkGridRendering::grForceForAllFormats);
+							}
+							else
+							{
+								img->put_UseHistogram(m_globalSettings.gridUseHistogram ? VARIANT_TRUE : VARIANT_FALSE);
+								img->put_ForceSingleBandRendering(VARIANT_TRUE);
+								img->put_AllowGridRendering(grNever);
+							}
 						}
 					}
 
