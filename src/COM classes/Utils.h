@@ -24,6 +24,7 @@
 #include "GridInterpolate.h"
 #include "XRedBlackTree.h"
 #include "YRedBlackTree.h"
+#include <unordered_map>
 
 struct BreakVal
 {
@@ -72,6 +73,9 @@ public:
 		_bSubCall = FALSE;
 		_tileProjections[0] = NULL;
 		_tileProjections[1] = NULL;
+
+		// pre-load Projection strings
+		LoadProjectionStrings();
 	}
 	~CUtils()
 	{
@@ -182,6 +186,10 @@ public:
 	STDMETHOD(ExplodeShapes)(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal);
 	STDMETHOD(ExportSelection)(IShapefile* subject, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal);
 	STDMETHOD(EPSGUnitConversion)(int EPSGUnitCode, tkUnitsOfMeasure* retVal);
+	STDMETHOD(GetNAD83ProjectionName)(tkNad83Projection projectionID, BSTR* retVal);
+	STDMETHOD(GetWGS84ProjectionName)(tkWgs84Projection projectionID, BSTR* retVal);
+	STDMETHOD(GetProjectionNameByID)(int SRID, BSTR* retVal);
+	STDMETHOD(GetProjectionList)(tkProjectionSet projectionSets, VARIANT* list, VARIANT_BOOL* retVal);
 
 private:
 	struct RasterPoint
@@ -289,6 +297,7 @@ private:
 	void WriteWorldFile(CStringW worldFile, CStringW imageFile, double dx, double dy, double xll, double yll, int nrows);
 	void ErrorMessage(long ErrorCode);
 	void ErrorMessage(ICallback* callback, long ErrorCode);
+	void ErrorMessage(long ErrorCode, CString customMessage);
 	bool ValidateInputNames(SAFEARRAY* InputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr);
 	bool ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void **pbstr);
 
@@ -304,9 +313,13 @@ private:
 	bool CheckInputShapefile(IShapefile* input);
 	IShapefile* CloneInput(IShapefile* input, BSTR outputFilename, VARIANT_BOOL overwrite);
 
+	// support for the load of Projection strings from the GDAL pcs.csv file
+	CString customErrorMessage();
+	bool LoadProjectionStrings();
+
 public:
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
-	
+
 };
 
 double CalcPolyGeodesicArea(std::vector<Point2D>& points);

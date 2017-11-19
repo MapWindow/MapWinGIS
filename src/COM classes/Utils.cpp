@@ -3602,6 +3602,12 @@ void CUtils::ErrorMessage(ICallback* callback, long ErrorCode)
 	CallbackHelper::ErrorMsg("Utils", callback, _key, ErrorMsg(_lastErrorCode));
 }
 
+void CUtils::ErrorMessage(long ErrorCode, CString customMessage)
+{
+	_lastErrorCode = ErrorCode;
+	CallbackHelper::ErrorMsg("Utils", _globalCallback, _key, (LPCSTR)customMessage);
+}
+
 STDMETHODIMP CUtils::ColorByName(tkMapColor name, OLE_COLOR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());

@@ -2800,6 +2800,16 @@ namespace MapWinGIS
         pomHighQuality = 2,
     }
 
+    /// <summary>
+    /// Supports the load of subsets of Projection Strings from Utils.GetProjectionStrings.
+    /// Can be combined to get NAD83 and/or WGS84, or the entire set.
+    /// </summary>
+    public enum tkProjectionSet
+    {
+        psAll_Projections = 1,
+        psNAD83_Subset = 2,
+        psWGS84_Subset = 4,
+    }
 
 #if nsp
 }

@@ -767,7 +767,76 @@ namespace MapWinGIS
         /// an Error will be submitted to the global callback with error code tkINVALID_PARAMETER_VALUE, 
         /// and return the default value of umDecimalDegrees.
         /// </remarks>
+        /// \new495 Added in version 4.9.5
         public tkUnitsOfMeasure EPSGUnitConversion(int EPSGUnitCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the name of the projection associated with the specified NAD83 enumeration
+        /// </summary>
+        /// <param name="projectionID">
+        /// Value from the the NAD83 projection enumeration tkNad83Projection
+        /// </param>
+        /// <returns>GDAL-provided projection name, or an empty string on error</returns>
+        /// <remarks>
+        /// If an error occurs, either because an invalid ID is specified, or the projection string
+        /// could not be loaded, a descriptive error will be raised to the Callback function, if specified.
+        /// </remarks>
+        /// \new495 Added in version 4.9.5
+        public string GetNAD83ProjectionName(tkNad83Projection projectionID)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the name of the projection associated with the specified WGS84 enumeration
+        /// </summary>
+        /// <param name="projectionID">
+        /// Value from the the NAD83 projection enumeration tkNad83Projection
+        /// </param>
+        /// <returns>GDAL-provided projection name, or an empty string on error</returns>
+        /// <remarks>
+        /// If an error occurs, either because an invalid ID is specified, or the projection string
+        /// could not be loaded, a descriptive error will be raised to the Callback function, if specified.
+        /// </remarks>
+        /// \new495 Added in version 4.9.5
+        public string GetWGS84ProjectionName(tkWgs84Projection projectionID)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the name of the projected or geographic coordinate system associated with the specified SRID
+        /// </summary>
+        /// <param name="SRID">
+        /// Spatial Reference identifier, could refer to any valid Projected or Geographic coordinate system
+        /// </param>
+        /// <returns>GDAL-provided name of a projected or geographic coordinate system, or an empty string on error</returns>
+        /// <remarks>
+        /// If an error occurs, either because an invalid ID is specified, or the projection string
+        /// could not be loaded, a descriptive error will be raised to the Callback function, if specified.
+        /// </remarks>
+        /// \new495 Added in version 4.9.5
+        public string GetProjectionNameByID(int SRID)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a list of ID,Name pairs of Projected and/or Geographic coordinate systems
+        /// </summary>
+        /// <param name="projectionSets">One or a combination of values from the tkProjectionSet enumeration</param>
+        /// <param name="list">Reference to an Object that will be filled with an array of strings</param>
+        /// <returns>True if successful (list will contain an array of strings containing the ID/Name pairs associated with the specified Projection Sets), or False on failure (list will be empty)</returns>
+        /// <remarks>
+        /// Each string will contain one pair of values, an ID and a Name, separated by a comma (e.g. "32611,WGS 84 / UTM zone 11N").
+        /// These can be parsed and used, for example, to populate a ComboBox control for user selection of a Projection.
+        /// If an error occurs, or if the projection strings could not be loaded, a descriptive error will be raised to the Callback function, if specified.
+        /// </remarks>
+        /// \new495 Added in version 4.9.5
+        public bool GetProjectionList(tkProjectionSet projectionSets, ref Object list)
         {
             throw new NotImplementedException();
         }
