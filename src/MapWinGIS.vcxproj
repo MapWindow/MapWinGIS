@@ -510,6 +510,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="COM classes\SelectionList.cpp" />
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
     <ClCompile Include="COM classes\UndoList.cpp" />
+    <ClCompile Include="COM classes\Utils_Projections.cpp" />
     <ClCompile Include="COM classes\Utils_Shapefile.cpp" />
     <ClCompile Include="COM classes\WmsLayer.cpp" />
     <ClCompile Include="ComHelpers\CallbackHelper.cpp" />

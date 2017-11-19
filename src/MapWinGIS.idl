@@ -3408,6 +3408,18 @@ enum tkScalebarUnits
 		Wgs84_UPS_South_NE = 32761,
 	}tkWgs84Projection;
 
+	typedef
+	[
+		uuid(29389DAF-9EF7-4C89-B000-D4735EB1D789),
+		helpstring("Enumerated Projection Sets"),
+	]
+	enum tkProjectionSet
+	{
+		[helpstring("All Projections")] psAll_Projections = 1,
+		[helpstring("NAD83 Subset")] psNAD83_Subset = 2,
+		[helpstring("WGS84 Subset")] psWGS84_Subset = 4,
+	}tkProjectionSet;
+
 	[
 		object,
 		uuid(105018E5-A71A-4734-AC06-094A3ABCC7BA),
@@ -4432,6 +4444,10 @@ interface IUtils : IDispatch{
 	[id(57)] HRESULT ExplodeShapes([in] IShapefile* subject, [in] VARIANT_BOOL SelectedOnly, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
 	[id(58)] HRESULT ExportSelection([in] IShapefile* subject, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
 	[id(59), helpstring("method EPSGUnitConversion")] HRESULT EPSGUnitConversion([in] int EPSGUnitCode, [out, retval] tkUnitsOfMeasure* retVal);
+	[id(60), helpstring("method GetNAD83ProjectionName")] HRESULT GetNAD83ProjectionName([in] tkNad83Projection projectionID, [out, retval] BSTR* retVal);
+	[id(61), helpstring("method GetWGS84ProjectionName")] HRESULT GetWGS84ProjectionName([in] tkWgs84Projection projectionID, [out, retval] BSTR* retVal);
+	[id(62), helpstring("method GetProjectionNameByID")] HRESULT GetProjectionNameByID([in] int SRID, [out, retval] BSTR* retVal);
+	[id(63), helpstring("method GetProjectionList")] HRESULT GetProjectionList([in] tkProjectionSet projectionSets, [in, out] VARIANT* list, [out, retval] VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/
