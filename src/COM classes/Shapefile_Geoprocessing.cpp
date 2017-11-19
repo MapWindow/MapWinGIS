@@ -564,7 +564,19 @@ void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	if (type == SHP_POINTZ) type = SHP_MULTIPOINTZ;
 	if (type == SHP_POINTM) type = SHP_MULTIPOINTM;
 	
-	ShapefileHelper::CloneNoFields(this, sf, type);
+	// ShapefileHelper::CloneNoFields(this, sf, type);
+	// -----------------------------------------------
+	//	 Creating output
+	// -----------------------------------------------
+	if (!ShapefileHelper::CloneNoFields(this, sf, type))
+	{
+		// Get errorcode and pass the source:
+		long errorCode;
+		(*sf)->get_LastErrorCode(&errorCode);
+		*sf = NULL;
+		ErrorMessage(errorCode);
+		return;
+	}
 	CloneField(this, *sf, FieldIndex, -1);
 	
 	// -------------------------------------------
@@ -1145,7 +1157,19 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 	if (targetType == SHP_POINTZ) targetType = SHP_MULTIPOINTZ;
 	if (targetType == SHP_POINTM) targetType = SHP_MULTIPOINTM;
 
-	ShapefileHelper::CloneNoFields(this, retval, targetType);
+	//ShapefileHelper::CloneNoFields(this, retval, targetType);
+	// -----------------------------------------------
+	//	 Creating output
+	// -----------------------------------------------
+	if (!ShapefileHelper::CloneNoFields(this, retval, targetType))
+	{
+		// Get errorcode and pass the source:
+		long errorCode;
+		(*retval)->get_LastErrorCode(&errorCode);
+		*retval = NULL;
+		ErrorMessage(errorCode);
+		return;
+	}
 	long newFieldIndex = 0;
 	CloneField(this, *retval, FieldIndex, newFieldIndex);
 
@@ -1358,7 +1382,19 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	if (MergeResults) {
-		ShapefileHelper::CloneNoFields(this, sf, SHP_POLYGON, true);
+		// ShapefileHelper::CloneNoFields(this, sf, SHP_POLYGON, true);
+		// -----------------------------------------------
+		//	 Creating output
+		// -----------------------------------------------
+		if (!ShapefileHelper::CloneNoFields(this, sf, SHP_POLYGON, true))
+		{
+			// Get errorcode and pass the source:
+			long errorCode;
+			(*sf)->get_LastErrorCode(&errorCode);
+			*sf = NULL;
+			ErrorMessage(errorCode);
+			return S_OK;
+		}
 	}
 	else  {
 		// if not merging shapes, copy fields
@@ -1737,7 +1773,16 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 	//   Creating output
 	// ----------------------------------------------
 	// creation of resulting shapefile
-	ShapefileHelper::CloneNoFields(this, retval, returnType);
+	// ShapefileHelper::CloneNoFields(this, retval, returnType);
+	if (!ShapefileHelper::CloneNoFields(this, retval, returnType))
+	{
+		// Get errorcode and pass the source:
+		long errorCode;
+		(*retval)->get_LastErrorCode(&errorCode);
+		*retval = NULL;
+		ErrorMessage(errorCode);
+		return;
+	}
 
 	// do field mapping
 	std::map<long, long> fieldMap;
@@ -3375,7 +3420,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	// -----------------------------------------------
 	//	 Creating output
 	// -----------------------------------------------
-	if (!ShapefileHelper::CloneNoFields2(this, retval))
+	if (!ShapefileHelper::CloneNoFields(this, retval))
 	{
 		// Get errorcode and pass the source:
 		long errorCode;

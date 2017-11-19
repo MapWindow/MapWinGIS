@@ -36,56 +36,19 @@ void ShapefileHelper::CopyAttributes(IShapefile* sf, long sourceIndex, long targ
 // ***********************************************************************
 //		CloneNoFields()
 // ***********************************************************************
-void ShapefileHelper::CloneNoFields(IShapefile* sf, IShapefile** retVal, bool addShapeId)
-{
-	if (!sf) {
-		*retVal = NULL;
-		return;
-	}
-	CloneNoFields(sf, retVal, GetShapeType(sf), addShapeId);
-}
-bool ShapefileHelper::CloneNoFields2(IShapefile* sf, IShapefile** retVal, bool addShapeId)
+bool ShapefileHelper::CloneNoFields(IShapefile* sf, IShapefile** retVal, bool addShapeId)
 {
 	if (!sf) {
 		*retVal = NULL;
 		return false;
 	}
-	return CloneNoFields2(sf, retVal, GetShapeType(sf), addShapeId);
+	return CloneNoFields(sf, retVal, GetShapeType(sf), addShapeId);
 }
 
 // ***********************************************************************
 //		CloneNoFields()
 // ***********************************************************************
-void ShapefileHelper::CloneNoFields(IShapefile* sfSource, IShapefile** retVal, ShpfileType targetShapeType, bool addShapeId)
-{
-	IShapefile* sf = NULL;
-	CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&sf);
-	
-	VARIANT_BOOL vb;
-	if (addShapeId)	{
-		sf->CreateNewWithShapeID(m_globalSettings.emptyBstr, targetShapeType, &vb);
-	}
-	else {
-		sf->CreateNew(m_globalSettings.emptyBstr, targetShapeType, &vb);
-	}
-
-	CComPtr<IGeoProjection> gpSource = NULL;
-	CComPtr<IGeoProjection> gpTarget = NULL;
-	sfSource->get_GeoProjection(&gpSource);
-	sf->get_GeoProjection(&gpTarget);
-	
-	if (gpSource && gpTarget) {
-		gpTarget->CopyFrom(gpSource, &vb);
-	}
-
-	ICallback* callback = NULL;
-	sfSource->get_GlobalCallback(&callback);
-	sf->put_GlobalCallback(callback);
-
-	*retVal = sf;
-}
-
-bool ShapefileHelper::CloneNoFields2(IShapefile* sfSource, IShapefile** retVal, ShpfileType targetShapeType, bool addShapeId)
+bool ShapefileHelper::CloneNoFields(IShapefile* sfSource, IShapefile** retVal, ShpfileType targetShapeType, bool addShapeId)
 {
 	IShapefile* sf = NULL;
 	CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&sf);
@@ -126,7 +89,7 @@ bool ShapefileHelper::CloneNoFields2(IShapefile* sfSource, IShapefile** retVal, 
 // ***********************************************************************
 void ShapefileHelper::CloneCore(IShapefile* sfSource, IShapefile** retVal, ShpfileType shpType, bool addShapeId)
 {
-	ShapefileHelper::CloneNoFields(sfSource, retVal, shpType, addShapeId);
+	CloneNoFields(sfSource, retVal, shpType, addShapeId);
 	VARIANT_BOOL vbretval;
 
 	IShapefile* sf = *retVal;

@@ -114,7 +114,19 @@ STDMETHODIMP CUtils::BufferByDistance(IShapefile* subject, DOUBLE Distance, LONG
 	IShapefile* result = NULL;
 
 	if (MergeResults) {
-		ShapefileHelper::CloneNoFields(subject, &result, SHP_POLYGON, true);
+		// ShapefileHelper::CloneNoFields(subject, &result, SHP_POLYGON, true);
+		// -----------------------------------------------
+		//	 Creating output
+		// -----------------------------------------------
+		if (!ShapefileHelper::CloneNoFields(subject, &result, SHP_POLYGON, true))
+		{
+			// Get errorcode and pass the source:
+			long errorCode;
+			result->get_LastErrorCode(&errorCode);
+			result = NULL;
+			ErrorMessage(errorCode);
+			return S_OK;
+		}
 	}
 	else  {
 		ShapefileHelper::CloneCore(subject, &result, SHP_POLYGON, false);
