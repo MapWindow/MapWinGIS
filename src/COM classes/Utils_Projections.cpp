@@ -40,21 +40,27 @@ bool CUtils::LoadProjectionStrings()
 
 	if (!bLoaded)
 	{
-#ifdef RELEASE_MODE
 		// in the release distribution, the gdal-data directory is right below us
-		csvPath = thisOcxPath() + "gdal-data\\pcs.csv";
-#else
+		CString releasePath = thisOcxPath() + "gdal-data\\pcs.csv";
 		// in the dev environment, it actually depends on the runtime version, and the bit-ness
-		csvPath = thisOcxPath() + "..\\..\\..\\support\\GDAL_SDK\\v120\\bin\\win32\\gdal-data\\pcs.csv";
-								//C:\dev\MapWinGIS\src\bin\Win32
-								//C:\dev\MapWinGIS\support\GDAL_SDK\v120\bin\win32\gdal-data
-#endif
+		CString developPath = thisOcxPath() + "..\\..\\..\\support\\GDAL_SDK\\v120\\bin\\win32\\gdal-data\\pcs.csv";
+								//ocx path = C:\dev\MapWinGIS\src\bin\Win32
+								//csv path = C:\dev\MapWinGIS\support\GDAL_SDK\v120\bin\win32\gdal-data
 
 		CStdioFile file;
+		// first try standard release path
+		csvPath = releasePath;
 		if (!file.Open(csvPath, CFile::modeRead | CFile::typeText))
 		{
-			// error message ?  not necessary perhaps until calling lookup functions
-			return false;
+			// for developers, try source-code path
+			csvPath = developPath;
+			if (!file.Open(csvPath, CFile::modeRead | CFile::typeText))
+			{
+				// for the purposes of error message, put path back to release
+				csvPath = releasePath;
+				// no error message here. instead, send error to callback when user calls lookup functions
+				return false;
+			}
 		}
 
 		CString nextLine;
@@ -73,9 +79,9 @@ bool CUtils::LoadProjectionStrings()
 				code = nextLine.Left(commaPosition);
 				// the rest of the line (account for leading quote symbol)
 				name = nextLine.Right(nextLine.GetLength() - commaPosition - 1 - 1);
-				// strip off all to the right of the name (account for closing quote symbol)
-				commaPosition = name.Find(",", 0);
-				name = name.Left(commaPosition - 1);
+				// strip off all to the right of the name (using the closing quote symbol)
+				int quotePosition = name.Find("\"", 0);
+				name = name.Left(quotePosition);
 
 				// add to mapping
 				projectionStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
