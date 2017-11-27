@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -126,6 +124,7 @@ namespace MapWinGISTests
             var newShapefileFile = Path.Combine(Path.GetTempPath(), "ZonalStatistics.shp");
             if (File.Exists(newShapefileFile))
             {
+                // ReSharper disable once AssignNullToNotNullAttribute
                 foreach (var f in Directory.EnumerateFiles(Path.GetDirectoryName(newShapefileFile), "ZonalStatistics.*"))
                 {
                     File.Delete(f);
@@ -258,6 +257,58 @@ namespace MapWinGISTests
             Console.WriteLine("The process took " + stopWatch.Elapsed);
             Console.WriteLine(found + " matching polygons where found");
         }
+
+        [TestMethod]
+        public void ProjectionStrings()
+        {
+            var utils = new Utils {GlobalCallback = this};
+            var gp = new GeoProjection {GlobalCallback = this};
+
+            // get NAD83 name
+            var utilProjection = utils.GetNAD83ProjectionName(tkNad83Projection.Nad83_Alabama_East);
+            gp.ImportFromEPSG((int)tkNad83Projection.Nad83_Alabama_East);
+            var importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
+            // get WGS84 name
+            utilProjection = utils.GetWGS84ProjectionName(tkWgs84Projection.Wgs84_BLM_14N_ftUS);
+            gp.ImportFromEPSG((int)tkWgs84Projection.Wgs84_BLM_14N_ftUS);
+            importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
+            // get NAD83 name by ID
+            utilProjection = utils.GetProjectionNameByID((int)tkNad83Projection.Nad83_Alabama_East);
+            gp.ImportFromEPSG((int)tkNad83Projection.Nad83_Alabama_East);
+            importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
+            // get WGS84 name by ID
+            utilProjection = utils.GetProjectionNameByID((int)tkWgs84Projection.Wgs84_BLM_14N_ftUS);
+            gp.ImportFromEPSG((int)tkWgs84Projection.Wgs84_BLM_14N_ftUS);
+            importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
+            // get obscure names by ID
+            utilProjection = utils.GetProjectionNameByID(2402);
+            gp.ImportFromEPSG(2402);
+            importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
+            // get obscure names by ID
+            utilProjection = utils.GetProjectionNameByID(20005);
+            gp.ImportFromEPSG(20005);
+            importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
+            // verify error
+            utilProjection = utils.GetProjectionNameByID(100);
+            Assert.IsTrue(utilProjection.Length == 0);
+            // should return Index Out-of-bounds error
+            var errorMsg = utils.ErrorMsg[utils.LastErrorCode];
+            Console.WriteLine(errorMsg);
+            Assert.AreEqual("Index Out of Bounds", errorMsg);
+        }
+
 
         public void Progress(string KeyOfSender, int Percent, string Message)
         {
