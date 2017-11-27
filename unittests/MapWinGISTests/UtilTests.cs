@@ -226,6 +226,8 @@ namespace MapWinGISTests
                 // Loop polygons:
                 for (var i = 0; i < numPolygons; i++)
                 {
+                    if (found > 100) break;
+
                     // Get polygon
                     var polygonShape = sfPolygons.Shape[i];
                     Assert.IsNotNull(polygonShape, "polygonShape == null");
