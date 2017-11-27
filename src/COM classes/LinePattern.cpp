@@ -275,7 +275,7 @@ STDMETHODIMP CLinePattern::Clear()
 // *************************************************************
 //		Draw()
 // *************************************************************
-STDMETHODIMP CLinePattern::Draw(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+STDMETHODIMP CLinePattern::Draw(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (!hdc)
@@ -285,25 +285,25 @@ STDMETHODIMP CLinePattern::Draw(int** hdc, float x, float y, int clipWidth, int 
 	}
 
 	CDC* dc = CDC::FromHandle((HDC)hdc);
-	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor);
+	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
 // *************************************************************
 //		DrawVB()
 // *************************************************************
-STDMETHODIMP CLinePattern::DrawVB(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+STDMETHODIMP CLinePattern::DrawVB(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CDC* dc = CDC::FromHandle((HDC)hdc);
-	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor);
+	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
 // *************************************************************
 //		Draw()
 // *************************************************************
-VARIANT_BOOL CLinePattern::DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor)
+VARIANT_BOOL CLinePattern::DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha)
 {
 	if (!dc)
 	{
@@ -314,7 +314,7 @@ VARIANT_BOOL CLinePattern::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 	Gdiplus::Bitmap bmp(clipWidth, clipHeight, PixelFormat32bppARGB);
 	Gdiplus::Graphics g(&bmp);
 
-	Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor);
+	Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor, backAlpha);
 	Gdiplus::SolidBrush brushBackground(clr);
 	g.Clear(clr);
 	

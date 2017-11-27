@@ -246,8 +246,8 @@ public:
 	STDMETHOD(get_OriginalWidth)(LONG* OriginalWidth);
 	STDMETHOD(get_OriginalHeight)(LONG* OriginalHeight);
 	STDMETHOD(get_Extents)(IExtents** pVal);
-	STDMETHOD(ProjectionToImage)(double ProjX, double ProjY, long* ImageX, long* ImageY);
-	STDMETHOD(ImageToProjection)(long ImageX, long ImageY, double* ProjX, double* ProjY);
+	STDMETHOD(ProjectionToImage)(double ProjX, double ProjY, long* Column, long* Row);
+	STDMETHOD(ImageToProjection)(long Column, long Row, double* ProjX, double* ProjY);
 	STDMETHOD(ProjectionToBuffer)(double ProjX, double ProjY, long* BufferX, long* BufferY);
 	STDMETHOD(BufferToProjection)(long BufferX, long BufferY, double* ProjX, double* ProjY);
 	STDMETHOD(get_CanUseGrouping)(VARIANT_BOOL* retVal);

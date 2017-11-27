@@ -1471,6 +1471,7 @@ static TargetLayerInfo* SetupTargetLayer(CPL_UNUSED GDALDataset *poSrcDS,
 	return psInfo;
 }
 
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalVectorTranslate instead"))
 STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 							 BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
 {

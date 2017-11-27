@@ -82,6 +82,7 @@ public:
 	tkFillType fillType;
 	tkPointSymbolType pointSymbolType;
 	tkPointShapeType pointShapeType;
+	tkPointReflectionType pointReflectionType;
 	tkVectorDrawingMode drawingMode;
 	tkGradientBounds fillGradientBounds;
 	tkGradientType fillGradientType;
@@ -164,6 +165,7 @@ public:
 		fillGradientType = gtLinear;
 		fillType = ftStandard;
 		pointShapeType = ptShapeRegular;
+		pointReflectionType = prtNone;
 		fillGradientBounds = gbPerShape;
 		frameType = lfRectangle;
 

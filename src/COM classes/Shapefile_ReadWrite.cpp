@@ -133,6 +133,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 	int contentLength = intbuf * 2;//(32 bit words)
 
 	fread(&intbuf, sizeof(int), 1, _shpfile);
+
 	ShpfileType shpType = (ShpfileType)intbuf;
 
 	IShape * shape = NULL;
@@ -143,6 +144,13 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 	// ------------------------------------------------------
 	//	  Shape specific record contents
 	// ------------------------------------------------------
+	
+	// MWGIS-91
+	bool areEqualTypes = shpType == _shpfiletype;
+	if (!areEqualTypes){
+		areEqualTypes = ShapeUtility::Convert2D(shpType) == ShapeUtility::Convert2D(_shpfiletype);
+	}
+	
 	if (_shpfiletype == SHP_NULLSHAPE)
 	{
 		if (shpType != SHP_NULLSHAPE)
@@ -157,7 +165,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			return shape;
 		}
 	}
-	else if (shpType != SHP_NULLSHAPE && shpType != _shpfiletype)
+	else if (shpType != SHP_NULLSHAPE && !areEqualTypes)
 	{
 		ErrorMessage(tkINVALID_SHP_FILE);
 		return NULL;
@@ -174,7 +182,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_POINT)
+		// if (shpType == SHP_POINT)
+		if (areEqualTypes)
 		{
 			ComHelper::CreatePoint(&pnt);
 			pnt->put_GlobalCallback(_globalCallback);
@@ -205,7 +214,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_POINTZ)
+		// if (shpType == SHP_POINTZ)
+		if (areEqualTypes)
 		{
 			ComHelper::CreatePoint(&pnt);
 			pnt->put_GlobalCallback(_globalCallback);
@@ -240,7 +250,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_POINTM)
+		// if (shpType == SHP_POINTM)
+		if (areEqualTypes)
 		{
 			ComHelper::CreatePoint(&pnt);
 			pnt->put_GlobalCallback(_globalCallback);
@@ -274,7 +285,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_POLYLINE)
+		// if (shpType == SHP_POLYLINE)
+		if (areEqualTypes)
 		{
 			VARIANT_BOOL retval;
 			double bx, by;
@@ -333,7 +345,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		ComHelper::CreateShape(&shape);
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
-		if (shpType == SHP_POLYLINEZ)
+		// if (shpType == SHP_POLYLINEZ)
+		if (areEqualTypes)
 		{
 			VARIANT_BOOL retval;
 			double bx, by, bz, bm;
@@ -431,7 +444,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_POLYLINEM)
+		// if (shpType == SHP_POLYLINEM)
+		if (areEqualTypes)
 		{
 			VARIANT_BOOL retval;
 			double bx, by, bm;
@@ -512,7 +526,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_POLYGON)
+		// if (shpType == SHP_POLYGON)
+		if (areEqualTypes)
 		{
 			VARIANT_BOOL retval;
 			double bx, by;
@@ -571,7 +586,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		ComHelper::CreateShape(&shape);
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
-		if (shpType == SHP_POLYGONZ)
+		// if (shpType == SHP_POLYGONZ)
+		if (areEqualTypes)
 		{
 			VARIANT_BOOL retval;
 			double bx, by, bz, bm;
@@ -667,7 +683,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		ComHelper::CreateShape(&shape);
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
-		if (shpType == SHP_POLYGONM)
+		// if (shpType == SHP_POLYGONM)
+		if (areEqualTypes)
 		{
 			VARIANT_BOOL retval;
 			double bx, by, bm;
@@ -748,7 +765,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_MULTIPOINT)
+		// if (shpType == SHP_MULTIPOINT)
+		if (areEqualTypes)
 		{
 			VARIANT_BOOL retval;
 			double bx, by;
@@ -792,7 +810,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_MULTIPOINTZ)
+		// if (shpType == SHP_MULTIPOINTZ)
+		if (areEqualTypes)
 		{
 			VARIANT_BOOL retval;
 			double bx, by, bz, bm;
@@ -872,7 +891,8 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		shape->Create(shpType, &vbretval);
 		shape->put_GlobalCallback(_globalCallback);
 
-		if (shpType == SHP_MULTIPOINTM)
+		// if (shpType == SHP_MULTIPOINTM)
+		if (areEqualTypes)
 		{
 			VARIANT_BOOL retval;
 			double bx, by, bm;

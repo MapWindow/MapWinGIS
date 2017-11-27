@@ -95,6 +95,7 @@ BOOL CMapView::GetTrapRMouseDown()
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	return _doTrapRMouseDown;
 }
+
 void CMapView::SetDisableWaitCursor(BOOL nNewValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -154,6 +155,19 @@ void CMapView::SetSerialNumber(LPCTSTR newVal)
 	}
 	else
 		AfxMessageBox("Invalid serial number!", MB_OK | MB_ICONEXCLAMATION, 0);
+}
+
+void CMapView::SetUseAlternatePanCursor(BOOL nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_useAlternatePanCursor = nNewValue;
+	//_cursorPan = (_useAlternatePanCursor == TRUE ? AfxGetApp()->LoadCursor(IDC_PAN_ALTERNATE) : AfxGetApp()->LoadCursor(IDC_PAN));
+}
+
+BOOL CMapView::GetUseAlternatePanCursor()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _useAlternatePanCursor;
 }
 
 // *************************************************************** //

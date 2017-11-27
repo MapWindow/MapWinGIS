@@ -77,7 +77,8 @@ IDR_GDALDRIVER          REGISTRY                "COM Classes/GdalDriver.rgs"
 IDR_GDALDRIVERMANAGER   REGISTRY                "COM Classes/GdalDriverManager.rgs"
 IDR_FUNCTION            REGISTRY                "COM Classes/Function.rgs"
 IDR_EXPRESSION          REGISTRY                "COM Classes/Expression.rgs"
-IDR_WmsLayer         REGISTRY                "COM Classes/WmsLayer.rgs"
+IDR_WmsLayer            REGISTRY                "COM Classes/WmsLayer.rgs"
+IDR_GdalUtils           REGISTRY                "COM Classes/GdalUtils.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -111,8 +112,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,9,4,2
- PRODUCTVERSION 4,9,4,2
+ FILEVERSION 4,9,5,0
+ PRODUCTVERSION 4,9,5,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -130,13 +131,13 @@ BEGIN
             VALUE "Comments", "This control includes a mapping component and objects for reading and writing shapefiles and various triangulated irregular network and grid files. It also has extensive label and chart options and includes projection routines."
             VALUE "CompanyName", "MapWindow OSS Team - www.mapwindow.org"
             VALUE "FileDescription", "MapWinGIS ActiveX Control"
-            VALUE "FileVersion", "4.9.4.2"
+            VALUE "FileVersion", "4.9.5.0"
             VALUE "InternalName", "MapWinGIS ActiveX Control"
-            VALUE "LegalCopyright", "Copyright (C) 2004-2016 MapWindow OSS Team"
-            VALUE "LegalTrademarks", "MapWindow GIS is a trademark of Daniel P. Ames, 2005-2016"
+            VALUE "LegalCopyright", "Copyright (C) 2004-2017 MapWindow OSS Team"
+            VALUE "LegalTrademarks", "MapWindow GIS is a trademark of Daniel P. Ames, 2005-2017"
             VALUE "OriginalFilename", "MapWinGIS.ocx"
             VALUE "ProductName", "MapWinGIS ActiveX Control"
-            VALUE "ProductVersion", "4.9.4.2"
+            VALUE "ProductVersion", "4.9.5.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -201,6 +202,7 @@ IDC_ROTATE_CURSOR       CURSOR                  "Resource/rotate_cursor.cur"
 IDC_MOVE_CURSOR         CURSOR                  "Resource/move_cursor.cur"
 IDC_SELECT2_CURSOR      CURSOR                  "Resource/select_cursor.cur"
 IDC_IDENTIFY_CURSOR     CURSOR                  "Resource/identify_cursor.cur"
+IDC_PAN_ALTERNATE       CURSOR                  "Resource/pan_alt.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

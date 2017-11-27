@@ -2131,12 +2131,15 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 	
 	if (_trgrid != NULL)
 	{
-		if (StartRow < 0 || StartRow >= _trgrid->getHeight() || EndRow < 0 || EndRow >= _trgrid->getHeight() )
+		long height = _trgrid->getHeight();
+		long width = _trgrid->getWidth();
+		if (StartRow < 0 || StartRow >= height || EndRow < 0 || EndRow >= height ||
+			StartCol < 0 || StartCol >= width || EndCol < 0 || EndCol >= width)
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			Vals = NULL;
-			ValsDouble = NULL;
-			*retval = FALSE;
+			*retval = VARIANT_FALSE;
+			return;
 		}
 
 		if (!_trgrid->GetFloatWindow(Vals, StartRow, EndRow, StartCol, EndCol, useDouble))

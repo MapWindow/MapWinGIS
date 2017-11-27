@@ -510,7 +510,7 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// Calculates statistics for grid cells within each polygon of the specified shapefile. Writes results to attribute table of shapefile.
         /// </summary>
@@ -520,11 +520,13 @@ namespace MapWinGIS
         /// When set to false, calculation will be made for all polygons in shapefile.</param>
         /// <param name="overwriteFields">If true output fields will be overwritten (if the fields with such names already exist). 
         /// Otherwise new set of output fields will be created with numerical indices added to their names.</param>
+        /// <param name="useCenterWithinMethod">If true (default) the center of the pixel needs to be inside the polygon. 
+        /// If set to false Intersection method is used meaning each pixel boundary that intersects with the polygon is used. Added in v4.9.4.3.</param>
         /// <returns>True on success.</returns>
         /// <remarks>The default names for output fields: "Mean", "Median", "Majority", "Minority", "Minimum", "Maximum", 
         /// "Range", "StD", "Sum", "MinX", "MinY", "Variety", "Count"</remarks>
         /// \new490 Added in version 4.9.0
-        public bool GridStatisticsToShapefile(Grid Grid, Shapefile sf, bool SelectedOnly, bool overwriteFields)
+        public bool GridStatisticsToShapefile(Grid Grid, Shapefile sf, bool SelectedOnly, bool overwriteFields, bool useCenterWithinMethod = true)
         {
             throw new NotImplementedException();
         }
@@ -753,6 +755,94 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets the tkUnitsOfMeasure enumeration associated with the specified EPSG Unit Code
+        /// </summary>
+        /// <param name="EPSGUnitCode">EPSG-defined Unit of Measure constant</param>
+        /// <returns>The internal enumeration associated with the specified EPSG code</returns>
+        /// <remarks>
+        /// Supports the more common EPSG-defined Unit constants; specifically those that can be mapped to 
+        /// the currently defined tkUnitsOfMeasure enumeration values. If the EPSG code cannot be mapped, 
+        /// an Error will be submitted to the global callback with error code tkINVALID_PARAMETER_VALUE, 
+        /// and return the default value of umDecimalDegrees.
+        /// </remarks>
+        /// \new495 Added in version 4.9.5
+        public tkUnitsOfMeasure EPSGUnitConversion(int EPSGUnitCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the name of the projection associated with the specified NAD83 enumeration
+        /// </summary>
+        /// <param name="projectionID">
+        /// Value from the the NAD83 projection enumeration tkNad83Projection
+        /// </param>
+        /// <returns>GDAL-provided projection name, or an empty string on error</returns>
+        /// <remarks>
+        /// If an error occurs, either because an invalid ID is specified, or the projection string
+        /// could not be loaded, a descriptive error will be raised to the Callback function (if one is specified).
+        /// </remarks>
+        /// \new495 Added in version 4.9.5
+        public string GetNAD83ProjectionName(tkNad83Projection projectionID)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the name of the projection associated with the specified WGS84 enumeration
+        /// </summary>
+        /// <param name="projectionID">
+        /// Value from the the NAD83 projection enumeration tkNad83Projection
+        /// </param>
+        /// <returns>GDAL-provided projection name, or an empty string on error</returns>
+        /// <remarks>
+        /// If an error occurs, either because an invalid ID is specified, or the projection string
+        /// could not be loaded, a descriptive error will be raised to the Callback function (if one is specified).
+        /// </remarks>
+        /// \new495 Added in version 4.9.5
+        public string GetWGS84ProjectionName(tkWgs84Projection projectionID)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the name of the projected coordinate system associated with the specified SRID,
+        /// which include the NAD83 and WGS84 codes, as well as those not specified by the enumerations, 
+        /// such as NAD27, NAD83 Harn, Beijing, Pulkova, etc.
+        /// </summary>
+        /// <param name="SRID">
+        /// Spatial Reference identifier, could refer to any valid Projected or Geographic coordinate system
+        /// </param>
+        /// <returns>GDAL-provided name of a projected or geographic coordinate system, or an empty string on error</returns>
+        /// <remarks>
+        /// If an error occurs, either because an invalid ID is specified, or the projection string
+        /// could not be loaded, a descriptive error will be raised to the Callback function (if one is specified).
+        /// </remarks>
+        /// \new495 Added in version 4.9.5
+        public string GetProjectionNameByID(int SRID)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a list of ID,Name pairs of Projected and/or Geographic coordinate systems
+        /// </summary>
+        /// <param name="projectionSets">One or a combination of values from the tkProjectionSet enumeration</param>
+        /// <param name="list">Reference to an Object that will be filled with an array of strings</param>
+        /// <returns>True if successful (list will contain an array of strings containing the ID/Name pairs associated with the specified Projection Sets), or False on failure (list will be empty)</returns>
+        /// <remarks>
+        /// Each string will contain one pair of values, an ID and a Name, separated by a comma (e.g. "32611,WGS 84 / UTM zone 11N").
+        /// These can be parsed and used, for example, to populate a ComboBox control for user selection of a Projection.
+        /// If an error occurs, or if the projection strings could not be loaded, a descriptive error will be raised to the Callback function (if one is specified).
+        /// </remarks>
+        /// \new495 Added in version 4.9.5
+        public bool GetProjectionList(tkProjectionSet projectionSets, ref Object list)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 #if nsp
 }

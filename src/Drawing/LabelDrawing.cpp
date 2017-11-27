@@ -209,7 +209,12 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 
 				// calculating screen rectangle
 				double piX, piY;
-				CalcScreenRectangle(options, lbl, settings.autoOffset, (*shapeData)[i]->size, rect, piX, piY);
+
+				// Fix for MWGIS-79:
+				int shapeSize = 0;
+				if (sf)
+					shapeSize = (*shapeData)[i]->size;
+				CalcScreenRectangle(options, lbl, settings.autoOffset, shapeSize, rect, piX, piY);
 
 				// do we have overlaps?
 				if (!TryAvoidCollisions(lbl, settings.avoidCollisions, rect, piX, piY, settings.buffer, angleRad)) {

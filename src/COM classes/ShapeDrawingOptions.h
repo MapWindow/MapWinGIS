@@ -126,11 +126,13 @@ public:
 	STDMETHOD(get_FillGradientType)(tkGradientType* pVal);
 	STDMETHOD(put_FillGradientType)(tkGradientType newVal);
 	STDMETHOD(get_PointType)(tkPointSymbolType* pVal);
-	STDMETHOD(put_PointType)(tkPointSymbolType newVal);			
+	STDMETHOD(put_PointType)(tkPointSymbolType newVal);
 	STDMETHOD(get_FillColor2)(OLE_COLOR *pVal);
 	STDMETHOD(put_FillColor2)(OLE_COLOR newVal);
 	STDMETHOD(get_PointRotation)(double *pVal);
 	STDMETHOD(put_PointRotation)(double newVal);
+	STDMETHOD(get_PointReflection)(tkPointReflectionType* pVal);
+	STDMETHOD(put_PointReflection)(tkPointReflectionType newVal);
 
 	STDMETHOD(get_PointSidesCount)(long *pVal);
 	STDMETHOD(put_PointSidesCount)(long newVal);
@@ -157,36 +159,36 @@ public:
 	
 	// .NET overloads
 	STDMETHOD(DrawPoint)(int** hdc, float x, float y, 
-						 int clipWidth, int clipHeight, OLE_COLOR backColor, 
+						 int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha,
 						 VARIANT_BOOL* retVal);
 
 	STDMETHOD(DrawLine)(int** hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
-						int clipWidth, int clipHeight, OLE_COLOR backColor, 
+						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						VARIANT_BOOL* retVal);
 
 	STDMETHOD(DrawRectangle)(int** hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
-						int clipWidth, int clipHeight, OLE_COLOR backColor, 
+						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						VARIANT_BOOL* retVal);
 
 	STDMETHOD(DrawShape)(int** hdc, float x, float y, IShape* shape,  VARIANT_BOOL drawVertices,
-						int clipWidth, int clipHeight, OLE_COLOR backColor , 
+						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						VARIANT_BOOL* retVal);
 
 	// VB6 overloads
 	STDMETHOD(DrawPointVB)(int hdc, float x, float y, 
-						 int clipWidth, int clipHeight, OLE_COLOR backColor, 
+						 int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						 VARIANT_BOOL* retVal);
 
 	STDMETHOD(DrawLineVB)(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
-						int clipWidth, int clipHeight, OLE_COLOR backColor, 
+						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						VARIANT_BOOL* retVal);
 
 	STDMETHOD(DrawRectangleVB)(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
-						int clipWidth, int clipHeight, OLE_COLOR backColor, 
+						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						VARIANT_BOOL* retVal);
 
 	STDMETHOD(DrawShapeVB)(int hdc, float x, float y, IShape* shape,  VARIANT_BOOL drawVertices,
-						int clipWidth, int clipHeight, OLE_COLOR backColor, 
+						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						VARIANT_BOOL* retVal);
 
 	STDMETHOD(get_PointCharacter)(short* retVal);
@@ -258,16 +260,16 @@ private:
 							 // which could become endless loop
 private:
 	VARIANT_BOOL DrawPointCore(CDC* dc, float x, float y, 
-							   int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215);
+							   int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215, BYTE backAlpha = 255);
 
 	VARIANT_BOOL DrawLineCore(CDC* dc, float x, float y, int width, int height, VARIANT_BOOL drawVertices,
-							  int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215);
+							  int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215, BYTE backAlpha = 255);
 
 	VARIANT_BOOL DrawRectangleCore(CDC* dc, float x, float y, int width, int height, VARIANT_BOOL drawVertices,
-							  int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215);
+								   int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215, BYTE backAlpha = 255);
 
 	VARIANT_BOOL DrawShapeCore(CDC* dc, float x, float y, IShape* shape, VARIANT_BOOL drawVertices, 
-							  int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215);
+							   int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215, BYTE backAlpha = 255);
 
 public:	
 	bool DeserializeCore(CPLXMLNode* node);

@@ -1171,6 +1171,28 @@ namespace MapWinGIS
     }
 
     /// <summary>
+    /// Available options applicable to point reflection
+    /// </summary>
+    /// \new495 Added in version 4.9.5
+    public enum tkPointReflectionType
+    {
+        /// <summary>
+        /// No reflection is applied
+        /// </summary>
+        prtNone = 0,
+
+        /// <summary>
+        /// Symbol is flipped left-to-right
+        /// </summary>
+        prtLeftToRight = 1, 
+
+        /// <summary>
+        /// Symbol is flipped top-to-bottom
+        /// </summary>
+        prtTopToBottom = 2,
+    }
+
+    /// <summary>
     /// The available parameters for the projections.
     /// </summary>
     /// \new48 Added in version 4.8
@@ -2702,6 +2724,7 @@ namespace MapWinGIS
         OnDrawBackBufferHdc = 1,
         OnDrawBackBufferBitmapData = 2,
         BeforeAfterDrawing = 4,
+        BeforeAfterLayers = 8,
     }
     
     /// <summary>
@@ -2776,7 +2799,17 @@ namespace MapWinGIS
         pomHighPerformance = 1,
         pomHighQuality = 2,
     }
-}
+
+    /// <summary>
+    /// Supports the load of subsets of Projection Strings from Utils.GetProjectionStrings.
+    /// Can be combined to get NAD83 and/or WGS84, or the entire set.
+    /// </summary>
+    public enum tkProjectionSet
+    {
+        psAll_Projections = 1,
+        psNAD83_Subset = 2,
+        psWGS84_Subset = 4,
+    }
 
 #if nsp
 }

@@ -1,9 +1,9 @@
 /**************************************************************************************
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -14,26 +14,26 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
-  
+
 #pragma once
 #include "BaseProvider.h"
 
 // *******************************************************
 //			GoogleBaseProvider
 // *******************************************************
-class GoogleBaseProvider: public BaseProvider
+class GoogleBaseProvider : public BaseProvider
 {
 protected:
 	CString server;
-    CString UrlFormatServer;
-    CString UrlFormatRequest;
+	CString UrlFormatServer;
+	CString UrlFormatRequest;
 	CString SecureWord;
 	CString Sec1;
 public:
-	GoogleBaseProvider() 
+	GoogleBaseProvider()
 	{
 		SecureWord = "Galileo";
 		Sec1 = "&s=";
@@ -45,13 +45,13 @@ public:
 		this->_projection = new MercatorProjection();
 		this->_maxZoom = 20;
 	}
-	
+
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
 		CString sec1 = "";
-        CString sec2 = "";
-        GetSecureWords(pos, sec1, sec2);
-		
+		CString sec2 = "";
+		GetSecureWords(pos, sec1, sec2);
+
 		CString s;
 		s.Format(_urlFormat, UrlFormatServer, GetServerNum(pos, 4), server, UrlFormatRequest, Version, LanguageStr, pos.x, sec1, pos.y, zoom, sec2);
 		return s;
@@ -63,7 +63,7 @@ public:
 		sec2 = "";
 		int seclen = ((pos.x * 3) + pos.y) % 8;
 		sec2 = SecureWord.Left(seclen);
-		if(pos.y >= 10000 && pos.y < 100000)
+		if (pos.y >= 10000 && pos.y < 100000)
 		{
 			sec1 = Sec1;
 		}
@@ -73,13 +73,13 @@ public:
 // *******************************************************
 //			GoogleBaseProvider
 // *******************************************************
-class GoogleMapProvider: public GoogleBaseProvider
+class GoogleMapProvider : public GoogleBaseProvider
 {
 public:
-	GoogleMapProvider() 
+	GoogleMapProvider()
 	{
 		UrlFormatServer = "mt";
-		UrlFormatRequest = "vt";	
+		UrlFormatRequest = "vt";
 		Version = "m@285000000";
 		Id = tkTileProvider::GoogleMaps;
 		Name = "GoogleMaps";
@@ -91,10 +91,10 @@ public:
 // *******************************************************
 //			GoogleSatelliteProvider
 // *******************************************************
-class GoogleSatelliteProvider: public GoogleBaseProvider
+class GoogleSatelliteProvider : public GoogleBaseProvider
 {
 public:
-	GoogleSatelliteProvider() 
+	GoogleSatelliteProvider()
 	{
 		UrlFormatServer = "khms";
 		UrlFormatRequest = "kh";
@@ -109,13 +109,13 @@ public:
 // *******************************************************
 //			GoogleHybridProvider
 // *******************************************************
-class GoogleHybridProvider: public GoogleBaseProvider
+class GoogleHybridProvider : public GoogleBaseProvider
 {
 public:
-	GoogleHybridProvider(CTileProviders* list) 
+	GoogleHybridProvider(CTileProviders* list)
 	{
 		UrlFormatServer = "mt";
-		UrlFormatRequest = "vt";	
+		UrlFormatRequest = "vt";
 		Version = "h@285000000";
 		Id = tkTileProvider::GoogleHybrid;
 		Name = "GoogleHybrid";
@@ -128,10 +128,10 @@ public:
 // *******************************************************
 //			GoogleTerrainProvider
 // *******************************************************
-class GoogleTerrainProvider: public GoogleBaseProvider
+class GoogleTerrainProvider : public GoogleBaseProvider
 {
 public:
-	GoogleTerrainProvider() 
+	GoogleTerrainProvider()
 	{
 		UrlFormatServer = "mt";
 		UrlFormatRequest = "vt";

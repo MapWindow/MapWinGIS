@@ -930,6 +930,9 @@
     <ClInclude Include="Tiles\Http\HttpProxyHelper.h">
       <Filter>Tiles\Http</Filter>
     </ClInclude>
+    <ClInclude Include="COM classes\GdalUtils.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1977,6 +1980,9 @@
     <ClCompile Include="Tiles\Http\HttpProxyHelper.cpp">
       <Filter>Tiles\Http</Filter>
     </ClCompile>
+    <ClCompile Include="COM classes\GdalUtils.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -2185,6 +2191,12 @@
     </None>
     <None Include="COM classes\WmsLayer.rgs">
       <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="COM classes\GdalUtils.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="Resource\pan_alt.cur">
+      <Filter>Resources</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

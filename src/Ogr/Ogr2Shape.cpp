@@ -276,20 +276,35 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 		OGRFieldType type = oField->GetType();
 
 		CComVariant var;
-		if (type == OFTInteger)
+
+		// https://mapwindow.atlassian.net/browse/MWGIS-57:		
+		if (poFeature->IsFieldSetAndNotNull(iFld))
 		{
-			var.vt = VT_I4;
-			var.lVal = poFeature->GetFieldAsInteger(iFld);
+			// TODO: Support date type
+			if (type == OFTInteger)
+			{
+				var.vt = VT_I4;
+				var.lVal = poFeature->GetFieldAsInteger(iFld);
+			}
+			else if (type == OFTInteger64)
+			{
+				var.vt = VT_I8;
+				var.llVal = poFeature->GetFieldAsInteger64(iFld);
+			}
+			else if (type == OFTReal)
+			{
+				var.vt = VT_R8;
+				var.dblVal = poFeature->GetFieldAsDouble(iFld);
+			}
+			else //if (type == OFTString )
+			{
+				var.vt = VT_BSTR;
+				var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+			}
 		}
-		else if (type == OFTReal)
+		else
 		{
-			var.vt = VT_R8;
-			var.dblVal = poFeature->GetFieldAsDouble(iFld);
-		}
-		else //if (type == OFTString )
-		{
-			var.vt = VT_BSTR;
-			var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+			var.vt = VT_NULL;
 		}
 
 		VARIANT_BOOL vb;

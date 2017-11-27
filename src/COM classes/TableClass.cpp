@@ -1343,9 +1343,11 @@ bool CTableClass::ReadRecord(long RowIndex)
 			    {	
 					val->vt = VT_BSTR;
 					const char* v = DBFReadStringAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
-					WCHAR *buffer = Utility::StringToWideChar(v);
-					val->bstrVal = W2BSTR(buffer);
-					delete[] buffer;				    
+					// MWGIS-72: Support Russian encoding
+					//WCHAR *buffer = Utility::StringToWideChar(v);
+					//val->bstrVal = W2BSTR(buffer);
+					//delete[] buffer;				    
+					val->bstrVal = W2BSTR(Utility::ConvertFromUtf8(v));
 			    }
 		    }
 		    else if( type == INTEGER_FIELD )
@@ -2342,6 +2344,8 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 			//CString strExpression;
 			CString strValue;
 			CComVariant* val = &(*result)[i].minValue;
+			// TODO: MWGIS-72: Support Russian encoding
+			// https://stackoverflow.com/questions/45484130/how-to-convert-ccomvariant-bstr-to-cstring
 			switch (val->vt)
 			{
 				case VT_BSTR:	
@@ -2644,6 +2648,21 @@ bool CTableClass::set_IndexValue(int rowIndex)
 STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision, int width, long* fieldIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	// MWGIS-55: Check inputs:
+	if (width < 1)
+	{
+		*fieldIndex = -1;
+		ErrorMessage(tkDBF_WIDTH_TOO_SMALL);
+		return S_OK;
+	}
+
+	if (type == DOUBLE_FIELD && precision < 1)
+	{
+		*fieldIndex = -1;
+		ErrorMessage(tkDBF_PRECISION_TOO_SMALL);
+		return S_OK;
+	}
+
 	IField* field = NULL;
 	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
 	field->put_Name(name);

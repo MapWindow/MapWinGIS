@@ -16,6 +16,7 @@
 //public domain in March 2004.  
 //********************************************************************************************************
 //Contributor(s): dpa, angela, cdm, Rob Cairns, lsu
+// 09-06-2017 jfaust - Add EPSGUnitConversion, return tkUnitsOfMeasure associated with specified EPSG code
 //********************************************************************************************************
 
 #include "stdafx.h"
@@ -3601,6 +3602,12 @@ void CUtils::ErrorMessage(ICallback* callback, long ErrorCode)
 	CallbackHelper::ErrorMsg("Utils", callback, _key, ErrorMsg(_lastErrorCode));
 }
 
+void CUtils::ErrorMessage(long ErrorCode, CString customMessage)
+{
+	_lastErrorCode = ErrorCode;
+	CallbackHelper::ErrorMsg("Utils", _globalCallback, _key, (LPCSTR)customMessage);
+}
+
 STDMETHODIMP CUtils::ColorByName(tkMapColor name, OLE_COLOR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -4021,7 +4028,7 @@ STDMETHODIMP CUtils::GridStatisticsForPolygon(IGrid* grid, IGridHeader* header, 
 // ********************************************************
 //		GridStatisticsToShapefile()
 // ********************************************************
-STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VARIANT_BOOL selectedOnly, VARIANT_BOOL overwriteFields, VARIANT_BOOL* retVal) 
+STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARIANT_BOOL selectedOnly, VARIANT_BOOL overwriteFields, VARIANT_BOOL useCenterWithinMethod, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -4042,7 +4049,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 
 	IExtents* extGrid = NULL;
 	((CGrid*)grid)->get_Extents(&extGrid);
-	
+
 	VARIANT_BOOL vb;
 	((CExtents*)extGrid)->Intersects(extSf, &vb);
 	extSf->Release();
@@ -4051,182 +4058,141 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 		ErrorMessage(tkBOUNDS_NOT_INTERSECT);
 		return S_OK;
 	}
-	else {
-		VARIANT_BOOL editing;
-		sf->get_EditingTable(&editing);
+
+	VARIANT_BOOL editing;
+	sf->get_EditingTable(&editing);
 		
-		if (!editing) {
-			sf->StartEditingTable(this->_globalCallback, &vb);	// it's safe enough not to check the result
-		}
+	if (!editing) {
+		sf->StartEditingTable(this->_globalCallback, &vb);	// it's safe enough not to check the result
+	}
 
-		std::vector<long> fieldIndices;
-		CreateStatisticsFields(sf, fieldIndices, overwriteFields ? true: false);
+	std::vector<long> fieldIndices;
+	CreateStatisticsFields(sf, fieldIndices, overwriteFields ? true: false);
 		
-		double dx, dy, xll, yll;
-		IGridHeader* header = NULL;
-		grid->get_Header(&header);
-		header->get_dX(&dx);
-		header->get_dY(&dy);
-		header->get_XllCenter(&xll);
-		header->get_YllCenter(&yll);
+	double dx, dy, xll, yll;
+	IGridHeader* header = NULL;
+	grid->get_Header(&header);
+	header->get_dX(&dx);
+	header->get_dY(&dy);
+	header->get_XllCenter(&xll);
+	header->get_YllCenter(&yll);
 
-		long gridRowCount;
-		header->get_NumberRows(&gridRowCount);
+	long gridRowCount;
+	header->get_NumberRows(&gridRowCount);
 
-		// no data values - must not be used in calculations
-		CComVariant var;
-		header->get_NodataValue(&var);
-		float noData;
-		fVal(var, noData);
+	// MWGIS-65:
+	long gridColumnCount;
+	header->get_NumberCols(&gridColumnCount);
 
-		header->Release();
+	// no data values - must not be used in calculations
+	CComVariant var;
+	header->get_NodataValue(&var);
+	float noData;
+	fVal(var, noData);
 
-		long percent = -1;
-		long numShapes;
-		sf->get_NumShapes(&numShapes);
+	header->Release();
 
-		for (long n = 0; n < numShapes; n++) 
+	long percent = -1;
+	long numShapes;
+	sf->get_NumShapes(&numShapes);
+
+	for (long n = 0; n < numShapes; n++) 
+	{
+		CallbackHelper::Progress(_globalCallback, n, numShapes, "Calculating...", _key, percent);
+			
+		sf->get_ShapeSelected(n, &vb);
+		if (selectedOnly && !vb)
+			continue;
+			
+		IShape* poly = NULL;
+		sf->get_Shape(n, &poly);
+			
+		IExtents* bounds = NULL;
+		poly->get_Extents(&extSf);
+		((CExtents*)extGrid)->GetIntersection(extSf, &bounds);
+		extSf->Release();
+
+		if (bounds != NULL) 
 		{
-			CallbackHelper::Progress(_globalCallback, n, numShapes, "Calculating...", _key, percent);
-			
-			sf->get_ShapeSelected(n, &vb);
-			if (selectedOnly && !vb)
-				continue;
-			
-			IShape* poly = NULL;
-			sf->get_Shape(n, &poly);
-			
-			IExtents* bounds = NULL;
-			poly->get_Extents(&extSf);
-			((CExtents*)extGrid)->GetIntersection(extSf, &bounds);
-			extSf->Release();
+			// determine rows & cols which correspond to a poly
+			double xMin, yMin, zMin, xMax, yMax, zMax;
+			bounds->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+			bounds->Release();	
 
-			if (bounds != NULL) 
+			long firstCol, firstRow, lastCol, lastRow;
+			grid->ProjToCell(xMin, yMin, &firstCol, &firstRow);
+			grid->ProjToCell(xMax, yMax, &lastCol, &lastRow);
+
+			long minRow = MIN(firstRow, lastRow);
+			long maxRow = MAX(firstRow, lastRow);
+
+			// Bounds returned by grid->get_Extents call return borders of outer most pixels,
+			// one of which because of rounding may be shifted to one pixel.
+			// So let's make sure that we are inside bounds.
+			// Another way to fix it is to return extents defined by centers of outer most pixels,
+			// which will eliminate possible rounding problems.
+			minRow = MAX(minRow, 0);
+			maxRow = MIN(maxRow, gridRowCount);
+
+			int cmnCount = lastCol - firstCol + 1;
+			int rowCount = maxRow - minRow + 1;
+
+			// now find the pixels inside poly and calculate stats
+			if (cmnCount > 0 && rowCount > 0) 
 			{
-				// determine rows & cols which correspond to a poly
-				double xMin, yMin, zMin, xMax, yMax, zMax;
-				bounds->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-				bounds->Release();	
-
-				long firstCol, firstRow, lastCol, lastRow;
-				grid->ProjToCell(xMin, yMin, &firstCol, &firstRow);
-				grid->ProjToCell(xMax, yMax, &lastCol, &lastRow);
-
-				long minRow = MIN(firstRow, lastRow);
-				long maxRow = MAX(firstRow, lastRow);
-
-				// Bounds returned by grid->get_Extents call return borders of outer most pixels,
-				// one of which because of rounding may be shifted to one pixel.
-				// So let's make sure that we are inside bounds.
-				// Another way to fix it is to return extents defined by centers of outer most pixels,
-				// which will eliminate possible rounding problems.
-				minRow = MAX(minRow, 0);
-				maxRow = MIN(maxRow, gridRowCount);
-
-				int cmnCount = lastCol - firstCol + 1;
-				int rowCount = maxRow - minRow + 1;
-
-				// now find the pixels inside poly and calculate stats
-				if (cmnCount > 0 && rowCount > 0) 
-				{
-					float* vals = new float[cmnCount];
-					int row = 0;
+				float* vals = new float[cmnCount];
+				int row = 0;
 					
-					int count = 0;
-					float sumWeight = 0.0f;	// a sum of cell parts which fall within polygon
-					float sum = 0.0;
-					float squares = 0.0;
-					float max = FLT_MIN;
-					float min = -FLT_MAX;
-					double minX = 0.0;
-					double minY = 0.0;
+				int count = 0;
+				float sumWeight = 0.0f;	// a sum of cell parts which fall within polygon
+				float sum = 0.0;
+				float squares = 0.0;
+				float max = -FLT_MIN;
+				float min = FLT_MAX;
+				double minX = 0.0;
+				double minY = 0.0;
 
-					double yllWindow = yll + ((gridRowCount - 1) - maxRow) * dy;
-					double xllWindow = xll + firstCol * dx;
-					std::map<float, int> values;	// value; count
+				double yllWindow = yll + ((gridRowCount - 1) - maxRow) * dy;
+				double xllWindow = xll + firstCol * dx;
+				std::map<float, int> values;	// value; count
 
-					GridScanMethod method = cmnCount * rowCount > 10 ? GridScanMethod::CenterWithin : GridScanMethod::Intersection;
+				// MWGIS-66:
+				GridScanMethod method = useCenterWithinMethod ? GridScanMethod::CenterWithin : GridScanMethod::Intersection;
 
-					if (method == GridScanMethod::CenterWithin)
+				if (method == GridScanMethod::CenterWithin)
+				{
+					CPointInPolygon pip;
+					if (pip.SetPolygon(poly))
 					{
-						CPointInPolygon pip;
-						if (pip.SetPolygon(poly))
-						{
-							for (long i = minRow; i <= maxRow; i++ ) 
-							{
-								grid->GetFloatWindow(i, i, firstCol, lastCol, vals, &vb);
-								
-								if (vb) {
-									double y = yllWindow + dy * (rowCount - row - 1.5);	  // (rowCount - 1) - row;  -0.5 - center of cell
-									pip.PrepareScanLine(y);
-									
-									// checking values within row
-									for (long j = 0; j < cmnCount; j++)
-									{
-										if (vals[j] == noData)
-											continue;
-
-										double x = xllWindow + dx * (j + 0.5);
-										if (pip.ScanPoint(x))
-										{
-											if (vals[j] < min) {
-												min = vals[j];
-												minX = x;
-												minY = y;
-											}
-											if (vals[j] > max) max = vals[j];
-											sum += vals[j];
-											squares += vals[j] * vals[j];
-											count++;
-											
-											// counting unique values
-											if (values.find(vals[j]) == values.end()) 
-												values[vals[j]] = 1;
-											else 
-												values[vals[j]] += 1;
-										}
-									}
-								}
-								row++;
-							}
-						}
-						sumWeight = (float)count;
-					}
-					else   //GridScanMethod == Intersection
-					{
-						Extent shape(xMin, xMax, yMin, yMax);
-						Extent cell;
-						Extent intersection;
-						double cellArea = dx * dy;
-
 						for (long i = minRow; i <= maxRow; i++ ) 
 						{
 							grid->GetFloatWindow(i, i, firstCol, lastCol, vals, &vb);
+								
 							if (vb) {
-								cell.bottom = yllWindow + dy * (rowCount - row - 1.5);
-								cell.top = yllWindow + dy * (rowCount - row - 0.5);
+								// double y = yllWindow + dy * (rowCount - row - 1.5);	  // (rowCount - 1) - row;  -0.5 - center of cell
+								double y = yllWindow + dy * (rowCount - row - 1.0); // MWGIS-65: yllWindow already use the center of the first cell.
+								pip.PrepareScanLine(y);
+									
+								// checking values within row
 								for (long j = 0; j < cmnCount; j++)
 								{
 									if (vals[j] == noData)
 										continue;
 
-									cell.left = xllWindow + dx * (j - 0.5);
-									cell.right = xllWindow + dx * (j + 0.5);
-									if (cell.getIntersection(shape, intersection))
+									// double x = xllWindow + dx * (j + 0.5);
+									double x = xllWindow + dx * (j); // MWGIS-65: xllWindow already use the center of the first cell.
+									if (pip.ScanPoint(x))
 									{
-										float weight = (float)(intersection.getArea()/cellArea);  // the part of cell within polygon bounds
-
 										if (vals[j] < min) {
 											min = vals[j];
-											minX = (cell.right + cell.left)/2;
-											minY = (cell.top + cell.bottom)/2;
+											minX = x;
+											minY = y;
 										}
 										if (vals[j] > max) max = vals[j];
-										sum += vals[j] * weight;
-										squares += vals[j] * vals[j] * weight;
-										sumWeight += weight;
+										sum += vals[j];
+										squares += vals[j] * vals[j];
 										count++;
-										
+											
 										// counting unique values
 										if (values.find(vals[j]) == values.end()) 
 											values[vals[j]] = 1;
@@ -4238,115 +4204,162 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 							row++;
 						}
 					}
-						
-					if (count > 0) 
+					sumWeight = (float)count;
+				}
+				else   //GridScanMethod == Intersection
+				{
+					Extent shape(xMin, xMax, yMin, yMax);
+					Extent cell;
+					Extent intersection;
+					double cellArea = dx * dy;
+
+					for (long i = minRow; i <= maxRow; i++ ) 
 					{
-						// 0 - "Mean"
-						CComVariant vMean(sum/sumWeight);
-						sf->EditCellValue(fieldIndices[0], n, vMean, &vb);
+						grid->GetFloatWindow(i, i, firstCol, lastCol, vals, &vb);
+						if (vb) {
+							cell.bottom = yllWindow + dy * (rowCount - row - 1.5);
+							cell.top = yllWindow + dy * (rowCount - row - 0.5);
+							for (long j = 0; j < cmnCount; j++)
+							{
+								if (vals[j] == noData)
+									continue;
 
-						if (!values.empty()) 
+								cell.left = xllWindow + dx * (j - 0.5);
+								cell.right = xllWindow + dx * (j + 0.5);
+								if (cell.getIntersection(shape, intersection))
+								{
+									float weight = (float)(intersection.getArea()/cellArea);  // the part of cell within polygon bounds
+
+									if (vals[j] < min) {
+										min = vals[j];
+										minX = (cell.right + cell.left)/2;
+										minY = (cell.top + cell.bottom)/2;
+									}
+									if (vals[j] > max) max = vals[j];
+									sum += vals[j] * weight;
+									squares += vals[j] * vals[j] * weight;
+									sumWeight += weight;
+									count++;
+										
+									// counting unique values
+									if (values.find(vals[j]) == values.end()) 
+										values[vals[j]] = 1;
+									else 
+										values[vals[j]] += 1;
+								}
+							}
+						}
+						row++;
+					}
+				}
+						
+				if (count > 0) 
+				{
+					// 0 - "Mean"
+					CComVariant vMean(sum/sumWeight);
+					sf->EditCellValue(fieldIndices[0], n, vMean, &vb);
+
+					if (!values.empty()) 
+					{
+						// 1 - "Median"
+						int half = count/2;
+						int subCount = 0;
+						std::map<float, int>::iterator it = values.begin();
+						while (it != values.end()) 
 						{
-							// 1 - "Median"
-							int half = count/2;
-							int subCount = 0;
-							std::map<float, int>::iterator it = values.begin();
-							while (it != values.end()) 
+							subCount += it->second;
+							if (subCount > half)
 							{
-								subCount += it->second;
-								if (subCount > half)
-								{
-									CComVariant vMedian(it->first);
-									sf->EditCellValue(fieldIndices[1], n, vMedian, &vb);
-									break;
-								}
-								++it;
+								CComVariant vMedian(it->first);
+								sf->EditCellValue(fieldIndices[1], n, vMedian, &vb);
+								break;
 							}
+							++it;
+						}
 							
-							int maxCount = INT_MIN;
-							int minCount = INT_MAX;
-							float major, minor;
-							it = values.begin();
-							while (it != values.end()) 
+						int maxCount = INT_MIN;
+						int minCount = INT_MAX;
+						float major, minor;
+						it = values.begin();
+						while (it != values.end()) 
+						{
+							if (it->second > maxCount) {
+								maxCount = it->second;
+								major = it->first;
+							}
+							if (it->second < minCount) 
 							{
-								if (it->second > maxCount) {
-									maxCount = it->second;
-									major = it->first;
-								}
-								if (it->second < minCount) 
-								{
-									minCount = it->second;
-									minor = it->first;
-								}
-								++it;
+								minCount = it->second;
+								minor = it->first;
 							}
-
-							// 2 - "Majority"
-							CComVariant vMajor(major);
-							sf->EditCellValue(fieldIndices[2], n, vMajor, &vb);
-							
-							// 3 - "Minority"
-							CComVariant vMinor(minor);
-							sf->EditCellValue(fieldIndices[3], n, vMinor, &vb);
+							++it;
 						}
 
-						// 4 - "Minimum"
-						CComVariant vMin(min);
-						sf->EditCellValue(fieldIndices[4], n, vMin, &vb);
-
-						// 5 - "Maximum"
-						CComVariant vMax(max);
-						sf->EditCellValue(fieldIndices[5], n, vMax, &vb);
-
-						// 6 - "Range"
-						CComVariant vRange(max - min);
-						sf->EditCellValue(fieldIndices[6], n, vRange, &vb);
-
-						// 7 - "StD"
-						float stddev = sqrt(squares/sumWeight - pow(sum/sumWeight, 2));		// /count
-						CComVariant vStd(stddev);
-						sf->EditCellValue(fieldIndices[7], n, vStd, &vb);
-
-						// 8 - "Sum"
-						CComVariant vSum(sum);
-						sf->EditCellValue(fieldIndices[8], n, vSum, &vb);
-
-						// 9 - "MinX"
-						CComVariant vMinX(minX);
-						sf->EditCellValue(fieldIndices[9], n, vMinX, &vb);
-
-						// 10 - "MinY"
-						CComVariant vMinY(minY);
-						sf->EditCellValue(fieldIndices[10], n, vMinY, &vb);
-
-						// 11 - "Variety"
-						int variety = values.size();
-						CComVariant vVar(variety);
-						sf->EditCellValue(fieldIndices[11], n, vVar, &vb);
-
-						// 12 - "Count"
-						CComVariant vCount(count);
-						sf->EditCellValue(fieldIndices[12], n, vCount, &vb);
+						// 2 - "Majority"
+						CComVariant vMajor(major);
+						sf->EditCellValue(fieldIndices[2], n, vMajor, &vb);
+							
+						// 3 - "Minority"
+						CComVariant vMinor(minor);
+						sf->EditCellValue(fieldIndices[3], n, vMinor, &vb);
 					}
-					delete[] vals;
-				}
-			}
-			poly->Release();
-		}
-		extGrid->Release();
 
-		if (!editing) {
-			sf->StopEditingTable(VARIANT_TRUE, this->_globalCallback, &vb);
-			if (!vb) {
-				long code;
-				sf->get_LastErrorCode(&code);
-				this->ErrorMessage(code);	
-				return S_OK;
+					// 4 - "Minimum"
+					CComVariant vMin(min);
+					sf->EditCellValue(fieldIndices[4], n, vMin, &vb);
+
+					// 5 - "Maximum"
+					CComVariant vMax(max);
+					sf->EditCellValue(fieldIndices[5], n, vMax, &vb);
+
+					// 6 - "Range"
+					CComVariant vRange(max - min);
+					sf->EditCellValue(fieldIndices[6], n, vRange, &vb);
+
+					// 7 - "StD"
+					float stddev = sqrt(squares/sumWeight - pow(sum/sumWeight, 2));		// /count
+					CComVariant vStd(stddev);
+					sf->EditCellValue(fieldIndices[7], n, vStd, &vb);
+
+					// 8 - "Sum"
+					CComVariant vSum(sum);
+					sf->EditCellValue(fieldIndices[8], n, vSum, &vb);
+
+					// 9 - "MinX"
+					CComVariant vMinX(minX);
+					sf->EditCellValue(fieldIndices[9], n, vMinX, &vb);
+
+					// 10 - "MinY"
+					CComVariant vMinY(minY);
+					sf->EditCellValue(fieldIndices[10], n, vMinY, &vb);
+
+					// 11 - "Variety"
+					int variety = values.size();
+					CComVariant vVar(variety);
+					sf->EditCellValue(fieldIndices[11], n, vVar, &vb);
+
+					// 12 - "Count"
+					CComVariant vCount(count);
+					sf->EditCellValue(fieldIndices[12], n, vCount, &vb);
+				}
+				delete[] vals;
 			}
 		}
-		
-		*retVal = VARIANT_TRUE;
+		poly->Release();
 	}
+	extGrid->Release();
+
+	if (!editing) {
+		sf->StopEditingTable(VARIANT_TRUE, this->_globalCallback, &vb);
+		if (!vb) {
+			long code;
+			sf->get_LastErrorCode(&code);
+			this->ErrorMessage(code);	
+			return S_OK;
+		}
+	}
+		
+	*retVal = VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -5210,6 +5223,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 
 	CustomExpression expr;	
 	CString err;
+	GDALDataset* dtOutput = NULL; // used in clean-up when something false, throws an exception when is it not yet created.
 
 	// --------------------------------------------------------
 	//   Open input
@@ -5303,9 +5317,9 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	
 	// --------------------------------------------------------
 	//   Creating output
-	// --------------------------------------------------------
-	GDALDataset* dtOutput = NULL;
+	// --------------------------------------------------------	
 	GDALDriverH driver = OpenOutputDriver(OLE2A(gdalOutputFormat));
+	// GDALDataset* dtOutput = NULL; Moved up, because it fails on clean up
 	if (driver != NULL)
 	{
 		dtOutput = OpenOutputFile(driver, OLE2W(outputFilename), xSize, ySize, datasets.begin()->second);
@@ -5368,7 +5382,9 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 		}
 		else
 		{
+			ErrorMessage(tkINVALID_EXPRESSION);
 			err.Format("Invalid formula field: %s; no dataset with such name in input names", name);
+			*errorMsg = A2BSTR(err);
 			goto cleaning;
 		}
 	}
@@ -5517,11 +5533,11 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 		return S_OK;
 	}
 
-	if (Utility::FileExistsW(outName))
-	{
-		ErrorMessage(tkFILE_EXISTS);
-		return S_OK;
-	}
+	//if (Utility::FileExistsW(outName))
+	//{
+	//	ErrorMessage(tkFILE_EXISTS);
+	//	return S_OK;
+	//}
 	
 	double* lows, *highs, *vals;
 	LONG lb1, ub1, lb2, ub2, lb3, ub3; 
@@ -5548,7 +5564,7 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 	}
 	
 	std::deque<BreakVal> breaks;
-	for (int i = 0; i < length; i++)
+	for (int i = 0; i <= length; i++)
 	{
 		BreakVal b;
 		b.highVal = highs[i];
@@ -5695,6 +5711,47 @@ STDMETHODIMP CUtils::IsTiffGrid(BSTR Filename, VARIANT_BOOL* retVal)
 	{
 		CallbackHelper::ErrorMsg("Exception in Utils.IsTiffGrid");
 	}
+	return S_OK;
+}
+
+// *************************************************
+//			EPSGUnitConversion()						  
+// *************************************************
+STDMETHODIMP CUtils::EPSGUnitConversion(int EPSGUnitCode, tkUnitsOfMeasure* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// convert common EPSG codes to internal enumeration
+	switch (EPSGUnitCode)
+	{
+	case 9001:
+		// International Meter
+		*retVal = umMeters;
+		break;
+	case 9002:
+	case 9003:
+	case 9004:
+		// International Foot, US Survey Foot, and American Foot
+		*retVal = umFeets;
+		break;
+	case 9035:
+		// US Survey Mile
+		*retVal = umMiles;
+		break;
+	case 9036:
+		// Kilometer
+		*retVal = umKilometers;
+		break;
+	case 9102:
+		// Degree
+		*retVal = umDecimalDegrees;
+		break;
+	default:
+		// not sure the best default, using Degrees
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		*retVal = umDecimalDegrees;
+	}
+
 	return S_OK;
 }
 

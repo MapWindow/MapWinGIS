@@ -36,19 +36,19 @@ void ShapefileHelper::CopyAttributes(IShapefile* sf, long sourceIndex, long targ
 // ***********************************************************************
 //		CloneNoFields()
 // ***********************************************************************
-void ShapefileHelper::CloneNoFields(IShapefile* sf, IShapefile** retVal, bool addShapeId)
+bool ShapefileHelper::CloneNoFields(IShapefile* sf, IShapefile** retVal, bool addShapeId)
 {
 	if (!sf) {
 		*retVal = NULL;
-		return;
+		return false;
 	}
-	CloneNoFields(sf, retVal, GetShapeType(sf), addShapeId);
+	return CloneNoFields(sf, retVal, GetShapeType(sf), addShapeId);
 }
 
 // ***********************************************************************
 //		CloneNoFields()
 // ***********************************************************************
-void ShapefileHelper::CloneNoFields(IShapefile* sfSource, IShapefile** retVal, ShpfileType targetShapeType, bool addShapeId)
+bool ShapefileHelper::CloneNoFields(IShapefile* sfSource, IShapefile** retVal, ShpfileType targetShapeType, bool addShapeId)
 {
 	IShapefile* sf = NULL;
 	CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&sf);
@@ -61,11 +61,18 @@ void ShapefileHelper::CloneNoFields(IShapefile* sfSource, IShapefile** retVal, S
 		sf->CreateNew(m_globalSettings.emptyBstr, targetShapeType, &vb);
 	}
 
+	if (!vb)
+	{
+		// Pass error back to source:
+		*retVal = sf;
+		return false;
+	}
+
 	CComPtr<IGeoProjection> gpSource = NULL;
 	CComPtr<IGeoProjection> gpTarget = NULL;
 	sfSource->get_GeoProjection(&gpSource);
 	sf->get_GeoProjection(&gpTarget);
-	
+
 	if (gpSource && gpTarget) {
 		gpTarget->CopyFrom(gpSource, &vb);
 	}
@@ -75,14 +82,14 @@ void ShapefileHelper::CloneNoFields(IShapefile* sfSource, IShapefile** retVal, S
 	sf->put_GlobalCallback(callback);
 
 	*retVal = sf;
+	return true;
 }
-
 // ***********************************************************************
 //		CloneCore()
 // ***********************************************************************
 void ShapefileHelper::CloneCore(IShapefile* sfSource, IShapefile** retVal, ShpfileType shpType, bool addShapeId)
 {
-	ShapefileHelper::CloneNoFields(sfSource, retVal, shpType, addShapeId);
+	CloneNoFields(sfSource, retVal, shpType, addShapeId);
 	VARIANT_BOOL vbretval;
 
 	IShapefile* sf = *retVal;
@@ -153,7 +160,7 @@ bool ShapefileHelper::GetSelectedExtents(IShapefile* sf, double& xMinRef, double
 // ****************************************************************
 void ShapefileHelper::CopyFields(IShapefile* source, IShapefile* target)
 {
-	if (!target || !target)
+	if (!source || !target)
 		return;
 
 	LONG numFields, position;
@@ -172,6 +179,9 @@ void ShapefileHelper::CopyFields(IShapefile* source, IShapefile* target)
 
 		field->Release();
 		fieldNew->Release();
+
+		if (!vbretval) 
+			return;
 	}
 }
 

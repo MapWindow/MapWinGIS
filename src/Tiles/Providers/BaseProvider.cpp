@@ -1,9 +1,9 @@
 /**************************************************************************************
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -14,10 +14,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
-  
+
 #include "stdafx.h"
 #include "Wininet.h"
 #include "BaseProvider.h"
@@ -40,7 +40,7 @@ TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
 		CMemoryBitmap* bmp = _subProviders[i]->DownloadBitmap(pos, zoom);
 		if (bmp)
 		{
-			tile->AddOverlay(bmp);	
+			tile->AddOverlay(bmp);
 		}
 		else
 		{
@@ -59,7 +59,7 @@ CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool
 	SecureHttpClient client;
 	CAtlNavigateData navData;
 	navData.dwReadBlockSize = 262144;
-	
+
 	client.SetProxyAndAuthentication(_proxyUsername, _proxyPassword, _proxyDomain);
 
 	PreventParallelExecution();
@@ -120,18 +120,18 @@ CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, CString 
 	CMemoryBitmap* bmp = NULL;
 	switch (contentType)
 	{
-		case httpImage:
-			bmp = ReadBitmap(body, length);
-			break;
-		case httpXml:
-			if (IsWms())
-			{
-				CString s(body);
-				ParseServerException(s);
-			}
-			break;
-		default:
-			break;
+	case httpImage:
+		bmp = ReadBitmap(body, length);
+		break;
+	case httpXml:
+		if (IsWms())
+		{
+			CString s(body);
+			ParseServerException(s);
+		}
+		break;
+	default:
+		break;
 	}
 
 	if (body) {
@@ -173,7 +173,7 @@ void BaseProvider::PreventParallelExecution()
 	// discarding the next connection if the previous one is under resolution; 
 	// since we experience periodic rertransmissions let's introduce
 	// a small delay between connections http://stackoverflow.com/questions/1875151/delay-in-multiple-tcp-connections-from-java-to-the-same-machine
-	Sleep(5);      
+	Sleep(5);
 }
 
 // *************************************************************

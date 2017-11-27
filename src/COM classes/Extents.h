@@ -35,7 +35,7 @@ public:
 	{
 		_pUnkMarshaler = NULL;
 		_xmin = 0.0;
-		_max = 0.0;
+		_xmax = 0.0;
 		_ymin = 0.0;
 		_ymax = 0.0;
 		_zmin = 0.0;
@@ -93,10 +93,13 @@ public:
 	STDMETHOD(PointIsWithin)(double x, double y, VARIANT_BOOL* retVal);
 	STDMETHOD(get_Center)(IPoint** retVal);
 	STDMETHOD(MoveTo)(double x, double y);
-	
+	STDMETHOD(get_Width)(/*[out, retval]*/ double *pVal);
+	STDMETHOD(get_Height)(/*[out, retval]*/ double *pVal);
+	STDMETHOD(get_Depth)(/*[out, retval]*/ double *pVal);
+
 private:
 	double _xmin;
-	double _max;
+	double _xmax;
 	double _ymin;
 	double _ymax;
 	double _zmin;

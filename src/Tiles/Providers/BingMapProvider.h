@@ -1,9 +1,9 @@
 /**************************************************************************************
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -14,10 +14,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
-  
+
 #pragma once
 #include "BaseProvider.h"
 #include "MercatorProjection.h"
@@ -25,19 +25,19 @@
 // *******************************************************
 //			BingBaseProvider
 // *******************************************************
-class BingBaseProvider: public BaseProvider
+class BingBaseProvider : public BaseProvider
 {
 protected:
 	CString _imagerySet;
 public:
-	BingBaseProvider() 
+	BingBaseProvider()
 	{
 		_refererUrl = "http://www.bing.com/maps/";
 		_copyright = L"Copyright © 2014 Microsoft and its suppliers";
 		this->_projection = new MercatorProjection();
 		_subProviders.push_back(this);
 	}
-	
+
 	bool Initialize();
 	CString TileXYToQuadKey(int tileX, int tileY, int levelOfDetail);
 	bool ParseUrlFormat(void* secureHttpClient);
@@ -48,10 +48,10 @@ public:
 // *******************************************************
 //			BingMapProvider
 // *******************************************************
-class BingMapProvider: public BingBaseProvider
+class BingMapProvider : public BingBaseProvider
 {
 public:
-	BingMapProvider() 
+	BingMapProvider()
 	{
 		_imagerySet = "Road";
 		Id = tkTileProvider::BingMaps;
@@ -62,10 +62,10 @@ public:
 // *******************************************************
 //			BingSatelliteProvider
 // *******************************************************
-class BingSatelliteProvider: public BingBaseProvider
+class BingSatelliteProvider : public BingBaseProvider
 {
 public:
-	BingSatelliteProvider() 
+	BingSatelliteProvider()
 	{
 		_imagerySet = "Aerial";
 		Id = tkTileProvider::BingSatellite;
@@ -76,10 +76,10 @@ public:
 // *******************************************************
 //			BingHybridProvider
 // *******************************************************
-class BingHybridProvider: public BingBaseProvider
+class BingHybridProvider : public BingBaseProvider
 {
 public:
-	BingHybridProvider() 
+	BingHybridProvider()
 	{
 		_imagerySet = "AerialWithLabels";
 		Id = tkTileProvider::BingHybrid;

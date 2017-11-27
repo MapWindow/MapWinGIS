@@ -321,10 +321,14 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list,
 			continue;
 		}
 
-		if (!layer->PointWithinExtents(projX, projY))		// TODO: use tolerance
-		{
-			continue;
-		}
+		// ************************************************************************************
+		// jfaust: until tolerance is determined/implemented, I am commenting out this pre-test
+		// since it often results in the exclusion of points that define the edge of the extent
+		//if (!layer->PointWithinExtents(projX, projY))		// TODO: use tolerance
+		//{
+		//	continue;
+		//}
+		// ************************************************************************************
 
 		if (layer->IsShapefile())
 		{
@@ -362,14 +366,14 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list,
 			img.Attach(GetImage(handles[i]));
 			if (img)
 			{
-				long rasterX, rasterY;
-				img->ProjectionToImage(projX, projY, &rasterX, &rasterY);
+				long row, column;
+				img->ProjectionToImage(projX, projY, &column, &row);
 				
 				if (ctrl) {
-					list->TogglePixel(handles[i], rasterX, rasterY);
+					list->TogglePixel(handles[i], column, row);
 				}
 				else {
-					list->AddPixel(handles[i], rasterX, rasterY);
+					list->AddPixel(handles[i], column, row);
 				}
 			}
 		}

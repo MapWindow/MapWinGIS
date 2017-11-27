@@ -145,7 +145,7 @@ STDMETHODIMP CShapeDrawingOptions::put_Picture(IImage* newVal)
 // *******************************************************
 //	   DrawPoint()
 // *******************************************************
-STDMETHODIMP CShapeDrawingOptions::DrawPoint(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+STDMETHODIMP CShapeDrawingOptions::DrawPoint(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CDC* dc = CDC::FromHandle((HDC)hdc);
@@ -156,14 +156,14 @@ STDMETHODIMP CShapeDrawingOptions::DrawPoint(int** hdc, float x, float y, int cl
 	if (clipHeight == 0)
 		clipHeight =  (int)_options.pointSize + 1;
 
-	*retVal = DrawPointCore(dc, x, y, clipWidth, clipHeight, backColor);
+	*retVal = DrawPointCore(dc, x, y, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
 // *******************************************************
 //	   DrawPointVB()
 // *******************************************************
-STDMETHODIMP CShapeDrawingOptions::DrawPointVB(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+STDMETHODIMP CShapeDrawingOptions::DrawPointVB(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CDC* dc = CDC::FromHandle((HDC)hdc);
@@ -174,14 +174,14 @@ STDMETHODIMP CShapeDrawingOptions::DrawPointVB(int hdc, float x, float y, int cl
 	if (clipHeight == 0)
 		clipHeight =  (int)_options.pointSize + 1;
 
-	*retVal = DrawPointCore(dc, x, y, clipWidth, clipHeight, backColor);
+	*retVal = DrawPointCore(dc, x, y, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
 // *******************************************************
 //	   DrawPointCore()
 // *******************************************************
-VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor )
+VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha)
 {
 	if (!dc)
 	{
@@ -210,7 +210,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int 
 	shp->InsertPoint(pnt, &position, &vbretval); 
 	pnt->Release();
 	
-	VARIANT_BOOL result = this->DrawShapeCore(dc, x, y, shp, VARIANT_FALSE, clipWidth, clipHeight, backColor);
+	VARIANT_BOOL result = this->DrawShapeCore(dc, x, y, shp, VARIANT_FALSE, clipWidth, clipHeight, backColor, backAlpha);
 	shp->Release();
 
 	return result;
@@ -222,7 +222,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int 
 // *******************************************************
 //	   DrawLine()
 // *******************************************************
-STDMETHODIMP CShapeDrawingOptions::DrawLine(int** hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+STDMETHODIMP CShapeDrawingOptions::DrawLine(int** hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CDC* dc = CDC::FromHandle((HDC)hdc);
@@ -233,14 +233,14 @@ STDMETHODIMP CShapeDrawingOptions::DrawLine(int** hdc, float x, float y, int wid
 	if (clipHeight == 0)
 		clipHeight = height + 1;
 
-	*retVal = DrawLineCore(dc, x, y, width, height, drawVertices, clipWidth, clipHeight, backColor);
+	*retVal = DrawLineCore(dc, x, y, width, height, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
 // *******************************************************
 //	   DrawLineVB()
 // *******************************************************
-STDMETHODIMP CShapeDrawingOptions::DrawLineVB(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+STDMETHODIMP CShapeDrawingOptions::DrawLineVB(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CDC* dc = CDC::FromHandle((HDC)hdc);
@@ -251,14 +251,14 @@ STDMETHODIMP CShapeDrawingOptions::DrawLineVB(int hdc, float x, float y, int wid
 	if (clipHeight == 0)
 		clipHeight = height + 1;
 
-	*retVal = DrawLineCore(dc, x, y, width, height, drawVertices, clipWidth, clipHeight, backColor);
+	*retVal = DrawLineCore(dc, x, y, width, height, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
 // *******************************************************
 //	   DrawLineCore()
 // *******************************************************
-VARIANT_BOOL CShapeDrawingOptions::DrawLineCore(CDC* dc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, int clipWidth, int clipHeight, OLE_COLOR backColor)
+VARIANT_BOOL CShapeDrawingOptions::DrawLineCore(CDC* dc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha)
 {
 	if (!dc)
 	{
@@ -312,7 +312,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawLineCore(CDC* dc, float x, float y, int w
 		pnt->Release();
 	}
 	
-	VARIANT_BOOL retVal = this->DrawShapeCore(dc, x, y, shp, drawVertices, clipWidth, clipHeight, backColor);
+	VARIANT_BOOL retVal = this->DrawShapeCore(dc, x, y, shp, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	shp->Release();
 	return retVal;
 }
@@ -325,7 +325,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawLineCore(CDC* dc, float x, float y, int w
 // *****************************************************************
 // We shall create the rectangle shape here
 STDMETHODIMP CShapeDrawingOptions::DrawRectangle(int** hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
-												 int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal )
+												 int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CDC* dc = CDC::FromHandle((HDC)hdc);
@@ -336,7 +336,7 @@ STDMETHODIMP CShapeDrawingOptions::DrawRectangle(int** hdc, float x, float y, in
 	if (clipHeight == 0)
 		clipHeight = height + 1;
 
-	*retVal = this->DrawRectangleCore(dc, x, y, width, height, drawVertices, clipWidth, clipHeight, backColor);
+	*retVal = this->DrawRectangleCore(dc, x, y, width, height, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
@@ -344,7 +344,7 @@ STDMETHODIMP CShapeDrawingOptions::DrawRectangle(int** hdc, float x, float y, in
 //	   DrawRectangleVB()
 // *****************************************************************
 STDMETHODIMP CShapeDrawingOptions::DrawRectangleVB(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
-												   int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+												   int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CDC* dc = CDC::FromHandle((HDC)hdc);
@@ -355,14 +355,14 @@ STDMETHODIMP CShapeDrawingOptions::DrawRectangleVB(int hdc, float x, float y, in
 	if (clipHeight == 0)
 		clipHeight = height + 1;
 
-	*retVal = DrawRectangleCore(dc, x, y, width, height, drawVertices, clipWidth, clipHeight, backColor);
+	*retVal = DrawRectangleCore(dc, x, y, width, height, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
 // ****************************************************************
 //		DrawRectangleCore()
 // ****************************************************************
-VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, int clipWidth, int clipHeight, OLE_COLOR backColor )
+VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha)
 {
 	if (!dc)
 	{
@@ -443,7 +443,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 		pnt->Release();
 	}
 	
-	VARIANT_BOOL retVal = this->DrawShapeCore(dc, x, y, shp, drawVertices, clipWidth, clipHeight, backColor);
+	VARIANT_BOOL retVal = this->DrawShapeCore(dc, x, y, shp, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	shp->Release();
 	return retVal;
 
@@ -458,13 +458,13 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 // *****************************************************************
 // We shall create the rectangle shape here
 STDMETHODIMP CShapeDrawingOptions::DrawShape(int** hdc, float x, float y, IShape* shape, VARIANT_BOOL drawVertices, 
-											 int clipWidth, int clipHeight, OLE_COLOR backColor, 
+											 int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 											 VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CDC* dc = CDC::FromHandle((HDC)hdc);
 
-	*retVal = this->DrawShapeCore(dc, x, y, shape, drawVertices, clipWidth, clipHeight, backColor);
+	*retVal = this->DrawShapeCore(dc, x, y, shape, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
@@ -472,13 +472,13 @@ STDMETHODIMP CShapeDrawingOptions::DrawShape(int** hdc, float x, float y, IShape
 //	   DrawShapeVB()
 // *****************************************************************
 STDMETHODIMP CShapeDrawingOptions::DrawShapeVB(int hdc, float x, float y, IShape* shape, VARIANT_BOOL drawVertices, 
-											   int clipWidth, int clipHeight, OLE_COLOR backColor, 
+											   int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 											   VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CDC* dc = CDC::FromHandle((HDC)hdc);
 
-	*retVal = this->DrawShapeCore(dc, x, y, shape, drawVertices, clipWidth, clipHeight, backColor);
+	*retVal = this->DrawShapeCore(dc, x, y, shape, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
 
@@ -486,7 +486,7 @@ STDMETHODIMP CShapeDrawingOptions::DrawShapeVB(int hdc, float x, float y, IShape
 //	   DrawShapeCore()
 // *****************************************************************
 VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, IShape* shape, VARIANT_BOOL drawVertices,
-												 int clipWidth, int clipHeight, OLE_COLOR backColor)
+												 int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha)
 {
 	if (!dc)
 	{
@@ -536,12 +536,12 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 	{
 		VARIANT_BOOL vbretval;
 		HDC hdcTemp = g.GetHDC();
-		_options.linePattern->Draw((int**)hdcTemp, 0.0f, 0.0f, clipWidth, clipHeight, backColor, &vbretval);
+		_options.linePattern->Draw((int**)hdcTemp, 0.0f, 0.0f, clipWidth, clipHeight, backColor, backAlpha, &vbretval);
 		g.ReleaseHDC(hdcTemp);
 	}
 	else
 	{
-		Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor);
+		Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor, backAlpha);
 		Gdiplus::SolidBrush brushBackground(clr);
 		
 		g.Clear(clr);
@@ -1287,6 +1287,29 @@ STDMETHODIMP CShapeDrawingOptions::put_PointRotation (double newVal)
 }
 
 // ****************************************************************
+//		get_PointReflection
+// ****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_PointReflection(tkPointReflectionType* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _options.pointReflectionType;
+	return S_OK;
+}
+STDMETHODIMP CShapeDrawingOptions::put_PointReflection(tkPointReflectionType newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (newVal >= 0 && newVal <= 2)
+	{
+		_options.pointReflectionType = newVal;
+	}
+	else
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+	}
+	return S_OK;
+}
+
+// ****************************************************************
 //		get_PointSidesCount
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointSidesCount (long *pVal)
@@ -1537,6 +1560,9 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 	if (opt->rotation != _options.rotation)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Rotation", CPLString().Printf("%f", _options.rotation));
 	
+	if (opt->pointReflectionType != _options.pointReflectionType)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointReflectionType", CPLString().Printf("%d", (int)_options.pointReflectionType));
+
 	if (opt->scaleX != _options.scaleX)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ScaleX", CPLString().Printf("%f", _options.scaleX));
 	
@@ -1692,6 +1718,9 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	
 	s = CPLGetXMLValue( node, "Rotation", NULL );
 	_options.rotation = (s == "") ? opt->rotation : Utility::atof_custom(s);
+	
+	s = CPLGetXMLValue( node, "PointReflectionType", NULL );
+	_options.pointReflectionType = (s == "") ? opt->pointReflectionType : (tkPointReflectionType)atoi(s.GetString());
 	
 	s = CPLGetXMLValue( node, "ScaleX", NULL );
 	_options.scaleX = (s == "") ? opt->scaleX : Utility::atof_custom(s);

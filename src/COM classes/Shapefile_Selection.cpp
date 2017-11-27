@@ -190,8 +190,14 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 
 			if (shapeVal < 0 || shapeVal >= (int)_shapeData.size()) continue;
 
-			if (renderedOnly && !_shapeData[shapeVal]->wasRendered())
-				continue;
+			// ***********************************************************************************
+			// jfaust: This test is not valid here; the wasRendered flag is initially set for each
+			// drawn feature, but is then immediately cleared when drawing the volatile layers; so
+			// this test appears to always fail, failing to select Point-type features.
+			// TODO: Re-evaluate need for wasRendered test; it is not done for Polygon features...
+			//if (renderedOnly && !_shapeData[shapeVal]->wasRendered())
+			//	continue;
+			// ***********************************************************************************
 
 			// bounds
 			if (this->QuickExtentsCore(shapeVal, &s_minX, &s_minY, &s_maxX, &s_maxY))

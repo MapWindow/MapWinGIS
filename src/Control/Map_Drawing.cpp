@@ -238,6 +238,15 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 				gLayers->Clear(Gdiplus::Color::Transparent);
 				gLayers->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
 
+				// fire external before layer drawing code
+				if (_customDrawingFlags & BeforeAfterLayers)
+				{
+					HDC hdc = g->GetHDC();
+					tkMwBoolean retVal = blnFalse;
+					this->FireBeforeLayers((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+					g->ReleaseHDC(hdc);
+				}
+
 				bool useRotation = false;	// not implemented
 				if (useRotation) {
 					DrawLayersRotated(dc, gLayers, rcBounds);
@@ -248,6 +257,21 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 
 				// passing layer buffer to the main buffer
 				g->DrawImage(_layerBitmap, 0.0f, 0.0f);
+
+				// clean up
+				delete gLayers;
+			}
+
+			// fire external after layer drawing code
+			// NOTE that we want to do this even if drawing from layer buffer (tkRedrawType::RedrawSkipDataLayers)
+			// since even that erases any custom drawing done through the hDC.  We still should consider whether 
+			// or not to allow After Layer drawing for the Snapshot (which is not done for the After Drawing draw)
+			if (_customDrawingFlags & BeforeAfterLayers)
+			{
+				HDC hdc = g->GetHDC();
+				tkMwBoolean retVal = blnFalse;
+				this->FireAfterLayers((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+				g->ReleaseHDC(hdc);
 			}
 		}
 	}
@@ -317,6 +341,9 @@ void CMapView::RedrawWmsLayers(Gdiplus::Graphics* g)
 				drawer.DrawTiles(manager, GetMapProjection(), _isSnapshot, _projectionChangeCount);
 
 				g->DrawImage(wmsBuffer, 0.0f, 0.0f);
+
+				// clean up
+				delete gWms;
 			}
 		}
 	}
@@ -624,8 +651,9 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 					gTiles->Flush();
 					wasReused = true;
 				}
-				delete gTemp;
 			}
+			// clean up
+			delete gTemp;
 		}
 		
 		if (!wasReused) {
@@ -646,6 +674,9 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 	if (initialization || get_TileManager()->UndrawnTilesExist()) {
 		DrawTiles(gTiles);		
 	}
+
+	// clean up
+	delete gTiles;
 }
 
 // ***************************************************************

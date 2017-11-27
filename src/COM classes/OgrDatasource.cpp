@@ -76,11 +76,19 @@ STDMETHODIMP COgrDatasource::put_GlobalCallback(ICallback *newVal)
 // *************************************************************
 STDMETHODIMP COgrDatasource::Open(BSTR connectionString, VARIANT_BOOL* retVal)
 {
+	return Open2(connectionString, VARIANT_FALSE, retVal);
+}
+
+// *************************************************************
+//		Open2()
+// *************************************************************
+STDMETHODIMP COgrDatasource::Open2(BSTR connectionString, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal)
+{
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	Close();
 	*retVal = VARIANT_FALSE;
 
-	GDALDataset* ds = GdalHelper::OpenOgrDatasetW(OLE2W(connectionString), false, true);
+	GDALDataset* ds = GdalHelper::OpenOgrDatasetW(OLE2W(connectionString), forUpdate ? true : false, true);
 	if (!ds)
 	{
 		// clients should extract last GDAL error
@@ -350,6 +358,9 @@ STDMETHODIMP COgrDatasource::CreateLayer(BSTR layerName, ShpfileType shpType, IG
 
 	OGRLayer* layer = _dataset->CreateLayer(OgrHelper::Bstr2OgrString(layerName), ref,
 		OgrConverter::ShapeType2GeometryType(shpType, multiPart), options);
+
+	_dataset->FlushCache();
+
 	CSLDestroy(options);
 
 	*retVal = layer != NULL ? VARIANT_TRUE : VARIANT_FALSE;

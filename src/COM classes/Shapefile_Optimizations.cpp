@@ -640,6 +640,8 @@ bool CShapefile::ReadShapeExtents(long ShapeIndex, Extent& result)
 	if (contentLength <= 0)
 		return FALSE;
 
+	bool bSuccess = false;
+
 	char * cdata = new char[contentLength];
 	fread(cdata, sizeof(char), contentLength, _shpfile);
 	int * intdata = (int*)cdata;
@@ -650,7 +652,7 @@ bool CShapefile::ReadShapeExtents(long ShapeIndex, Extent& result)
 
 	if (shapetype == SHP_NULLSHAPE)
 	{
-		return false;
+		bSuccess = false;
 	}
 	else if (shapetype == SHP_POINT || shapetype == SHP_POINTZ || shapetype == SHP_POINTM)
 	{
@@ -660,6 +662,7 @@ bool CShapefile::ReadShapeExtents(long ShapeIndex, Extent& result)
 		result.bottom = bnds[1];
 		result.right = bnds[0];
 		result.top = bnds[1];
+		bSuccess = true;
 	}
 	else if (shapetype == SHP_POLYLINE || shapetype == SHP_POLYLINEZ || shapetype == SHP_POLYLINEM ||
 		shapetype == SHP_POLYGON || shapetype == SHP_POLYGONZ || shapetype == SHP_POLYGONM ||
@@ -670,16 +673,19 @@ bool CShapefile::ReadShapeExtents(long ShapeIndex, Extent& result)
 		result.bottom = bnds[1];
 		result.right = bnds[2];
 		result.top = bnds[3];
+		bSuccess = true;
 	}
 	else
 	{
 		ErrorMessage(tkUNSUPPORTED_SHAPEFILE_TYPE);
-		return false;
+		bSuccess = false;
 	}
 
+	// make sure to always delete allocation
 	delete[] cdata;
 	cdata = NULL;
-	return true;
+	// return status
+	return bSuccess;
 }
 
 #pragma endregion

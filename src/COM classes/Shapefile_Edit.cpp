@@ -193,6 +193,7 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 				}
 			}
 		}
+		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 	
@@ -571,8 +572,15 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 			
 	ShpfileType shapetype;
 	Shape->get_ShapeType(&shapetype);
+	
+	// MWGIS-91
+	bool areEqualTypes = shapetype == _shpfiletype;
+	if (!areEqualTypes){
+		areEqualTypes = ShapeUtility::Convert2D(shapetype) == ShapeUtility::Convert2D(_shpfiletype);
+	}
 				
-	if( shapetype != SHP_NULLSHAPE && shapetype != _shpfiletype)
+	// if( shapetype != SHP_NULLSHAPE && shapetype != _shpfiletype)
+	if (shapetype != SHP_NULLSHAPE && !areEqualTypes)
 	{	
 		ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
 		return S_OK;
@@ -907,10 +915,15 @@ BOOL CShapefile::VerifyMemShapes(ICallback * cBack)
 			continue;
 		
 		shp->get_ShapeType(&shapetype);
+		// MWGIS-91
+		bool areEqualTypes = shapetype == _shpfiletype;
+		if (!areEqualTypes){
+			areEqualTypes = ShapeUtility::Convert2D(shapetype) == ShapeUtility::Convert2D(_shpfiletype);
+		}
 		shp->get_NumPoints(&numPoints);
 		shp->get_NumParts(&numParts);
 
-		if( shapetype != SHP_NULLSHAPE && shapetype != _shpfiletype )
+		if (shapetype != SHP_NULLSHAPE && !areEqualTypes)
 		{	
 			
 			ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);

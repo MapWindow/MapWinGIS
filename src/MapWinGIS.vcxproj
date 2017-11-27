@@ -218,6 +218,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="COM classes\GdalDriver.h" />
     <ClInclude Include="COM classes\GdalDriverManager.h" />
     <ClInclude Include="COM classes\GdalRasterBand.h" />
+    <ClInclude Include="COM classes\GdalUtils.h" />
     <ClInclude Include="COM classes\Histogram.h" />
     <ClInclude Include="COM classes\Identifier.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
@@ -501,6 +502,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="COM classes\GdalDriver.cpp" />
     <ClCompile Include="COM classes\GdalDriverManager.cpp" />
     <ClCompile Include="COM classes\GdalRasterBand.cpp" />
+    <ClCompile Include="COM classes\GdalUtils.cpp" />
     <ClCompile Include="COM classes\Histogram.cpp" />
     <ClCompile Include="COM classes\Identifier.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
@@ -508,6 +510,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="COM classes\SelectionList.cpp" />
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
     <ClCompile Include="COM classes\UndoList.cpp" />
+    <ClCompile Include="COM classes\Utils_Projections.cpp" />
     <ClCompile Include="COM classes\Utils_Shapefile.cpp" />
     <ClCompile Include="COM classes\WmsLayer.cpp" />
     <ClCompile Include="ComHelpers\CallbackHelper.cpp" />
@@ -870,6 +873,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <None Include="COM classes\GdalDriver.rgs" />
     <None Include="COM classes\GdalDriverManager.rgs" />
     <None Include="COM classes\GdalRasterBand.rgs" />
+    <None Include="COM classes\GdalUtils.rgs" />
     <None Include="COM classes\GeoProjection.rgs" />
     <None Include="COM classes\GlobalSettings.rgs" />
     <None Include="COM classes\Grid.rgs" />
@@ -911,6 +915,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <None Include="Grid\fip\readme.123" />
     <None Include="MapWinGIS.def" />
     <None Include="MapWinGIS.rgs" />
+    <None Include="resource\cur00001.cur" />
     <None Include="Resource\cursor1.cur" />
     <None Include="Resource\cursor2.cur" />
     <None Include="Resource\cursor3.cur" />
@@ -921,6 +926,7 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <None Include="Resource\Map.bmp" />
     <None Include="ReadMe.txt" />
     <None Include="Resource\move_cursor.cur" />
+    <None Include="Resource\pan_alt.cur" />
     <None Include="Resource\rotate_cursor.cur" />
     <None Include="Resource\select_cursor.cur" />
     <None Include="Resource\vertex_cursor.cur" />

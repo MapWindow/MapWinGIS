@@ -59,6 +59,8 @@ public:
 	STDMETHOD(Close)();
 	STDMETHOD(SetGeoTransform)(DOUBLE xLeft, DOUBLE dX, DOUBLE yProjOnX, DOUBLE yTop, DOUBLE xProjOnY, DOUBLE dY, VARIANT_BOOL* retVal);
 	STDMETHOD(SetProjection)(BSTR Projection, VARIANT_BOOL* retVal);
+	STDMETHOD(get_SubDatasetCount)(LONG* retVal);
+	STDMETHOD(GetSubDatasetName)(int subDatasetIndex, BSTR* retVal);
 
 private:
 	GDALDataset* _dataset;

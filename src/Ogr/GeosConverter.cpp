@@ -34,7 +34,9 @@ bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool
 		has25D = GeosHelper::HasZ(gsGeom);
 	
 		// would be better to pass units explicitly
-		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.GetInvalidShapeBufferDistance(umMeters) / 1000.0, 30, gsGeom);
+		// Fixing MWGIS-59: Fixup makes new shape larger: 
+		// GEOSGeometry* gsNew = DoBuffer(m_globalSettings.GetInvalidShapeBufferDistance(umMeters) / 1000.0, 30, gsGeom);
+		GEOSGeometry* gsNew = DoBuffer(0, 30, gsGeom);
 		if (gsNew && GeosHelper::IsValid(gsNew))
 		{
 			gsGeom = gsNew;

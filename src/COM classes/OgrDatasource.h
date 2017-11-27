@@ -83,6 +83,7 @@ public:
 	STDMETHOD(get_GdalLastErrorMsg)(BSTR* pVal);
 	STDMETHOD(GetSchemas)(VARIANT* retVal);
 	STDMETHOD(GetLayer2)(LONG index, VARIANT_BOOL forUpdate, VARIANT_BOOL newConnection, IOgrLayer** retVal);
+	STDMETHOD(Open2)(BSTR connectionString, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal);
 
 private:
 	ICallback * _globalCallback;

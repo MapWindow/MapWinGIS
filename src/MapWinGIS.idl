@@ -7,6 +7,8 @@
 //6-24-2007 Tom Shanley (tws) - define tkHJustification=hjNone (draw label AT the indicated point)
 //5-15-2009 Andrew Purkis (ajp) - define tkHJustification = hjRaw (draw rotated lines correctly)  
 //27 aug 2009 lsu - added ShapeDrawingOptions class
+// june 2017 PaulM - Added IGdalUtils
+// sep 2017 jfaust - Extend interfaces of IExtents and IPoint
 
 #include <olectl.h>
 #include <idispids.h>
@@ -65,6 +67,7 @@ interface IGdalDriverManager;
 interface IFunction;
 interface IExpression;
 interface IWmsLayer;
+interface IGdalUtils;
 
 /************************** tkWmsVersion Enumeration **********************/
 typedef
@@ -143,6 +146,7 @@ enum tkCustomDrawingFlags {
 	OnDrawBackBufferHdc = 1,
 	OnDrawBackBufferBitmapData = 2,
 	BeforeAfterDrawing = 4,
+	BeforeAfterLayers = 8,
 }tkCustomDrawingFlags;
 
 /************************** tkGdalDataType Enumeration **********************/
@@ -1156,6 +1160,7 @@ enum tkScalebarUnits
 		idFunction = 50,
 		idExpression = 51,
 		idWmsLayer = 52,
+		idGdalUtils = 53
 	} tkInterface;	
 
 	typedef		
@@ -1808,6 +1813,17 @@ enum tkScalebarUnits
 		dpsAsterisk = 15,
 		dpsFlag = 16,
 	}tkDefaultPointSymbol;
+
+	typedef
+		[uuid (D763CF97-9280-4CAA-9C22-9CDC422357B8),
+		helpstring("tkPointReflectionType enumeration"),
+		]
+	enum tkPointReflectionType
+	{
+		prtNone = 0,
+		prtLeftToRight = 1,
+		prtTopToBottom = 2,
+	}tkPointReflectionType;
 
 	typedef
 	[	uuid  (FB3763C2-1D27-419f-A7CF-5A7B350E00E1),
@@ -3392,6 +3408,18 @@ enum tkScalebarUnits
 		Wgs84_UPS_South_NE = 32761,
 	}tkWgs84Projection;
 
+	typedef
+	[
+		uuid(29389DAF-9EF7-4C89-B000-D4735EB1D789),
+		helpstring("Enumerated Projection Sets"),
+	]
+	enum tkProjectionSet
+	{
+		[helpstring("All Projections")] psAll_Projections = 1,
+		[helpstring("NAD83 Subset")] psNAD83_Subset = 2,
+		[helpstring("WGS84 Subset")] psWGS84_Subset = 4,
+	}tkProjectionSet;
+
 	[
 		object,
 		uuid(105018E5-A71A-4734-AC06-094A3ABCC7BA),
@@ -3714,8 +3742,8 @@ interface IImage : IDispatch{
 	[propget, id(56), helpstring("property Labels")] HRESULT Labels([out, retval] ILabels** pVal);
 	[propput, id(56), helpstring("property Labels")] HRESULT Labels([in] ILabels* newVal);
 	[propget, id(57), helpstring("property Extents")] HRESULT Extents([out, retval] IExtents** pVal);
-	[id(58), helpstring("method ProjectionToImage")] HRESULT ProjectionToImage([in]double ProjX, [in]double ProjY, [out]long* ImageX, [out]long* ImageY);
-	[id(59), helpstring("method ImageToProjection")] HRESULT ImageToProjection([in]long ImageX, [in]long ImageY, [out]double* ProjX, [out]double* ProjY);
+	[id(58), helpstring("method ProjectionToImage")] HRESULT ProjectionToImage([in]double ProjX, [in]double ProjY, [out]long* Column, [out]long* Row);
+	[id(59), helpstring("method ImageToProjection")] HRESULT ImageToProjection([in]long Column, [in]long Row, [out]double* ProjX, [out]double* ProjY);
 	[id(60), helpstring("method ProjectionToBuffer")] HRESULT ProjectionToBuffer([in]double ProjX, [in]double ProjY, [out]long* BufferX, [out]long* BufferY);
 	[id(61), helpstring("method BufferToProjection")] HRESULT BufferToProjection([in]long BufferX, [in]long BufferY, [out]double* ProjX, [out] double* ProjY);
 	[propget, id(62), helpstring("property CanUseGrouping")] HRESULT CanUseGrouping([out, retval] VARIANT_BOOL* pVal);
@@ -4121,6 +4149,9 @@ interface IExtents : IDispatch{
 		//[id(13), helpstring("method Disjoint")] HRESULT Disjoint([in]IExtents* ext, [out, retval]VARIANT_BOOL* retval);
 		//[id(15), helpstring("method Union")] HRESULT Union([in]IExtents* ext);
 		//[id(16), helpstring("method GetIntersection")] HRESULT GetIntersection([in]IExtents* ext, [out, retval]IExtents** retval);
+		[propget, id(18), helpstring("property Width")] HRESULT Width([out, retval]double* pVal);
+		[propget, id(19), helpstring("property Height")] HRESULT Height([out, retval]double* pVal);
+		[propget, id(20), helpstring("property Depth")] HRESULT Depth([out, retval]double* pVal);
 };
 
 /****************************  Point Interface ***********************/
@@ -4148,6 +4179,7 @@ interface IPoint : IDispatch{
 	[propget, id(8), helpstring("property M")] HRESULT M([out, retval] double *pVal);
 	[propput, id(8), helpstring("property M")] HRESULT M([in] double newVal);
 	[id(9), helpstring("method Clone")] HRESULT Clone([out, retval] IPoint** retVal);
+	[id(10), helpstring("Sets X, Y, and Z values")] HRESULT Set([in] double newX, [in] double newY, [in, optional, defaultvalue(0.0)] double newZ);
 };
 
 /****************************  Table Interface ***********************/
@@ -4375,15 +4407,15 @@ interface IUtils : IDispatch{
 	[id(28), helpstring("method ColorByName")] HRESULT ColorByName([in] tkMapColor name, [out,retval] OLE_COLOR* retVal);
 	[id(30), helpstring("method ClipGridWithPolygon")] HRESULT ClipGridWithPolygon([in]BSTR inputGridfile, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
 	[id(31), helpstring("method ClipGridWithPolygon2")] HRESULT ClipGridWithPolygon2([in]IGrid* inputGrid, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
-	[id(32), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [out, retval]VARIANT_BOOL* retVal);
+	[id(32), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useCenterWithinMethod, [out, retval]VARIANT_BOOL* retVal);
 	[id(33), helpstring("method Polygonize")] HRESULT Polygonize([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in, optional, defaultvalue(1)] int iSrcBand, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL NoMask, [in, optional, defaultvalue(NULL)] BSTR pszMaskFilename, [in, optional, defaultvalue("GML")] BSTR pszOGRFormat, [in, optional, defaultvalue("out")] BSTR pszDstLayerName, [in, optional, defaultvalue("DN")] BSTR pszPixValFieldName, [in, optional, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(36), helpstring("method GDALInfo")] HRESULT GDALInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
-	[id(37), helpstring("method GDALWarp")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(37), helpstring("Deprecated method GDALWarp")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(38), helpstring("method GDALBuildVrt")] HRESULT GDALBuildVrt([in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(39), helpstring("method GDALAddOverviews")] HRESULT GDALAddOverviews([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in] BSTR bstrLevels, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(40), helpstring("method GDALRasterize")] HRESULT GDALRasterize([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(41), helpstring("method OGRInfo")] HRESULT OGRInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] BSTR bstrLayers, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
-	[id(42), helpstring("method OGR2OGR")] HRESULT OGR2OGR([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(42), helpstring("Deprecated method OGR2OGR")] HRESULT OGR2OGR([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	/**** 4.9 only ****/
 	[id(29), helpstring("method ConvertDistance")] HRESULT ConvertDistance([in] tkUnitsOfMeasure sourceUnit, [in] tkUnitsOfMeasure targetUnit, [in,out] DOUBLE* Value, [out,retval] VARIANT_BOOL* retval);
 	[id(34), helpstring("method CreateInstance")] HRESULT CreateInstance([in]tkInterface interfaceId, [out, retval]IDispatch** retVal);
@@ -4411,6 +4443,11 @@ interface IUtils : IDispatch{
 	[id(56)] HRESULT BufferByDistance([in] IShapefile* subject, [in] DOUBLE Distance, [in] LONG nSegments, [in] VARIANT_BOOL SelectedOnly, [in] VARIANT_BOOL MergeResults, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval]VARIANT_BOOL* retVal);
 	[id(57)] HRESULT ExplodeShapes([in] IShapefile* subject, [in] VARIANT_BOOL SelectedOnly, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
 	[id(58)] HRESULT ExportSelection([in] IShapefile* subject, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
+	[id(59), helpstring("method EPSGUnitConversion")] HRESULT EPSGUnitConversion([in] int EPSGUnitCode, [out, retval] tkUnitsOfMeasure* retVal);
+	[id(60), helpstring("method GetNAD83ProjectionName")] HRESULT GetNAD83ProjectionName([in] tkNad83Projection projectionID, [out, retval] BSTR* retVal);
+	[id(61), helpstring("method GetWGS84ProjectionName")] HRESULT GetWGS84ProjectionName([in] tkWgs84Projection projectionID, [out, retval] BSTR* retVal);
+	[id(62), helpstring("method GetProjectionNameByID")] HRESULT GetProjectionNameByID([in] int SRID, [out, retval] BSTR* retVal);
+	[id(63), helpstring("method GetProjectionList")] HRESULT GetProjectionList([in] tkProjectionSet projectionSets, [in, out] VARIANT* list, [out, retval] VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/
@@ -4634,7 +4671,8 @@ interface IShapeDrawingOptions : IDispatch{
 
 	[id(28), helpstring("method DrawShape")] HRESULT DrawShape([in]int** hdc, [in]float x, [in]float y, [in]IShape* shape, [in]VARIANT_BOOL drawVertices, 
 															   [in]int clipWidth, [in]int clipHeight, 
-															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+															   [out, retval] VARIANT_BOOL* retVal);
 	
 	[propget, id(29), helpstring("property PointCharacter")] HRESULT PointCharacter([out, retval] short *pVal);
 	[propput, id(29), helpstring("property PointCharacter")] HRESULT PointCharacter([in] short newVal);
@@ -4649,11 +4687,13 @@ interface IShapeDrawingOptions : IDispatch{
 
 	[id(34), helpstring("method DrawRectangle")] HRESULT DrawRectangle([in]int** hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices, 
 																	   [in, optional, defaultvalue(0)]int clipWidth, [in, optional, defaultvalue(0)]int clipHeight, 
-																	   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+																	   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+																	   [out, retval] VARIANT_BOOL* retVal);
 	
 	[id(35), helpstring("method DrawPoint")] HRESULT DrawPoint([in]int** hdc,  [in]float x, [in]float y,
 															   [in, optional, defaultvalue(0)]int clipWidth, [in, optional, defaultvalue(0)]int clipHeight, 
-															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+															   [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(36), helpstring("property VerticesVisible")] HRESULT VerticesVisible([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(36), helpstring("property VerticesVisible")] HRESULT VerticesVisible([in] VARIANT_BOOL newVal);
@@ -4668,7 +4708,8 @@ interface IShapeDrawingOptions : IDispatch{
 	
 	[id(45), helpstring("method DrawLine")] HRESULT DrawLine([in]int** hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices,
 															 [in]int clipWidth, [in]int clipHeight, 
-															 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+															 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+															 [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(46), helpstring("property LinePattern")] HRESULT LinePattern([out, retval] ILinePattern** pVal);
 	[propput, id(46), helpstring("property LinePattern")] HRESULT LinePattern([in] ILinePattern* newVal);
@@ -4686,22 +4727,26 @@ interface IShapeDrawingOptions : IDispatch{
 	
 	[id(54), helpstring("method DrawPointVB")] HRESULT DrawPointVB([in]int hdc, [in]float x, [in]float y, 
 																   [in, optional, defaultvalue(0)] int clipWidth, [in, optional, defaultvalue(0)] int clipHeight,  
-																   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+																   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+																   [out, retval] VARIANT_BOOL* retVal);
 
 	[id(55), helpstring("method DrawLineVB")] HRESULT DrawLineVB([in]int hdc, [in]float x, [in]float y, [in]int width, [in]int height,
 																 [in]VARIANT_BOOL drawVertices,														 
 																 [in] int clipWidth, [in] int clipHeight,
-																 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+																 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+																 [out, retval] VARIANT_BOOL* retVal);
 	
 	[id(56), helpstring("method DrawRectangleVB")] HRESULT DrawRectangleVB([in] int hdc, [in] float x, [in] float y, [in] int width, [in] int height,
 														   [in] VARIANT_BOOL drawVertices, 
 														   [in, optional, defaultvalue(0)] int clipWidth, [in, optional, defaultvalue(0)] int clipHeight,   
-														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														   [out, retval] VARIANT_BOOL* retVal);
 	
 	[id(57), helpstring("method DrawShapeVB")] HRESULT DrawShapeVB([in]int hdc, [in]float x, [in]float y, [in]IShape* shape,
 														   [in]VARIANT_BOOL drawVertices, 
 														   [in] int clipWidth, [in] int clipHeight,   
-														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
+														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														   [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(58), helpstring("property DynamicVisibility")] HRESULT DynamicVisibility([out, retval]VARIANT_BOOL* retval);
 	[propput, id(58), helpstring("property DynamicVisibility")] HRESULT DynamicVisibility([in]VARIANT_BOOL newVal);
@@ -4720,6 +4765,9 @@ interface IShapeDrawingOptions : IDispatch{
 
 	[propget, id(64), helpstring("property FrameType")] HRESULT FrameType([out, retval] tkLabelFrameType* pVal);
 	[propput, id(64), helpstring("property FrameType")] HRESULT FrameType([in] tkLabelFrameType newVal);
+
+	[propget, id(65), helpstring("property PointReflection")] HRESULT PointReflection([out, retval] tkPointReflectionType* pVal);
+	[propput, id(65), helpstring("property PointReflection")] HRESULT PointReflection([in] tkPointReflectionType newVal);
 };
 
 // ***********************************  Label Interface  **********************************
@@ -5445,7 +5493,8 @@ interface ILinePattern : IDispatch{
 	[id(11), helpstring("method RemoveItem")] HRESULT RemoveItem([in]int Index, [out, retval]VARIANT_BOOL* retVal);
 	[id(12), helpstring("method Clear")] HRESULT Clear();
 	[id(13), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
-													 [in, optional, defaultvalue(16777215) ]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
+													[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+													[out, retval]VARIANT_BOOL* retVal);
 	
 	[propget, id(14), helpstring("property Transparency")] HRESULT Transparency( [out, retval]BYTE* retVal);
 	[propput, id(14), helpstring("property Transparency")] HRESULT Transparency( [in]BYTE newVal);
@@ -5454,7 +5503,8 @@ interface ILinePattern : IDispatch{
 	[id(16), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
 
 	[id(17), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
-													 [in, optional, defaultvalue(16777215) ]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
+														[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														[out, retval]VARIANT_BOOL* retVal);
 };
 
 /***************************  LineSegment Interface  ********************************/
@@ -5488,11 +5538,13 @@ interface ILineSegment : IDispatch{
 	[propget, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [out, retval]float* retVal);
 	[propput, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [in]float newVal);
 	[id(11), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
-													 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
+													[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+													[out, retval]VARIANT_BOOL* retVal);
 	[propget, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [out, retval]OLE_COLOR* retVal);
 	[propput, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [in]OLE_COLOR newVal);
 	[id(13), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
-													 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
+														[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														[out, retval]VARIANT_BOOL* retVal);
 };
 
 /************************************  MapWinGIS Library  ********************************/
@@ -6035,6 +6087,7 @@ interface IOgrDatasource : IDispatch{
 	[propget, id(22)] HRESULT GdalLastErrorMsg([out, retval]BSTR* retVal);
 	[id(23)] HRESULT GetSchemas([out, retval] VARIANT* retVal);
 	[id(24)] HRESULT GetLayer2([in] LONG index, [in] VARIANT_BOOL forUpdate, [in] VARIANT_BOOL newConnection, [out, retval] IOgrLayer** retVal);
+	[id(25)] HRESULT Open2([in]BSTR connectionString, [in]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
 };
 [
 	object,
@@ -6159,11 +6212,13 @@ interface ISelectionList : IDispatch{
 	[propget, id(4)] HRESULT ShapeIndex([in] LONG index, [out, retval] LONG* pVal);
 	[id(5)] HRESULT Clear();
 	[id(6)] HRESULT RemoveByLayerHandle([in]LONG layerHandle);
-	[id(7)] HRESULT AddPixel([in] LONG layerHandle, [in] LONG rasterPixelX, [in] LONG rasterPixelY);
+	[id(7)] HRESULT AddPixel([in] LONG layerHandle, [in] LONG column, [in] LONG row);
 	[propget, id(8)] HRESULT LayerType([in] LONG index, [out, retval] tkLayerType* pVal);
 	[propget, id(9)] HRESULT RasterX([in] LONG index, [out, retval] LONG* pVal);
 	[propget, id(10)] HRESULT RasterY([in] LONG index, [out, retval] LONG* pVal);
-	[id(11)] HRESULT TogglePixel([in] LONG layerHandle, [in] LONG rasterX, [in] LONG rasterY);
+	[id(11)] HRESULT TogglePixel([in] LONG layerHandle, [in] LONG column, [in] LONG row);
+	[propget, id(12)] HRESULT Row([in] LONG index, [out, retval] LONG* pVal);
+	[propget, id(13)] HRESULT Column([in] LONG index, [out, retval] LONG* pVal);
 };
 
 [
@@ -6259,6 +6314,8 @@ interface IGdalDataset : IDispatch {
 	[id(3)] HRESULT Close();
 	[id(4)] HRESULT SetGeoTransform([in] DOUBLE xLeft, [in] DOUBLE dX, [in] DOUBLE yProjOnX, [in] DOUBLE yTop, [in] DOUBLE xProjOnY, [in] DOUBLE dY, [out, retval] VARIANT_BOOL* retVal);
 	[id(5)] HRESULT SetProjection([in] BSTR Projection, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(6)] HRESULT SubDatasetCount([out, retval] LONG* retVal);
+	[id(7)] HRESULT GetSubDatasetName([in]int subDatasetIndex, [out, retval] BSTR* retVal);
 };
 
 [
@@ -6332,6 +6389,7 @@ interface IExpression : IDispatch{
 	[id(9)] HRESULT CalculateForTableRow([in] LONG rowIndex, [in] LONG targetFieldIndex, [out, retval] VARIANT_BOOL* retVal);
 	[id(10)] HRESULT CalculateForTableRow2([in] LONG rowIndex, [out] VARIANT* result, [out, retval] VARIANT_BOOL* retVal);
 };
+
 [
 	object,
 	uuid(74BFB63D-6DBC-41FF-A50F-22CD10BAC930),
@@ -6389,6 +6447,26 @@ interface IWmsLayer : IDispatch{
 	[propget, id(28)] HRESULT Styles([out, retval] BSTR* pVal);
 	[propput, id(28)] HRESULT Styles([in] BSTR newVal);
 };
+
+[
+	object,
+	uuid(5EFD0C96-0C97-4573-B80B-12FC75C06E76),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IGdalUtils : IDispatch{
+	[propget, id(1)] HRESULT LastErrorCode([out, retval] long *pVal);
+	[propget, id(2)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+	[id(3), helpstring("method GdalWarp")] HRESULT GdalWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(4), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
+	[propput, id(4), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(5), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
+	[propput, id(5), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
+	[id(6), helpstring("method GdalVectorTranslate")] HRESULT GdalVectorTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
+	[id(7), helpstring("method ClipVectorWithVector")] HRESULT ClipVectorWithVector([in] BSTR bstrSubjectFilename, [in] BSTR bstrOverlayFilename, [in] BSTR bstrDstFilename, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(8)] HRESULT DetailedErrorMsg([out, retval] BSTR *pVal);
+}
 
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
@@ -6473,8 +6551,8 @@ library MapWinGIS
 			//{{AFX_ODL_METHOD(CMapView)
 			[id(15), propput, nonbrowsable] void GlobalCallback(IDispatch* nNewValue);
 			[id(15), propget, nonbrowsable] IDispatch* GlobalCallback();
-			[id(17), propput, nonbrowsable] void Extents(IDispatch* nNewValue);
-			[id(17), propget, nonbrowsable] IDispatch* Extents();
+			[id(17), propput, nonbrowsable] void Extents(IExtents* nNewValue);
+			[id(17), propget, nonbrowsable] IExtents* Extents();
 
 #define REDRAW_API		
 #ifdef REDRAW_API	
@@ -6840,6 +6918,8 @@ library MapWinGIS
 			[id(227), propget] tkCustomState AnimationOnZooming();
 			[id(231), propput] void ZoomBoxStyle(tkZoomBoxStyle nNewValue);
 			[id(231), propget] tkZoomBoxStyle ZoomBoxStyle();
+			[id(261), propget] VARIANT_BOOL UseAlternatePanCursor();
+			[id(261), propput] void UseAlternatePanCursor(VARIANT_BOOL nNewValue);
 #endif			
 
 			[id(43)] void Resize(long Width, long Height);
@@ -6919,7 +6999,9 @@ library MapWinGIS
 			[id(34)] void GridOpened(LONG LayerHandle, BSTR gridFilename, LONG bandIndex, VARIANT_BOOL isUsingProxy);
 			[id(35)] void ShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY);
 			[id(36)] void OnDrawBackBuffer2(LONG height, LONG Width, LONG Stride, LONG pixelFormat, LONG scan0);
-		//}}AFX_ODL_EVENT
+			[id(37)] void BeforeLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
+			[id(38)] void AfterLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
+			//}}AFX_ODL_EVENT
 			
 	};
 
@@ -7386,11 +7468,20 @@ library MapWinGIS
 	{
 		[default] interface IExpression;
 	};
+
 	[
 		uuid(EE9A0CDA-162C-4663-A48F-A5A29C1071C6)		
 	]
 	coclass WmsLayer
 	{
 		[default] interface IWmsLayer;
+	};
+
+	[
+		uuid(7DDFE06A-0461-4F72-9865-8274A91EB052)
+	]
+	coclass GdalUtils
+	{
+		[default] interface IGdalUtils;
 	};
 };

@@ -490,45 +490,43 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 		ErrorMessage(tkINMEMORY_SHAPEFILE_EXPECTED);
 		return S_OK;
 	}
-	else
+	
+	if (OpenCore(OLE2CA(ShapefileName), cBack))
 	{
-		if (OpenCore(OLE2CA(ShapefileName), cBack))
+		// loading data in-memory
+		VARIANT_BOOL vb;
+		_isEditingShapes = false;
+		StartEditingShapes(VARIANT_TRUE, cBack, &vb);
+			
+		// this will trigger loading of all DBF values into the memory
+		long numFields;
+		this->get_NumFields(&numFields);
+		if (numFields > 0)
 		{
-			// loading data in-memory
-			VARIANT_BOOL vb;
-			_isEditingShapes = false;
-			StartEditingShapes(VARIANT_TRUE, cBack, &vb);
-			
-			// this will trigger loading of all DBF values into the memory
-			long numFields;
-			this->get_NumFields(&numFields);
-			if (numFields > 0)
+			CComVariant var;
+			for(size_t i = 0; i < _shapeData.size(); i++)
 			{
-				CComVariant var;
-				for(size_t i = 0; i < _shapeData.size(); i++)
-				{
-					_table->get_CellValue(0, i, &var);
-				}
+				_table->get_CellValue(0, i, &var);
 			}
-			
-			// closing disk file despite the result success or failure
-			_shpfileName = "";
-			_shxfileName = "";
-			_dbffileName = "";
-
-			if( _shpfile != NULL) 
-				fclose(_shpfile);
-			_shpfile = NULL;
-			
-			if( _shxfile != NULL) 
-				fclose(_shxfile);
-			_shxfile = NULL;
-			
-			if( _table != NULL )
-				((CTableClass*)_table)->CloseUnderlyingFile();
-			
-			*retval = vb;
 		}
+			
+		// closing disk file despite the result success or failure
+		_shpfileName = "";
+		_shxfileName = "";
+		_dbffileName = "";
+
+		if( _shpfile != NULL) 
+			fclose(_shpfile);
+		_shpfile = NULL;
+			
+		if( _shxfile != NULL) 
+			fclose(_shxfile);
+		_shxfile = NULL;
+			
+		if( _table != NULL )
+			((CTableClass*)_table)->CloseUnderlyingFile();
+			
+		*retval = vb;
 	}
 	return S_OK;
 }
@@ -686,8 +684,7 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 STDMETHODIMP CShapefile::CreateNew(BSTR ShapefileName, ShpfileType ShapefileType, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	return this->CreateNewCore(ShapefileName, ShapefileType, true ,retval);
-	return S_OK;
+		return this->CreateNewCore(ShapefileName, ShapefileType, true, retval);
 }
 
 // *********************************************************
@@ -708,6 +705,7 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 		ShapefileType != SHP_POLYGONZ &&
 		ShapefileType != SHP_MULTIPOINT &&
 		ShapefileType != SHP_MULTIPOINTZ &&
+		ShapefileType != SHP_POINTM &&   // MWGIS-69
 		ShapefileType != SHP_POLYLINEM &&
 		ShapefileType != SHP_POLYGONM &&
 		ShapefileType != SHP_MULTIPOINTM )
@@ -2750,20 +2748,24 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		OGRCoordinateTransformation::DestroyCT(transf);
 		transf = NULL;
 	}
-
-	// setting new projection
-	if (reprojectInPlace)
+	
+	// When creating the new shapefile was successfull:
+	if (vb) 
 	{
-		_geoProjection->CopyFrom(newProjection, &vb);
-	}
-	else
-	{
-		IGeoProjection* proj = NULL;
-		(*retVal)->get_GeoProjection(&proj);
-		if (proj)
+		// setting new projection
+		if (reprojectInPlace)
 		{
-			proj->CopyFrom(newProjection, &vb);
-			proj->Release();
+			_geoProjection->CopyFrom(newProjection, &vb);
+		}
+		else
+		{
+			IGeoProjection* proj = NULL;
+			(*retVal)->get_GeoProjection(&proj);
+			if (proj)
+			{
+				proj->CopyFrom(newProjection, &vb);
+				proj->Release();
+			}
 		}
 	}
 	
@@ -2793,7 +2795,8 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	FixUpShapes2(VARIANT_TRUE, retVal, fixed);
+	// MWGIS-90: default to all shapes:
+	FixUpShapes2(VARIANT_FALSE, retVal, fixed);
 	
 	return S_OK;
 }

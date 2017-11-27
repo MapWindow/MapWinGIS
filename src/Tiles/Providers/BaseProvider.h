@@ -1,9 +1,9 @@
 /**************************************************************************************
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -14,10 +14,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
-  
+
 #pragma once
 #include "geopoint.h"
 #include "baseprojection.h"
@@ -62,7 +62,7 @@ protected:
 	vector<BaseProvider*> _subProviders;	// for complex providers with more than one source bitmap per tile
 	BaseProjection* _projection;
 	CStringW _copyright;
-	CString _refererUrl; 
+	CString _refererUrl;
 	CString _licenseUrl;
 	CString _urlFormat;
 	int _initAttemptCount;
@@ -75,7 +75,7 @@ public:
 	CString Name;
 	CString Version;
 	CString LanguageStr;
- 
+
 private:
 	CMemoryBitmap* GetTileHttpData(CString urlStr, CString shortUrl, bool recursive = false);
 	void PreventParallelExecution();
@@ -110,5 +110,5 @@ public:
 
 	void AddDynamicOverlay(BaseProvider* p);
 	void ClearSubProviders();
-	TileCore* GetTileImage(CPoint &pos, int zoom);	
+	TileCore* GetTileImage(CPoint &pos, int zoom);
 };

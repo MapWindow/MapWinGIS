@@ -5,8 +5,8 @@ class ShapefileHelper
 public:
 	static long GetMWShapeIdIndex(IShapefile* sf);
 	static void CopyAttributes(IShapefile* sf, long sourceIndex, long targetIndex, long skipFieldIndex);
-	static void CloneNoFields(IShapefile* sfSource, IShapefile** retVal, ShpfileType shpType, bool addShapeId = false);
-	static void CloneNoFields(IShapefile* sf, IShapefile** retVal, bool addShapeId = false);
+	static bool CloneNoFields(IShapefile* sfSource, IShapefile** retVal, ShpfileType shpType, bool addShapeId = false);
+	static bool CloneNoFields(IShapefile* sf, IShapefile** retVal, bool addShapeId = false);
 	static void CloneCore(IShapefile* sfSource, IShapefile** retVal, ShpfileType shpType, bool addShapeId = false);
 	static bool GetSelectedExtents(IShapefile* sf, double& xMinRef, double& yMinRef, double& xMaxRef, double& yMaxRef);
 	static void CopyFields(IShapefile* source, IShapefile* target);

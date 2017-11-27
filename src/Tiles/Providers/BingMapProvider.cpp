@@ -38,7 +38,7 @@ bool BingBaseProvider::Initialize()
 		CallbackHelper::ErrorMsg(Debug::Format("Failed to perform imagery metadata request. URL: ", url));
 		return false;
 	}
-	
+
 	return ParseUrlFormat(reinterpret_cast<void*>(&client));
 }
 

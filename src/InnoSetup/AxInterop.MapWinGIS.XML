@@ -149,17 +149,6 @@
             for printing.</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMapWinGIS.AxMap.TilesAreInCache(MapWinGIS.Extents,System.Int32,MapWinGIS.tkTileProvider)">
-            <summary>
-            Checks whether tiles for specified extents and provider are already present in cache.
-            </summary>
-            <param name="extents">Extents to check for (map coordinates).</param>
-            <param name="width">Width of the canvas on which the extents will be displayed.</param>
-            <param name="provider">Provider to load tiles from.</param>
-            <returns>1 if tiles are in cache, 0 if not, -1 if an there was an error.</returns>
-            <remarks>The main purpose: loading of tiles for printing.</remarks>
-            \new491 Added in version 4.9.1
-        </member>
         <member name="M:AxMapWinGIS.AxMap.Redraw2(MapWinGIS.tkRedrawType)">
             <summary>
             Performs specific type of map redraw. 

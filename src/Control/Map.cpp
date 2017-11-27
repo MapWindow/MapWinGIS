@@ -142,6 +142,8 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("BackgroundLoadingFinished", eventidBackgroundLoadingFinished, FireBackgroundLoadingFinished, VTS_I4 VTS_I4 VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("GridOpened", eventidGridOpened, FireGridOpened, VTS_I4 VTS_BSTR VTS_I4 VTS_BOOL)
 	EVENT_CUSTOM_ID("OnDrawBackBuffer2", eventidOnDrawBackBuffer2, FireOnDrawBackBuffer2, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
+	EVENT_CUSTOM_ID("BeforeLayers", eventidBeforeLayers, FireBeforeLayers, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
+	EVENT_CUSTOM_ID("AfterLayers", eventidAfterLayers, FireAfterLayers, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
 	
@@ -261,6 +263,7 @@ void CMapView::Startup()
 	_cursorMove = AfxGetApp()->LoadCursor(IDC_MOVE_CURSOR);
 	_cursorSelect2 = AfxGetApp()->LoadCursor(IDC_SELECT2_CURSOR);
 	_cursorIdentify = AfxGetApp()->LoadCursor(IDC_IDENTIFY_CURSOR);
+	_cursorAlternatePan = AfxGetApp()->LoadCursor(IDC_PAN_ALTERNATE);
 
 	_udCursor = NULL;
 
@@ -294,7 +297,7 @@ void CMapView::Startup()
 	InitProjections();
 
 	// let them all work by default 
-	_customDrawingFlags = (tkCustomDrawingFlags)(BeforeAfterDrawing | OnDrawBackBufferBitmapData | OnDrawBackBufferHdc);
+	_customDrawingFlags = (tkCustomDrawingFlags)(BeforeAfterDrawing | BeforeAfterLayers | OnDrawBackBufferBitmapData | OnDrawBackBufferHdc);
 
 	GetMeasuringBase()->SetMapCallback(this, ShapeInputMode::simMeasuring);
 	_shapeEditor->SetMapCallback(this);
@@ -376,6 +379,7 @@ void CMapView::SetDefaults()
 	_showCoordinatesFormat = afDegrees;
 	_panningExtentsChanged = false;
 	_prevExtentsIndex = 0;
+	_useAlternatePanCursor = FALSE;
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:
@@ -515,7 +519,7 @@ DWORD CMapView::GetPropertyExchangeVersion()
 {
 	// properties can be added between versions, so let use a bit different numbering
 	//return MAKELONG(_wVerMinor, _wVerMajor);
-	return MAKELONG(49, 11);
+	return MAKELONG(49, 12);
 }
 
 // **********************************************************************
@@ -652,6 +656,8 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 		temp = (long)_showCoordinatesFormat;
 		PX_Long(pPX, "ShowCoordinatesFormat", temp, 0);			// afDegrees
 		_showCoordinatesFormat = (tkAngleFormat)temp;
+
+		PX_Bool(pPX, "UseAlternatePanCursor", _useAlternatePanCursor, FALSE);
 	}
 	catch(...)
 	{
