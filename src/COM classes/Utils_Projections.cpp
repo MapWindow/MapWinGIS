@@ -8,8 +8,10 @@
 
 // path to projection csv
 static CString csvPath;
-// single instance of Projection Strings mapping
-static unordered_map<int, CString> projectionStrings;
+// single instance of Projected Coordinate System string mappings
+static unordered_map<int, CString> pcsStrings;
+// single instance of Geographic Coordinate System string mappings
+static unordered_map<int, CString> gcsStrings;
 
 // determine the path of this OCX, independent of the calling executable
 // https://stackoverflow.com/questions/6924195/get-dll-path-at-runtime
@@ -40,27 +42,14 @@ bool CUtils::LoadProjectionStrings()
 
 	if (!bLoaded)
 	{
-		// in the release distribution, the gdal-data directory is right below us
-		CString releasePath = thisOcxPath() + "gdal-data\\pcs.csv";
-		// in the dev environment, it actually depends on the runtime version, and the bit-ness
-		CString developPath = thisOcxPath() + "..\\..\\..\\support\\GDAL_SDK\\v120\\bin\\win32\\gdal-data\\pcs.csv";
-								//ocx path = C:\dev\MapWinGIS\src\bin\Win32
-								//csv path = C:\dev\MapWinGIS\support\GDAL_SDK\v120\bin\win32\gdal-data
+		// the gdal-data directory is right below the registered OCX
+		csvPath = thisOcxPath() + "gdal-data\\pcs.csv";
 
 		CStdioFile file;
-		// first try standard release path
-		csvPath = releasePath;
 		if (!file.Open(csvPath, CFile::modeRead | CFile::typeText))
 		{
-			// for developers, try source-code path
-			csvPath = developPath;
-			if (!file.Open(csvPath, CFile::modeRead | CFile::typeText))
-			{
-				// for the purposes of error message, put path back to release
-				csvPath = releasePath;
-				// no error message here. instead, send error to callback when user calls lookup functions
-				return false;
-			}
+			// no error message here. instead, send error to callback when user calls lookup functions
+			return false;
 		}
 
 		CString nextLine;
@@ -72,24 +61,40 @@ bool CUtils::LoadProjectionStrings()
 			// continue on error
 			try
 			{
-				CString code, name;
+				CString code, name, restOfLine;
 				// find the first comma
 				int commaPosition = nextLine.Find(",", 0);
 				// strip off the SRID
 				code = nextLine.Left(commaPosition);
 				// the rest of the line (account for leading quote symbol)
-				name = nextLine.Right(nextLine.GetLength() - commaPosition - 1 - 1);
+				restOfLine = nextLine.Right(nextLine.GetLength() - commaPosition - 1 - 1);
 				// strip off all to the right of the name (using the closing quote symbol)
-				int quotePosition = name.Find("\"", 0);
-				name = name.Left(quotePosition);
+				int quotePosition = restOfLine.Find("\"", 0);
+				// this is the name
+				name = restOfLine.Left(quotePosition);
+				// add to PCS mapping
+				pcsStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
 
-				// add to mapping
-				projectionStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
+				//// now get the coordinate system code
+				//commaPosition = restOfLine.Find(",", 0);
+				//// restOfLine here is UOM code + the rest of the line
+				//restOfLine = restOfLine.Right(restOfLine.GetLength() - commaPosition - 1);
+				//// skipping over UOM code...
+				//commaPosition = restOfLine.Find(",", 0);
+				//restOfLine = restOfLine.Right(restOfLine.GetLength() - commaPosition - 1);
+				//// this is the actual code
+				//commaPosition = restOfLine.Find(",", 0);
+				//code = restOfLine.Left(commaPosition);
+
+				//// add to GCS mapping (watch for duplicates)
+				//if (gcsStrings.count(atoi((LPCSTR)code)) == 0)
+				//	gcsStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
 			}
 			catch (...)
 			{
 			}
 		}
+		file.Close();
 		//
 		bLoaded = true;
 	}
@@ -109,7 +114,7 @@ STDMETHODIMP CUtils::GetNAD83ProjectionName(tkNad83Projection projectionID, BSTR
 	try
 	{
 		// list check
-		if (projectionStrings.empty())
+		if (pcsStrings.empty())
 		{
 			ErrorMessage(tkFILE_NOT_OPEN, customErrorMessage());
 			*retVal = A2BSTR("");
@@ -117,7 +122,7 @@ STDMETHODIMP CUtils::GetNAD83ProjectionName(tkNad83Projection projectionID, BSTR
 		else
 		{
 			// return string mapped to specified ID (use 'at' rather than [] to check existence)
-			*retVal = A2BSTR((LPCSTR)projectionStrings.at(projectionID));
+			*retVal = A2BSTR((LPCSTR)pcsStrings.at(projectionID));
 		}
 	}
 	catch (...)
@@ -138,7 +143,7 @@ STDMETHODIMP CUtils::GetWGS84ProjectionName(tkWgs84Projection projectionID, BSTR
 	try
 	{
 		// list check
-		if (projectionStrings.empty())
+		if (pcsStrings.empty())
 		{
 			ErrorMessage(tkFILE_NOT_OPEN, customErrorMessage());
 			*retVal = A2BSTR("");
@@ -146,7 +151,7 @@ STDMETHODIMP CUtils::GetWGS84ProjectionName(tkWgs84Projection projectionID, BSTR
 		else
 		{
 			// return string mapped to specified ID (use 'at' rather than [] to check existence)
-			*retVal = A2BSTR((LPCSTR)projectionStrings.at(projectionID));
+			*retVal = A2BSTR((LPCSTR)pcsStrings.at(projectionID));
 		}
 	}
 	catch (...)
@@ -159,7 +164,8 @@ STDMETHODIMP CUtils::GetWGS84ProjectionName(tkWgs84Projection projectionID, BSTR
 	return S_OK;
 }
 
-// return the name of the projection specified by the SRID, which may be Nad83, Wgs84, or a Coordinate System ID
+// return the name of any projection specified by the SRID, which include the Nad83 and Wgs84, 
+// but also includes those not specified by the enumerations, such as NAD27, NAD83 Harn, Beijing, Pulkova, etc.
 STDMETHODIMP CUtils::GetProjectionNameByID(int SRID, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -167,7 +173,7 @@ STDMETHODIMP CUtils::GetProjectionNameByID(int SRID, BSTR* retVal)
 	try
 	{
 		// list check
-		if (projectionStrings.empty())
+		if (pcsStrings.empty())
 		{
 			ErrorMessage(tkFILE_NOT_OPEN, customErrorMessage());
 			*retVal = A2BSTR("");
@@ -175,7 +181,7 @@ STDMETHODIMP CUtils::GetProjectionNameByID(int SRID, BSTR* retVal)
 		else
 		{
 			// return string mapped to specified ID (use 'at' rather than [] to check existence)
-			*retVal = A2BSTR((LPCSTR)projectionStrings.at(SRID));
+			*retVal = A2BSTR((LPCSTR)pcsStrings.at(SRID));
 		}
 	}
 	catch (...)
@@ -196,7 +202,7 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 	*retVal = VARIANT_FALSE;
 
 	// list check
-	if (projectionStrings.empty())
+	if (pcsStrings.empty())
 	{
 		ErrorMessage(tkFILE_NOT_OPEN, customErrorMessage());
 		*retVal = VARIANT_FALSE;
@@ -210,23 +216,23 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 		int theSize = 0;
 		if ((projectionSets & psAll_Projections) == psAll_Projections)
 		{
-			theSize = projectionStrings.size();
+			theSize = pcsStrings.size();
 		}
 		else
 		{
 			// may include NAD 83 strings
 			if ((projectionSets & psNAD83_Subset) == psNAD83_Subset)
 			{
-				for each (pair<int, CString> p in projectionStrings)
+				for each (pair<int, CString> p in pcsStrings)
 				{
-					if (p.second.Left(5) == "NAD83") theSize++;
+					if (p.second.Left(6) == "NAD83 ") theSize++;
 				}
 				//theSize += 881;
 			}
 			// may also include WGS 84 strings
 			if ((projectionSets & psWGS84_Subset) == psWGS84_Subset)
 			{
-				for each (pair<int, CString> p in projectionStrings)
+				for each (pair<int, CString> p in pcsStrings)
 				{
 					if (p.second.Left(6) == "WGS 84") theSize++;
 				}
@@ -245,11 +251,11 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 
 			CComBSTR comBSTR;
 			int j = 0;
-			for each (pair<int, CString> p in projectionStrings)
+			for each (pair<int, CString> p in pcsStrings)
 			{
 				// include ?
 				if (((projectionSets & psAll_Projections) == psAll_Projections) ||
-					(((projectionSets & psNAD83_Subset) == psNAD83_Subset) && (p.second.Left(5) == "NAD83")) ||
+					(((projectionSets & psNAD83_Subset) == psNAD83_Subset) && (p.second.Left(6) == "NAD83 ")) ||
 					(((projectionSets & psWGS84_Subset) == psWGS84_Subset) && (p.second.Left(6) == "WGS 84")))
 				{
 					// create concatenated string
