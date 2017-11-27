@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,7 +9,7 @@ namespace MapWinGISTests
 {
     [TestClass]
     [DeploymentItem("Testdata")]
-    public class ShapefileTests
+    public class ShapefileTests : ICallback
     {
         [TestInitialize]
         public void Init()
@@ -24,7 +26,7 @@ namespace MapWinGISTests
 
             bool result;
             // Create shapefile
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
             try
             {
                 result = sf.CreateNewWithShapeID(tempFilename, ShpfileType.SHP_POINT);
@@ -63,7 +65,7 @@ namespace MapWinGISTests
 
             bool result;
             // Create shapefile
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
             try
             {
                 result = sf.CreateNewWithShapeID(tempFilename, ShpfileType.SHP_POINT);
@@ -140,7 +142,7 @@ namespace MapWinGISTests
         public void CheckNullValueTableData()
         {
             bool result;
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
 
             try
             {
@@ -207,7 +209,7 @@ namespace MapWinGISTests
         public void AddField()
         {
             bool result;
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
 
             try
             {
@@ -250,7 +252,7 @@ namespace MapWinGISTests
         {
             // MWGIS-90
             // Open shapefile:
-            var sfInvalid = new Shapefile();
+            var sfInvalid = new Shapefile { GlobalCallback = this };
             Shapefile sfFixed = null;
             try
             {
@@ -275,9 +277,10 @@ namespace MapWinGISTests
         }
 
         // Missing data: [TestMethod]
-        public void Reproject2281Test()
+        /*
+        private void Reproject2281Test()
         {
-            var sf = new Shapefile();
+            var sf = new Shapefile {GlobalCallback = this};
             const string filename = @"Issues/MWGIS-91/utah_central_arcs.shp"; // In NAD83 / Utah Central (ft), EPSG:2281
             if (!sf.Open(filename)) Assert.Fail("Could not open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
             Assert.IsTrue(sf.NumShapes == 1, "Unexpected number of shapes in " + filename);
@@ -295,11 +298,12 @@ namespace MapWinGISTests
 
             Helper.SaveAsShapefile(reprojectedSf, Path.ChangeExtension(filename, ".WGS84-UTM12N.shp"));
         }
+        */
 
         [TestMethod]
         public void Reproject2280Test()
         {
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
             const string filename = @"Issues/MWGIS-91/utah_north_arcs.shp"; // In NAD83 / Utah North (ft), EPSG:2280
             if (!sf.Open(filename)) Assert.Fail("Could not open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
             Assert.IsTrue(sf.NumShapes == 1, "Unexpected number of shapes in " + filename);
@@ -332,7 +336,6 @@ namespace MapWinGISTests
 
             // Create fishnet for bounds of shape:
             var sf = Helper.CreateFishnet(shp.Extents, 20, 20);
-            const string fishnetFilename = @"D:\dev\GIS-Data\MarcelBonder\Ortho\ndvi\Prototype\Fishnet.shp";
             Helper.SaveAsShapefile(sf, Path.Combine(Path.GetTempPath(), "CreateFishnet.shp"));
         }
 
@@ -345,7 +348,7 @@ namespace MapWinGISTests
             // Check file:
             if (!File.Exists(filename)) Assert.Fail(filename + " does not exists.");
             // Open shapefile:
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
             if (!sf.Open(filename))
                 Assert.Fail("Failed to open shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
 
@@ -365,10 +368,10 @@ namespace MapWinGISTests
             const string sf3Location = @"Issues\MWGIS-69\SHP3_POINT.shp";
             const string sf4Location = @"Issues\MWGIS-69\SHP4_POINT.shp";
 
-            var sf3 = new Shapefile();
+            var sf3 = new Shapefile { GlobalCallback = this };
             if (!sf3.Open(sf3Location)) Assert.Fail("Can't open " + sf3Location + " Error: " + sf3.ErrorMsg[sf3.LastErrorCode]);
 
-            var sf4 = new Shapefile();
+            var sf4 = new Shapefile { GlobalCallback = this };
             if (!sf4.Open(sf4Location)) Assert.Fail("Can't open " + sf4Location + " Error: " + sf4.ErrorMsg[sf4.LastErrorCode]);
 
             var sfMerged = sf3.Merge(false, sf4, false);
@@ -387,11 +390,11 @@ namespace MapWinGISTests
             const string sf1Location = @"Issues\MWGIS-69\SHP1_POINT_M.shp";
             const string sf2Location = @"Issues\MWGIS-69\SHP2_POINT_M.shp";
 
-            var sf1 = new Shapefile();
+            var sf1 = new Shapefile { GlobalCallback = this };
             if (!sf1.Open(sf1Location)) Assert.Fail("Can't open " + sf1Location + " Error: " + sf1.ErrorMsg[sf1.LastErrorCode]);
             Console.WriteLine("num shapes in sf1: " + sf1.NumShapes);
 
-            var sf2 = new Shapefile();
+            var sf2 = new Shapefile { GlobalCallback = this };
             if (!sf2.Open(sf2Location)) Assert.Fail("Can't open " + sf2Location + " Error: " + sf2.ErrorMsg[sf2.LastErrorCode]);
             Console.WriteLine("num shapes in sf2: " + sf2.NumShapes);
 
@@ -407,7 +410,7 @@ namespace MapWinGISTests
         {
             const string sfLocation = @"D:\dev\GIS-Data\MapWindow-Projects\UnitedStates\Shapefiles\states.shp";
 
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
             if (!sf.Open(sfLocation)) Assert.Fail("Can't open " + sfLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
 
             var value = sf.CellValue[1, 0] as string;
@@ -424,7 +427,7 @@ namespace MapWinGISTests
             const string sfLocation = @"Issues\MWGIS-72\point.shp";
             const int fieldIndex = 2;
 
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
             if (!sf.Open(sfLocation))
                 Assert.Fail("Can't open " + sfLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
 
@@ -442,7 +445,7 @@ namespace MapWinGISTests
             const string sfLocation = @"Issues\MWGIS-72\point.shp";
             const int fieldIndex = 2;
 
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
             if (!sf.Open(sfLocation))
                 Assert.Fail("Can't open " + sfLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
 
@@ -460,6 +463,76 @@ namespace MapWinGISTests
             var cat = sf.Categories.Item[0];
             Console.WriteLine(cat.Name);
             Assert.AreNotEqual(cat.Name[0], '?', "The category name is invalid");
+        }
+
+        [TestMethod]
+        public void PointInShapefile()
+        {
+            // It goes too fast for DotMemory:
+            Thread.Sleep(2000);
+
+            const string folder = @"D:\dev\GIS-Data\Issues\Point in Polygon";
+            Assert.IsTrue(Directory.Exists(folder), "Input folder doesn't exists");
+            var sfPolygons = new Shapefile { GlobalCallback = this };
+            var sfPoints = new Shapefile { GlobalCallback = this };
+            var found = 0;
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            try
+            {
+                var retVal = sfPolygons.Open(Path.Combine(folder, "CatchmentBuilderShapefile.shp"));
+                Assert.IsTrue(retVal, "Can't open polygon shapefile");
+
+                retVal = sfPoints.Open(Path.Combine(folder, "Sbk_FGrPt_n.shp"));
+                Assert.IsTrue(retVal, "Can't open point shapefile");
+
+                // Caches the coordinates of shapefile points for faster point in shape test:
+                retVal = sfPolygons.BeginPointInShapefile();
+                Assert.IsTrue(retVal, "Can't cache points");
+
+                var numPoints = sfPoints.NumShapes;
+                Assert.IsTrue(numPoints > 0, "No point shapes in shapefile");
+
+                for (var i = 0; i < numPoints; i++)
+                {
+                    var pointShape = sfPoints.Shape[i];
+                    Assert.IsNotNull(pointShape, "pointShape == null");
+
+                    double x = 0d, y = 0d;
+                    retVal = pointShape.XY[0, ref x, ref y];
+                    Assert.IsTrue(retVal, "Can't get XY from first point");
+
+                    // Returns a number which indicates the index of shapes within which a test point is situated:
+                    var shapeIndex = sfPolygons.PointInShapefile(x, y);
+                    Console.WriteLine($"Point {i} lies within polygon {shapeIndex}");
+                    found++;
+                }
+            }
+            finally
+            {
+                // Clear cache:
+                sfPolygons.EndPointInShapefile();
+
+                // Close shapefiles:
+                sfPolygons.Close();
+                sfPoints.Close();
+            }
+
+            stopWatch.Stop();
+            Console.WriteLine("The process took " + stopWatch.Elapsed);
+            Console.WriteLine(found + " matching polygons where found");
+
+        }
+
+        public void Progress(string KeyOfSender, int Percent, string Message)
+        {
+            Console.Write(".");
+        }
+
+        public void Error(string KeyOfSender, string ErrorMsg)
+        {
+            Assert.Fail("Found error: " + ErrorMsg);
         }
     }
 }

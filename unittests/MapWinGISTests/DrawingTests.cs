@@ -101,6 +101,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void SaveSnapshot2()
         {
+            // MWGIS-80
             SaveSnapshot("SaveSnapshot2.jpg");
             SaveSnapshot("SaveSnapshot2", true);
         }
@@ -187,7 +188,7 @@ namespace MapWinGISTests
 
         private void DebugMsg(string msg)
         {
-            Debug.WriteLine(msg);
+            // Debug.WriteLine(msg);
             Console.WriteLine(msg);
         }
 

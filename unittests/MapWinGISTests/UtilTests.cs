@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting;
+using System.Threading;
+using System.Threading.Tasks;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,19 +12,19 @@ namespace MapWinGISTests
 {
     [TestClass]
     [DeploymentItem("Testdata")]
-    public class UtilTests
+    public class UtilTests : ICallback
     {
         [TestInitialize]
         public void Start()
         {
-            Debug.WriteLine("Start Util tests");
-            Debug.WriteLine(DateTime.Now);
+            Console.WriteLine("Start Util tests");
+            Console.WriteLine(DateTime.Now);
         }
 
         [TestMethod]
         public void CalculateRaster()
         {
-            var utils = new Utils();
+            var utils = new Utils { GlobalCallback = this };
             var tmpFile = Path.GetTempFileName();
             const string tiffInput = "GeoTiff/5band.tif";
             string errorMsg;
@@ -30,7 +32,7 @@ namespace MapWinGISTests
             // TODO: Can't use only one file:
             var result = utils.CalculateRaster(new[] { tiffInput, "GeoTiff/5bandCopy.tif" }, formula, tmpFile, "GTiff", 0f, null, out errorMsg);
             Assert.IsTrue(result, "utils.CalculateRaster was unsuccessful: " + errorMsg);
-            Debug.WriteLine(tmpFile);
+            Console.WriteLine(tmpFile);
 
             var tiffIn = new Image();
             result = tiffIn.Open(tiffInput);
@@ -51,7 +53,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void FixUpShapes()
         {
-            var utils = new Utils();
+            var utils = new Utils { GlobalCallback = this };
             // Open shapefile:
             var sfInvalid = new Shapefile();
             var sfFixed = new Shapefile();
@@ -69,7 +71,7 @@ namespace MapWinGISTests
                     var shp = sfInvalid.Shape[i];
                     Assert.IsFalse(shp.IsValid, "Shape should be invalid");
                     var reason = shp.IsValidReason;
-                    Debug.WriteLine(reason);
+                    Console.WriteLine(reason);
                     Assert.IsFalse(string.IsNullOrEmpty(reason), "Cannot get validation reason");
                 }
 
@@ -103,18 +105,18 @@ namespace MapWinGISTests
             const string shapefileFile = @"sf\MWGIS-65.shp";
             if (!File.Exists(shapefileFile)) throw new FileNotFoundException("Can't open " + shapefileFile);
 
-            var grd = new Grid();
+            var grd = new Grid { GlobalCallback = this };
             if (!grd.Open(rasterFile, GridDataType.FloatDataType))
             {
                 Assert.Fail("Can't open grid file: " + grd.ErrorMsg[grd.LastErrorCode]);
             }
-            var sf = new Shapefile();
+            var sf = new Shapefile { GlobalCallback = this };
             if (!sf.Open(shapefileFile))
             {
                 Assert.Fail("Can't open shapefile file: " + sf.ErrorMsg[sf.LastErrorCode]);
             }
 
-            var utils = new Utils();
+            var utils = new Utils { GlobalCallback = this };
             Console.WriteLine("Before utils.GridStatisticsToShapefile");
             if (!utils.GridStatisticsToShapefile(grd, sf, false, true))
             {
@@ -138,19 +140,19 @@ namespace MapWinGISTests
         [TestMethod]
         public void GdalInfoEcw()
         {
-            var utils = new Utils();
+            var utils = new Utils { GlobalCallback = this };
             var retVal = utils.GDALInfo(@"D:\dev\GIS-Data\Issues\MWGIS-70 ECW-crash\TK25.ecw", string.Empty);
             Assert.IsNotNull(retVal, "GDALInfo failed: " + utils.ErrorMsg[utils.LastErrorCode]);
-            Debug.WriteLine(retVal);
+            Console.WriteLine(retVal);
             Assert.IsTrue(retVal.Contains("Driver: ECW/ERDAS Compressed Wavelets (SDK 5."), "Wrong ECW driver");
         }
 
         [TestMethod]
         public void GdalFormats()
         {
-            var utils = new Utils();
+            var utils = new Utils { GlobalCallback = this };
             var retVal = utils.GDALInfo(@"D:\dev\GIS-Data\Issues\ECW-crash\TK25.ecw", "--formats");
-            Debug.WriteLine(retVal);
+            Console.WriteLine(retVal);
         }
 
         [TestMethod]
@@ -158,7 +160,7 @@ namespace MapWinGISTests
         {
             const string input = @"D:\dev\TopX\TopX-Agri\TestData\Chlorofyl-index.clipped.optimized.tif";
             const string output = @"D:\dev\TopX\TopX-Agri\TestData\Chlorofyl-index.clipped.optimized.reclassified.tif";
-            var gridSource = new Grid();
+            var gridSource = new Grid { GlobalCallback = this };
             gridSource.Open(input);
 
             var nodataValue = (double)gridSource.Header.NodataValue;
@@ -175,12 +177,12 @@ namespace MapWinGISTests
                 new {Low = nodataValue + 1, High = newMin, NewValue = newMin},
                 new {Low = newMax, High = max + 1, NewValue = newMax}
             };
-            var utils = new Utils();
+            var utils = new Utils { GlobalCallback = this };
             retVal = utils.ReclassifyRaster(input, 1, output, arr.Select(i => i.Low).ToArray(),
-                arr.Select(i => i.High).ToArray(), arr.Select(i => i.NewValue).ToArray(), "GTiff", null);
+                arr.Select(i => i.High).ToArray(), arr.Select(i => i.NewValue).ToArray(), "GTiff", this);
             Assert.IsTrue(retVal, "ReclassifyRaster failed: " + utils.ErrorMsg[utils.LastErrorCode]);
 
-            gridSource = new Grid();
+            gridSource = new Grid { GlobalCallback = this };
             gridSource.Open(output);
 
             var nodataValueOutput = (double)gridSource.Header.NodataValue;
@@ -196,5 +198,75 @@ namespace MapWinGISTests
             Assert.IsTrue(Math.Round(maxOutput, 4) <= Math.Round(newMax, 4), $"New maximum is incorrect. got {maxOutput} expected {newMax}");
         }
 
+        [TestMethod]
+        public void PointInPolygon()
+        {
+            // It goes too fast for DotMemory:
+            Thread.Sleep(2000);
+
+            const string folder = @"D:\dev\GIS-Data\Issues\Point in Polygon";
+            Assert.IsTrue(Directory.Exists(folder), "Input folder doesn't exists");
+            var sfPolygons = new Shapefile { GlobalCallback = this };
+            var sfPoints = new Shapefile { GlobalCallback = this };
+            var found = 0;
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            try
+            {
+                var retVal = sfPolygons.Open(Path.Combine(folder, "CatchmentBuilderShapefile.shp"));
+                Assert.IsTrue(retVal, "Can't open polygon shapefile");
+
+                retVal = sfPoints.Open(Path.Combine(folder, "Sbk_FGrPt_n.shp"));
+                Assert.IsTrue(retVal, "Can't open point shapefile");
+
+                var utils = new Utils { GlobalCallback = this };
+                var numPolygons = sfPolygons.NumShapes;
+                Assert.IsTrue(numPolygons > 0, "No polygon shapes in shapefile");
+
+                // Loop polygons:
+                for (var i = 0; i < numPolygons; i++)
+                {
+                    // Get polygon
+                    var polygonShape = sfPolygons.Shape[i];
+                    Assert.IsNotNull(polygonShape, "polygonShape == null");
+
+                    var numPoints = sfPoints.NumShapes;
+                    Assert.IsTrue(numPoints > 0, "No point shapes in shapefile");
+
+                    for (var j = 0; j < numPoints; j++)
+                    {
+                        var pointShape = sfPoints.Shape[j];
+                        Assert.IsNotNull(pointShape, "pointShape == null");
+
+                        if (utils.PointInPolygon(polygonShape, pointShape.Point[0]))
+                        {
+                            Console.WriteLine($"Point {j} lies in polygon {i}");
+                            found++;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                // Close shapefiles:
+                sfPolygons.Close();
+                sfPoints.Close();
+            }
+
+            stopWatch.Stop();
+            Console.WriteLine("The process took " + stopWatch.Elapsed);
+            Console.WriteLine(found + " matching polygons where found");
+        }
+
+        public void Progress(string KeyOfSender, int Percent, string Message)
+        {
+            Console.Write(".");
+        }
+
+        public void Error(string KeyOfSender, string ErrorMsg)
+        {
+            Assert.Fail("Error found: " + ErrorMsg);
+        }
     }
 }

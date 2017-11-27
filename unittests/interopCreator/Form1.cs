@@ -437,28 +437,29 @@ namespace interopCreator
 
         private void axMap1_FileDropped(object sender, AxMapWinGIS._DMapEvents_FileDroppedEvent e)
         {
-            if (Path.GetExtension(e.filename).ToLower() == ".ecw")
-            {
-                var img = new ImageClass();
-                if (!img.Open(e.filename))
-                    throw new Exception("Cannot open ECW file: " + img.ErrorMsg[img.LastErrorCode], new Exception("Working with " + e.filename));
-                axMap1.AddLayer(img, true);
-            }
-            else
-            {
                 axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
-            }
         }
 
         private void button9_Click(object sender, EventArgs e)
         {
-            axMap1.Projection = tkMapProjection.PROJECTION_WGS84;
-            axMap1.KnownExtents = tkKnownExtents.keLatvia;
+            //    axMap1.Projection = tkMapProjection.PROJECTION_WGS84;
+            //    axMap1.KnownExtents = tkKnownExtents.keLatvia;
 
-            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
-            axMap1.DrawCircle(24.0, 57.0, 0.1, 0, false);
-            axMap1.DrawLabel("Label", 24.0, 57.0, 0.0);
-            axMap1.DrawLabel("Воздух", 24.1, 57.1, 0.0);
+            //    var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            //    axMap1.DrawCircle(24.0, 57.0, 0.1, 0, false);
+            //    axMap1.DrawLabel("Label", 24.0, 57.0, 0.0);
+            //    axMap1.DrawLabel("Воздух", 24.1, 57.1, 0.0);
+
+            axMap1.Projection = tkMapProjection.PROJECTION_WGS84;
+            axMap1.Latitude = 0;
+            axMap1.Longitude = 0;
+            axMap1.CurrentZoom = 10;
+
+            // Add drawing layer and circle with its own label
+            axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            var utils = new Utils();
+            axMap1.DrawCircle(0, 0, 0.1, utils.ColorByName(tkMapColor.Yellow), true);
+            axMap1.DrawLabel("ABC", 0, 0, 0);
         }
     }
 }

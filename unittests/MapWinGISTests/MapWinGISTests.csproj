@@ -73,10 +73,11 @@
   <ItemGroup>
     <Reference Include="AxInterop.MapWinGIS">
       <HintPath>..\interopCreator\bin\x86\Debug\AxInterop.MapWinGIS.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Interop.MapWinGIS">
       <HintPath>..\interopCreator\bin\x86\Debug\Interop.MapWinGIS.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -112,6 +113,7 @@
     <Compile Include="DrawingTests.cs" />
     <Compile Include="ClipperTests.cs" />
     <Compile Include="AkkerwebTests.cs" />
+    <Compile Include="GridTests.cs" />
     <Compile Include="UtilTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -201,6 +203,9 @@
     <None Include="Testdata\Issues\MWGIS-91\utah_north_arcs.shx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Testdata\Issues\MWGIS-94\test.asc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Testdata\sf\invalid.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -243,7 +248,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Testdata\GeoTiff\5band.tif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

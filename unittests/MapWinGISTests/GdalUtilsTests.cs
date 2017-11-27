@@ -15,10 +15,10 @@ namespace MapWinGISTests
         public GdalUtilsTests()
         {
             // https://github.com/dwtkns/gdal-cheat-sheet
-            _gdalUtils = new GdalUtilsClass { GlobalCallback = this };
+            _gdalUtils = new GdalUtils { GlobalCallback = this };
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(5 * 60 * 1000)]
         public void GdalWarp()
         {
             // gdalwarp -dstnodata 0 -multi -overwrite -crop_to_cutline -cutline border.shp "bc1b395d-5011-4b25-947c-b06db932493b_index_ci_red-uptake.Amersfoort - RD New.tif" clipped.tif
@@ -42,7 +42,7 @@ namespace MapWinGISTests
             WriteLine(outputFilename + " is created");
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(5 * 60 * 1000)]
         public void GdalWarp2()
         {
             // Comes from GdalTests.GdalWarp, which uses the old
@@ -62,7 +62,7 @@ namespace MapWinGISTests
             Debug.WriteLine(output);
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(5 * 60 * 1000)]
         public void GdalWarpCutline()
         {
             // Comes from GdalTests.GdalWarpCutline, which uses the old
@@ -85,7 +85,7 @@ namespace MapWinGISTests
             Debug.WriteLine(output);
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(5 * 60 * 1000)]
         public void ClipPolygon()
         {
             var settings = new GlobalSettings { OgrShareConnection = true };
@@ -198,7 +198,7 @@ namespace MapWinGISTests
             WriteLine(outputFilename + " is created");
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(5 * 60 * 1000)]
         public void VeryLargeClip()
         {
             var settings = new GlobalSettings { OgrShareConnection = true };

@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -125,15 +124,12 @@ namespace MapWinGISTests
                 Assert.Fail("Input file does not exist: " + filename);
 
             var fm = new FileManager();
-            var obj = fm.Open(filename, tkFileOpenStrategy.fosAutoDetect, null);
-            if (obj != null && fm.LastOpenIsSuccess)
-            {
-                var img = obj as Image;
-                Assert.IsNotNull(img, "Loaded object is not an image");
-                return img;
-            }
+            var obj = fm.Open(filename);
+            if (obj == null || !fm.LastOpenIsSuccess) return null;
 
-            return null;
+            var img = obj as Image;
+            Assert.IsNotNull(img, "Loaded object is not an image");
+            return img;
         }
     }
 }

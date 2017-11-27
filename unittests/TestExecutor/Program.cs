@@ -36,14 +36,23 @@ namespace ConsoleApplication1
             // t.Shapefile2Gml();
             // t.VerySmallClip();
 
-            var t = new OgrDatasourceTests();
+            //var t = new OgrDatasourceTests();
             //t.ImportShapefileTest();
-            t.GetBuffer();
+            //t.GetBuffer();
+
+            //var t = new PostGisTest();
+            //t.ReadAttributesFromPostGISLayer();
 
             //var t = new ShapefileTests();
             //t.Reproject2280Test();
             //t.ReadRussionDataFromTable();
             //t.CreateRussionCategories();
+            //t.MergeM();
+            //t.Reproject2280Test();
+            // t.PointInShapefile();
+
+            //var t = new GridTests();
+            //t.ChangeValueGridNotInRam();
 
             //var t = new ImageTests();
             //t.SaveImageShouldFail();
@@ -57,10 +66,12 @@ namespace ConsoleApplication1
             // t.DissolveSmallfileClipper();
             //t.DissolveLargefileClipper();
 
-            //var t = new UtilTests();
+            var t = new UtilTests();
             //t.ZonalStatistics();
             //t.ReclassifyRaster();
             //t.ClipPolygon();
+            t.PointInPolygon();
+
 
             Console.WriteLine("Finished");
             Console.ReadLine();

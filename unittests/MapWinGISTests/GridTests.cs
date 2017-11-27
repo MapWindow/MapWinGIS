@@ -8,7 +8,7 @@ namespace MapWinGISTests
 {
     [TestClass]
     [DeploymentItem("Testdata")]
-    public class GridTests
+    public class GridTests: ICallback
     {
         [TestMethod]
         public void ChangeValueGridNotInRam()
@@ -29,7 +29,7 @@ namespace MapWinGISTests
             Assert.IsTrue(File.Exists(gridFilename), "The input file doesn't exist!");
 
             // Open grid:
-            var grd = new Grid();
+            var grd = new Grid {GlobalCallback = this};
             var retVal = grd.Open(gridFilename, GridDataType.UnknownDataType, useInRam);
             Assert.IsTrue(retVal, "Cannot open grid file. Error: " + grd.ErrorMsg[grd.LastErrorCode]);
             Console.WriteLine(grd.DataType);
@@ -47,7 +47,6 @@ namespace MapWinGISTests
                 for (var j = 0; j < numCols; j++)
                 {
                     var value = (double)grd.Value[j, i];
-                    Debug.WriteLine(value);
                     if (value.Equals(nodataValue)) continue;
                     if (value < -50) continue;
 
@@ -83,6 +82,16 @@ namespace MapWinGISTests
             var updatedGridValue = grd2.Value[col, row];
             Console.WriteLine("Updated grid value: " + updatedGridValue);
             Assert.AreEqual(newValue, (double)updatedGridValue, 0.001, "The update value is not equal to the new value.");
+        }
+
+        public void Progress(string KeyOfSender, int Percent, string Message)
+        {
+            Debug.Write("..");
+        }
+
+        public void Error(string KeyOfSender, string ErrorMsg)
+        {
+            Assert.Fail("Error found: " + ErrorMsg);
         }
     }
 }

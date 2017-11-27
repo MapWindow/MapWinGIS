@@ -25,13 +25,13 @@ namespace MapWinGISTests
         }
 
         #region Dissolve
-        [TestCategory("Dissolve"), TestMethod]
+        [TestCategory("Dissolve"), TestMethod, Timeout(5 * 60 * 1000)]
         public void DissolveLargefileClipper()
         {
             DissolveLargefile(tkGeometryEngine.engineClipper);
         }
 
-        [TestCategory("Dissolve"), TestMethod]
+        [TestCategory("Dissolve"), TestMethod, Timeout(5 * 60 * 1000)]
         public void DissolveLargefileGeos()
         {
             DissolveLargefile(tkGeometryEngine.engineGeos);
@@ -86,7 +86,7 @@ namespace MapWinGISTests
                 Assert.Fail("Can't close sf Error: " + sf.ErrorMsg[sf.LastErrorCode]); ;
         }
 
-        [TestCategory("Dissolve"), TestMethod]
+        [TestCategory("Dissolve"), TestMethod, Timeout(5 * 60 * 1000)]
         public void ClipperInvalidResults()
         {
             const string sfLocation = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\FishnetClipped_invalid3.shp";
@@ -118,13 +118,13 @@ namespace MapWinGISTests
                 Assert.Fail("Can't close input shapefile Error: " + sf.ErrorMsg[sf.LastErrorCode]);
         }
 
-        [TestCategory("Dissolve"), TestMethod]
+        [TestCategory("Dissolve"), TestMethod, Timeout(5 * 60 * 1000)]
         public void DissolveSmallfileClipper()
         {
             DissolveSmallfile(tkGeometryEngine.engineClipper);
         }
 
-        [TestCategory("Dissolve"), TestMethod]
+        [TestCategory("Dissolve"), TestMethod, Timeout(5 * 60 * 1000)]
         public void DissolveSmallfileGeos()
         {
             DissolveSmallfile(tkGeometryEngine.engineGeos);
@@ -161,13 +161,13 @@ namespace MapWinGISTests
 
         #region Clip
 
-        [TestCategory("Clip"), TestMethod]
+        [TestCategory("Clip"), TestMethod, Timeout(5 * 60 * 1000)]
         public void VerySmallClipClipper()
         {
             VerySmallClip(tkGeometryEngine.engineClipper);
         }
 
-        [TestCategory("Clip"), TestMethod]
+        [TestCategory("Clip"), TestMethod, Timeout(5 * 60 * 1000)]
         public void VerySmallClipGeos()
         {
             VerySmallClip(tkGeometryEngine.engineGeos);
@@ -206,31 +206,31 @@ namespace MapWinGISTests
                 Assert.Fail("Can't close sfClipped Error: " + sfClipped.ErrorMsg[sfClipped.LastErrorCode]);
         }
 
-        [TestCategory("Clip"), TestMethod]
+        [TestCategory("Clip"), TestMethod, Timeout(5 * 60 * 1000)]
         public void ClipSmallfileClipper()
         {
             Clipfile(tkGeometryEngine.engineClipper, 1, 15);
         }
 
-        [TestCategory("Clip"), TestMethod]
+        [TestCategory("Clip"), TestMethod, Timeout(5 * 60 * 1000)]
         public void ClipSmallfileGeos()
         {
             Clipfile(tkGeometryEngine.engineGeos, 1, 15);
         }
 
-        [TestCategory("Clip"), TestMethod]
+        [TestCategory("Clip"), TestMethod, Timeout(5 * 60 * 1000)]
         public void ClipLargefileClipper()
         {
             Clipfile(tkGeometryEngine.engineClipper, 5, 0.5);
         }
 
-        [TestCategory("Clip"), TestMethod]
+        [TestCategory("Clip"), TestMethod, Timeout(5 * 60 * 1000)]
         public void ClipLargefileGeos()
         {
             Clipfile(tkGeometryEngine.engineGeos, 5, 0.5);
         }
 
-        [TestCategory("Clip"), TestMethod]
+        [TestCategory("Clip"), TestMethod, Timeout(5 * 60 * 1000)]
         public void CreateFishnet()
         {
             var tempFolder = Helper.WorkingFolder("CreateFishnet");
@@ -298,13 +298,13 @@ namespace MapWinGISTests
                 Assert.Fail("Can't close sfClipped Error: " + sfClipped.ErrorMsg[sfClipped.LastErrorCode]);
         }
 
-        [TestCategory("Clip"), TestMethod]
+        [TestCategory("Clip"), TestMethod, Timeout(5 * 60 * 1000)]
         public void ClipLargefileClipper2()
         {
             ClipLargefile(tkGeometryEngine.engineClipper);
         }
 
-        [TestCategory("Clip"), TestMethod]
+        [TestCategory("Clip"), TestMethod, Timeout(5 * 60 * 1000)]
         public void ClipLargefileGeos2()
         {
             ClipLargefile(tkGeometryEngine.engineGeos);
@@ -352,13 +352,13 @@ namespace MapWinGISTests
         #endregion
 
         #region Merge
-        [TestCategory("Merge"), TestMethod]
+        [TestCategory("Merge"), TestMethod, Timeout(5 * 60 * 1000)]
         public void MergeShapefileGeos()
         {
             MergeShapefile(tkGeometryEngine.engineGeos);
         }
 
-        [TestCategory("Merge"), TestMethod]
+        [TestCategory("Merge"), TestMethod, Timeout(5*60*1000)]
         public void MergeShapefileClipper()
         {
             MergeShapefile(tkGeometryEngine.engineClipper);

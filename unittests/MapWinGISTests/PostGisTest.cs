@@ -19,8 +19,8 @@ namespace MapWinGISTests
         /// <summary>
         /// Opens the post gis different port test.
         /// </summary>
-        /// <remarks>Because it needs an existing host, database and table it is not a 'proper' test by default</remarks>
-        // [TestMethod]
+        /// <remarks>It needs an existing host, database and table it is not a 'proper' test by default</remarks>
+        [TestMethod]
         public void OpenPostGISDifferentPortTest()
         {
             var ogrDatasource = new OgrDatasource();
@@ -169,6 +169,7 @@ namespace MapWinGISTests
                 Console.WriteLine("GetLayer took " + stopwatch.Elapsed);
 
                 // TODO Get layername with schema name
+                Assert.Fail("TODO");
             }
             finally
             {
