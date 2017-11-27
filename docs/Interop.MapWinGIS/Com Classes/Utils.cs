@@ -782,7 +782,7 @@ namespace MapWinGIS
         /// <returns>GDAL-provided projection name, or an empty string on error</returns>
         /// <remarks>
         /// If an error occurs, either because an invalid ID is specified, or the projection string
-        /// could not be loaded, a descriptive error will be raised to the Callback function, if specified.
+        /// could not be loaded, a descriptive error will be raised to the Callback function (if one is specified).
         /// </remarks>
         /// \new495 Added in version 4.9.5
         public string GetNAD83ProjectionName(tkNad83Projection projectionID)
@@ -799,7 +799,7 @@ namespace MapWinGIS
         /// <returns>GDAL-provided projection name, or an empty string on error</returns>
         /// <remarks>
         /// If an error occurs, either because an invalid ID is specified, or the projection string
-        /// could not be loaded, a descriptive error will be raised to the Callback function, if specified.
+        /// could not be loaded, a descriptive error will be raised to the Callback function (if one is specified).
         /// </remarks>
         /// \new495 Added in version 4.9.5
         public string GetWGS84ProjectionName(tkWgs84Projection projectionID)
@@ -808,7 +808,9 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Gets the name of the projected or geographic coordinate system associated with the specified SRID
+        /// Gets the name of the projected coordinate system associated with the specified SRID,
+        /// which include the NAD83 and WGS84 codes, as well as those not specified by the enumerations, 
+        /// such as NAD27, NAD83 Harn, Beijing, Pulkova, etc.
         /// </summary>
         /// <param name="SRID">
         /// Spatial Reference identifier, could refer to any valid Projected or Geographic coordinate system
@@ -816,7 +818,7 @@ namespace MapWinGIS
         /// <returns>GDAL-provided name of a projected or geographic coordinate system, or an empty string on error</returns>
         /// <remarks>
         /// If an error occurs, either because an invalid ID is specified, or the projection string
-        /// could not be loaded, a descriptive error will be raised to the Callback function, if specified.
+        /// could not be loaded, a descriptive error will be raised to the Callback function (if one is specified).
         /// </remarks>
         /// \new495 Added in version 4.9.5
         public string GetProjectionNameByID(int SRID)
@@ -833,7 +835,7 @@ namespace MapWinGIS
         /// <remarks>
         /// Each string will contain one pair of values, an ID and a Name, separated by a comma (e.g. "32611,WGS 84 / UTM zone 11N").
         /// These can be parsed and used, for example, to populate a ComboBox control for user selection of a Projection.
-        /// If an error occurs, or if the projection strings could not be loaded, a descriptive error will be raised to the Callback function, if specified.
+        /// If an error occurs, or if the projection strings could not be loaded, a descriptive error will be raised to the Callback function (if one is specified).
         /// </remarks>
         /// \new495 Added in version 4.9.5
         public bool GetProjectionList(tkProjectionSet projectionSets, ref Object list)

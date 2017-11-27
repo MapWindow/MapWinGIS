@@ -196,5 +196,56 @@ namespace MapWinGISTests
             Assert.IsTrue(Math.Round(maxOutput, 4) <= Math.Round(newMax, 4), $"New maximum is incorrect. got {maxOutput} expected {newMax}");
         }
 
+        [TestMethod]
+        public void ProjectionStrings()
+        {
+            var utils = new Utils();
+            var gp = new GeoProjection();
+            string utilProjection, importProjection;
+
+            // get NAD83 name
+            utilProjection = utils.GetNAD83ProjectionName(tkNad83Projection.Nad83_Alabama_East);
+            gp.ImportFromEPSG((int)tkNad83Projection.Nad83_Alabama_East);
+            importProjection = gp.Name;
+            Debug.Assert(utilProjection.Equals(importProjection));
+
+            // get WGS84 name
+            utilProjection = utils.GetWGS84ProjectionName(tkWgs84Projection.Wgs84_BLM_14N_ftUS);
+            gp.ImportFromEPSG((int)tkWgs84Projection.Wgs84_BLM_14N_ftUS);
+            importProjection = gp.Name;
+            Debug.Assert(utilProjection.Equals(importProjection));
+
+            // get NAD83 name by ID
+            utilProjection = utils.GetProjectionNameByID((int)tkNad83Projection.Nad83_Alabama_East);
+            gp.ImportFromEPSG((int)tkNad83Projection.Nad83_Alabama_East);
+            importProjection = gp.Name;
+            Debug.Assert(utilProjection.Equals(importProjection));
+
+            // get WGS84 name by ID
+            utilProjection = utils.GetProjectionNameByID((int)tkWgs84Projection.Wgs84_BLM_14N_ftUS);
+            gp.ImportFromEPSG((int)tkWgs84Projection.Wgs84_BLM_14N_ftUS);
+            importProjection = gp.Name;
+            Debug.Assert(utilProjection.Equals(importProjection));
+
+            // get obscure names by ID
+            utilProjection = utils.GetProjectionNameByID(2402);
+            gp.ImportFromEPSG(2402);
+            importProjection = gp.Name;
+            Debug.Assert(utilProjection.Equals(importProjection));
+
+            // get obscure names by ID
+            utilProjection = utils.GetProjectionNameByID(20005);
+            gp.ImportFromEPSG(20005);
+            importProjection = gp.Name;
+            Debug.Assert(utilProjection.Equals(importProjection));
+
+            // verify error
+            utilProjection = utils.GetProjectionNameByID(100);
+            Debug.Assert(utilProjection.Length == 0);
+            // should return Index Out-of-bounds error
+            Console.WriteLine(utils.ErrorMsg[utils.LastErrorCode]);
+
+        }
+
     }
 }

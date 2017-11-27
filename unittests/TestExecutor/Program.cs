@@ -36,9 +36,9 @@ namespace ConsoleApplication1
             // t.Shapefile2Gml();
             // t.VerySmallClip();
 
-            var t = new OgrDatasourceTests();
+            //var t = new OgrDatasourceTests();
+            //t.GetBuffer();
             //t.ImportShapefileTest();
-            t.GetBuffer();
 
             //var t = new ShapefileTests();
             //t.Reproject2280Test();
@@ -57,7 +57,8 @@ namespace ConsoleApplication1
             // t.DissolveSmallfileClipper();
             //t.DissolveLargefileClipper();
 
-            //var t = new UtilTests();
+            var t = new UtilTests();
+            t.ProjectionStrings();
             //t.ZonalStatistics();
             //t.ReclassifyRaster();
             //t.ClipPolygon();
