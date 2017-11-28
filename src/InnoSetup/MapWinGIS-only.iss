@@ -7,7 +7,7 @@
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapwinGIS\GitHub\src\InnoSetup"
 #define BinLocation "D:\dev\MapwinGIS\GitHub\src\bin"
-#define x64BitVersion
+;; #define x64BitVersion
 
 #ifdef x64BitVersion
   #define CPU "x64"
@@ -121,11 +121,11 @@ Name: "MrSID"; Description: "Add MrSID support"; Types: full custom
 Name: "HDF5"; Description: "Add Hierarchical Data Format Release 5 support"; Types: full custom
 
 [Run]
-; Install VC++ 2010 if needed:
+; Install VC++ 2012 if needed:
 #ifdef x64BitVersion
-Filename: "{tmp}\{#vcredist}"; Parameters: "/qb"; Flags: waituntilterminated; Check: VCRedistNeedsInstall_x64()
+Filename: "{tmp}\{#vcredist}"; Parameters: "/quiet"; Flags: waituntilterminated; Check: VCRedistNeedsInstall_x64()
 #else
-Filename: "{tmp}\{#vcredist}"; Parameters: "/qb"; Flags: waituntilterminated; Check: VCRedistNeedsInstall_x86()
+Filename: "{tmp}\{#vcredist}"; Parameters: "/quiet"; Flags: waituntilterminated; Check: VCRedistNeedsInstall_x86()
 #endif
 ;Run some command files:
 Filename: "{app}\regMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runhidden
