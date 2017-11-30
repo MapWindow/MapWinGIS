@@ -653,6 +653,13 @@ namespace MapWinGIS
         /// \new494 Added in version 4.9.4
         public tkCallbackVerbosity CallbackVerbosity { get; set; }
 
+        /// <summary> 
+        /// Share connection between layers (may be unstable). 
+        /// For large read-only layers it will increase performance.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool OgrShareConnection { get; set; }
+
         /// <summary>
         /// Starts logging of tile requests.
         /// </summary>

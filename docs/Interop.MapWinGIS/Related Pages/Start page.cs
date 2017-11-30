@@ -1,9 +1,10 @@
-﻿/// \mainpage MapWinGIS ActiveX Control
+﻿#pragma warning disable 1587
+/// \mainpage MapWinGIS ActiveX Control
 /// 
 /// \section content Main topics
-/// - \link overview Library overview \endlink
+/// - \link getting_started GETTING STARTED WITH v. 4.9.3+ \endlink
 /// - \link version_history Version history \endlink
-/// - \link getting_started GETTING STARTED WITH v. 4.9.3 \endlink
+/// - \link overview Library overview \endlink
 /// - \ref a_projection "Map projection"
 /// - <a href="class_ax_map.html#details" class="bold">Map control</a>
 /// - <a href="class_tiles.html#details" class="bold">Online tiles services</a>
@@ -32,4 +33,4 @@
 /// 
 /// \link documentation How to document further \endlink
 /// 
-
+#pragma warning restore 1587

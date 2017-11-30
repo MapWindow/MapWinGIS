@@ -210,7 +210,8 @@ namespace MapWinGIS
     /// \note See description of editing in <a href = "group__ogrlayer__editing.html#details">this section</a>.\n
     /// </remarks>
     /// \n Here is a diagram for the %OgrLayer class.
-    /// \dot digraph ogr_diagram {
+    /// \dot 
+    /// digraph ogr_diagram {
     /// nodesep = 0.3;
     /// ranksep = 0.3;
     /// splines = ortho;

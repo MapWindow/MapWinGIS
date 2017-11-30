@@ -81,7 +81,8 @@ namespace MapWinGIS
     /// and new objects. See details about string encoding in the documentation of particular OGR driver.\n\n
     /// 
     /// Here is a diagram for the OgrDatasource class.
-    /// \dot digraph ogr_diagram {
+    /// \dot 
+    /// digraph ogr_diagram {
     /// nodesep = 0.3;
     /// ranksep = 0.3;
     /// splines = ortho;

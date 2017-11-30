@@ -1,4 +1,5 @@
-﻿/// \page documentation How to document further
+﻿#pragma warning disable 1587
+/// \page documentation How to document further
 /// 
 /// Here is a brief overview of documentation project, doxygen tags and diagrams specification which were used to create this documentation. \n
 /// 
@@ -96,5 +97,4 @@
 /// The output will be the following:
 /// \dotfile dot_tags.txt
 /// 
-
-
+#pragma warning restore 1587

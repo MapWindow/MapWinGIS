@@ -1,4 +1,5 @@
-﻿/// \page version_history Version history
+﻿#pragma warning disable 1587
+/// \page version_history Version history
 /// 
 /// \section apichanges API changes.
 /// -  New API in version \link newpage495 4.9.5 \endlink
@@ -204,8 +205,4 @@
 /// 15. New methods in %Shape class:
 /// - Shape.ClosestPoints: finds 2 closest points for any pair of shapes;
 /// - Shape.ImportFromWKT: imports data from WKT format.
-
-
-
-
-
+#pragma warning restore 1587

@@ -1502,8 +1502,6 @@ namespace MapWinGIS
         ///     but assign new coordinates to the points by calling Shape.put_XY only;
         ///     - if you are bound to the exiting code with Shape.get_Point.x = [value] calls, set this property to true but call 
         ///     Shapefile.RefreshShapeExtents after the editing operations.</remarks>
-        ///     .
-        /// .
         /// \new48 Added in version 4.8
         public bool CacheExtents
         {

@@ -10,7 +10,8 @@ namespace MapWinGIS
     /// <summary>
     /// Represents an raster image of particular format which may be added to the map.
     /// </summary>
-    /// \dot digraph image_diagram {
+    /// \dot 
+    /// digraph image_diagram {
     /// nodesep = 0.3;
     /// ranksep = 0.3;
     /// splines = ortho;

@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-
-    
+﻿/// <summary>
+/// Justification of the labels
+/// </summary>
 public enum tkHJustification { }
+
+/// <summary>
+/// Shape drawing method
+/// </summary>
 public enum tkShapeDrawingMethod { }
     
 

@@ -1,4 +1,5 @@
-﻿/// \page hints Hints
+﻿#pragma warning disable 1587
+/// \page hints Hints
 /// 
 /// <b>A. COM objects.</b> \n\n
 /// MapWinGIS is COM-based, therefore it counts the references of particular objects to determine when they are no longer needed and can be released.
@@ -137,3 +138,4 @@
 /// It provides the the fastest way to setup the visualization options for the layers and pass them to custom application. \n\n
 /// -# The functionality present in MapWindow can be more or less easily implemented in other custom application based on MapWinGIS. 
 /// MapWindow 4 repository is <a href = "http://svn.mapwindow.org/svnroot/MapWindow4Dev/">here.</a>
+#pragma warning restore 1587
