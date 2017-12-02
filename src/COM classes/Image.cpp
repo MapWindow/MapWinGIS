@@ -3030,7 +3030,7 @@ void CImageClass::SerializePixelsCore(CPLXMLNode* psTree, long fullWidth, long f
 			this->get_Height(&bufferHeight);
 
 			unsigned char* data = reinterpret_cast<unsigned char*>(_imageData);
-			std::string s = base64_encode(data, bufferWidth * bufferHeight * 3);
+			std::string s = base64_encode(data, bufferWidth * bufferHeight * 4); // * 4 to account for ARGB
 			CPLXMLNode* psBuffer = CPLCreateXMLElementAndValue(psTree, "ImageBuffer", s.c_str());
 
 			Utility::CPLCreateXMLAttributeAndValue(psBuffer, "GdiPlusBitmap", CPLString().Printf("%d", (int)false));
@@ -3095,11 +3095,11 @@ void CImageClass::DeserializePixels(CPLXMLNode* node)
 					this->Close(&vbretval);
 
 					this->CreateNew(width, height, &vbretval);
-					_sourceType = istGDIPlus;
+					_sourceType = istInMemory;
 					str = base64_decode(str);
 					const char* data = str.c_str();
 
-					memcpy(_imageData, data, sizeof(unsigned char) * width * height * 3);
+					memcpy(_imageData, data, sizeof(unsigned char) * width * height * 4); // * 4 to account for ARGB
 				}
 			}
 		}
