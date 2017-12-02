@@ -54,8 +54,9 @@ namespace ConsoleApplication1
             //var t = new GridTests();
             //t.ChangeValueGridNotInRam();
 
-            //var t = new ImageTests();
+            var t = new ImageTests();
             //t.SaveImageShouldFail();
+            t.SerializeDeserializeImage();
 
             //var t = new DrawingTests();
             //t.Init();

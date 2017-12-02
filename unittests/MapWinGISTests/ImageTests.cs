@@ -131,5 +131,33 @@ namespace MapWinGISTests
             Assert.IsNotNull(img, "Loaded object is not an image");
             return img;
         }
+
+        [TestMethod]
+        public void SerializeDeserializeImage()
+        {
+            // MWGIS-97
+
+            int size = 2;
+            Image original = new Image();
+            // create 2x2 red square
+            if (original.CreateNew(size, size))
+            {
+                for (int i = 0; i < size; i++)
+                    for (int j = 0; j < size; j++)
+                        original.Value[i, j] = 0xFF;
+            }
+            // serialize it
+            string s = original.Serialize(true);
+
+            // deserialize it
+            Image modified = new Image();
+            modified.Deserialize(s);
+
+            // verify pixels
+            Assert.AreEqual(original.Value[0, 0], modified.Value[0, 0]);
+            Assert.AreEqual(original.Value[0, 1], modified.Value[0, 1]);
+            Assert.AreEqual(original.Value[1, 0], modified.Value[1, 0]);
+            Assert.AreEqual(original.Value[1, 1], modified.Value[1, 1]);
+        }
     }
 }
