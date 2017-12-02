@@ -109,59 +109,13 @@ CString CUtils::customErrorMessage()
 // return the name of the projection specified by the Nad83 enumeration
 STDMETHODIMP CUtils::GetNAD83ProjectionName(tkNad83Projection projectionID, BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	try
-	{
-		// list check
-		if (pcsStrings.empty())
-		{
-			ErrorMessage(tkFILE_NOT_OPEN, customErrorMessage());
-			*retVal = A2BSTR("");
-		}
-		else
-		{
-			// return string mapped to specified ID (use 'at' rather than [] to check existence)
-			*retVal = A2BSTR((LPCSTR)pcsStrings.at(projectionID));
-		}
-	}
-	catch (...)
-	{
-		// 'at' method will throw exception if key does not exist
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, Debug::Format("Invalid Projection ID specified: {0}", projectionID));
-		*retVal = A2BSTR("");
-	}
-
-	return S_OK;
+	return GetProjectionNameByID((int)projectionID, retVal);
 }
 
 // return the name of the projection specified by the Wgs84 enumeration
 STDMETHODIMP CUtils::GetWGS84ProjectionName(tkWgs84Projection projectionID, BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	try
-	{
-		// list check
-		if (pcsStrings.empty())
-		{
-			ErrorMessage(tkFILE_NOT_OPEN, customErrorMessage());
-			*retVal = A2BSTR("");
-		}
-		else
-		{
-			// return string mapped to specified ID (use 'at' rather than [] to check existence)
-			*retVal = A2BSTR((LPCSTR)pcsStrings.at(projectionID));
-		}
-	}
-	catch (...)
-	{
-		// 'at' method will throw exception if key does not exist
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, Debug::Format("Invalid Projection ID specified: {0}", projectionID));
-		*retVal = A2BSTR("");
-	}
-
-	return S_OK;
+	return GetProjectionNameByID((int)projectionID, retVal);
 }
 
 // return the name of any projection specified by the SRID, which include the Nad83 and Wgs84, 
@@ -187,7 +141,7 @@ STDMETHODIMP CUtils::GetProjectionNameByID(int SRID, BSTR* retVal)
 	catch (...)
 	{
 		// 'at' method will throw exception if key does not exist
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, Debug::Format("Invalid SRID specified: {0}", SRID));
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, Debug::Format("Invalid projection ID specified: {0}", SRID));
 		*retVal = A2BSTR("");
 	}
 
