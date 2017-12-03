@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using AxMapWinGIS;
 using MapWinGIS;
+using Point = MapWinGIS.Point;
 
 namespace MapWinGISTests
 {
     public static class Helper
     {
+        private static AxMap _axMap1;
+
         public static void PrintExtents(Extents extents)
         {
             Console.Write(extents.xMin + "; ");
@@ -128,7 +135,7 @@ namespace MapWinGISTests
             return sf;
         }
 
-        public static Shapefile OpenShapefile(string fileLocation, bool checkInvalidShapes = true)
+        public static Shapefile OpenShapefile(string fileLocation, bool checkInvalidShapes = true, ICallback callback = null)
         {
             if (!File.Exists(fileLocation))
                 throw new Exception($"Input file [{fileLocation}] does not exists");
@@ -138,6 +145,8 @@ namespace MapWinGISTests
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var sf = new Shapefile();
+            if (callback != null) sf.GlobalCallback = callback;
+
             if (!sf.Open(fileLocation))
                 throw new Exception("Can't open " + fileLocation + " Error: " + sf.ErrorMsg[sf.LastErrorCode]);
             stopWatch.Stop();
@@ -187,7 +196,6 @@ namespace MapWinGISTests
         public static void DebugMsg(string msg)
         {
             Console.WriteLine(msg);
-            Console.WriteLine(msg);
         }
 
         public static string WorkingFolder(string subfolder)
@@ -195,6 +203,87 @@ namespace MapWinGISTests
             var tempFolder = Path.Combine(Path.GetTempPath(), subfolder);
             if (!Directory.Exists(tempFolder)) Directory.CreateDirectory(tempFolder);
             return tempFolder;
+        }
+
+        public static AxMap GetAxMap()
+        {
+            if (_axMap1 != null) return _axMap1;
+
+            // Create MapWinGIS:
+            _axMap1 = new AxMap();
+            _axMap1.CreateControl();
+
+            // Create form and add MapWinGIS:
+            var myForm = new Form();
+            myForm.Controls.Add(_axMap1);
+
+            _axMap1.ScalebarVisible = true;
+            _axMap1.ShowCoordinates = tkCoordinatesDisplay.cdmAuto;
+            _axMap1.ShowRedrawTime = true;
+            _axMap1.ShowVersionNumber = true;
+            _axMap1.ShowZoomBar = true;
+
+            return _axMap1;
+        }
+
+        public static string SaveSnapshot(AxMap axMap1, string baseName, bool shouldFail = false)
+        {
+            Application.DoEvents();
+            var filename = Path.Combine(Path.GetTempPath(), baseName);
+            DeleteFile(filename);
+
+            var img = axMap1.SnapShot2(0, axMap1.CurrentZoom, 1000);
+            if (img == null) throw new NullReferenceException("Snapshot is null");
+
+            var retVal = img.Save(filename);
+            if (!shouldFail)
+            {
+                if (!retVal) throw new Exception("Snapshot could not be saved: " + img.ErrorMsg[img.LastErrorCode]);
+                if (!File.Exists(filename)) throw new FileNotFoundException("The file doesn't exists.", filename);
+                DebugMsg(filename);
+            }
+            else
+            {
+                DebugMsg("Expected error: " + img.ErrorMsg[img.LastErrorCode]);
+                if (retVal) throw new Exception("Image could be saved. This is unexpected.");
+            }
+
+            return filename;
+        }
+
+
+        /// <summary>
+        /// Deletes the file if it exists
+        /// </summary>
+        /// <param name="filename">The filename.</param>
+        public static void DeleteFile(string filename)
+        {
+            if (File.Exists(filename)) File.Delete(filename);
+        }
+
+        public static Dictionary<Color, int> GetColorsFromBitmap(string fileLocation)
+        {
+            if (!File.Exists(fileLocation))
+                throw new Exception($"Input file [{fileLocation}] does not exists");
+
+            var bm = new Bitmap(fileLocation);
+            var retVal = new Dictionary<Color, int>();
+            for (var y = 0; y < bm.Height; y++)
+            {
+                for (var x = 0; x < bm.Width; x++)
+                {
+                    var color = bm.GetPixel(x, y);
+                    if (retVal.ContainsKey(color))
+                    {
+                        retVal[color]++;
+                    }
+                    else
+                    {
+                        retVal.Add(color, 1);
+                    }
+                }
+            }
+            return retVal;
         }
     }
 }

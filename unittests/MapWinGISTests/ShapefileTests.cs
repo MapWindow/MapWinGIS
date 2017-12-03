@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Windows.Forms;
+using AxMapWinGIS;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -11,6 +13,8 @@ namespace MapWinGISTests
     [DeploymentItem("Testdata")]
     public class ShapefileTests : ICallback
     {
+        private AxMap _axMap1;
+
         [TestInitialize]
         public void Init()
         {
@@ -522,8 +526,48 @@ namespace MapWinGISTests
             stopWatch.Stop();
             Console.WriteLine("The process took " + stopWatch.Elapsed);
             Console.WriteLine(found + " matching polygons where found");
-
         }
+
+        [TestMethod]
+        public void SpatialIndex()
+        {
+            const string sfName = @"Issues\MWGIS-98\3dPoint.shp";
+
+            // Delete previous spatial index files:
+            Helper.DeleteFile(Path.ChangeExtension(sfName, ".mwd"));
+            Helper.DeleteFile(Path.ChangeExtension(sfName, ".mwx"));
+
+            var sf = Helper.OpenShapefile(sfName, true, this);
+            Console.WriteLine("Numshapes: " + sf.NumShapes);
+
+            // Get map to create snapshot:
+            _axMap1 = Helper.GetAxMap();
+            _axMap1.TileProvider = tkTileProvider.ProviderNone;
+
+            var layerHandle = _axMap1.AddLayer(sf, true);
+            Assert.IsTrue(layerHandle > -1, "Can't add layer");
+            _axMap1.ZoomToLayer(layerHandle);
+            var snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-without.jpg");
+            var colorsWithout = Helper.GetColorsFromBitmap(snapshot);
+            Console.WriteLine("Number of unique colors without index: " + colorsWithout.Count);
+
+            // Create spatial index:
+            var retVal = sf.CreateSpatialIndex(sfName);
+            Assert.IsTrue(retVal, "Can't create spatial index");
+            Assert.IsTrue(sf.IsSpatialIndexValid(), "Spatial index is invalid");
+            sf.UseSpatialIndex = true;
+            _axMap1.ZoomToLayer(layerHandle);
+            snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-with.jpg");
+            var colorsWith = Helper.GetColorsFromBitmap(snapshot);
+            Console.WriteLine("Number of unique colors with index: " + colorsWith.Count);
+
+            retVal = sf.Close();
+            Assert.IsTrue(retVal, "Can't close shapefile");
+
+            Assert.IsTrue(colorsWith.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
+        }
+
+
 
         public void Progress(string KeyOfSender, int Percent, string Message)
         {
