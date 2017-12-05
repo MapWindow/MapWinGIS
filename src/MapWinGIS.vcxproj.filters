@@ -1983,6 +1983,9 @@
     <ClCompile Include="COM classes\GdalUtils.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
+    <ClCompile Include="COM classes\Utils_Projections.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">

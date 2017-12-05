@@ -103,7 +103,9 @@ bool CUtils::LoadProjectionStrings()
 
 CString CUtils::customErrorMessage()
 {
-	return Debug::Format("Unable to reference projection list. Failed to load GDAL Projection list '%s'", csvPath);
+	CString msg;
+	msg.Format("Unable to reference projection list. Failed to load GDAL Projection list '%s'", csvPath);
+	return msg;
 }
 
 // return the name of the projection specified by the Nad83 enumeration
@@ -141,7 +143,9 @@ STDMETHODIMP CUtils::GetProjectionNameByID(int SRID, BSTR* retVal)
 	catch (...)
 	{
 		// 'at' method will throw exception if key does not exist
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, Debug::Format("Invalid projection ID specified: {0}", SRID));
+		CString msg;
+		msg.Format("Invalid projection ID specified: {0}", SRID);
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, msg);
 		*retVal = A2BSTR("");
 	}
 
@@ -213,7 +217,9 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 					(((projectionSets & psWGS84_Subset) == psWGS84_Subset) && (p.second.Left(6) == "WGS 84")))
 				{
 					// create concatenated string
-					comBSTR.Append((LPCSTR)Debug::Format("%d,%s", p.first, p.second));
+					CString msg;
+					msg.Format("%d,%s", p.first, p.second);
+					comBSTR.Append((LPCSTR)msg);
 					// copy to array
 					pBSTR[j++] = comBSTR.Copy();
 					// empty the string
