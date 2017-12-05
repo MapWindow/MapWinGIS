@@ -10,8 +10,6 @@
 static CString csvPath;
 // single instance of Projected Coordinate System string mappings
 static unordered_map<int, CString> pcsStrings;
-// single instance of Geographic Coordinate System string mappings
-static unordered_map<int, CString> gcsStrings;
 
 // determine the path of this OCX, independent of the calling executable
 // https://stackoverflow.com/questions/6924195/get-dll-path-at-runtime
@@ -74,21 +72,6 @@ bool CUtils::LoadProjectionStrings()
 				name = restOfLine.Left(quotePosition);
 				// add to PCS mapping
 				pcsStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
-
-				//// now get the coordinate system code
-				//commaPosition = restOfLine.Find(",", 0);
-				//// restOfLine here is UOM code + the rest of the line
-				//restOfLine = restOfLine.Right(restOfLine.GetLength() - commaPosition - 1);
-				//// skipping over UOM code...
-				//commaPosition = restOfLine.Find(",", 0);
-				//restOfLine = restOfLine.Right(restOfLine.GetLength() - commaPosition - 1);
-				//// this is the actual code
-				//commaPosition = restOfLine.Find(",", 0);
-				//code = restOfLine.Left(commaPosition);
-
-				//// add to GCS mapping (watch for duplicates)
-				//if (gcsStrings.count(atoi((LPCSTR)code)) == 0)
-				//	gcsStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
 			}
 			catch (...)
 			{
