@@ -5,7 +5,7 @@
  * Copyright (c) 2002, Marios Hadjieleftheriou
  *
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -220,7 +220,7 @@ SpatialIndex::MVRTree::MVRTree::MVRTree(IStorageManager& sm, Tools::PropertySet&
 	m_leafPool(100)
 {
 #ifdef HAVE_PTHREAD_H
-	Tools::LockGuard lock(&m_lock);
+	pthread_mutex_init(&m_lock, NULL);
 #endif
 
 	Tools::Variant var = ps.getProperty("IndexIdentifier");
@@ -245,7 +245,7 @@ SpatialIndex::MVRTree::MVRTree::MVRTree(IStorageManager& sm, Tools::PropertySet&
 SpatialIndex::MVRTree::MVRTree::~MVRTree()
 {
 #ifdef HAVE_PTHREAD_H
-	Tools::LockGuard lock(&m_lock);
+	pthread_mutex_destroy(&m_lock);
 #endif
 
 	storeHeader();
@@ -337,7 +337,7 @@ void SpatialIndex::MVRTree::MVRTree::pointLocationQuery(const Point& query, IVis
 	rangeQuery(IntersectionQuery, r, v);
 }
 
-void SpatialIndex::MVRTree::MVRTree::nearestNeighborQuery(uint32_t k, const IShape& query, IVisitor& v, INearestNeighborComparator& nnc)
+void SpatialIndex::MVRTree::MVRTree::nearestNeighborQuery(uint32_t, const IShape&, IVisitor&, INearestNeighborComparator&)
 {
 	throw Tools::IllegalStateException("nearestNeighborQuery: not impelmented yet.");
 }
@@ -349,7 +349,7 @@ void SpatialIndex::MVRTree::MVRTree::nearestNeighborQuery(uint32_t k, const ISha
 	nearestNeighborQuery(k, query, v, nnc);
 }
 
-void SpatialIndex::MVRTree::MVRTree::selfJoinQuery(const IShape& query, IVisitor& v)
+void SpatialIndex::MVRTree::MVRTree::selfJoinQuery(const IShape&, IVisitor&)
 {
 	throw Tools::IllegalStateException("selfJoinQuery: not impelmented yet.");
 }
@@ -453,6 +453,10 @@ void SpatialIndex::MVRTree::MVRTree::getIndexProperties(Tools::PropertySet& out)
 	var.m_varType = Tools::VT_DOUBLE;
 	var.m_val.dblVal = m_versionUnderflow;
 	out.setProperty("VersionUnderflow", var);
+
+	var.m_varType = Tools::VT_LONGLONG;
+	var.m_val.llVal = m_headerID;
+	out.setProperty("IndexIdentifier", var);
 }
 
 void SpatialIndex::MVRTree::MVRTree::addCommand(ICommand* pCommand, CommandType ct)
@@ -564,6 +568,11 @@ bool SpatialIndex::MVRTree::MVRTree::isIndexValid()
 void SpatialIndex::MVRTree::MVRTree::getStatistics(IStatistics** out) const
 {
 	*out = new Statistics(m_stats);
+}
+
+void SpatialIndex::MVRTree::MVRTree::flush()
+{
+	storeHeader();
 }
 
 void SpatialIndex::MVRTree::MVRTree::initNew(Tools::PropertySet& ps)

@@ -437,7 +437,8 @@ namespace interopCreator
 
         private void axMap1_FileDropped(object sender, AxMapWinGIS._DMapEvents_FileDroppedEvent e)
         {
-                axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
+            txtResults.Text += $@"Opening {e.filename} after dropping.";
+            axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
         }
 
         private void button9_Click(object sender, EventArgs e)
@@ -460,6 +461,11 @@ namespace interopCreator
             var utils = new Utils();
             axMap1.DrawCircle(0, 0, 0.1, utils.ColorByName(tkMapColor.Yellow), true);
             axMap1.DrawLabel("ABC", 0, 0, 0);
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            axMap1.AddLayerFromFilename(@"D:\dev\MapwinGIS\GitHub\unittests\MapWinGISTests\Testdata\Issues\MWGIS-98\3dPoint.shp", tkFileOpenStrategy.fosAutoDetect, true);
         }
     }
 }

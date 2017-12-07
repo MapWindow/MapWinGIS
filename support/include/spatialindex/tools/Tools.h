@@ -5,7 +5,7 @@
  * Copyright (c) 2004, Marios Hadjieleftheriou
  *
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -28,7 +28,7 @@
 #pragma once
 
 
-#if (defined _WIN32 || defined _WIN64 || defined WIN32 || defined WIN64) && !defined __GNUC__
+#if (defined(_MSC_VER) && _MSC_VER < 1600) && !defined __GNUC__
   typedef __int8 int8_t;
   typedef __int16 int16_t;
   typedef __int32 int32_t;
@@ -38,12 +38,12 @@
   typedef unsigned __int32 uint32_t;
   typedef unsigned __int64 uint64_t;
 
-// Nuke this annoying warning.  See http://www.unknownroad.com/rtfm/VisualStudio/warningC4251.html
-#pragma warning( disable: 4251 )
-
 #else
   #include <stdint.h>
 #endif
+
+  // Nuke this annoying warning.  See http://www.unknownroad.com/rtfm/VisualStudio/warningC4251.html
+#pragma warning( disable: 4251 )
 
 #include <assert.h>
 #include <iostream>
@@ -59,9 +59,7 @@
 #include <stack>
 #include <list>
 #include <algorithm>
-// #include <cmath>
-// #include <limits>
-// #include <climits>
+#include <cwchar>
 
 #if HAVE_PTHREAD_H
   #include <pthread.h>
@@ -100,8 +98,9 @@ namespace Tools
 		VT_PVOID,
 		VT_EMPTY,
 		VT_LONGLONG,
-		VT_ULONGLONG
-	};
+		VT_ULONGLONG,
+        VT_PWCHAR
+    };
 
 	enum FileMode
 	{
@@ -288,6 +287,7 @@ namespace Tools
 			bool blVal;                // VT_BOOL
 			char* pcVal;               // VT_PCHAR
 			void* pvVal;               // VT_PVOID
+            wchar_t* pwcVal;
 		} m_val;
 	}; // Variant
 
@@ -301,8 +301,8 @@ namespace Tools
 		PropertySet(const byte* data);
 		virtual ~PropertySet();
 
-		Variant getProperty(std::string property);
-		void setProperty(std::string property, Variant& v);
+		Variant getProperty(std::string property) const;
+		void setProperty(std::string property, Variant const& v);
 		void removeProperty(std::string property);
 
 		virtual uint32_t getByteArraySize();
@@ -311,11 +311,11 @@ namespace Tools
 
 	private:
 		std::map<std::string, Variant> m_propertySet;
-#ifdef HAVE_PTHREAD_H
-			pthread_rwlock_t m_rwLock;
-#else
-			bool m_rwLock;
-#endif
+// #ifdef HAVE_PTHREAD_H
+//             pthread_rwlock_t m_rwLock;
+// #else
+//             bool m_rwLock;
+// #endif
 		friend std::ostream& Tools::operator<<(std::ostream& os, const Tools::PropertySet& p);
 	}; // PropertySet
 

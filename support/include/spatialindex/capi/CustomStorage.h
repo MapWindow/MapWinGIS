@@ -28,6 +28,8 @@
 
 #pragma once
 
+
+
 namespace SpatialIndex
 {
 	namespace StorageManager

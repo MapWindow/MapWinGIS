@@ -212,6 +212,8 @@ namespace MapWinGISTests
             // Create MapWinGIS:
             _axMap1 = new AxMap();
             _axMap1.CreateControl();
+            _axMap1.Width = 200;
+            _axMap1.Height = 200;
 
             // Create form and add MapWinGIS:
             var myForm = new Form();
@@ -222,20 +224,22 @@ namespace MapWinGISTests
             _axMap1.ShowRedrawTime = true;
             _axMap1.ShowVersionNumber = true;
             _axMap1.ShowZoomBar = true;
+            _axMap1.CursorMode = tkCursorMode.cmZoomIn;
 
             return _axMap1;
         }
 
-        public static string SaveSnapshot(AxMap axMap1, string baseName, bool shouldFail = false)
+        public static string SaveSnapshot2(AxMap axMap1, string baseName, bool shouldFail = false)
         {
             Application.DoEvents();
             var filename = Path.Combine(Path.GetTempPath(), baseName);
             DeleteFile(filename);
-
-            var img = axMap1.SnapShot2(0, axMap1.CurrentZoom, 1000);
+            
+            var img = axMap1.SnapShot2(0, axMap1.CurrentZoom + 10, 1000);
             if (img == null) throw new NullReferenceException("Snapshot is null");
 
             var retVal = img.Save(filename);
+            img.Close();
             if (!shouldFail)
             {
                 if (!retVal) throw new Exception("Snapshot could not be saved: " + img.ErrorMsg[img.LastErrorCode]);
@@ -247,6 +251,25 @@ namespace MapWinGISTests
                 DebugMsg("Expected error: " + img.ErrorMsg[img.LastErrorCode]);
                 if (retVal) throw new Exception("Image could be saved. This is unexpected.");
             }
+
+            return filename;
+        }
+
+        public static string SaveSnapshot(AxMap axMap1, string baseName, IExtents boundBox)
+        {
+            Application.DoEvents();
+            var filename = Path.Combine(Path.GetTempPath(), baseName);
+            DeleteFile(filename);
+
+            var img = axMap1.SnapShot(boundBox);
+            if (img == null) throw new NullReferenceException("Snapshot is null");
+
+            var retVal = img.Save(filename);
+            img.Close();
+            img = null;
+            if (!retVal) throw new Exception("Snapshot could not be saved: " + img.ErrorMsg[img.LastErrorCode]);
+            if (!File.Exists(filename)) throw new FileNotFoundException("The file doesn't exists.", filename);
+            DebugMsg(filename);
 
             return filename;
         }
@@ -266,20 +289,22 @@ namespace MapWinGISTests
             if (!File.Exists(fileLocation))
                 throw new Exception($"Input file [{fileLocation}] does not exists");
 
-            var bm = new Bitmap(fileLocation);
             var retVal = new Dictionary<Color, int>();
-            for (var y = 0; y < bm.Height; y++)
+            using (var bm = new Bitmap(fileLocation))
             {
-                for (var x = 0; x < bm.Width; x++)
+                for (var y = 0; y < bm.Height; y++)
                 {
-                    var color = bm.GetPixel(x, y);
-                    if (retVal.ContainsKey(color))
+                    for (var x = 0; x < bm.Width; x++)
                     {
-                        retVal[color]++;
-                    }
-                    else
-                    {
-                        retVal.Add(color, 1);
+                        var color = bm.GetPixel(x, y);
+                        if (retVal.ContainsKey(color))
+                        {
+                            retVal[color]++;
+                        }
+                        else
+                        {
+                            retVal.Add(color, 1);
+                        }
                     }
                 }
             }

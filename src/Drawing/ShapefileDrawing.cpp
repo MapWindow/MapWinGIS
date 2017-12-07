@@ -2255,7 +2255,7 @@ std::vector<long>* CShapefileDrawer::SelectShapesFromSpatialIndex(char* sFilenam
 	
 	IndexSearching::CIndexSearching *res = new IndexSearching::CIndexSearching();	
 
-	if (IndexSearching::selectShapesFromIndex((char *)baseName.c_str(), lowVals, highVals, IndexSearching::intersection, 100, res) == 0)
+	if (IndexSearching::selectShapesFromIndex((char *)baseName.c_str(), lowVals, highVals, IndexSearching::intersection, 100, res) == 0)	
 	{
 		std::vector<long>* selectResult = new std::vector<long>;	
 		selectResult->reserve(res->getLength());

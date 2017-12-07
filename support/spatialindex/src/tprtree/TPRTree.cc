@@ -5,7 +5,7 @@
  * Copyright (c) 2002, Marios Hadjieleftheriou
  *
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -355,7 +355,7 @@ void SpatialIndex::TPRTree::TPRTree::pointLocationQuery(const Point& query, IVis
 	rangeQuery(IntersectionQuery, r, v);
 }
 
-void SpatialIndex::TPRTree::TPRTree::nearestNeighborQuery(uint32_t k, const IShape& query, IVisitor& v, INearestNeighborComparator& nnc)
+void SpatialIndex::TPRTree::TPRTree::nearestNeighborQuery(uint32_t, const IShape&, IVisitor&, INearestNeighborComparator&)
 {
 	throw Tools::IllegalStateException("nearestNeighborQuery: not impelmented yet.");
 }
@@ -367,7 +367,7 @@ void SpatialIndex::TPRTree::TPRTree::nearestNeighborQuery(uint32_t k, const ISha
 	nearestNeighborQuery(k, query, v, nnc);
 }
 
-void SpatialIndex::TPRTree::TPRTree::selfJoinQuery(const IShape& query, IVisitor& v)
+void SpatialIndex::TPRTree::TPRTree::selfJoinQuery(const IShape&, IVisitor&)
 {
 	throw Tools::IllegalStateException("selfJoinQuery: not impelmented yet.");
 }
@@ -461,6 +461,11 @@ void SpatialIndex::TPRTree::TPRTree::getIndexProperties(Tools::PropertySet& out)
 	var.m_varType = Tools::VT_ULONG;
 	var.m_val.ulVal = m_pointPool.getCapacity();
 	out.setProperty("PointPoolCapacity", var);
+
+	var.m_varType = Tools::VT_LONGLONG;
+	var.m_val.llVal = m_headerID;
+	out.setProperty("IndexIdentifier", var);
+
 }
 
 void SpatialIndex::TPRTree::TPRTree::addCommand(ICommand* pCommand, CommandType ct)
@@ -586,6 +591,11 @@ bool SpatialIndex::TPRTree::TPRTree::isIndexValid()
 void SpatialIndex::TPRTree::TPRTree::getStatistics(IStatistics** out) const
 {
 	*out = new Statistics(m_stats);
+}
+
+void SpatialIndex::TPRTree::TPRTree::flush()
+{
+	storeHeader();
 }
 
 void SpatialIndex::TPRTree::TPRTree::initNew(Tools::PropertySet& ps)

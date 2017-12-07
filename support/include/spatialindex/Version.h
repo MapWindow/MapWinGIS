@@ -5,7 +5,7 @@
  * Copyright (c) 2003, Marios Hadjieleftheriou
  *
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -29,8 +29,8 @@
 
 #ifndef SIDX_VERSION_MAJOR
 #define SIDX_VERSION_MAJOR    1
-#define SIDX_VERSION_MINOR    8
-#define SIDX_VERSION_REV      1
+#define SIDX_VERSION_MINOR    9
+#define SIDX_VERSION_REV      0
 #define SIDX_VERSION_BUILD    0
 #endif
 
@@ -39,10 +39,10 @@
 #endif
 
 #ifndef SIDX_RELEASE_DATE
-#define SIDX_RELEASE_DATE     20130626
+#define SIDX_RELEASE_DATE     20170302
 #endif
 
 #ifndef SIDX_RELEASE_NAME
-#define SIDX_RELEASE_NAME     "1.8.1"
+#define SIDX_RELEASE_NAME     "1.9.0"
 #endif
 

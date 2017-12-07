@@ -158,6 +158,7 @@ namespace SpatialIndex
 		virtual void loadByteArray(const id_type id, uint32_t& len, byte** data) = 0;
 		virtual void storeByteArray(id_type& id, const uint32_t len, const byte* const data) = 0;
 		virtual void deleteByteArray(const id_type id) = 0;
+		virtual void flush() = 0;
 		virtual ~IStorageManager() {}
 	}; // IStorageManager
 
@@ -203,6 +204,7 @@ namespace SpatialIndex
 		virtual void addCommand(ICommand* in, CommandType ct) = 0;
 		virtual bool isIndexValid() = 0;
 		virtual void getStatistics(IStatistics** out) const = 0;
+		virtual void flush() = 0;
 		virtual ~ISpatialIndex() {}
 
 	}; // ISpatialIndex

@@ -543,13 +543,22 @@ namespace MapWinGISTests
             // Get map to create snapshot:
             _axMap1 = Helper.GetAxMap();
             _axMap1.TileProvider = tkTileProvider.ProviderNone;
+            _axMap1.ZoomBehavior = tkZoomBehavior.zbDefault;
+            _axMap1.KnownExtents = tkKnownExtents.keWorld;
 
             var layerHandle = _axMap1.AddLayer(sf, true);
             Assert.IsTrue(layerHandle > -1, "Can't add layer");
             _axMap1.ZoomToLayer(layerHandle);
-            var snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-without.jpg");
+            var snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-without.jpg", _axMap1.get_layerExtents(layerHandle));
             var colorsWithout = Helper.GetColorsFromBitmap(snapshot);
+            Assert.IsTrue(colorsWithout.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
             Console.WriteLine("Number of unique colors without index: " + colorsWithout.Count);
+            // Zoom in:
+            _axMap1.ZoomIn(0.3);
+            snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-without-zoomin.jpg", _axMap1.get_layerExtents(layerHandle));
+            var colorsWithoutZoomIn = Helper.GetColorsFromBitmap(snapshot);
+            Assert.IsTrue(colorsWithoutZoomIn.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
+            Console.WriteLine("Number of unique colors without index zoom in: " + colorsWithoutZoomIn.Count);
 
             // Create spatial index:
             var retVal = sf.CreateSpatialIndex(sfName);
@@ -557,14 +566,21 @@ namespace MapWinGISTests
             Assert.IsTrue(sf.IsSpatialIndexValid(), "Spatial index is invalid");
             sf.UseSpatialIndex = true;
             _axMap1.ZoomToLayer(layerHandle);
-            snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-with.jpg");
+            snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-with.jpg", _axMap1.get_layerExtents(layerHandle));
             var colorsWith = Helper.GetColorsFromBitmap(snapshot);
+            Assert.IsTrue(colorsWith.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
             Console.WriteLine("Number of unique colors with index: " + colorsWith.Count);
+            // Zoom in:
+            _axMap1.ZoomIn(0.3);
+            snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-with-zoomin.jpg", _axMap1.get_layerExtents(layerHandle));
+            var colorsWithZoomIn = Helper.GetColorsFromBitmap(snapshot);
+            Console.WriteLine("Number of unique colors with index zoom in: " + colorsWithZoomIn.Count);
 
             retVal = sf.Close();
             Assert.IsTrue(retVal, "Can't close shapefile");
-
-            Assert.IsTrue(colorsWith.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
+            
+            Assert.AreEqual(colorsWith.Count, colorsWithout.Count, "The snapshots no zoom are not identical");
+            Assert.AreEqual(colorsWithZoomIn.Count, colorsWithoutZoomIn.Count, "The snapshots zoom in are not identical");
         }
 
 

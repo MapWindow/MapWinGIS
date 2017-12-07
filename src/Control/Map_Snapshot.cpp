@@ -265,6 +265,10 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 		return NULL;
 	}
 
+	// PM dec 2017
+	if (Width == 0) Width = 100;
+	if (Height == 0) Height = 100;
+
 	bool createDC = (snapDC == NULL);
 	CBitmap * bmp = NULL;
 	

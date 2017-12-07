@@ -6,7 +6,7 @@
  * Copyright (c) 2009, Howard Butler
  *
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -44,53 +44,194 @@ IndexH Index_CreateWithStream( IndexPropertyH properties,
 void Index_Destroy(IndexH index);
 IndexPropertyH Index_GetProperties(IndexH index);
 
-RTError Index_DeleteData(	IndexH index, 
-									int64_t id, 
-									double* pdMin, 
-									double* pdMax, 
+RTError Index_DeleteData(	IndexH index,
+									int64_t id,
+									double* pdMin,
+									double* pdMax,
 									uint32_t nDimension);
-							
-RTError Index_InsertData(	IndexH index, 
-									int64_t id, 
-									double* pdMin, 
-									double* pdMax, 
-									uint32_t nDimension, 
-									const uint8_t* pData, 
+
+SIDX_C_DLL RTError Index_DeleteTPData( IndexH index,
+                  int64_t id,
+                  double* pdMin,
+                  double* pdMax,
+                  double* pdVMin,
+                  double* pdVMax,
+                  double tStart,
+                  double tEnd,
+                  uint32_t nDimension
+                  );
+
+SIDX_C_DLL RTError Index_DeleteMVRData( IndexH index,
+									int64_t id,
+									double* pdMin,
+									double* pdMax,
+									double tStart,
+									double tEnd,
+									uint32_t nDimension
+									);
+
+RTError Index_InsertData(	IndexH index,
+									int64_t id,
+									double* pdMin,
+									double* pdMax,
+									uint32_t nDimension,
+									const uint8_t* pData,
 									size_t nDataLength);
-							
+
+SIDX_C_DLL RTError Index_InsertTPData( IndexH index,
+  int64_t id,
+  double* pdMin,
+  double* pdMax,
+  double* pdVMin,
+  double* pdVMax,
+  double tStart,
+  double tEnd,
+  uint32_t nDimension,
+  const uint8_t* pData,
+  size_t nDataLength);
+
+SIDX_C_DLL RTError Index_InsertMVRData( IndexH index,
+	int64_t id,
+	double* pdMin,
+	double* pdMax,
+	double tStart,
+	double tEnd,
+	uint32_t nDimension,
+	const uint8_t* pData,
+	size_t nDataLength);
+
 uint32_t Index_IsValid(IndexH index);
 
-RTError Index_Intersects_obj(	IndexH index, 
-										double* pdMin, 
-										double* pdMax, 
-										uint32_t nDimension, 
-										IndexItemH** items, 
+SIDX_C_DLL RTError Index_TPIntersects_obj(  IndexH index,
+                    double* pdMin,
+                    double* pdMax,
+                    double* pdVMin,
+                    double* pdVMax,
+                    double tStart,
+                    double tEnd,
+                    uint32_t nDimension,
+                    IndexItemH** items,
+                    uint64_t* nResults);
+
+SIDX_C_DLL RTError Index_MVRIntersects_obj(  IndexH index,
+										double* pdMin,
+										double* pdMax,
+										double tStart,
+										double tEnd,
+										uint32_t nDimension,
+										IndexItemH** items,
 										uint64_t* nResults);
 
-RTError Index_Intersects_id(	IndexH index, 
-										double* pdMin, 
-										double* pdMax, 
-										uint32_t nDimension, 
-										int64_t** items, 
+RTError Index_Intersects_obj(	IndexH index,
+										double* pdMin,
+										double* pdMax,
+										uint32_t nDimension,
+										IndexItemH** items,
 										uint64_t* nResults);
-										
-RTError Index_Intersects_count(	IndexH index, 
-										double* pdMin, 
-										double* pdMax, 
-										uint32_t nDimension, 
+
+SIDX_C_DLL RTError Index_TPIntersects_id(  IndexH index,
+                    double* pdMin,
+                    double* pdMax,
+                    double* pdVMin,
+                    double* pdVMax,
+                    double tStart,
+                    double tEnd,
+                    uint32_t nDimension,
+                    int64_t** ids,
+                    uint64_t* nResults);
+
+SIDX_C_DLL RTError Index_MVRIntersects_id(  IndexH index,
+										double* pdMin,
+										double* pdMax,
+										double tStart,
+										double tEnd,
+										uint32_t nDimension,
+										int64_t** ids,
 										uint64_t* nResults);
-RTError Index_NearestNeighbors_obj(IndexH index, 
-											double* pdMin, 
-											double* pdMax, 
-											uint32_t nDimension, 
-											IndexItemH** items, 
+
+RTError Index_Intersects_id(	IndexH index,
+										double* pdMin,
+										double* pdMax,
+										uint32_t nDimension,
+										int64_t** items,
+										uint64_t* nResults);
+
+SIDX_C_DLL RTError Index_TPIntersects_count(	  IndexH index,
+                    double* pdMin,
+                    double* pdMax,
+                    double* pdVMin,
+                    double* pdVMax,
+                    double tStart,
+                    double tEnd,
+                    uint32_t nDimension,
+                    uint64_t* nResults);
+
+SIDX_C_DLL RTError Index_MVRIntersects_count(	  IndexH index,
+										double* pdMin,
+										double* pdMax,
+										double tStart,
+										double tEnd,
+										uint32_t nDimension,
+										uint64_t* nResults);
+
+RTError Index_Intersects_count(	IndexH index,
+										double* pdMin,
+										double* pdMax,
+										uint32_t nDimension,
+										uint64_t* nResults);
+
+SIDX_C_DLL RTError Index_TPNearestNeighbors_obj(IndexH index,
+                      double* pdMin,
+                      double* pdMax,
+                      double* pdVMin,
+                      double* pdVMax,
+                      double tStart,
+                      double tEnd,
+                      uint32_t nDimension,
+                      IndexItemH** items,
+                      uint64_t* nResults);
+
+SIDX_C_DLL RTError Index_MVRNearestNeighbors_obj(IndexH index,
+											double* pdMin,
+											double* pdMax,
+											double tStart,
+											double tEnd,
+											uint32_t nDimension,
+											IndexItemH** items,
 											uint64_t* nResults);
 
-RTError Index_NearestNeighbors_id( IndexH index, 
-											double* pdMin, 
-											double* pdMax, 
-											uint32_t nDimension, 
-											int64_t** items, 
+RTError Index_NearestNeighbors_obj(IndexH index,
+											double* pdMin,
+											double* pdMax,
+											uint32_t nDimension,
+											IndexItemH** items,
+											uint64_t* nResults);
+
+SIDX_C_DLL RTError Index_TPNearestNeighbors_id(IndexH index,
+                      double* pdMin,
+                      double* pdMax,
+                      double* pdVMin,
+                      double* pdVMax,
+                      double tStart,
+                      double tEnd,
+                      uint32_t nDimension,
+                      int64_t** ids,
+                      uint64_t* nResults);
+
+SIDX_C_DLL RTError Index_MVRNearestNeighbors_id(IndexH index,
+											double* pdMin,
+											double* pdMax,
+											double tStart,
+											double tEnd,
+											uint32_t nDimension,
+											int64_t** ids,
+											uint64_t* nResults);
+
+RTError Index_NearestNeighbors_id( IndexH index,
+											double* pdMin,
+											double* pdMax,
+											uint32_t nDimension,
+											int64_t** items,
 											uint64_t* nResults);
 
 RTError Index_GetBounds(	IndexH index,
@@ -99,18 +240,25 @@ RTError Index_GetBounds(	IndexH index,
 									uint32_t* nDimension);
 
 
-SIDX_C_DLL RTError Index_GetLeaves( IndexH index, 
+SIDX_C_DLL RTError Index_GetLeaves( IndexH index,
 									uint32_t* nLeafNodes,
-									uint32_t** nLeafSizes, 
-									int64_t** nLeafIDs, 
+									uint32_t** nLeafSizes,
+									int64_t** nLeafIDs,
 									int64_t*** nLeafChildIDs,
-									double*** pppdMin, 
-									double*** pppdMax, 
+									double*** pppdMin,
+									double*** pppdMax,
 									uint32_t* nDimension);
+
+RTError Index_SetResultSetOffset(IndexH index, int64_t value);
+int64_t Index_GetResultSetOffset(IndexH index);
+
+RTError Index_SetResultSetLimit(IndexH index, int64_t value);
+int64_t Index_GetResultSetLimit(IndexH index);
 
 void Index_DestroyObjResults(IndexItemH* results, uint32_t nResults);
 void Index_ClearBuffer(IndexH index);
 void Index_Free(void* object);
+void Index_Flush(IndexH index);
 
 void IndexItem_Destroy(IndexItemH item);
 int64_t IndexItem_GetID(IndexItemH item);
@@ -121,7 +269,7 @@ RTError IndexItem_GetBounds(	IndexItemH item,
 										double** ppdMin,
 										double** ppdMax,
 										uint32_t* nDimension);
-									
+
 IndexPropertyH IndexProperty_Create();
 void IndexProperty_Destroy(IndexPropertyH hProp);
 
@@ -206,7 +354,12 @@ int64_t IndexProperty_GetIndexID(IndexPropertyH iprop);
 SIDX_C_DLL void* SIDX_NewBuffer(size_t bytes);
 SIDX_C_DLL void  SIDX_DeleteBuffer(void* buffer);
 
+RTError IndexProperty_SetResultSetLimit(IndexPropertyH iprop, uint64_t value);
+uint64_t IndexProperty_GetResultSetLimit(IndexPropertyH iprop);
+
 SIDX_C_DLL char* SIDX_Version();
+
+SIDX_C_DLL char* Error_GetLastErrorMsg(void);
 
 IDX_C_END
 

@@ -45,14 +45,14 @@ Leaf::Leaf(SpatialIndex::RTree::RTree* pTree, id_type id): Node(pTree, id, 0, pT
 {
 }
 
-NodePtr Leaf::chooseSubtree(const Region& mbr, uint32_t level, std::stack<id_type>& pathBuffer)
+NodePtr Leaf::chooseSubtree(const Region&, uint32_t, std::stack<id_type>&)
 {
 	// should make sure to relinquish other PoolPointer lists that might be pointing to the
 	// same leaf.
 	return NodePtr(this, &(m_pTree->m_leafPool));
 }
 
-NodePtr Leaf::findLeaf(const Region& mbr, id_type id, std::stack<id_type>& pathBuffer)
+NodePtr Leaf::findLeaf(const Region& mbr, id_type id, std::stack<id_type>&)
 {
 	for (uint32_t cChild = 0; cChild < m_children; ++cChild)
 	{
@@ -109,13 +109,13 @@ void Leaf::split(uint32_t dataLength, byte* pData, Region& mbr, id_type id, Node
 	}
 }
 
-void Leaf::deleteData(id_type id, std::stack<id_type>& pathBuffer)
+void Leaf::deleteData(const Region& mbr, id_type id, std::stack<id_type>& pathBuffer)
 {
 	uint32_t child;
 
 	for (child = 0; child < m_children; ++child)
 	{
-		if (m_pIdentifier[child] == id) break;
+		if (m_pIdentifier[child] == id && mbr == *(m_ptrMBR[child])) break;
 	}
 
 	deleteEntry(child);

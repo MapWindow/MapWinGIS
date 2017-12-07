@@ -31,7 +31,7 @@ namespace MapWinGISTests
             _axMap1.ClearDrawings();
             var dhandle = _axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
             _axMap1.DrawCircle(24.0, 57.0, 0.1, 0, false);
-            Helper.SaveSnapshot(_axMap1, "DrawCircle.jpg");
+            Helper.SaveSnapshot2(_axMap1, "DrawCircle.jpg");
         }
 
         [TestMethod]
@@ -41,7 +41,7 @@ namespace MapWinGISTests
             var dhandle = _axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
             var utils = new Utils();
             _axMap1.DrawCircleEx(dhandle, 24.0, 57.0, 0.1, utils.ColorByName(tkMapColor.IndianRed), true);
-            Helper.SaveSnapshot(_axMap1, "DrawCircleEx.jpg");
+            Helper.SaveSnapshot2(_axMap1, "DrawCircleEx.jpg");
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace MapWinGISTests
             Assert.AreEqual(dhandle, retVal, "Unexpected handle");
             retVal = _axMap1.DrawLabel("Воздух", 24.05, 57.05, 0.0);
             Assert.AreEqual(dhandle, retVal, "Unexpected handle");
-            Helper.SaveSnapshot(_axMap1, "DrawLabel.jpg");
+            Helper.SaveSnapshot2(_axMap1, "DrawLabel.jpg");
         }
 
         [TestMethod]
@@ -63,7 +63,7 @@ namespace MapWinGISTests
             var dhandle = _axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
             var retVal = _axMap1.DrawLabelEx(dhandle, "Воздух", 24.0, 57.0, 45.0);
             Assert.AreEqual(dhandle, retVal, "Unexpected handle");
-            Helper.SaveSnapshot(_axMap1, "DrawLabelEx.jpg");
+            Helper.SaveSnapshot2(_axMap1, "DrawLabelEx.jpg");
         }
 
         [TestMethod]
@@ -90,8 +90,8 @@ namespace MapWinGISTests
         public void SaveSnapshot2()
         {
             // MWGIS-80
-            Helper.SaveSnapshot(_axMap1, "SaveSnapshot2.jpg");
-            Helper.SaveSnapshot(_axMap1, "SaveSnapshot2", true);
+            Helper.SaveSnapshot2(_axMap1, "SaveSnapshot2.jpg");
+            Helper.SaveSnapshot2(_axMap1, "SaveSnapshot2", true);
         }
 
  

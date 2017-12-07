@@ -1,9 +1,9 @@
 /******************************************************************************
  * Project:  libsidx - A C API wrapper around libspatialindex
- * Purpose:	 C++ object declarations to implement a query of the index's leaves.
+ * Purpose:  C++ object declarations to implement utilities.
  * Author:   Howard Butler, hobu.inc@gmail.com
  ******************************************************************************
- * Copyright (c) 2009, Howard Butler
+ * Copyright (c) 2014, Howard Butler
  *
  * All rights reserved.
  * 
@@ -28,44 +28,17 @@
 
 #pragma once
 
-class LeafQueryResult;
-
-class LeafQuery : public SpatialIndex::IQueryStrategy
-{
-private:
-	std::queue<SpatialIndex::id_type> m_ids;
-	std::vector<LeafQueryResult> m_results;
-public:
-
-	LeafQuery();
-	~LeafQuery() { }
-	void getNextEntry(	const SpatialIndex::IEntry& entry, 
-						SpatialIndex::id_type& nextEntry, 
-						bool& hasNext);
-	std::vector<LeafQueryResult> const& GetResults() const {return m_results;}
-};
-
-class LeafQueryResult 
-{
-private:
-    std::vector<SpatialIndex::id_type> ids;
-    SpatialIndex::Region* bounds;
-    uint32_t m_id;
-    LeafQueryResult();
-public:
-    LeafQueryResult(uint32_t id) : bounds(0), m_id(id){}
-    ~LeafQueryResult() {if (bounds!=0) delete bounds;}
-
-    /// Copy constructor.
-    LeafQueryResult(LeafQueryResult const& other);
-
-    /// Assignment operator.
-    LeafQueryResult& operator=(LeafQueryResult const& rhs);
-        
-    std::vector<SpatialIndex::id_type> const& GetIDs() const;
-    void SetIDs(std::vector<SpatialIndex::id_type>& v);
-    const SpatialIndex::Region* GetBounds() const;
-    void SetBounds(const SpatialIndex::Region*  b);
-    uint32_t getIdentifier() const {return m_id;}
-    void setIdentifier(uint32_t v) {m_id = v;}
-};
+#ifndef SIDX_C_DLL
+#if defined(_MSC_VER)
+#  define SIDX_C_DLL     __declspec(dllexport)
+#  define     __declspec(dllexport)
+#else
+#  if defined(USE_GCC_VISIBILITY_FLAG)
+#    define SIDX_C_DLL     __attribute__ ((visibility("default")))
+#    define     __attribute__ ((visibility("default")))
+#  else
+#    define SIDX_C_DLL
+#    define SIDX_DLL
+#  endif
+#endif
+#endif
