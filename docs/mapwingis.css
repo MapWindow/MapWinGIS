@@ -1,0 +1,33 @@
+﻿/* Make the header fixed at the top */
+#top {
+  position: fixed;
+  width: 100vw;
+  top: 0;
+  background: white;
+}
+.header {
+  position: fixed;
+  width: 100vw;
+  top: 137px;
+}
+.header > div.summary {
+  padding-right: 25px;
+}
+div.headertitle {
+  padding: 5px 5px 0 10px;
+}
+div.headertitle > .title {
+  margin: 0 2px;
+}
+div.contents {
+  margin-top: 180px;
+}
+#MSearchResultsWindow {
+  position: fixed;
+  border-radius: 3px;    
+  padding-right: 2px;
+}
+
+.bold {
+  font-weight: bold;
+}
