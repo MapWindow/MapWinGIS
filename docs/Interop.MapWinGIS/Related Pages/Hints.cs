@@ -29,7 +29,7 @@
 /// 
 /// <b>B. Error handling and progress information.</b> \n\n
 /// By design MapWinGIS doesn't throw exceptions to return the information about errors. If an unhandled exception is still thrown,
-/// in the most cases it should be treated as a bug and reported to the <a href = "http://mapwingis.codeplex.com/workitem/list/basic">Issue tracker.</a>\n
+/// in the most cases it should be treated as a bug and reported to the <a href="https://github.com/MapWindow/MapWinGIS/issues" target="_blank">Issue tracker.</a>\n
 /// 
 /// To notify a client about success or failure of certain method the following approaches are used:
 /// -# A boolean return value (for C++ it's VARIANT_BOOL* [out, retval] parameter);

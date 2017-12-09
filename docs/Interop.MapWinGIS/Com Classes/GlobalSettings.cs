@@ -551,16 +551,14 @@ namespace MapWinGIS
         public string GdalPluginPath { get; set;}
 
         /// <summary>
-        /// Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available. See 
-        /// <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+        /// Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available.
         /// </summary>
         /// \new493 Added in version 4.9.3
         public string BingApiKey { get; set;}
 
         /// <summary>
         /// Sets application credentials for Here Maps online tiles. 
-        /// Without these credentials Here Maps providers are not available. See 
-        /// <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+        /// Without these credentials Here Maps providers are not available. 
         /// </summary>
         /// <param name="appId">Application Id. Can be obtained by registering on the site of the service.</param>
         /// <param name="appCode">Application code. Can be obtained by registering on the site of the service.</param>
