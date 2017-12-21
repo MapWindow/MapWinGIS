@@ -255,14 +255,22 @@ namespace MapWinGISTests
             return filename;
         }
 
-        public static string SaveSnapshot(AxMap axMap1, string baseName, IExtents boundBox)
+        public static string SaveSnapshot(AxMap axMap1, string baseName, IExtents boundBox, double extentEnlarger = 1d)
         {
             Application.DoEvents();
             var filename = Path.Combine(Path.GetTempPath(), baseName);
             DeleteFile(filename);
 
+            if ((boundBox.Width * boundBox.Height).Equals(0))
+            {
+                double xmin, ymin, xmax, ymax, zmin, zmax;
+                boundBox.GetBounds(out xmin, out ymin, out zmin, out xmax, out ymax, out zmax);
+                boundBox.SetBounds(xmin - extentEnlarger, ymin - extentEnlarger, zmin, xmax + extentEnlarger, ymax + extentEnlarger, zmax);
+            }
+
             var img = axMap1.SnapShot(boundBox);
-            if (img == null) throw new NullReferenceException("Snapshot is null");
+            if (img == null)
+                throw new NullReferenceException("Snapshot is null: " + axMap1.get_ErrorMsg(axMap1.LastErrorCode));
 
             var retVal = img.Save(filename);
             img.Close();
@@ -281,7 +289,8 @@ namespace MapWinGISTests
         /// <param name="filename">The filename.</param>
         public static void DeleteFile(string filename)
         {
-            if (File.Exists(filename)) File.Delete(filename);
+            if (File.Exists(filename))
+                File.Delete(filename);
         }
 
         public static Dictionary<Color, int> GetColorsFromBitmap(string fileLocation)

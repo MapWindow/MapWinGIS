@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using System.Windows.Forms;
 using AxMapWinGIS;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -529,61 +528,298 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
-        public void SpatialIndex()
+        public void SpatialIndexMWGIS98()
         {
             const string sfName = @"Issues\MWGIS-98\3dPoint.shp";
+            TestSpatialIndex(sfName);
+            GetInfoShapefile(sfName);
+        }
 
+        [TestMethod]
+        public void SpatialIndexAllTypes()
+        {
+            var numErrors = 0;
+            foreach (var filename in Directory.EnumerateFiles(@"sf", "*.shp", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    Console.WriteLine("***************************");
+                    TestSpatialIndex(filename);
+                    GetInfoShapefile(filename);
+                    Console.WriteLine("Test was successful");
+                    Console.WriteLine();
+                }
+                catch (Exception e)
+                {
+                    numErrors++;
+                    Console.WriteLine(e);
+                    // Don't stop
+                }
+            }
+
+            Assert.AreEqual(0, numErrors);
+        }
+
+        private void TestSpatialIndex(string sfName)
+        {
             // Delete previous spatial index files:
             Helper.DeleteFile(Path.ChangeExtension(sfName, ".mwd"));
             Helper.DeleteFile(Path.ChangeExtension(sfName, ".mwx"));
 
             var sf = Helper.OpenShapefile(sfName, true, this);
-            Console.WriteLine("Numshapes: " + sf.NumShapes);
+            bool retVal;
+            var baseName = Path.GetFileNameWithoutExtension(sfName);
+            try
+            {
+                Console.WriteLine("Numshapes: " + sf.NumShapes);
 
-            // Get map to create snapshot:
-            _axMap1 = Helper.GetAxMap();
-            _axMap1.TileProvider = tkTileProvider.ProviderNone;
-            _axMap1.ZoomBehavior = tkZoomBehavior.zbDefault;
-            _axMap1.KnownExtents = tkKnownExtents.keWorld;
+                // Get map to create snapshot:
+                _axMap1 = Helper.GetAxMap();
+                _axMap1.TileProvider = tkTileProvider.ProviderNone;
+                _axMap1.ZoomBehavior = tkZoomBehavior.zbDefault;
+                _axMap1.KnownExtents = tkKnownExtents.keWorld;
 
-            var layerHandle = _axMap1.AddLayer(sf, true);
-            Assert.IsTrue(layerHandle > -1, "Can't add layer");
-            _axMap1.ZoomToLayer(layerHandle);
-            var snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-without.jpg", _axMap1.get_layerExtents(layerHandle));
-            var colorsWithout = Helper.GetColorsFromBitmap(snapshot);
-            Assert.IsTrue(colorsWithout.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
-            Console.WriteLine("Number of unique colors without index: " + colorsWithout.Count);
-            // Zoom in:
-            _axMap1.ZoomIn(0.3);
-            snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-without-zoomin.jpg", _axMap1.get_layerExtents(layerHandle));
-            var colorsWithoutZoomIn = Helper.GetColorsFromBitmap(snapshot);
-            Assert.IsTrue(colorsWithoutZoomIn.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
-            Console.WriteLine("Number of unique colors without index zoom in: " + colorsWithoutZoomIn.Count);
+                var layerHandle = _axMap1.AddLayer(sf, true);
+                Assert.IsTrue(layerHandle > -1, "Can't add layer");
+                _axMap1.ZoomToLayer(layerHandle);
+                var snapshot = Helper.SaveSnapshot(_axMap1, $"{baseName}-without.jpg", _axMap1.get_layerExtents(layerHandle), 1);
+                var colorsWithout = Helper.GetColorsFromBitmap(snapshot);
+                Assert.IsTrue(colorsWithout.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
+                Console.WriteLine("Number of unique colors without index: " + colorsWithout.Count);
+                // Zoom in:
+                _axMap1.ZoomIn(0.3);
+                snapshot = Helper.SaveSnapshot(_axMap1, $"{baseName}-without-zoomin.jpg", _axMap1.get_layerExtents(layerHandle), 2);
+                var colorsWithoutZoomIn = Helper.GetColorsFromBitmap(snapshot);
+                Assert.IsTrue(colorsWithoutZoomIn.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
+                Console.WriteLine("Number of unique colors without index zoom in: " + colorsWithoutZoomIn.Count);
 
-            // Create spatial index:
-            var retVal = sf.CreateSpatialIndex(sfName);
-            Assert.IsTrue(retVal, "Can't create spatial index");
-            Assert.IsTrue(sf.IsSpatialIndexValid(), "Spatial index is invalid");
-            sf.UseSpatialIndex = true;
-            _axMap1.ZoomToLayer(layerHandle);
-            snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-with.jpg", _axMap1.get_layerExtents(layerHandle));
-            var colorsWith = Helper.GetColorsFromBitmap(snapshot);
-            Assert.IsTrue(colorsWith.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
-            Console.WriteLine("Number of unique colors with index: " + colorsWith.Count);
-            // Zoom in:
-            _axMap1.ZoomIn(0.3);
-            snapshot = Helper.SaveSnapshot(_axMap1, "3dPoint-with-zoomin.jpg", _axMap1.get_layerExtents(layerHandle));
-            var colorsWithZoomIn = Helper.GetColorsFromBitmap(snapshot);
-            Console.WriteLine("Number of unique colors with index zoom in: " + colorsWithZoomIn.Count);
+                // Create spatial index:
+                retVal = sf.CreateSpatialIndex(sfName);
+                Assert.IsTrue(retVal, "Can't create spatial index: " + sf.ErrorMsg[sf.LastErrorCode]);
+                Assert.IsTrue(sf.IsSpatialIndexValid(), "Spatial index is invalid");
+                sf.UseSpatialIndex = true;
+                _axMap1.ZoomToLayer(layerHandle);
+                snapshot = Helper.SaveSnapshot(_axMap1, $"{baseName}-with.jpg", _axMap1.get_layerExtents(layerHandle), 1);
+                var colorsWith = Helper.GetColorsFromBitmap(snapshot);
+                Assert.IsTrue(colorsWith.Count > 1, "No colors found. Most likely the points are not loaded on the map.");
+                Console.WriteLine("Number of unique colors with index: " + colorsWith.Count);
 
-            retVal = sf.Close();
-            Assert.IsTrue(retVal, "Can't close shapefile");
-            
-            Assert.AreEqual(colorsWith.Count, colorsWithout.Count, "The snapshots no zoom are not identical");
-            Assert.AreEqual(colorsWithZoomIn.Count, colorsWithoutZoomIn.Count, "The snapshots zoom in are not identical");
+                // Zoom in:
+                _axMap1.ZoomIn(0.3);
+                snapshot = Helper.SaveSnapshot(_axMap1, $"{baseName}-with-zoomin.jpg", _axMap1.get_layerExtents(layerHandle), 2);
+                var colorsWithZoomIn = Helper.GetColorsFromBitmap(snapshot);
+                Console.WriteLine("Number of unique colors with index zoom in: " + colorsWithZoomIn.Count);
+
+                Assert.AreEqual(colorsWith.Count, colorsWithout.Count, "The snapshots no zoom are not identical");
+                Assert.AreEqual(colorsWithZoomIn.Count, colorsWithoutZoomIn.Count, "The snapshots zoom in are not identical");
+            }
+            finally
+            {
+                retVal = sf.Close();
+                Assert.IsTrue(retVal, "Can't close shapefile");
+            }
         }
 
+        [TestMethod]
+        public void GetInfoAllShapefiles()
+        {
+            // Call EnumerateFiles in a foreach-loop.
+            foreach (var filename in Directory.EnumerateFiles(@"D:\dev\MapwinGIS\GitHub\unittests\MapWinGISTests\Testdata\sf", "*.shp", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    Console.WriteLine("***************************");
+                    GetInfoShapefile(filename);
+                    Console.WriteLine();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    // Don't stop
+                }
+            }
+        }
 
+        [TestMethod]
+        public void PointM()
+        {
+            const string filename = @"d:\dev\GIS-Data\Issues\MWGIS-69 Merge M\shp1_point_m\SHP1_POINT_M.shp";
+            var retVal = GetInfoShapefile(filename);
+            Assert.IsTrue(retVal);
+        }
+
+        [TestMethod]
+        public void UpdatePolygonZ()
+        {
+            const string filename = @"D:\dev\GIS-Data\Issues\CORE-198-crash on view properties\ND_-_Export.shp";
+            var retVal = GetInfoShapefile(filename);
+            Assert.IsTrue(retVal);
+
+            // Update Z Value:
+            var sf = new Shapefile { GlobalCallback = this };
+            if (!sf.Open(filename))
+                throw new Exception("Cannot open this file: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+            // Go into edit mode:
+            if (!sf.StartEditingShapes())
+                throw new Exception("Cannot StartEditingShapes: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+            var shp = sf.Shape[0];
+            var numPoints = shp.numPoints;
+            for (var i = 0; i < numPoints; i++)
+            {
+                // Add the index as Z value
+                shp.put_Z(i, i + 10);
+            }
+
+            // Save and close shapefile:
+            if (!sf.StopEditingShapes())
+                throw new Exception("Cannot StopEditingShapes: " + sf.ErrorMsg[sf.LastErrorCode]);
+            if (!sf.Close())
+                throw new Exception("Cannot close shapefile: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+            retVal = GetInfoShapefile(filename);
+            Assert.IsTrue(retVal);
+
+        }
+
+        private bool GetInfoShapefile(string filename)
+        {
+            if (!File.Exists(filename))
+                throw new FileNotFoundException("Cannot find file", filename);
+
+            Console.WriteLine("Working with " + filename);
+            var sf = new Shapefile { GlobalCallback = this };
+            bool retVal;
+
+            try
+            {
+                if (!sf.Open(filename))
+                    throw new Exception("Cannot open this file: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+                Console.WriteLine("ShapefileType: " + sf.ShapefileType);
+                Console.WriteLine("ShapefileType2D: " + sf.ShapefileType2D);
+                Console.WriteLine("Num fields: " + sf.NumFields);
+                Console.WriteLine("Num shapes: " + sf.NumShapes);
+                Console.WriteLine("HasSpatialIndex: " + sf.HasSpatialIndex);
+                Console.WriteLine("Projection: " + sf.Projection);
+                if (sf.NumShapes < 100)
+                {
+                    Console.WriteLine("HasInvalidShapes: " + sf.HasInvalidShapes());
+                }
+                else
+                {
+                    Console.WriteLine("Warning. Large number of shapes. Skipping HasInvalidShapes check.");
+                }
+
+                if (!sf.GeoProjection.IsEmpty)
+                {
+                    int epsgCode;
+                    sf.GeoProjection.TryAutoDetectEpsg(out epsgCode);
+                    Console.WriteLine("epsgCode: " + epsgCode);
+                }
+
+                if (sf.NumShapes <= 0)
+                    throw new Exception("Shapefile has no shapes");
+
+                var shp = sf.Shape[0];
+                if (shp == null)
+                    throw new NullReferenceException("Cannot get shape: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+                Console.WriteLine("numPoints: " + shp.numPoints);
+                Console.WriteLine("NumParts: " + shp.NumParts);
+                Console.WriteLine("ShapeType: " + shp.ShapeType);
+                Console.WriteLine("ShapeType2D: " + shp.ShapeType2D);
+                var isValid = shp.IsValid;
+                Console.WriteLine("IsValid: " + isValid);
+                if (!isValid)
+                {
+                    Console.WriteLine("IsValidReason: " + shp.IsValidReason);
+                }
+
+                if (sf.ShapefileType != shp.ShapeType)
+                    Console.WriteLine("Warning shape(file) type mismatch");
+
+                double x = 0d, y = 0d;
+                double z, m;
+                if (!shp.XY[0, ref x, ref y])
+                    throw new Exception("Cannot get XY from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                Console.WriteLine("X: " + x);
+                Console.WriteLine("Y: " + y);
+
+                switch (shp.ShapeType)
+                {
+                    case ShpfileType.SHP_NULLSHAPE:
+                        throw new Exception("Shape is a NULLSHAPE");
+                    case ShpfileType.SHP_POINT:
+                        break;
+                    case ShpfileType.SHP_POLYLINE:
+                        Console.WriteLine("Length: " + shp.Length);
+                        break;
+                    case ShpfileType.SHP_POLYGON:
+                        Console.WriteLine("Area: " + shp.Area);
+                        Console.WriteLine("Perimeter: " + shp.Perimeter);
+                        break;
+                    case ShpfileType.SHP_MULTIPOINT:
+                        break;
+                    case ShpfileType.SHP_POINTZ:
+                        if (!shp.get_Z(0, out z))
+                            throw new Exception("Cannot get Z from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("Z: " + z);
+                        break;
+                    case ShpfileType.SHP_POLYLINEZ:
+                        if (!shp.get_Z(0, out z))
+                            throw new Exception("Cannot get Z from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("Z: " + z);
+                        Console.WriteLine("Length: " + shp.Length);
+                        break;
+                    case ShpfileType.SHP_POLYGONZ:
+                        if (!shp.get_Z(0, out z))
+                            throw new Exception("Cannot get Z from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("Z: " + z);
+                        Console.WriteLine("Area: " + shp.Area);
+                        Console.WriteLine("Perimeter: " + shp.Perimeter);
+                        break;
+                    case ShpfileType.SHP_MULTIPOINTZ:
+                        break;
+                    case ShpfileType.SHP_POINTM:
+                        if (!shp.get_M(0, out m))
+                            throw new Exception("Cannot get M from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("M: " + m);
+                        break;
+                    case ShpfileType.SHP_POLYLINEM:
+                        if (!shp.get_M(0, out m))
+                            throw new Exception("Cannot get M from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("M: " + m);
+                        Console.WriteLine("Length: " + shp.Length);
+                        break;
+                    case ShpfileType.SHP_POLYGONM:
+                        if (!shp.get_M(0, out m))
+                            throw new Exception("Cannot get M from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("M: " + m);
+                        Console.WriteLine("Area: " + shp.Area);
+                        Console.WriteLine("Perimeter: " + shp.Perimeter);
+                        break;
+                    case ShpfileType.SHP_MULTIPOINTM:
+                        if (!shp.get_M(0, out m))
+                            throw new Exception("Cannot get M from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("M: " + m);
+                        break;
+                    case ShpfileType.SHP_MULTIPATCH:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                retVal = true;
+            }
+            finally
+            {
+                sf.Close();
+            }
+
+            return retVal;
+        }
 
         public void Progress(string KeyOfSender, int Percent, string Message)
         {

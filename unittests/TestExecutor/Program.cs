@@ -50,7 +50,7 @@ namespace ConsoleApplication1
             //t.MergeM();
             //t.Reproject2280Test();
             // t.PointInShapefile();
-            t.SpatialIndex();
+            t.SpatialIndexMWGIS98();
 
             //var t = new GridTests();
             //t.ChangeValueGridNotInRam();
