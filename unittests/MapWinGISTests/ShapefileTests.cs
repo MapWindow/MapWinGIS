@@ -531,8 +531,8 @@ namespace MapWinGISTests
         public void SpatialIndexMWGIS98()
         {
             const string sfName = @"Issues\MWGIS-98\3dPoint.shp";
-            TestSpatialIndex(sfName);
             GetInfoShapefile(sfName);
+            TestSpatialIndex(sfName);
         }
 
         [TestMethod]
@@ -544,8 +544,8 @@ namespace MapWinGISTests
                 try
                 {
                     Console.WriteLine("***************************");
-                    TestSpatialIndex(filename);
                     GetInfoShapefile(filename);
+                    TestSpatialIndex(filename);
                     Console.WriteLine("Test was successful");
                     Console.WriteLine();
                 }
@@ -558,6 +558,7 @@ namespace MapWinGISTests
             }
 
             Assert.AreEqual(0, numErrors);
+            Console.ReadLine();
         }
 
         private void TestSpatialIndex(string sfName)
