@@ -123,7 +123,9 @@
 		{
 		case 0: // NULL Shape
 		  break;
-		case 1: // Point
+		case ShpfileType::SHP_POINT:
+		case ShpfileType::SHP_POINTM:
+		case ShpfileType::SHP_POINTZ: // Point types
 		  m_ShpFile.read((char *)&low[0],sizeof(double));
 		  m_ShpFile.read((char *)&low[1],sizeof(double));
 		  high[0] = low[0];
