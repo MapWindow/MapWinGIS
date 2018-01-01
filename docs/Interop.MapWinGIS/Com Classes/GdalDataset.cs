@@ -67,10 +67,17 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        public string GetSubDatasetName(int subDatasetIndex)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Gets the driver which manages this datasource.
         /// </summary>
         public GdalDriver Driver { get; private set; }
+
+        public int SubDatasetCount { get; }
     }
 #if nsp
 }

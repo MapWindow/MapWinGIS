@@ -37,7 +37,7 @@ namespace MapWinGISTests
             };
             var retVal = _gdalUtils.GDALWarp(inputFilename, outputFilename, options);
             WriteLine("retVal: " + retVal);
-            Assert.IsTrue(retVal, "gdalUtils.GDALWarp() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode]);
+            Assert.IsTrue(retVal, "gdalUtils.GDALWarp() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(outputFilename), "Can't find the output file");
             WriteLine(outputFilename + " is created");
         }
@@ -57,7 +57,7 @@ namespace MapWinGISTests
                 "-overwrite"
             };
             var retVal = _gdalUtils.GDALWarp(@"GeoTiff/5band.tif", output, options);
-            Assert.IsTrue(retVal, "GdalWarp failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode]);
+            Assert.IsTrue(retVal, "GdalWarp failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
             Debug.WriteLine(output);
         }
@@ -138,8 +138,7 @@ namespace MapWinGISTests
                 "-cutline", cutline
             };
             retVal = _gdalUtils.GDALWarp(input, output, options);
-
-            Assert.IsTrue(retVal, "Could not ClipGridWithPolygon: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode]);
+            Assert.IsTrue(retVal, "Could not ClipGridWithPolygon: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(output), "Output file does not exists");
             Debug.WriteLine(output);
         }
@@ -158,7 +157,7 @@ namespace MapWinGISTests
             };
 
             var retVal = _gdalUtils.GdalVectorTranslate(inputFilename, outputFilename, options, true);
-            Assert.IsTrue(retVal, "gdalUtils.GdalVectorTranslate() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode]);
+            Assert.IsTrue(retVal, "gdalUtils.GdalVectorTranslate() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(outputFilename), "Can't find the output file");
             WriteLine(outputFilename + " is created");
         }
@@ -215,7 +214,7 @@ namespace MapWinGISTests
             stopWatch.Stop();
             WriteLine("VeryLargeClip took " + stopWatch.Elapsed);
 
-            Assert.IsTrue(retVal, "gdalUtils.GdalVectorTranslate() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode]);
+            Assert.IsTrue(retVal, "gdalUtils.GdalVectorTranslate() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(outputFilename), "Can't find the output file");
             WriteLine(outputFilename + " is created");
         }

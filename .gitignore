@@ -169,3 +169,6 @@ demo/.nuget/
 *.zip
 unittests/MapWinGISTests/AkkerwebTests.cs
 *.exe
+*.mwd
+*.mwx
+unittests/packages/

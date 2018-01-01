@@ -272,6 +272,8 @@ namespace MapWinGIS
     public class Tiles
 #endif
     {
+        private GeoProjection _serverProjection;
+
         /// <summary>
         /// Retrieves and applies proxy server settings (address and port) from IE settings
         /// </summary>
@@ -300,6 +302,11 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        public void ClearCache2(tkCacheType cacheType, int ProviderId, int fromScale = 0, int toScale = 100)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Clears cache of the specified to type for a given provider and scales.
         /// </summary>
@@ -322,6 +329,8 @@ namespace MapWinGIS
         {
             get { throw new NotImplementedException(); }
         }
+
+        public int DelayRequestTimeout { get; set; }
 
         /// <summary>
         /// Restores the state of Tiles class from string.
@@ -452,6 +461,11 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        public bool SetProxyAuthentication(string username, string password, string domain)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Gets or sets active provider to serve the tiles.
         /// </summary>
@@ -486,6 +500,11 @@ namespace MapWinGIS
         public TileProviders Providers
         {
             get { throw new NotImplementedException(); }
+        }
+
+        public double get_CacheSize2(tkCacheType cacheType, int Provider = -1, int Scale = -1)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -775,6 +794,11 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
         }
 
+        GeoProjection ITiles.ServerProjection
+        {
+            get { return _serverProjection; }
+        }
+
         /// <summary>
         /// Get information about whether map projection and tile projection match.
         /// </summary>
@@ -784,6 +808,9 @@ namespace MapWinGIS
         {
             get { throw new NotImplementedException(); }
         }
+
+        public tkProxyAuthentication ProxyAuthenticationScheme { get; set; }
+        public bool ProjectionIsSphericalMercator { get; }
 
         /// <summary>
         /// Gets projection used by specific tile service.

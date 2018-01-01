@@ -186,6 +186,11 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        public void min(out double x, out double y, out double Z)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Gets the indices of the specified triangle's neighboring triangles in the TIN.
         /// </summary>
@@ -206,6 +211,11 @@ namespace MapWinGIS
         /// <param name="y">Returns the x projected map coordinate of the specified vertex in the TIN.</param>
         /// <param name="Z">Returns the x projected map coordinate of the specified vertex in the TIN. </param>
         public void Vertex(int VtxIndex, out double x, out double y, out double Z)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void max(out double x, out double y, out double Z)
         {
             throw new NotImplementedException();
         }

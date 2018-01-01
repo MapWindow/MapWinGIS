@@ -1,4 +1,5 @@
-﻿/// \page diagrams Diagram description
+﻿#pragma warning disable 1587
+/// \page diagrams Diagram description
 /// 
 /// \section one I. Pseudo class diagram.
 /// This diagram represents "contains" type of the relation between 2 classes, i.e. when an instance of the class
@@ -48,4 +49,4 @@
 ///   cl -> gr3;
 /// }
 /// \enddot
-
+#pragma warning restore 1587

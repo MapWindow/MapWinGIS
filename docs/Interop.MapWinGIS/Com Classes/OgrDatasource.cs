@@ -134,6 +134,11 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        public OgrLayer GetLayer2(int Index, bool forUpdate, bool newConnection)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Opens particular type of datasource supported by GDAL/OGR.
         /// </summary>

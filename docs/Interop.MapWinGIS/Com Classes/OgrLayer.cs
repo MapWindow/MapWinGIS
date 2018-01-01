@@ -478,6 +478,8 @@ namespace MapWinGIS
         /// \new494 Added in version 4.9.4
         public ShpfileType ActiveShapeType { get; set; }
 
+        public bool IsExternalDatasource { get; }
+
         /// <summary>
         /// Gets layer name or SQL query which was used to open this layer.
         /// </summary>

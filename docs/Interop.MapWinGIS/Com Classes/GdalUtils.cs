@@ -52,6 +52,40 @@ namespace MapWinGIS
         /// <param name="Options">The options, as a string array</param>
         /// <remarks>See GDAL's documentation here: http://www.gdal.org/gdalwarp.html</remarks>
         /// \new495 Added in version 4.9.5
+        /// 
+        /// \code
+        /// // Example of creating VRT file from TIFF file. More options are possible:
+        /// var output = Path.GetTempPath() + "GdalWarp.vrt";
+        /// var options = new[]
+        /// {
+        ///     "-of", "vrt",
+        ///     "-overwrite"
+        /// };
+        /// var gdalUtils = new GdalUtils();
+        /// if (!gdalUtils.GDALWarp("test.tif", output, options))
+        /// {
+        ///     Debug.WriteLine("GdalWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+        /// }
+        /// \endcode 
+        /// 
+        /// \code
+        /// // Example of cutting a TIFF file with a border file: 
+        /// var output = Path.GetTempPath() + "GdalWarpCutline.vrt";
+        /// const string border = @"test.shp";
+
+        /// var options = new[]
+        /// {
+        ///     "-of", "vrt",
+        ///     "-overwrite",
+        ///     "-crop_to_cutline",
+        ///     "-cutline", border
+        /// };
+        /// var gdalUtils = new GdalUtils();
+        /// if (!gdalUtils.GDALWarp("test.tif", output, options))
+        /// {
+        ///     Debug.WriteLine("GdalWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+        /// }
+        /// \endcode
         public bool GDALWarp(string bstrSrcFilename, string bstrDstFilename, Array Options)
         {
             throw new NotImplementedException();
@@ -67,6 +101,20 @@ namespace MapWinGIS
         /// <param name="useSharedConnection">If set to <c>true</c> improves performance but also might make it instable.</param>
         /// <remarks>See GDAL's documentation here: http://www.gdal.org/ogr2ogr.html</remarks>
         /// \new495 Added in version 4.9.5
+        /// 
+        /// \code
+        /// // Converting shapefile to gml:
+        /// var outputFilename = Path.Combine(Path.GetTempPath(), "translated.gml");
+        /// var options = new[]
+        /// {
+        ///     "-f", "GML"
+        /// };
+        /// var gdalUtils = new GdalUtils();
+        /// if (!gdalUtils.GdalVectorTranslate(inputFilename, outputFilename, options, true))
+        /// {
+        ///     Debug.WriteLine("GdalVectorTranslate failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+        /// }
+        /// \endcode
         public bool GdalVectorTranslate(string bstrSrcFilename, string bstrDstFilename, Array Options,
             bool useSharedConnection = false)
         {
@@ -82,6 +130,18 @@ namespace MapWinGIS
         /// <param name="useSharedConnection">If set to <c>true</c> improves performance but also might make it instable.</param>
         /// <remarks>Uses GdalUtils.GdalVectorTranslate under the hood.</remarks>
         /// \new495 Added in version 4.9.5
+        /// 
+        /// \code
+        /// // Clipping large shapefile with border file
+        /// const string subjectFilename = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\Fishnet.shp";
+        /// const string borderFilename = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\border.shp";
+        /// var outputFilename = Path.Combine(tempFolder, "GdalVectorTranslate.shp");
+        /// var gdalUtils = new GdalUtils();
+        /// if (!gdalUtils.ClipVectorWithVector("LargeFile.shp", "Border.shp", outputFilename))
+        /// {
+        ///     Debug.WriteLine("GdalVectorTranslate failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+        /// }
+        /// \endcode
         public bool ClipVectorWithVector(string bstrSubjectFilename, string bstrOverlayFilename, string bstrDstFilename,
             bool useSharedConnection = true)
         {

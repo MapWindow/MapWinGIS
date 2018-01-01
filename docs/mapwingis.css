@@ -1,51 +1,47 @@
-﻿/* Make the header fixed at the top */
+﻿/* Make header fixed at the top using flex layout*/
+html,
+body,
+#page {
+  height: 100%; /* needed for proper layout */
+}
+
+body {
+  overflow: hidden;
+}
+
+#page {
+  display: flex;
+  flex-direction: column;
+}
+
 #top {
-  position: fixed;
-  width: 100vw;
-  top: 0;
-  background: white;
+  flex: 0 0 auto;
 }
 
 .header {
-  position: fixed;
-  width: 100vw;
-  top: 137px;
+  flex: 0 0 auto;
 }
-
-  .header > div.summary {
-    padding-right: 25px;
-  }
-
-div.headertitle {
-  padding: 5px 5px 0 10px;
-}
-
-  div.headertitle > .title {
-    margin: 0 2px;
-  }
 
 div.contents {
-  margin-top: 180px;
+  flex: 1 1 auto;
+  position: relative; /* need this to position inner content */
+  overflow-y: auto;
 }
 
-#MSearchResultsWindow {
-  position: fixed;
-  border-radius: 3px;
-  padding-right: 2px;
+div.footer {
+  flex: 0 0 auto;
 }
 
+  div.footer > div {
+    margin-left: 10px;
+  }
+
+/* Standard settings */
 .bold {
   font-weight: bold;
 }
 
-@media(max-width:768px) {
-  .header {
-    position: fixed;
-    width: 100vw;
-    top: 277px;
-  }
-
-  div.contents {
-    margin-top: 318px;
-  }
+div.fragment {
+  padding: 3px;
+  margin-bottom: 12px;
 }

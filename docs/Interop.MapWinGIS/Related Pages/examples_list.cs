@@ -1,3 +1,4 @@
+#pragma warning disable 1587
 /// This example demonstrates how to create several buffers around the rivers. Four buffers are build sequentially, each of them as the separate shapefile.The overlapping shapes of each buffer are merged together. Then smaller buffers are subtracted from the larger ones, making "holes" in them. After it all 4 buffers are copied to a single shapefile with buffer distance field. Finally a color scheme ranging from blue to yellow is applied. An implementation of ICallback interface is used for reporting progress information.
 ///Here is a screenshot with the results of the code execution.
 /// \image html CreateBuffer.png
@@ -145,4 +146,4 @@
 ///Here is a screenshot with the results of the code execution.
 /// \image html TrackCars.png
 /// \example TrackCars.cs
-
+#pragma warning restore 1587
