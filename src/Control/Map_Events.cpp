@@ -517,7 +517,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	long x = point.x;
-	long y = point.y - 1;
+	long y = point.y;
 
 	// --------------------------------------------
 	//  Snapping
@@ -771,7 +771,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 		case DragZoombox:
 		case DragSelectionBox:
 			{
-				HandleLButtonUpZoomBox(vbflags, point.x, point.y - 1);
+				HandleLButtonUpZoomBox(vbflags, point.x, point.y);
 			}
 			break;
 	}
@@ -781,7 +781,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 	// in case of selection mouse down event will be triggered in this function (to preserve backward compatibility); 
 	// so mouse up should be further on to preserve at least some logic
 	if (m_sendMouseUp && _leftButtonDown)
-		FireMouseUp(MK_LBUTTON, (short)vbflags, point.x, point.y - 1);
+		FireMouseUp(MK_LBUTTON, (short)vbflags, point.x, point.y);
 	
 	_leftButtonDown = FALSE;
 }
@@ -1324,7 +1324,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	if( m_sendMouseDown == TRUE )
-		this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
+		this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y );
 
 	if (_doTrapRMouseDown)
 	{
@@ -1369,7 +1369,7 @@ void CMapView::OnRButtonUp(UINT nFlags, CPoint point)
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	if( m_sendMouseUp == TRUE )
-		this->FireMouseUp( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
+		this->FireMouseUp( MK_RBUTTON, (short)vbflags, point.x, point.y );
 }
 
 // *********************************************************
