@@ -27,7 +27,7 @@ public:
 	DiskCache::DiskCache(CStringW path, CStringW extension)
 		: _init(false)
 	{
-		_ext = _ext;
+		_ext = extension;
 		_rootPath = path;
 		_encoder = L"image/png";	// default
 
