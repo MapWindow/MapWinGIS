@@ -1,4 +1,4 @@
-﻿/* Make header fixed at the top using flex layout*/
+/* Make header fixed at the top using flex layout*/
 html,
 body,
 #page {
@@ -45,3 +45,18 @@ div.fragment {
   padding: 3px;
   margin-bottom: 12px;
 }
+
+td#projectalign {
+  padding-right: 1em;
+  padding-top: 6px;
+  text-align: right;
+}
+
+  td#projectalign img {
+    height: 96px;
+    border: 0;
+  }
+
+  td#projectalign a:hover {
+    text-decoration: none;
+  }

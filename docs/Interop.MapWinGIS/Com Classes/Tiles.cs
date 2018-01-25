@@ -63,7 +63,7 @@ namespace MapWinGIS
     /// </tr>
     /// <tr>
     ///     <td align = "center">Spherical Mercator -> WGS84</td>
-    ///     <td align = "center">Spherical Meractor -> WGS84 UTM16</td>
+    ///     <td align = "center">Spherical Mercator -> WGS84 UTM16</td>
     /// </tr>
     /// </table>
     /// </div>
@@ -72,17 +72,6 @@ namespace MapWinGIS
     /// most cases it may be set without additional checks:
     /// \code
     /// axMap1.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
-    /// \endcode
-    /// 
-    /// More generalized code to initialize map control with projection used by tile server is:
-    /// \code
-    /// var ut = new Utils();
-    /// tkTileProjection pr = axMap1.Tiles.ServerProjection;
-    /// GeoProjection gp = ut.TileProjectionToGeoProjection(pr);
-    /// axMap1.GeoProjection = gp;
-    /// Debug.Print("Projection was set: " + axMap1.GeoProjection.Name);
-    /// Debug.Print("Tiles projection status: " + axMap1.Tiles.ProjectionStatus.ToString());
-    /// //if all went was tpsNative status will be returned, i.e. rendering in native projection
     /// \endcode
     /// 
     /// <b>B. Providers.</b>\n
@@ -263,16 +252,16 @@ namespace MapWinGIS
     /// Instance of Tiles class associated with AxMap control is accessible via AxMap.Tiles property which is read-only.
     /// \new490 Added in version 4.9.0
 #if nsp
-    #if upd
-        public class Tiles : MapWinGIS.ITiles
-    #else        
+#if upd
+    public class Tiles : MapWinGIS.ITiles
+#else
         public class ITiles
-    #endif
+#endif
 #else
     public class Tiles
 #endif
     {
-        private GeoProjection _serverProjection;
+        private GeoProjection _serverProjection = new GeoProjection();
 
         /// <summary>
         /// Retrieves and applies proxy server settings (address and port) from IE settings
@@ -302,7 +291,14 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
-        public void ClearCache2(tkCacheType cacheType, int ProviderId, int fromScale = 0, int toScale = 100)
+        /// <summary>
+        /// Clears cache of the specified to type for a given provider ID and scales.
+        /// </summary>
+        /// <param name="cacheType">Type of cache to be cleared.</param>
+        /// <param name="providerId">Tile provider ID to be cleared. -1 will clear tiles for all providers.</param>
+        /// <param name="fromScale">Minimal scale (zoom) to clear tiles for.</param>
+        /// <param name="toScale">Maximum scale (zoom) to clear tiles for.</param>
+        public void ClearCache2(tkCacheType cacheType, int providerId, int fromScale = 0, int toScale = 100)
         {
             throw new NotImplementedException();
         }
@@ -311,14 +307,14 @@ namespace MapWinGIS
         /// Clears cache of the specified to type for a given provider and scales.
         /// </summary>
         /// <param name="cacheType">Type of cache to be cleared.</param>
-        /// <param name="Provider">Tile provider to be cleared. ProviderNone will clear tiles for all providers.</param>
+        /// <param name="provider">Tile provider to be cleared. ProviderNone will clear tiles for all providers.</param>
         /// <param name="fromScale">Minimal scale (zoom) to clear tiles for.</param>
         /// <param name="toScale">Maximum scale (zoom) to clear tiles for.</param>
-        public void ClearCache2(tkCacheType cacheType, tkTileProvider Provider, int fromScale = 0, int toScale = 100)
+        public void ClearCache2(tkCacheType cacheType, tkTileProvider provider, int fromScale = 0, int toScale = 100)
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// Gets zoom (scale) of tiles currently displayed on the map.
         /// </summary>
@@ -330,6 +326,9 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Gets or sets the delay request timeout.
+        /// </summary>
         public int DelayRequestTimeout { get; set; }
 
         /// <summary>
@@ -353,12 +352,12 @@ namespace MapWinGIS
         /// <summary>
         /// Gets the bounds of specific tile in decimal degrees (for inner use/debug purposes).
         /// </summary>
-        /// <param name="ProviderId">Id of the provider.</param>
+        /// <param name="providerId">Id of the provider.</param>
         /// <param name="zoom">Zoom level for a tile.</param>
         /// <param name="tileX">X coordinate of the tile within zoom level.</param>
         /// <param name="tileY">Y coordinate of the tile within zoom level.</param>
         /// <returns>Bounds in decimal degrees or null on failure.</returns>
-        public Extents GetTileBounds(int ProviderId, int zoom, int tileX, int tileY)
+        public MapWinGIS.Extents GetTileBounds(int providerId, int zoom, int tileX, int tileY)
         {
             throw new NotImplementedException();
         }
@@ -368,10 +367,10 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="boundsDegrees">Bounds in decimal degrees.</param>
         /// <param name="zoom">Zoom level.</param>
-        /// <param name="Provider">Id of the provider.</param>
+        /// <param name="providerId">Id of the provider.</param>
         /// <returns>Extents object with tile bounds or null on failure.</returns>
         /// <remarks>Can be used at the first step of prefetching operation.</remarks>
-        public Extents GetTilesIndices(Extents boundsDegrees, int zoom, int Provider)
+        public Extents GetTilesIndices(Extents boundsDegrees, int zoom, int providerId)
         {
             throw new NotImplementedException();
         }
@@ -414,12 +413,12 @@ namespace MapWinGIS
         /// <param name="minLng">Minimal longitude to cache within.</param>
         /// <param name="maxLng">Maximum longitude to cache within.</param>
         /// <param name="zoom">Zoom level.</param>
-        /// <param name="ProviderId">Id of the provider.</param>
+        /// <param name="providerId">Id of the provider.</param>
         /// <param name="stop">StopExecution interface implementation to stop the operation prematurely.</param>
         /// <returns>The number of tiles scheduled for caching.</returns>
         /// <remarks>The operation is executed asynchronously. To get the progress information use Tiles.GlobalCallback property.
         /// The callback will returned the number of tiles already downloaded. When operation is completed, -1 will be returned.</remarks>
-        public int Prefetch(double minLat, double maxLat, double minLng, double maxLng, int zoom, int ProviderId, IStopExecution stop)
+        public int Prefetch(double minLat, double maxLat, double minLng, double maxLng, int zoom, int providerId, IStopExecution stop)
         {
             throw new NotImplementedException();
         }
@@ -432,11 +431,11 @@ namespace MapWinGIS
         /// <param name="minY">Minimum Y index of tile to be cached (in coordinates of tile zoom level).</param>
         /// <param name="maxY">Maximum Y index of tile to be cached (in coordinates of tile zoom level).</param>
         /// <param name="zoom">Zoom level to be cached.</param>
-        /// <param name="ProviderId">Id of the provider.</param>
+        /// <param name="providerId">Id of the provider.</param>
         /// <param name="stop">StopExecution interface implementation to stop the operation prematurely.</param>
         /// <returns>Number of tiles scheduled for caching.</returns>
         /// <remarks>The operation is executed asynchronously. See details in Tiles.Prefetch.</remarks>
-        public int Prefetch2(int minX, int maxX, int minY, int maxY, int zoom, int ProviderId, IStopExecution stop)
+        public int Prefetch2(int minX, int maxX, int minY, int maxY, int zoom, int providerId, IStopExecution stop)
         {
             throw new NotImplementedException();
         }
@@ -446,8 +445,8 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="ext">Extents to cache within in decimal degrees.</param>
         /// <param name="zoom">Zoom level.</param>
-        /// <param name="ProviderId">Id of the provider.</param>
-        /// <param name="savePath">Directory to save files into. Nested folders for zoom levels, 
+        /// <param name="providerId">Id of the provider.</param>
+        /// <param name="savePath">Directory to save files into (must exists). Nested folders for zoom levels, 
         /// X/Y coordinates will be created automatically.</param>
         /// <param name="fileExt">File extension to store tiles with.</param>
         /// <param name="stop">StopExecution interface implementation to stop the operation prematurely.</param>
@@ -456,12 +455,7 @@ namespace MapWinGIS
         /// to avoid their listing in the gallery of smartphones for example. Tile consuming application often may be configured
         /// to handle such extensions.</remarks>
         /// <remarks>The operation is executed asynchronously. See details in Tiles.Prefetch.</remarks>
-        public int PrefetchToFolder(Extents ext, int zoom, int ProviderId, string savePath, string fileExt, IStopExecution stop)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool SetProxyAuthentication(string username, string password, string domain)
+        public int PrefetchToFolder(Extents ext, int zoom, int providerId, string savePath, string fileExt, IStopExecution stop)
         {
             throw new NotImplementedException();
         }
@@ -502,7 +496,36 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
         }
 
-        public double get_CacheSize2(tkCacheType cacheType, int Provider = -1, int Scale = -1)
+        /// <summary>
+        /// Gets the current size of cache.
+        /// </summary>
+        /// <param name="cacheType">The type of cache to return size for.</param>
+        /// <returns>The size of cache in MB.</returns>
+        public double get_CacheSize(tkCacheType cacheType)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the current size of cache used for specific provider and zoom level.
+        /// </summary>
+        /// <param name="cacheType">The type of cache to return size for.</param>
+        /// <param name="provider">Provider. ProviderNone will return size for all providers.</param>
+        /// <param name="scale">Scale (zoom) level. -1 will return size for all zoom levels.</param>
+        /// <returns>The size of cache in MB.</returns>
+        public double get_CacheSize2(tkCacheType cacheType, tkTileProvider provider = tkTileProvider.ProviderNone, int scale = -1)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the current size of cache used for specific provider and zoom level.
+        /// </summary>
+        /// <param name="cacheType">Type of the cache.</param>
+        /// <param name="providerId">The provider. -1 will return size for all providers.</param>
+        /// <param name="scale">The scale. -1 will return size for all zoom levels.</param>
+        /// <returns>The size of cache in MB.</returns>
+        public double get_CacheSize2(tkCacheType cacheType, int providerId = -1, int scale = -1)
         {
             throw new NotImplementedException();
         }
@@ -567,28 +590,6 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Gets the current size of cache.
-        /// </summary>
-        /// <param name="cacheType">The type of cache to return size for.</param>
-        /// <returns>The size of cache in MB.</returns>
-        public double get_CacheSize(tkCacheType cacheType)
-        {
-            throw new NotImplementedException();
-        }
-        
-        /// <summary>
-        /// Gets the current size of cache used for specific provider and zoom level.
-        /// </summary>
-        /// <param name="cacheType">The type of cache to return size for.</param>
-        /// <param name="Provider">Provider. ProviderNone will return size for all providers.</param>
-        /// <param name="scale">Scale (zoom) level. -1 will return size for all zoom levels.</param>
-        /// <returns>The size of cache in MB.</returns>
-        public double get_CacheSize2(tkCacheType cacheType, tkTileProvider Provider = tkTileProvider.ProviderNone, int scale = -1)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Gets the value indicating whether tiles requested from server will be automatically cached.
         /// </summary>
         /// <param name="cacheType">The type of cache to be used.</param>
@@ -617,7 +618,7 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// Sets the maximum allowable size of cache.
         /// </summary>
@@ -679,23 +680,23 @@ namespace MapWinGIS
         /// <summary>
         /// Starts logging HTTP requests for tile server.
         /// </summary>
-        /// <param name="Filename">Filename to write log into. New file will be created any existing file - overwritten.</param>
-        /// <param name="errorsOnly">Indicate whether only unsuccessful requests should logged.</param>
+        /// <param name="filename">Filename to write log into. New file will be created, any existing file will be overwritten.</param>
+        /// <param name="errorsOnly">Indicate whether only unsuccessful requests should be logged.</param>
         /// <returns>True if log was opened, and false on failure.</returns>
         /// \new491 Added in version 4.9.1
-        public bool StartLogRequests(string Filename, bool errorsOnly = false)
-        {
-            throw new NotImplementedException();
-        }
+        //public bool StartLogRequests(string filename, bool errorsOnly = false)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         /// <summary>
         /// Stops logging of HTTP requests to a file.
         /// </summary>
         /// \new491 Added in version 4.9.1
-        public void StopLogRequests()
-        {
-            throw new NotImplementedException();
-        }
+        //public void StopLogRequests()
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         /// <summary>
         /// Gets the number of unsuccessful HTTP requests during prefetching operation (Tiles.Prefetch and overloads).
@@ -727,14 +728,14 @@ namespace MapWinGIS
         /// <summary>
         /// Gets number of tiles stored in disk cache for a given provider, zoom and region.
         /// </summary>
-        /// <param name="Provider">Id of provider.</param>
+        /// <param name="providerId">Id of provider.</param>
         /// <param name="zoom">Zoom level.</param>
         /// <param name="xMin">Min X index of tile.</param>
         /// <param name="xMax">Max X index of tile.</param>
         /// <param name="yMin">Min Y index of tile.</param>
         /// <param name="yMax">Max Y index of tile.</param>
         /// <returns>Number of tiles.</returns>
-        public int get_DiskCacheCount(int Provider, int zoom, int xMin, int xMax, int yMin, int yMax)
+        public int get_DiskCacheCount(int providerId, int zoom, int xMin, int xMax, int yMin, int yMax)
         {
             throw new NotImplementedException();
         }
@@ -769,9 +770,9 @@ namespace MapWinGIS
         /// <summary>
         /// Gets the description of the specific error code.
         /// </summary>
-        /// <param name="ErrorCode">The error code returned by LastErrorCode property.</param>
+        /// <param name="errorCode">The error code returned by LastErrorCode property.</param>
         /// <returns>String with the description.</returns>
-        public string get_ErrorMsg(int ErrorCode)
+        public string get_ErrorMsg(int errorCode)
         {
             throw new NotImplementedException();
         }
@@ -794,11 +795,6 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
         }
 
-        GeoProjection ITiles.ServerProjection
-        {
-            get { return _serverProjection; }
-        }
-
         /// <summary>
         /// Get information about whether map projection and tile projection match.
         /// </summary>
@@ -809,20 +805,31 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Gets or sets the proxy authentication scheme.
+        /// </summary>
+        /// \new491 Added in version 4.9.1
         public tkProxyAuthentication ProxyAuthenticationScheme { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether [projection is spherical mercator].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [projection is spherical mercator]; otherwise, <c>false</c>.
+        /// </value>
         public bool ProjectionIsSphericalMercator { get; }
 
         /// <summary>
         /// Gets projection used by specific tile service.
         /// </summary>
         /// \new491 Added in version 4.9.1
-        public tkTileProjection ServerProjection
+        public GeoProjection ServerProjection
         {
-            get { throw new NotImplementedException(); }
+            get { return _serverProjection; }
         }
 
         /// <summary>
-        /// Clears user name and password set by Tiles.SetProxyAuthorization method.
+        /// Clears user name and password set by Tiles.SetProxyAuthentication method.
         /// </summary>
         /// \new493 Added in version 4.9.3
         public void ClearProxyAuthorization()
@@ -840,7 +847,7 @@ namespace MapWinGIS
         /// <param name="domain">Domain name.</param>
         /// <returns>True on success.</returns>
         /// \new493 Added in version 4.9.3
-        public bool SetProxyAuthorization(string username, string password, string domain)
+        public bool SetProxyAuthentication(string username, string password, string domain)
         {
             throw new NotImplementedException();
         }
