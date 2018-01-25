@@ -1,18 +1,30 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Windows.Forms;
+using AxMapWinGIS;
+using MapWinGIS;
 
 namespace interopCreator
 {
-    using System;
-    using System.IO;
-    using System.Windows.Forms;
-    using MapWinGIS;
-
-    public partial class Form1 : Form
+    public partial class Form1 : Form, ICallback
     {
+        private static readonly GlobalSettings _settings = new GlobalSettings();
+
         public Form1()
         {
             InitializeComponent();
+            _settings.ApplicationCallback = this;
+        }
+
+        public void Progress(string KeyOfSender, int Percent, string Message)
+        {
+            txtResults.Text += $@"{Percent} {Message}";
+        }
+
+        public void Error(string KeyOfSender, string ErrorMsg)
+        {
+            txtResults.Text += $@"Error: {ErrorMsg}";
         }
 
         private void CheckNewMethods()
@@ -39,17 +51,17 @@ namespace interopCreator
             var utils = new Utils();
             utils.ClipGridWithPolygon("test", sfSimple.Shape[0], "new", false);
 
-            utils.Polygonize(string.Empty, string.Empty, 1, false, string.Empty, "ESRI Shapefile", string.Empty, "DN", null);
+            utils.Polygonize(string.Empty, string.Empty, 1, false, string.Empty, "ESRI Shapefile", string.Empty);
 
-            utils.GDALInfo(string.Empty, string.Empty, null);
-            utils.TranslateRaster(string.Empty, string.Empty, string.Empty, null);
+            utils.GDALInfo(string.Empty, string.Empty);
+            utils.TranslateRaster(string.Empty, string.Empty, string.Empty);
 
-            utils.OGRInfo(string.Empty, string.Empty, null, null);
-            utils.OGR2OGR(string.Empty, string.Empty, string.Empty, null);
-            utils.GDALAddOverviews(string.Empty, string.Empty, string.Empty, null);
-            utils.GDALBuildVrt(string.Empty, string.Empty, null);
-            utils.GDALRasterize(string.Empty, string.Empty, string.Empty, null);
-            utils.GDALWarp(string.Empty, string.Empty, string.Empty, null);
+            utils.OGRInfo(string.Empty, string.Empty);
+            utils.OGR2OGR(string.Empty, string.Empty, string.Empty);
+            utils.GDALAddOverviews(string.Empty, string.Empty, string.Empty);
+            utils.GDALBuildVrt(string.Empty, string.Empty);
+            utils.GDALRasterize(string.Empty, string.Empty, string.Empty);
+            utils.GDALWarp(string.Empty, string.Empty, string.Empty);
 
             var ds = new GdalDataset();
             var subDatasetCount = ds.SubDatasetCount;
@@ -62,7 +74,7 @@ namespace interopCreator
 
             var gridFilename = Path.Combine(workingFolder, "AHN2.asc");
             var sf = new Shapefile();
-            sf.Open(Path.Combine(workingFolder, "Areas.shp"), null);
+            sf.Open(Path.Combine(workingFolder, "Areas.shp"));
             var numShapes = sf.NumShapes;
             var clippedWrong = 0;
             var clippedGood = 0;
@@ -70,32 +82,24 @@ namespace interopCreator
             // Needed for the new method:
             var utils = new Utils();
             var grd = new Grid();
-            grd.Open(gridFilename, GridDataType.UnknownDataType, true, GridFileType.UseExtension, null);
+            grd.Open(gridFilename);
 
             for (var i = 0; i < numShapes; i++)
             {
-                var polygon = sf.get_Shape(i);
+                var polygon = sf.Shape[i];
                 var resultGrid = Path.Combine(tempFolder, "AHN2_clipped" + i + ".asc");
 
                 // Using thr mwGeoProc version takes almost 4 hours with this data:
                 // if (MapWinGeoProc.SpatialOperations.ClipGridWithPolygon(ref gridFilename, ref polygon, ref resultGrid))
                 if (utils.ClipGridWithPolygon2(grd, polygon, resultGrid, false))
-                {
                     clippedGood++;
-                }
                 else
-                {
                     clippedWrong++;
-                    /*
-                    testsMethods.ReportMessage(
-                      string.Format(
-                        "Clipping grid with polygon number {0} failed. Error: {1}", i, MapWinGeoProc.Error.GetLastErrorMsg()));
-                    */
-                }
             }
 
-            var msg = string.Empty;
-            msg = clippedWrong == 0 ? "All tests successful!" : string.Format("{0} clippings went OK, {1} went wrong", clippedGood, clippedWrong);
+            var msg = clippedWrong == 0
+                ? "All tests successful!"
+                : $"{clippedGood} clippings went OK, {clippedWrong} went wrong";
             MessageBox.Show(msg);
         }
 
@@ -122,7 +126,8 @@ namespace interopCreator
                 var sf = new ShapefileClass();
                 if (!sf.Open(Path.Combine(workingFolder, "ARK.shp")))
                 {
-                    writer.WriteLine(DateTime.Now + " Could not open shapefile. Reason " + sf.ErrorMsg[sf.LastErrorCode]);
+                    writer.WriteLine(
+                        DateTime.Now + " Could not open shapefile. Reason " + sf.ErrorMsg[sf.LastErrorCode]);
                     return;
                 }
 
@@ -130,15 +135,12 @@ namespace interopCreator
 
                 var netCdfFiles = Directory.GetFiles(workingFolder, "*.nc");
                 var utils = new UtilsClass();
-                var settings = new GlobalSettings();
+                _settings.ResetGdalError();
                 var amersfoort = new GeoProjectionClass();
                 amersfoort.ImportFromEPSG(28992);
 
                 // Check projection:
-                if (!sf.GeoProjection.IsSame[amersfoort])
-                {
-                    sf.GeoProjection = amersfoort.Clone();
-                }
+                if (!sf.GeoProjection.IsSame[amersfoort]) sf.GeoProjection = amersfoort.Clone();
 
                 // Loop through all netCDF files in folder:
                 foreach (var netCdfFile in netCdfFiles)
@@ -147,15 +149,16 @@ namespace interopCreator
                     if (!grd.Open(netCdfFile))
                     {
                         writer.WriteLine(DateTime.Now + " Could not open {0}. Reason: {1}, GDAL Error: {2}", netCdfFile,
-                            grd.ErrorMsg[grd.LastErrorCode], settings.GdalLastErrorMsg);
+                            grd.ErrorMsg[grd.LastErrorCode], _settings.GdalLastErrorMsg);
                         continue;
                     }
 
                     currentProcess.Refresh();
-                    writer.WriteLine(DateTime.Now + "Loaded grid " + netCdfFile + " Current memory " + FormatBytes(currentProcess.WorkingSet64));
+                    writer.WriteLine(DateTime.Now + "Loaded grid " + netCdfFile + " Current memory " +
+                                     FormatBytes(currentProcess.WorkingSet64));
 
                     var header = grd.Header;
-                    var noDataValue = (double)grd.Header.NodataValue;
+                    var noDataValue = (double) grd.Header.NodataValue;
                     var extents = grd.Extents;
 
                     // Set projection:
@@ -168,12 +171,13 @@ namespace interopCreator
                         if (!grd.OpenBand(i))
                         {
                             writer.WriteLine(DateTime.Now + " Could not open band {0}. Reason: {1}, GDAL Error: {2}", i,
-                                grd.ErrorMsg[grd.LastErrorCode], settings.GdalLastErrorMsg);
+                                grd.ErrorMsg[grd.LastErrorCode], _settings.GdalLastErrorMsg);
                             continue;
                         }
 
                         currentProcess.Refresh();
-                        writer.WriteLine(DateTime.Now + " Working with band {0}  Current memory: {1} ", i, FormatBytes(currentProcess.WorkingSet64));
+                        writer.WriteLine(DateTime.Now + " Working with band {0}  Current memory: {1} ", i,
+                            FormatBytes(currentProcess.WorkingSet64));
                         var mean = 0d;
                         var min = 0d;
                         var max = 0d;
@@ -185,20 +189,22 @@ namespace interopCreator
                                 !utils.GridStatisticsForPolygon(grd, header, extents, shp, noDataValue, ref mean,
                                     ref min,
                                     ref max))
-                            {
-                                writer.WriteLine(DateTime.Now + " Error getting statistics: " + utils.ErrorMsg[utils.LastErrorCode]);
-                            }
+                                writer.WriteLine(DateTime.Now + " Error getting statistics: " +
+                                                 utils.ErrorMsg[utils.LastErrorCode]);
 
                             currentProcess.Refresh();
-                            writer.WriteLine(DateTime.Now + " Mean: {0}, Min: {1}, Max: {2}, Current memory: {3}", mean, min, max, FormatBytes(currentProcess.WorkingSet64));
+                            writer.WriteLine(DateTime.Now + " Mean: {0}, Min: {1}, Max: {2}, Current memory: {3}", mean,
+                                min, max, FormatBytes(currentProcess.WorkingSet64));
                         }
                     }
 
                     // Close grid:
                     grd.Close();
                     currentProcess.Refresh();
-                    writer.WriteLine(DateTime.Now + " Closed grid Current memory: " + FormatBytes(currentProcess.WorkingSet64));
+                    writer.WriteLine(DateTime.Now + " Closed grid Current memory: " +
+                                     FormatBytes(currentProcess.WorkingSet64));
                 }
+
                 currentProcess.Refresh();
                 writer.WriteLine(DateTime.Now + " Done. Current memory: " + FormatBytes(currentProcess.WorkingSet64));
             }
@@ -208,15 +214,12 @@ namespace interopCreator
 
         private static string FormatBytes(long bytes)
         {
-            string[] Suffix = { "B", "KB", "MB", "GB", "TB" };
+            string[] Suffix = {"B", "KB", "MB", "GB", "TB"};
             int i;
             double dblSByte = bytes;
-            for (i = 0; i < Suffix.Length && bytes >= 1024; i++, bytes /= 1024)
-            {
-                dblSByte = bytes / 1024.0;
-            }
+            for (i = 0; i < Suffix.Length && bytes >= 1024; i++, bytes /= 1024) dblSByte = bytes / 1024.0;
 
-            return string.Format("{0:0.##} {1}", dblSByte, Suffix[i]);
+            return $"{dblSByte:0.##} {Suffix[i]}";
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -258,35 +261,33 @@ namespace interopCreator
 
         private void btnOgr2Ogr_Click(object sender, EventArgs e)
         {
-            GlobalSettings settings = new GlobalSettings();
-            settings.ResetGdalError();
-            UtilsClass utils = new MapWinGIS.UtilsClass();
-            string options = "--config CONFIG_FILE \"D:\\dev\\GIS-Data\\Djordje\\osmconf.ini\" --config OSM_USE_CUSTOM_INDEXING NO -skipfailures -f \"ESRI Shapefile\"";
-            bool result = utils.OGR2OGR(@"D:\dev\GIS-Data\Djordje\map.osm", @"D:\dev\GIS-Data\Djordje\osm-result", options);
+            _settings.ResetGdalError();
+            var utils = new UtilsClass();
+            var options =
+                "--config CONFIG_FILE \"D:\\dev\\GIS-Data\\Djordje\\osmconf.ini\" --config OSM_USE_CUSTOM_INDEXING NO -skipfailures -f \"ESRI Shapefile\"";
+            var result = utils.OGR2OGR(@"D:\dev\GIS-Data\Djordje\map.osm", @"D:\dev\GIS-Data\Djordje\osm-result",
+                options);
             if (!result)
             {
                 // Both line should be the same:
                 Debug.WriteLine(utils.ErrorMsgFromObject(utils));
                 Debug.WriteLine(utils.ErrorMsg[utils.LastErrorCode]);
-                Debug.WriteLine(settings.GdalLastErrorMsg);
+                Debug.WriteLine(_settings.GdalLastErrorMsg);
             }
 
             txtResults.Text = @"OGR2OGR result: " + result;
             if (!result) return;
 
             // Add files:
-            string[] shapefileFilenames = Directory.GetFiles(@"D:\dev\GIS-Data\Djordje\osm-result\", "*.shp");
-            foreach (string filename in shapefileFilenames)
-            {
+            var shapefileFilenames = Directory.GetFiles(@"D:\dev\GIS-Data\Djordje\osm-result\", "*.shp");
+            foreach (var filename in shapefileFilenames)
                 axMap1.AddLayerFromFilename(filename, tkFileOpenStrategy.fosVectorLayer, true);
-            }
         }
 
         private void btnGdalInfo_Click(object sender, EventArgs e)
         {
-            GlobalSettings settings = new GlobalSettings();
-            settings.ResetGdalError();
-            UtilsClass utils = new MapWinGIS.UtilsClass();
+            _settings.ResetGdalError();
+            var utils = new UtilsClass();
 
             var filename = @"D:\dev\GIS-Data\HDF5\RAD_NL25_RAC_03H_201612040000.h5";
             var result = utils.GDALInfo(filename, "");
@@ -296,8 +297,8 @@ namespace interopCreator
                 var hndle = axMap1.AddLayerFromFilename(filename, tkFileOpenStrategy.fosAutoDetect, true);
                 if (hndle >= 1) return;
 
-                txtResults.Text += @" GDAL Error: " + settings.GdalLastErrorMsg
-                                   + axMap1.get_ErrorMsg(axMap1.LastErrorCode);
+                txtResults.Text += @" GDAL Error: " + _settings.GdalLastErrorMsg
+                                                    + axMap1.get_ErrorMsg(axMap1.LastErrorCode);
                 var grd = new GridClass();
                 var opened = grd.Open(filename);
                 if (!opened)
@@ -320,14 +321,13 @@ namespace interopCreator
                 return;
             }
 
-            txtResults.Text = @" GDAL Error: " + settings.GdalLastErrorMsg
-                              + @" GdalPluginPath: " + settings.GdalPluginPath;
-
+            txtResults.Text = @" GDAL Error: " + _settings.GdalLastErrorMsg
+                                               + @" GdalPluginPath: " + _settings.GdalPluginPath;
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            var settings = new GlobalSettings { OgrStringEncoding = tkOgrEncoding.oseUtf8 };
+            _settings.OgrStringEncoding = tkOgrEncoding.oseUtf8;
 
             var sf = new ShapefileClass();
             if (!sf.Open(@"D:\dev\GIS-Data\Issues\Persian\roads.shp"))
@@ -344,6 +344,7 @@ namespace interopCreator
 
             // Add shapefile to map:
             var hndl = axMap1.AddLayer(sf, true);
+            txtResults.Text += @"Added layer with handle " + hndl;
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -376,8 +377,8 @@ namespace interopCreator
             sfPoint.CreateNewWithShapeID("", ShpfileType.SHP_POINT);
             for (var i = 0; i < numPoints; i++)
             {
-                var x = extents.xMin + (width * random.NextDouble());
-                var y = extents.yMin + (height * random.NextDouble());
+                var x = extents.xMin + width * random.NextDouble();
+                var y = extents.yMin + height * random.NextDouble();
                 var shpPoint = new Shape();
                 shpPoint.Create(ShpfileType.SHP_POINT);
                 shpPoint.AddPoint(x, y);
@@ -393,14 +394,12 @@ namespace interopCreator
             const string filename = @"J:\Akkerweb.Shared\tmp\ndre-copied.tif";
             // axMap1.AddLayerFromFilename(filename, tkFileOpenStrategy.fosAutoDetect, true);
             var fm = new FileManager();
-            var obj = fm.Open(filename, tkFileOpenStrategy.fosAutoDetect, null);
+            var obj = fm.Open(filename);
             if (obj != null && fm.LastOpenIsSuccess)
             {
                 var handle = axMap1.AddLayer(obj, true);
                 if (handle == -1)
-                {
                     MessageBox.Show(@"Failed to add layer to the map: " + axMap1.get_ErrorMsg(axMap1.LastErrorCode));
-                }
             }
             else
             {
@@ -413,29 +412,23 @@ namespace interopCreator
             var utils = new Utils();
             var grd = new Grid();
             if (!grd.Open(@"J:\Akkerweb.Shared\tmp\ndre-copied.tif", GridDataType.FloatDataType))
-            {
                 throw new Exception("Can't open grid file: " + grd.ErrorMsg[grd.LastErrorCode]);
-            }
             var sf = new Shapefile();
             if (!sf.Open(@"J:\Akkerweb.Shared\tmp\Fishnet.shp"))
-            {
                 throw new Exception("Can't open shapefile file: " + sf.ErrorMsg[sf.LastErrorCode]);
-            }
             if (!utils.GridStatisticsToShapefile(grd, sf, false, true))
-            {
                 throw new Exception("GridStatisticsToShapefile failed: " + utils.ErrorMsg[utils.LastErrorCode]);
-            }
 
             axMap1.AddLayer(grd, true);
             axMap1.AddLayer(sf, true);
         }
 
-        private void axMap1_ShapeIdentified(object sender, AxMapWinGIS._DMapEvents_ShapeIdentifiedEvent e)
+        private void axMap1_ShapeIdentified(object sender, _DMapEvents_ShapeIdentifiedEvent e)
         {
             axMap1.ZoomToShape(e.layerHandle, e.shapeIndex);
         }
 
-        private void axMap1_FileDropped(object sender, AxMapWinGIS._DMapEvents_FileDroppedEvent e)
+        private void axMap1_FileDropped(object sender, _DMapEvents_FileDroppedEvent e)
         {
             txtResults.Text += $@"Opening {e.filename} after dropping.";
             axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
@@ -465,7 +458,33 @@ namespace interopCreator
 
         private void button10_Click(object sender, EventArgs e)
         {
-            axMap1.AddLayerFromFilename(@"D:\dev\MapwinGIS\GitHub\unittests\MapWinGISTests\Testdata\Issues\MWGIS-98\3dPoint.shp", tkFileOpenStrategy.fosAutoDetect, true);
+            axMap1.AddLayerFromFilename(
+                @"D:\dev\MapwinGIS\GitHub\unittests\MapWinGISTests\Testdata\Issues\MWGIS-98\3dPoint.shp",
+                tkFileOpenStrategy.fosAutoDetect, true);
+        }
+        
+        private void button11_Click(object sender, EventArgs e)
+        {
+            if (axMap1.Projection == tkMapProjection.PROJECTION_NONE)
+            {
+                axMap1.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
+                axMap1.Tiles.Provider = tkTileProvider.OpenStreetMap;
+                axMap1.KnownExtents = tkKnownExtents.keNetherlands;
+            }
+
+            axMap1.ZoomBehavior = tkZoomBehavior.zbUseTileLevels;
+            var outputFolder = $@"D:\tmp\axmap.tiles\{axMap1.Tiles.Provider.ToString()}";
+            if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
+
+            var numTilesToCache = axMap1.Tiles.PrefetchToFolder(axMap1.Extents, axMap1.Tiles.CurrentZoom,
+                Convert.ToInt32(axMap1.Tiles.Provider), outputFolder, ".png", null);
+            txtResults.Text += $@"{Environment.NewLine}numTilesToCache: " + numTilesToCache;
+        }
+
+        private void txtResults_TextChanged(object sender, EventArgs e)
+        {
+            txtResults.SelectionStart = txtResults.Text.Length;
+            txtResults.ScrollToCaret();
         }
     }
 }

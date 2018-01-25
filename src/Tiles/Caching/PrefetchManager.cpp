@@ -117,6 +117,12 @@ long PrefetchManager::Prefetch(BaseProvider* provider, CRect indices, int zoom, 
 
 	if (points.size() == 0)
 	{
+		if (tilesLogger.IsOpened())
+		{
+			tilesLogger.out() << "\n";
+			tilesLogger.out() << "Nothing to fetch\n";
+			tilesLogger.out() << "---------------------" << endl;
+		}
 		return 0;
 	}
 

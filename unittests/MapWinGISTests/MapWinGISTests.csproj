@@ -119,6 +119,7 @@
     <Compile Include="AkkerwebTests.cs" />
     <Compile Include="GridTests.cs" />
     <Compile Include="TilesTests.cs" />
+    <Compile Include="AxMapTests.cs" />
     <Compile Include="UtilTests.cs" />
   </ItemGroup>
   <ItemGroup>

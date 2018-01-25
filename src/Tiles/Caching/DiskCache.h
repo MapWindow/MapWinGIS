@@ -16,7 +16,9 @@
  * DEALINGS IN THE SOFTWARE.
  ************************************************************************************** 
  * Contributor(s): 
- * (Open source contributors should list themselves and their modifications here). */
+ * (Open source contributors should list themselves and their modifications here). 
+ * Jan. 2018, Paul Meems, fixing MWGIS-108
+ */
 #pragma once
 #include "ITileCache.h"
 
