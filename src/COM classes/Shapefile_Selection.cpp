@@ -299,7 +299,7 @@ STDMETHODIMP CShapefile::get_ShapeSelected(long ShapeIndex, VARIANT_BOOL* pVal)
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	else {
-		*pVal = _shapeData[ShapeIndex]->selected(); 
+		*pVal = (_shapeData[ShapeIndex]->selected() == true) ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 
 	return S_OK;
