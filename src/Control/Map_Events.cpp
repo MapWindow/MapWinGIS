@@ -849,28 +849,28 @@ void CMapView::ZoomToCursorPosition(bool zoomIn)
 
 	RECT rect;
 	this->GetWindowRect(&rect);
+	// if pt is outside of map window, just return
 	if (pt.x < rect.left || pt.x > rect.right || pt.y < rect.top || pt.y > rect.bottom)
 		return;
 	if ((rect.right - rect.left == 0) && (rect.bottom - rect.top == 0))
 		return;
 
 	double xCent, yCent, dx, dy;
-	// if we're set to recenter the map
+	// pt is screen position, and we need the position within the map rectangle
+	PixelToProj((double)(pt.x - rect.left), (double)(pt.y - rect.top), &xCent, &yCent);
+
+	// if we are recentering the map...
 	if (GetRecenterMapOnZoom())
 	{
-		// use click point as new center point, recenter map
-		PixelToProj((double)(pt.x), (double)(pt.y), &xCent, &yCent);
-		// dx and dy represent fraction of screen position from mouse click;
+		// dx and dy represent the mouse position as a percent of the screen;
 		// since we are centering, set both to 50%
 		dx = 0.5;
 		dy = 0.5;
 	}
 	else
 	{
-		// default behavior is to maintain relative screen position and centering
-		PixelToProj((double)(pt.x - rect.left), (double)(pt.y - rect.top), &xCent, &yCent);
-		// dx and dy represent fraction of screen position of mouse click;
-		// maintain current screen position as a fractional distance 
+		// dx and dy represent the mouse position as a percent of the screen;
+		// maintain the current screen position as a percent
 		dx = (double)(pt.x - rect.left) / (rect.right - rect.left);
 		dy = (double)(pt.y - rect.top) / (rect.bottom - rect.top);
 	}
