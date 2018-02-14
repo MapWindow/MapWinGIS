@@ -379,7 +379,8 @@ void CMapView::SetDefaults()
 	_showCoordinatesFormat = afDegrees;
 	_panningExtentsChanged = false;
 	_prevExtentsIndex = 0;
-	_useAlternatePanCursor = FALSE;
+	_useAlternatePanCursor = VARIANT_FALSE;
+	_recenterMapOnZoom = VARIANT_FALSE;
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:
@@ -658,6 +659,8 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 		_showCoordinatesFormat = (tkAngleFormat)temp;
 
 		PX_Bool(pPX, "UseAlternatePanCursor", _useAlternatePanCursor, FALSE);
+
+		PX_Bool(pPX, "RecenterMapOnZoom", _recenterMapOnZoom, FALSE);
 	}
 	catch(...)
 	{

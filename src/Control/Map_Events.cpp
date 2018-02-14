@@ -854,10 +854,26 @@ void CMapView::ZoomToCursorPosition(bool zoomIn)
 	if ((rect.right - rect.left == 0) && (rect.bottom - rect.top == 0))
 		return;
 
-	double xCent, yCent;
-	PixelToProj((double)(pt.x - rect.left), (double)(pt.y - rect.top), &xCent, &yCent);
-	double dx = (double)(pt.x - rect.left) / (rect.right - rect.left);
-	double dy = (double)(pt.y - rect.top) / (rect.bottom - rect.top);
+	double xCent, yCent, dx, dy;
+	// if we're set to recenter the map
+	if (GetRecenterMapOnZoom())
+	{
+		// use click point as new center point, recenter map
+		PixelToProj((double)(pt.x), (double)(pt.y), &xCent, &yCent);
+		// dx and dy represent fraction of screen position from mouse click;
+		// since we are centering, set both to 50%
+		dx = 0.5;
+		dy = 0.5;
+	}
+	else
+	{
+		// default behavior is to maintain relative screen position and centering
+		PixelToProj((double)(pt.x - rect.left), (double)(pt.y - rect.top), &xCent, &yCent);
+		// dx and dy represent fraction of screen position of mouse click;
+		// maintain current screen position as a fractional distance 
+		dx = (double)(pt.x - rect.left) / (rect.right - rect.left);
+		dy = (double)(pt.y - rect.top) / (rect.bottom - rect.top);
+	}
 
 	double ratio;
 	if (ForceDiscreteZoom()) 

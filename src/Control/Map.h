@@ -619,9 +619,11 @@ public:
 	afx_msg long GetExtentHistoryUndoCount();
 	afx_msg long GetExtentHistoryRedoCount();
 
-	afx_msg void SetUseAlternatePanCursor(BOOL nNewValue);
-	afx_msg BOOL GetUseAlternatePanCursor();
+	afx_msg void SetUseAlternatePanCursor(VARIANT_BOOL nNewValue);
+	afx_msg VARIANT_BOOL GetUseAlternatePanCursor();
 
+	afx_msg void SetRecenterMapOnZoom(VARIANT_BOOL nNewValue);
+	afx_msg VARIANT_BOOL GetRecenterMapOnZoom();
 #pragma endregion
 
 	//}}AFX_DISPATCH
@@ -818,6 +820,7 @@ public:
 	BOOL _zoombarVisible;
 	BOOL _canUseImageGrouping;
 	BOOL _useAlternatePanCursor;		// use traditional Hand cursor for panning rather than NSEW cursor
+	BOOL _recenterMapOnZoom;			// recenter the map at the clicked zoom point
 	tkCustomState _panningInertia;			
 	BOOL _reuseTileBuffer;			
 	tkCustomState _zoomAnimation;			
