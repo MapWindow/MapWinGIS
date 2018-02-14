@@ -701,6 +701,15 @@ namespace AxMapWinGIS
         public int ZoomBarMaxZoom { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to move the mouse click point to the center of the map 
+        /// when using the Zoom In or Zoom Out tools.
+        /// </summary>
+        /// <remarks>The default value is False, indicating that the map is not recentered,  
+        /// but instead keeps the click point at the mouse position and zooms around that point.</remarks>
+        /// \new495 Added in version 4.9.5
+        public bool RecenterMapOnZoom { get; set; }
+
+        /// <summary>
         /// Reverts the last operation performed by user in interactive shape editor.
         /// </summary>
         /// <remarks>This method is preferable over AxMap.UndoList.Undo since it can 
