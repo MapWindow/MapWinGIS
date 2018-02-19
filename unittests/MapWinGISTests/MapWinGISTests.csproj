@@ -75,10 +75,6 @@
       <HintPath>..\interopCreator\bin\x86\Debug\AxInterop.MapWinGIS.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="dotMemory.Unit, Version=111.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
-      <HintPath>..\packages\JetBrains.dotMemoryUnit.3.0.20171219.105559\lib\net35\dotMemory.Unit.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Interop.MapWinGIS">
       <HintPath>..\interopCreator\bin\x86\Debug\Interop.MapWinGIS.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -116,7 +112,6 @@
     <Compile Include="GdalUtilsTests.cs" />
     <Compile Include="DrawingTests.cs" />
     <Compile Include="ClipperTests.cs" />
-    <Compile Include="AkkerwebTests.cs" />
     <Compile Include="GridTests.cs" />
     <Compile Include="TilesTests.cs" />
     <Compile Include="AxMapTests.cs" />

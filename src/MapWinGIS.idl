@@ -2428,10 +2428,17 @@ enum tkScalebarUnits
 		helpstring("Enumerated FieldType Types"),
 	]
 	enum FieldType
-	{		
-		[helpstring("STRING_FIELD")] STRING_FIELD= 0,
+	{
+		// note that types 0 through 3 match enumerated type values from ShapeLib.h
+		[helpstring("STRING_FIELD")] STRING_FIELD = 0,
 		[helpstring("INTEGER_FIELD")] INTEGER_FIELD	= 1,
 		[helpstring("DOUBLE_FIELD")] DOUBLE_FIELD = 2,
+		// jf, 2/17/2018, added Boolean and Date fields
+		[helpstring("BOOLEAN_FIELD")] BOOLEAN_FIELD = 3,
+		// as per ShapeLib documentation (shapelib.maptools.org/dbf_api.html)
+		// "the xBase field type for Date will just be returned as being FTInteger"
+		// still, we will provide a distinct DATE field type for ease of programming
+		[helpstring("DATE_FIELD")] DATE_FIELD = 4
 	}FieldType;
 	
 /*******************************  Grid Enumerations  *****************/
