@@ -1400,7 +1400,6 @@ bool CTableClass::ReadRecord(long RowIndex)
 				}
 				else
 				{
-					//const char* v = DBFReadStringAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
 					const char* v = DBFReadLogicalAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
 					val->vt = VT_BOOL;
 					// depending on who wrote the record, we will accept any of 'Y', 'y', 'T', or 't'
@@ -1567,7 +1566,13 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 		{
 			if (val.vt == VT_BSTR)
 			{
-				//
+				// still a string? 'YYYYMMDD'
+				CString cval = OLE2CA(val.bstrVal);
+				if (cval.GetLength() == 8 && cval.Find('/') < 0)
+				{
+					// just write it back out
+					DBFWriteStringAttribute(dbfHandle, toRowIndex, i, (LPCSTR)cval);
+				}
 			}
 			else if (val.vt == VT_I4)
 			{
