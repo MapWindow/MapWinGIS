@@ -137,6 +137,131 @@ namespace MapWinGISTests
             }
         }
 
+        [TestMethod]
+        public void ShapefileDataTest()
+        {
+            var tempFolder = Path.GetTempPath();
+            var tempFilename = Path.Combine(tempFolder, "ShapefileDataTest.shp");
+            var esriShapefilePath = @"C:\dev\MapWinGIS\unittests\MapWinGISTests\Testdata\Issues\MWGIS-48-68\EsriShapefile.shp";
+            Helper.DeleteShapefile(tempFilename);
+
+            bool result;
+            // Create shapefile
+            var sf = new Shapefile { GlobalCallback = this };
+            try
+            {
+                result = sf.CreateNewWithShapeID(tempFilename, ShpfileType.SHP_POINT);
+                Assert.IsTrue(result, "Could not create shapefile");
+
+                Assert.IsTrue(sf.EditingShapes, "Shapefile is not in edit shapes mode");
+                Assert.IsTrue(sf.EditingTable, "Shapefile is not in edit table mode");
+
+                // Add fields of each data type:
+                var fieldIndex = sf.EditAddField("intField", FieldType.INTEGER_FIELD, 0, 10);
+                Assert.AreEqual(1, fieldIndex, "Could not add Integer field");
+                var width = sf.Field[fieldIndex].Width;
+                Assert.AreEqual(9, width, "Integer field did not shrink to 9 digits");
+                fieldIndex = sf.EditAddField("dateField", FieldType.DATE_FIELD, 0, 6);
+                Assert.AreEqual(2, fieldIndex, "Could not add Date field");
+                width = sf.Field[fieldIndex].Width;
+                Assert.AreEqual(8, width, "Date field did not expand to 8 digits");
+                fieldIndex = sf.EditAddField("boolField", FieldType.BOOLEAN_FIELD, 0, 3);
+                Assert.AreEqual(3, fieldIndex, "Could not add Boolean field");
+                width = sf.Field[fieldIndex].Width;
+                Assert.AreEqual(1, width, "Boolean field did not shrink to 1 character");
+                //
+                Assert.AreEqual(fieldIndex + 1, sf.NumFields, "Number of fields are incorrect");
+
+                result = sf.Save();
+                Assert.IsTrue(result, "Could not save shapefile");
+                Assert.AreEqual(fieldIndex + 1, sf.NumFields, "Number of fields are incorrect");
+
+                // Create shape:
+                var shp = new Shape();
+                result = shp.Create(ShpfileType.SHP_POINT);
+                Assert.IsTrue(result, "Could not create point shape");
+                var idx = sf.EditAddShape(shp);
+                // Add data:
+                result = sf.EditCellValue(sf.FieldIndexByName["intField"], idx, 99);
+                Assert.IsTrue(result, "Could not edit intField");
+                DateTime dt = System.DateTime.Now;
+                result = sf.EditCellValue(sf.FieldIndexByName["dateField"], idx, dt);
+                Assert.IsTrue(result, "Could not edit dateField");
+                result = sf.EditCellValue(sf.FieldIndexByName["boolField"], idx, true);
+                Assert.IsTrue(result, "Could not edit boolField");
+
+                result = sf.StopEditingShapes();
+                Assert.IsTrue(result, "Could not stop editing shapefile");
+
+                // Read back data:
+                for (idx = 0; idx < sf.NumShapes; idx++)
+                {
+                    int iField = (int)sf.CellValue[sf.FieldIndexByName["intField"], idx];
+                    Assert.AreEqual(iField, 99, "intField value of 99 was not returned");
+                    DateTime dField = (DateTime)sf.CellValue[sf.FieldIndexByName["dateField"], idx];
+                    Assert.IsTrue(DateTime.Now.DayOfYear.Equals(((DateTime)dField).DayOfYear), "dateField value of Now was not returned");
+                    bool bField = (bool)sf.CellValue[sf.FieldIndexByName["boolField"], idx];
+                    Assert.AreEqual(bField, true, "boolField value of True was not returned");
+                }
+            }
+            finally
+            {
+                // Close the shapefile:
+                result = sf.Close();
+                Assert.IsTrue(result, "Could not close shapefile");
+            }
+
+            // although the default setting, indicate intent to interpret Y/N OGR String fields as Boolean
+            GlobalSettings gs = new GlobalSettings();
+            gs.OgrInterpretYNStringAsBoolean = true;  // setting to false results in exception reading boolField below
+
+            // open as OGRLayer
+            OgrDatasource _datasource = new OgrDatasource();
+            _datasource.GlobalCallback = this;
+
+            if (_datasource.Open(tempFilename)) // "ESRI Shapefile:" + 
+            {
+                // read layer through OGR library
+                IOgrLayer ogrLayer = _datasource.GetLayer(0);
+                sf = ogrLayer.GetBuffer();
+                for (int idx = 0; idx < sf.NumShapes; idx++)
+                {
+                    int iField = (int)sf.CellValue[sf.FieldIndexByName["intField"], idx];
+                    Assert.AreEqual(iField, 99, "intField value of 99 was not returned");
+                    DateTime dField = (DateTime)sf.CellValue[sf.FieldIndexByName["dateField"], idx];
+                    Assert.IsTrue(DateTime.Now.DayOfYear.Equals(((DateTime)dField).DayOfYear), "dateField value of Now was not returned");
+                    bool bField = (bool)sf.CellValue[sf.FieldIndexByName["boolField"], idx];
+                    Assert.AreEqual(bField, true, "boolField value of True was not returned");
+                }
+                sf.Close();
+            }
+
+            // open and read a Shapefile created by ESRI MapObjects, including a Boolean and Date field
+            // table has a Boolean 'Inspected' field, and a Date 'InspDate' field
+            Assert.IsTrue(sf.Open(esriShapefilePath, this));
+            for (int fld = 0; fld < sf.NumFields; fld++)
+            {
+                Console.WriteLine(string.Format("Field({0}): Name = '{1}', Fieldtype = {2}", fld, sf.Field[fld].Name, sf.Field[fld].Type));
+            }
+            for (int idx = 0; idx < sf.NumShapes; idx++)
+            {
+                // read 'Inspected' value as object
+                object inspected = sf.CellValue[sf.FieldIndexByName["Inspected"], idx];
+                // verify that it's a bool
+                Assert.IsTrue(inspected is bool);
+                // watch for Inspected rows (there aren't many)
+                if ((bool)inspected == true)
+                {
+                    // read 'InspDate' value as object
+                    object dt = sf.CellValue[sf.FieldIndexByName["InspDate"], idx];
+                    // verify that it's a Date
+                    Assert.IsTrue(dt is DateTime);
+                    Console.WriteLine(string.Format("idx = {0}, Inspected = true, Inspection Date = {1}", idx, (DateTime)dt));
+                }
+            }
+            sf.Close();
+        }
+
         /// <summary>
         /// Checks the null value table data.
         /// </summary>

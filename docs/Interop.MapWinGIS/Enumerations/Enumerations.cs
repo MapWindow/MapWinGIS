@@ -35,6 +35,8 @@ namespace MapWinGIS
         STRING_FIELD = 0,
         INTEGER_FIELD = 1,
         DOUBLE_FIELD = 2,
+        BOOLEAN_FIELD = 3,
+        DATE_FIELD = 4
     }
 
     /// <summary>

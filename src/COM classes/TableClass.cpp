@@ -576,7 +576,7 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 	if( *retval)
 	{	
 		CStringW name = OLE2W(dbfFilename);
-		if( !Utility::FileExistsW(name))
+		if (!Utility::FileExistsW(name))
 		{	
 			ErrorMessage(tkDBF_FILE_DOES_NOT_EXIST);
 			return S_OK;
@@ -593,7 +593,7 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 		bool readOnly = (dwAttrs & FILE_ATTRIBUTE_READONLY);
 
 		if (!readOnly) {
-			_dbfHandle = DBFOpen_MW(name,"rb+");
+			_dbfHandle = DBFOpen_MW(name, "rb+");
 		}
 
 		if (_dbfHandle == NULL) {
@@ -770,6 +770,22 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 			if (width > 9)
 			{
 				width = 9;  // otherwise it will be reopened as double
+			}
+		}
+
+		if (type == DATE_FIELD)
+		{
+			if (width > 8)
+			{
+				width = 8;  // fixed-width YYYYMMDD
+			}
+		}
+
+		if (type == BOOLEAN_FIELD)
+		{
+			if (width > 1)
+			{
+				width = 1;  // fixed-width of 1
 			}
 		}
 
@@ -1346,7 +1362,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 					// MWGIS-72: Support Russian encoding
 					//WCHAR *buffer = Utility::StringToWideChar(v);
 					//val->bstrVal = W2BSTR(buffer);
-					//delete[] buffer;				    
+					//delete[] buffer;
 					val->bstrVal = W2BSTR(Utility::ConvertFromUtf8(v));
 			    }
 		    }
@@ -1376,7 +1392,42 @@ bool CTableClass::ReadRecord(long RowIndex)
 				    val->dblVal = res;
 			    }
 		    }
-            _rows[RowIndex].row->SetDirty(TableRow::DATA_CLEAN);
+			else if (type == BOOLEAN_FIELD)
+			{
+				if (isNull)
+				{
+					val->vt = VT_NULL;
+				}
+				else
+				{
+					//const char* v = DBFReadStringAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
+					const char* v = DBFReadLogicalAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
+					val->vt = VT_BOOL;
+					// depending on who wrote the record, we will accept any of 'Y', 'y', 'T', or 't'
+					val->boolVal = (v[0] == 'Y' || v[0] == 'y' || v[0] == 'T' || v[0] == 't') ? VARIANT_TRUE : VARIANT_FALSE;
+				}
+			}
+			else if (type == DATE_FIELD)
+			{
+				if (isNull)
+				{
+					val->vt = VT_NULL;
+				}
+				else
+				{
+					int nFullDate = DBFReadIntegerAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
+					// first we need to parse out the date from the integer
+					int m, d, y;
+					y = (nFullDate / 10000);
+					m = ((nFullDate / 100) % 100);
+					d = (nFullDate % 100);
+					COleDateTime dt(y, m, d, 0, 0, 0);
+					val->vt = VT_DATE;
+					val->date = dt.m_dt;
+				}
+			}
+
+			_rows[RowIndex].row->SetDirty(TableRow::DATA_CLEAN);
         }
 		_rows[RowIndex].row->values.push_back(val);
 	}
@@ -1433,6 +1484,19 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 				cval.Format("%i",val.lVal);
 				DBFWriteStringAttribute(dbfHandle,toRowIndex,i,cval);
 			}
+			else if (val.vt == VT_BOOL)
+			{
+				CString cval;
+				cval = (val.boolVal == VARIANT_TRUE) ? "Y" : "N";
+				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, cval);
+			}
+			else if (val.vt == VT_DATE)
+			{
+				CString cval;
+				COleDateTime dt(val.date);
+				cval.Format("%4d%2d%2d", dt.GetYear(), dt.GetMonth(), dt.GetDay());
+				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, cval);
+			}
 			else
 			{	
 				DBFWriteStringAttribute(dbfHandle,toRowIndex,i,"");
@@ -1456,7 +1520,14 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 			{	
 				DBFWriteIntegerAttribute(dbfHandle,toRowIndex,i,(int)val.dblVal);
 			}
-			else if( val.vt == VT_NULL )
+			else if (val.vt == VT_DATE)
+			{
+				int ival;
+				COleDateTime dt(val.date);
+				ival= dt.GetYear() * 10000 + dt.GetMonth() * 100 + dt.GetDay();
+				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, ival);
+			}
+			else if (val.vt == VT_NULL)
 			{	
 				DBFWriteNULLAttribute(dbfHandle,toRowIndex,i); 
 			}
@@ -1490,6 +1561,55 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 			else
 			{	
 				DBFWriteDoubleAttribute(dbfHandle,toRowIndex,i,0.0);
+			}
+		}
+		else if (type == FTDate)
+		{
+			if (val.vt == VT_BSTR)
+			{
+				//
+			}
+			else if (val.vt == VT_I4)
+			{
+				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, val.lVal);
+			}
+			else if (val.vt == VT_R8)
+			{
+				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, (int)val.dblVal);
+			}
+			else if (val.vt == VT_DATE)
+			{
+				int ival;
+				COleDateTime dt(val.date);
+				ival = dt.GetYear() * 10000 + dt.GetMonth() * 100 + dt.GetDay();
+				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, ival);
+			}
+			else // if (val.vt == VT_NULL)
+			{
+				DBFWriteNULLAttribute(dbfHandle, toRowIndex, i);
+			}
+		}
+		else if (type == FTLogical)
+		{
+			if (val.vt == VT_BSTR)
+			{
+				CString cval = OLE2CA(val.bstrVal);
+				// if no string, assume False
+				if (cval.GetLength() == 0) cval = "F";
+				// make sure to only write a single character
+				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, cval.Left(1));
+			}
+			else if (val.vt == VT_BOOL)
+			{
+				CString cval;
+				cval = (val.boolVal == VARIANT_TRUE) ? "T" : "F";
+				//DBFWriteStringAttribute(dbfHandle, toRowIndex, i, cval);
+				DBFWriteLogicalAttribute(dbfHandle, toRowIndex, i, cval[0]);
+			}
+			else
+			{
+				// default False
+				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, "F");
 			}
 		}
 		VariantClear(&val);
@@ -1577,15 +1697,16 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 		newVal.vt = VT_BSTR;
 		newVal.bstrVal = val;
 	}
-	else if( newVal.vt == VT_DATE )
-	{
-		BSTR val;
-		LCID localeID = MAKELCID(MAKELANGID(LANG_ENGLISH,SUBLANG_ENGLISH_US), SORT_DEFAULT);
-		VarBstrFromDate(newVal.date,localeID,LOCALE_NOUSEROVERRIDE,&val);
-		newVal.vt = VT_BSTR;
-		newVal.bstrVal = val;
-		SysFreeString(val);
-	}
+	// jf, 2/17/2018, no longer want to write a string, we can now process dates as dates
+	//else if( newVal.vt == VT_DATE )
+	//{
+	//	BSTR val;
+	//	LCID localeID = MAKELCID(MAKELANGID(LANG_ENGLISH,SUBLANG_ENGLISH_US), SORT_DEFAULT);
+	//	VarBstrFromDate(newVal.date,localeID,LOCALE_NOUSEROVERRIDE,&val);
+	//	newVal.vt = VT_BSTR;
+	//	newVal.bstrVal = val;
+	//	SysFreeString(val);
+	//}
 
 	/*
 	VT_UI1;
@@ -1618,7 +1739,8 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
     */
 
 	// Darrel Brown, 10/16/2003 Added support for null cell values
-	if( newVal.vt != VT_I4 && newVal.vt != VT_R8 && newVal.vt != VT_BSTR && newVal.vt != VT_NULL )
+	// jf, 2/17/2018, added support for Dates and Booleans
+	if (newVal.vt != VT_I4 && newVal.vt != VT_R8 && newVal.vt != VT_BSTR && newVal.vt != VT_DATE && newVal.vt != VT_BOOL && newVal.vt != VT_NULL)
 	{	
 		ErrorMessage(tkINCORRECT_VARIANT_TYPE);
 		return S_OK;
@@ -1670,7 +1792,16 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 			cval.Format("%." + fmat + "d",precision,newVal.dblVal);	
 			valWidth = cval.GetLength();
 		}
-		if( valWidth > width )
+		else if (newVal.vt == VT_DATE)
+		{
+			valWidth = 8;
+		}
+		else if (newVal.vt == VT_BOOL)
+		{
+			valWidth = 1;
+		}
+
+		if (valWidth > width)
 			field->put_Width(valWidth);
 
 		field->Release();  
@@ -2661,6 +2792,23 @@ STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision,
 		*fieldIndex = -1;
 		ErrorMessage(tkDBF_PRECISION_TOO_SMALL);
 		return S_OK;
+	}
+
+	// fixed width fields
+	if (type == DATE_FIELD)
+	{
+		width = 8;
+		precision = 0;
+	}
+	else if (type == BOOLEAN_FIELD)
+	{
+		width = 1;
+		precision = 0;
+	}
+	else if (type == INTEGER_FIELD && width > 9)
+	{
+		width = 9;
+		precision = 0;
 	}
 
 	IField* field = NULL;
