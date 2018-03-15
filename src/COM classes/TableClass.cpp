@@ -1566,12 +1566,24 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 		{
 			if (val.vt == VT_BSTR)
 			{
-				// still a string? 'YYYYMMDD'
+				// still a string? not likely, but the two GDAL formats
+				// would either be 'YYYYMMDD' or 'MM/DD/YYYY'
 				CString cval = OLE2CA(val.bstrVal);
 				if (cval.GetLength() == 8 && cval.Find('/') < 0)
 				{
-					// just write it back out
+					// already formatted properly, just write it back out
 					DBFWriteStringAttribute(dbfHandle, toRowIndex, i, (LPCSTR)cval);
+				}
+				else if (cval.GetLength() == 10 && cval[2] == '/' && cval[5] == '/')
+				{
+					// reformat the way it should be...
+					CString newVal = cval.Right(4) + cval.Left(2) + cval.Mid(3, 2);
+					DBFWriteStringAttribute(dbfHandle, toRowIndex, i, (LPCSTR)newVal);
+				}
+				else
+				{
+					// don't know what we've got
+					DBFWriteNULLAttribute(dbfHandle, toRowIndex, i);
 				}
 			}
 			else if (val.vt == VT_I4)
