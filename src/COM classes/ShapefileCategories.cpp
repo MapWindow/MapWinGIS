@@ -1150,12 +1150,14 @@ STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending,
 	fld->get_Type(&type);
 	fld->Release();
 	CComVariant valDefault;
-	if (type == DOUBLE_FIELD || INTEGER_FIELD)
+	if (type == DOUBLE_FIELD || type == INTEGER_FIELD || type == DATE_FIELD)
 	{
+		// each of these can be treated as numeric
 		valDefault = 0;
 	}
 	else
 	{
+		// string and boolean can be treated as string
 		valDefault = "";
 	}
 		

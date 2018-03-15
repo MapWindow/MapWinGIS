@@ -138,6 +138,7 @@ void Ogr2Shape::CopyFields(OGRLayer* layer, IShapefile* sf)
 		OGRFieldType type = oField->GetType();
 
 		if (type == OFTInteger)	fld->put_Type(INTEGER_FIELD);
+		else if (type == OFTDate)	fld->put_Type(DATE_FIELD);
 		else if (type == OFTReal)	fld->put_Type(DOUBLE_FIELD);
 		else if (type == OFTString)	fld->put_Type(STRING_FIELD);
 
@@ -260,6 +261,18 @@ next_feature:
 	return true;
 }
 
+// is the specified character one of the valid XBase Logical characters
+bool isXBaseLogicalChar(char c)
+{
+	return (c == 'Y' || c == 'N' || c == 'T' || c == 'F' || c == '?'); // || c == 'y' || c == 'n' || c == 't' || c == 'f');
+}
+
+// is the specified character one of the valid XBase Logical characters indicating TRUE
+bool isXBaseLogicalTrue(char c)
+{
+	return (c == 'Y' || c == 'T'); // || c == 'y' || c == 't');
+}
+
 // *************************************************************
 //		CopyValues()
 // *************************************************************
@@ -296,10 +309,43 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 				var.vt = VT_R8;
 				var.dblVal = poFeature->GetFieldAsDouble(iFld);
 			}
-			else //if (type == OFTString )
+			else if (type == OFTDate)
 			{
-				var.vt = VT_BSTR;
-				var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+				int m, d, y, h, min, sec, flag;
+				// should be able to read an an Integer
+				int nFullDate = poFeature->GetFieldAsDateTime(iFld, &y, &m, &d, &h, &min, &sec, &flag);
+				//y = (nFullDate / 10000);
+				//m = ((nFullDate / 100) % 100);
+				//d = (nFullDate % 100);
+				COleDateTime dt(y, m, d, 0, 0, 0);
+				var.vt = VT_DATE;
+				var.date = dt.m_dt;
+			}
+			else if (type == OFTString)
+			{
+				// preview string
+				CString str(poFeature->GetFieldAsString(iFld));
+				// OGR does not currently support the Logical (boolean) field type.  It is possible that they will exist 
+				// in the file, but OGR will interpret them as Strings.  Since we support boolean field types, we want 
+				// to have a way of copying these particular string fields and interpreting them as booleans.  We will 
+				// take the position that a single-character string field that contains any one of the valid XBase logical
+				// characters is actually a Logical field.  This behavior can be turned off in the global settings.
+				// NOTE: ESRI stores these values as Y and N, but the XBase spec indicates that it could also be a T or F,
+				//       or lower case y, n, t, or f; so I have set up this test to accept all of the valid characters.
+				// So, if the string is a single character, equal to one of the valid XBase Logical characters, 
+				// AND our global settings are set to interpret a Yes/No character as a boolean, then do so.
+				if (m_globalSettings.ogrInterpretYNStringAsBoolean && str.GetLength() == 1 && isXBaseLogicalChar(str.MakeUpper()[0]))
+				{
+					// interpret as a boolean
+					var.vt = VT_BOOL;
+					var.boolVal = isXBaseLogicalTrue(str.MakeUpper()[0]) ? VARIANT_TRUE : VARIANT_FALSE;
+				}
+				else
+				{
+					// else accept as a string
+					var.vt = VT_BSTR;
+					var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+				}
 			}
 		}
 		else

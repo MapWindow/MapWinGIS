@@ -9,6 +9,7 @@
 //27 aug 2009 lsu - added ShapeDrawingOptions class
 // june 2017 PaulM - Added IGdalUtils
 // sep 2017 jfaust - Extend interfaces of IExtents and IPoint
+// feb 2018 jfaust - added Boolean and Date fields
 
 #include <olectl.h>
 #include <idispids.h>
@@ -2428,10 +2429,15 @@ enum tkScalebarUnits
 		helpstring("Enumerated FieldType Types"),
 	]
 	enum FieldType
-	{		
-		[helpstring("STRING_FIELD")] STRING_FIELD= 0,
+	{
+		// note that types 0 through 3 match enumerated type values from ShapeLib.h
+		// although we have proposed a change to ShapeLib such that Dates are supported
+		[helpstring("STRING_FIELD")] STRING_FIELD = 0,
 		[helpstring("INTEGER_FIELD")] INTEGER_FIELD	= 1,
 		[helpstring("DOUBLE_FIELD")] DOUBLE_FIELD = 2,
+		// jf, 2/17/2018, added Boolean and Date fields
+		[helpstring("BOOLEAN_FIELD")] BOOLEAN_FIELD = 3,
+		[helpstring("DATE_FIELD")] DATE_FIELD = 4
 	}FieldType;
 	
 /*******************************  Grid Enumerations  *****************/
@@ -5747,6 +5753,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(68)] HRESULT CallbackVerbosity([in] tkCallbackVerbosity newVal);
 	[propget, id(69)] HRESULT OgrShareConnection([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(69)] HRESULT OgrShareConnection([in] VARIANT_BOOL newVal);
+	[propget, id(70)] HRESULT OgrInterpretYNStringAsBoolean([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(70)] HRESULT OgrInterpretYNStringAsBoolean([in] VARIANT_BOOL newVal);
 };
 
 [

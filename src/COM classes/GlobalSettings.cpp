@@ -1220,7 +1220,7 @@ STDMETHODIMP CGlobalSettings::put_CallbackVerbosity(tkCallbackVerbosity newVal)
 }
 
 // *********************************************************
-//	     OgrShareDatasources()
+//	     OgrShareConnection()
 // *********************************************************
 STDMETHODIMP CGlobalSettings::get_OgrShareConnection(VARIANT_BOOL* pVal)
 {
@@ -1235,7 +1235,28 @@ STDMETHODIMP CGlobalSettings::put_OgrShareConnection(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.ogrShareConnection  = newVal ? true : false;
+	m_globalSettings.ogrShareConnection  = (newVal == VARIANT_TRUE) ? true : false;
+
+	return S_OK;
+}
+
+// *********************************************************
+//	     OgrInterpretYNStringAsBoolean()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_OgrInterpretYNStringAsBoolean(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = m_globalSettings.ogrInterpretYNStringAsBoolean ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_OgrInterpretYNStringAsBoolean(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_globalSettings.ogrInterpretYNStringAsBoolean = (newVal == VARIANT_TRUE) ? true : false;
 
 	return S_OK;
 }
