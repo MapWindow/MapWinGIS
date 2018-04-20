@@ -78,6 +78,53 @@ bool CUtils::LoadProjectionStrings()
 			}
 		}
 		file.Close();
+
+		////////////////////////////////////////////////////
+		// now process and append the esri-extra definitions
+		////////////////////////////////////////////////////
+		csvPath = thisOcxPath() + "gdal-data\\esri_extra.wkt";
+
+		if (file.Open(csvPath, CFile::modeRead | CFile::typeText))
+		{
+			CString nextLine;
+			// throw away the first line
+			file.ReadString(nextLine);
+			// now read all definitions
+			while (file.ReadString(nextLine))
+			{
+				// continue on error
+				try
+				{
+					// bypass comments
+					if (nextLine.Left(1) == "#") continue;
+					CString code, name, restOfLine;
+					// find the first comma
+					int commaPosition = nextLine.Find(",", 0);
+					// bypass Geographic Projections (GEOGCS immediately following the comma)
+					if (nextLine.Find("GEOGCS") == commaPosition + 1) continue;
+					// strip off the SRID
+					code = nextLine.Left(commaPosition);
+					// the rest of the line (account for PROJCS[ and the leading quote symbol)
+					restOfLine = nextLine.Right(nextLine.GetLength() - commaPosition -1 - 7 - 1);
+					// strip off all to the right of the name (using the closing quote symbol)
+					int quotePosition = restOfLine.Find("\"", 0);
+					// this is the name
+					name = restOfLine.Left(quotePosition);
+					// add to PCS mapping
+					pcsStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
+				}
+				catch (...)
+				{
+				}
+			}
+			file.Close();
+		}
+		else
+		{
+			// not sure if we should raise any error in this case, 
+			// since at least all of the EPSG codes have been loaded...
+		}
+
 		//
 		bLoaded = true;
 	}
@@ -166,7 +213,11 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 			{
 				for each (pair<int, CString> p in pcsStrings)
 				{
-					if (p.second.Left(6) == "NAD83 ") theSize++;
+					// account for both pcs.csv and esri_extra formats (state plane only)
+					// NOTE that this enumeration is not a contiguous sequence of number, so for now, 
+					// for simplicity, rather than repeatedly enumerating to check for containment,
+					// we will narrow is down slightly by only including those with a known prefix.
+					if (p.second.Left(6) == "NAD83 " || p.second.Left(10) == "NAD_1983_S") theSize++;
 				}
 				//theSize += 881;
 			}
@@ -175,7 +226,11 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 			{
 				for each (pair<int, CString> p in pcsStrings)
 				{
-					if (p.second.Left(6) == "WGS 84") theSize++;
+					// account for both pcs.csv and esri_extra formats
+					// NOTE that this enumeration is not a contiguous sequence of number, so for now, 
+					// for simplicity, rather than repeatedly enumerating to check for containment,
+					// we will narrow is down slightly by only including those with a known prefix.
+					if (p.second.Left(6) == "WGS 84" || p.second.Left(8) == "WGS_1984") theSize++;
 				}
 				//theSize += 248;
 			}
@@ -196,8 +251,8 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 			{
 				// include ?
 				if (((projectionSets & psAll_Projections) == psAll_Projections) ||
-					(((projectionSets & psNAD83_Subset) == psNAD83_Subset) && (p.second.Left(6) == "NAD83 ")) ||
-					(((projectionSets & psWGS84_Subset) == psWGS84_Subset) && (p.second.Left(6) == "WGS 84")))
+					(((projectionSets & psNAD83_Subset) == psNAD83_Subset) && (p.second.Left(6) == "NAD83 " || p.second.Left(10) == "NAD_1983_S")) ||
+					(((projectionSets & psWGS84_Subset) == psWGS84_Subset) && (p.second.Left(6) == "WGS 84" || p.second.Left(8) == "WGS_1984")))
 				{
 					// create concatenated string
 					CString msg;

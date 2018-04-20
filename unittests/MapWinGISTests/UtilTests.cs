@@ -278,6 +278,18 @@ namespace MapWinGISTests
             importProjection = gp.Name;
             Assert.AreEqual(utilProjection, importProjection);
 
+            // get ESRI-specific NAD83 name
+            utilProjection = utils.GetNAD83ProjectionName(tkNad83Projection.NAD_1983_StatePlane_Alabama_East_FIPS_0101_Feet);
+            gp.ImportFromEPSG((int)tkNad83Projection.NAD_1983_StatePlane_Alabama_East_FIPS_0101_Feet);
+            importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
+            // get ESRI-specific WGS84 name
+            utilProjection = utils.GetWGS84ProjectionName(tkWgs84Projection.WGS_1984_Web_Mercator);
+            gp.ImportFromEPSG((int)tkWgs84Projection.WGS_1984_Web_Mercator);
+            importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
             // get NAD83 name by ID
             utilProjection = utils.GetProjectionNameByID((int)tkNad83Projection.Nad83_Alabama_East);
             gp.ImportFromEPSG((int)tkNad83Projection.Nad83_Alabama_East);
@@ -287,6 +299,18 @@ namespace MapWinGISTests
             // get WGS84 name by ID
             utilProjection = utils.GetProjectionNameByID((int)tkWgs84Projection.Wgs84_BLM_14N_ftUS);
             gp.ImportFromEPSG((int)tkWgs84Projection.Wgs84_BLM_14N_ftUS);
+            importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
+            // get ESRI-specific NAD83 name by ID
+            utilProjection = utils.GetProjectionNameByID((int)tkNad83Projection.NAD_1983_StatePlane_Alabama_East_FIPS_0101_Feet);
+            gp.ImportFromEPSG((int)tkNad83Projection.NAD_1983_StatePlane_Alabama_East_FIPS_0101_Feet);
+            importProjection = gp.Name;
+            Assert.AreEqual(utilProjection, importProjection);
+
+            // get ESRI-specific WGS84 name by ID
+            utilProjection = utils.GetProjectionNameByID((int)tkWgs84Projection.WGS_1984_Web_Mercator);
+            gp.ImportFromEPSG((int)tkWgs84Projection.WGS_1984_Web_Mercator);
             importProjection = gp.Name;
             Assert.AreEqual(utilProjection, importProjection);
 

@@ -1330,7 +1330,7 @@ bool CGeoProjection::ParseLinearUnits(CString s, tkUnitsOfMeasure& units)
 		units = umDecimalDegrees;
 		return true;
 	}
-	else if (s.CompareNoCase("feet") == 0 || s.CompareNoCase("us survey foot") == 0)
+	else if (s.CompareNoCase("feet") == 0 || s.CompareNoCase("us survey foot") == 0 || s.CompareNoCase("foot_us") == 0)
 	{
 		units = umFeets;
 		return true;
