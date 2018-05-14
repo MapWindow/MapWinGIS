@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spatialindex-mw", "spatiali
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cqlib", "cqlib\cqlib.vcxproj", "{E81699D6-81BA-41BF-A3A9-DD4CEF0B4E95}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShapeLib", "ShapeLib\ShapeLib.vcxproj", "{13159D99-66E0-4E2F-B155-4749BE815470}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShapeLib", "ShapeLib\ShapeLib.vcxproj", "{A0B00502-605B-4382-B313-5983F6BC8E71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,12 +35,14 @@ Global
 		{E81699D6-81BA-41BF-A3A9-DD4CEF0B4E95}.Release|Win32.Build.0 = Release|Win32
 		{E81699D6-81BA-41BF-A3A9-DD4CEF0B4E95}.Release|x64.ActiveCfg = Release|x64
 		{E81699D6-81BA-41BF-A3A9-DD4CEF0B4E95}.Release|x64.Build.0 = Release|x64
-		{13159D99-66E0-4E2F-B155-4749BE815470}.Debug|Win32.ActiveCfg = Debug|Win32
-		{13159D99-66E0-4E2F-B155-4749BE815470}.Debug|Win32.Build.0 = Debug|Win32
-		{13159D99-66E0-4E2F-B155-4749BE815470}.Debug|x64.ActiveCfg = Debug|Win32
-		{13159D99-66E0-4E2F-B155-4749BE815470}.Release|Win32.ActiveCfg = Release|Win32
-		{13159D99-66E0-4E2F-B155-4749BE815470}.Release|Win32.Build.0 = Release|Win32
-		{13159D99-66E0-4E2F-B155-4749BE815470}.Release|x64.ActiveCfg = Release|Win32
+		{A0B00502-605B-4382-B313-5983F6BC8E71}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A0B00502-605B-4382-B313-5983F6BC8E71}.Debug|Win32.Build.0 = Debug|Win32
+		{A0B00502-605B-4382-B313-5983F6BC8E71}.Debug|x64.ActiveCfg = Debug|x64
+		{A0B00502-605B-4382-B313-5983F6BC8E71}.Debug|x64.Build.0 = Debug|x64
+		{A0B00502-605B-4382-B313-5983F6BC8E71}.Release|Win32.ActiveCfg = Release|Win32
+		{A0B00502-605B-4382-B313-5983F6BC8E71}.Release|Win32.Build.0 = Release|Win32
+		{A0B00502-605B-4382-B313-5983F6BC8E71}.Release|x64.ActiveCfg = Release|x64
+		{A0B00502-605B-4382-B313-5983F6BC8E71}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
