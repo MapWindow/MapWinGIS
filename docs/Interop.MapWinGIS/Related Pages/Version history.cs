@@ -119,7 +119,7 @@
 /// but uses fast heuristic which can employ somewhat more colors than optimal solution
 /// (ShapefileCategories.GeneratePolygonColors).
 /// 
-/// 6. New <a href="http://hot.openstreetmap.org/">OpenStreetMap Humanitarian</a> tile provider.
+/// 6. New <a href="https://hot.openstreetmap.org/">OpenStreetMap Humanitarian</a> tile provider.
 /// 
 /// \section changes491 Changes in version 4.9.1.
 ///

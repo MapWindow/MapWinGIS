@@ -27,7 +27,7 @@ namespace MWLite.Core.GeoLocation
         private static string ResquestLocation(string query)
         {
             //var url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + query;
-            var url = string.Format("http://nominatim.openstreetmap.org/search/{0}?format=json&limit=1", query);
+            var url = string.Format("https://nominatim.openstreetmap.org/search/{0}?format=json&limit=1", query);
             var request = (HttpWebRequest)WebRequest.Create(url);
             
             request.Referer = "mapwingis.codeplex.com";

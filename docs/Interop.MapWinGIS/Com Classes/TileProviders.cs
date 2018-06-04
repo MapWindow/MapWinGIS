@@ -26,7 +26,7 @@ namespace MapWinGIS
         /// <param name="Name">Arbitrary name of provider.</param>
         /// <param name="urlPattern">Url pattern for provider. The pattern may include the following varying components: 
         /// {zoom}, {x}, {y}, {switch:n1,n2,n3}. For example, the following can be used to setup OpenStreetMap 
-        /// as custom provider: "http://{switch:a,b,c}.tile.openstreetmap.org/{zoom}/{x}/{y}.png".</param>
+        /// as custom provider: "https://{switch:a,b,c}.tile.openstreetmap.org/{zoom}/{x}/{y}.png".</param>
         /// <param name="Projection">Projection used by tile server. Projection must not necessarily match the map projection.
         /// MapWinGIS will try to do the transformation even if projection don't match, though these may lead to 
         /// distortions and gaps between tiles.</param>
