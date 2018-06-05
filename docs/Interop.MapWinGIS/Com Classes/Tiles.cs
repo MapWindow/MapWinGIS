@@ -121,7 +121,7 @@ namespace MapWinGIS
     /// TileProviders providers = axMap1.Tiles.Providers;
     /// int providerId = (int)tkTileProvider.ProviderCustom + 1;    // (1024 + 1) should be unique across application runs in case disk caching is used
     /// providers.Add(providerId, "Custom TMS provider",
-    /// "http://{switch:a,b,c}.tile.openstreetmap.org/{zoom}/{x}/{y}.png",
+    /// "https://{switch:a,b,c}.tile.openstreetmap.org/{zoom}/{x}/{y}.png",
     /// tkTileProjection.SphericalMercator, 0, 18);
     /// \endcode
     /// The following placeholders can be used:

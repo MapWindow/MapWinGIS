@@ -38,10 +38,10 @@ public:
 		this->_projection = new MercatorProjection();
 		_subProviders.push_back(this);
 		_serverLetters = "abc";
-		_refererUrl = "http://www.openstreetmap.org/";
-		_urlFormat = "http://%c.tile.openstreetmap.org/%d/%d/%d.png";
+		_refererUrl = "https://www.openstreetmap.org/";
+		_urlFormat = "https://%c.tile.openstreetmap.org/%d/%d/%d.png";
 		_maxZoom = 19;
-		_licenseUrl = "http://wiki.openstreetmap.org/wiki/Tile_usage_policy";
+		_licenseUrl = "https://wiki.openstreetmap.org/wiki/Tile_usage_policy";
 	}
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
@@ -87,7 +87,7 @@ public:
 	{
 		Id = tkTileProvider::OpenHumanitarianMap;
 		Name = "OpenHumanitarianMap";
-		_refererUrl = "http://www.openstreetmap.org/";
+		_refererUrl = "https://www.openstreetmap.org/";
 		_urlFormat = "http://%c.tile.openstreetmap.fr/hot/%d/%d/%d.png";
 	}
 };
