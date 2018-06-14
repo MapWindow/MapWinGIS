@@ -1,8 +1,8 @@
 When releasing a new version version numbers need to be updated on several locations:
 MapWinGIS.rc lines: 114, 115, 133, 139
 MapWinGIS.cpp lines: 32, 33
-MapWinGIS.idl line: 6395 (helpfile("MapWinGIS.chm"))
-                  , 6416 (helpstring("Dispatch interface for Map Control"))
+MapWinGIS.idl line: 6622 (helpfile("MapWinGIS.chm"))
+                  , 6644 (helpstring("Dispatch interface for Map Control"))
 
 If you want to update AxInterop.MapWinGIS.dll and Interop.MapWinGIS.dll
 you can run the InteropCreator project. It is a C# project which will create the interop dlls for you.
