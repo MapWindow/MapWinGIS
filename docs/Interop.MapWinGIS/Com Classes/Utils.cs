@@ -1,4 +1,4 @@
-﻿
+﻿// ReSharper disable UnassignedGetOnlyAutoProperty
 #if nsp
 namespace MapWinGIS
 {
@@ -6,18 +6,18 @@ namespace MapWinGIS
     using System;
     /// <summary>
     /// A utils object provides access to a set of utility functions to perform a variety of tasks on other objects such as grids, images, points, shapes, shapefiles, tins, etc.  
+    /// Starting at v4.9.5 some specific GDAL methods are moved to GdalUtils.
     /// </summary>
-    #if nsp
-        #if upd
-            public class Utils : MapWinGIS.IUtils
-        #else        
-            public class IUtils
-        #endif
-    #else
+#if nsp
+#if upd
+    public class Utils : MapWinGIS.IUtils
+#else
+    public class IUtils
+#endif
+#else
         public class Utils
-    #endif
+#endif
     {
-        #region IUtils Members
         /// <summary>
         /// Modifies a polygon using the specified method. 
         /// </summary>
@@ -66,8 +66,8 @@ namespace MapWinGIS
         /// \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
         public ICallback GlobalCallback
         {
-            get  { throw new NotImplementedException(); }
-            set  { throw new NotImplementedException(); }
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// Gets the perimeter of the polygon shape. 
         /// </summary>
@@ -358,7 +358,6 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-        #endregion
 
         /// <summary>
         /// Creates a new grid from the input one in which all values outside the specified polygon are set to no data value.
@@ -472,6 +471,8 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>See documentation here: http://www.gdal.org/gdalwarp.html</remarks>
         /// \new490 Added in version 4.9.0
+        /// \deprecated v4.9.5 Use GdalUtils.GDALWarp instead.
+        [Obsolete("Use GdalUtils.GDALWarp")]
         public bool GDALWarp(string bstrSrcFilename, string bstrDstFilename, string bstrOptions, ICallback cBack = null)
         {
             throw new NotImplementedException();
@@ -490,7 +491,7 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         ///  Calculates statistics for portion of grid that is overlapped by specified polygon.
         /// </summary>
@@ -575,17 +576,19 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// The same as GDAL's ogr2ogr utility.
         /// </summary>
         /// <remarks>See documentation here: http://www.gdal.org/ogr2ogr.html</remarks>
         /// \new490 Added in version 4.9.0
+        /// \deprecated v4.9.5 Use GdalUtils.GdalVectorTranslate instead.
+        [Obsolete("Use GdalUtils.GdalVectorTranslate")]
         public bool OGR2OGR(string bstrSrcFilename, string bstrDstFilename, string bstrOptions, ICallback cBack = null)
         {
             throw new NotImplementedException();
         }
-                
+
         /// <summary>
         /// The same as GDAL's OGRInfo utility.
         /// </summary>
@@ -752,6 +755,32 @@ namespace MapWinGIS
         /// <returns>True on success and false otherwise.</returns>
         /// \new493 Added in version 4.9.3 (is moved from AxMap.IsTiffGrid)
         public bool IsTiffGrid(string Filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        public double GeodesicArea(Shape shapeWgs84)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool FixUpShapes(Shapefile subject, bool SelectedOnly, string outputFilename, bool Overwrite)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool BufferByDistance(Shapefile subject, double Distance, int nSegments, bool SelectedOnly, bool MergeResults,
+            string outputFilename, bool Overwrite)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ExplodeShapes(Shapefile subject, bool SelectedOnly, string outputFilename, bool Overwrite)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ExportSelection(Shapefile subject, string outputFilename, bool Overwrite)
         {
             throw new NotImplementedException();
         }

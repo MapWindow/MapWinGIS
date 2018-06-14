@@ -289,7 +289,7 @@ Node::~Node()
 	delete[] m_pIdentifier;
 }
 
-Node& Node::operator=(const Node& n)
+Node& Node::operator=(const Node&)
 {
 	throw Tools::IllegalStateException("operator =: This should never be called.");
 }
@@ -471,7 +471,7 @@ bool Node::insertData(uint32_t dataLength, byte* pData, Region& mbr, id_type id,
 		id_type cParent = pathBuffer.top(); pathBuffer.pop();
 		NodePtr ptrN = m_pTree->readNode(cParent);
 		Index* p = static_cast<Index*>(ptrN.get());
-		p->adjustTree(this, pathBuffer);
+		p->adjustTree(this, pathBuffer, true);
 
 		for (cIndex = 0; cIndex < lReinsert; ++cIndex)
 		{
@@ -589,15 +589,20 @@ void Node::reinsertData(uint32_t dataLength, byte* pData, Region& mbr, id_type i
 
 	uint32_t cCount;
 
-	for (cCount = 0; cCount < cReinsert; ++cCount)
+    // Keep all but cReinsert nodes
+	for (cCount = 0; cCount < m_capacity + 1 - cReinsert; ++cCount)
 	{
-		reinsert.push_back(v[cCount]->m_index);
+		keep.push_back(v[cCount]->m_index);
 		delete v[cCount];
 	}
 
-	for (cCount = cReinsert; cCount < m_capacity + 1; ++cCount)
+    // Remove cReinsert nodes which will be
+    // reinserted into the tree. Since our array
+    // is already sorted in ascending order this
+    // matches the order suggested in the paper.
+	for (cCount = m_capacity + 1 - cReinsert; cCount < m_capacity + 1; ++cCount)
 	{
-		keep.push_back(v[cCount]->m_index);
+		reinsert.push_back(v[cCount]->m_index);
 		delete v[cCount];
 	}
 
@@ -1027,6 +1032,27 @@ void Node::condenseTree(std::stack<NodePtr>& toReinsert, std::stack<id_type>& pa
 			m_pTree->m_stats.m_u32TreeHeight -= 1;
 			// HACK: pending deleteNode for deleted child will decrease nodesInLevel, later on.
 			m_pTree->m_stats.m_nodesInLevel[m_pTree->m_stats.m_u32TreeHeight - 1] = 2;
+		}
+		else
+		{
+			// due to data removal.
+			if (m_pTree->m_bTightMBRs)
+			{
+				for (uint32_t cDim = 0; cDim < m_nodeMBR.m_dimension; ++cDim)
+				{
+					m_nodeMBR.m_pLow[cDim] = std::numeric_limits<double>::max();
+					m_nodeMBR.m_pHigh[cDim] = -std::numeric_limits<double>::max();
+
+					for (uint32_t u32Child = 0; u32Child < m_children; ++u32Child)
+					{
+						m_nodeMBR.m_pLow[cDim] = std::min(m_nodeMBR.m_pLow[cDim], m_ptrMBR[u32Child]->m_pLow[cDim]);
+						m_nodeMBR.m_pHigh[cDim] = std::max(m_nodeMBR.m_pHigh[cDim], m_ptrMBR[u32Child]->m_pHigh[cDim]);
+					}
+				}
+			}
+
+            // write parent node back to storage.
+			m_pTree->writeNode(this);
 		}
 	}
 	else

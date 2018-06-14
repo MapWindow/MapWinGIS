@@ -161,27 +161,27 @@ bool TimePoint::intersectsShapeInTime(const ITimeShape& in) const
 	throw Tools::IllegalStateException("intersectsShapeInTime: Not implemented yet!");
 }
 
-bool TimePoint::intersectsShapeInTime(const IInterval& ivI, const ITimeShape& in) const
+bool TimePoint::intersectsShapeInTime(const IInterval&, const ITimeShape&) const
 {
 	throw Tools::IllegalStateException("intersectsShapeInTime: Not implemented yet!");
 }
 
-bool TimePoint::containsShapeInTime(const ITimeShape& in) const
+bool TimePoint::containsShapeInTime(const ITimeShape&) const
 {
 	return false;
 }
 
-bool TimePoint::containsShapeInTime(const IInterval& ivI, const ITimeShape& in) const
+bool TimePoint::containsShapeInTime(const IInterval&, const ITimeShape&) const
 {
 	return false;
 }
 
-bool TimePoint::touchesShapeInTime(const ITimeShape& in) const
+bool TimePoint::touchesShapeInTime(const ITimeShape&) const
 {
 	throw Tools::IllegalStateException("touchesShapeInTime: Not implemented yet!");
 }
 
-bool TimePoint::touchesShapeInTime(const IInterval& ivI, const ITimeShape& in) const
+bool TimePoint::touchesShapeInTime(const IInterval&, const ITimeShape&) const
 {
 	throw Tools::IllegalStateException("touchesShapeInTime: Not implemented yet!");
 }
@@ -191,17 +191,17 @@ double TimePoint::getAreaInTime() const
 	return 0.0;
 }
 
-double TimePoint::getAreaInTime(const IInterval& ivI) const
+double TimePoint::getAreaInTime(const IInterval&) const
 {
 	return 0.0;
 }
 
-double TimePoint::getIntersectingAreaInTime(const ITimeShape& r) const
+double TimePoint::getIntersectingAreaInTime(const ITimeShape&) const
 {
 	return 0.0;
 }
 
-double TimePoint::getIntersectingAreaInTime(const IInterval& ivI, const ITimeShape& r) const
+double TimePoint::getIntersectingAreaInTime(const IInterval&, const ITimeShape&) const
 {
 	return 0.0;
 }
@@ -243,7 +243,7 @@ bool TimePoint::intersectsInterval(const IInterval& ti) const
 	return intersectsInterval(ti.getIntervalType(), ti.getLowerBound(), ti.getUpperBound());
 }
 
-bool TimePoint::intersectsInterval(Tools::IntervalType t, const double start, const double end) const
+bool TimePoint::intersectsInterval(Tools::IntervalType, const double start, const double end) const
 {
 	//if (m_startTime != start &&
 	//		(m_startTime >= end || m_endTime <= start)) return false;

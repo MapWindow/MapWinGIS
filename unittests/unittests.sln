@@ -1,15 +1,18 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "interopCreator", "interopCreator\interopCreator.csproj", "{607BE05F-F636-40CD-BFA9-49BF798FC7B2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9E7451A0-C7BB-4036-82A4-5DFCD0150D66} = {9E7451A0-C7BB-4036-82A4-5DFCD0150D66}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapWinGISTests", "MapWinGISTests\MapWinGISTests.csproj", "{11B56223-8866-44CB-9FCA-AE58A8EBEF72}"
+	ProjectSection(ProjectDependencies) = postProject
+		{607BE05F-F636-40CD-BFA9-49BF798FC7B2} = {607BE05F-F636-40CD-BFA9-49BF798FC7B2}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExecutor", "TestExecutor\TestExecutor.csproj", "{9E7451A0-C7BB-4036-82A4-5DFCD0150D66}"
+	ProjectSection(ProjectDependencies) = postProject
+		{607BE05F-F636-40CD-BFA9-49BF798FC7B2} = {607BE05F-F636-40CD-BFA9-49BF798FC7B2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,5 +61,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {158CEFA1-563C-4589-8940-F8485A479150}
 	EndGlobalSection
 EndGlobal

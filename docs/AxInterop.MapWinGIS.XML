@@ -9,7 +9,8 @@
             Map component for visualization of vector, raster or grid data.
             </summary>
             Here is a class diagram for the AxMap class:
-            \dot digraph map_diagram {
+            \dot 
+            digraph map_diagram {
             nodesep = 0.3;
             ranksep = 0.3;
             splines = ortho;
@@ -45,6 +46,30 @@
             \dotfile mapgroups.dot
             <a href = "diagrams.html">Graph description</a>
         </member>
+        <member name="P:AxMapWinGIS.AxMap.UDCursorHandle">
+            <summary>
+            Gets or sets the user defined cursor handle. The handle is a windows cursor handle. 
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.Tiles">
+            <summary>
+            Gets or sets the object of Tiles class associated with map.
+            </summary>
+            \new490 Added in version 4.9.0
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.FileManager">
+            <summary>
+            Gets FileManager object associated with map. The object is used by AxMap.AddLayerFromFilename methods.
+            </summary>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.BackColor">
+            <summary>
+            Gets or sets the background color of the map.
+            </summary>
+            <remarks>When using VB.NET the color is represented as a System.Drawing.Color. 
+            When using VB 6 the color can be an OLE_COLOR or an integer representation of an RGB value.</remarks>
+        </member>
         <member name="M:AxMapWinGIS.AxMap.DrawBackBuffer(System.IntPtr,System.Int32,System.Int32)">
             <summary>
             Draws the content of the back buffer to specified device context.
@@ -54,11 +79,41 @@
             <param name="ImageWidth">The width of the resulting image.</param>
             <param name="ImageHeight">The height of the resulting image.</param>
         </member>
+        <member name="P:AxMapWinGIS.AxMap.GlobalCallback">
+            <summary>
+            The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications. 
+            </summary>
+            <remarks>.NET clients passing ICallback implementation to this property must make respective 
+            class COM visible by setting ComVisible(true) attribute. In fact ComVisible(true) is set by default 
+            for public classes, so it's enough to make sure that it isn't explicitly set to false for the class
+            or assembly where the class is defined. Otherwise InvalidCastException may occur at runtime.</remarks>
+            \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
+        </member>
         <member name="M:AxMapWinGIS.AxMap.HWnd">
             <summary>
             Returns the handle of the window of map control.
             </summary>
             <returns>The handle of window.</returns>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.Key">
+            <summary>
+            The key may be used by the programmer to store any string data associated with the object.
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.LastErrorCode">
+            <summary>
+            Retrieves the last error generated in the object.
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.MapCursor">
+            <summary>
+            Gets or sets the cursor used with the map. When using crsrUserDefined be sure to set a UDCursorHandle. 
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.MapResizeBehavior">
+            <summary>
+            Gets or sets the value which indicates how the control adjust its content after the resizing operations.
+            </summary>
         </member>
         <member name="M:AxMapWinGIS.AxMap.Redraw">
             <summary>
@@ -73,12 +128,25 @@
             <param name="Width">The new width of the control.</param>
             <param name="Height">The new hight of the control.</param>
         </member>
+        <member name="P:AxMapWinGIS.AxMap.ShowRedrawTime">
+            <summary>
+            Gets or sets a value which indicates whether the time of map redraw will be displayed on the screen.
+            </summary>
+            <remarks>Only times of full redraws when data layers are drawn anew are displayed.</remarks>
+            \new48 Added in version 4.8
+        </member>
         <member name="M:AxMapWinGIS.AxMap.ShowToolTip(System.String,System.Int32)">
             <summary>
             Shows tooltip near the mouse cursor.
             </summary>
             <param name="Text">Text of the tooltip.</param>
             <param name="Milliseconds">The duration of tooltip display.</param>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ShowVersionNumber">
+            <summary>
+            Gets or sets a boolean value which indicate whether control's version number will be displayed on the screen.
+            </summary>
+            \new48 Added in version 4.8
         </member>
         <member name="M:AxMapWinGIS.AxMap.SnapShot(System.Object)">
             <summary>
@@ -117,12 +185,26 @@
             <param name="Width">The width of the resulting image inShowVersionNumber pixels.</param>
             <returns>True on success and false otherwise.</returns>
         </member>
+        <member name="P:AxMapWinGIS.AxMap.VersionNumber">
+            <summary>
+            Gets or sets version number of the control.
+            </summary>
+            <remarks>The set part of the property isn't supported.</remarks>
+        </member>
         <member name="M:AxMapWinGIS.AxMap.get_ErrorMsg(System.Int32)">
             <summary>
             Retrieves the error message associated with the specified error code.
             </summary>
             <param name="ErrorCode">The error code for which the error message is required.  </param>
             <returns>The error message description for the specified error code.</returns>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.TileProvider">
+            <summary>
+            Gets or sets tile provider for the map.
+            </summary>
+            <remarks>This property is a shortcut for AxMap.Tiles.Provider property. 
+            Setting it to ProviderNone will change AxMap.Tiles.Visible property to false.</remarks>
+            \new491 Added in version 4.9.1
         </member>
         <member name="M:AxMapWinGIS.AxMap.FindSnapPoint(System.Double,System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
@@ -166,6 +248,59 @@
             altogether and call AxMap.Redraw instead ( equivalent to AxMap.Redraw2(tkRedrawType.RedrawAll)). </remarks>
             \new491 Added in version 4.9.1
         </member>
+        <member name="P:AxMapWinGIS.AxMap.UndoList">
+            <summary>
+            Gets list actions performed by user via interactive shape editor. Provides undo/redo capability.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.Identifier">
+            <summary>
+            Gets an %Identifier object which holds settings of cmIdentify tools.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ShapeEditor">
+            <summary>
+            Gets instance of shape editor class associated with map which stores data entered by interactive editing tools.
+            </summary>
+            \new493 Added in version 4.9.3
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.UseSeamlessPan">
+            \addtogroup map_interaction Map interaction
+            Here is a list of properties and methods which affect the way a user interacts with the map. This module is a part of the documentation of AxMap class.
+            \dot
+            digraph map_interaction {
+            splines = true;
+            node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+            lb [ label="AxMap" URL="\ref AxMap"];
+            node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
+            gr  [label="Map Interaction" URL="\ref map_interaction"];
+            edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+            lb -> gr;
+            }
+            \enddot
+            <a href = "diagrams.html">Graph description</a>
+            @{
+            <summary>
+            Gets or sets a boolean value which indicate whether map will be redrawn in the course of panning operation.
+            </summary>
+            <remarks>The default value is false. Setting this value to true can improve the user experience but 
+            decrease the performance in case large layers are displayed.</remarks>
+            \new48 Added in version 4.8
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.CursorMode">
+            <summary>
+            Gets or sets the cursor mode for the map. 
+            </summary>
+            <remarks>The cursor mode determines how the map handles mouse click events on the map. The only mode not handled by the map is cmNone.</remarks>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ZoomBehavior">
+            <summary>
+            Gets or sets zoom behaviour for the map control.
+            </summary>
+            \new491 Added in version 4.9.1
+        </member>
         <member name="M:AxMapWinGIS.AxMap.ZoomToSelected(System.Int32)">
             <summary>
             Zoomes map to display selected shapes of the specified shapefile.
@@ -191,6 +326,11 @@
             <returns>True on success.</returns>
             \new490 Added in version 4.9.0
         </member>
+        <member name="P:AxMapWinGIS.AxMap.IsLocked">
+            <summary>
+            Checks to see if the map is currently locked or not.
+            </summary>
+        </member>
         <member name="M:AxMapWinGIS.AxMap.LockWindow(MapWinGIS.tkLockMode)">
             <summary>
             Locks the window so that any changes will not be displayed until it is unlocked. 
@@ -198,6 +338,53 @@
             <remarks>This is very useful if you are making a large number of changes at once and don't want the map to be redrawn between each change.
             The changes of drawing options in the related classes (Shapefile, Labels, etc.) won't cause the redraw of the map even if it's not locked.</remarks>
             <param name="LockMode">The state of the lock mode.</param>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.DisableWaitCursor">
+            <summary>
+            Gets or sets a boolean value which indicates whether a wait cursor will be displayed on map redraw.
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.MouseWheelSpeed">
+            <summary>
+            Gets or sets the speed of zooming with mouse wheel.
+            </summary>
+            <remarks>The default values is 0.5. The values in 0.1 - 10.0 range are accepted. The value 1.0 will turn off
+            the zooming by mouse wheel.</remarks>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.SendMouseDown">
+            <summary>
+            Gets or sets whether the map sends mouse down events. 
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.SendMouseMove">
+            <summary>
+            Gets or sets whether the map sends mouse move events. 
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.SendMouseUp">
+            <summary>
+            Gets or sets whether the map sends mouse up events.
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.SendOnDrawBackBuffer">
+            <summary>
+            Gets or sets a boolean value which indicates whether the map sends on draw back buffer events.
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.SendSelectBoxDrag">
+            <summary>
+            Gets or sets whether the map sends the SelectBoxDrag event.
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.SendSelectBoxFinal">
+            <summary>
+            Gets or sets whether the map sends the SelectBoxFinal event. 
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.TrapRMouseDown">
+            <summary>
+            Gets or sets a boolean value which can affect the displaying of the context menus in client code by the right click.
+            </summary>
         </member>
         <member name="M:AxMapWinGIS.AxMap.ZoomIn(System.Double)">
             <summary>
@@ -210,6 +397,11 @@
             Zooms the display out by the specified factor.
             </summary>
             <param name="Percent">The factor to zoom out by.</param>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ZoomPercent">
+            <summary>
+            Gets or sets the factor by which to zoom the view of the map in or out.
+            </summary>
         </member>
         <member name="M:AxMapWinGIS.AxMap.ZoomToLayer(System.Int32)">
             <summary>
@@ -242,6 +434,87 @@
             <param name="LayerHandle">The handle of the layer containing the shape to zoom to.</param>
             <param name="Shape">The index of the shape to zoom to.</param>
         </member>
+        <member name="P:AxMapWinGIS.AxMap.ShowZoomBar">
+            <summary>
+            Gets or sets a value indicating whether zoom bar will be displayed on the map.
+            </summary>
+            <remarks>Zoom bar can be displayed only if projection of the map is set. Zoom levels
+            depend upon tile of the current tile provider.</remarks>
+            /see AxMap.TileProvider, AxMap.Projection
+            \new492 Added in version 4.9.2
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.AnimationOnZooming">
+            <summary>
+            Gets or sets a value indicating whether animation will be displayed zooming map in or out.
+            </summary>
+            <remarks>Default csAuto value will display animation only if there are no data layers
+            within visisble extents. Animation also won't be displayed if there are more than 4
+            zoom levels between current and target level.</remarks>
+            \new492 Added in version 4.9.2
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.InertiaOnPanning">
+            <summary>
+            Gets or sets a value indicating whether animation will be displayed to simulate 
+            inertia after panning operation.
+            </summary>
+            <remarks>Default csAuto value will display animation only if there are no data layers
+            within visisble extents.
+            \note Mouse panning is somewhat more tricky than the one with smartphone's touch screen,
+            so some practice may be needed to learn not to stop mouse motion before releasing the button )))
+            </remarks>
+            \new492 Added in version 4.9.2
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ReuseTileBuffer">
+            <summary>
+            Gets or sets a value indicating whether currently rendered tile buffer should be scaled 
+            and reused during the next redraw.
+            </summary>
+            \new492 Added in version 4.9.2
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.UseAlternatePanCursor">
+            <summary>
+            Gets or sets a value indicating whether the legacy 'hand' cursor should be used
+            for map panning rather than the standard 'NSEW' four-point cursor.
+            </summary>
+            \new495 Added in version 4.9.5
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ZoomBarVerbosity">
+            <summary>
+            Gets or sets the amount of information to be displayed in zoom bar tool tip.
+            </summary>
+            \new492 Added in version 4.9.2
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ZoomBoxStyle">
+            <summary>
+            Gets or sets a style of zoom box, which is used to select a region with Zoom In tool.
+            </summary>
+            \new492 Added in version 4.9.2
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ZoomBarMinZoom">
+            <summary>
+            Gets or sets minimum zoom level to be used by zoom bar.
+            </summary>
+            <remarks>This property won't increase the number of available levels, 
+            if certain levels aren't supported by the provider they still won't be displayed.</remarks>
+            \new492 Added in version 4.9.2
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ZoomBarMaxZoom">
+            <summary>
+            Gets or sets maximum zoom level to be used by zoom bar.
+            </summary>
+            <remarks>This property won't increase the number of available levels, 
+            if certain levels aren't supported by the provider they still won't be displayed.</remarks>
+            \new492 Added in version 4.9.2
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.RecenterMapOnZoom">
+            <summary>
+            Gets or sets a value indicating whether to move the mouse click point to the center of the map 
+            when using the Zoom In or Zoom Out tools.
+            </summary>
+            <remarks>The default value is False, indicating that the map is not recentered,  
+            but instead keeps the click point at the mouse position and zooms around that point.</remarks>
+            \new495 Added in version 4.9.5
+        </member>
         <member name="M:AxMapWinGIS.AxMap.Undo">
             <summary>
             Reverts the last operation performed by user in interactive shape editor.
@@ -251,6 +524,21 @@
             \new493 Added in version 4.9.3
         </member>
         <member name="M:AxMapWinGIS.AxMap.SerializeLayer(System.Int32)">
+            \addtogroup map_serialization Map serialization
+            Here is a list of properties and methods to preserve the state of the map and particular layers. This module is a part of the documentation of AxMap class.
+            \dot
+            digraph map_serialization {
+            splines = true;
+            node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+            lb [ label="AxMap" URL="\ref AxMap"];
+            node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
+            gr  [label="Map Serialization" URL="\ref map_serialization"];
+            edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+            lb -> gr;
+            }
+            \enddot
+            <a href = "diagrams.html">Graph description</a>
+            @{
             <summary>
             Serializes the layer settings to the string.
             </summary>
@@ -348,6 +636,21 @@
             \new48 Added in version 4.8
         </member>
         <member name="M:AxMapWinGIS.AxMap.get_LayerMaxVisibleZoom(System.Int32)">
+            \addtogroup map_layer_properties Layer properties
+            Here is a list of properties common to all data layers. This module is a part of the documentation of AxMap class.
+            \dot
+            digraph map_layer_properties {
+            splines = true;
+            node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+            lb [ label="AxMap" URL="\ref AxMap"];
+            node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
+            gr  [label="Layer Properties" URL="\ref map_layer_properties"];
+            edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+            lb -> gr;
+            }
+            \enddot
+            <a href = "diagrams.html">Graph description</a>
+            @{
             <summary>
             Gets maximum zoom at which the layer will be displayed.
             </summary>
@@ -549,6 +852,21 @@
             <returns>The color scheme for the specified layer</returns>
         </member>
         <member name="M:AxMapWinGIS.AxMap.Clear">
+            \addtogroup map_layer_management Layer management
+            Here is a list of properties and methods which allow to work with layers of the map. This module is a part of the documentation of AxMap class.
+            \dot
+            digraph map_layer {
+            splines = true;
+            node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+            lb [ label="AxMap" URL="\ref AxMap"];
+            node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
+            gr  [label="Layer Management" URL="\ref map_layer_management"];
+            edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+            lb -> gr;
+            }
+            \enddot
+            <a href = "diagrams.html">Graph description</a>
+            @{
             <summary>
             Removes all data from the map and sets its properties to the default state.
             </summary>
@@ -627,6 +945,11 @@
             </summary>
             <param name="InitialPosition">The initial position of the layer to be moved.</param>
             <returns>Boolean value representing success when true, failure when false.</returns>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.NumLayers">
+            <summary>
+            Gets the number of layers loaded in the map.
+            </summary>
         </member>
         <member name="M:AxMapWinGIS.AxMap.RemoveAllLayers">
             <summary>
@@ -718,6 +1041,21 @@
             \new493 Added in version 4.9.3
         </member>
         <member name="M:AxMapWinGIS.AxMap.set_DrawingLabels(System.Int32,MapWinGIS.Labels)">
+            \addtogroup map_drawing_layers Drawing layers
+            Here is a list of methods and properties to interact with the drawing layers of the map. This module is a part of the documentation of AxMap class.
+            \dot
+            digraph map_drawing_layers {
+            splines = true;
+            node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+            lb [ label="AxMap" URL="\ref AxMap"];
+            node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
+            gr  [label="Drawing Layers" URL="\ref map_drawing_layers"];
+            edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+            lb -> gr;
+            }
+            \enddot
+            <a href = "diagrams.html">Graph description</a>
+            @{
             <summary>
             Replaces the labels associated with the drawing layer.
             </summary>
@@ -947,6 +1285,23 @@
             \new493 Added in version 4.9.3
         </member>
         <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerDrawFill(System.Int32)">
+            \addtogroup map_shapefile Shapefile visualization
+            Here is a list of properties for changing appearance of shapefile layer added to the map. 
+            Consider the usage of ShapeDrawingOptions class to access wider set of options. 
+            See Shapefile.DefaultDrawingOptions for details. This module is a part of the documentation of AxMap class.
+            \dot
+            digraph map_shapefile {
+            splines = true;
+            node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+            lb [ label="AxMap" URL="\ref AxMap"];
+            node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
+            gr  [label="Shapefile visualization" URL="\ref map_shapefile"];
+            edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+            lb -> gr;
+            }
+            \enddot
+            <a href = "diagrams.html">Graph description</a>
+            @{
             <summary>
             Gets whether the specified layer is drawn with a fill. Only works on polygon shapefiles.
             </summary>
@@ -1124,7 +1479,16 @@
             <param name="LayerHandle">The handle of the shapefile layer.</param>
             <returns>The color of stipple.</returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:AxMapWinGIS.AxMap.set_ShapeLayerStippleColor(System.Int32,System.UInt32)" -->
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerStippleColor(System.Int32,System.UInt32)">
+            <summary>
+            Sets the color of the polygon stipple for shapefile layer.
+            </summary>
+            <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
+            <remarks>This property corresponds to the ShapeDrawingOptions.FillHatchStyle property.</remarks>
+            <param name="LayerHandle">The handle of the shapefile layer.</param>
+            <param name="newValue">The color of stipple.</param>
+            \see Shapefile.DefaultDrawingOptions
+        </member>
         <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerStippleTransparent(System.Int32)">
             <summary>
             Gets a boolean value which indicates whether the background of fill stipple for polygon shapefile layer will be transparent.
@@ -1142,6 +1506,21 @@
             <param name="newValue">True in case the background is transparent and false otherwise.</param>
         </member>
         <member name="M:AxMapWinGIS.AxMap.SetGeographicExtents2(System.Double,System.Double,System.Double)">
+            \addtogroup map_extents Max extents and zoom
+            Here is list of properties and methods that affect map extents and zoom level. This module is a part of the documentation of AxMap class.
+            \dot
+            digraph map_extents {
+            splines = true;
+            node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+            lb [ label="AxMap" URL="\ref AxMap"];
+            node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
+            gr  [label="Map extents adn zoom" URL="\ref map_extents"];
+            edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+            lb -> gr;
+            }
+            \enddot
+            <a href = "diagrams.html">Graph description</a>
+            @{
             <summary>
             Sets geographic extents for the map.
             </summary>
@@ -1160,6 +1539,14 @@
             <returns>Extents object.</returns>
             \new491 Added in version 4.9.1
         </member>
+        <member name="P:AxMapWinGIS.AxMap.GeographicExtents">
+            <summary>
+            Gets geographic extents of the map in decimal degrees.
+            </summary>
+            <remarks>For operation to succeed, projection must be set for the map (see AxMap.GeoProjection property). 
+            Otherwise null will be returned.</remarks>
+            \new490 Added in version 4.9.0
+        </member>
         <member name="M:AxMapWinGIS.AxMap.SetGeographicExtents(MapWinGIS.Extents)">
             <summary>
             Sets geographic extents in decimal degrees for the map.
@@ -1168,6 +1555,221 @@
             <returns>True on success.</returns>
             <remarks>For operation to succeed, projection must be set for the map (see AxMap.GeoProjection property)</remarks>
             \new490 Added in version 4.9.0
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.Latitude">
+            <summary>
+            Gets or sets latitude of the center of screen (in decimal degrees). 
+            </summary>
+            <remarks>Map projection must be set in order for this property to work.</remarks>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.Longitude">
+            <summary>
+            Gets or sets longitude of the center of screen (in decimal degrees). 
+            </summary>
+            <remarks>Map projection must be set in order for this property to work.</remarks>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.CurrentZoom">
+            <summary>
+            Gets or sets the current zoom level for the map. It corresponds to the zoom level of current tile provider.
+            </summary>
+            <remarks>Map projection must be set in order for this property to work.</remarks>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.KnownExtents">
+            <summary>
+            Gets or sets known extents for the map.
+            </summary>
+            <remarks>Map projection must be set in order for this property to work.</remarks>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.CurrentScale">
+            <summary>
+            Gets or sets the current map scale.
+            </summary>
+            <remarks>The scale depends on the AxMap.MapUnits property. Number of pixels per logical inch and the size of window are used to
+            determine the size of the displaying device. The calculations represent the closest approximation as there is no way
+            to determine the physical size of displaying device. The operation of setting the new scale preserve the map coordinates 
+            of the center point on the screen.</remarks>
+            \new48 Added in version 4.8
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ExtentHistory">
+            <summary>
+            Gets or sets the number of extents to cache in the extents history
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ExtentPad">
+            <summary>
+            Gets or sets the percentage of the view used to pad the extents of a layer when zooming to a layer or maximum extents.
+            </summary>
+            <remarks>
+            Padding makes it so that there is a small border around the layer when you zoom to it.</remarks>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.Extents">
+            <summary>
+            Gets or sets the extents of the map using an Extents object. 
+            </summary>
+            <remarks>If the given extents do not fit the aspect ratio of the map, the map will fit the given extents as well as possible.</remarks>
+            \new495 Return value changed to IExtents in version 4.9.5
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.MaxExtents">
+            <summary>
+            Gets or sets the extents of the map displayed by the control.
+            </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.Measuring">
+             \addtogroup map_coordinates Map projection and coordinates
+             Here is list of properties and methods which are related to coordinate system, projection of map and units conversion.
+             This module is a part of the documentation of AxMap class.
+             \dot
+             digraph map_projection {
+             splines = true;
+             node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+             lb [ label="AxMap" URL="\ref AxMap"];
+             node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
+             gr  [label="Max projection and coordianates" URL="\ref map_coordinates"];
+             edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+             lb -> gr;
+             }
+             \enddot
+             <a href = "diagrams.html">Graph description</a>\n\n
+             \anchor a_projection
+             \section proj1 A. Setting projection for the map.
+            
+             No matter what type of GIS application you are going to write, the decision about map coordinate system and projection is one of the first to be made. 
+             MapWinGIS provides the following options.
+             
+             \dot
+             digraph projection_options {
+             splines = true;
+             ranksep = 0.15;
+             nodesep = 0.5;
+             node  [shape = oval, peripheries = 1, fontname=Helvetica, fontsize=9, fillcolor = gray, color = "gray", style = filled, height = 0.3, width = 0.8];
+             render [ label="Choosing map projection"];
+             
+             node  [shape = "note", width = 0.3, height = 0.3, peripheries = 1 fillcolor = "khaki" ]
+             s1    [label=" Set projection manullay\l"];
+             s2    [label=" Grab projection from data\l"];
+             s3    [label=" Don't use projection at all\l"];
+             
+             edge  [dir = none, arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#808080" minlen=2 ]
+             render -> s1;
+             render -> s2;
+             render -> s3;
+             }
+             \enddot
+             Let's consider each of the approaches.
+            
+             <b>1. Settings projection manually.</b> \n\n
+             It can be done using one of the following approaches:\n\n
+             a) AxMap.Projection property - provides only most common projections (Spherical Mercator, WGS84) but available in Properties Window of Form designer.
+             \code
+             axMap1.Projection = tkMapProjection.PROJECTION_WGS84;
+             \endcode
+             b) For all other projections - GeoProjection class and AxMap.GeoProjection property:
+             \code
+             var gp = new GeoProjection();
+            
+             // one of the following methods can be used; see more in GeoProjection class
+             // - use projections provided by MapWinGIS enumerations:
+             gp.SetWgs84Projection(tkWgs84Projection.Wgs84_UTM_zone_22N);    
+             gp.SetWellKnownGeogCS(tkCoordinateSystem.csNAD83);
+            
+             // - EPSG code of coordinate system; in this example Pulkovo 1942(83) / 3-degree Gauss-Kruger zone 5; see wwww.spatialreference.org for EPSG codes
+             gp.ImportFromEPSG(2399);                                        
+            
+             // - importing from proj4 or WKT string; in this example proj4 string for Amersfoort / RD New projection for Netherlands
+             gp.ImportFromAutoDetect("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +no_defs ");
+            
+             // applying projection
+             axMap1.GeoProjection = gp;
+             \endcode
+            
+             <b>2. Grabbing coordinate system and projection from data.</b>
+             \code
+             axMap1.GrabProjectionFromData = true;   // default value
+             axMap1.AddLayerFromFilename(@"d:\some_shapefile.shp", tkFileOpenStrategy.fosVectorLayer, true);
+             \endcode
+             GeoProjection will be taken from the first layer added to the map which has metadata about projection. AxMap.GeoProjection property will be updated from this metadata.
+             When last layer is removed from map AxMap.GeoProjection property will be cleared (set to empty projection).
+             
+             <b>3. Don't specify coordinate system at all.\n</b>
+             - AxMap.Projection property is equal to PROJECTION_NONE (the default value);
+             - map units should be set manually via AxMap.MapUnits;
+             - calculation of distance and area will use Euclidean geometry with no account to the shape of Earth;
+             - it won't be possible to display tiles from TMS servers.
+             
+             To setup map to work without geoprojection use the code: 
+             \code
+             axMap1.Projection = tkMapProjection.PROJECTION_NONE;
+             axMap1.GrabProjectionFromData = false;
+             axMap1.MapUnits = tkUnitsOfMeasure.umMeters;	// or another, depending on the data you display
+             \endcode
+             
+             \section proj2 B. Interaction with already set projection
+             
+             To check that map actually has a projection:
+             \code
+             Debug.WriteLine("Map has projection:" + (axMap1.Projection != tkMapProjection.PROJECTION_NONE));
+             // or with mode details
+             Debug.WriteLine("Projection of the map: " + (axMap1.GeoProjection.IsEmpty() ? "None" : axMap1.GeoProjection.ExportToWKT());
+             \endcode
+            
+             Another way to check whether map has geoprojection is to see how coordinates are displayed when AxMap.ShowCoordinates is set to cdmAuto. 
+             In case decimal degrees are displayed (Lat/Lng) - map has geoprojection, if x/y pair is shown - no geoprojection was set.
+            
+             All of these methods will result in updating AxMap.GeoProjection property. GeoProjection object assigned to map is protected from changes, 
+             i.e. GeoProjection.IsFrozen = true. To change already assigned projection, a new instance of GeoProjection object must be created:
+             \code
+             // this one will fail, because projection is frozen
+             if (!axMap1.GeoProjection.ImportFromEPSG(2399))
+             {
+            	   Debug.WriteLine("Projection wasn't set: " + axMap1.GeoProjection.get_ErrorMsg(axMap1.GeoProjection.LastErrorCode));
+             }
+             // this one will succeed as a new GeoProjection instance is created by Clone method:
+             var gp = axMap1.GeoProjection.Clone();
+             if (gp.ImportFromEPSG(2399))
+             {
+            	   axMap1.GeoProjection = gp;
+             }
+             \endcode
+            
+             Regardless of the method for settings projection MapWinGIS will update AxMap.MapUnits. IF coordinate system is geographic one umDecimalDegrees 
+             will be set, otherwise umMeters. This will ensure that scalebar and measuring will work correctly.
+             
+             \section proj3 C. Choosing projection
+             
+             When making decision about coordinate system and projection consider:\n\n
+             1. Whether it's important to display tiles from online services. Most TMS servers use Shperical Mercator projection (EPSG:3857), 
+             therefore to avoid distortions of tiles map projection should be set to GoogleMercator as well:
+             \code
+             axMap1.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
+             \endcode
+             \note See more details on the issue in description of Tiles class.\n\n
+             
+             2. What data you plan to display and what projection it's using. It's possible to do a reprojection with:
+             - Utils.ReprojectShapefile for shapefiles;
+             - Utils.GDALWarp for images and grids.
+             
+             But it should be considered whether it is worth the effort.
+             
+             Starting from version 4.9.2. built-in projection mismatch testing is implemented + optional 
+             transformation for shapefiles. See GlobalSettings.AllowProjectionMismatch, GlobalSettings.ReprojectLayersOnAdding. 
+             
+             @{
+            <summary>
+            Gets measuring object associated with map.
+            </summary>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.MapUnits">
+            <summary>
+            Gets or sets the units of measure for the map.
+            </summary>
+            <remarks>This units must be the same as the units of the datasources being displayed. 
+            This method affects the calculation of map scale (see AxMap.CurrentScale).</remarks>
+            \new48 Added in version 4.8
         </member>
         <member name="M:AxMapWinGIS.AxMap.PixelToProj(System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
@@ -1178,6 +1780,13 @@
             <param name="projX">The projected x map coordinate is returned through this reference parameter.</param>
             <param name="projY">The projected y map coordinate is returned through this reference parameter.</param>
         </member>
+        <member name="P:AxMapWinGIS.AxMap.PixelsPerDegree">
+            <summary>
+            Gets the number of screen pixels per the decimal degree of the data.
+            </summary>
+            <remarks>The set part of this property isn't supported. The correctness of results depends on AxMap.MapUnits property.</remarks>
+            \new48 Added in version 4.8
+        </member>
         <member name="M:AxMapWinGIS.AxMap.ProjToPixel(System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
             Converts projected map coordinates into screen pixel units
@@ -1186,6 +1795,49 @@
             <param name="projY">The projected y map coordinate to be converted into the y pixel coordinate.</param>
             <param name="pixelX">The pixel x coordinate is returned through this reference parameter</param>
             <param name="pixelY">The pixel y coordinate is returned through this reference parameter.</param>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ShowCoordinates">
+            <summary>
+            Gets or sets a value indicating whether coordinates of the current mouse position will be displayed on map.
+            </summary>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ScalebarVisible">
+            <summary>
+            Gets or sets a value which indicate whether scalebar will be displayed on the map.
+            </summary>
+            \new490 Added in version 4.9.0
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ScalebarUnits">
+            <summary>
+            Gets or sets units to be displayed for map scalebar.
+            </summary>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.GrabProjectionFromData">
+            <summary>
+            Gets or sets a value indicating whether projection for will be taken from the first datasource added to it.
+            </summary>
+            <remarks>If set to true projection will be taken from the first layer added to the map which has a projection. 
+            On removing the last layer projection of the map will be cleared (set to an empty one).</remarks>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.Projection">
+            <summary>
+            Sets projection of the map. It providers 2 most commonly used coordinate system/projections to be easily set from Form Designer. 
+            To set other projections initialize GeoProjection object manually and use AxMap.GeoProjection property.
+            </summary>
+            <remarks></remarks>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.GeoProjection">
+            <summary>
+            Gets or sets projection for map. 
+            </summary>
+            <remarks>Projection layered set to map must not be changed, but rather a new instance 
+            of GeoProjection should be created (GeoProjection.Clone) and set to the property.
+            This property must be set in order for certain functionality to work (tiles, for example).</remarks>
+            \new490 Added in version 4.9.0
         </member>
         <member name="M:AxMapWinGIS.AxMap.ProjToDegrees(System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
@@ -1264,386 +1916,21 @@
             <returns>Length of polyline or perimeter of polygon in meters or 0.0 if current map projection doesn't support transformation to WGS84.</returns>
             \new493 Added in version 4.9.3
         </member>
-        <member name="P:AxMapWinGIS.AxMap.UDCursorHandle">
-            <summary>
-            Gets or sets the user defined cursor handle. The handle is a windows cursor handle. 
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.Tiles">
-            <summary>
-            Gets or sets the object of Tiles class associated with map.
-            </summary>
-            \new490 Added in version 4.9.0
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.FileManager">
-            <summary>
-            Gets FileManager object associated with map. The object is used by AxMap.AddLayerFromFilename methods.
-            </summary>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.BackColor">
-            <summary>
-            Gets or sets the background color of the map.
-            </summary>
-            <remarks>When using VB.NET the color is represented as a System.Drawing.Color. 
-            When using VB 6 the color can be an OLE_COLOR or an integer representation of an RGB value.</remarks>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.GlobalCallback">
-            <summary>
-            The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications. 
-            </summary>
-            <remarks>.NET clients passing ICallback implementation to this property must make respective 
-            class COM visible by setting ComVisible(true) attribute. In fact ComVisible(true) is set by default 
-            for public classes, so it's enough to make sure that it isn't explicitly set to false for the class
-            or assembly where the class is defined. Otherwise InvalidCastException may occur at runtime.</remarks>
-            \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.Key">
-            <summary>
-            The key may be used by the programmer to store any string data associated with the object.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.LastErrorCode">
-            <summary>
-            Retrieves the last error generated in the object.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.MapCursor">
-            <summary>
-            Gets or sets the cursor used with the map. When using crsrUserDefined be sure to set a UDCursorHandle. 
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.MapResizeBehavior">
-            <summary>
-            Gets or sets the value which indicates how the control adjust its content after the resizing operations.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ShowRedrawTime">
-            <summary>
-            Gets or sets a value which indicates whether the time of map redraw will be displayed on the screen.
-            </summary>
-            <remarks>Only times of full redraws when data layers are drawn anew are displayed.</remarks>
-            \new48 Added in version 4.8
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ShowVersionNumber">
-            <summary>
-            Gets or sets a boolean value which indicate whether control's version number will be displayed on the screen.
-            </summary>
-            \new48 Added in version 4.8
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.VersionNumber">
-            <summary>
-            Gets or sets version number of the control.
-            </summary>
-            <remarks>The set part of the property isn't supported.</remarks>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.TileProvider">
-            <summary>
-            Gets or sets tile provider for the map.
-            </summary>
-            <remarks>This property is a shortcut for AxMap.Tiles.Provider property. 
-            Setting it to ProviderNone will change AxMap.Tiles.Visible property to false.</remarks>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.UndoList">
-            <summary>
-            Gets list actions performed by user via interactive shape editor. Provides undo/redo capability.
-            </summary>
-            \new493 Added in version 4.9.3
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.Identifier">
-            <summary>
-            Gets an %Identifier object which holds settings of cmIdentify tools.
-            </summary>
-            \new493 Added in version 4.9.3
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ShapeEditor">
-            <summary>
-            Gets instance of shape editor class associated with map which stores data entered by interactive editing tools.
-            </summary>
-            \new493 Added in version 4.9.3
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.UseSeamlessPan">
-            <summary>
-            Gets or sets a boolean value which indicate whether map will be redrawn in the course of panning operation.
-            </summary>
-            <remarks>The default value is false. Setting this value to true can improve the user experience but 
-            decrease the performance in case large layers are displayed.</remarks>
-            \new48 Added in version 4.8
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.CursorMode">
-            <summary>
-            Gets or sets the cursor mode for the map. 
-            </summary>
-            <remarks>The cursor mode determines how the map handles mouse click events on the map. The only mode not handled by the map is cmNone.</remarks>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ZoomBehavior">
-            <summary>
-            Gets or sets zoom behaviour for the map control.
-            </summary>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.IsLocked">
-            <summary>
-            Checks to see if the map is currently locked or not.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.DisableWaitCursor">
-            <summary>
-            Gets or sets a boolean value which indicates whether a wait cursor will be displayed on map redraw.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.MouseWheelSpeed">
-            <summary>
-            Gets or sets the speed of zooming with mouse wheel.
-            </summary>
-            <remarks>The default values is 0.5. The values in 0.1 - 10.0 range are accepted. The value 1.0 will turn off
-            the zooming by mouse wheel.</remarks>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.SendMouseDown">
-            <summary>
-            Gets or sets whether the map sends mouse down events. 
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.SendMouseMove">
-            <summary>
-            Gets or sets whether the map sends mouse move events. 
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.SendMouseUp">
-            <summary>
-            Gets or sets whether the map sends mouse up events.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.SendOnDrawBackBuffer">
-            <summary>
-            Gets or sets a boolean value which indicates whether the map sends on draw back buffer events.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.SendSelectBoxDrag">
-            <summary>
-            Gets or sets whether the map sends the SelectBoxDrag event.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.SendSelectBoxFinal">
-            <summary>
-            Gets or sets whether the map sends the SelectBoxFinal event. 
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.TrapRMouseDown">
-            <summary>
-            Gets or sets a boolean value which can affect the displaying of the context menus in client code by the right click.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ZoomPercent">
-            <summary>
-            Gets or sets the factor by which to zoom the view of the map in or out.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ShowZoomBar">
-            <summary>
-            Gets or sets a value indicating whether zoom bar will be displayed on the map.
-            </summary>
-            <remarks>Zoom bar can be displayed only if projection of the map is set. Zoom levels
-            depend upon tile of the current tile provider.</remarks>
-            /see AxMap.TileProvider, AxMap.Projection
-            \new492 Added in version 4.9.2
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.AnimationOnZooming">
-            <summary>
-            Gets or sets a value indicating whether animation will be displayed zooming map in or out.
-            </summary>
-            <remarks>Default csAuto value will display animation only if there are no data layers
-            within visisble extents. Animation also won't be displayed if there are more than 4
-            zoom levels between current and target level.</remarks>
-            \new492 Added in version 4.9.2
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.InertiaOnPanning">
-            <summary>
-            Gets or sets a value indicating whether animation will be displayed to simulate 
-            inertia after panning operation.
-            </summary>
-            <remarks>Default csAuto value will display animation only if there are no data layers
-            within visisble extents.
-            \note Mouse panning is somewhat more tricky than the one with smartphone's touch screen,
-            so some practice may be needed to learn not to stop mouse motion before releasing the button )))
-            </remarks>
-            \new492 Added in version 4.9.2
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ReuseTileBuffer">
-            <summary>
-            Gets or sets a value indicating whether currently rendered tile buffer should be scaled 
-            and reused during the next redraw.
-            </summary>
-            \new492 Added in version 4.9.2
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ZoomBarVerbosity">
-            <summary>
-            Gets or sets the amount of information to be displayed in zoom bar tool tip.
-            </summary>
-            \new492 Added in version 4.9.2
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ZoomBoxStyle">
-            <summary>
-            Gets or sets a style of zoom box, which is used to select a region with Zoom In tool.
-            </summary>
-            \new492 Added in version 4.9.2
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ZoomBarMinZoom">
-            <summary>
-            Gets or sets minimum zoom level to be used by zoom bar.
-            </summary>
-            <remarks>This property won't increase the number of available levels, 
-            if certain levels aren't supported by the provider they still won't be displayed.</remarks>
-            \new492 Added in version 4.9.2
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ZoomBarMaxZoom">
-            <summary>
-            Gets or sets maximum zoom level to be used by zoom bar.
-            </summary>
-            <remarks>This property won't increase the number of available levels, 
-            if certain levels aren't supported by the provider they still won't be displayed.</remarks>
-            \new492 Added in version 4.9.2
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.NumLayers">
-            <summary>
-            Gets the number of layers loaded in the map.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.GeographicExtents">
-            <summary>
-            Gets geographic extents of the map in decimal degrees.
-            </summary>
-            <remarks>For operation to succeed, projection must be set for the map (see AxMap.GeoProjection property). 
-            Otherwise null will be returned.</remarks>
-            \new490 Added in version 4.9.0
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.Latitude">
-            <summary>
-            Gets or sets latitude of the center of screen (in decimal degrees). 
-            </summary>
-            <remarks>Map projection must be set in order for this property to work.</remarks>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.Longitude">
-            <summary>
-            Gets or sets longitude of the center of screen (in decimal degrees). 
-            </summary>
-            <remarks>Map projection must be set in order for this property to work.</remarks>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.CurrentZoom">
-            <summary>
-            Gets or sets the current zoom level for the map. It corresponds to the zoom level of current tile provider.
-            </summary>
-            <remarks>Map projection must be set in order for this property to work.</remarks>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.KnownExtents">
-            <summary>
-            Gets or sets known extents for the map.
-            </summary>
-            <remarks>Map projection must be set in order for this property to work.</remarks>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.CurrentScale">
-            <summary>
-            Gets or sets the current map scale.
-            </summary>
-            <remarks>The scale depends on the AxMap.MapUnits property. Number of pixels per logical inch and the size of window are used to
-            determine the size of the displaying device. The calculations represent the closest approximation as there is no way
-            to determine the physical size of displaying device. The operation of setting the new scale preserve the map coordinates 
-            of the center point on the screen.</remarks>
-            \new48 Added in version 4.8
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ExtentHistory">
-            <summary>
-            Gets or sets the number of extents to cache in the extents history
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ExtentPad">
-            <summary>
-            Gets or sets the percentage of the view used to pad the extents of a layer when zooming to a layer or maximum extents.
-            </summary>
-            <remarks>
-            Padding makes it so that there is a small border around the layer when you zoom to it.</remarks>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.Extents">
-            <summary>
-            Gets or sets the extents of the map using an Extents object. 
-            </summary>
-            <remarks>If the given extents do not fit the aspect ratio of the map, the map will fit the given extents as well as possible.</remarks>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.MaxExtents">
-            <summary>
-            Gets or sets the extents of the map displayed by the control.
-            </summary>
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.Measuring">
-            <summary>
-            Gets measuring object associated with map.
-            </summary>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.MapUnits">
-            <summary>
-            Gets or sets the units of measure for the map.
-            </summary>
-            <remarks>This units must be the same as the units of the datasources being displayed. 
-            This method affects the calculation of map scale (see AxMap.CurrentScale).</remarks>
-            \new48 Added in version 4.8
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.PixelsPerDegree">
-            <summary>
-            Gets the number of screen pixels per the decimal degree of the data.
-            </summary>
-            <remarks>The set part of this property isn't supported. The correctness of results depends on AxMap.MapUnits property.</remarks>
-            \new48 Added in version 4.8
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ShowCoordinates">
-            <summary>
-            Gets or sets a value indicating whether coordinates of the current mouse position will be displayed on map.
-            </summary>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ScalebarVisible">
-            <summary>
-            Gets or sets a value which indicate whether scalebar will be displayed on the map.
-            </summary>
-            \new490 Added in version 4.9.0
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.ScalebarUnits">
-            <summary>
-            Gets or sets units to be displayed for map scalebar.
-            </summary>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.GrabProjectionFromData">
-            <summary>
-            Gets or sets a value indicating whether projection for will be taken from the first datasource added to it.
-            </summary>
-            <remarks>If set to true projection will be taken from the first layer added to the map which has a projection. 
-            On removing the last layer projection of the map will be cleared (set to an empty one).</remarks>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.Projection">
-            <summary>
-            Sets projection of the map. It providers 2 most commonly used coordinate system/projections to be easily set from Form Designer. 
-            To set other projections initialize GeoProjection object manually and use AxMap.GeoProjection property.
-            </summary>
-            <remarks></remarks>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="P:AxMapWinGIS.AxMap.GeoProjection">
-            <summary>
-            Gets or sets projection for map. 
-            </summary>
-            <remarks>Projection layered set to map must not be changed, but rather a new instance 
-            of GeoProjection should be created (GeoProjection.Clone) and set to the property.
-            This property must be set in order for certain functionality to work (tiles, for example).</remarks>
-            \new490 Added in version 4.9.0
-        </member>
         <member name="E:AxMapWinGIS.AxMap.AfterDrawing">
+            \addtogroup map_events Map events
+            \dot
+            digraph map_events_graph {
+            splines = true;
+            node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+            lb [ label="AxMap" URL="\ref AxMap"];
+            node [shape = "ellipse", color = gray, width = 0.2, height = 0.2, style = filled]
+            gr  [label="Map events" URL="\ref map_events"];
+            edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+            lb -> gr;
+            }
+            \enddot
+            <a href = "diagrams.html">Graph description</a>
+            @{
             <summary>
             This event is fired after the rendering of drawing layers. Handle of device context is passed to allow the user to implement custom drawing. 
             </summary>
@@ -1654,6 +1941,19 @@
             <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
             <param name="handled">Passed by reference. 
             The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        </member>
+        <member name="E:AxMapWinGIS.AxMap.AfterLayers">
+            <summary>
+            This event is fired after the rendering of standard layers. Handle of device context is passed to allow the user to implement custom drawing. 
+            </summary>
+            <param name="hdc">Handle of device context of screen buffer.</param>
+            <param name="xMin">Minimum X coordinate of the rectangle being rendered.</param>
+            <param name="xMax">Maximum X coordinate of the rectangle being rendered.</param>
+            <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
+            <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
+            <param name="handled">Passed by reference. 
+            The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+            \new495 Added in version 4.9.5
         </member>
         <member name="E:AxMapWinGIS.AxMap.AfterShapeEdit">
             <summary>
@@ -1713,6 +2013,19 @@
             <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
             <param name="handled">Passed by reference. 
             The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        </member>
+        <member name="E:AxMapWinGIS.AxMap.BeforeLayers">
+            <summary>
+            This event is fired before the rendering of standard layers. Handle of device context is passed to allow the user to implement custom drawing. 
+            </summary>
+            <param name="hdc">Handle of device context of screen buffer.</param>
+            <param name="xMin">Minimum X coordinate of the rectangle being rendered.</param>
+            <param name="xMax">Maximum X coordinate of the rectangle being rendered.</param>
+            <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
+            <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
+            <param name="handled">Passed by reference. 
+            The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+            \new495 Added in version 4.9.5
         </member>
         <member name="E:AxMapWinGIS.AxMap.BeforeShapeEdit">
             <summary>
@@ -1946,6 +2259,13 @@
             Holds members that once were a part of %AxMap class. 
             New API members to substitute deprecated ones are listed in description.
             </summary>
+        </member>
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.LineSeparationFactor">
+            <summary>
+            Gets or sets line separation factor.
+            </summary>
+            \deprecated v4.8. Use LinePattern class, and ShapeDrawingOptions.LinePattern property instead.
+            \removed493 Removed in v4.9.3
         </member>
         <member name="M:AxMapWinGIS.AxMap_Deprecated.get_UDFillStipple(System.Int32,System.Int32)">
             <summary>
@@ -2485,6 +2805,15 @@
             \deprecated v4.9.3 Use Utils.IsTiffGrid instead.
             \removed493 Removed in v4.9.3.
         </member>
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.ShapeDrawingMethod">
+            <summary>
+            Gets or sets the drawing method for vector layers.
+            </summary>
+            <remarks>The default value is vdmNewSymbology. From the version 4.8 this is the only value supported.</remarks>
+            \new48 Added in version 4.8
+            \deprecated v4.8 No longer used.
+            \removed493 Removed in v4.9.3
+        </member>
         <member name="M:AxMapWinGIS.AxMap_Deprecated.SetImageLayerColorScheme(System.Int32,System.Object)">
             <summary>
             Sets a coloring scheme to be associated with an image layer. 
@@ -2730,6 +3059,14 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.FontName, Labels.FontSize, Labels.FontBold, Labels.FontItalic, Labels.FontUnderline instead.
             \removed493 Removed in v4.9.3
         </member>
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.MultilineLabels">
+            <summary>
+            Gets or sets a boolean value which indicates whether multiline labels will be drawn correctly on the map.
+            </summary>
+            \deprecated v 4.8. Multiline labels will be drawn after specification of appropriate label expression. 
+            \see Labels.Expression.
+            \removed493 Removed in v4.9.3
+        </member>
         <member name="M:AxMapWinGIS.AxMap_Deprecated.AddDrawingLabel(System.Int32,System.String,System.UInt32,System.Double,System.Double,tkHJustification)">
             <summary>
             Adds label to the specified drawing layer.
@@ -2876,6 +3213,13 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.FontName, Labels.FontSize instead.
             \removed493 Removed in v4.9.3
         </member>
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.MapRotationAngle">
+            <summary>
+            Gets or sets the angle of map rotation in degrees.
+            </summary>
+            \deprecated v.4.9.3 The functionality is no longer supported.
+            \removed493 Removed in v4.9.3
+        </member>
         <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ImageLayerPercentTransparent(System.Int32,System.Single)">
             <summary>
             Sets the numeric value which determines the transparency of the given image layer.
@@ -2935,46 +3279,6 @@
             \deprecated v4.9.3 Use GeoProjection.get_IsSame, GeoProjection.get_IsSameExt instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMapWinGIS.AxMap_Deprecated.AdjustLayerExtents(System.Int32)">
-            <summary>
-            Deprecated. Updates the extents of the layer before the drawing.
-            </summary>
-            <param name="LayerHandle">The handle of the layer.</param>
-            <returns>True on success and false in case of invalid layer handle.</returns>
-            \deprecated v.4.8. The call is incorporated into drawing routine.
-            \removed493 Removed in v4.9.3
-        </member>
-        <member name="P:AxMapWinGIS.AxMap_Deprecated.LineSeparationFactor">
-            <summary>
-            Gets or sets line separation factor.
-            </summary>
-            \deprecated v4.8. Use LinePattern class, and ShapeDrawingOptions.LinePattern property instead.
-            \removed493 Removed in v4.9.3
-        </member>
-        <member name="P:AxMapWinGIS.AxMap_Deprecated.ShapeDrawingMethod">
-            <summary>
-            Gets or sets the drawing method for vector layers.
-            </summary>
-            <remarks>The default value is vdmNewSymbology. From the version 4.8 this is the only value supported.</remarks>
-            \new48 Added in version 4.8
-            \deprecated v4.8 No longer used.
-            \removed493 Removed in v4.9.3
-        </member>
-        <member name="P:AxMapWinGIS.AxMap_Deprecated.MultilineLabels">
-            <summary>
-            Gets or sets a boolean value which indicates whether multiline labels will be drawn correctly on the map.
-            </summary>
-            \deprecated v 4.8. Multiline labels will be drawn after specification of appropriate label expression. 
-            \see Labels.Expression.
-            \removed493 Removed in v4.9.3
-        </member>
-        <member name="P:AxMapWinGIS.AxMap_Deprecated.MapRotationAngle">
-            <summary>
-            Gets or sets the angle of map rotation in degrees.
-            </summary>
-            \deprecated v.4.9.3 The functionality is no longer supported.
-            \removed493 Removed in v4.9.3
-        </member>
         <member name="P:AxMapWinGIS.AxMap_Deprecated.CanUseImageGrouping">
             <summary>
             Gets or sets a boolean value which indicates how images with identical size and position on the map will be drawn.
@@ -3008,6 +3312,25 @@
             </summary>
             \deprecated v4.8 This property is no longer used.
             \removed493 Removed in v4.9.3
+        </member>
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.AdjustLayerExtents(System.Int32)">
+            <summary>
+            Deprecated. Updates the extents of the layer before the drawing.
+            </summary>
+            <param name="LayerHandle">The handle of the layer.</param>
+            <returns>True on success and false in case of invalid layer handle.</returns>
+            \deprecated v.4.8. The call is incorporated into drawing routine.
+            \removed493 Removed in v4.9.3
+        </member>
+        <member name="T:tkHJustification">
+            <summary>
+            Justification of the labels
+            </summary>
+        </member>
+        <member name="T:tkShapeDrawingMethod">
+            <summary>
+            Shape drawing method
+            </summary>
         </member>
     </members>
 </doc>

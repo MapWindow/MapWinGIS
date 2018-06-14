@@ -12,27 +12,15 @@ namespace MapWinGISTests
     [TestClass]
     public class DrawingTests
     {
-        private AxMap axMap1;
-        private Form myForm;
+        private AxMap _axMap1;
 
         [TestInitialize]
         public void Init()
         {
             // Create MapWinGIS:
-            axMap1 = new AxMap();
-            axMap1.CreateControl();
-
-            // Create form and add MapWinGIS:
-            myForm = new Form();
-            myForm.Controls.Add(axMap1);
-
-            axMap1.Projection = tkMapProjection.PROJECTION_WGS84;
-            axMap1.KnownExtents = tkKnownExtents.keLatvia;
-            axMap1.ScalebarVisible = true;
-            axMap1.ShowCoordinates = tkCoordinatesDisplay.cdmAuto;
-            axMap1.ShowRedrawTime = true;
-            axMap1.ShowVersionNumber = true;
-            axMap1.ShowZoomBar = true;
+            _axMap1 = Helper.GetAxMap();
+            _axMap1.Projection = tkMapProjection.PROJECTION_WGS84;
+            _axMap1.KnownExtents = tkKnownExtents.keLatvia;
 
             CreateLayer();
         }
@@ -40,55 +28,55 @@ namespace MapWinGISTests
         [TestMethod]
         public void DrawCircle()
         {
-            axMap1.ClearDrawings();
-            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
-            axMap1.DrawCircle(24.0, 57.0, 0.1, 0, false);
-            SaveSnapshot("DrawCircle.jpg");
+            _axMap1.ClearDrawings();
+            var dhandle = _axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            _axMap1.DrawCircle(24.0, 57.0, 0.1, 0, false);
+            Helper.SaveSnapshot2(_axMap1, "DrawCircle.jpg");
         }
 
         [TestMethod]
         public void DrawCircleEx()
         {
-            axMap1.ClearDrawings();
-            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            _axMap1.ClearDrawings();
+            var dhandle = _axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
             var utils = new Utils();
-            axMap1.DrawCircleEx(dhandle, 24.0, 57.0, 0.1, utils.ColorByName(tkMapColor.IndianRed), true);
-            SaveSnapshot("DrawCircleEx.jpg");
+            _axMap1.DrawCircleEx(dhandle, 24.0, 57.0, 0.1, utils.ColorByName(tkMapColor.IndianRed), true);
+            Helper.SaveSnapshot2(_axMap1, "DrawCircleEx.jpg");
         }
 
         [TestMethod]
         public void DrawLabel()
         {
-            axMap1.ClearDrawings();
-            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
-            var retVal = axMap1.DrawLabel("label", 24.0, 57.0, 0.0);
+            _axMap1.ClearDrawings();
+            var dhandle = _axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            var retVal = _axMap1.DrawLabel("label", 24.0, 57.0, 0.0);
             Assert.AreEqual(dhandle, retVal, "Unexpected handle");
-            retVal = axMap1.DrawLabel("Воздух", 24.05, 57.05, 0.0);
+            retVal = _axMap1.DrawLabel("Воздух", 24.05, 57.05, 0.0);
             Assert.AreEqual(dhandle, retVal, "Unexpected handle");
-            SaveSnapshot("DrawLabel.jpg");
+            Helper.SaveSnapshot2(_axMap1, "DrawLabel.jpg");
         }
 
         [TestMethod]
         public void DrawLabelEx()
         {
-            axMap1.ClearDrawings();
-            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
-            var retVal = axMap1.DrawLabelEx(dhandle, "Воздух", 24.0, 57.0, 45.0);
+            _axMap1.ClearDrawings();
+            var dhandle = _axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            var retVal = _axMap1.DrawLabelEx(dhandle, "Воздух", 24.0, 57.0, 45.0);
             Assert.AreEqual(dhandle, retVal, "Unexpected handle");
-            SaveSnapshot("DrawLabelEx.jpg");
+            Helper.SaveSnapshot2(_axMap1, "DrawLabelEx.jpg");
         }
 
         [TestMethod]
         public void CheckUnicodeLabelText()
         {
             // https://mapwindow.atlassian.net/browse/MWGIS-81
-            axMap1.ClearDrawings();
-            var dhandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+            _axMap1.ClearDrawings();
+            var dhandle = _axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
             const string labelText = "Воздух";
             const double rotation = 45.0;
-            var retVal = axMap1.DrawLabelEx(dhandle, labelText, 24.0, 57.0, rotation);
+            var retVal = _axMap1.DrawLabelEx(dhandle, labelText, 24.0, 57.0, rotation);
             Assert.AreEqual(dhandle, retVal, "Unexpected handle");
-            var labels = axMap1.get_DrawingLabels(dhandle);
+            var labels = _axMap1.get_DrawingLabels(dhandle);
             for (var i = 0; i < labels.Count; i++)
             {
                 var label = labels.Label[i, 0];
@@ -102,37 +90,17 @@ namespace MapWinGISTests
         public void SaveSnapshot2()
         {
             // MWGIS-80
-            SaveSnapshot("SaveSnapshot2.jpg");
-            SaveSnapshot("SaveSnapshot2", true);
+            Helper.SaveSnapshot2(_axMap1, "SaveSnapshot2.jpg");
+            Helper.SaveSnapshot2(_axMap1, "SaveSnapshot2", true);
         }
 
-        private void SaveSnapshot(string baseName, bool shouldFail = false)
-        {
-            Application.DoEvents();
-            var filename = Path.Combine(Path.GetTempPath(), baseName);
-            if (File.Exists(filename)) File.Delete(filename);
-
-            var img = axMap1.SnapShot2(0, axMap1.CurrentZoom, 1000);
-            Assert.IsNotNull(img, "Snapshot is null");
-            var retVal = img.Save(filename);
-            if (!shouldFail)
-            {
-                Assert.IsTrue(retVal, "Snapshot could not be saved: " + img.ErrorMsg[img.LastErrorCode]);
-                Assert.IsTrue(File.Exists(filename), "The file doesn't exists.");
-                DebugMsg(filename);
-            }
-            else
-            {
-                DebugMsg("Expected error: " + img.ErrorMsg[img.LastErrorCode]);
-                Assert.IsFalse(retVal, "Image could be saved. This is unexpected.");
-            }
-        }
+ 
         [TestMethod]
         public void CaptureSnapshot()
         {
             // clear map
-            axMap1.ClearDrawings();
-            axMap1.RemoveAllLayers();
+            _axMap1.ClearDrawings();
+            _axMap1.RemoveAllLayers();
             // create layer
             CreateLayer();
             
@@ -145,7 +113,7 @@ namespace MapWinGISTests
             try
             {
                 DebugMsg("Calling AxMap.Snapshot() method.  Watch for Access Violation Exception if color depth is less than 32 bpp.");
-                var img = axMap1.SnapShot(axMap1.Extents);
+                var img = _axMap1.SnapShot(_axMap1.Extents);
                 Assert.IsNotNull(img, "axMap1.SnapShot returned null");
                 DebugMsg($"Successfully called Snapshot() with color depth = {bpp}.");
                 if (bpp != 32)
@@ -180,10 +148,10 @@ namespace MapWinGISTests
             Assert.IsTrue(shp.IsValid, "Shape is invalid");
 
             sf.EditAddShape(shp);
-            axMap1.AddLayer(sf, true);
-            axMap1.ZoomToShape(0, 0);
-            axMap1.ZoomOut(0.5);
-            axMap1.ZoomToTileLevel(axMap1.Tiles.CurrentZoom);
+            _axMap1.AddLayer(sf, true);
+            _axMap1.ZoomToShape(0, 0);
+            _axMap1.ZoomOut(0.5);
+            _axMap1.ZoomToTileLevel(_axMap1.Tiles.CurrentZoom);
         }
 
         private void DebugMsg(string msg)

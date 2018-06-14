@@ -10,8 +10,6 @@
 static CString csvPath;
 // single instance of Projected Coordinate System string mappings
 static unordered_map<int, CString> pcsStrings;
-// single instance of Geographic Coordinate System string mappings
-static unordered_map<int, CString> gcsStrings;
 
 // determine the path of this OCX, independent of the calling executable
 // https://stackoverflow.com/questions/6924195/get-dll-path-at-runtime
@@ -74,27 +72,59 @@ bool CUtils::LoadProjectionStrings()
 				name = restOfLine.Left(quotePosition);
 				// add to PCS mapping
 				pcsStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
-
-				//// now get the coordinate system code
-				//commaPosition = restOfLine.Find(",", 0);
-				//// restOfLine here is UOM code + the rest of the line
-				//restOfLine = restOfLine.Right(restOfLine.GetLength() - commaPosition - 1);
-				//// skipping over UOM code...
-				//commaPosition = restOfLine.Find(",", 0);
-				//restOfLine = restOfLine.Right(restOfLine.GetLength() - commaPosition - 1);
-				//// this is the actual code
-				//commaPosition = restOfLine.Find(",", 0);
-				//code = restOfLine.Left(commaPosition);
-
-				//// add to GCS mapping (watch for duplicates)
-				//if (gcsStrings.count(atoi((LPCSTR)code)) == 0)
-				//	gcsStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
 			}
 			catch (...)
 			{
 			}
 		}
 		file.Close();
+
+		////////////////////////////////////////////////////
+		// now process and append the esri-extra definitions
+		////////////////////////////////////////////////////
+		csvPath = thisOcxPath() + "gdal-data\\esri_extra.wkt";
+
+		if (file.Open(csvPath, CFile::modeRead | CFile::typeText))
+		{
+			CString nextLine;
+			// throw away the first line
+			file.ReadString(nextLine);
+			// now read all definitions
+			while (file.ReadString(nextLine))
+			{
+				// continue on error
+				try
+				{
+					// bypass comments
+					if (nextLine.Left(1) == "#") continue;
+					CString code, name, restOfLine;
+					// find the first comma
+					int commaPosition = nextLine.Find(",", 0);
+					// bypass Geographic Projections (GEOGCS immediately following the comma)
+					if (nextLine.Find("GEOGCS") == commaPosition + 1) continue;
+					// strip off the SRID
+					code = nextLine.Left(commaPosition);
+					// the rest of the line (account for PROJCS[ and the leading quote symbol)
+					restOfLine = nextLine.Right(nextLine.GetLength() - commaPosition -1 - 7 - 1);
+					// strip off all to the right of the name (using the closing quote symbol)
+					int quotePosition = restOfLine.Find("\"", 0);
+					// this is the name
+					name = restOfLine.Left(quotePosition);
+					// add to PCS mapping
+					pcsStrings.insert(std::pair<int, CString>(atoi((LPCSTR)code), name));
+				}
+				catch (...)
+				{
+				}
+			}
+			file.Close();
+		}
+		else
+		{
+			// not sure if we should raise any error in this case, 
+			// since at least all of the EPSG codes have been loaded...
+		}
+
 		//
 		bLoaded = true;
 	}
@@ -103,65 +133,21 @@ bool CUtils::LoadProjectionStrings()
 
 CString CUtils::customErrorMessage()
 {
-	return Debug::Format("Unable to reference projection list. Failed to load GDAL Projection list '%s'", csvPath);
+	CString msg;
+	msg.Format("Unable to reference projection list. Failed to load GDAL Projection list '%s'", csvPath);
+	return msg;
 }
 
 // return the name of the projection specified by the Nad83 enumeration
 STDMETHODIMP CUtils::GetNAD83ProjectionName(tkNad83Projection projectionID, BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	try
-	{
-		// list check
-		if (pcsStrings.empty())
-		{
-			ErrorMessage(tkFILE_NOT_OPEN, customErrorMessage());
-			*retVal = A2BSTR("");
-		}
-		else
-		{
-			// return string mapped to specified ID (use 'at' rather than [] to check existence)
-			*retVal = A2BSTR((LPCSTR)pcsStrings.at(projectionID));
-		}
-	}
-	catch (...)
-	{
-		// 'at' method will throw exception if key does not exist
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, Debug::Format("Invalid Projection ID specified: {0}", projectionID));
-		*retVal = A2BSTR("");
-	}
-
-	return S_OK;
+	return GetProjectionNameByID((int)projectionID, retVal);
 }
 
 // return the name of the projection specified by the Wgs84 enumeration
 STDMETHODIMP CUtils::GetWGS84ProjectionName(tkWgs84Projection projectionID, BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	try
-	{
-		// list check
-		if (pcsStrings.empty())
-		{
-			ErrorMessage(tkFILE_NOT_OPEN, customErrorMessage());
-			*retVal = A2BSTR("");
-		}
-		else
-		{
-			// return string mapped to specified ID (use 'at' rather than [] to check existence)
-			*retVal = A2BSTR((LPCSTR)pcsStrings.at(projectionID));
-		}
-	}
-	catch (...)
-	{
-		// 'at' method will throw exception if key does not exist
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, Debug::Format("Invalid Projection ID specified: {0}", projectionID));
-		*retVal = A2BSTR("");
-	}
-
-	return S_OK;
+	return GetProjectionNameByID((int)projectionID, retVal);
 }
 
 // return the name of any projection specified by the SRID, which include the Nad83 and Wgs84, 
@@ -187,7 +173,9 @@ STDMETHODIMP CUtils::GetProjectionNameByID(int SRID, BSTR* retVal)
 	catch (...)
 	{
 		// 'at' method will throw exception if key does not exist
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, Debug::Format("Invalid SRID specified: {0}", SRID));
+		CString msg;
+		msg.Format("Invalid projection ID specified: {0}", SRID);
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS, msg);
 		*retVal = A2BSTR("");
 	}
 
@@ -225,7 +213,11 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 			{
 				for each (pair<int, CString> p in pcsStrings)
 				{
-					if (p.second.Left(6) == "NAD83 ") theSize++;
+					// account for both pcs.csv and esri_extra formats (state plane only)
+					// NOTE that this enumeration is not a contiguous sequence of number, so for now, 
+					// for simplicity, rather than repeatedly enumerating to check for containment,
+					// we will narrow is down slightly by only including those with a known prefix.
+					if (p.second.Left(6) == "NAD83 " || p.second.Left(10) == "NAD_1983_S") theSize++;
 				}
 				//theSize += 881;
 			}
@@ -234,7 +226,11 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 			{
 				for each (pair<int, CString> p in pcsStrings)
 				{
-					if (p.second.Left(6) == "WGS 84") theSize++;
+					// account for both pcs.csv and esri_extra formats
+					// NOTE that this enumeration is not a contiguous sequence of number, so for now, 
+					// for simplicity, rather than repeatedly enumerating to check for containment,
+					// we will narrow is down slightly by only including those with a known prefix.
+					if (p.second.Left(6) == "WGS 84" || p.second.Left(8) == "WGS_1984") theSize++;
 				}
 				//theSize += 248;
 			}
@@ -255,11 +251,13 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 			{
 				// include ?
 				if (((projectionSets & psAll_Projections) == psAll_Projections) ||
-					(((projectionSets & psNAD83_Subset) == psNAD83_Subset) && (p.second.Left(6) == "NAD83 ")) ||
-					(((projectionSets & psWGS84_Subset) == psWGS84_Subset) && (p.second.Left(6) == "WGS 84")))
+					(((projectionSets & psNAD83_Subset) == psNAD83_Subset) && (p.second.Left(6) == "NAD83 " || p.second.Left(10) == "NAD_1983_S")) ||
+					(((projectionSets & psWGS84_Subset) == psWGS84_Subset) && (p.second.Left(6) == "WGS 84" || p.second.Left(8) == "WGS_1984")))
 				{
 					// create concatenated string
-					comBSTR.Append((LPCSTR)Debug::Format("%d,%s", p.first, p.second));
+					CString msg;
+					msg.Format("%d,%s", p.first, p.second);
+					comBSTR.Append((LPCSTR)msg);
 					// copy to array
 					pBSTR[j++] = comBSTR.Copy();
 					// empty the string

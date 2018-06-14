@@ -81,7 +81,8 @@ namespace MapWinGIS
     /// and new objects. See details about string encoding in the documentation of particular OGR driver.\n\n
     /// 
     /// Here is a diagram for the OgrDatasource class.
-    /// \dot digraph ogr_diagram {
+    /// \dot 
+    /// digraph ogr_diagram {
     /// nodesep = 0.3;
     /// ranksep = 0.3;
     /// splines = ortho;
@@ -129,6 +130,11 @@ namespace MapWinGIS
         /// <param name="connectionString">Connection string for RDMSs or filename for file-based formats.</param>
         /// <returns>True on success.</returns>
         public bool Open(string connectionString)
+        {
+            throw new NotImplementedException();
+        }
+
+        public OgrLayer GetLayer2(int Index, bool forUpdate, bool newConnection)
         {
             throw new NotImplementedException();
         }

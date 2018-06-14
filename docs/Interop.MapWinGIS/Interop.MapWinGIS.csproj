@@ -113,6 +113,7 @@
     <Compile Include="Com Classes\ChartField.cs" />
     <Compile Include="Com Classes\Charts.cs" />
     <Compile Include="Com Classes\ColorScheme.cs" />
+    <Compile Include="Com Classes\GdalUtils.cs" />
     <Compile Include="Com Classes\WmsLayer.cs" />
     <Compile Include="Com Classes\SelectionList.cs" />
     <Compile Include="Com Classes\GdalRasterBand.cs" />
@@ -150,7 +151,6 @@
     <Compile Include="Com Classes\ShapeDrawingOptions.cs" />
     <Compile Include="Com Classes\ShapefileCategories.cs" />
     <Compile Include="Com Classes\ShapefileCategory.cs" />
-    <Compile Include="Com Classes\ShapefileColorBreak.cs" />
     <Compile Include="Com Classes\ShapefileColorScheme.cs" />
     <Compile Include="Com Classes\ShapeNetwork.cs" />
     <Compile Include="Com Classes\TableClass.cs" />

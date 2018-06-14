@@ -1,4 +1,5 @@
-﻿/// \page hints Hints
+﻿#pragma warning disable 1587
+/// \page hints Hints
 /// 
 /// <b>A. COM objects.</b> \n\n
 /// MapWinGIS is COM-based, therefore it counts the references of particular objects to determine when they are no longer needed and can be released.
@@ -28,7 +29,7 @@
 /// 
 /// <b>B. Error handling and progress information.</b> \n\n
 /// By design MapWinGIS doesn't throw exceptions to return the information about errors. If an unhandled exception is still thrown,
-/// in the most cases it should be treated as a bug and reported to the <a href = "http://mapwingis.codeplex.com/workitem/list/basic">Issue tracker.</a>\n
+/// in the most cases it should be treated as a bug and reported to the <a href="https://github.com/MapWindow/MapWinGIS/issues" target="_blank">Issue tracker.</a>\n
 /// 
 /// To notify a client about success or failure of certain method the following approaches are used:
 /// -# A boolean return value (for C++ it's VARIANT_BOOL* [out, retval] parameter);
@@ -137,3 +138,4 @@
 /// It provides the the fastest way to setup the visualization options for the layers and pass them to custom application. \n\n
 /// -# The functionality present in MapWindow can be more or less easily implemented in other custom application based on MapWinGIS. 
 /// MapWindow 4 repository is <a href = "http://svn.mapwindow.org/svnroot/MapWindow4Dev/">here.</a>
+#pragma warning restore 1587

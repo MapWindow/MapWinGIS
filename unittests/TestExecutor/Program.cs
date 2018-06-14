@@ -44,18 +44,22 @@ namespace ConsoleApplication1
             //t.ReadAttributesFromPostGISLayer();
 
             //var t = new ShapefileTests();
+            //t.ShapefileDataTest();
+
             //t.Reproject2280Test();
             //t.ReadRussionDataFromTable();
             //t.CreateRussionCategories();
             //t.MergeM();
             //t.Reproject2280Test();
             // t.PointInShapefile();
+            // t.SpatialIndexMWGIS98();
 
             //var t = new GridTests();
             //t.ChangeValueGridNotInRam();
 
-            //var t = new ImageTests();
+            // var t = new ImageTests();
             //t.SaveImageShouldFail();
+            //t.SerializeDeserializeImage();
 
             //var t = new DrawingTests();
             //t.Init();
@@ -67,11 +71,14 @@ namespace ConsoleApplication1
             //t.DissolveLargefileClipper();
 
             var t = new UtilTests();
+            t.ProjectionStrings();
             //t.ZonalStatistics();
             //t.ReclassifyRaster();
             //t.ClipPolygon();
-            t.PointInPolygon();
+            //t.PointInPolygon();
 
+            //var t = new TilesTests();
+            //t.PrefetchToFolder();
 
             Console.WriteLine("Finished");
             Console.ReadLine();

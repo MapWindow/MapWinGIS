@@ -1,8 +1,9 @@
-/// \page getting_started Getting started with MapWinGIS 4.9.3
+#pragma warning disable 1587
+/// \page getting_started Getting started with MapWinGIS 4.9.3+
 ///
 /// Let's start assuming that you:
 /// - Installed the latest 32-Bit version of MapWinGIS using the installer available on the 
-/// <a href="https://mapwingis.codeplex.com/releases/">MapWinGIS site</a>;
+/// <a href="https://github.com/MapWindow/MapWinGIS/releases">MapWinGIS GitHub site</a>;
 /// - Created a new WinForms project in Visual Studio and have a new Form to add Map control to.
 /// 
 /// \note You can create a 64-Bit version of you application and run it with the 64-Bit version of MapWinGIS, 
@@ -90,8 +91,8 @@
 /// \image html intellisense2.jpg
 /// </div>
 /// The latest versions of XML documentation for Interop assemblies can also be found in the repository:
-/// <a href = "https://mapwingis.codeplex.com/SourceControl/latest#NET%20Assemblies/Documentation/Interop.MapWinGIS.XML">Interop.MapWinGIS.xml</a>
-/// <a href = "https://mapwingis.codeplex.com/SourceControl/latest#NET%20Assemblies/Documentation/AxInterop.MapWinGIS.XML">AxInterop.MapWinGIS.xml</a>
+/// <a href = "https://github.com/MapWindow/MapWinGIS/blob/master/docs/Interop.MapWinGIS.XML">Interop.MapWinGIS.xml</a>
+/// <a href = "https://github.com/MapWindow/MapWinGIS/blob/master/docs/AxInterop.MapWinGIS.XML">AxInterop.MapWinGIS.xml</a>
 ///
 /// \section gs4 C. Default hotkeys.
 /// Map control uses the following built-in keyboard hotkeys:
@@ -126,7 +127,7 @@
 /// \endcode
 /// 
 /// \section gs5 D. Measuring tool.
-/// MapWinGIS has built-in measuing tool. To start measuring set in Properties window or in code:
+/// MapWinGIS has built-in measuring tool. To start measuring set in Properties window or in code:
 /// \code
 /// axMap1.CursorMode = cmMeasure;
 /// \endcode
@@ -199,14 +200,14 @@
 /// \endcode
 /// 
 /// \section gs7 F. Projection mismatch testing.
-/// Adding of layer to the map may fail because of projection mismatch testing (GlobalSettings.AllowProjectMismatch).
+/// Adding of layer to the map may fail because of projection mismatch testing (GlobalSettings.AllowProjectionMismatch).
 /// It's turned off by default (i.e. set to true; mismatch is allowed), 
 /// so any layer will be added to the map even if its projection doesn't match.  
 /// If projection mismatch testing is on and reprojection option is chosen (GlobalSettings.ReprojectLayersOnAdding),
 /// a copy of datasource may be created in AxMap.AddLayer. 
 /// Any initialization logic in this case should be run after layer was added to the map.
 /// \code
-/// new GlobalSettings() { AllowProjectMismatch = false, ReprojectLayersOnAdding = true };
+/// new GlobalSettings() { AllowProjectionMismatch = false, ReprojectLayersOnAdding = true };
 /// var sf = new Shapefile();
 /// if (sf.Open(filename, null)) 
 /// {
@@ -243,5 +244,4 @@
 /// \endcode
 /// This will reset control's properties set in the designer, as outdated state information often
 /// becomes a source of problems.
-
-
+#pragma warning restore 1587

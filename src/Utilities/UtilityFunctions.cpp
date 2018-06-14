@@ -1212,6 +1212,17 @@ namespace Utility
 		{
 			Utility::CPLCreateXMLAttributeAndValue(node, elementName, CPLString().Printf("%d", val->lVal));
 		}
+		else if (val->vt == VT_BOOL)
+		{
+			Utility::CPLCreateXMLAttributeAndValue(node, elementName, (val->boolVal == VARIANT_TRUE) ? "T" : "F");
+		}
+		else if (val->vt == VT_DATE)
+		{
+			CString cval;
+			COleDateTime dt(val->date);
+			cval.Format("%4d%2d%2d", dt.GetYear(), dt.GetMonth(), dt.GetDay());
+			Utility::CPLCreateXMLAttributeAndValue(node, elementName, cval);
+		}
 	}
 
 	// ****************************************************************** 
@@ -1232,6 +1243,18 @@ namespace Utility
 			case DOUBLE_FIELD:
 				var->vt = VT_R8;
 				var->dblVal = Utility::atof_custom(sValue);
+				break;
+			case BOOLEAN_FIELD:
+				var->vt = VT_BOOL;
+				var->boolVal = (sValue[0] == 'T') ? VARIANT_TRUE : VARIANT_FALSE;
+			case DATE_FIELD:
+				int m, d, y;
+				y = atoi(sValue.Mid(0, 4));
+				m = atoi(sValue.Mid(4, 2));
+				d = atoi(sValue.Mid(6, 2));
+				COleDateTime dt(y, m, d, 0, 0, 0);
+				var->vt = VT_DATE;
+				var->date = dt;
 				break;
 		}
 	}

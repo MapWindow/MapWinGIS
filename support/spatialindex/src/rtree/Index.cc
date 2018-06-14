@@ -280,7 +280,7 @@ uint32_t Index::findLeastOverlap(const Region& r) const
 	return ret;
 }
 
-void Index::adjustTree(Node* n, std::stack<id_type>& pathBuffer)
+void Index::adjustTree(Node* n, std::stack<id_type>& pathBuffer, bool force)
 {
 	++(m_pTree->m_stats.m_u64Adjustments);
 
@@ -300,7 +300,7 @@ void Index::adjustTree(Node* n, std::stack<id_type>& pathBuffer)
 
 	*(m_ptrMBR[child]) = n->m_nodeMBR;
 
-	if (bRecompute)
+	if (bRecompute || force)
 	{
 		for (uint32_t cDim = 0; cDim < m_nodeMBR.m_dimension; ++cDim)
 		{
@@ -317,12 +317,12 @@ void Index::adjustTree(Node* n, std::stack<id_type>& pathBuffer)
 
 	m_pTree->writeNode(this);
 
-	if (bRecompute && (! pathBuffer.empty()))
+	if ((bRecompute || force) && (! pathBuffer.empty()))
 	{
 		id_type cParent = pathBuffer.top(); pathBuffer.pop();
 		NodePtr ptrN = m_pTree->readNode(cParent);
 		Index* p = static_cast<Index*>(ptrN.get());
-		p->adjustTree(this, pathBuffer);
+		p->adjustTree(this, pathBuffer, force);
 	}
 }
 
@@ -338,9 +338,11 @@ void Index::adjustTree(Node* n1, Node* n2, std::stack<id_type>& pathBuffer, byte
 	}
 
 	// MBR needs recalculation if either:
-	//   1. the NEW child MBR is not contained.
+	//   1. either child MBR is not contained.
 	//   2. the OLD child MBR is touching.
-	bool bContained = m_nodeMBR.containsRegion(n1->m_nodeMBR);
+	bool bContained1 = m_nodeMBR.containsRegion(n1->m_nodeMBR);
+	bool bContained2 = m_nodeMBR.containsRegion(n2->m_nodeMBR);
+	bool bContained = bContained1 && bContained2;
 	bool bTouches = m_nodeMBR.touchesRegion(*(m_ptrMBR[child]));
 	bool bRecompute = (! bContained || (bTouches && m_pTree->m_bTightMBRs));
 

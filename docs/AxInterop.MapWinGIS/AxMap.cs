@@ -1,5 +1,6 @@
 ﻿using System;
 using MapWinGIS;
+#pragma warning disable 67 // Never used warning
 
 #if nsp
 namespace AxMapWinGIS
@@ -9,7 +10,8 @@ namespace AxMapWinGIS
     /// Map component for visualization of vector, raster or grid data.
     /// </summary>
     /// Here is a class diagram for the AxMap class:
-    /// \dot digraph map_diagram {
+    /// \dot 
+    /// digraph map_diagram {
     /// nodesep = 0.3;
     /// ranksep = 0.3;
     /// splines = ortho;
@@ -315,21 +317,6 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
-
-        /// <summary>
-        /// Checks whether tiles for specified extents and provider are already present in cache.
-        /// </summary>
-        /// <param name="extents">Extents to check for (map coordinates).</param>
-        /// <param name="width">Width of the canvas on which the extents will be displayed.</param>
-        /// <param name="provider">Provider to load tiles from.</param>
-        /// <returns>1 if tiles are in cache, 0 if not, -1 if an there was an error.</returns>
-        /// <remarks>The main purpose: loading of tiles for printing.</remarks>
-        /// \new491 Added in version 4.9.1
-        // Removed in v4.9.4 again
-        //public int TilesAreInCache(Extents extents, int width, tkTileProvider provider)
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         /// <summary>
         /// Performs specific type of map redraw. 
@@ -712,6 +699,15 @@ namespace AxMapWinGIS
         /// if certain levels aren't supported by the provider they still won't be displayed.</remarks>
         /// \new492 Added in version 4.9.2
         public int ZoomBarMaxZoom { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to move the mouse click point to the center of the map 
+        /// when using the Zoom In or Zoom Out tools.
+        /// </summary>
+        /// <remarks>The default value is False, indicating that the map is not recentered,  
+        /// but instead keeps the click point at the mouse position and zooms around that point.</remarks>
+        /// \new495 Added in version 4.9.5
+        public bool RecenterMapOnZoom { get; set; }
 
         /// <summary>
         /// Reverts the last operation performed by user in interactive shape editor.
@@ -2074,7 +2070,7 @@ namespace AxMapWinGIS
         /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
         /// <remarks>This property corresponds to the ShapeDrawingOptions.FillHatchStyle property.</remarks>
         /// <param name="LayerHandle">The handle of the shapefile layer.</param>
-        /// <param name="newValue">The color of stipple.</returns>
+        /// <param name="newValue">The color of stipple.</param>
         /// \see Shapefile.DefaultDrawingOptions
         public void set_ShapeLayerStippleColor(int LayerHandle, uint newValue)
         {

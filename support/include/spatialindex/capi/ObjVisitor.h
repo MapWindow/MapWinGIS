@@ -28,6 +28,8 @@
 
 #pragma once
 
+
+
 class ObjVisitor : public SpatialIndex::IVisitor
 {
 private:
@@ -39,7 +41,7 @@ public:
     ObjVisitor();
     ~ObjVisitor();
 
-    uint32_t GetResultCount() const { return nResults; }
+    uint64_t GetResultCount() const { return nResults; }
     std::vector<SpatialIndex::IData*>& GetResults()  { return m_vector; }
     
     void visitNode(const SpatialIndex::INode& n);

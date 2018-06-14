@@ -5,7 +5,7 @@
  * Copyright (c) 2002, Marios Hadjieleftheriou
  *
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -689,6 +689,11 @@ void SpatialIndex::RTree::RTree::getIndexProperties(Tools::PropertySet& out) con
 	var.m_varType = Tools::VT_ULONG;
 	var.m_val.ulVal = m_pointPool.getCapacity();
 	out.setProperty("PointPoolCapacity", var);
+
+	var.m_varType = Tools::VT_LONGLONG;
+	var.m_val.llVal = m_headerID;
+	out.setProperty("IndexIdentifier", var);
+
 }
 
 void SpatialIndex::RTree::RTree::addCommand(ICommand* pCommand, CommandType ct)
@@ -802,6 +807,11 @@ bool SpatialIndex::RTree::RTree::isIndexValid()
 void SpatialIndex::RTree::RTree::getStatistics(IStatistics** out) const
 {
 	*out = new Statistics(m_stats);
+}
+
+void SpatialIndex::RTree::RTree::flush()
+{
+	storeHeader();
 }
 
 void SpatialIndex::RTree::RTree::initNew(Tools::PropertySet& ps)
@@ -1255,7 +1265,7 @@ bool SpatialIndex::RTree::RTree::deleteData_impl(const Region& mbr, id_type id)
 	if (l.get() != 0)
 	{
 		Leaf* pL = static_cast<Leaf*>(l.get());
-		pL->deleteData(id, pathBuffer);
+		pL->deleteData(mbr, id, pathBuffer);
 		--(m_stats.m_u64Data);
 		return true;
 	}

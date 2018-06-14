@@ -28,6 +28,8 @@
 
 #pragma once
 
+
+
 class IdVisitor : public SpatialIndex::IVisitor
 {
 private:

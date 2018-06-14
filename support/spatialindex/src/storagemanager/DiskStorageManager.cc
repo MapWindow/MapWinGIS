@@ -31,6 +31,10 @@
 // For checking if a file exists - hobu
 #include <sys/stat.h>
 
+#ifdef WIN32
+#define stat _stat64
+#endif
+
 #include <spatialindex/SpatialIndex.h>
 #include "DiskStorageManager.h"
 #include <spatialindex/tools/Tools.h>
@@ -43,6 +47,8 @@ bool CheckFilesExists(Tools::PropertySet& ps)
 	bool bExists = false;
 
 	std::string filename("");
+	//std::string idx("idx");
+	//std::string dat("dat");
 	std::string idx("mwx");
 	std::string dat("mwd");
 
@@ -127,6 +133,9 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 
 	// Open/Create flag.
 	bool bOverwrite = false;
+	bool bFileExists = false;
+	std::streamoff length = 0;
+	
 	var = ps.getProperty("Overwrite");
 
 	if (var.m_varType != Tools::VT_EMPTY)
@@ -141,9 +150,12 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 
 	if (var.m_varType != Tools::VT_EMPTY)
 	{
-		if (var.m_varType != Tools::VT_PCHAR)
-			throw Tools::IllegalArgumentException("SpatialIndex::DiskStorageManager: Property FileName must be Tools::VT_PCHAR");
+		if (!(var.m_varType == Tools::VT_PCHAR ||
+            var.m_varType == Tools::VT_PWCHAR))
+			throw Tools::IllegalArgumentException("SpatialIndex::DiskStorageManager: Property FileName must be Tools::VT_PCHAR or Tools::VT_PWCHAR");
 
+		//std::string idx("idx");
+		//std::string dat("dat");
 		std::string idx("mwx");
 		std::string dat("mwd");
 
@@ -157,21 +169,23 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 		std::string sDataFile = std::string(var.m_val.pcVal) + "." + dat;
 
 		// check if file exists.
-		bool bFileExists = CheckFilesExists(ps);
+		bFileExists = CheckFilesExists(ps);
 
 		// check if file can be read/written.
 		if (bFileExists == true && bOverwrite == false)
 		{
-			m_indexFile.open(sIndexFile.c_str(), std::ios::in | std::ios::out | std::ios::binary);
-			m_dataFile.open(sDataFile.c_str(), std::ios::in | std::ios::out | std::ios::binary);
+            std::ios_base::openmode mode = std::ios::in | std::ios::out | std::ios::binary;
+			m_indexFile.open(sIndexFile.c_str(), mode);
+			m_dataFile.open(sDataFile.c_str(), mode);
 
 			if (m_indexFile.fail() || m_dataFile.fail())
-				throw Tools::IllegalArgumentException("SpatialIndex::DiskStorageManager: Index/Data file cannot be read/writen.");
+				throw Tools::IllegalArgumentException("SpatialIndex::DiskStorageManager: Index/Data file cannot be read/written.");
 		}
 		else
 		{
-			m_indexFile.open(sIndexFile.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
-			m_dataFile.open(sDataFile.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+            std::ios_base::openmode mode = std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc;
+			m_indexFile.open(sIndexFile.c_str(), mode);
+			m_dataFile.open(sDataFile.c_str(), mode);
 
 			if (m_indexFile.fail() || m_dataFile.fail())
 				throw Tools::IllegalArgumentException("SpatialIndex::DiskStorageManager: Index/Data file cannot be created.");
@@ -183,8 +197,13 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 		throw Tools::IllegalArgumentException("SpatialIndex::DiskStorageManager: Property FileName was not specified.");
 	}
 
+	// get current length of file
+	m_indexFile.seekg (0, m_indexFile.end);
+	length = m_indexFile.tellg();
+	m_indexFile.seekg (0, m_indexFile.beg);
+
 	// find page size.
-	if (bOverwrite == true)
+	if ((bOverwrite == true) || (length == 0) || (bFileExists == false))
 	{
 		var = ps.getProperty("PageSize");
 
@@ -215,7 +234,7 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 	m_buffer = new byte[m_pageSize];
 	memset(m_buffer, 0, m_pageSize);
 
-	if (bOverwrite == false)
+	if ((bOverwrite == false) && (length > 0))
 	{
 		uint32_t count;
 		id_type page, id;

@@ -434,6 +434,16 @@ namespace MapWinGIS
         public int OgrLayerMaxFeatureCount { get; set; }
 
         /// <summary>
+        /// Applies to conversion of OGR Shapefile layers to MapWinGIS Shapefiles (via GetBuffer), since 
+        /// OGR Shapefiles do not support Logical fields.  Instead, DBF Logical fields are read as single-
+        /// character strings.  This property Gets or Sets a value which indicates whether to interpret 
+        /// single-character Ogr strings as Logical/Boolean values, as long as the character contained
+        /// in the string is one of valid DBF logical characters (e.g. Y, N, T, F). The default value is true.
+        /// </summary>
+        /// \new495 Added in version 4.9.5
+        public bool OgrInterpretYNStringAsBoolean { get; set; }
+
+        /// <summary>
         /// Gets or sets a value which indicates whether OgrLayer.DynamicLoading mode will
         /// chosen automatically based on the number of features. The default value is true.
         /// </summary>
@@ -551,16 +561,14 @@ namespace MapWinGIS
         public string GdalPluginPath { get; set;}
 
         /// <summary>
-        /// Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available. See 
-        /// <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+        /// Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available.
         /// </summary>
         /// \new493 Added in version 4.9.3
         public string BingApiKey { get; set;}
 
         /// <summary>
         /// Sets application credentials for Here Maps online tiles. 
-        /// Without these credentials Here Maps providers are not available. See 
-        /// <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+        /// Without these credentials Here Maps providers are not available. 
         /// </summary>
         /// <param name="appId">Application Id. Can be obtained by registering on the site of the service.</param>
         /// <param name="appCode">Application code. Can be obtained by registering on the site of the service.</param>
@@ -652,6 +660,13 @@ namespace MapWinGIS
         /// </summary>
         /// \new494 Added in version 4.9.4
         public tkCallbackVerbosity CallbackVerbosity { get; set; }
+
+        /// <summary> 
+        /// Share connection between layers (may be unstable). 
+        /// For large read-only layers it will increase performance.
+        /// </summary>
+        /// \new494 Added in version 4.9.4
+        public bool OgrShareConnection { get; set; }
 
         /// <summary>
         /// Starts logging of tile requests.

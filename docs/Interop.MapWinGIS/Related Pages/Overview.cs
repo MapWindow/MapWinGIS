@@ -1,4 +1,5 @@
-﻿/// \page overview Library Overview
+﻿#pragma warning disable 1587
+/// \page overview Library Overview
 /// 
 /// \section overview_zero I. Specification.
 /// <table border = "0">
@@ -9,7 +10,8 @@
 /// <tr><td>License: </td><td>Mozilla Public License v.1.1. (http://www.mozilla.org/MPL/)</td></tr>
 /// <tr><td>Functionality:</td><td>data visualization and geoprocessing</td></tr>
 /// <tr><td>Intended use:</td><td>desktop applications with GIS functionality</td></tr>
-/// <tr><td>Homepage:</td><td>http://mapwingis.codeplex.com</td></tr>
+/// <tr><td>Homepage:</td><td>http://www.mapwindow.org</td></tr>
+/// <tr><td>GitHub page:</td><td>https://github.com/MapWindow/MapWinGIS</td></tr>
 /// </table>
 /// 
 /// \section overview_nine II. Registration.
@@ -78,8 +80,5 @@
 /// <tr><td>PROJ.4</td><td>Reprojection of data.</td><td>http://proj.osgeo.org</td><td>static</td></tr>
 /// <tr><td>Libspatialindex</td><td>The file-based spatial index for ESRI shapefiles.</td><td>http://libspatialindex.github.com/</td><td>static</td></tr>
 /// </table>
-/// The binary versions of dlls can be found on the home pages of corresponding products or 
-/// <a href = "http://svn.mapwindow.org/svnroot/SupportLibraries/bin/"> here</a>. \n
-/// For those who want to build MapWinGIS from the source, the .lib files for the external libraries 
-/// can be downloaded <a href = "http://svn.mapwindow.org/svnroot/SupportLibraries/lib">here</a>. \n
 /// 
+#pragma warning restore 1587

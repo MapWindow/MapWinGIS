@@ -1,4 +1,5 @@
-﻿/// \page version_history Version history
+﻿#pragma warning disable 1587
+/// \page version_history Version history
 /// 
 /// \section apichanges API changes.
 /// -  New API in version \link newpage495 4.9.5 \endlink
@@ -118,7 +119,7 @@
 /// but uses fast heuristic which can employ somewhat more colors than optimal solution
 /// (ShapefileCategories.GeneratePolygonColors).
 /// 
-/// 6. New <a href="http://hot.openstreetmap.org/">OpenStreetMap Humanitarian</a> tile provider.
+/// 6. New <a href="https://hot.openstreetmap.org/">OpenStreetMap Humanitarian</a> tile provider.
 /// 
 /// \section changes491 Changes in version 4.9.1.
 ///
@@ -204,8 +205,4 @@
 /// 15. New methods in %Shape class:
 /// - Shape.ClosestPoints: finds 2 closest points for any pair of shapes;
 /// - Shape.ImportFromWKT: imports data from WKT format.
-
-
-
-
-
+#pragma warning restore 1587

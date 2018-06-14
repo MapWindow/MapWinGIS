@@ -517,7 +517,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	long x = point.x;
-	long y = point.y - 1;
+	long y = point.y;
 
 	// --------------------------------------------
 	//  Snapping
@@ -771,7 +771,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 		case DragZoombox:
 		case DragSelectionBox:
 			{
-				HandleLButtonUpZoomBox(vbflags, point.x, point.y - 1);
+				HandleLButtonUpZoomBox(vbflags, point.x, point.y);
 			}
 			break;
 	}
@@ -781,7 +781,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 	// in case of selection mouse down event will be triggered in this function (to preserve backward compatibility); 
 	// so mouse up should be further on to preserve at least some logic
 	if (m_sendMouseUp && _leftButtonDown)
-		FireMouseUp(MK_LBUTTON, (short)vbflags, point.x, point.y - 1);
+		FireMouseUp(MK_LBUTTON, (short)vbflags, point.x, point.y);
 	
 	_leftButtonDown = FALSE;
 }
@@ -849,15 +849,31 @@ void CMapView::ZoomToCursorPosition(bool zoomIn)
 
 	RECT rect;
 	this->GetWindowRect(&rect);
+	// if pt is outside of map window, just return
 	if (pt.x < rect.left || pt.x > rect.right || pt.y < rect.top || pt.y > rect.bottom)
 		return;
 	if ((rect.right - rect.left == 0) && (rect.bottom - rect.top == 0))
 		return;
 
-	double xCent, yCent;
+	double xCent, yCent, dx, dy;
+	// pt is screen position, and we need the position within the map rectangle
 	PixelToProj((double)(pt.x - rect.left), (double)(pt.y - rect.top), &xCent, &yCent);
-	double dx = (double)(pt.x - rect.left) / (rect.right - rect.left);
-	double dy = (double)(pt.y - rect.top) / (rect.bottom - rect.top);
+
+	// if we are recentering the map...
+	if (GetRecenterMapOnZoom())
+	{
+		// dx and dy represent the mouse position as a percent of the screen;
+		// since we are centering, set both to 50%
+		dx = 0.5;
+		dy = 0.5;
+	}
+	else
+	{
+		// dx and dy represent the mouse position as a percent of the screen;
+		// maintain the current screen position as a percent
+		dx = (double)(pt.x - rect.left) / (rect.right - rect.left);
+		dy = (double)(pt.y - rect.top) / (rect.bottom - rect.top);
+	}
 
 	double ratio;
 	if (ForceDiscreteZoom()) 
@@ -1324,7 +1340,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	if( m_sendMouseDown == TRUE )
-		this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
+		this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y );
 
 	if (_doTrapRMouseDown)
 	{
@@ -1369,7 +1385,7 @@ void CMapView::OnRButtonUp(UINT nFlags, CPoint point)
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	if( m_sendMouseUp == TRUE )
-		this->FireMouseUp( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
+		this->FireMouseUp( MK_RBUTTON, (short)vbflags, point.x, point.y );
 }
 
 // *********************************************************

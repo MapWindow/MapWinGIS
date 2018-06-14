@@ -28,6 +28,8 @@
 
 #pragma once
 
+
+
 class BoundsQuery : public SpatialIndex::IQueryStrategy
 {
 private:

@@ -157,17 +157,29 @@ void CMapView::SetSerialNumber(LPCTSTR newVal)
 		AfxMessageBox("Invalid serial number!", MB_OK | MB_ICONEXCLAMATION, 0);
 }
 
-void CMapView::SetUseAlternatePanCursor(BOOL nNewValue)
+void CMapView::SetUseAlternatePanCursor(VARIANT_BOOL nNewValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_useAlternatePanCursor = nNewValue;
 	//_cursorPan = (_useAlternatePanCursor == TRUE ? AfxGetApp()->LoadCursor(IDC_PAN_ALTERNATE) : AfxGetApp()->LoadCursor(IDC_PAN));
 }
 
-BOOL CMapView::GetUseAlternatePanCursor()
+VARIANT_BOOL CMapView::GetUseAlternatePanCursor()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	return _useAlternatePanCursor;
+}
+
+void CMapView::SetRecenterMapOnZoom(VARIANT_BOOL nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_recenterMapOnZoom = nNewValue;
+}
+
+VARIANT_BOOL CMapView::GetRecenterMapOnZoom()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _recenterMapOnZoom;
 }
 
 // *************************************************************** //
@@ -427,7 +439,7 @@ void CMapView::SetReuseTileBuffer(VARIANT_BOOL nNewValue)
 }
 
 // *****************************************************
-//		ReuseTileBuffer
+//		ZoomBarVerbosity
 // *****************************************************
 tkZoomBarVerbosity CMapView::GetZoomBarVerbosity()
 {

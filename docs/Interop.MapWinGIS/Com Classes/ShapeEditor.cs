@@ -111,12 +111,12 @@ namespace MapWinGIS
     /// 
     /// \note The fully working implementation of the shape editor can be examined in the the Demo application 
     /// included in MapWinGIS installation (starting from v4.9.3). The source code for this application is available in
-    /// the <a href = "http://mapwingis.codeplex.com/SourceControl/latest#NET%20Assemblies/Demo/MapWinGIS.Demo.sln">repository</a>.
+    /// the <a href = "https://github.com/MapWindow/MapWinGIS/tree/master/demo" target="_blank">repository</a>.
     /// </remarks>
     /// \new493 Added in version 4.9.3
-    #if nsp
-        #if upd
-            public class ShapeEditor : MapWinGIS.IShapeEditor
+#if nsp
+#if upd
+    public class ShapeEditor : MapWinGIS.IShapeEditor
         #else        
             public class IShapeEditor
         #endif

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interop.MapWinGIS", "Interop.MapWinGIS\Interop.MapWinGIS.csproj", "{C8417744-324A-4766-AE1D-1387C4AC359E}"
 EndProject
@@ -18,6 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doxygen", "Doxygen", "{5843
 		header.html = header.html
 		Interop.MapWinGIS.XML = Interop.MapWinGIS.XML
 		MapWinGIS doxyfile = MapWinGIS doxyfile
+		mapwingis.css = mapwingis.css
 	EndProjectSection
 EndProject
 Global
@@ -36,6 +37,7 @@ Global
 		{C8417744-324A-4766-AE1D-1387C4AC359E}.Intellisense|Any CPU.ActiveCfg = Intellisense|Any CPU
 		{C8417744-324A-4766-AE1D-1387C4AC359E}.Intellisense|Any CPU.Build.0 = Intellisense|Any CPU
 		{C8417744-324A-4766-AE1D-1387C4AC359E}.Intellisense|x86.ActiveCfg = Intellisense|x86
+		{C8417744-324A-4766-AE1D-1387C4AC359E}.Intellisense|x86.Build.0 = Intellisense|x86
 		{C8417744-324A-4766-AE1D-1387C4AC359E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8417744-324A-4766-AE1D-1387C4AC359E}.Release|x86.ActiveCfg = Release|Any CPU
 		{B80A883E-E7B4-484B-9278-312C64EB7B7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -44,6 +46,7 @@ Global
 		{B80A883E-E7B4-484B-9278-312C64EB7B7A}.Intellisense|Any CPU.ActiveCfg = Intellisense|Any CPU
 		{B80A883E-E7B4-484B-9278-312C64EB7B7A}.Intellisense|Any CPU.Build.0 = Intellisense|Any CPU
 		{B80A883E-E7B4-484B-9278-312C64EB7B7A}.Intellisense|x86.ActiveCfg = Intellisense|x86
+		{B80A883E-E7B4-484B-9278-312C64EB7B7A}.Intellisense|x86.Build.0 = Intellisense|x86
 		{B80A883E-E7B4-484B-9278-312C64EB7B7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B80A883E-E7B4-484B-9278-312C64EB7B7A}.Release|x86.ActiveCfg = Release|Any CPU
 		{A9BC7069-2AC8-49CB-BB0C-8D5B04586D67}.Debug|Any CPU.ActiveCfg = Debug|x86

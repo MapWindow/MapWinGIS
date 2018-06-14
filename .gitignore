@@ -168,3 +168,15 @@ docs/output
 demo/.nuget/
 *.zip
 unittests/MapWinGISTests/AkkerwebTests.cs
+*.exe
+*.mwd
+*.mwx
+unittests/packages/
+unittests/.vs/unittests/v15/Server/sqlite3/storage.ide
+unittests/.vs/unittests/v15/Server/sqlite3/db.lock
+docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/storage.ide-wal
+docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/storage.ide-shm
+docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/storage.ide
+docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/db.lock
+src/MapWinGIS.vcxproj.filters
+unittests/.vs/
