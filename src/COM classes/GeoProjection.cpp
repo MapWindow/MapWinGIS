@@ -940,7 +940,7 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 
 	if (proj.GetLength() != 0)
 	{
-		fprintf(prjFile, "%s", proj);
+		fprintf(prjFile, "%s", (LPCSTR)proj);
 	}
 
 	fclose(prjFile);

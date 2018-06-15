@@ -839,7 +839,7 @@ void CUtils::WriteWorldFile(CStringW worldFile, CStringW imageFile, double dx, d
 	fprintf(fout,"%.14f\n",yupLeft);
 	
 	fprintf(fout,"%s\n","[tkImageCom]");
-	fprintf(fout,"%s %s\n","ImageFile",imageFile);
+	fprintf(fout,"%s %s\n","ImageFile",(LPCSTR)CString(imageFile));
 	fflush(fout);
 	fclose(fout);
 }
