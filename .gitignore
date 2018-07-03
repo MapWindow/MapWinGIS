@@ -180,3 +180,5 @@ docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/storage.ide
 docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/db.lock
 src/MapWinGIS.vcxproj.filters
 unittests/.vs/
+src/MapWinGIS.VC.db
+src/MapWinGIS.VC.VC.opendb
