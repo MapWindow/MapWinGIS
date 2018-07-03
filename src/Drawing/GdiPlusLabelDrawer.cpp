@@ -283,8 +283,9 @@ Gdiplus::Font* GdiPlusLabelDrawer::CreateFont(CLabelOptions* options, double fon
 		fontSize = fontSize * scaleFactor;
 	}
 
+	// MWGIS-121; rather than return null, enforce a minimum font size of 4
 	if (fontSize < 4)  {
-		return NULL;
+		fontSize = 4;
 	}
 
 	int style = FontStyleRegular;
