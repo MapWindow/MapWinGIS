@@ -23,7 +23,47 @@
 #include "HttpProxyHelper.h"
 #include "TileCore.h"
 
+SecureHttpClient::SecureHttpClient()
+{
+	// create CURL handle
+	curl = curl_easy_init();
 
+	// set up write buffer
+	chunk.memory = (char *)malloc(1);	/* will be grown as needed */
+	chunk.size = 0;						/* no data yet */
+
+	/* send all data to this function */
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+	/* we pass our 'chunk' struct to the callback function */
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+}
+
+size_t SecureHttpClient::WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+	size_t realsize = size * nmemb;
+	struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+
+	mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
+	if (mem->memory == NULL) {
+		/* out of memory! */
+		CallbackHelper::ErrorMsg("not enough memory (realloc returned NULL)");
+		return 0;
+	}
+
+	memcpy(&(mem->memory[mem->size]), contents, realsize);
+	mem->size += realsize;
+	mem->memory[mem->size] = 0;
+
+	return realsize;
+}
+
+SecureHttpClient::~SecureHttpClient()
+{
+	free(chunk.memory);
+	// CURL cleanup
+	curl_easy_cleanup(curl);
+}
 
 // ************************************************************
 //		SetAuthentication()
@@ -34,24 +74,63 @@ bool SecureHttpClient::SetProxyAndAuthentication(CString userName, CString passw
 {
 	// otherwise it will query zone settings in IE for that URL
 	// if the setting is anything other than URLPOLICY_CREDENTIALS_SILENT_LOGON_OK it will fail
-	SetSilentLogonOk(true);
+	//SetSilentLogonOk(true);
+
+	// validate handle
+	if (!curl) return false;
+
+	CURLcode curlCode;
+	curlCode = curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
+	if (curlCode != CURLcode::CURLE_OK) /* what to do */;
 
 	if (HttpProxyHelper::m_proxyAddress.GetLength() > 0)
 	{
-		if (!SetProxy(HttpProxyHelper::m_proxyAddress, HttpProxyHelper::m_proxyPort))
+		//if (!SetProxy(HttpProxyHelper::m_proxyAddress, HttpProxyHelper::m_proxyPort))
+		//	return false;
+
+		if (!SetProxy((LPCTSTR)HttpProxyHelper::m_proxyAddress, (long)HttpProxyHelper::m_proxyPort))
 			return false;
 	}
 
-	basicAuth.SetCredentials(userName, password, domain);
+	//basicAuth.SetCredentials(userName, password, domain);
+
+	//curlCode = curl_easy_setopt(curl, CURLOPT_PROXY, (LPCTSTR)domain);
+	curlCode = curl_easy_setopt(curl, CURLOPT_USERNAME, (LPCTSTR)userName);
+	curlCode = curl_easy_setopt(curl, CURLOPT_PASSWORD, (LPCTSTR)password);
 
 	if (m_globalSettings.proxyAuthentication == tkProxyAuthentication::asNtlm)
 	{
 		// We're using the standard CNLMAuthObject class here because it automatically uses the current user's
 		// credentials if no IAuthInfo implementation is given.
-		return AddAuthObj(_T("NTLM"), &ntlmAuth);
+		//return AddAuthObj(_T("NTLM"), &ntlmAuth);
+
+		return (curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM) == CURLcode::CURLE_OK);
 	}
 
-	return AddAuthObj("BASIC", &basicAuth, &basicAuth);
+	//return AddAuthObj("BASIC", &basicAuth, &basicAuth);
+
+	return (curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC) == CURLcode::CURLE_OK);
+}
+
+// *************************************************************
+//			GetBodyLength()
+// *************************************************************
+int SecureHttpClient::GetBodyLength()
+{
+	//curl_off_t byteCount = 0;
+	//curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &byteCount);
+	//
+	return chunk.size; // (int)byteCount;
+}
+
+// *************************************************************
+//			GetBody()
+// *************************************************************
+BYTE *SecureHttpClient::GetBody()
+{
+	//void *buffer;
+	//fread(buffer, 1, GetBodyLength(), file);
+	return (BYTE*)chunk.memory; // buffer;
 }
 
 // *************************************************************
@@ -60,6 +139,14 @@ bool SecureHttpClient::SetProxyAndAuthentication(CString userName, CString passw
 bool SecureHttpClient::ReadBody(char** body, int& length)
 {
 	length = GetBodyLength();
+
+	//if (length > 0)
+	//{
+	//	*body = new char[length + 1];
+	//	memcpy(*body, GetBody(), length);
+	//	(*body)[length] = 0;
+	//	return true;
+	//}
 
 	if (length > 0)
 	{
@@ -77,8 +164,12 @@ bool SecureHttpClient::ReadBody(char** body, int& length)
 // *************************************************************
 TileHttpContentType SecureHttpClient::get_ContentType(int providerId)
 {
+	char* szContentType;
 	CString contentType;
-	GetHeaderValue(_T("Content-Type"), contentType);
+	//GetHeaderValue(_T("Content-Type"), contentType);
+
+	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &szContentType);
+	contentType = szContentType;
 
 	if (contentType.Left(5).CompareNoCase(_T("image")) == 0)
 	{
@@ -97,29 +188,42 @@ TileHttpContentType SecureHttpClient::get_ContentType(int providerId)
 	return httpUndefined;
 }
 
+// get request status
+long SecureHttpClient::GetStatus()
+{
+	long responseCode = -1;
+	if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode) != CURLcode::CURLE_OK)
+		responseCode = -1;
+	//
+	return responseCode;
+}
+
 // ************************************************************
 //		LogHttpError()
 // ************************************************************
 void SecureHttpClient::LogHttpError()
 {
-	int status = GetStatus();
-	DWORD socketError = GetLastError();
+	//int status = GetStatus();
+	//DWORD socketError = GetLastError();
 
-	if (status == -1 && socketError == 0)
-	{
-		CallbackHelper::ErrorMsg("Failed to retrieve tile: undefined error.");
-		return;
-	}
+	//if (status == -1 && socketError == 0)
+	//{
+	//	CallbackHelper::ErrorMsg("Failed to retrieve tile: undefined error.");
+	//	return;
+	//}
 
-	if (status == -1)
-	{
-		CString msg = Utility::GetSocketErrorMessage(socketError);
-		CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. WSA error: %d. %s", socketError, msg));
-	}
-	else
-	{
-		CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. HTTP status: %d", status));
-	}
+	//if (status == -1)
+	//{
+	//	CString msg = Utility::GetSocketErrorMessage(socketError);
+	//	CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. WSA error: %d. %s", socketError, msg));
+	//}
+	//else
+	//{
+	//	CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. HTTP status: %d", status));
+	//}
+
+	// last error message should be in buffer
+	CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. cURL error: %s", errorString));
 }
 
 // *************************************************************
@@ -148,21 +252,49 @@ void SecureHttpClient::LogRequest(int bodyLen, CString shortUrl, CString url)
 }
 
 // ************************************************************
+//		SetProxy()
+// ************************************************************
+bool SecureHttpClient::SetProxy(LPCTSTR address, long port)
+{
+	return (curl_easy_setopt(curl, CURLOPT_PROXY, address) == CURLcode::CURLE_OK &&
+			curl_easy_setopt(curl, CURLOPT_PROXYPORT, port) == CURLcode::CURLE_OK);
+}
+
+// ************************************************************
+//		Navigate()
+// ************************************************************
+bool SecureHttpClient::Navigate(LPCTSTR url)
+{
+	if (curl_easy_setopt(curl, CURLOPT_URL, url) == CURLcode::CURLE_OK)
+	{
+		// the following call is currently required to avoid error CURLE_SSL_CACERT
+		// not sure whether or not this is appropriate solution
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+		// perform the operation
+		CURLcode result = curl_easy_perform(curl);
+		return (result == CURLcode::CURLE_OK);
+	}
+	// something went wrong
+	return false;
+}
+
+// ************************************************************
 //		CheckConnection()
 // ************************************************************
 bool SecureHttpClient::CheckConnection(CString url)
 {
-	CAtlHttpClient* httpClient = new CAtlHttpClient();
-	CAtlNavigateData navData;
+	SecureHttpClient* httpClient = new SecureHttpClient();
 
 	if (HttpProxyHelper::m_proxyAddress.GetLength() > 0)	
 	{
-		httpClient->SetProxy(HttpProxyHelper::m_proxyAddress, HttpProxyHelper::m_proxyPort);
+		httpClient->SetProxy(HttpProxyHelper::m_proxyAddress, (long)HttpProxyHelper::m_proxyPort);
 	}
 
-	bool result = httpClient->Navigate(url);
-	httpClient->Close();
+	bool result = httpClient->Navigate((LPCTSTR)url);
+
+	//httpClient->Close();
 	delete httpClient;
 
 	return result;
 }
+

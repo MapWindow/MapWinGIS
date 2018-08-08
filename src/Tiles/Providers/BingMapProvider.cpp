@@ -26,14 +26,14 @@ bool BingBaseProvider::Initialize()
 	SecureHttpClient client;
 	client.SetProxyAndAuthentication(_proxyUsername, _proxyPassword, _proxyDomain);
 
-	CAtlNavigateData navData;
+	//CAtlNavigateData navData;
 
 	CString url;
 	url.Format("http://dev.virtualearth.net/REST/v1/Imagery/Metadata/%s?key=%s&o=xml", _imagerySet, m_globalSettings.bingApiKey);
 
 	bool result = false;
 
-	if (!client.Navigate(url, &navData) || client.GetStatus() != 200)
+	if (!client.Navigate(url/*, &navData*/) || client.GetStatus() != 200)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Failed to perform imagery metadata request. URL: ", url));
 		return false;

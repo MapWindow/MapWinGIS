@@ -19,7 +19,7 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #include "stdafx.h"
-#include "Wininet.h"
+//#include "Wininet.h"
 #include "BaseProvider.h"
 #include "SecureHttpClient.h"
 
@@ -56,15 +56,22 @@ TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool recursive)
 {
+	//CSingleLock lock(&_clientLock, TRUE);
+
 	SecureHttpClient client;
-	CAtlNavigateData navData;
-	navData.dwReadBlockSize = 262144;
+	//CAtlNavigateData navData;
+	//navData.dwReadBlockSize = 262144;
 
 	client.SetProxyAndAuthentication(_proxyUsername, _proxyPassword, _proxyDomain);
 
-	PreventParallelExecution();
+	//PreventParallelExecution();
 
-	bool success = client.Navigate(url, &navData);
+	bool success = client.Navigate(url); // , &navData);
+	if (!success)
+	{
+		client.LogHttpError();
+		return 0;
+	}
 
 	CMemoryBitmap* bmp = ProcessHttpRequest(reinterpret_cast<void*>(&client), url, shortUrl, success);
 
