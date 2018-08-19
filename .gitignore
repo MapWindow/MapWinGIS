@@ -163,9 +163,18 @@ $RECYCLE.BIN/
 # Mac desktop service store files
 .DS_Store
 
+# GDAL SDK
+support/GDAL_SDK/licenses/*.rtf
+support/GDAL_SDK/**/*.dll
+support/GDAL_SDK/**/*.exe
+support/GDAL_SDK/**/*.lib
+support/GDAL_SDK/**/*.h
+support/GDAL_SDK/**/*.hpp
+support/GDAL_SDK/**/*.c
+support/GDAL_SDK/**/*.inc
+
 # Custom
 *.dll
-support/GDAL_SDK/*
 docs/output
 demo/.nuget/
 *.zip
@@ -176,3 +185,4 @@ unittests/MapWinGISTests/AkkerwebTests.cs
 unittests/packages/
 src/MapWinGIS.VC.db
 src/MapWinGIS.VC.VC.opendb
+
