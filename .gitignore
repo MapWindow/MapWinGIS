@@ -69,6 +69,8 @@ ipch/
 # ReSharper is a .NET coding add-in
 _ReSharper*/
 *.[Rr]e[Ss]harper
+*.idea
+*.vs
 
 # TeamCity is a build add-in
 _TeamCity*
@@ -172,13 +174,5 @@ unittests/MapWinGISTests/AkkerwebTests.cs
 *.mwd
 *.mwx
 unittests/packages/
-unittests/.vs/unittests/v15/Server/sqlite3/storage.ide
-unittests/.vs/unittests/v15/Server/sqlite3/db.lock
-docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/storage.ide-wal
-docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/storage.ide-shm
-docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/storage.ide
-docs/.vs/MapWinGis Documentation/v15/Server/sqlite3/db.lock
-src/MapWinGIS.vcxproj.filters
-unittests/.vs/
 src/MapWinGIS.VC.db
 src/MapWinGIS.VC.VC.opendb
