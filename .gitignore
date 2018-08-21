@@ -138,8 +138,7 @@ UpgradeLog*.htm
 
 # SQL Server files
 App_Data/*.mdf
-App_Data/*.ldf
-
+App_Data/*.ldf  
 
 #LightSwitch generated files
 GeneratedArtifacts/
@@ -162,6 +161,7 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+__MACOSX/
 
 # GDAL SDK
 support/GDAL_SDK/licenses/*.rtf
@@ -172,6 +172,8 @@ support/GDAL_SDK/**/*.h
 support/GDAL_SDK/**/*.hpp
 support/GDAL_SDK/**/*.c
 support/GDAL_SDK/**/*.inc
+support/GDAL_SDK/**/*.proto
+support/GDAL_SDK/**/*.pc
 
 # Custom
 *.dll
@@ -183,6 +185,7 @@ unittests/MapWinGISTests/AkkerwebTests.cs
 *.mwd
 *.mwx
 unittests/packages/
-src/MapWinGIS.VC.db
-src/MapWinGIS.VC.VC.opendb
-
+*.VC.db
+*.VC.opendb
+docs/Assets/Syncfusion Logos/
+tmp/
