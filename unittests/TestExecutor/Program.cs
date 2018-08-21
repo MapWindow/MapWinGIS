@@ -43,8 +43,9 @@ namespace ConsoleApplication1
             //var t = new PostGisTest();
             //t.ReadAttributesFromPostGISLayer();
 
-            //var t = new ShapefileTests();
+            var t = new ShapefileTests();
             //t.ShapefileDataTest();
+            t.UnionShapefiles();
 
             //t.Reproject2280Test();
             //t.ReadRussionDataFromTable();
@@ -70,8 +71,8 @@ namespace ConsoleApplication1
             // t.DissolveSmallfileClipper();
             //t.DissolveLargefileClipper();
 
-            var t = new UtilTests();
-            t.ProjectionStrings();
+            //var t = new UtilTests();
+            //t.ProjectionStrings();
             //t.ZonalStatistics();
             //t.ReclassifyRaster();
             //t.ClipPolygon();

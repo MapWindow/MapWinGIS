@@ -138,6 +138,39 @@
     <None Include="Testdata\HDF5\test.h5">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Testdata\Issues\MWGIS-125-Union\SoilTest.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-125-Union\SoilTest.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-125-Union\SoilTest.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-125-Union\SoilTest.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-125-Union\UseTest.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-125-Union\UseTest.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-125-Union\UseTest.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-125-Union\UseTest.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-48-68\EsriShapefile.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-48-68\EsriShapefile.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-48-68\EsriShapefile.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Testdata\Issues\MWGIS-69\SHP1_POINT_M.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
