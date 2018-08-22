@@ -4167,6 +4167,7 @@ interface IShapefile : IDispatch{
 	[id(139)] HRESULT StartAppendMode([out, retval] VARIANT_BOOL* retVal);
 	[id(140)] HRESULT StopAppendMode();
 	[propget, id(141)] HRESULT AppendMode([out, retval] VARIANT_BOOL* pVal);
+	[propget, id(142)] HRESULT IsGeographicProjection([out, retval] VARIANT_BOOL* retVal);
 };
 
 /****************************  Shape Interface ***********************/
