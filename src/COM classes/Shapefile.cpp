@@ -2574,6 +2574,21 @@ STDMETHODIMP CShapefile::put_GeoProjection(IGeoProjection* pVal)
 	return S_OK;
 }
 
+// ****************************************************************
+//		get_IsGeographicProjection
+// ****************************************************************
+STDMETHODIMP CShapefile::get_IsGeographicProjection(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = VARIANT_FALSE;
+
+	if (_geoProjection)
+		_geoProjection->get_IsGeographic(pVal);
+
+	return S_OK;
+}
+
 // *****************************************************************
 //		Reproject()
 // *****************************************************************

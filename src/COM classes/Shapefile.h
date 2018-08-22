@@ -256,6 +256,7 @@ public:
 	STDMETHOD(StartAppendMode)(VARIANT_BOOL* retVal);
 	STDMETHOD(StopAppendMode)();
 	STDMETHOD(get_AppendMode)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_IsGeographicProjection)(VARIANT_BOOL* pVal);
 private:
 
 	// data for point in shapefile test

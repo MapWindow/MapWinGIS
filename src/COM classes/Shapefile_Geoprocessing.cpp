@@ -89,11 +89,8 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes,
 
 	CComVariant var;
 	
-	IGeoProjection* proj = NULL;
-	sf->get_GeoProjection(&proj);
-	VARIANT_BOOL isGeographic;
-	proj->get_IsGeographic(&isGeographic);
-	proj->Release();
+	VARIANT_BOOL isGeographic = VARIANT_FALSE;
+	sf->get_IsGeographicProjection(&isGeographic);
 
 	for (int i = 0; i < (int)vShapes.size(); i++) 
 	{	
@@ -2280,15 +2277,9 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 	ClipperLib::Clipper clp; 
 	ClipperConverter converter(this);
 
-	IGeoProjection* projection = NULL;
-	sfClip->get_GeoProjection(&projection);
 	VARIANT_BOOL isGeographic = VARIANT_FALSE;
-	if (projection)
-	{
-		projection->get_IsGeographic(&isGeographic);
-		projection->Release();
-		projection = NULL;
-	}
+	sfResult->get_IsGeographicProjection(&isGeographic);
+
 	double AREA_TOLERANCE = m_globalSettings.GetMinPolygonArea(isGeographic) * 0.001;
 
 	// initial areas areas of the clipping shapes
