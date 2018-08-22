@@ -956,7 +956,8 @@ namespace MapWinGIS
 
         /// \addtogroup shapefile_geoprocessing Shapefile geoprocessing
         /// Here is a list of methods to perform geoprocessing tasks using shapefile data.
-        /// This module is a part of the documentation of Shapefile class.
+        /// This module is a part of the documentation of Shapefile class.\n\n
+        /// Use GlobalSettings.MinAreaToPerimeterRatio and GlobalSettings.MinPolygonArea to tweak which polygon needs to be included in the output file.
         /// \dot
         /// digraph shapefile_geoprocessing {
         /// splines = true;
