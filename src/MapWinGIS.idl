@@ -6006,7 +6006,8 @@ interface ITileProviders : IDispatch{
 										[in]BSTR UrlPattern, 
 										[in]tkTileProjection Projection, 
 										[in, optional, defaultvalue(0)]int MinZoom, 
-										[in, optional, defaultvalue(17)]int MaxZoom,
+										[in, optional, defaultvalue(17)]int MaxZoom, 
+										[in, optional, defaultvalue("")]BSTR Copyright,
 										[out,retval] VARIANT_BOOL* retVal);
 	[propget, id(5), helpstring("")] HRESULT Id([in] int Index, [out, retval] LONG* retVal);
 	[propget, id(6), helpstring("")] HRESULT Name([in] int Index, [out, retval] BSTR* retVal);

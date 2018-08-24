@@ -309,7 +309,7 @@ STDMETHODIMP CTileProviders::get_Count(LONG* pVal)
 // *******************************************************
 //			Add()
 // *******************************************************
-STDMETHODIMP CTileProviders::Add(int Id, BSTR name, BSTR urlPattern, tkTileProjection projection, int minZoom, int maxZoom, VARIANT_BOOL* retVal)
+STDMETHODIMP CTileProviders::Add(int Id, BSTR name, BSTR urlPattern, tkTileProjection projection, int minZoom, int maxZoom, BSTR copyright, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
@@ -330,7 +330,7 @@ STDMETHODIMP CTileProviders::Add(int Id, BSTR name, BSTR urlPattern, tkTileProje
 
 	try
 	{
-		CustomTileProvider* provider = new CustomTileProvider(Id, name, urlPattern, projection, minZoom, maxZoom);
+		CustomTileProvider* provider = new CustomTileProvider(Id, name, urlPattern, projection, minZoom, maxZoom, copyright);
 		_providers.push_back(provider);
 		*retVal = VARIANT_TRUE;
 	}

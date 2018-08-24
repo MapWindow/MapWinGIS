@@ -100,7 +100,7 @@ public:
 	STDMETHOD(Remove)(LONG provider, VARIANT_BOOL clearCache, VARIANT_BOOL* retVal);
 	STDMETHOD(Clear)(VARIANT_BOOL clearCache);
 	STDMETHOD(get_Count)(LONG* pVal);
-	STDMETHOD(Add)(int Id, BSTR name, BSTR urlPattern, tkTileProjection projection, int minZoom, int maxZoom, VARIANT_BOOL* retVal);
+	STDMETHOD(Add)(int Id, BSTR name, BSTR urlPattern, tkTileProjection projection, int minZoom, int maxZoom, BSTR copyright, VARIANT_BOOL* retVal);
 	
 	STDMETHOD(get_Id)(int Index, LONG* retVal);
 	STDMETHOD(get_Name)(int Index, BSTR* retVal);

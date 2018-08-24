@@ -678,6 +678,7 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Projection", CPLString().Printf("%d", (int)cp->get_Projection()));
 				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MinZoom", CPLString().Printf("%d", cp->get_MinZoom()));
 				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MaxZoom", CPLString().Printf("%d", cp->get_MaxZoom()));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Copyright", cp->get_Copyright());
 				CPLAddXMLChild(psProviders, psCustom);
 			}
 		}
@@ -790,7 +791,7 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 			if (strcmp(nodeProvider->pszValue, "TileProvider") == 0)
 			{
 				int id, minZoom, maxZoom, projection;
-				CString url, name;
+				CString url, name, copyright;
 				
 				s = CPLGetXMLValue( nodeProvider, "Id", NULL );
 				if (s != "") id = atoi(s);
@@ -810,11 +811,15 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 				s = CPLGetXMLValue( nodeProvider, "Name", NULL );
 				if (s != "") name = s;
 
+				s = CPLGetXMLValue(nodeProvider, "Copyright", NULL);
+				if (s != "") copyright = s;
+
 				VARIANT_BOOL vb;
 				CComBSTR bstrName(name);
 				CComBSTR bstrUrl(url);
+				CComBSTR bstrCopyright(copyright);
 
-				_providers->Add(id, bstrName, bstrUrl, (tkTileProjection)projection, minZoom, maxZoom, &vb);
+				_providers->Add(id, bstrName, bstrUrl, (tkTileProjection)projection, minZoom, maxZoom, bstrCopyright, &vb);
 			}
 			nodeProvider = nodeProvider->psNext;
 		}
