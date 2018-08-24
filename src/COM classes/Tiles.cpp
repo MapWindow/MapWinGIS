@@ -621,11 +621,10 @@ STDMETHODIMP CTiles::Serialize(BSTR* retVal)
 CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 {
 	USES_CONVERSION;
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
+	CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, ElementName);
 	
 	if (!_visible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_visible));
-
 	
 	if (_manager.get_GridLinesVisible())
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "GridLinesVisible", CPLString().Printf("%d", (int)_manager.get_GridLinesVisible()));
@@ -671,16 +670,16 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", Utility::ConvertToUtf8(dbName));
 	
 	// serialization of custom providers
-	CPLXMLNode* psProviders = CPLCreateXMLNode( NULL, CXT_Element, "TileProviders");
+	CPLXMLNode* psProviders = CPLCreateXMLNode(nullptr, CXT_Element, "TileProviders");
 	if (psProviders)
 	{
 		vector<BaseProvider*>* providers = ((CTileProviders*)_providers)->GetList();
-		for(size_t i = 0; i < providers->size(); i++)
+		for (size_t i = 0; i < providers->size(); i++)
 		{
 			CustomTileProvider* cp = dynamic_cast<CustomTileProvider*>(providers->at(i));
 			if (cp)
 			{
-				CPLXMLNode* psCustom = CPLCreateXMLNode( NULL, CXT_Element, "TileProvider");
+				CPLXMLNode* psCustom = CPLCreateXMLNode(nullptr, CXT_Element, "TileProvider");
 				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Id", CPLString().Printf("%d", cp->Id));
 				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Name", cp->Name);
 				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Url", cp->get_UrlFormat());
