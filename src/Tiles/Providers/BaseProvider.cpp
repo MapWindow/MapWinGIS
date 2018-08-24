@@ -16,7 +16,8 @@
  * DEALINGS IN THE SOFTWARE.
  **************************************************************************************
  * Contributor(s):
- * (Open source contributors should list themselves and their modifications here). */
+ * (Open source contributors should list themselves and their modifications here). 
+ * jkf, 8/24/2018: Replace ATL Http library usage with libCurl so as to support SSL/HTTPS */
 
 #include "stdafx.h"
 //#include "Wininet.h"
@@ -56,17 +57,19 @@ TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool recursive)
 {
+	// jf: I don't think we need a mutex here
 	//CSingleLock lock(&_clientLock, TRUE);
 
+	// stack-based instance
 	SecureHttpClient client;
-	//CAtlNavigateData navData;
-	//navData.dwReadBlockSize = 262144;
 
 	client.SetProxyAndAuthentication(_proxyUsername, _proxyPassword, _proxyDomain);
 
+	// jf: Likewise, don't think we need this work-around.
+	// if we observe multiple retransmissions, we can reconsider.
 	//PreventParallelExecution();
 
-	bool success = client.Navigate(url); // , &navData);
+	bool success = client.Navigate(url);
 	if (!success)
 	{
 		client.LogHttpError();
@@ -75,6 +78,7 @@ CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool
 
 	CMemoryBitmap* bmp = ProcessHttpRequest(reinterpret_cast<void*>(&client), url, shortUrl, success);
 
+	// this is a leftover from the Atl Http code; it remains to be seen if it is necessary
 	if (!success && !recursive && client.GetStatus() == -1)
 	{
 		// it's a socket error, so let's try one more time

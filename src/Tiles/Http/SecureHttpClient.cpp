@@ -16,7 +16,8 @@
  * DEALINGS IN THE SOFTWARE.
  ************************************************************************************** 
  * Contributor(s): 
- * (Open source contributors should list themselves and their modifications here). */
+ * (Open source contributors should list themselves and their modifications here). 
+ * jkf, 8/24/2018: Replace ATL Http library usage with libCurl so as to support SSL/HTTPS */
 
 #include "stdafx.h"
 #include "SecureHttpClient.h"
@@ -72,10 +73,6 @@ SecureHttpClient::~SecureHttpClient()
 // give even more troubles
 bool SecureHttpClient::SetProxyAndAuthentication(CString userName, CString password, CString domain)
 {
-	// otherwise it will query zone settings in IE for that URL
-	// if the setting is anything other than URLPOLICY_CREDENTIALS_SILENT_LOGON_OK it will fail
-	//SetSilentLogonOk(true);
-
 	// validate handle
 	if (!curl) return false;
 
@@ -85,14 +82,9 @@ bool SecureHttpClient::SetProxyAndAuthentication(CString userName, CString passw
 
 	if (HttpProxyHelper::m_proxyAddress.GetLength() > 0)
 	{
-		//if (!SetProxy(HttpProxyHelper::m_proxyAddress, HttpProxyHelper::m_proxyPort))
-		//	return false;
-
 		if (!SetProxy((LPCTSTR)HttpProxyHelper::m_proxyAddress, (long)HttpProxyHelper::m_proxyPort))
 			return false;
 	}
-
-	//basicAuth.SetCredentials(userName, password, domain);
 
 	//curlCode = curl_easy_setopt(curl, CURLOPT_PROXY, (LPCTSTR)domain);
 	curlCode = curl_easy_setopt(curl, CURLOPT_USERNAME, (LPCTSTR)userName);
@@ -100,14 +92,8 @@ bool SecureHttpClient::SetProxyAndAuthentication(CString userName, CString passw
 
 	if (m_globalSettings.proxyAuthentication == tkProxyAuthentication::asNtlm)
 	{
-		// We're using the standard CNLMAuthObject class here because it automatically uses the current user's
-		// credentials if no IAuthInfo implementation is given.
-		//return AddAuthObj(_T("NTLM"), &ntlmAuth);
-
 		return (curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM) == CURLcode::CURLE_OK);
 	}
-
-	//return AddAuthObj("BASIC", &basicAuth, &basicAuth);
 
 	return (curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC) == CURLcode::CURLE_OK);
 }
@@ -117,10 +103,7 @@ bool SecureHttpClient::SetProxyAndAuthentication(CString userName, CString passw
 // *************************************************************
 int SecureHttpClient::GetBodyLength()
 {
-	//curl_off_t byteCount = 0;
-	//curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &byteCount);
-	//
-	return chunk.size; // (int)byteCount;
+	return chunk.size;
 }
 
 // *************************************************************
@@ -128,9 +111,7 @@ int SecureHttpClient::GetBodyLength()
 // *************************************************************
 BYTE *SecureHttpClient::GetBody()
 {
-	//void *buffer;
-	//fread(buffer, 1, GetBodyLength(), file);
-	return (BYTE*)chunk.memory; // buffer;
+	return (BYTE*)chunk.memory;
 }
 
 // *************************************************************
@@ -139,14 +120,6 @@ BYTE *SecureHttpClient::GetBody()
 bool SecureHttpClient::ReadBody(char** body, int& length)
 {
 	length = GetBodyLength();
-
-	//if (length > 0)
-	//{
-	//	*body = new char[length + 1];
-	//	memcpy(*body, GetBody(), length);
-	//	(*body)[length] = 0;
-	//	return true;
-	//}
 
 	if (length > 0)
 	{
@@ -166,7 +139,6 @@ TileHttpContentType SecureHttpClient::get_ContentType(int providerId)
 {
 	char* szContentType;
 	CString contentType;
-	//GetHeaderValue(_T("Content-Type"), contentType);
 
 	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &szContentType);
 	contentType = szContentType;
@@ -203,25 +175,6 @@ long SecureHttpClient::GetStatus()
 // ************************************************************
 void SecureHttpClient::LogHttpError()
 {
-	//int status = GetStatus();
-	//DWORD socketError = GetLastError();
-
-	//if (status == -1 && socketError == 0)
-	//{
-	//	CallbackHelper::ErrorMsg("Failed to retrieve tile: undefined error.");
-	//	return;
-	//}
-
-	//if (status == -1)
-	//{
-	//	CString msg = Utility::GetSocketErrorMessage(socketError);
-	//	CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. WSA error: %d. %s", socketError, msg));
-	//}
-	//else
-	//{
-	//	CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. HTTP status: %d", status));
-	//}
-
 	// last error message should be in buffer
 	CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. cURL error: %s", errorString));
 }
@@ -270,6 +223,7 @@ bool SecureHttpClient::Navigate(LPCTSTR url)
 		// the following call is currently required to avoid error CURLE_SSL_CACERT
 		// not sure whether or not this is appropriate solution
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+
 		// perform the operation
 		CURLcode result = curl_easy_perform(curl);
 		return (result == CURLcode::CURLE_OK);

@@ -16,7 +16,8 @@
  * DEALINGS IN THE SOFTWARE.
  **************************************************************************************
  * Contributor(s):
- * (Open source contributors should list themselves and their modifications here). */
+ * (Open source contributors should list themselves and their modifications here). 
+ * jkf, 8/24/2018: Replace ATL Http library usage with libCurl so as to support SSL/HTTPS */
 
 #pragma once
 #include "geopoint.h"
