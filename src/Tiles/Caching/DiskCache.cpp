@@ -17,7 +17,9 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-#include "stdafx.h"
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#include "StdAfx.h"
 #include "DiskCache.h"
 
 // *********************************************************
@@ -27,7 +29,7 @@ void DiskCache::InitEncoder()
 {
 	if (_ext.GetLength() >= 4)
 	{
-		CStringW s = _ext.Mid(0, 4).MakeLower(); // try to guess it from input
+	    const CStringW s = _ext.Mid(0, 4).MakeLower(); // try to guess it from input
 
 		if (s == L".png")
 		{
@@ -45,7 +47,7 @@ void DiskCache::InitEncoder()
 // *********************************************************
 bool DiskCache::get_TileExists(BaseProvider* provider, int zoom, int x, int y)
 {
-	return (Utility::FileExistsW(get_TilePath(zoom, x, y)) == TRUE);
+	return Utility::FileExistsW(get_TilePath(zoom, x, y)) == TRUE;
 }
 
 // *********************************************************
@@ -78,7 +80,7 @@ void DiskCache::CreateFolder(int zoom, TilePoint* pnt)
 {
 	CStringW name;
 	name.Format(L"\\%d\\", zoom);	//	_mkdir can't create folders recursively
-	int val = _wmkdir(_rootPath + name);
+	_wmkdir(_rootPath + name);
 	name.Format(L"\\%d\\%d\\", zoom, pnt->x);
 	_wmkdir(_rootPath + name);
 }
@@ -97,12 +99,12 @@ void DiskCache::AddTile(TileCore* tile)
 	}
 
 	// TODO: better to get it from provider (as tile size is not necessarily 256 by 256 pixels)
-	Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(256, 256);
+    auto* bmp = new Gdiplus::Bitmap(256, 256);
 	Gdiplus::Graphics* g = Gdiplus::Graphics::FromImage(bmp);
 
 	for (size_t i = 0; i < tile->Overlays.size(); i++)
 	{
-		Gdiplus::Bitmap* bmp = tile->get_Bitmap(i)->m_bitmap;
+		bmp = tile->get_Bitmap(i)->m_bitmap;
 		if (bmp)
 		{
 			g->DrawImage(bmp, 0.0f, 0.0f);
@@ -110,8 +112,8 @@ void DiskCache::AddTile(TileCore* tile)
 	}
 
 	USES_CONVERSION;
-	CStringW path = tile->get_Path(_rootPath, _ext);
-	bmp->Save(path, &_pngClsid, NULL);
+    const CStringW path = tile->GetPath(_rootPath, _ext);
+	bmp->Save(path, &_pngClsid, nullptr);
 
 	delete g;
 	delete bmp;

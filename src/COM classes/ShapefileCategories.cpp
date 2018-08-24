@@ -23,8 +23,9 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // lsu 9 may 2010 - created the file
+ // Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "ShapefileCategories.h"
 #include "ShapefileCategory.h"
 #include "ShapeDrawingOptions.h"
@@ -40,7 +41,7 @@ STDMETHODIMP CShapefileCategories::get_Count(long* pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _categories.size();
 	return S_OK;
-};
+}
 
 // ***************************************************************
 //		Add()
@@ -62,24 +63,24 @@ STDMETHODIMP CShapefileCategories::Insert(long Index, BSTR Name, IShapefileCateg
 	if(Index < 0 || Index > (long)_categories.size())
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = VARIANT_FALSE;
+		*retVal = nullptr;
 		return NULL;
 	}
 
-	*retVal = NULL;
-	IShapefileCategory* cat = NULL;
-	CoCreateInstance( CLSID_ShapefileCategory, NULL, CLSCTX_INPROC_SERVER, IID_IShapefileCategory, (void**)&cat);
-	if (cat == NULL) return S_OK;
+	*retVal = nullptr;
+	IShapefileCategory* cat = nullptr;
+	CoCreateInstance( CLSID_ShapefileCategory, nullptr, CLSCTX_INPROC_SERVER, IID_IShapefileCategory, (void**)&cat);
+	if (cat == nullptr) return S_OK;
 	
 	// initialization with default options if shapefile is present
-	if (_shapefile != NULL)
+	if (_shapefile != nullptr)
 	{
-		IShapeDrawingOptions* defaultOpt = NULL;
+		IShapeDrawingOptions* defaultOpt = nullptr;
 		_shapefile->get_DefaultDrawingOptions(&defaultOpt);
 		CDrawingOptionsEx* newOpt =((CShapeDrawingOptions*)defaultOpt)->get_UnderlyingOptions();
 		defaultOpt->Release();
 		
-		IShapeDrawingOptions* opt = NULL;
+		IShapeDrawingOptions* opt = nullptr;
 		cat->get_DrawingOptions(&opt);
 		((CShapeDrawingOptions*)opt)->put_underlyingOptions(newOpt);
 		opt->Release();
@@ -105,22 +106,22 @@ STDMETHODIMP CShapefileCategories::Insert(long Index, BSTR Name, IShapefileCateg
 // ***************************************************************
 //		Remove()
 // ***************************************************************
-STDMETHODIMP CShapefileCategories::Remove(long Index, VARIANT_BOOL* vbretval)
+STDMETHODIMP CShapefileCategories::Remove(long Index, VARIANT_BOOL* vbRetval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*vbretval = VARIANT_FALSE;
+	*vbRetval = VARIANT_FALSE;
 
 	if( Index < 0 || Index >= (long)_categories.size() )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*vbretval = VARIANT_FALSE;
+		*vbRetval = VARIANT_FALSE;
 	}
 	else
 	{
 		_categories[Index]->Release();
-		_categories[Index] = NULL;
+		_categories[Index] = nullptr;
 		_categories.erase(_categories.begin() + Index);
-		*vbretval = VARIANT_TRUE;
+		*vbRetval = VARIANT_TRUE;
 	}
 	return S_OK;
 }
@@ -131,18 +132,18 @@ STDMETHODIMP CShapefileCategories::Remove(long Index, VARIANT_BOOL* vbretval)
 STDMETHODIMP CShapefileCategories::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	for (unsigned int i=0; i < _categories.size(); i++ )
+	for (auto& _categorie : _categories)
 	{
-		_categories[i]->Release();
+	    _categorie->Release();
 	}
 	_categories.clear();
 
 	if (_shapefile)
 	{
 		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
-		for (unsigned  int i = 0; i < data->size(); i++)
+		for (auto& i : *data)
 		{
-			(*data)[i]->category = -1;
+		    i->category = -1;
 		}
 	}
 	return S_OK;
@@ -157,7 +158,7 @@ STDMETHODIMP CShapefileCategories::get_Item (long Index, IShapefileCategory** re
 	if( Index < 0 || Index >= (long)_categories.size() )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retval = NULL;
+		*retval = nullptr;
 	}
 	else
 	{
@@ -175,24 +176,18 @@ STDMETHODIMP CShapefileCategories::put_Item(long Index, IShapefileCategory* newV
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
-	else
-	{
-		if (!newVal)
-		{
-			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-			return S_OK;
-		}
-		else
-		{
-			if (_categories[Index] != newVal)
-			{
-				_categories[Index]->Release();
-				_categories[Index] = newVal;
-				_categories[Index]->AddRef();
-			}
-			return S_OK;
-		}
-	}
+    if (!newVal)
+    {
+        ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+        return S_OK;
+    }
+    if (_categories[Index] != newVal)
+    {
+        _categories[Index]->Release();
+        _categories[Index] = newVal;
+        _categories[Index]->AddRef();
+    }
+    return S_OK;
 }
 
 // ***************************************************************
@@ -205,10 +200,10 @@ STDMETHODIMP CShapefileCategories::AddRange(long FieldIndex, tkClassificationTyp
 	USES_CONVERSION;
 	*retVal = VARIANT_FALSE;
 	
-	if(_shapefile == NULL) 
+	if(_shapefile == nullptr) 
 		return S_OK;
 	
-	CComPtr<ITable> tbl = NULL;
+	CComPtr<ITable> tbl = nullptr;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
 		return S_OK;
@@ -220,18 +215,18 @@ STDMETHODIMP CShapefileCategories::AddRange(long FieldIndex, tkClassificationTyp
 	
 	_classificationField = -1;		// fast processing is off
 
-	IShapefileCategory* cat = NULL;
+	IShapefileCategory* cat = nullptr;
 	
-	for (int i = 0; i < (int)values->size(); i++ )
+	for (auto& value : *values)
 	{
 		CString strValue;
 
-		CComBSTR bstrName((*values)[i].name);
-		CComBSTR bstrExpression((*values)[i].expression);
+		CComBSTR bstrName(value.name);
+		CComBSTR bstrExpression(value.expression);
 		this->Add(bstrName, &cat);
 		cat->put_Expression(bstrExpression);
-		cat->put_MinValue((*values)[i].minValue);
-		cat->put_MaxValue((*values)[i].maxValue);
+		cat->put_MinValue(value.minValue);
+		cat->put_MaxValue(value.maxValue);
 		cat->Release();
 	}	
 
@@ -259,7 +254,7 @@ STDMETHODIMP CShapefileCategories::Generate2(BSTR fieldName, tkClassificationTyp
 
 	if (!_shapefile) return S_OK;
 
-	CComPtr<ITable> tbl = NULL;
+	CComPtr<ITable> tbl = nullptr;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) return S_OK;
 
@@ -280,10 +275,10 @@ STDMETHODIMP CShapefileCategories::Generate(long FieldIndex, tkClassificationTyp
 	USES_CONVERSION;
 	*retVal = VARIANT_FALSE;
 	
-	if(_shapefile == NULL) 
+	if(_shapefile == nullptr) 
 		return S_OK;
 	
-	CComPtr<ITable> tbl = NULL;
+	CComPtr<ITable> tbl = nullptr;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
 		return S_OK;
@@ -311,21 +306,21 @@ void CShapefileCategories::GenerateCore(std::vector<CategoriesData>* categories,
 	this->Clear();
 	_classificationField = -1;		// fast processing is off
 
-	IShapefileCategory* icat = NULL;
-	CShapefileCategory* ct = NULL;
+	IShapefileCategory* icat = nullptr;
+	// CShapefileCategory* ct = nullptr;
 
-	for (int i = 0; i < (int)categories->size(); i++)
+	for (auto& categorie : *categories)
 	{
 		CString strValue;
-		CComBSTR bstrName((*categories)[i].name);
-		CComBSTR bstrExpression((*categories)[i].expression);
+		CComBSTR bstrName(categorie.name);
+		CComBSTR bstrExpression(categorie.expression);
 		
 		this->Add(bstrName, &icat);
 		icat->put_Expression(bstrExpression);
 
 		icat->put_ValueType(ClassificationType == tkClassificationType::ctUniqueValues ? cvSingleValue : cvRange);
-		icat->put_MinValue((*categories)[i].minValue);
-		icat->put_MaxValue((*categories)[i].maxValue);
+		icat->put_MinValue(categorie.minValue);
+		icat->put_MaxValue(categorie.maxValue);
 		icat->Release();
 	}
 
@@ -346,7 +341,7 @@ STDMETHODIMP CShapefileCategories::get_Key(BSTR *pVal)
 STDMETHODIMP CShapefileCategories::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(_key);
+	SysFreeString(_key);
 	USES_CONVERSION;
 	_key = OLE2BSTR(newVal);
 	return S_OK;
@@ -365,7 +360,7 @@ STDMETHODIMP CShapefileCategories::get_Caption(BSTR *pVal)
 STDMETHODIMP CShapefileCategories::put_Caption(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(_caption);
+	SysFreeString(_caption);
 	USES_CONVERSION;
 	_caption = OLE2BSTR(newVal);
 	return S_OK;
@@ -403,7 +398,7 @@ STDMETHODIMP CShapefileCategories::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _globalCallback;
-	if( _globalCallback != NULL ) _globalCallback->AddRef();
+	if( _globalCallback != nullptr ) _globalCallback->AddRef();
 	return S_OK;
 }
 
@@ -434,7 +429,7 @@ void CShapefileCategories::put_ParentShapefile(IShapefile* newVal)
 {
 	_shapefile = newVal;
 }
-IShapefile* CShapefileCategories::get_ParentShapefile()
+IShapefile* CShapefileCategories::get_ParentShapefile() const
 {
 	return _shapefile;
 }
@@ -446,8 +441,7 @@ CDrawingOptionsEx* CShapefileCategories::get_UnderlyingOptions(int Index)
 {
 	if (Index >=0 && Index < (int)_categories.size())
 		return ((CShapefileCategory*)_categories[Index])->get_UnderlyingOptions();
-	else
-		return NULL;
+    return nullptr;
 }
 
 // *******************************************************************
@@ -469,11 +463,11 @@ STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex)
 	
 	// switching off shapes that are currently included in the category
 	std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
-	for (unsigned int i = 0; i < data->size(); i++)
+	for (auto& i : *data)
 	{
-		if ((*data)[i]->category == CategoryIndex)
+		if (i->category == CategoryIndex)
 		{
-			(*data)[i]->category = -1;
+		    i->category = -1;
 		}
 	}
 
@@ -489,7 +483,7 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 	if (!_shapefile)
 		return;
 	
-	CComPtr<ITable> tbl = NULL;
+	CComPtr<ITable> tbl = nullptr;
 	_shapefile->get_Table(&tbl);
 	if ( !tbl )	return;
 	
@@ -501,9 +495,10 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 	results.resize(numShapes, -1);
 
 	bool uniqueValues = true;
-	for (unsigned int i = 0; i < _categories.size(); i++) {
+	for (auto& _categorie : _categories)
+	{
 		tkCategoryValue value;
-		_categories[i]->get_ValueType(&value);
+	    _categorie->get_ValueType(&value);
 		if (value != cvSingleValue) {
 			uniqueValues = false;
 			break;
@@ -678,7 +673,7 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 		}
 	}
 
-	IShapeDrawingOptions* options = NULL;
+	IShapeDrawingOptions* options = nullptr;
 	for (int i = CategoryStartIndex; i <= CategoryEndIndex; i++)
 	{
 		OLE_COLOR color;
@@ -704,6 +699,8 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 				case shElementFill2:			options->put_FillColor2(color);		break;
 				case shElementLines:			options->put_LineColor(color);		break;
 				case shElementFillBackground:	options->put_FillBgColor(color);	break;
+			case shElementDefault: break;
+			default: ;
 			}
 			options->Release();
 		}
@@ -724,15 +721,15 @@ STDMETHODIMP CShapefileCategories::MoveUp (long Index, VARIANT_BOOL* retval)
 		_categories[Index] = catBefore;
 		
 		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
-		for (unsigned int i = 0; i < data->size(); i++)
+		for (auto& i : *data)
 		{
-			if ((*data)[i]->category == Index)
+			if (i->category == Index)
 			{
-				(*data)[i]->category = Index - 1;
+			    i->category = Index - 1;
 			}
-			else if ((*data)[i]->category == Index - 1)
+			else if (i->category == Index - 1)
 			{
-				(*data)[i]->category = Index;
+			    i->category = Index;
 			}
 		}
 
@@ -759,15 +756,15 @@ STDMETHODIMP CShapefileCategories::MoveDown (long Index, VARIANT_BOOL* retval)
 		_categories[Index] = catAfter;
 
 		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
-		for (unsigned int i = 0; i < data->size(); i++)
+		for (auto& i : *data)
 		{
-			if ((*data)[i]->category == Index)
+			if (i->category == Index)
 			{
-				(*data)[i]->category = Index + 1;
+			    i->category = Index + 1;
 			}
-			else if ((*data)[i]->category == Index + 1)
+			else if (i->category == Index + 1)
 			{
-				(*data)[i]->category = Index;
+			    i->category = Index;
 			}
 		}
 		*retval = VARIANT_TRUE;
@@ -799,19 +796,18 @@ CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName)
 {
 	USES_CONVERSION;
 	
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
-	CString str;
+	CPLXMLNode* psTree = CPLCreateXMLNode( nullptr, CXT_Element, ElementName);
 
-	// classification field
+    // classification field
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "ClassificationField", CPLString().Printf("%d", _classificationField));
 
 	// field type
 	FieldType type;
-	CComPtr<ITable> table = NULL;
+	CComPtr<ITable> table = nullptr;
 	_shapefile->get_Table(&table);
 	if (table && _classificationField != -1)
 	{
-		CComPtr<IField> fld = NULL;
+		CComPtr<IField> fld = nullptr;
 		table->get_Field(_classificationField, &fld);
 		if (fld)
 		{
@@ -820,24 +816,24 @@ CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName)
 		}
 	}
 	
-	for (unsigned int i = 0; i < _categories.size(); i++)
+	for (auto& _categorie : _categories)
 	{
 		CPLXMLNode* psNode = CPLCreateXMLNode(psTree, CXT_Element, "ShapefileCategoryClass");
 		
 		// name
 		BSTR vbstr;
-		_categories[i]->get_Name(&vbstr);
+	    _categorie->get_Name(&vbstr);
 		Utility::CPLCreateXMLAttributeAndValue( psNode, "Name", OLE2CA(vbstr));
 		SysFreeString(vbstr);
 
 		// expression
-		_categories[i]->get_Expression(&vbstr);
-		str = OLE2CA(vbstr);
+	    _categorie->get_Expression(&vbstr);
+		CString str = OLE2CA(vbstr);
 
 		Utility::CPLCreateXMLAttributeAndValue( psNode, "Expression", str);
 		SysFreeString(vbstr);
 
-		CShapefileCategory* ct = (CShapefileCategory*)_categories[i];
+	    auto* ct = (CShapefileCategory*)_categorie;
 		Utility::CPLCreateXMLAttributeAndValue(psNode, "ValueType", CPLString().Printf("%d", (int)ct->GetCategoryValue()));
 
 		// values
@@ -846,7 +842,7 @@ CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName)
 		
 		// options
 		IShapeDrawingOptions* options;
-		_categories[i]->get_DrawingOptions(&options);
+	    _categorie->get_DrawingOptions(&options);
 		CPLXMLNode* psChild = ((CShapeDrawingOptions*)options)->SerializeCore("ShapeDrawingOptionsClass");
 		if (psChild)
 		{
@@ -872,7 +868,7 @@ bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressio
 	bool loadField = false;
 
 	FieldType type = INTEGER_FIELD;
-	CString s = CPLGetXMLValue( node, "FieldType", NULL );
+	CString s = CPLGetXMLValue( node, "FieldType", nullptr );
 	if (s != "")
 	{
 		type = (FieldType)atoi(s);
@@ -881,16 +877,16 @@ bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressio
 
 	if (loadField)
 	{
-		s = CPLGetXMLValue( node, "ClassificationField", NULL );
+		s = CPLGetXMLValue( node, "ClassificationField", nullptr );
 		if (s != "")
 		{
-			int fieldIndex = atoi(s);
+		    const int fieldIndex = atoi(s);
 
-			CComPtr<ITable> table = NULL;
+			CComPtr<ITable> table = nullptr;
 			_shapefile->get_Table(&table);
 			if (table)
 			{
-				IField* fld = NULL;
+				IField* fld = nullptr;
 				table->get_Field(fieldIndex, &fld);
 				if (fld)
 				{
@@ -916,30 +912,30 @@ bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressio
 			if (strcmp(node->pszValue, "ShapefileCategoryClass") == 0)
 			{
 				CString str;
-				str = CPLGetXMLValue( node, "Name", NULL );
+				str = CPLGetXMLValue( node, "Name", nullptr );
 				CComBSTR bstrName( str );
-				IShapefileCategory* cat = NULL;
+				IShapefileCategory* cat = nullptr;
 				this->Add(bstrName, &cat);
 
-				str = CPLGetXMLValue( node, "Expression", NULL );
+				str = CPLGetXMLValue( node, "Expression", nullptr );
 				CComBSTR bstrExpression(str);
 				cat->put_Expression(bstrExpression);
 
-				str = CPLGetXMLValue(node, "ValueType", NULL);
-				tkCategoryValue ctVal = (str != "") ? (tkCategoryValue)atoi(str.GetString()) : cvExpression;
+				str = CPLGetXMLValue(node, "ValueType", nullptr);
+			    const tkCategoryValue ctVal = str != "" ? (tkCategoryValue)atoi(str.GetString()) : cvExpression;
 				cat->put_ValueType(ctVal);
 
-				str = CPLGetXMLValue(node, "Value", NULL);
+				str = CPLGetXMLValue(node, "Value", nullptr);
 				Utility::DeserializeVariant(str, type, ((CShapefileCategory*)cat)->GetMinValue());
 
-				str = CPLGetXMLValue(node, "MaxValue", NULL);
+				str = CPLGetXMLValue(node, "MaxValue", nullptr);
 				Utility::DeserializeVariant(str, type, ((CShapefileCategory*)cat)->GetMaxValue());
 
 				// drawing options
 				CPLXMLNode* nodeOptions = CPLGetXMLNode( node, "ShapeDrawingOptionsClass" );
 				if (nodeOptions)
 				{
-					IShapeDrawingOptions* options = NULL;
+					IShapeDrawingOptions* options = nullptr;
 					cat->get_DrawingOptions(&options);
 					((CShapeDrawingOptions*)options)->DeserializeCore(nodeOptions);
 					options->Release();
@@ -1064,19 +1060,19 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 	Coloring::ColorGraph* graph = ((CShapefile*)_shapefile)->GeneratePolygonColors();
 	if (graph)
 	{
-		int colorCount = graph->GetColorCount();
+	    const int colorCount = graph->GetColorCount();
 
 		// -------------------------------------------------
 		// create categories
 		// -------------------------------------------------
-		int firstCategory = _categories.size();
+	    const int firstCategory = _categories.size();
 		long numBreaks;
 		scheme->get_NumBreaks(&numBreaks);
 		for(int i = 0; i < colorCount; i++)
 		{
 			CString s;
 			s.Format("Color %d", i + 1);
-			IShapefileCategory* ct = NULL;
+			IShapefileCategory* ct = nullptr;
 
 			CComBSTR bstrName(s);
 			this->Add(bstrName, &ct);
@@ -1101,10 +1097,10 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 		// -------------------------------------------------
 		// apply indices to polygons
 		// -------------------------------------------------
-		for(size_t i = 0; i < graph->nodes.size(); i++)
+		for (auto& node : graph->nodes)
 		{
-			int shapeId = graph->nodes[i]->id;
-			_shapefile->put_ShapeCategory(shapeId, firstCategory + graph->nodes[i]->color);
+		    const int shapeId = node->id;
+			_shapefile->put_ShapeCategory(shapeId, firstCategory + node->color);
 		}
 		delete graph;
 	}
@@ -1140,11 +1136,11 @@ STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending,
 		return S_OK;
 	}
 
-	CComPtr<ITable> table = NULL;
+	CComPtr<ITable> table = nullptr;
 	_shapefile->get_Table(&table);
 	if (!table) return S_OK;
 
-	IField* fld = NULL;
+	IField* fld = nullptr;
 	table->get_Field(FieldIndex, &fld);
 	FieldType type;
 	fld->get_Type(&type);
@@ -1163,40 +1159,39 @@ STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending,
 		
 	multimap <CComVariant, IShapefileCategory*> map;
 
-	for (unsigned int i = 0; i < _categories.size(); i++)
+	for (auto& _categorie : _categories)
 	{
-		VARIANT_BOOL vbretval = VARIANT_FALSE;
+	    const VARIANT_BOOL vbretval = VARIANT_FALSE;
 		CComVariant var = NULL;
 		BSTR expr;
-		_categories[i]->get_Expression(&expr);
+	    _categorie->get_Expression(&expr);
 
 		// TODO: implement
 		//table->CalculateStat(FieldIndex, Operation, expr, &var, &vbretval);
 
 		if (vbretval)
 		{
-			pair<CComVariant, IShapefileCategory*> myPair(var, _categories[i]);	
+			pair<CComVariant, IShapefileCategory*> myPair(var, _categorie);	
 			map.insert(myPair);	
 		}
 		else
 		{
-			pair<CComVariant, IShapefileCategory*> myPair(valDefault, _categories[i]);	
+			pair<CComVariant, IShapefileCategory*> myPair(valDefault, _categorie);	
 			map.insert(myPair);	
 		}
 	}
-	
-	// returning result
-	multimap <CComVariant, IShapefileCategory*>::iterator p;
-	p = map.begin();
+
+    multimap<CComVariant, IShapefileCategory*>::iterator p = map.begin();
 		
 	int i = 0;
 	ASSERT(map.size() == _categories.size());
 	
 	while(p != map.end())
 	{
-		IShapefileCategory* cat = p->second;
+		// IShapefileCategory* cat = p->second;
 		_categories[i] = p->second;
-		i++; p++;
+		i++; 
+	    ++p;
 	}
 
 	*retVal = VARIANT_TRUE;
@@ -1226,14 +1221,14 @@ void CShapefileCategories::GetCategoryData(vector<CategoriesData*>& data)
 {
 	USES_CONVERSION;
 	data.clear();
-	for (size_t i = 0; i < _categories.size(); i++) 
+	for (auto& _categorie : _categories)
 	{
-		CategoriesData* ct = new CategoriesData();
-		_categories[i]->get_MinValue(&ct->minValue);
-		_categories[i]->get_MaxValue(&ct->maxValue);
-		_categories[i]->get_ValueType(&ct->valueType);
+	    auto* ct = new CategoriesData();
+	    _categorie->get_MinValue(&ct->minValue);
+	    _categorie->get_MaxValue(&ct->maxValue);
+	    _categorie->get_ValueType(&ct->valueType);
 		CComBSTR expr;
-		_categories[i]->get_Expression(&expr);
+	    _categorie->get_Expression(&expr);
 		ct->expression = OLE2A(expr);
 		ct->classificationField = _classificationField;
 		data.push_back(ct);

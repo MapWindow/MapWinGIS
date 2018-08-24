@@ -17,10 +17,10 @@
  **************************************************************************************
  * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #pragma once
-#include "geopoint.h"
-#include "baseprojection.h"
+#include "BaseProjection.h"
 #include "TileCore.h"
 #include "afxmt.h"
 
@@ -32,9 +32,9 @@ class BaseProvider
 {
 public:
 	BaseProvider()
-		: Id(-1), _minZoom(1), _maxZoom(18),
-		_manager(NULL), _projection(NULL), _isStopped(false),
-		_dynamicOverlay(false), _initAttemptCount(0)
+		: _dynamicOverlay(false), _isStopped(false), _manager(nullptr),
+		_projection(nullptr), _initAttemptCount(0), _minZoom(1),
+		_maxZoom(18), Id(-1)
 	{
 		_licenseUrl = "https://mapwingis.codeplex.com/wikipage?title=tiles";
 		LanguageStr = "en";
@@ -42,10 +42,8 @@ public:
 
 	virtual ~BaseProvider(void)
 	{
-		if (_projection) {
-			delete _projection;
-		}
-	};
+	    delete _projection;
+	}
 
 private:
 	bool _dynamicOverlay;
@@ -53,13 +51,13 @@ private:
 	void* _manager;
 
 protected:
-	static ::CCriticalSection _clientLock;
+	static CCriticalSection _clientLock;
 	static CString _proxyUsername;
 	static CString _proxyPassword;
 	static CString _proxyDomain;
 
 protected:
-	vector<BaseProvider*> _subProviders;	// for complex providers with more than one source bitmap per tile
+	vector<BaseProvider*> _subProviders{};	// for complex providers with more than one source bitmap per tile
 	BaseProjection* _projection;
 	CStringW _copyright;
 	CString _refererUrl;
@@ -77,9 +75,9 @@ public:
 	CString LanguageStr;
 
 private:
-	CMemoryBitmap* GetTileHttpData(CString urlStr, CString shortUrl, bool recursive = false);
+	CMemoryBitmap* GetTileHttpData(CString url, CString shortUrl, bool recursive = false);
 	void PreventParallelExecution();
-	CMemoryBitmap* ProcessHttpRequest(void* client, CString url, CString shortUrl, bool success);
+	CMemoryBitmap* ProcessHttpRequest(void* secureHttpClient, CString url, CString shortUrl, bool success);
 	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
 	void ParseServerException(CString s);
 
@@ -92,9 +90,9 @@ public:
 	// properties
 	virtual bool IsWms() { return false; }
 	virtual CStringW get_Copyright() { return _copyright; }
-	virtual bool Initialize() { return true; };
+	virtual bool Initialize() { return true; }
 
-	int get_MinZoom() { return _minZoom; }
+    int get_MinZoom() { return _minZoom; }
 	int get_MaxZoom() { return _maxZoom; }
 	void* get_Manager() { return _manager; }
 	void put_Manager(void* value) { _manager = value; }

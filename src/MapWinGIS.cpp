@@ -16,6 +16,7 @@
 #endif
 #include "MercatorProjection.h"
 #include "PrefetchManager.h"
+#include "TileCacheManager.h"
 
 class CMapWinGISModule :
 	public ATL::CAtlMfcModule

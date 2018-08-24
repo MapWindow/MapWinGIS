@@ -17,12 +17,12 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- #pragma once
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#pragma once
 #include <list>
-#include <algorithm>
-#include "baseprovider.h"
+#include "BaseProvider.h"
 #include "tilecacher.h"
-#include "TileCacheManager.h"
 #include "ITileCache.h"
 #include "ILoadingTask.h"
 
@@ -38,62 +38,63 @@ class ILoadingTask;
 class ITileLoader
 {
 public:
-	ITileLoader()
-		: _pool(NULL), _pool2(NULL), _stopped(false)
-	{
-		_delayRequestTimeout = 0;
-		_lastGeneration = 0;
-	}
+    ITileLoader()
+        : _pool(nullptr), _pool2(nullptr), _stopped(false)
+    {
+        _delayRequestTimeout = 0;
+        _lastGeneration = 0;
+    }
 
-	virtual ~ITileLoader(void)
-	{
-		CleanTasks();
+    virtual ~ITileLoader(void)
+    {
+        CleanTasks();
 
-		if (_pool != NULL) {
-			_pool->Shutdown(50);   // will result in TerminateThread call after 50ms delay
-			delete _pool;
-		}
+        if (_pool != nullptr)
+        {
+            _pool->Shutdown(50); // will result in TerminateThread call after 50ms delay
+            delete _pool;
+        }
 
-		if (_pool2 != NULL) {
-			_pool2->Shutdown(50);  // will result in TerminateThread call after 50ms delay
-			delete _pool2;
-		}
-	}
+        if (_pool2 != nullptr)
+        {
+            _pool2->Shutdown(50); // will result in TerminateThread call after 50ms delay
+            delete _pool2;
+        }
+    }
 
 protected:
-	// 2 pools will be used in alternate fashion,
-	// as it's problematic to terminate threads correctly until their current task is finished
-	// but it's quite desirable to start the processing of new requests ASAP
-	CThreadPool<ThreadWorker>* _pool;
-	CThreadPool<ThreadWorker>* _pool2;
-	list<void*> _tasks;			// all the scheduled tasks
-	list<TileRequestInfo*> _requests;
-	::CCriticalSection _requestLock;
-	long _delayRequestTimeout;
-	bool _stopped;
-	int _lastGeneration;   // the most recent generation
+    // 2 pools will be used in alternate fashion,
+    // as it's problematic to terminate threads correctly until their current task is finished
+    // but it's quite desirable to start the processing of new requests ASAP
+    CThreadPool<ThreadWorker>* _pool;
+    CThreadPool<ThreadWorker>* _pool2;
+    list<void*> _tasks; // all the scheduled tasks
+    list<TileRequestInfo*> _requests;
+    CCriticalSection _requestLock;
+    long _delayRequestTimeout;
+    bool _stopped;
+    int _lastGeneration; // the most recent generation
 
 private:
-	void CleanTasks();
-	bool InitPools();
-	CThreadPool<ThreadWorker>* PreparePool();
-	void CleanRequests();
+    void CleanTasks();
+    bool InitPools();
+    CThreadPool<ThreadWorker>* PreparePool();
+    void CleanRequests();
 
 public:
-	// properties
-	virtual bool IsOutdated(int generation) { return _stopped; } 
-	bool isStopped() { return _stopped; }
-	int get_LastGeneration() { return _lastGeneration; }
-	TileRequestInfo* CreateNextRequest(CString key, bool isSnapshot);
-	long get_DelayRequestTimeout() { return _delayRequestTimeout; }
-	void set_DelayRequestTimeout(long value) { _delayRequestTimeout = value; }
+    // properties
+    virtual bool IsOutdated(int generation) { return _stopped; }
+    bool isStopped() { return _stopped; }
+    int get_LastGeneration() { return _lastGeneration; }
+    TileRequestInfo* CreateNextRequest(const CString& key, bool isSnapshot);
+    long get_DelayRequestTimeout() { return _delayRequestTimeout; }
+    void set_DelayRequestTimeout(long value) { _delayRequestTimeout = value; }
 
 public:
-	//methods
-	virtual ILoadingTask* CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation) = 0;
-	virtual void Stop();
-	TileRequestInfo* FindRequest(int generation);
-	void Load(vector<TilePoint*> &points, BaseProvider* provider, int zoom, TileRequestInfo* info );
-	unsigned int RegisterTile(int generation);
+    //methods
+    virtual ILoadingTask* CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation) = 0;
+    virtual void Stop();
+    TileRequestInfo* FindRequest(int generation);
+    void Load(vector<TilePoint*>& points, BaseProvider* provider, int zoom, TileRequestInfo* info);
+    unsigned int RegisterTile(int generation);
 };
-

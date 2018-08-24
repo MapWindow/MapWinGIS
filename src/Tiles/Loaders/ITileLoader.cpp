@@ -17,38 +17,38 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-#include "stdafx.h"
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#include "StdAfx.h"
 #include "ITileLoader.h"
 #include "ILoadingTask.h"
-#include "TileBulkLoader.h"
-#include "TileMapLoader.h"
 
 // *******************************************************
 //		InitPools()
 // *******************************************************
 bool ITileLoader::InitPools()
 {
-	_stopped = false;
+    _stopped = false;
 
-	int size = m_globalSettings.GetTilesThreadPoolSize();
+    const int size = m_globalSettings.GetTilesThreadPoolSize();
 
-	if (!_pool)
-	{
-		_pool = new CThreadPool<ThreadWorker>();
-		HRESULT hr = _pool->Initialize(NULL, size);
-		if (!SUCCEEDED( hr ))
-			CallbackHelper::ErrorMsg("Failed to initialize thread pool (1) for tile loading.");
-	}
+    if (!_pool)
+    {
+        _pool = new CThreadPool<ThreadWorker>();
+        const HRESULT hr = _pool->Initialize(nullptr, size);
+        if (!SUCCEEDED( hr ))
+            CallbackHelper::ErrorMsg("Failed to initialize thread pool (1) for tile loading.");
+    }
 
-	if (!_pool2)
-	{
-		_pool2 = new CThreadPool<ThreadWorker>();
-		HRESULT hr = _pool2->Initialize(NULL, size);
-		if(!SUCCEEDED( hr ))
-			CallbackHelper::ErrorMsg("Failed to initialize thread pool (2) for tile loading.");
-	}
+    if (!_pool2)
+    {
+        _pool2 = new CThreadPool<ThreadWorker>();
+        const HRESULT hr = _pool2->Initialize(nullptr, size);
+        if (!SUCCEEDED( hr ))
+            CallbackHelper::ErrorMsg("Failed to initialize thread pool (2) for tile loading.");
+    }
 
-	return _pool && _pool2;
+    return _pool && _pool2;
 }
 
 // *******************************************************
@@ -56,22 +56,22 @@ bool ITileLoader::InitPools()
 // *******************************************************
 CThreadPool<ThreadWorker>* ITileLoader::PreparePool()
 {
-	if (!InitPools())
-		return NULL;
+    if (!InitPools())
+        return nullptr;
 
-	CThreadPool<ThreadWorker>* pool = (_lastGeneration % 2 == 0) ? _pool : _pool2;
+    CThreadPool<ThreadWorker>* pool = _lastGeneration % 2 == 0 ? _pool : _pool2;
 
-	pool->SetSize(m_globalSettings.GetTilesThreadPoolSize());
+    pool->SetSize(m_globalSettings.GetTilesThreadPoolSize());
 
-	pool->SetTimeout(100000);		// 100 seconds (lower rate limit may be set)
+    pool->SetTimeout(100000); // 100 seconds (lower rate limit may be set)
 
-	tilesLogger.WriteLine("Tiles requested; generation = %d", _lastGeneration);
+    tilesLogger.WriteLine("Tiles requested; generation = %d", _lastGeneration);
 
-	CleanTasks();
+    CleanTasks();
 
-	CleanRequests();
+    CleanRequests();
 
-	return pool;
+    return pool;
 }
 
 // *******************************************************
@@ -79,33 +79,33 @@ CThreadPool<ThreadWorker>* ITileLoader::PreparePool()
 // *******************************************************
 unsigned int ITileLoader::RegisterTile(int generation)
 {
-	TileRequestInfo* info = FindRequest(generation);
-	if (info)
-	{
-		return InterlockedIncrement(&info->count);
-	}
+    TileRequestInfo* info = FindRequest(generation);
+    if (info)
+    {
+        return InterlockedIncrement(&info->count);
+    }
 
-	return 0;
+    return 0;
 }
 
 // *******************************************************
 //		Load()
 // *******************************************************
 //	Creates tasks for tile points and enqueues them in thread pool
-void ITileLoader::Load(std::vector<TilePoint*> &points, BaseProvider* provider, int zoom, TileRequestInfo* requestInfo)
+void ITileLoader::Load(std::vector<TilePoint*>& points, BaseProvider* provider, int zoom, TileRequestInfo* requestInfo)
 {
-	CThreadPool<ThreadWorker>* pool = PreparePool();
-	if (!pool) return;
+    CThreadPool<ThreadWorker>* pool = PreparePool();
+    if (!pool) return;
 
-	sort(points.begin(), points.end(), [](TilePoint* p1, TilePoint* p2) { return p1->dist < p2->dist; } );
+    sort(points.begin(), points.end(), [](TilePoint* p1, TilePoint* p2) { return p1->dist < p2->dist; });
 
-	for ( size_t i = 0; i < points.size(); i++ ) 
-	{
-		ILoadingTask* task = CreateTask(points[i]->x, points[i]->y, zoom, provider, _lastGeneration);
-		task->set_Loader(this);
-		_tasks.push_back(task);
-		pool->QueueRequest( (ThreadWorker::RequestType) task );
-	}
+    for (size_t i = 0; i < points.size(); i++)
+    {
+        ILoadingTask* task = CreateTask(points[i]->x, points[i]->y, zoom, provider, _lastGeneration);
+        task->set_Loader(this);
+        _tasks.push_back(task);
+        pool->QueueRequest((ThreadWorker::RequestType)task);
+    }
 }
 
 // *******************************************************
@@ -113,14 +113,14 @@ void ITileLoader::Load(std::vector<TilePoint*> &points, BaseProvider* provider, 
 // *******************************************************
 void ITileLoader::Stop()
 {
-	// This one is called from map destructor. Don't wait for tasks to finish 
-	// as it deters the closing of form or application. 
-	// Don't bother with releasing memory for unfinished tasks as 
-	// they use around 30 bytes of memory, so just let it leak.
+    // This one is called from map destructor. Don't wait for tasks to finish 
+    // as it deters the closing of form or application. 
+    // Don't bother with releasing memory for unfinished tasks as 
+    // they use around 30 bytes of memory, so just let it leak.
 
-	_stopped = true;
+    _stopped = true;
 
-	CleanTasks();
+    CleanTasks();
 }
 
 // *******************************************************
@@ -129,20 +129,20 @@ void ITileLoader::Stop()
 // Cleans completed tasks
 void ITileLoader::CleanTasks()
 {
-	list<void*>::iterator it = _tasks.begin();
-	while (it != _tasks.end())
-	{
-		ILoadingTask* task = (ILoadingTask*)*it;
-		if (task->completed())
-		{
-			delete task;
-			it = _tasks.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
+    list<void*>::iterator it = _tasks.begin();
+    while (it != _tasks.end())
+    {
+        ILoadingTask* task = (ILoadingTask*)*it;
+        if (task->completed())
+        {
+            delete task;
+            it = _tasks.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 // *******************************************************
@@ -150,25 +150,25 @@ void ITileLoader::CleanTasks()
 // *******************************************************
 void ITileLoader::CleanRequests()
 {
-	CSingleLock lock(&_requestLock, TRUE);
+    CSingleLock lock(&_requestLock, TRUE);
 
-	int size = static_cast<int>(_requests.size());
+    // Never used: int size = static_cast<int>(_requests.size());
 
-	// remove all requests but the last one
-	list<TileRequestInfo*>::iterator it = _requests.begin();
-	while (it != _requests.end())
-	{
-		TileRequestInfo* info = *it;
-		if (info->generation < _lastGeneration) 
-		{
-			delete info;
-			it = _requests.erase(it);
-		}
-		else 
-		{
-			++it;
-		}
-	}
+    // remove all requests but the last one
+    list<TileRequestInfo*>::iterator it = _requests.begin();
+    while (it != _requests.end())
+    {
+        TileRequestInfo* info = *it;
+        if (info->generation < _lastGeneration)
+        {
+            delete info;
+            it = _requests.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 // *******************************************************
@@ -176,30 +176,33 @@ void ITileLoader::CleanRequests()
 // *******************************************************
 TileRequestInfo* ITileLoader::FindRequest(int generation)
 {
-	CSingleLock lock(&_requestLock, TRUE);
+    CSingleLock lock(&_requestLock, TRUE);
 
-	list<TileRequestInfo*>::iterator it = find_if(_requests.begin(), _requests.end(),
-						[&](TileRequestInfo* info){ return info->generation == generation; });
+    const list<TileRequestInfo*>::iterator it = find_if(_requests.begin(), _requests.end(),
+                                                        [&](TileRequestInfo* info)
+                                                        {
+                                                            return info->generation == generation;
+                                                        });
 
-	if (it != _requests.end())
-	{
-		return *it;
-	}
+    if (it != _requests.end())
+    {
+        return *it;
+    }
 
-	return NULL;
+    return nullptr;
 }
 
 // *******************************************************
 //		CreateNextRequest()
 // *******************************************************
-TileRequestInfo* ITileLoader::CreateNextRequest(CString key, bool isSnapshot)
+TileRequestInfo* ITileLoader::CreateNextRequest(const CString& key, bool isSnapshot)
 {
-	TileRequestInfo* info = new TileRequestInfo(key, isSnapshot);
-	info->generation = ++_lastGeneration;
-	
-	_requestLock.Lock();
-	_requests.push_back(info);
-	_requestLock.Unlock();
+    TileRequestInfo* info = new TileRequestInfo(key, isSnapshot);
+    info->generation = ++_lastGeneration;
 
-	return info;
+    _requestLock.Lock();
+    _requests.push_back(info);
+    _requestLock.Unlock();
+
+    return info;
 }

@@ -39,9 +39,9 @@ public:
 		_subProviders.push_back(this);
 		_serverLetters = "abc";
 		_refererUrl = "https://www.openstreetmap.org/";
-		_urlFormat = "https://%c.tile.openstreetmap.org/%d/%d/%d.png";
+		_urlFormat = "http://%c.tile.openstreetmap.org/%d/%d/%d.png";
 		_maxZoom = 19;
-		_licenseUrl = "https://wiki.openstreetmap.org/wiki/Tile_usage_policy";
+		_licenseUrl = "https://operations.osmfoundation.org/policies/tiles/";
 	}
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)

@@ -158,7 +158,7 @@ public:
 	CPLXMLNode* SerializeCore(CString ElementName);
 
 	void put_ParentShapefile(IShapefile* newVal);
-	IShapefile* get_ParentShapefile();
+	IShapefile* get_ParentShapefile() const;
 	CDrawingOptionsEx* get_UnderlyingOptions(int Index);
 	void GenerateCore(std::vector<CategoriesData>* categories, long FieldIndex, tkClassificationType ClassificationType, VARIANT_BOOL* retVal);
 	void GetCategoryData(vector<CategoriesData*>& data);

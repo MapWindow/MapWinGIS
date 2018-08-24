@@ -17,12 +17,12 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "PrefetchManager.h"
-#include "HttpProxyHelper.h"
 
-::CCriticalSection PrefetchManagerFactory::_lock;
+CCriticalSection PrefetchManagerFactory::_lock;
 vector<PrefetchManager*> PrefetchManagerFactory::_managers;
 
 // *******************************************************
@@ -30,15 +30,15 @@ vector<PrefetchManager*> PrefetchManagerFactory::_managers;
 // *******************************************************
 PrefetchManager* PrefetchManagerFactory::Create(ITileCache* cache)
 {
-	if (!cache) return NULL;
+    if (!cache) return nullptr;
 
-	PrefetchManager* manager = new PrefetchManager(cache);
+    auto* manager = new PrefetchManager(cache);
 
-	_lock.Lock();
-	_managers.push_back(manager);
-	_lock.Unlock();
+    _lock.Lock();
+    _managers.push_back(manager);
+    _lock.Unlock();
 
-	return manager;
+    return manager;
 }
 
 // *******************************************************
@@ -46,16 +46,16 @@ PrefetchManager* PrefetchManagerFactory::Create(ITileCache* cache)
 // *******************************************************
 void PrefetchManagerFactory::Clear()
 {
-	_lock.Lock();
+    _lock.Lock();
 
-	for (size_t i = 0; i < _managers.size(); i++)
-	{
-		delete _managers[i];
-	}
+    for (size_t i = 0; i < _managers.size(); i++)
+    {
+        delete _managers[i];
+    }
 
-	_managers.clear();
+    _managers.clear();
 
-	_lock.Unlock();
+    _lock.Unlock();
 }
 
 // *********************************************************
@@ -63,83 +63,85 @@ void PrefetchManagerFactory::Clear()
 // *********************************************************
 void PrefetchManager::BuildDownloadList(BaseProvider* provider, int zoom, CRect indices, vector<TilePoint*>& points)
 {
-	CSize size1, size2;
-	provider->get_Projection()->GetTileMatrixMinXY(zoom, size1);
-	provider->get_Projection()->GetTileMatrixMaxXY(zoom, size2);
+    CSize size1, size2;
+    provider->get_Projection()->GetTileMatrixMinXY(zoom, size1);
+    provider->get_Projection()->GetTileMatrixMaxXY(zoom, size2);
 
-	int minX = (int)BaseProjection::Clip(indices.left, size1.cx, size2.cx);
-	int maxX = (int)BaseProjection::Clip(indices.right, size1.cy, size2.cy);
-	int minY = (int)BaseProjection::Clip(MIN(indices.top, indices.bottom), size1.cx, size2.cx);
-	int maxY = (int)BaseProjection::Clip(MAX(indices.top, indices.bottom), size1.cy, size2.cy);
+    const auto minX = (int)BaseProjection::Clip(indices.left, size1.cx, size2.cx);
+    const auto maxX = (int)BaseProjection::Clip(indices.right, size1.cy, size2.cy);
+    const auto minY = (int)BaseProjection::Clip(MIN(indices.top, indices.bottom), size1.cx, size2.cx);
+    const auto maxY = (int)BaseProjection::Clip(MAX(indices.top, indices.bottom), size1.cy, size2.cy);
 
-	int centX = (maxX + minX) / 2;
-	int centY = (maxY + minY) / 2;
+    const int centX = (maxX + minX) / 2;
+    const int centY = (maxY + minY) / 2;
 
-	USES_CONVERSION;
+    USES_CONVERSION;
 
-	ITileCache* cache = _loader.get_Cache();
+    ITileCache* cache = _loader.get_Cache();
 
-	for (int x = minX; x <= maxX; x++)
-	{
-		for (int y = minY; y <= maxY; y++)
-		{
-			if (!cache->get_TileExists(provider, zoom, x, y))
-			{
-				TilePoint* pnt = new TilePoint(x, y);
-				pnt->dist = sqrt(pow((pnt->x - centX), 2.0) + pow((pnt->y - centY), 2.0));
-				points.push_back(pnt);
-			}
-		}
-	}
+    for (int x = minX; x <= maxX; x++)
+    {
+        for (int y = minY; y <= maxY; y++)
+        {
+            if (!cache->get_TileExists(provider, zoom, x, y))
+            {
+                auto* pnt = new TilePoint(x, y);
+                pnt->dist = sqrt(pow(pnt->x - centX, 2.0) + pow(pnt->y - centY, 2.0));
+                points.push_back(pnt);
+            }
+        }
+    }
 }
 
 // *********************************************************
 //	     PrefetchCore
 // *********************************************************
-long PrefetchManager::Prefetch(BaseProvider* provider, CRect indices, int zoom, ICallback* callback, IStopExecution* stop)
+long PrefetchManager::Prefetch(BaseProvider* provider, CRect indices, int zoom, ICallback* callback,
+                               IStopExecution* stop)
 {
-	if (!provider)
-	{
-		CallbackHelper::ErrorMsg("PrefetchManager", NULL, "", "Invalid provider.");
-		return -1;
-	}
+    if (!provider)
+    {
+        CallbackHelper::ErrorMsg("PrefetchManager", nullptr, "", "Invalid provider.");
+        return -1;
+    }
 
-	LogBulkDownloadStarted(zoom);
+    LogBulkDownloadStarted(zoom);
 
-	if (provider->get_MaxZoom() < zoom)
-	{
-		CallbackHelper::ErrorMsg("PrefetchManager", NULL, "", "Invalid zoom level for tile provider: %s, %d", provider->Name, zoom);
-		return 0;
-	}
+    if (provider->get_MaxZoom() < zoom)
+    {
+        CallbackHelper::ErrorMsg("PrefetchManager", nullptr, "", "Invalid zoom level for tile provider: %s, %d",
+                                 provider->Name, zoom);
+        return 0;
+    }
 
-	vector<TilePoint*> points;
-	BuildDownloadList(provider, zoom, indices, points);
+    vector<TilePoint*> points;
+    BuildDownloadList(provider, zoom, indices, points);
 
-	if (points.size() == 0)
-	{
-		if (tilesLogger.IsOpened())
-		{
-			tilesLogger.out() << "\n";
-			tilesLogger.out() << "Nothing to fetch\n";
-			tilesLogger.out() << "---------------------" << endl;
-		}
-		return 0;
-	}
+    if (points.size() == 0)
+    {
+        if (tilesLogger.IsOpened())
+        {
+            tilesLogger.out() << "\n";
+            tilesLogger.out() << "Nothing to fetch\n";
+            tilesLogger.out() << "---------------------" << endl;
+        }
+        return 0;
+    }
 
-	_loader.set_StopCallback(stop);
-	_loader.set_Callback(callback);
-	_loader.get_Cache()->InitBulkDownload(zoom, points);
+    _loader.set_StopCallback(stop);
+    _loader.set_Callback(callback);
+    _loader.get_Cache()->InitBulkDownload(zoom, points);
 
-	TileRequestInfo* info = _loader.CreateNextRequest("", false);
+    TileRequestInfo* info = _loader.CreateNextRequest("", false);
 
-	// actual call to do the job
-	_loader.Load(points, provider, zoom, info);
+    // actual call to do the job
+    _loader.Load(points, provider, zoom, info);
 
-	long size = points.size();
+    const long size = points.size();
 
-	TilePoint::ReleaseMemory(points);
+    TilePoint::ReleaseMemory(points);
 
-	return size;
+    return size;
 }
 
 // *********************************************************
@@ -147,11 +149,11 @@ long PrefetchManager::Prefetch(BaseProvider* provider, CRect indices, int zoom, 
 // *********************************************************
 void PrefetchManager::LogBulkDownloadStarted(int zoom)
 {
-	if (tilesLogger.IsOpened())
-	{
-		tilesLogger.out() << "\n";
-		tilesLogger.out() << "PREFETCHING TILES:\n";
-		tilesLogger.out() << "ZOOM " << zoom << endl;
-		tilesLogger.out() << "---------------------" << endl;
-	}
+    if (tilesLogger.IsOpened())
+    {
+        tilesLogger.out() << "\n";
+        tilesLogger.out() << "PREFETCHING TILES:\n";
+        tilesLogger.out() << "ZOOM " << zoom << endl;
+        tilesLogger.out() << "---------------------" << endl;
+    }
 }

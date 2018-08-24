@@ -17,7 +17,9 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-#include "stdafx.h"
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#include "StdAfx.h"
 #include "TileMapLoader.h"
 #include "MapLoadingTask.h"
 
@@ -26,7 +28,7 @@
 // *******************************************************
 ILoadingTask* TileMapLoader::CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation)
 {
-	return new MapLoadingTask(x, y, zoom, provider, generation);
+    return new MapLoadingTask(x, y, zoom, provider, generation);
 }
 
 // *******************************************************
@@ -34,10 +36,10 @@ ILoadingTask* TileMapLoader::CreateTask(int x, int y, int zoom, BaseProvider* pr
 // *******************************************************
 void TileMapLoader::LockActiveTasks(bool lock)
 {
-	if (lock)
-		_activeTasksLock.Lock();
-	else
-		_activeTasksLock.Unlock();
+    if (lock)
+        _activeTasksLock.Lock();
+    else
+        _activeTasksLock.Unlock();
 }
 
 // *******************************************************
@@ -45,9 +47,9 @@ void TileMapLoader::LockActiveTasks(bool lock)
 // *******************************************************
 void TileMapLoader::AddActiveTask(void* task)
 {
-	_activeTasksLock.Lock();
-	_activeTasks.push_back(task);
-	_activeTasksLock.Unlock();
+    _activeTasksLock.Lock();
+    _activeTasks.push_back(task);
+    _activeTasksLock.Unlock();
 }
 
 // *******************************************************
@@ -55,23 +57,23 @@ void TileMapLoader::AddActiveTask(void* task)
 // *******************************************************
 void TileMapLoader::RemoveActiveTask(void* t)
 {
-	_activeTasksLock.Lock();
+    _activeTasksLock.Lock();
 
-	ILoadingTask* task = (ILoadingTask*)t;
-	list<void*>::iterator it = _activeTasks.begin();
+    auto* task = (ILoadingTask*)t;
+    list<void*>::iterator it = _activeTasks.begin();
 
-	while (it != _activeTasks.end())
-	{
-		ILoadingTask* item = (ILoadingTask*)*it;
-		if (item->Compare(task))
-		{
-			_activeTasks.remove(item);
-			break;
-		}
-		++it;
-	}
+    while (it != _activeTasks.end())
+    {
+        ILoadingTask* item = (ILoadingTask*)*it;
+        if (item->Compare(task))
+        {
+            _activeTasks.remove(item);
+            break;
+        }
+        ++it;
+    }
 
-	_activeTasksLock.Unlock();
+    _activeTasksLock.Unlock();
 }
 
 // *******************************************************
@@ -79,26 +81,26 @@ void TileMapLoader::RemoveActiveTask(void* t)
 // *******************************************************
 bool TileMapLoader::HasActiveTask(void* t)
 {
-	_activeTasksLock.Lock();
+    _activeTasksLock.Lock();
 
-	ILoadingTask* task = (ILoadingTask*)t;
-	list<void*>::iterator it = _activeTasks.begin();
-	bool found = false;
+    auto* task = (ILoadingTask*)t;
+    list<void*>::iterator it = _activeTasks.begin();
+    bool found = false;
 
-	while (it != _activeTasks.end())
-	{
-		ILoadingTask* item = (ILoadingTask*)*it;
-		if (item->Compare(task))
-		{
-			found = true;
-			break;
-		}
-		++it;
-	}
+    while (it != _activeTasks.end())
+    {
+        ILoadingTask* item = (ILoadingTask*)*it;
+        if (item->Compare(task))
+        {
+            found = true;
+            break;
+        }
+        ++it;
+    }
 
-	_activeTasksLock.Unlock();
+    _activeTasksLock.Unlock();
 
-	return found;
+    return found;
 }
 
 // *******************************************************
@@ -106,7 +108,7 @@ bool TileMapLoader::HasActiveTask(void* t)
 // *******************************************************
 void TileMapLoader::StopCaching()
 {
-	_cacher->Stop();
+    _cacher->Stop();
 }
 
 // *******************************************************
@@ -114,11 +116,11 @@ void TileMapLoader::StopCaching()
 // *******************************************************
 void TileMapLoader::ScheduleForCaching(TileCore* tile)
 {
-	if (tile)
-	{
-		tile->AddRef();
-		_cacher->Enqueue(tile);
-	}
+    if (tile)
+    {
+        tile->AddRef();
+        _cacher->Enqueue(tile);
+    }
 }
 
 // *******************************************************
@@ -126,7 +128,7 @@ void TileMapLoader::ScheduleForCaching(TileCore* tile)
 // *******************************************************
 void TileMapLoader::RunCaching()
 {
-	_cacher->Run();
+    _cacher->Run();
 }
 
 // *******************************************************
@@ -134,8 +136,7 @@ void TileMapLoader::RunCaching()
 // *******************************************************
 void TileMapLoader::Stop()
 {
-	ITileLoader::Stop();
+    ITileLoader::Stop();
 
-	StopCaching();
+    StopCaching();
 }
-

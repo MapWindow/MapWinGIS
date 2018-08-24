@@ -21,12 +21,11 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- 
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
 #pragma once
-#include "TileCore.h"
 #include "BaseProvider.h"
 #include "TileProviders.h"
-#include "WmsCustomProvider.h"
 #include "TileManager.h"
 #include "SQLiteCache.h"
 #include "PrefetchManager.h"
@@ -37,180 +36,184 @@ using namespace std;
 #endif
 
 class ATL_NO_VTABLE CTiles :
-	public CComObjectRootEx<CComMultiThreadModel>,
-	public CComCoClass<CTiles, &CLSID_Tiles>,
-	public IDispatchImpl<ITiles, &IID_ITiles, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
+    public CComObjectRootEx<CComMultiThreadModel>,
+    public CComCoClass<CTiles, &CLSID_Tiles>,
+    public IDispatchImpl<ITiles, &IID_ITiles, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
-	CTiles()
-		: _manager(true), _mercatorProjection(NULL), _reloadNeeded(true)
-	{
-		_pUnkMarshaler = NULL;
-		_key = SysAllocString(L"");
-		_globalCallback = NULL;
-		_lastErrorCode = tkNO_ERROR;
-		
-		ComHelper::CreateInstance(idTileProviders, (IDispatch**)&_providers);
-		((CTileProviders*)_providers)->put_Tiles(this);
+    CTiles()
+        : _manager(true), _mercatorProjection(nullptr), _reloadNeeded(true)
+    {
+        _pUnkMarshaler = nullptr;
+        _key = SysAllocString(L"");
+        _globalCallback = nullptr;
+        _lastErrorCode = tkNO_ERROR;
 
-		SetDefaults();
+        ComHelper::CreateInstance(idTileProviders, (IDispatch**)&_providers);
+        ((CTileProviders*)_providers)->put_Tiles(this);
 
-		gReferenceCounter.AddRef(tkInterface::idTiles);
-	}
+        SetDefaults();
 
-	~CTiles()
-	{
-		SysFreeString(_key);
+        gReferenceCounter.AddRef(tkInterface::idTiles);
+    }
 
-		ClearAll();
+    ~CTiles()
+    {
+        SysFreeString(_key);
 
-		if (_mercatorProjection) {
-			_mercatorProjection->Release();
-		}
+        ClearAll();
 
-		gReferenceCounter.Release(tkInterface::idTiles);
-	}
-	
-	void ClearAll()
-	{
-		Stop();
+        if (_mercatorProjection)
+        {
+            _mercatorProjection->Release();
+        }
 
-		_manager.Clear();
+        gReferenceCounter.Release(tkInterface::idTiles);
+    }
 
-		if (_providers)
-		{
-			_providers->Release();
-			_providers = NULL;
-		}
-	}
+    void ClearAll()
+    {
+        Stop();
 
-	void SetDefaults()
-	{
-		_provider = ((CTileProviders*)_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
-		_visible = true;
-		_minScaleToCache = 0;
-		_maxScaleToCache = 100;
-	}
+        _manager.Clear();
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_TILES)
+        if (_providers)
+        {
+            _providers->Release();
+            _providers = nullptr;
+        }
+    }
 
-	BEGIN_COM_MAP(CTiles)
-		COM_INTERFACE_ENTRY(ITiles)
-		COM_INTERFACE_ENTRY(IDispatch)
-		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
-	END_COM_MAP()
+    void SetDefaults()
+    {
+        _provider = ((CTileProviders*)_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
+        _visible = true;
+        _minScaleToCache = 0;
+        _maxScaleToCache = 100;
+    }
 
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-	DECLARE_GET_CONTROLLING_UNKNOWN()
+    DECLARE_REGISTRY_RESOURCEID(IDR_TILES)
 
-	HRESULT FinalConstruct()
-	{
-		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
-		return S_OK;
-	}
+BEGIN_COM_MAP(CTiles)
+            COM_INTERFACE_ENTRY(ITiles)
+            COM_INTERFACE_ENTRY(IDispatch)
+            COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
+    END_COM_MAP()
 
-	void FinalRelease()
-	{
-		_pUnkMarshaler.Release();
-	}
+    DECLARE_PROTECT_FINAL_CONSTRUCT()
+DECLARE_GET_CONTROLLING_UNKNOWN()
 
-	CComPtr<IUnknown> _pUnkMarshaler;
+    HRESULT FinalConstruct()
+    {
+        return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+    }
+
+    void FinalRelease()
+    {
+        _pUnkMarshaler.Release();
+    }
+
+    CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
-	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
-	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
-	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
-	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
-	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
-	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
-	STDMETHOD(get_Visible)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_Visible)(VARIANT_BOOL newVal);
-	STDMETHOD(get_GridLinesVisible)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_GridLinesVisible)(VARIANT_BOOL newVal);
-	STDMETHOD(get_Provider)(tkTileProvider* pVal);
-	STDMETHOD(put_Provider)(tkTileProvider newVal);
-	STDMETHOD(get_DoCaching)(tkCacheType type, VARIANT_BOOL* pVal);
-	STDMETHOD(put_DoCaching)(tkCacheType type, VARIANT_BOOL newVal);
-	STDMETHOD(get_UseCache)(tkCacheType type, VARIANT_BOOL* pVal);
-	STDMETHOD(put_UseCache)(tkCacheType type, VARIANT_BOOL newVal);
-	STDMETHOD(get_UseServer)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_UseServer)(VARIANT_BOOL newVal);
-	STDMETHOD(get_MaxCacheSize)(tkCacheType type, double* pVal);
-	STDMETHOD(put_MaxCacheSize)(tkCacheType type, double newVal);
-	STDMETHOD(get_MinScaleToCache)(int* pVal);
-	STDMETHOD(put_MinScaleToCache)(int newVal);
-	STDMETHOD(get_MaxScaleToCache)(int* pVal);
-	STDMETHOD(put_MaxScaleToCache)(int newVal);
-	STDMETHOD(ClearCache)(tkCacheType type);
-	STDMETHOD(ClearCache2)(tkCacheType type, int providerId, int fromScale = 0, int toScale = 100);
-	STDMETHOD(get_CacheSize)(tkCacheType type, double* retVal);
-	STDMETHOD(get_CacheSize2)(tkCacheType type, int providerId, int scale, double* retVal);
-	STDMETHOD(Serialize)(BSTR* retVal);
-	STDMETHOD(Deserialize)(BSTR newVal);
-	STDMETHOD(SetProxy)(BSTR address, int port, VARIANT_BOOL* retVal);
-	STDMETHOD(get_Proxy)(BSTR* retVal);
-	STDMETHOD(AutodetectProxy)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_DiskCacheFilename)(BSTR* retVal);
-	STDMETHOD(put_DiskCacheFilename)(BSTR pVal);
-	STDMETHOD(get_Providers)(ITileProviders** retVal);
-	STDMETHOD(get_ProviderId)(int* retVal);
-	STDMETHOD(put_ProviderId)(int newVal);
-	STDMETHOD(GetTilesIndices)(IExtents* boundsDegrees, int zoom, int provider, IExtents** retVal);
-	STDMETHOD(get_DiskCacheCount)(int provider, int zoom, int xMin, int xMax, int yMin, int yMax, LONG* retVal);
-	STDMETHOD(get_ProviderName)(BSTR* retVal);
-	STDMETHOD(CheckConnection)(BSTR url, VARIANT_BOOL* retVal);
-	STDMETHOD(GetTileBounds)(int provider, int zoom, int tileX, int tileY, IExtents** retVal);
-	STDMETHOD(get_CurrentZoom)(int* retVal);
-	STDMETHOD(get_MaxZoom)(int* retVal);
-	STDMETHOD(get_MinZoom)(int* pVal);
-	STDMETHOD(get_ServerProjection)(IGeoProjection** retVal);
-	STDMETHOD(get_ProjectionStatus)(tkTilesProjectionStatus* retVal);
-	STDMETHOD(get_ScalingRatio)(double* pVal);
-	STDMETHOD(put_ScalingRatio)(double newVal);
-	STDMETHOD(SetProxyAuthentication)(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal);
-	STDMETHOD(ClearProxyAuthorization)();
-	STDMETHOD(get_ProxyAuthenticationScheme)(tkProxyAuthentication* pVal);
-	STDMETHOD(put_ProxyAuthenticationScheme)(tkProxyAuthentication newVal);
-	STDMETHOD(get_DelayRequestTimeout)(long* retVal);
-	STDMETHOD(put_DelayRequestTimeout)(long pVal);
-	STDMETHOD(Prefetch)(double minLat, double maxLat, double minLng, double maxLng, int zoom, int provider, IStopExecution* stop, LONG* retVal);
-	STDMETHOD(Prefetch2)(int minX, int maxX, int minY, int maxY, int zoom, int provider, IStopExecution* stop, LONG* retVal);
-	STDMETHOD(PrefetchToFolder)(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal);
-	STDMETHOD(get_ProjectionIsSphericalMercator)(VARIANT_BOOL* pVal);
+    STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long* pVal);
+    STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR* pVal);
+    STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback* * pVal);
+    STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback* newVal);
+    STDMETHOD(get_Key)(/*[out, retval]*/ BSTR* pVal);
+    STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
+    STDMETHOD(get_Visible)(VARIANT_BOOL* pVal);
+    STDMETHOD(put_Visible)(VARIANT_BOOL newVal);
+    STDMETHOD(get_GridLinesVisible)(VARIANT_BOOL* pVal);
+    STDMETHOD(put_GridLinesVisible)(VARIANT_BOOL newVal);
+    STDMETHOD(get_Provider)(tkTileProvider* pVal);
+    STDMETHOD(put_Provider)(tkTileProvider newVal);
+    STDMETHOD(get_DoCaching)(tkCacheType type, VARIANT_BOOL* pVal);
+    STDMETHOD(put_DoCaching)(tkCacheType type, VARIANT_BOOL newVal);
+    STDMETHOD(get_UseCache)(tkCacheType type, VARIANT_BOOL* pVal);
+    STDMETHOD(put_UseCache)(tkCacheType type, VARIANT_BOOL newVal);
+    STDMETHOD(get_UseServer)(VARIANT_BOOL* pVal);
+    STDMETHOD(put_UseServer)(VARIANT_BOOL newVal);
+    STDMETHOD(get_MaxCacheSize)(tkCacheType type, double* pVal);
+    STDMETHOD(put_MaxCacheSize)(tkCacheType type, double newVal);
+    STDMETHOD(get_MinScaleToCache)(int* pVal);
+    STDMETHOD(put_MinScaleToCache)(int newVal);
+    STDMETHOD(get_MaxScaleToCache)(int* pVal);
+    STDMETHOD(put_MaxScaleToCache)(int newVal);
+    STDMETHOD(ClearCache)(tkCacheType type);
+    STDMETHOD(ClearCache2)(tkCacheType type, int providerId, int fromScale = 0, int toScale = 100);
+    STDMETHOD(get_CacheSize)(tkCacheType type, double* retVal);
+    STDMETHOD(get_CacheSize2)(tkCacheType type, int providerId, int scale, double* retVal);
+    STDMETHOD(Serialize)(BSTR* retVal);
+    STDMETHOD(Deserialize)(BSTR newVal);
+    STDMETHOD(SetProxy)(BSTR address, int port, VARIANT_BOOL* retVal);
+    STDMETHOD(get_Proxy)(BSTR* retVal);
+    STDMETHOD(AutodetectProxy)(VARIANT_BOOL* retVal);
+    STDMETHOD(get_DiskCacheFilename)(BSTR* retVal);
+    STDMETHOD(put_DiskCacheFilename)(BSTR pVal);
+    STDMETHOD(get_Providers)(ITileProviders** retVal);
+    STDMETHOD(get_ProviderId)(int* retVal);
+    STDMETHOD(put_ProviderId)(int newVal);
+    STDMETHOD(GetTilesIndices)(IExtents* boundsDegrees, int zoom, int provider, IExtents** retVal);
+    STDMETHOD(get_DiskCacheCount)(int provider, int zoom, int xMin, int xMax, int yMin, int yMax, LONG* retVal);
+    STDMETHOD(get_ProviderName)(BSTR* retVal);
+    STDMETHOD(CheckConnection)(BSTR url, VARIANT_BOOL* retVal);
+    STDMETHOD(GetTileBounds)(int provider, int zoom, int tileX, int tileY, IExtents** retVal);
+    STDMETHOD(get_CurrentZoom)(int* retVal);
+    STDMETHOD(get_MaxZoom)(int* retVal);
+    STDMETHOD(get_MinZoom)(int* pVal);
+    STDMETHOD(get_ServerProjection)(IGeoProjection** retVal);
+    STDMETHOD(get_ProjectionStatus)(tkTilesProjectionStatus* retVal);
+    STDMETHOD(get_ScalingRatio)(double* pVal);
+    STDMETHOD(put_ScalingRatio)(double newVal);
+    STDMETHOD(SetProxyAuthentication)(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal);
+    STDMETHOD(ClearProxyAuthorization)();
+    STDMETHOD(get_ProxyAuthenticationScheme)(tkProxyAuthentication* pVal);
+    STDMETHOD(put_ProxyAuthenticationScheme)(tkProxyAuthentication newVal);
+    STDMETHOD(get_DelayRequestTimeout)(long* retVal);
+    STDMETHOD(put_DelayRequestTimeout)(long pVal);
+    STDMETHOD(Prefetch)(double minLat, double maxLat, double minLng, double maxLng, int zoom, int provider,
+                        IStopExecution* stop, LONG* retVal);
+    STDMETHOD(Prefetch2)(int minX, int maxX, int minY, int maxY, int zoom, int provider, IStopExecution* stop,
+                         LONG* retVal);
+    static void LogBulkDownloadStarted(IExtents* ext, int zoom, BaseProvider* provider, BSTR savePath, BSTR fileExt);
+    STDMETHOD(PrefetchToFolder)(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt,
+                                IStopExecution* stop, LONG* retVal);
+    STDMETHOD(get_ProjectionIsSphericalMercator)(VARIANT_BOOL* pVal);
 
 private:
-	long _lastErrorCode;
-	ICallback * _globalCallback;
-	BSTR _key;
-	bool _visible;
-	int _minScaleToCache;
-	int _maxScaleToCache;
-	ITileProviders* _providers;
-	TileManager _manager;
-	BaseProvider* _provider;
-	IGeoProjection* _mercatorProjection;
-	bool _reloadNeeded;
+    long _lastErrorCode;
+    ICallback* _globalCallback;
+    BSTR _key;
+    bool _visible;
+    int _minScaleToCache;
+    int _maxScaleToCache;
+    ITileProviders* _providers;
+    TileManager _manager;
+    BaseProvider* _provider;
+    IGeoProjection* _mercatorProjection;
+    bool _reloadNeeded;
 
 private:
-	void ErrorMessage(long ErrorCode);
-	void SetAuthorization(BSTR userName, BSTR password, BSTR domain);
-	SQLiteCache* get_SqliteCache() { return dynamic_cast<SQLiteCache*>(TileCacheManager::get_Cache(tctSqliteCache)); }
-	BaseProvider* get_Provider(int providerId);
+    void ErrorMessage(long ErrorCode);
+    void SetAuthorization(BSTR userName, BSTR password, BSTR domain);
+    SQLiteCache* get_SqliteCache() { return dynamic_cast<SQLiteCache*>(TileCacheManager::get_Cache(tctSqliteCache)); }
+    BaseProvider* get_Provider(int providerId);
 
 public:
-	// properties
-	TileManager* get_Manager() { return &_manager; }
-	BaseProvider* get_Provider() { return _provider; }
-	bool get_ReloadNeeded();
+    // properties
+    TileManager* get_Manager() { return &_manager; }
+    BaseProvider* get_Provider() { return _provider; }
+    bool get_ReloadNeeded();
 
 public:
-	void Init(IMapViewCallback* map) {_manager.set_MapCallback(map); }
-	void LoadTiles(bool isSnapshot, CString key = "");
-	bool TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId = ProviderNone);
-	bool DeserializeCore(CPLXMLNode* node);
-	CPLXMLNode* SerializeCore(CString ElementName);
-	BaseProjection* get_Projection(){ return _provider->get_Projection(); }
-	void Stop();
+    void Init(IMapViewCallback* map) { _manager.set_MapCallback(map); }
+    void LoadTiles(bool isSnapshot, CString key = "");
+    bool TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId = ProviderNone);
+    bool DeserializeCore(CPLXMLNode* node);
+    CPLXMLNode* SerializeCore(CString ElementName);
+    BaseProjection* get_Projection() { return _provider->get_Projection(); }
+    void Stop();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Tiles), CTiles)

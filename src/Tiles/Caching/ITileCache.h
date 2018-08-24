@@ -17,12 +17,15 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- #pragma once
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#pragma once
 #include "TileCore.h"
 #include "BaseProvider.h"
 
 #define TILE_CACHE_SIZE_TO_CLEAR (20 * 0x1 << 20)	// 20 MB; when overall size of tiles exceeds maximum, tiles will be removed 
-													// starting from the oldest until this amount of memory is freed
+
+// starting from the oldest until this amount of memory is freed
 
 // ********************************************************
 //     ITileCache()
@@ -31,29 +34,29 @@
 class ITileCache
 {
 protected:
-	double _maxSize;
+    double _maxSize;
 
 public:
-	virtual void AddTile(TileCore* tile) = 0;
-	virtual void Close() = 0;
-	virtual TileCore* get_Tile(BaseProvider* provider, int scale, int x, int y) = 0;
-	virtual bool get_TileExists(BaseProvider* provider, int scale, int x, int y) = 0;
-	virtual bool IsLocked() = 0;
-	virtual CacheType get_CacheType() = 0;
-	virtual void Clear(int providerId = -1, int fromScale = 0, int toScale = 100) = 0;
-	virtual double get_SizeMB() = 0;
-	virtual double get_SizeMB(int providerId, int scale) = 0;
-	virtual CStringW get_Filename() = 0;
-	virtual void set_Filename(CStringW name) = 0;
-	virtual void Initialize(bool canUseCache, bool canDoCaching) = 0;
-	virtual void Lock() = 0;
-	virtual void Unlock() = 0;
-	virtual void InitBulkDownload(int zoom, vector<TilePoint*>& points) = 0;
-	virtual long get_TileCount(int providerId, int zoom, CRect indices) = 0;
+    virtual void AddTile(TileCore* tile) = 0;
+    virtual void Close() = 0;
+    virtual TileCore* get_Tile(BaseProvider* provider, int scale, int x, int y) = 0;
+    virtual bool get_TileExists(BaseProvider* provider, int scale, int x, int y) = 0;
+    virtual bool IsLocked() = 0;
+    virtual CacheType get_CacheType() = 0;
+    virtual void Clear(int providerId = -1, int fromScale = 0, int toScale = 100) = 0;
+    virtual double get_SizeMB() = 0;
+    virtual double get_SizeMB(int providerId, int scale) = 0;
+    virtual CStringW get_Filename() = 0;
+    virtual void set_Filename(CStringW name) = 0;
+    virtual void Initialize(bool canUseCache, bool canDoCaching) = 0;
+    virtual void Lock() = 0;
+    virtual void Unlock() = 0;
+    virtual void InitBulkDownload(int zoom, vector<TilePoint*>& points) = 0;
+    virtual long get_TileCount(int providerId, int zoom, CRect indices) = 0;
 
 public:
-	double get_MaxSize() { return _maxSize; }
-	void set_MaxSize(double value) { _maxSize = value; }
+    double get_MaxSize() { return _maxSize; }
+    void set_MaxSize(double value) { _maxSize = value; }
 };
 
 // ********************************************************
@@ -64,13 +67,13 @@ public:
 // we shall use this wrapper to store permissions.
 struct TileCacheInfo
 {
-	TileCacheInfo()
-	{
-		useCache = true;
-		doCaching = true;
-	}
+    TileCacheInfo(): cache(nullptr)
+    {
+        useCache = true;
+        doCaching = true;
+    }
 
-	ITileCache* cache;
-	bool useCache;
-	bool doCaching;
+    ITileCache* cache;
+    bool useCache;
+    bool doCaching;
 };
