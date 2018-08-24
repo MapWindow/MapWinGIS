@@ -43,9 +43,9 @@ namespace ConsoleApplication1
             //var t = new PostGisTest();
             //t.ReadAttributesFromPostGISLayer();
 
-            var t = new ShapefileTests();
+            // var t = new ShapefileTests();
             //t.ShapefileDataTest();
-            t.UnionShapefiles();
+            // t.UnionShapefiles();
 
             //t.Reproject2280Test();
             //t.ReadRussionDataFromTable();
@@ -78,8 +78,8 @@ namespace ConsoleApplication1
             //t.ClipPolygon();
             //t.PointInPolygon();
 
-            //var t = new TilesTests();
-            //t.PrefetchToFolder();
+            var t = new TilesTests();
+            t.PrefetchToFolder();
 
             Console.WriteLine("Finished");
             Console.ReadLine();
