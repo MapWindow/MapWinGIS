@@ -19,7 +19,7 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #include "stdafx.h"
-#include "Wininet.h"
+//#include "Wininet.h"
 #include "BaseProvider.h"
 #include "SecureHttpClient.h"
 
@@ -56,18 +56,28 @@ TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool recursive)
 {
+	// jf: I don't think we need a mutex here
+	//CSingleLock lock(&_clientLock, TRUE);
+
+	// stack-based instance
 	SecureHttpClient client;
-	CAtlNavigateData navData;
-	navData.dwReadBlockSize = 262144;
 
 	client.SetProxyAndAuthentication(_proxyUsername, _proxyPassword, _proxyDomain);
 
-	PreventParallelExecution();
+	// jf: Likewise, don't think we need this work-around.
+	// if we observe multiple retransmissions, we can reconsider.
+	//PreventParallelExecution();
 
-	bool success = client.Navigate(url, &navData);
+	bool success = client.Navigate(url);
+	if (!success)
+	{
+		client.LogHttpError();
+		return 0;
+	}
 
 	CMemoryBitmap* bmp = ProcessHttpRequest(reinterpret_cast<void*>(&client), url, shortUrl, success);
 
+	// this is a leftover from the Atl Http code; it remains to be seen if it is necessary
 	if (!success && !recursive && client.GetStatus() == -1)
 	{
 		// it's a socket error, so let's try one more time

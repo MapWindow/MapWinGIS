@@ -17,22 +17,40 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
+// jf, 8/2018: Replace ATL Http library usage with libCurl so as to support SSL/HTTPS
+
 #pragma once
 
-#include "BasicAuth.h"
-//#include "SecureSocket.h"
+#include "curl.h"
 
-class SecureHttpClient : public CAtlHttpClient
-	//public CAtlHttpClientT<CSecureEvtSyncSocket>
+struct MemoryStruct
 {
+	char *memory;
+	size_t size;
+};
+
+class SecureHttpClient
+{
+public:
+	SecureHttpClient();
+	~SecureHttpClient();
+
 private:
-	BasicAuth basicAuth;
-	CNTLMAuthObject ntlmAuth;
+	CURL *curl;
+	FILE *file;
+	struct MemoryStruct chunk;
+	char errorString[CURL_ERROR_SIZE];
+	static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
 
 public:
+	long GetStatus();
 	void LogRequest(int bodyLen, CString shortUrl, CString url);
 	void LogHttpError();
+	bool SetProxy(LPCTSTR address, long port);
+	bool Navigate(LPCTSTR url);
 	TileHttpContentType get_ContentType(int providerId);
+	int GetBodyLength();
+	BYTE *GetBody();
 	bool ReadBody(char** body, int& length);
 public:
 	// methods

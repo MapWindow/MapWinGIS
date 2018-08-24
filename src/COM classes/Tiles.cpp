@@ -620,84 +620,80 @@ STDMETHODIMP CTiles::Serialize(BSTR* retVal)
 // ********************************************************
 CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 {
-    USES_CONVERSION;
-    CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, ElementName);
+	USES_CONVERSION;
+	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
+	
+	if (!_visible)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_visible));
 
-    if (!_visible)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_visible));
+	
+	if (_manager.get_GridLinesVisible())
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "GridLinesVisible", CPLString().Printf("%d", (int)_manager.get_GridLinesVisible()));
 
+	if (_provider->Id != 0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Provider", CPLString().Printf("%d", (int)_provider->Id));
 
-    if (_manager.get_GridLinesVisible())
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "GridLinesVisible",
-                                               CPLString().Printf("%d", (int)_manager.get_GridLinesVisible()));
+	bool value = _manager.get_RamCache()->doCaching;
+	if (!value)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoRamCaching", CPLString().Printf("%d", (int)value));
 
-    if (_provider->Id != 0)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "Provider", CPLString().Printf("%d", (int)_provider->Id));
+	value = _manager.get_DiskCache()->doCaching;
+	if (value)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoDiskCaching", CPLString().Printf("%d", (int)value));
 
-    bool value = _manager.get_RamCache()->doCaching;
-    if (!value)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "DoRamCaching", CPLString().Printf("%d", (int)value));
+	value = _manager.get_RamCache()->useCache;
+	if (!value)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseRamCache", CPLString().Printf("%d", (int)value));
 
-    value = _manager.get_DiskCache()->doCaching;
-    if (value)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "DoDiskCaching", CPLString().Printf("%d", (int)value));
+	value = _manager.get_DiskCache()->useCache;
+	if (!value)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseDiskCache", CPLString().Printf("%d", (int)value));
 
-    value = _manager.get_RamCache()->useCache;
-    if (!value)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "UseRamCache", CPLString().Printf("%d", (int)value));
+	if (!_manager.useServer())
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseServer", CPLString().Printf("%d", (int)_manager.useServer()));
 
-    value = _manager.get_DiskCache()->useCache;
-    if (!value)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "UseDiskCache", CPLString().Printf("%d", (int)value));
+	double dbl = _manager.get_RamCache()->cache->get_MaxSize();
+	if (dbl != 100.0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxRamCacheSize", CPLString().Printf("%f", dbl));
 
-    if (!_manager.useServer())
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "UseServer",
-                                               CPLString().Printf("%d", (int)_manager.useServer()));
+	dbl = _manager.get_DiskCache()->cache->get_MaxSize();
+	if (dbl != 100.0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxDiskCacheSize", CPLString().Printf("%f", dbl));
 
-    double dbl = _manager.get_RamCache()->cache->get_MaxSize();
-    if (dbl != 100.0)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxRamCacheSize", CPLString().Printf("%f", dbl));
+	if (_minScaleToCache != 0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinScaleToCache", CPLString().Printf("%d", _minScaleToCache));
 
-    dbl = _manager.get_DiskCache()->cache->get_MaxSize();
-    if (dbl != 100.0)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxDiskCacheSize", CPLString().Printf("%f", dbl));
-
-    if (_minScaleToCache != 0)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "MinScaleToCache", CPLString().Printf("%d", _minScaleToCache));
-
-    if (_maxScaleToCache != 100)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxScaleToCache", CPLString().Printf("%d", _maxScaleToCache));
-
-    CStringW dbName = _manager.get_DiskCache()->cache->get_Filename();
-    if (dbName.GetLength() != 0)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", Utility::ConvertToUtf8(dbName));
-
-    // serialization of custom providers
-    CPLXMLNode* psProviders = CPLCreateXMLNode(nullptr, CXT_Element, "TileProviders");
-    if (psProviders)
-    {
-        vector<BaseProvider*>* providers = ((CTileProviders*)_providers)->GetList();
-        for (size_t i = 0; i < providers->size(); i++)
-        {
-            CustomTileProvider* cp = dynamic_cast<CustomTileProvider*>(providers->at(i));
-            if (cp)
-            {
-                CPLXMLNode* psCustom = CPLCreateXMLNode(nullptr, CXT_Element, "TileProvider");
-                Utility::CPLCreateXMLAttributeAndValue(psCustom, "Id", CPLString().Printf("%d", cp->Id));
-                Utility::CPLCreateXMLAttributeAndValue(psCustom, "Name", cp->Name);
-                Utility::CPLCreateXMLAttributeAndValue(psCustom, "Url", cp->get_UrlFormat());
-                Utility::CPLCreateXMLAttributeAndValue(psCustom, "Projection",
-                                                       CPLString().Printf("%d", (int)cp->get_Projection()));
-                Utility::CPLCreateXMLAttributeAndValue(psCustom, "MinZoom",
-                                                       CPLString().Printf("%d", cp->get_MinZoom()));
-                Utility::CPLCreateXMLAttributeAndValue(psCustom, "MaxZoom",
-                                                       CPLString().Printf("%d", cp->get_MaxZoom()));
-                CPLAddXMLChild(psProviders, psCustom);
-            }
-        }
-        CPLAddXMLChild(psTree, psProviders);
-    }
-    return psTree;
+	if (_maxScaleToCache != 100)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxScaleToCache", CPLString().Printf("%d", _maxScaleToCache));
+	
+	CStringW dbName = _manager.get_DiskCache()->cache->get_Filename();
+	if (dbName.GetLength() != 0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", Utility::ConvertToUtf8(dbName));
+	
+	// serialization of custom providers
+	CPLXMLNode* psProviders = CPLCreateXMLNode( NULL, CXT_Element, "TileProviders");
+	if (psProviders)
+	{
+		vector<BaseProvider*>* providers = ((CTileProviders*)_providers)->GetList();
+		for(size_t i = 0; i < providers->size(); i++)
+		{
+			CustomTileProvider* cp = dynamic_cast<CustomTileProvider*>(providers->at(i));
+			if (cp)
+			{
+				CPLXMLNode* psCustom = CPLCreateXMLNode( NULL, CXT_Element, "TileProvider");
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Id", CPLString().Printf("%d", cp->Id));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Name", cp->Name);
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Url", cp->get_UrlFormat());
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Projection", CPLString().Printf("%d", (int)cp->get_Projection()));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MinZoom", CPLString().Printf("%d", cp->get_MinZoom()));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MaxZoom", CPLString().Printf("%d", cp->get_MaxZoom()));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Copyright", cp->get_Copyright());
+				CPLAddXMLChild(psProviders, psCustom);
+			}
+		}
+		CPLAddXMLChild(psTree, psProviders);
+	}
+	return psTree;
 }
 
 // ********************************************************
@@ -805,8 +801,8 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
             if (strcmp(nodeProvider->pszValue, "TileProvider") == 0)
             {
                 int id = 0, minZoom = 0, maxZoom = 0, projection = 0;
-                CString url, name;
-
+				CString url, name, copyright;
+				
                 s = CPLGetXMLValue(nodeProvider, "Id", nullptr);
                 if (s != "") id = atoi(s);
 
@@ -825,16 +821,20 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
                 s = CPLGetXMLValue(nodeProvider, "Name", nullptr);
                 if (s != "") name = s;
 
-                VARIANT_BOOL vb;
-                CComBSTR bstrName(name);
-                CComBSTR bstrUrl(url);
+				s = CPLGetXMLValue(nodeProvider, "Copyright", nullptr);
+				if (s != "") copyright = s;
 
-                _providers->Add(id, bstrName, bstrUrl, (tkTileProjection)projection, minZoom, maxZoom, &vb);
-            }
-            nodeProvider = nodeProvider->psNext;
-        }
-    }
-    return true;
+				VARIANT_BOOL vb;
+				CComBSTR bstrName(name);
+				CComBSTR bstrUrl(url);
+				CComBSTR bstrCopyright(copyright);
+
+				_providers->Add(id, bstrName, bstrUrl, (tkTileProjection)projection, minZoom, maxZoom, bstrCopyright, &vb);
+			}
+			nodeProvider = nodeProvider->psNext;
+		}
+	}
+	return true;
 }
 
 // *********************************************************

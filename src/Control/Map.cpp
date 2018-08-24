@@ -28,6 +28,7 @@
 #include "Tiles.h"
 #include "ShapeEditor.h"
 #include "UndoList.h"
+#include "curl.h"
 using namespace std;
 
 //disable some known warnings we don't care about
@@ -302,6 +303,9 @@ void CMapView::Startup()
 	GetMeasuringBase()->SetMapCallback(this, ShapeInputMode::simMeasuring);
 	_shapeEditor->SetMapCallback(this);
 	_geodesicShape->SetMapCallback(this);
+
+	// initialize cURL
+	curl_global_init(CURL_GLOBAL_ALL);
 }
 
 // **********************************************************************
@@ -425,6 +429,9 @@ void CMapView::ReleaseTempObjects()
 // Must be called from destructor only
 void CMapView::Shutdown()
 {
+	// clean up cURL
+	curl_global_cleanup();
+
 	Utility::ClosePointer(&_fontCourier);
 	Utility::ClosePointer(&_fontCourierSmall);
 	Utility::ClosePointer(&_fontCourierLink);

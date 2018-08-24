@@ -18,6 +18,7 @@
  * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
 // Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+// jf, 8/2018: Replace ATL Http library usage with libCurl so as to support SSL/HTTPS
 
 #pragma once
 #include "BaseProjection.h"
