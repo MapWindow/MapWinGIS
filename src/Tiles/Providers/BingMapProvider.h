@@ -39,7 +39,7 @@ public:
 	}
 
 	bool Initialize();
-	CString TileXYToQuadKey(int tileX, int tileY, int levelOfDetail);
+    static CString TileXYToQuadKey(int tileX, int tileY, int levelOfDetail);
 	bool ParseUrlFormat(void* secureHttpClient);
 	CString MakeTileImageUrl(CPoint &pos, int zoom);
 	virtual CStringW GetCopyright();

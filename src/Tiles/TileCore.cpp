@@ -28,7 +28,7 @@ Debug::Logger tilesLogger;
 //    TileCore
 // ******************************************************
 // gets relative path of tile disk storage
-CStringW TileCore::GetPath(const CStringW root, const CStringW ext)
+CStringW TileCore::GetPath(const CStringW root, const CStringW ext) const
 {
     CStringW path;
     path.Format(L"%s%d\\%d\\%d%s", root, this->_scale, this->_tileX, this->_tileY, ext);
@@ -92,7 +92,7 @@ long TileCore::Release()
 // ******************************************************
 //    operator==
 // ******************************************************
-bool TileCore::operator==(const TileCore& t2)
+bool TileCore::operator==(const TileCore& t2) const
 {
     return this->_tileX == t2._tileX &&
         this->_tileY == t2._tileY &&

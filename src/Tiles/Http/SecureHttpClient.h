@@ -38,23 +38,23 @@ public:
 private:
 	CURL *curl;
 	FILE *file;
-	struct MemoryStruct chunk;
-	char errorString[CURL_ERROR_SIZE];
+	struct MemoryStruct chunk{};
+	char errorString[CURL_ERROR_SIZE]{};
 	static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
 
 public:
-	long GetStatus();
-	void LogRequest(int bodyLen, CString shortUrl, CString url);
+	long GetStatus() const;
+	void LogRequest(int bodyLen, CString shortUrl, CString url) const;
 	void LogHttpError();
-	bool SetProxy(LPCTSTR address, long port);
-	bool Navigate(LPCTSTR url);
-	TileHttpContentType get_ContentType(int providerId);
-	int GetBodyLength();
-	BYTE *GetBody();
-	bool ReadBody(char** body, int& length);
+	bool SetProxy(LPCTSTR address, long port) const;
+	bool Navigate(LPCTSTR url) const;
+	TileHttpContentType get_ContentType(int providerId) const;
+	int GetBodyLength() const;
+	BYTE *GetBody() const;
+	bool ReadBody(char** body, int& length) const;
 public:
 	// methods
-	bool SetProxyAndAuthentication(CString userName, CString password, CString domain);
+	bool SetProxyAndAuthentication(const CString& userName, const CString& password, const CString& domain) const;
 
 public:
 	// static methods

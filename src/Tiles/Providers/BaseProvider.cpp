@@ -17,8 +17,9 @@
  **************************************************************************************
  * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
-#include "stdafx.h"
+#include "StdAfx.h"
 //#include "Wininet.h"
 #include "BaseProvider.h"
 #include "SecureHttpClient.h"
@@ -26,29 +27,29 @@
 CString BaseProvider::_proxyUsername = "";
 CString BaseProvider::_proxyPassword = "";
 CString BaseProvider::_proxyDomain = "";
-::CCriticalSection BaseProvider::_clientLock;
+CCriticalSection BaseProvider::_clientLock;
 
 // ************************************************************
 //		GetTileImage()
 // ************************************************************
-TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
+TileCore* BaseProvider::GetTileImage(CPoint& pos, const int zoom)
 {
-	TileCore* tile = new TileCore(this->Id, zoom, pos, this->_projection);
+    auto* tile = new TileCore(this->Id, zoom, pos, this->_projection);
 
-	for (size_t i = 0; i < _subProviders.size(); i++)
-	{
-		CMemoryBitmap* bmp = _subProviders[i]->DownloadBitmap(pos, zoom);
-		if (bmp)
-		{
-			tile->AddOverlay(bmp);
-		}
-		else
-		{
-			tile->hasErrors(true);
-		}
-	}
+    for (size_t i = 0; i < _subProviders.size(); i++)
+    {
+        CMemoryBitmap* bmp = _subProviders[i]->DownloadBitmap(pos, zoom);
+        if (bmp)
+        {
+            tile->AddOverlay(bmp);
+        }
+        else
+        {
+            tile->hasErrors(true);
+        }
+    }
 
-	return tile;
+    return tile;
 }
 
 // ************************************************************
@@ -56,120 +57,121 @@ TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool recursive)
 {
-	// jf: I don't think we need a mutex here
-	//CSingleLock lock(&_clientLock, TRUE);
+    // jf: I don't think we need a mutex here
+    //CSingleLock lock(&_clientLock, TRUE);
 
-	// stack-based instance
-	SecureHttpClient client;
+    // stack-based instance
+    SecureHttpClient client;
 
-	client.SetProxyAndAuthentication(_proxyUsername, _proxyPassword, _proxyDomain);
+    client.SetProxyAndAuthentication(_proxyUsername, _proxyPassword, _proxyDomain);
 
-	// jf: Likewise, don't think we need this work-around.
-	// if we observe multiple retransmissions, we can reconsider.
-	//PreventParallelExecution();
+    // jf: Likewise, don't think we need this work-around.
+    // if we observe multiple retransmissions, we can reconsider.
+    //PreventParallelExecution();
 
-	bool success = client.Navigate(url);
-	if (!success)
-	{
-		client.LogHttpError();
-		return 0;
-	}
+    const bool success = client.Navigate(url);
+    if (!success)
+    {
+        client.LogHttpError();
+        return nullptr;
+    }
 
-	CMemoryBitmap* bmp = ProcessHttpRequest(reinterpret_cast<void*>(&client), url, shortUrl, success);
+    CMemoryBitmap* bmp = ProcessHttpRequest(reinterpret_cast<void*>(&client), url, shortUrl, success);
 
-	// this is a leftover from the Atl Http code; it remains to be seen if it is necessary
-	if (!success && !recursive && client.GetStatus() == -1)
-	{
-		// it's a socket error, so let's try one more time
-		Sleep(20);
-		tilesLogger.Log("Reloading attempt: " + m_globalSettings.useShortUrlForTiles ? shortUrl : url);
-		bmp = GetTileHttpData(url, shortUrl, true);
-	}
+    // this is a leftover from the Atl Http code; it remains to be seen if it is necessary
+    if (!success && !recursive && client.GetStatus() == -1)
+    {
+        // it's a socket error, so let's try one more time
+        Sleep(20);
+        tilesLogger.Log("Reloading attempt: " + m_globalSettings.useShortUrlForTiles ? shortUrl : url);
+        bmp = GetTileHttpData(url, shortUrl, true);
+    }
 
-	return bmp;
+    return bmp;
 }
 
 // ************************************************************
 //		DownloadBitmap()
 // ************************************************************
-CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint &pos, int zoom)
+CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
 {
-	CString url = MakeTileImageUrl(pos, zoom);
-	CString shortUrl;
+    const CString url = MakeTileImageUrl(pos, zoom);
+    CString shortUrl;
 
-	shortUrl.Format("\\zoom=%d\\x=%d\\y=%d", zoom, pos.x, pos.y);
+    shortUrl.Format(R"(\zoom=%d\x=%d\y=%d)", zoom, pos.x, pos.y);
 
-	CMemoryBitmap* bmp = GetTileHttpData(url, shortUrl);
+    CMemoryBitmap* bmp = GetTileHttpData(url, shortUrl);
 
-	return bmp;
+    return bmp;
 }
 
 // ************************************************************
 //		ProcessResults()
 // ************************************************************
-CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, CString url, CString shortUrl, bool success)
+CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, const CString& url, const CString& shortUrl,
+                                                bool success)
 {
-	SecureHttpClient* client = reinterpret_cast<SecureHttpClient*>(secureHttpClient);
+    auto* client = reinterpret_cast<SecureHttpClient*>(secureHttpClient);
 
-	if (_isStopped)  return NULL;
+    if (_isStopped) return nullptr;
 
-	if (!success) client->LogHttpError();
+    if (!success) client->LogHttpError();
 
-	TileHttpContentType contentType = client->get_ContentType(Id);
+    const TileHttpContentType contentType = client->get_ContentType(Id);
 
-	char* body = NULL;
-	int length = 0;
+    char* body = nullptr;
+    int length = 0;
 
-	if (success && client->GetStatus() == 200)
-	{
-		client->ReadBody(&body, length);
-	}
+    if (success && client->GetStatus() == 200)
+    {
+        client->ReadBody(&body, length);
+    }
 
-	client->LogRequest(length, shortUrl, url);
+    client->LogRequest(length, shortUrl, url);
 
-	CMemoryBitmap* bmp = NULL;
-	switch (contentType)
-	{
-	case httpImage:
-		bmp = ReadBitmap(body, length);
-		break;
-	case httpXml:
-		if (IsWms())
-		{
-			CString s(body);
-			ParseServerException(s);
-		}
-		break;
-	default:
-		break;
-	}
+    CMemoryBitmap* bmp = nullptr;
+    switch (contentType)
+    {
+    case httpImage:
+        bmp = ReadBitmap(body, length);
+        break;
+    case httpXml:
+        if (IsWms())
+        {
+            const CString s(body);
+            ParseServerException(s);
+        }
+        break;
+    default:
+        break;
+    }
 
-	if (body) {
-		delete[] body;
-	}
+    delete[] body;
 
-	return bmp;
+    return bmp;
 }
 
 // ************************************************************
 //		ParseServerException()
 // ************************************************************
-void BaseProvider::ParseServerException(CString s)
+void BaseProvider::ParseServerException(const CString& s) const
 {
-	CPLXMLNode* node = CPLParseXMLString(s);
-	if (node)
-	{
-		while (node) {
-			CPLXMLNode* nodeException = CPLGetXMLNode(node, "ServiceException");
-			if (nodeException) {
-				CString msg = CPLGetXMLValue(nodeException, "", "");
-				CallbackHelper::ErrorMsg(Debug::Format("WMS Server exception (%s): %s", Name, msg));
-			}
-			node = node->psNext;
-		}
+    CPLXMLNode* node = CPLParseXMLString(s);
+    if (node)
+    {
+        while (node)
+        {
+            CPLXMLNode* nodeException = CPLGetXMLNode(node, "ServiceException");
+            if (nodeException)
+            {
+                const CString msg = CPLGetXMLValue(nodeException, "", "");
+                CallbackHelper::ErrorMsg(Debug::Format("WMS Server exception (%s): %s", Name, msg));
+            }
+            node = node->psNext;
+        }
 
-		CPLDestroyXMLNode(node);
-	}
+        CPLDestroyXMLNode(node);
+    }
 }
 
 // ************************************************************
@@ -177,40 +179,40 @@ void BaseProvider::ParseServerException(CString s)
 // ************************************************************
 void BaseProvider::PreventParallelExecution()
 {
-	CSingleLock lock(&_clientLock, TRUE);
+    CSingleLock lock(&_clientLock, TRUE);
 
-	// there is info that ARP might have problems with simultaneous connections, 
-	// discarding the next connection if the previous one is under resolution; 
-	// since we experience periodic rertransmissions let's introduce
-	// a small delay between connections http://stackoverflow.com/questions/1875151/delay-in-multiple-tcp-connections-from-java-to-the-same-machine
-	Sleep(5);
+    // there is info that ARP might have problems with simultaneous connections, 
+    // discarding the next connection if the previous one is under resolution; 
+    // since we experience periodic rertransmissions let's introduce
+    // a small delay between connections http://stackoverflow.com/questions/1875151/delay-in-multiple-tcp-connections-from-java-to-the-same-machine
+    Sleep(5);
 }
 
 // *************************************************************
 //			ReadBitmap()
 // *************************************************************
-CMemoryBitmap* BaseProvider::ReadBitmap(char* body, int bodyLen)
+CMemoryBitmap* BaseProvider::ReadBitmap(char* body, int bodyLen) const
 {
-	CMemoryBitmap* bmp = new CMemoryBitmap();
-	bmp->LoadFromRawData(body, bodyLen);
-	bmp->Provider = this->Id;
-	return bmp;
+    auto* bmp = new CMemoryBitmap();
+    bmp->LoadFromRawData(body, bodyLen);
+    bmp->Provider = this->Id;
+    return bmp;
 }
 
 // *************************************************************
 //			SetProxyAuthorization()
 // *************************************************************
-bool BaseProvider::SetAuthorization(CString username, CString password, CString domain)
+bool BaseProvider::SetAuthorization(const CString& username, const CString& password, const CString& domain)
 {
-	CString oldProxy = _proxyUsername;
-	CString oldDomain = _proxyDomain;
-	CString oldPassword = _proxyPassword;
+    CString oldProxy = _proxyUsername;
+    CString oldDomain = _proxyDomain;
+    CString oldPassword = _proxyPassword;
 
-	_proxyUsername = username;
-	_proxyDomain = domain;
-	_proxyPassword = password;
+    _proxyUsername = username;
+    _proxyDomain = domain;
+    _proxyPassword = password;
 
-	return true;
+    return true;
 }
 
 // *************************************************************
@@ -218,9 +220,9 @@ bool BaseProvider::SetAuthorization(CString username, CString password, CString 
 // *************************************************************
 void BaseProvider::ClearAuthorization()
 {
-	_proxyUsername = "";
-	_proxyDomain = "";
-	_proxyPassword = "";
+    _proxyUsername = "";
+    _proxyDomain = "";
+    _proxyPassword = "";
 }
 
 // *************************************************************
@@ -228,11 +230,12 @@ void BaseProvider::ClearAuthorization()
 // *************************************************************
 void BaseProvider::AddDynamicOverlay(BaseProvider* p)
 {
-	if (p) {
-		p->_dynamicOverlay = true;
-	}
+    if (p)
+    {
+        p->_dynamicOverlay = true;
+    }
 
-	_subProviders.push_back(p);
+    _subProviders.push_back(p);
 }
 
 // *************************************************************
@@ -240,10 +243,10 @@ void BaseProvider::AddDynamicOverlay(BaseProvider* p)
 // *************************************************************
 void BaseProvider::ClearSubProviders()
 {
-	for (size_t i = 0; i < _subProviders.size(); i++)
-	{
-		if (_subProviders[i]->_dynamicOverlay)
-			delete _subProviders[i];
-	}
-	_subProviders.clear();
+    for (size_t i = 0; i < _subProviders.size(); i++)
+    {
+        if (_subProviders[i]->_dynamicOverlay)
+            delete _subProviders[i];
+    }
+    _subProviders.clear();
 }

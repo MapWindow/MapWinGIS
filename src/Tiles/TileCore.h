@@ -127,7 +127,7 @@ public:
     RectLatLng* get_GeographicBounds() { return &_geogBounds; }
     BaseProjection* get_Projection() { return _projection; }
     void set_Projection(BaseProjection* projection) { _projection = projection; }
-    CStringW GetPath(CStringW root, CStringW ext);
+    CStringW GetPath(CStringW root, CStringW ext) const;
     CMemoryBitmap* get_Bitmap(int overlayIndex);
     int get_ByteSize();
     bool IsEmpty() { return Overlays.size() == 0; }
@@ -160,5 +160,5 @@ public:
 
 public:
     // operators
-    bool TileCore::operator==(const TileCore& t2);
+    bool TileCore::operator==(const TileCore& t2) const;
 };
