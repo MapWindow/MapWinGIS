@@ -39,7 +39,7 @@ public:
 		_subProviders.push_back(this);
 		_serverLetters = "abc";
 		_refererUrl = "https://www.openstreetmap.org/";
-		_urlFormat = "http://%c.tile.openstreetmap.org/%d/%d/%d.png";
+		_urlFormat = "https://%c.tile.openstreetmap.org/%d/%d/%d.png";
 		_maxZoom = 19;
 		_licenseUrl = "https://operations.osmfoundation.org/policies/tiles/";
 	}
@@ -63,7 +63,7 @@ public:
 		Name = "OpenCycleMap";
 		_refererUrl = "http://www.opencyclemap.org/";
 		_licenseUrl = "http://www.opencyclemap.org/docs/";
-		_urlFormat = "http://%c.tile.opencyclemap.org/cycle/%d/%d/%d.png";
+		_urlFormat = "https://%c.tile.opencyclemap.org/cycle/%d/%d/%d.png";
 	}
 };
 
@@ -75,7 +75,7 @@ public:
 		Id = tkTileProvider::OpenTransportMap;
 		Name = "OpenTransportMap";
 		_refererUrl = "http://www.opencyclemap.org/";
-		_urlFormat = "http://%c.tile2.opencyclemap.org/transport/%d/%d/%d.png";
+		_urlFormat = "https://%c.tile2.opencyclemap.org/transport/%d/%d/%d.png";
 	}
 };
 
@@ -88,7 +88,7 @@ public:
 		Id = tkTileProvider::OpenHumanitarianMap;
 		Name = "OpenHumanitarianMap";
 		_refererUrl = "https://www.openstreetmap.org/";
-		_urlFormat = "http://%c.tile.openstreetmap.fr/hot/%d/%d/%d.png";
+		_urlFormat = "https://%c.tile.openstreetmap.fr/hot/%d/%d/%d.png";
 	}
 };
 
