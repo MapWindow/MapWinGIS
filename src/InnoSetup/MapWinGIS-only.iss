@@ -11,12 +11,12 @@
 
 #ifdef x64BitVersion
   #define CPU "x64"
-  #define vcredist "vcredist_x64_2013.exe"
+  #define vcredist "vcredist_x64_2015.exe"
   #define MySourceDir BinLocation + "\x64\"
   #define SystemFlag "64bit"
 #else
   #define CPU "Win32"
-  #define vcredist "vcredist_x86-2013.exe"
+  #define vcredist "vcredist_x86-2015.exe"
   #define MySourceDir BinLocation + "\Win32\"
   #define SystemFlag "32bit"
 #endif
@@ -121,7 +121,7 @@ Name: "MrSID"; Description: "Add MrSID support"; Types: full custom
 Name: "HDF5"; Description: "Add Hierarchical Data Format Release 5 support"; Types: full custom
 
 [Run]
-; Install VC++ 2013 if needed:
+; Install VC++ 2015 if needed:
 #ifdef x64BitVersion
 Filename: "{tmp}\{#vcredist}"; Parameters: "/quiet"; Flags: waituntilterminated; Check: VCRedistNeedsInstall_x64()
 #else
@@ -183,6 +183,9 @@ const
   VC_2013_REDIST_X86 = '{13A4EE12-23EA-3371-91EE-EFB36DDFFF3E}'; //Microsoft.VS.VC_RuntimeMinimumVSU_x86,v12
   VC_2013_REDIST_X64 = '{A749D8E6-B613-3BE3-8F5F-045C84EBA29B}'; //Microsoft.VS.VC_RuntimeMinimumVSU_amd64,v12
 
+  VC_2015_REDIST_X86 = '{8F271F6C-6E7B-3D0A-951B-6E7B694D78BD}'; //Microsoft.VS.VC_RuntimeMinimumVSU_x86,v14
+  VC_2015_REDIST_X64 = '{221D6DB4-46E2-333C-B09B-5F49351D0980}'; //Microsoft.VS.VC_RuntimeMinimumVSU_amd64,v14
+
 function MsiQueryProductState(szProduct: string): INSTALLSTATE; 
   external 'MsiQueryProductState{#AW}@msi.dll stdcall';
 
@@ -198,7 +201,7 @@ begin
   // this statement, the following won't install your VC redist only when
   // the Visual C++ 2008 Redist (x86) and Visual C++ 2008 SP1 Redist(x86)
   // are installed for the current user
-  Result := not (VCVersionInstalled(VC_2013_REDIST_X86));
+  Result := not (VCVersionInstalled(VC_2015_REDIST_X86));
 end;
 
 function VCRedistNeedsInstall_x64(): Boolean;
@@ -208,7 +211,7 @@ begin
   // this statement, the following won't install your VC redist only when
   // the Visual C++ 2008 Redist (x86) and Visual C++ 2008 SP1 Redist(x86)
   // are installed for the current user
-  Result := not (VCVersionInstalled(VC_2013_REDIST_X64));
+  Result := not (VCVersionInstalled(VC_2015_REDIST_X64));
 end;
 
 function NeedsAddPath(Param: string): boolean;
