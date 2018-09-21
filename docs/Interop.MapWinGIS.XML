@@ -702,6 +702,138 @@
             <param name="Index">The index of the break.</param>
             <param name="retval">The new colour to set.</param>
         </member>
+        <member name="T:MapWinGIS.IGdalUtils">
+            <summary>
+            Implementation of the GDAL v2 librified functions.
+            Not all functions are implemented yet.
+            </summary>
+            \new495 Added in version 4.9.5
+        </member>
+        <member name="P:MapWinGIS.IGdalUtils.LastErrorCode">
+            <summary>
+            Retrieves the last error generated in the object. 
+            </summary>
+            \new495 Added in version 4.9.5
+        </member>
+        <member name="P:MapWinGIS.IGdalUtils.GlobalCallback">
+            <summary>
+            The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications.
+            </summary>
+            \new495 Added in version 4.9.5
+        </member>
+        <member name="P:MapWinGIS.IGdalUtils.Key">
+            <summary>
+            The key may be used by the programmer to store any string data associated with the object.
+            </summary>
+            \new495 Added in version 4.9.5
+        </member>
+        <member name="P:MapWinGIS.IGdalUtils.DetailedErrorMsg">
+            <summary>
+            Gets the detailed error message.
+            </summary>
+            \new495 Added in version 4.9.5
+        </member>
+        <member name="M:MapWinGIS.IGdalUtils.GDALWarp(System.String,System.String,System.Array)">
+            <summary>
+            Image reprojection and warping utility.
+            Implementing the librified function of GDAL's gdalwarp.exe tool
+            </summary>
+            <param name="bstrSrcFilename">The source filename.</param>
+            <param name="bstrDstFilename">The destination filename.</param>
+            <param name="Options">The options, as a string array</param>
+            <remarks>See GDAL's documentation here: http://www.gdal.org/gdalwarp.html</remarks>
+            \new495 Added in version 4.9.5
+            
+            \code
+            // Example of creating VRT file from TIFF file. More options are possible:
+            var output = Path.GetTempPath() + "GdalWarp.vrt";
+            var options = new[]
+            {
+                "-of", "vrt",
+                "-overwrite"
+            };
+            var gdalUtils = new GdalUtils();
+            if (!gdalUtils.GDALWarp("test.tif", output, options))
+            {
+                Debug.WriteLine("GdalWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+            }
+            \endcode 
+            
+            \code
+            // Example of cutting a TIFF file with a border file: 
+            var output = Path.GetTempPath() + "GdalWarpCutline.vrt";
+            const string border = @"test.shp";
+            var options = new[]
+            {
+                "-of", "vrt",
+                "-overwrite",
+                "-crop_to_cutline",
+                "-cutline", border
+            };
+            var gdalUtils = new GdalUtils();
+            if (!gdalUtils.GDALWarp("test.tif", output, options))
+            {
+                Debug.WriteLine("GdalWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+            }
+            \endcode
+        </member>
+        <member name="M:MapWinGIS.IGdalUtils.GdalVectorTranslate(System.String,System.String,System.Array,System.Boolean)">
+            <summary>
+            Converts simple features data between file formats.
+            Implementing the librified function of GDAL's ogr2ogr.exe tool
+            </summary>
+            <param name="bstrSrcFilename">The source filename.</param>
+            <param name="bstrDstFilename">The destination filename.</param>
+            <param name="Options">The options, as a string array</param>
+            <param name="useSharedConnection">If set to <c>true</c> improves performance but also might make it instable.</param>
+            <remarks>See GDAL's documentation here: http://www.gdal.org/ogr2ogr.html</remarks>
+            \new495 Added in version 4.9.5
+            
+            \code
+            // Converting shapefile to gml:
+            var outputFilename = Path.Combine(Path.GetTempPath(), "translated.gml");
+            var options = new[]
+            {
+                "-f", "GML"
+            };
+            var gdalUtils = new GdalUtils();
+            if (!gdalUtils.GdalVectorTranslate(inputFilename, outputFilename, options, true))
+            {
+                Debug.WriteLine("GdalVectorTranslate failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+            }
+            \endcode
+        </member>
+        <member name="M:MapWinGIS.IGdalUtils.ClipVectorWithVector(System.String,System.String,System.String,System.Boolean)">
+            <summary>
+            Clips the vector with another vector.
+            </summary>
+            <param name="bstrSubjectFilename">The subject filename.</param>
+            <param name="bstrOverlayFilename">The overlay filename.</param>
+            <param name="bstrDstFilename">The destination filename.</param>
+            <param name="useSharedConnection">If set to <c>true</c> improves performance but also might make it instable.</param>
+            <remarks>Uses GdalUtils.GdalVectorTranslate under the hood.</remarks>
+            \new495 Added in version 4.9.5
+            
+            \code
+            // Clipping large shapefile with border file
+            const string subjectFilename = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\Fishnet.shp";
+            const string borderFilename = @"D:\dev\GIS-Data\Issues\MWGIS-78 Clipper\border.shp";
+            var outputFilename = Path.Combine(tempFolder, "GdalVectorTranslate.shp");
+            var gdalUtils = new GdalUtils();
+            if (!gdalUtils.ClipVectorWithVector("LargeFile.shp", "Border.shp", outputFilename))
+            {
+                Debug.WriteLine("GdalVectorTranslate failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+            }
+            \endcode
+        </member>
+        <member name="M:MapWinGIS.IGdalUtils.get_ErrorMsg(System.Int32)">
+            <summary>
+            Retrieves the error message associated with the specified error code. 
+            </summary>
+            <param name="ErrorCode">The error code for which the error message is required.</param>
+            <returns>The error message description for the specified error code. </returns>
+            \new495 Added in version 4.9.5
+        </member>
         <member name="T:MapWinGIS.IWmsLayer">
             <summary>
             Represents a layer downloading and displaying the data from the particular WMS Server.
@@ -2269,7 +2401,7 @@
             
             \note The fully working implementation of the shape editor can be examined in the the Demo application 
             included in MapWinGIS installation (starting from v4.9.3). The source code for this application is available in
-            the <a href = "http://mapwingis.codeplex.com/SourceControl/latest#NET%20Assemblies/Demo/MapWinGIS.Demo.sln">repository</a>.
+            the <a href = "https://github.com/MapWindow/MapWinGIS/tree/master/demo" target="_blank">repository</a>.
             </remarks>
             \new493 Added in version 4.9.3
         </member>
@@ -3835,6 +3967,16 @@
             \see OgrLayer.MaxFeatureCount
             \new493 Added in version 4.9.3
         </member>
+        <member name="P:MapWinGIS.IGlobalSettings.OgrInterpretYNStringAsBoolean">
+            <summary>
+            Applies to conversion of OGR Shapefile layers to MapWinGIS Shapefiles (via GetBuffer), since 
+            OGR Shapefiles do not support Logical fields.  Instead, DBF Logical fields are read as single-
+            character strings.  This property Gets or Sets a value which indicates whether to interpret 
+            single-character Ogr strings as Logical/Boolean values, as long as the character contained
+            in the string is one of valid DBF logical characters (e.g. Y, N, T, F). The default value is true.
+            </summary>
+            \new495 Added in version 4.9.5
+        </member>
         <member name="P:MapWinGIS.IGlobalSettings.AutoChooseOgrLoadingMode">
             <summary>
             Gets or sets a value which indicates whether OgrLayer.DynamicLoading mode will
@@ -3950,16 +4092,14 @@
         </member>
         <member name="P:MapWinGIS.IGlobalSettings.BingApiKey">
             <summary>
-            Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available. See 
-            <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+            Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available.
             </summary>
             \new493 Added in version 4.9.3
         </member>
         <member name="M:MapWinGIS.IGlobalSettings.SetHereMapsApiKey(System.String,System.String)">
             <summary>
             Sets application credentials for Here Maps online tiles. 
-            Without these credentials Here Maps providers are not available. See 
-            <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+            Without these credentials Here Maps providers are not available. 
             </summary>
             <param name="appId">Application Id. Can be obtained by registering on the site of the service.</param>
             <param name="appCode">Application code. Can be obtained by registering on the site of the service.</param>
@@ -8947,125 +9087,6 @@
             ShapefileCategory.Expression property will change it to cvExpression.</remarks>
             \new493 Added in version 4.9.3
         </member>
-        <member name="T:MapWinGIS.IShapefileColorBreak">
-            <summary>
-            Defines a part of shapefile color scheme and specifies how a certain region of a shapefile will be colored. 
-            </summary>
-            \deprecated in v. 4.8. Use ShapefileCategories, ShapefileCategory, ColorScheme classes instead.
-            \removed493 Removed in 4.9.3
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorBreak.Caption">
-            <summary>
-            Gets or sets the caption of the shapefile color break.
-            </summary>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorBreak.EndColor">
-            <summary>
-            Gets or sets the color which will be used for drawing objects characterized by ShapefileColorBreak.EndValue.
-            </summary>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorBreak.EndValue">
-            <summary>
-            Gets or sets the value which represent the end of shapefile color break.
-            </summary>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorBreak.StartColor">
-            <summary>
-            Gets or sets the color which will be used for drawing objects characterized by ShapefileColorBreak.StartValue.
-            </summary>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorBreak.StartValue">
-            <summary>
-            Gets or sets the value which represent the start of shapefile color break.
-            </summary>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorBreak.Visible">
-            <summary>
-            Gets or sets a boolean value which indicates whether the objects defined by color break will be displayed.
-            </summary>
-        </member>
-        <member name="T:MapWinGIS.IShapefileColorScheme">
-            <summary>
-            A shapefile color scheme defines how a shapefile will be colored. 
-            </summary>
-            <remarks>A shapefile color scheme consists of ShapefileColorBreak objects.</remarks>
-            \deprecated in v. 4.8. Use ShapefileCategories, ShapefileCategory, ColorScheme instead.
-            \removed493 Removed in 4.9.3
-        </member>
-        <member name="M:MapWinGIS.IShapefileColorScheme.Add(MapWinGIS.IShapefileColorBreak)">
-            <summary>
-            Adds a color break to the color scheme.
-            </summary>
-            <param name="Break"></param>
-            <returns></returns>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorScheme.FieldIndex">
-            <summary>
-            Gets or sets the index in the attribute table the color scheme is associated with.
-            </summary>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorScheme.GlobalCallback">
-            <summary>
-            Gets or sets callback object to return the information about the errors.
-            </summary>
-            \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
-        </member>
-        <member name="M:MapWinGIS.IShapefileColorScheme.InsertAt(System.Int32,MapWinGIS.IShapefileColorBreak)">
-            <summary>
-            Insert a color break in the specified position of the scheme.
-            </summary>
-            <param name="Position">The position to insert color break at.</param>
-            <param name="Break">The color break to insert.</param>
-            <returns>The actual position color break was inserted at.</returns>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorScheme.Key">
-            <summary>
-            Gets or sets text string associated with the object.
-            </summary>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorScheme.LastErrorCode">
-            <summary>
-            Returns the code of the last error which took place inside this instance of class.
-            </summary>
-        </member>
-        <member name="P:MapWinGIS.IShapefileColorScheme.LayerHandle">
-            <summary>
-            Gets or sets the layer handle the color scheme is associated with.
-            </summary>
-        </member>
-        <member name="M:MapWinGIS.IShapefileColorScheme.NumBreaks">
-            <summary>
-            Gets the number of color breaks in the color scheme.
-            </summary>
-            <returns>The number of breaks.</returns>
-        </member>
-        <member name="M:MapWinGIS.IShapefileColorScheme.Remove(System.Int32)">
-            <summary>
-            Removes specific color break from the scheme.
-            </summary>
-            <param name="Index">The index of the break to remove.</param>
-        </member>
-        <member name="M:MapWinGIS.IShapefileColorScheme.get_ColorBreak(System.Int32)">
-            <summary>
-            Gets a color break from the color scheme.
-            </summary>
-            <param name="Index">The index of the break.</param>
-            <returns>The color break object or NULL reference on failure.</returns>
-        </member>
-        <member name="M:MapWinGIS.IShapefileColorScheme.get_ErrorMsg(System.Int32)">
-            <summary>
-            Gets the description of the error code returned by ShapefileColorScheme.LastErrorCode.
-            </summary>
-            <param name="ErrorCode">The code of error.</param>
-            <returns>The description of error.</returns>
-        </member>
-        <member name="M:MapWinGIS.IShapefileColorScheme.set_ColorBreak(System.Int32,MapWinGIS.IShapefileColorBreak)">
-            <summary>
-            Replaces a color break in the color scheme.
-            </summary>
-            <param name="Index">The index of color break to replace.</param>
-            <param name="pVal">The reference to the new color break.</param>
-        </member>
         <member name="T:MapWinGIS.IShapeNetwork">
             <summary>
             Represents a network built from the polyline shapefile.
@@ -9887,12 +9908,21 @@
             </summary>
             <param name="cacheType">Type of cache to be cleared.</param>
         </member>
+        <member name="M:MapWinGIS.ITiles.ClearCache2(MapWinGIS.tkCacheType,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Clears cache of the specified to type for a given provider ID and scales.
+            </summary>
+            <param name="cacheType">Type of cache to be cleared.</param>
+            <param name="providerId">Tile provider ID to be cleared. -1 will clear tiles for all providers.</param>
+            <param name="fromScale">Minimal scale (zoom) to clear tiles for.</param>
+            <param name="toScale">Maximum scale (zoom) to clear tiles for.</param>
+        </member>
         <member name="M:MapWinGIS.ITiles.ClearCache2(MapWinGIS.tkCacheType,MapWinGIS.tkTileProvider,System.Int32,System.Int32)">
             <summary>
             Clears cache of the specified to type for a given provider and scales.
             </summary>
             <param name="cacheType">Type of cache to be cleared.</param>
-            <param name="Provider">Tile provider to be cleared. ProviderNone will clear tiles for all providers.</param>
+            <param name="provider">Tile provider to be cleared. ProviderNone will clear tiles for all providers.</param>
             <param name="fromScale">Minimal scale (zoom) to clear tiles for.</param>
             <param name="toScale">Maximum scale (zoom) to clear tiles for.</param>
         </member>
@@ -9903,6 +9933,11 @@
             <remarks>Tile zooms are discrete, but the scale for Map control is continuous. 
             Therefore in most cases tiles of particular zoom will be somewhat additionally scaled to fit the map, 
             i.e. their display size on map won't be equal to the original 256 pixels.</remarks>
+        </member>
+        <member name="P:MapWinGIS.ITiles.DelayRequestTimeout">
+            <summary>
+            Gets or sets the delay request timeout.
+            </summary>
         </member>
         <member name="M:MapWinGIS.ITiles.Deserialize(System.String)">
             <summary>
@@ -9919,7 +9954,7 @@
             <summary>
             Gets the bounds of specific tile in decimal degrees (for inner use/debug purposes).
             </summary>
-            <param name="ProviderId">Id of the provider.</param>
+            <param name="providerId">Id of the provider.</param>
             <param name="zoom">Zoom level for a tile.</param>
             <param name="tileX">X coordinate of the tile within zoom level.</param>
             <param name="tileY">Y coordinate of the tile within zoom level.</param>
@@ -9931,7 +9966,7 @@
             </summary>
             <param name="boundsDegrees">Bounds in decimal degrees.</param>
             <param name="zoom">Zoom level.</param>
-            <param name="Provider">Id of the provider.</param>
+            <param name="providerId">Id of the provider.</param>
             <returns>Extents object with tile bounds or null on failure.</returns>
             <remarks>Can be used at the first step of prefetching operation.</remarks>
         </member>
@@ -9962,7 +9997,7 @@
             <param name="minLng">Minimal longitude to cache within.</param>
             <param name="maxLng">Maximum longitude to cache within.</param>
             <param name="zoom">Zoom level.</param>
-            <param name="ProviderId">Id of the provider.</param>
+            <param name="providerId">Id of the provider.</param>
             <param name="stop">StopExecution interface implementation to stop the operation prematurely.</param>
             <returns>The number of tiles scheduled for caching.</returns>
             <remarks>The operation is executed asynchronously. To get the progress information use Tiles.GlobalCallback property.
@@ -9977,7 +10012,7 @@
             <param name="minY">Minimum Y index of tile to be cached (in coordinates of tile zoom level).</param>
             <param name="maxY">Maximum Y index of tile to be cached (in coordinates of tile zoom level).</param>
             <param name="zoom">Zoom level to be cached.</param>
-            <param name="ProviderId">Id of the provider.</param>
+            <param name="providerId">Id of the provider.</param>
             <param name="stop">StopExecution interface implementation to stop the operation prematurely.</param>
             <returns>Number of tiles scheduled for caching.</returns>
             <remarks>The operation is executed asynchronously. See details in Tiles.Prefetch.</remarks>
@@ -9988,8 +10023,8 @@
             </summary>
             <param name="ext">Extents to cache within in decimal degrees.</param>
             <param name="zoom">Zoom level.</param>
-            <param name="ProviderId">Id of the provider.</param>
-            <param name="savePath">Directory to save files into. Nested folders for zoom levels, 
+            <param name="providerId">Id of the provider.</param>
+            <param name="savePath">Directory to save files into (must exists). Nested folders for zoom levels, 
             X/Y coordinates will be created automatically.</param>
             <param name="fileExt">File extension to store tiles with.</param>
             <param name="stop">StopExecution interface implementation to stop the operation prematurely.</param>
@@ -10020,6 +10055,31 @@
             <summary>
             Gets list of the available default and custom tile providers.
             </summary>
+        </member>
+        <member name="M:MapWinGIS.ITiles.get_CacheSize(MapWinGIS.tkCacheType)">
+            <summary>
+            Gets the current size of cache.
+            </summary>
+            <param name="cacheType">The type of cache to return size for.</param>
+            <returns>The size of cache in MB.</returns>
+        </member>
+        <member name="M:MapWinGIS.ITiles.get_CacheSize2(MapWinGIS.tkCacheType,MapWinGIS.tkTileProvider,System.Int32)">
+            <summary>
+            Gets the current size of cache used for specific provider and zoom level.
+            </summary>
+            <param name="cacheType">The type of cache to return size for.</param>
+            <param name="provider">Provider. ProviderNone will return size for all providers.</param>
+            <param name="scale">Scale (zoom) level. -1 will return size for all zoom levels.</param>
+            <returns>The size of cache in MB.</returns>
+        </member>
+        <member name="M:MapWinGIS.ITiles.get_CacheSize2(MapWinGIS.tkCacheType,System.Int32,System.Int32)">
+            <summary>
+            Gets the current size of cache used for specific provider and zoom level.
+            </summary>
+            <param name="cacheType">Type of the cache.</param>
+            <param name="providerId">The provider. -1 will return size for all providers.</param>
+            <param name="scale">The scale. -1 will return size for all zoom levels.</param>
+            <returns>The size of cache in MB.</returns>
         </member>
         <member name="P:MapWinGIS.ITiles.Proxy">
             <summary>
@@ -10058,22 +10118,6 @@
             Gets or sets a value indicating whether the tiles will be displayed on the map.
             </summary>
             <remarks>When set to false tiles won't be requested either from server or cache.</remarks>
-        </member>
-        <member name="M:MapWinGIS.ITiles.get_CacheSize(MapWinGIS.tkCacheType)">
-            <summary>
-            Gets the current size of cache.
-            </summary>
-            <param name="cacheType">The type of cache to return size for.</param>
-            <returns>The size of cache in MB.</returns>
-        </member>
-        <member name="M:MapWinGIS.ITiles.get_CacheSize2(MapWinGIS.tkCacheType,MapWinGIS.tkTileProvider,System.Int32)">
-            <summary>
-            Gets the current size of cache used for specific provider and zoom level.
-            </summary>
-            <param name="cacheType">The type of cache to return size for.</param>
-            <param name="Provider">Provider. ProviderNone will return size for all providers.</param>
-            <param name="scale">Scale (zoom) level. -1 will return size for all zoom levels.</param>
-            <returns>The size of cache in MB.</returns>
         </member>
         <member name="M:MapWinGIS.ITiles.get_DoCaching(MapWinGIS.tkCacheType)">
             <summary>
@@ -10135,21 +10179,6 @@
             </summary>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:MapWinGIS.ITiles.StartLogRequests(System.String,System.Boolean)">
-            <summary>
-            Starts logging HTTP requests for tile server.
-            </summary>
-            <param name="Filename">Filename to write log into. New file will be created any existing file - overwritten.</param>
-            <param name="errorsOnly">Indicate whether only unsuccessful requests should logged.</param>
-            <returns>True if log was opened, and false on failure.</returns>
-            \new491 Added in version 4.9.1
-        </member>
-        <member name="M:MapWinGIS.ITiles.StopLogRequests">
-            <summary>
-            Stops logging of HTTP requests to a file.
-            </summary>
-            \new491 Added in version 4.9.1
-        </member>
         <member name="P:MapWinGIS.ITiles.PrefetchErrorCount">
             <summary>
             Gets the number of unsuccessful HTTP requests during prefetching operation (Tiles.Prefetch and overloads).
@@ -10172,7 +10201,7 @@
             <summary>
             Gets number of tiles stored in disk cache for a given provider, zoom and region.
             </summary>
-            <param name="Provider">Id of provider.</param>
+            <param name="providerId">Id of provider.</param>
             <param name="zoom">Zoom level.</param>
             <param name="xMin">Min X index of tile.</param>
             <param name="xMax">Max X index of tile.</param>
@@ -10200,7 +10229,7 @@
             <summary>
             Gets the description of the specific error code.
             </summary>
-            <param name="ErrorCode">The error code returned by LastErrorCode property.</param>
+            <param name="errorCode">The error code returned by LastErrorCode property.</param>
             <returns>String with the description.</returns>
         </member>
         <member name="P:MapWinGIS.ITiles.MaxZoom">
@@ -10222,6 +10251,20 @@
             <remarks>This diagnostic value indicates whether tiles will be rendered without scaling and distortions and if they will be rendered at all.</remarks>
             \new491 Added in version 4.9.1
         </member>
+        <member name="P:MapWinGIS.ITiles.ProxyAuthenticationScheme">
+            <summary>
+            Gets or sets the proxy authentication scheme.
+            </summary>
+            \new491 Added in version 4.9.1
+        </member>
+        <member name="P:MapWinGIS.ITiles.ProjectionIsSphericalMercator">
+            <summary>
+            Gets a value indicating whether [projection is spherical mercator].
+            </summary>
+            <value>
+              <c>true</c> if [projection is spherical mercator]; otherwise, <c>false</c>.
+            </value>
+        </member>
         <member name="P:MapWinGIS.ITiles.ServerProjection">
             <summary>
             Gets projection used by specific tile service.
@@ -10230,11 +10273,11 @@
         </member>
         <member name="M:MapWinGIS.ITiles.ClearProxyAuthorization">
             <summary>
-            Clears user name and password set by Tiles.SetProxyAuthorization method.
+            Clears user name and password set by Tiles.SetProxyAuthentication method.
             </summary>
             \new493 Added in version 4.9.3
         </member>
-        <member name="M:MapWinGIS.ITiles.SetProxyAuthorization(System.String,System.String,System.String)">
+        <member name="M:MapWinGIS.ITiles.SetProxyAuthentication(System.String,System.String,System.String)">
             <summary>
             Sets credentials for proxy authorization. 
             </summary>
@@ -10488,6 +10531,7 @@
         <member name="T:MapWinGIS.IUtils">
             <summary>
             A utils object provides access to a set of utility functions to perform a variety of tasks on other objects such as grids, images, points, shapes, shapefiles, tins, etc.  
+            Starting at v4.9.5 some specific GDAL methods are moved to GdalUtils.
             </summary>
         </member>
         <member name="M:MapWinGIS.IUtils.ClipPolygon(MapWinGIS.PolygonOperation,MapWinGIS.Shape,MapWinGIS.Shape)">
@@ -10825,6 +10869,7 @@
             </summary>
             <remarks>See documentation here: http://www.gdal.org/gdalwarp.html</remarks>
             \new490 Added in version 4.9.0
+            \deprecated v4.9.5 Use GdalUtils.GDALWarp instead.
         </member>
         <member name="M:MapWinGIS.IUtils.GeodesicDistance(System.Double,System.Double,System.Double,System.Double)">
             <summary>
@@ -10913,6 +10958,7 @@
             </summary>
             <remarks>See documentation here: http://www.gdal.org/ogr2ogr.html</remarks>
             \new490 Added in version 4.9.0
+            \deprecated v4.9.5 Use GdalUtils.GdalVectorTranslate instead.
         </member>
         <member name="M:MapWinGIS.IUtils.OGRInfo(System.String,System.String,System.String,MapWinGIS.ICallback)">
             <summary>
@@ -14162,7 +14208,8 @@
         <member name="M:MapWinGIS.IShapefile.AggregateShapesWithStats(System.Boolean,System.Int32,MapWinGIS.FieldStatOperations)">
             \addtogroup shapefile_geoprocessing Shapefile geoprocessing
             Here is a list of methods to perform geoprocessing tasks using shapefile data.
-            This module is a part of the documentation of Shapefile class.
+            This module is a part of the documentation of Shapefile class.\n\n
+            Use GlobalSettings.MinAreaToPerimeterRatio and GlobalSettings.MinPolygonArea to tweak which polygon needs to be included in the output file.
             \dot
             digraph shapefile_geoprocessing {
             splines = true;

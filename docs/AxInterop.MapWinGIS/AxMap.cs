@@ -1,4 +1,9 @@
-﻿using System;
+﻿// ReSharper disable ArrangeAccessorOwnerBody
+// ReSharper disable DelegateSubtraction
+// ReSharper disable PossibleInvalidCastExceptionInForeachLoop
+// ReSharper disable CheckNamespace
+
+using System;
 using MapWinGIS;
 #pragma warning disable 67 // Never used warning
 
@@ -1470,7 +1475,9 @@ namespace AxMapWinGIS
 
         #region Drawing layer
         /// \addtogroup map_drawing_layers Drawing layers
-        /// Here is a list of methods and properties to interact with the drawing layers of the map. This module is a part of the documentation of AxMap class.
+        /// Here is a list of methods and properties to interact with the drawing layers of the map.
+        /// The drawing layers are more transient that the standard layers, intended for fast drawing of temporary elements on top of the map.
+        /// This module is a part of the documentation of AxMap class.
         /// \dot
         /// digraph map_drawing_layers {
         /// splines = true;
@@ -1506,16 +1513,19 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Clears all the drawings on the drawing layer specified.
+        /// Clears all drawings on the specified drawing layer, and removes the drawing layer. The drawing handle will no longer be valid.
+        /// Call AxMap.NewDrawing again to create a new drawing layer to continue adding new elements.
         /// </summary>
-        /// <param name="DrawHandle">Drawing handle of the drawing layer for which all drawings are to be cleared.</param>
+        /// <param name="DrawHandle">Drawing handle of the drawing layer to be cleared (and removed).</param>
         public void ClearDrawing(int DrawHandle)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Clears all drawings on all drawing layers. This method is slower than using ClearDrawing on a specific layer
+        /// Clears all drawings on all drawing layers, and removes all drawing layers.
+        /// This method is slower than using ClearDrawing on a specific layer.
+        /// Call AxMap.NewDrawing again to create a new drawing layer to continue adding new elements.
         /// </summary>
         public void ClearDrawings()
         {
@@ -1523,7 +1533,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Draws a circle on the last drawing layer created by NewDrawing
+        /// Draws a circle on the last drawing layer created by AxMap.NewDrawing
         /// </summary>
         /// <param name="x">Center x coordinate for the circle to be drawn.</param>
         /// <param name="y">Center y coordinate for the circle to be drawn.</param>
@@ -1550,7 +1560,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Draws a line on the last drawing layer created using NewDrawing.
+        /// Draws a line on the last drawing layer created using AxMap.NewDrawing.
         /// </summary>
         /// <param name="x1">X coordinate of the first point used to draw the line</param>
         /// <param name="y1">Y coordinate of the first point used to draw the line.</param>
@@ -1579,7 +1589,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Draws a point on the last drawing layer created by NewDrawing.
+        /// Draws a point on the last drawing layer created by AxMap.NewDrawing.
         /// </summary>
         /// <param name="x">The x coordinate of the point to draw</param>
         /// <param name="y">The y coordinate of the point to draw.</param>
@@ -1604,7 +1614,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Draws a polygon on the last drawing layer created using NewDrawing.
+        /// Draws a polygon on the last drawing layer created using AxMap.NewDrawing.
         /// </summary>
         /// <param name="xPoints">An array containing x-coordinates for each point in the polygon.</param>
         /// <param name="yPoints">An array containing y-coordinates for each point in the polygon.</param>
@@ -1631,7 +1641,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Draws a circle with custom outline width on the last drawing layer created by NewDrawing.
+        /// Draws a circle with custom outline width on the last drawing layer created by AxMap.NewDrawing.
         /// </summary>
         /// <param name="x">Center x coordinate for the circle to be drawn.</param>
         /// <param name="y">Center y coordinate for the circle to be drawn.</param>
@@ -1660,7 +1670,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Draws a polygon with custom width of outline on the last drawing layer created using NewDrawing.
+        /// Draws a polygon with custom width of outline on the last drawing layer created using AxMap.NewDrawing.
         /// </summary>
         /// <param name="xPoints">An array containing x-coordinates for each point in the polygon.</param>
         /// <param name="yPoints">An array containing y-coordinates for each point in the polygon.</param>
@@ -1674,7 +1684,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Draws a polygon with custom width of outline on the last drawing layer created using NewDrawing.
+        /// Draws a polygon with custom width of outline on the last drawing layer created using AxMap.NewDrawing.
         /// </summary>
         /// <param name="LayerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
         /// <param name="xPoints">An array containing x-coordinates for each point in the polygon.</param>
@@ -1691,10 +1701,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// Creates a new drawing layer on the map returning its handle.
         /// </summary>
-        /// <param name="Projection">Sets the coordinate system to use for the new drawing layer to be created. (ScreenReferenced 
-        /// uses pixels in screen coordinates. SpatiallyReferenced uses projected map units.)</param>
+        /// <param name="projection">Sets the coordinate system to use for the new drawing layer to be created. (tkDrawReferenceList.dlScreenReferencedList 
+        /// uses pixels in screen coordinates. tkDrawReferenceList.dlSpatiallyReferencedList uses projected map units.)</param>
         /// <returns>The handle for the new drawing layer in the map.</returns>
-        public int NewDrawing(MapWinGIS.tkDrawReferenceList Projection)
+        public int NewDrawing(tkDrawReferenceList projection)
         {
             throw new NotImplementedException();
         }
