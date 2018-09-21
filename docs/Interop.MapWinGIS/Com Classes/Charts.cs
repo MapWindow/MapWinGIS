@@ -89,7 +89,8 @@ namespace MapWinGIS
     /// \new48 Added in version 4.8
     #if nsp
         #if upd    
-            public class Charts : MapWinGIS.ICharts
+            //public class Charts : MapWinGIS.ICharts
+    public class ICharts       
         #else        
             public class ICharts       
         #endif
@@ -692,7 +693,6 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-
         #endregion
     }
 #if nsp

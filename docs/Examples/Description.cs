@@ -1,10 +1,12 @@
-﻿
+﻿// ReSharper disable ArrangeAccessorOwnerBody
+// ReSharper disable DelegateSubtraction
+// ReSharper disable PossibleInvalidCastExceptionInForeachLoop
+// ReSharper disable CheckNamespace
+
+// ReSharper disable UseNullPropagation
 namespace Examples
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
     /// The groups of the examples for GUI
@@ -25,9 +27,8 @@ namespace Examples
     /// <summary>
     /// Holds description of the example to be displayed in the documentation and GUI of this project.
     /// </summary>
-    class Example
+    public class Example
     {
-        private string guiName;           // in the interface
         public string function;           // to call with reflection
         public string description;        // to generate documentation page and show in the GUI
         public bool image;                // whether an image should be attached to the page
@@ -38,24 +39,22 @@ namespace Examples
             image = true;
         }
 
-        public string GuiName
-        {
-            get { return guiName; }
-            set { guiName = value; }
-        }
+        public string GuiName { get; set; }
     }
 
-    class Description
+    internal class Description
     {
         // list of the examples
-        public List<Example> examples = new List<Example>();
+        public readonly List<Example> examples = new List<Example>();
 
         // event declaration
-        delegate void ExampleAddedEventHandler(Example ex, int index);
-        event ExampleAddedEventHandler ExampleAdded;
-        void FireExampleAdded(Example ex, int index)
+        private delegate void ExampleAddedEventHandler(Example ex, int index);
+
+        private event ExampleAddedEventHandler ExampleAdded;
+
+        private void FireExampleAdded(Example ex, int index)
         {
-            if (this.ExampleAdded != null)
+            if (ExampleAdded != null)
                 ExampleAdded(ex, index);
         }
 
@@ -64,10 +63,10 @@ namespace Examples
         /// </summary>
         public Description()
         {
-            this.ExampleAdded += Description_ExampleAdded;
-            for (int i = 0; i < 30; i++)
+            ExampleAdded += Description_ExampleAdded;
+            for (var i = 0; i < 30; i++)
             {
-                Example ex = new Example();
+                var ex = new Example();
                 FireExampleAdded(ex, i);
                 examples.Add(ex);
             }
@@ -76,7 +75,7 @@ namespace Examples
         /// <summary>
         /// Adds description of the examples
         /// </summary>
-        void Description_ExampleAdded(Example ex, int index)
+        private static void Description_ExampleAdded(Example ex, int index)
         {
             switch (index)
             {

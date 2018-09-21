@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+// ReSharper disable ArrangeAccessorOwnerBody
+// ReSharper disable DelegateSubtraction
+// ReSharper disable PossibleInvalidCastExceptionInForeachLoop
+// ReSharper disable CheckNamespace
 
-static class MapEvents
+public static class MapEvents
 {
-    public static AxMapWinGIS._DMapEvents_MouseDownEventHandler _mouseDownDelegate;
-    public static AxMapWinGIS._DMapEvents_MouseMoveEventHandler _mouseMoveDelegate;
-    public static AxMapWinGIS._DMapEvents_MouseUpEventHandler _mouseUpDelegate;
-    public static AxMapWinGIS._DMapEvents_SelectBoxFinalEventHandler _selectBoxDelegate;
-    public static AxMapWinGIS._DMapEvents_ShapeHighlightedEventHandler _shapeHighlightedDelegate;
-
-    private static Delegate[] m_delegates = new Delegate[5] { _mouseDownDelegate, _mouseMoveDelegate, _mouseUpDelegate, 
-                                                             _selectBoxDelegate, _shapeHighlightedDelegate };
+    private static AxMapWinGIS._DMapEvents_MouseDownEventHandler _mouseDownDelegate;
+    private static AxMapWinGIS._DMapEvents_MouseMoveEventHandler _mouseMoveDelegate;
+    private static AxMapWinGIS._DMapEvents_MouseUpEventHandler _mouseUpDelegate;
+    private static AxMapWinGIS._DMapEvents_SelectBoxFinalEventHandler _selectBoxDelegate;
+    private static AxMapWinGIS._DMapEvents_ShapeHighlightedEventHandler _shapeHighlightedDelegate;
 
     #region Attach delegate
     /// <summary>
@@ -22,31 +20,31 @@ static class MapEvents
     {
         axMap1.MouseDownEvent += delegate(object sender, AxMapWinGIS._DMapEvents_MouseDownEvent e)
         {
-            object[] param = new object[2] { sender, e };
+            var param = new[] { sender, e };
             Invoke(_mouseDownDelegate, param);
         };
 
         axMap1.MouseMoveEvent += delegate(object sender, AxMapWinGIS._DMapEvents_MouseMoveEvent e)
         {
-            object[] param = new object[2] { sender, e };
+            var param = new[] { sender, e };
             Invoke(_mouseMoveDelegate, param);
         };
 
         axMap1.MouseUpEvent += delegate(object sender, AxMapWinGIS._DMapEvents_MouseUpEvent e)
         {
-            object[] param = new object[2] { sender, e };
+            var param = new[] { sender, e };
             Invoke(_mouseUpDelegate, param);
         };
 
         axMap1.SelectBoxFinal += delegate(object sender, AxMapWinGIS._DMapEvents_SelectBoxFinalEvent e)
         {
-            object[] param = new object[2] { sender, e };
+            var param = new[] { sender, e };
             Invoke(_selectBoxDelegate, param);
         };
 
         axMap1.ShapeHighlighted += delegate(object sender, AxMapWinGIS._DMapEvents_ShapeHighlightedEvent e)
         {
-            object[] param = new object[2] { sender, e };
+            var param = new[] { sender, e };
             Invoke(_shapeHighlightedDelegate, param);
         };
     }
