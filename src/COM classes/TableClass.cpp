@@ -1363,8 +1363,20 @@ bool CTableClass::ReadRecord(long RowIndex)
 					//WCHAR *buffer = Utility::StringToWideChar(v);
 					//val->bstrVal = W2BSTR(buffer);
 					//delete[] buffer;
-					val->bstrVal = W2BSTR(Utility::ConvertFromUtf8(v));
-			    }
+
+					// jf, 12-22-2018
+					// if code page was not provided (via .CPG file), OR if code page is specified UTF-8,
+					// then we will assume we have to unpack it as UTF-8, else we assume the string is 
+					// already encoded properly, or is in the Windows multi-byte charset, and take it as is.
+					// Further reading: https://support.esri.com/en/technical-article/000013192
+					// NOTE that this code differs from shapefiles being read from OGR, which are always UTF-8.
+					if(DBFGetCodePage(_dbfHandle) == nullptr || strcmp(DBFGetCodePage(_dbfHandle), "UTF-8") == 0)
+						// assume UTF-8
+						val->bstrVal = W2BSTR(Utility::ConvertFromUtf8(v));
+					else
+						// else assume it's already interpreted by associated code page
+						val->bstrVal = A2BSTR(v);
+				}
 		    }
 		    else if( type == INTEGER_FIELD )
 		    {	
