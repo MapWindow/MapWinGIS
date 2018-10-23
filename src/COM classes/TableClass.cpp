@@ -463,10 +463,10 @@ STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT 
 			}
 			else
 			{
-				VARIANT var;
-				VariantInit(&var);
-				var.vt = VT_EMPTY;
-				pVal = &var;
+				// MWGIS-128
+				// no value, send back EMPTY variant
+				VariantInit(pVal);
+				pVal->vt = VT_EMPTY;
 			}
 			return S_OK;
 		}
