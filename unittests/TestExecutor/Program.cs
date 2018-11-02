@@ -43,7 +43,8 @@ namespace ConsoleApplication1
             //var t = new PostGisTest();
             //t.ReadAttributesFromPostGISLayer();
 
-            // var t = new ShapefileTests();
+            var t = new ShapefileTests();
+            t.ImportExportWKT();
             //t.ShapefileDataTest();
             // t.UnionShapefiles();
 
@@ -78,8 +79,8 @@ namespace ConsoleApplication1
             //t.ClipPolygon();
             //t.PointInPolygon();
 
-            var t = new TilesTests();
-            t.PrefetchToFolder();
+            //var t = new TilesTests();
+            //t.PrefetchToFolder();
 
             Console.WriteLine("Finished");
             Console.ReadLine();

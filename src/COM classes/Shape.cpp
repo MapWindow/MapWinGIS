@@ -2575,8 +2575,9 @@ STDMETHODIMP CShape::ExportToWKT(BSTR * retVal)
 		geom->exportToWkt(&s);
 		(*retVal) = A2BSTR(s);
 		OGRGeometryFactory::destroyGeometry(geom);
-		delete[] s;
-	}
+        // allocated in GDAL; free using CPLFree
+        CPLFree(s);
+    }
 	else {
 		(*retVal) = A2BSTR("");
 	}
