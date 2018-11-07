@@ -190,6 +190,7 @@ public:
 	STDMETHOD(GetWGS84ProjectionName)(tkWgs84Projection projectionID, BSTR* retVal);
 	STDMETHOD(GetProjectionNameByID)(int SRID, BSTR* retVal);
 	STDMETHOD(GetProjectionList)(tkProjectionSet projectionSets, VARIANT* list, VARIANT_BOOL* retVal);
+    STDMETHOD(GetAngle)(IPoint* firstPoint, IPoint* secondPoint, double* retVal);
 
 private:
 	struct RasterPoint

@@ -17,6 +17,7 @@
 //********************************************************************************************************
 //Contributor(s): dpa, angela, cdm, Rob Cairns, lsu
 // 09-06-2017 jfaust - Add EPSGUnitConversion, return tkUnitsOfMeasure associated with specified EPSG code
+// 11-06-2018 jfaust - Add GetAngle function
 //********************************************************************************************************
 
 #include "stdafx.h"
@@ -43,6 +44,7 @@
 #include "TableHelper.h"
 #include "xtiffio.h"
 #include "ShapeHelper.h"
+#include "GeometryHelper.h"
 
 #pragma warning(disable:4996)
 
@@ -5755,3 +5757,21 @@ STDMETHODIMP CUtils::EPSGUnitConversion(int EPSGUnitCode, tkUnitsOfMeasure* retV
 	return S_OK;
 }
 
+// *************************************************
+//			GetAngle()
+// *************************************************
+STDMETHODIMP CUtils::GetAngle(IPoint* firstPoint, IPoint* secondPoint, double* retVal)
+{
+    double x1, y1, x2, y2, dx, dy;
+    // get delta X and Y
+    firstPoint->get_X(&x1);
+    firstPoint->get_Y(&y1);
+    secondPoint->get_X(&x2);
+    secondPoint->get_Y(&y2);
+    dx = x2 - x1;
+    dy = y2 - y1;
+    // return angle in degrees
+    *retVal = GeometryHelper::GetPointAngleDeg(dx, dy);
+    //
+    return S_OK;
+}

@@ -4597,6 +4597,7 @@ interface IUtils : IDispatch{
 	[id(61), helpstring("method GetWGS84ProjectionName")] HRESULT GetWGS84ProjectionName([in] tkWgs84Projection projectionID, [out, retval] BSTR* retVal);
 	[id(62), helpstring("method GetProjectionNameByID")] HRESULT GetProjectionNameByID([in] int SRID, [out, retval] BSTR* retVal);
 	[id(63), helpstring("method GetProjectionList")] HRESULT GetProjectionList([in] tkProjectionSet projectionSets, [in, out] VARIANT* list, [out, retval] VARIANT_BOOL* retVal);
+    [id(64), helpstring("method GetAngle")] HRESULT GetAngle([in] IPoint* firstPoint, [in] IPoint* secondPoint, [out, retval] double* retVal);
 };
 
 /****************************  Vector Interface ***********************/
