@@ -886,22 +886,25 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 		return false;
 	}
 	
-	// let's substitute original file with this one
+	// let's substitute original shapefile with the reprojected one
 	// don't close the original shapefile; use may still want to interact with it
-	// release should be called twice, smart pointer won't allow it
-	ShapefileHelper::Cast(sf)->Release();
 
 	if (layer->get_LayerType() == OgrLayerSource)
 	{
 		CComPtr<IOgrLayer> ogr = NULL;
 		layer->QueryOgrLayer(&ogr);
 		if (ogr) {
+            // don't need to Release original Shapefile reference here,
+            // since InjectShapefile Closes/Releases original reference
 			OgrHelper::Cast(ogr)->InjectShapefile(sfNew);
 		}
 	}
 	else
 	{
-		layer->set_Object(sfNew);
+        // need to Release original reference for Shapefile here, 
+        // since we are directly replacing old reference with new
+        ShapefileHelper::Cast(sf)->Release();
+        layer->set_Object(sfNew);
 	}
 	layer->UpdateExtentsFromDatasource();
 

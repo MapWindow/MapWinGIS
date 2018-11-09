@@ -61,12 +61,17 @@ STDMETHODIMP CShapefile::Validate(tkShapeValidationMode validationMode, VARIANT_
 bool CShapefile::ValidateInput(IShapefile* isf, CString methodName,
                                CString parameterName, VARIANT_BOOL selectedOnly, CString className /*= "Shapefile"*/)
 {
-    // Always check if the shapefile is open:
-    if (_shpfile == nullptr)
-    {
-        ErrorMessage(tkFILE_NOT_OPEN);
-        return false;
-    }
+    // MWGIS-132; this code, suggested by CLang for MWGIS-104 on 24 Aug 2018,
+    // is being removed because it prevents any in-memory Shapefile from passing 
+    // validation (since in-memory shapefiles have no FILE * (_shpfile == NULL). 
+    // This also affected all OGR layers, and was observed when attempting to 
+    // load an OGR layer that required reprojection on-the-fly.
+    //// Always check if the shapefile is open:
+    //if (_shpfile == nullptr)
+    //{
+    //    ErrorMessage(tkFILE_NOT_OPEN);
+    //    return false;
+    //}
 
     if (m_globalSettings.inputValidation != AbortOnErrors)
     {
