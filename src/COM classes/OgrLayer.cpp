@@ -1575,8 +1575,15 @@ STDMETHODIMP COgrLayer::get_AvailableShapeTypes(VARIANT* pVal)
 		{
 			vector<ShpfileType> shapeTypes;
 
+            // querying the MSSQL datasource for available types doesn't work if
+            // we're looking at a query result set rather than an actual table. 
+            // instead, we'll let it fall into the 'else' logic, which iterates the
+            // local layer instead of the database to determine which types are present.
+            CStringW layerName = Utility::ConvertFromUtf8(_layer->GetName());
+
 			if (m_globalSettings.ogrListAllGeometryTypes && 
-				OgrHelper::IsMsSqlDatasource(_dataset))
+				OgrHelper::IsMsSqlDatasource(_dataset) &&
+                (layerName != "SELECT" && layerName != "UPDATE"))
 			{
 				GetMsSqlShapeTypes(shapeTypes);
 			}
@@ -1665,11 +1672,19 @@ STDMETHODIMP COgrLayer::put_ActiveShapeType(ShpfileType newVal)
 	ShpfileType shpType;
 	get_ShapeType(&shpType);
 
+    // SHP_NULLSHAPE indicates multiple shape types
 	if (shpType == SHP_NULLSHAPE)
 	{
-		_activeShapeType = newVal;
-	}
-	else
+        // if re-assigning the active type
+        if (_activeShapeType != newVal)
+        {
+            // clear current buffer to force new
+            CloseShapefile();
+        }
+        // assign active type
+        _activeShapeType = newVal;
+    }
+    else
 	{
 		CallbackHelper::ErrorMsg("OGR layer has single geometry type. ActiveShapeType provided will be ignored.");
 	}
