@@ -704,7 +704,7 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Imports shape data from WKT format.
+        /// Exports shape data to WKT format.
         /// </summary>
         /// <returns>String in WKT format with shape data.</returns>
         /// \new490 Added in version 4.9.0

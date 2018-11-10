@@ -872,6 +872,16 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Calculates the angle between the two specified coordinates
+        /// </summary>
+        /// <param name="firstPoint"></param>
+        /// <param name="secondPoint"></param>
+        /// <returns>Angle of the vector from the first point to the second point</returns>
+        public double GetAngle(Point firstPoint, Point secondPoint)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }
