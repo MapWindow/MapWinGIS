@@ -873,11 +873,17 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Calculates the angle between the two specified coordinates
+        /// Calculates the angle defined by the two specified coordinates
         /// </summary>
         /// <param name="firstPoint"></param>
         /// <param name="secondPoint"></param>
-        /// <returns>Angle of the vector from the first point to the second point</returns>
+        /// <returns>Geographic Angle (in degrees) of the vector measured from the first point to the second point</returns>
+        /// <remarks>
+        /// The angle returned is the so-called Geographic angle, measured in a clockwise direction
+        /// from the positive Y-axis, as opposed to the Arithmetic (Cartesian) angle measured in a
+        /// counter-clockwise direction from the positive X-axis.  The returned value can be used 
+        /// as-is to specify Shape or Label Rotation.
+        /// </remarks>
         public double GetAngle(Point firstPoint, Point secondPoint)
         {
             throw new NotImplementedException();
