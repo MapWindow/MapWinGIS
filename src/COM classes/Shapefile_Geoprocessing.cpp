@@ -3704,7 +3704,7 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
         if (this->QuickExtentsCore(i, &xMin, &yMin, &xMax, &yMax))
         {
             const QTreeExtent query(xMin, xMax, yMax, yMin);
-            std::vector<int> shapes = this->_qtree->GetNodes(query);
+            std::vector<int> shapes = this->_tempTree->GetNodes(query);
 
             // calculation union of all geometries
             if (!shapes.empty())
@@ -3731,16 +3731,20 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
                     }
                 }
 
-                GEOSGeometry* gsOut = GeosHelper::Difference(geom1, gsUnion);
-                GeosHelper::DestroyGeometry(gsUnion);
-
-                if (gsOut)
+                // may have had no shapes
+                if (gsUnion)
                 {
-                    const bool res = InsertGeosGeometry(sfOut, gsOut, this, i);
-                    GeosHelper::DestroyGeometry(gsOut);
-                    if (res)
-                        continue;
+                    GEOSGeometry* gsOut = GeosHelper::Difference(geom1, gsUnion);
+                    GeosHelper::DestroyGeometry(gsUnion);
+                    if (gsOut)
+                    {
+                        const bool res = InsertGeosGeometry(sfOut, gsOut, this, i);
+                        GeosHelper::DestroyGeometry(gsOut);
+                        if (res)
+                            continue;
+                    }
                 }
+
             }
         }
         InsertGeosGeometry(sfOut, geom1, this, i);
