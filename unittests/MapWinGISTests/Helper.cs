@@ -26,6 +26,8 @@ namespace MapWinGISTests
 
         public static void DeleteShapefile(string filename)
         {
+            if (string.IsNullOrEmpty(filename)) return;
+
             var folder = Path.GetDirectoryName(filename);
             if (folder == null) return;
             var filenameBody = Path.GetFileNameWithoutExtension(filename);
@@ -131,6 +133,15 @@ namespace MapWinGISTests
 
             if (sf.HasInvalidShapes())
                 throw new Exception("Shapefile has invalid shapes");
+
+            return sf;
+        }
+
+        public static Shapefile CreateSf(ShpfileType shpfileType)
+        {
+            var sf = new Shapefile();
+            if (!sf.CreateNewWithShapeID("", shpfileType))
+                throw new Exception("Can't create shapefile. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
 
             return sf;
         }
