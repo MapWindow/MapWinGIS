@@ -108,6 +108,7 @@
   <ItemGroup>
     <Compile Include="GdalTests.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="PointInPolygonTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShapefileTests.cs" />
     <Compile Include="PostGisTest.cs" />
@@ -134,7 +135,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="Testdata\HDF5\test.h5">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -258,6 +258,18 @@
     <None Include="Testdata\Issues\MWGIS-98\3dPoint.shx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Testdata\sf\embankments_buffered_split.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\embankments_buffered_split.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\embankments_buffered_split.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\embankments_buffered_split.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Testdata\sf\invalid.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -304,6 +316,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Testdata\sf\onepoint.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\Reach2_simplify100_smooth.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\Reach2_simplify100_smooth.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\Reach2_simplify100_smooth.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\Reach2_simplify100_smooth.shx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Testdata\sf\SHP_MULTIPOINT.dbf">

@@ -27,7 +27,6 @@ namespace MapWinGISTests
 
             // Tiles settings:
             _axMap1.Tiles.GlobalCallback = this;
-            _settings.StartLogTileRequests(@"D:\tmp\axmap.tiles\TileRequests.log");
         }
 
         ~TilesTests()
@@ -78,12 +77,14 @@ namespace MapWinGISTests
         {
             // Set tiles provider:
             _axMap1.Tiles.Provider = tileProvider;
+            _axMap1.Tiles.GlobalCallback = this;
 
             Helper.DebugMsg("Tiles projection status: " + _axMap1.Tiles.ProjectionStatus);
             Helper.DebugMsg("_axMap1.Tiles.ProjectionIsSphericalMercator: " + _axMap1.Tiles.ProjectionIsSphericalMercator);
 
             var outputFolder = $@"D:\tmp\axmap.tiles\{_axMap1.Tiles.Provider.ToString()}";
             if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
+            _settings.StartLogTileRequests($@"D:\tmp\axmap.tiles\TileRequests-{_axMap1.Tiles.Provider.ToString()}.log");
 
             var providerId = Convert.ToInt32(tileProvider);
             var numRounds = 0; // To prevent endless loops
@@ -117,12 +118,12 @@ namespace MapWinGISTests
 
         public void Progress(string KeyOfSender, int Percent, string Message)
         {
-            Console.WriteLine($"{Percent} {Message}");
+            Console.WriteLine($"Callback {Percent} {Message}");
         }
 
         public void Error(string KeyOfSender, string ErrorMsg)
         {
-            Console.WriteLine("Error: " + ErrorMsg);
+            Console.WriteLine("Callback Error: " + ErrorMsg);
         }
 
         public bool StopFunction()

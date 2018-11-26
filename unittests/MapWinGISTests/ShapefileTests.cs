@@ -704,7 +704,6 @@ namespace MapWinGISTests
             }
 
             Assert.AreEqual(0, numErrors);
-            Console.ReadLine();
         }
 
         private void TestSpatialIndex(string sfName)
@@ -1155,7 +1154,9 @@ namespace MapWinGISTests
             var result = sf.Open(filename, this);
             Assert.IsTrue(result, "Could not open shapefile");
 
-            return Helper.GetInfoShapefile(ref sf);
+            var retVal= Helper.GetInfoShapefile(ref sf);
+            sf.Close();
+            return retVal;
         }
 
         public void Progress(string KeyOfSender, int Percent, string Message)
