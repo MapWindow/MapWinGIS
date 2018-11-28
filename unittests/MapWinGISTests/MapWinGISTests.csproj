@@ -219,6 +219,30 @@
     <None Include="Testdata\Issues\MWGIS-69\SHP4_POINT.shx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Testdata\Issues\MWGIS-72\monitoring_object.cpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-72\monitoring_object.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-72\monitoring_object.lbl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-72\monitoring_object.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-72\monitoring_object.sbn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-72\monitoring_object.sbx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-72\monitoring_object.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\Issues\MWGIS-72\monitoring_object.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Testdata\Issues\MWGIS-72\point.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

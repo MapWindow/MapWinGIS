@@ -588,6 +588,27 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
+        public void ReadRussianDataFromOgrDatasource()
+        {
+            // https://github.com/MapWindow/MapWinGIS/issues/121
+            _axMap1 = Helper.GetAxMap();
+            _axMap1.Clear();
+            _axMap1.TileProvider = tkTileProvider.OpenStreetMap;
+            _axMap1.ZoomBehavior = tkZoomBehavior.zbDefault;
+            _axMap1.KnownExtents = tkKnownExtents.keWorld;
+
+            var sfName = @"Issues\MWGIS-72\monitoring_object.shp";
+            var baseName = Path.GetFileNameWithoutExtension(sfName);
+            var query = "Select * from monitoring_object";
+            var layerHandle = _axMap1.AddLayerFromDatabase(sfName, query, true);
+            var shpfile = _axMap1.get_Shapefile(layerHandle);
+            shpfile.Labels.Generate("[Type]", tkLabelPositioning.lpCenter, false);
+            shpfile.Labels.FrameVisible = true;
+            shpfile.Labels.FrameType = tkLabelFrameType.lfRectangle;
+            Helper.SaveSnapshot(_axMap1, $"{baseName}.jpg", _axMap1.get_layerExtents(layerHandle));
+        }
+
+        [TestMethod]
         public void CreateRussianCategories()
         {
             const string sfLocation = @"Issues\MWGIS-72\point.shp";
@@ -889,7 +910,7 @@ namespace MapWinGISTests
                 Console.WriteLine("*************** Validate union *************");
                 Console.WriteLine("globalSettings.MinPolygonArea: " + globalSettings.MinPolygonArea.ToString(CultureInfo.InvariantCulture));
                 Console.WriteLine("globalSettings.MinAreaToPerimeterRatio: " + globalSettings.MinAreaToPerimeterRatio.ToString(CultureInfo.InvariantCulture));
-                
+
                 // Check all fields:
                 var numFields = sfUnion.NumFields;
                 var numShapes = sfUnion.NumShapes;
@@ -960,7 +981,7 @@ namespace MapWinGISTests
                 Console.WriteLine("*************** Validate clip *************");
                 Console.WriteLine("globalSettings.MinPolygonArea: " + globalSettings.MinPolygonArea.ToString(CultureInfo.InvariantCulture));
                 Console.WriteLine("globalSettings.MinAreaToPerimeterRatio: " + globalSettings.MinAreaToPerimeterRatio.ToString(CultureInfo.InvariantCulture));
-                
+
                 // Check all fields:
                 var numFields = sfClip.NumFields;
                 var numShapes = sfClip.NumShapes;
@@ -1035,7 +1056,7 @@ namespace MapWinGISTests
                 Console.WriteLine("*************** Validate difference *************");
                 Console.WriteLine("globalSettings.MinPolygonArea: " + globalSettings.MinPolygonArea.ToString(CultureInfo.InvariantCulture));
                 Console.WriteLine("globalSettings.MinAreaToPerimeterRatio: " + globalSettings.MinAreaToPerimeterRatio.ToString(CultureInfo.InvariantCulture));
-                
+
                 // Check all fields:
                 var numFields = sfDifference.NumFields;
                 var numShapes = sfDifference.NumShapes;
@@ -1109,7 +1130,7 @@ namespace MapWinGISTests
                 Console.WriteLine("*************** Validate difference reverse *************");
                 Console.WriteLine("globalSettings.MinPolygonArea: " + globalSettings.MinPolygonArea.ToString(CultureInfo.InvariantCulture));
                 Console.WriteLine("globalSettings.MinAreaToPerimeterRatio: " + globalSettings.MinAreaToPerimeterRatio.ToString(CultureInfo.InvariantCulture));
-                
+
                 // Check all fields:
                 var numFields = sfDifference.NumFields;
                 var numShapes = sfDifference.NumShapes;
@@ -1154,7 +1175,7 @@ namespace MapWinGISTests
             var result = sf.Open(filename, this);
             Assert.IsTrue(result, "Could not open shapefile");
 
-            var retVal= Helper.GetInfoShapefile(ref sf);
+            var retVal = Helper.GetInfoShapefile(ref sf);
             sf.Close();
             return retVal;
         }

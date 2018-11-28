@@ -409,10 +409,9 @@ namespace MapWinGISTests
             var filename = Path.Combine(WorkingFolder("mw5-snapshots"), baseName);
             DeleteFile(filename);
 
-            if ((boundBox.Width * boundBox.Height).Equals(0))
+            if ((boundBox.Width * boundBox.Height).Equals(0) || extentEnlarger > 1)
             {
-                double xmin, ymin, xmax, ymax, zmin, zmax;
-                boundBox.GetBounds(out xmin, out ymin, out zmin, out xmax, out ymax, out zmax);
+                boundBox.GetBounds(out var xmin, out var ymin, out var zmin, out var xmax, out var ymax, out var zmax);
                 boundBox.SetBounds(xmin - extentEnlarger, ymin - extentEnlarger, zmin, xmax + extentEnlarger, ymax + extentEnlarger, zmax);
             }
 
