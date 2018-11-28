@@ -92,40 +92,55 @@ namespace MapWinGISTests
         [TestMethod]
         public void CreateAnglePolylines()
         {
+            var tempFolder = Path.GetTempPath();
             var sfLineInput = Helper.OpenShapefile(Path.Combine(@"sf", "Reach2_simplify100_smooth.shp"));
-            Debug.WriteLine(sfLineInput.NumShapes);
             var utils = new Utils();
 
             // Create new shapefile with polylines:
             var sfNew = Helper.CreateSf(ShpfileType.SHP_POLYLINE);
             sfNew.GeoProjection = sfLineInput.GeoProjection.Clone();
 
-            // TODO: For each shape:
-            var i = 10; // One shape first
-            var shape = sfLineInput.Shape[i];
-            var numPoints = shape.numPoints;
-            Helper.DebugMsg("Number points: " + numPoints);
-            const int distance = 15;
-
-            for (var j = 1; j < numPoints; j++)
+            var numShapesInput = sfLineInput.NumShapes;
+            for (var i = 0; i < numShapesInput; i++)
             {
-                var firstPoint = shape.Point[j - 1];
-                var secondPoint = shape.Point[j];
-                var angle = utils.GetAngle(firstPoint, secondPoint);
-                // Get perpendicular angle:
-                angle += 90;
-                if (angle > 360) angle -= 360;
-                Helper.DebugMsg("Angle: " + angle);
+                var shape = sfLineInput.Shape[i];
+                var numPoints = shape.numPoints;
+                const int distance = 20;
 
-                var newLineShp = new Shape();
-                newLineShp.Create(ShpfileType.SHP_POLYLINE);
-                newLineShp.AddPoint(firstPoint.x, firstPoint.y);
-                newLineShp.AddPoint(Math.Sin(angle) * distance + firstPoint.x, Math.Cos(angle) * distance + firstPoint.y);
-                sfNew.EditAddShape(newLineShp);
+                // Skip the first point:
+                for (var j = 0; j < numPoints; j++)
+                {
+                    var firstPoint = shape.Point[j];
+                    var secondPoint = shape.Point[j + 1];
+                    if (j == numPoints - 1) secondPoint = shape.Point[j - 1];
+
+                    var angle = utils.GetAngle(firstPoint, secondPoint);
+                    // convert to proper Cartesian angle of rotation
+                    angle = (450 - angle) % 360;
+                    // convert to Radians
+                    angle = angle * Math.PI / 180.0;
+
+                    // Get perpendicular angle:
+                    angle += 90 * Math.PI / 180.0; ;
+                    if (angle > 2 * Math.PI) angle -= 2 * Math.PI;
+
+                    var newLineShp = new Shape();
+                    newLineShp.Create(ShpfileType.SHP_POLYLINE);
+                    newLineShp.AddPoint(firstPoint.x, firstPoint.y);
+                    newLineShp.AddPoint(Math.Cos(angle) * distance + firstPoint.x,
+                        Math.Sin(angle) * distance + firstPoint.y);
+                    sfNew.EditAddShape(newLineShp);
+                    // Add line to other side:
+                    newLineShp = new Shape();
+                    newLineShp.Create(ShpfileType.SHP_POLYLINE);
+                    newLineShp.AddPoint(firstPoint.x, firstPoint.y);
+                    newLineShp.AddPoint(Math.Cos(angle) * -1 * distance + firstPoint.x,
+                        Math.Sin(angle) * -1 * distance + firstPoint.y);
+                    sfNew.EditAddShape(newLineShp);
+                }
             }
 
             // Save new shapefile:
-            var tempFolder = Path.GetTempPath();
             Helper.SaveAsShapefile(sfNew, Path.Combine(tempFolder, "AngledLines.shp"));
             sfNew.Close();
 
