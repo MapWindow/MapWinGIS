@@ -170,6 +170,13 @@ namespace MapWinGISTests
             return sf;
         }
 
+        public static Point MakePoint(double x, double y)
+        {
+            var point = new Point();
+            point.Set(x, y);
+            return point;
+        }
+
         public static void CheckValidity(IShapefile sf)
         {
             if (sf.NumShapes == 0)
