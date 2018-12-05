@@ -254,12 +254,6 @@ namespace MapWinGISTests
             
             if (!sfPolygon.SelectByShapefile(sfInside, tkSpatialRelation.srContains, false, ref resultArray))
             {
-                Debug.WriteLine("Error in SelectByShapefile: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
-                Debug.WriteLine(_settings.GdalLastErrorMsg);
-                numErrors++;
-            }
-            if (((int[]) resultArray).Length == 0)
-            {
                 Debug.WriteLine("Error! No shapes found");
                 numErrors++;
             }
@@ -271,13 +265,7 @@ namespace MapWinGISTests
             shpOutside.AddPoint(pointOutside.x, pointOutside.y);
             sfOutside.EditAddShape(shpOutside);
             
-            if (!sfPolygon.SelectByShapefile(sfOutside, tkSpatialRelation.srContains, false, ref resultArray))
-            {
-                Debug.WriteLine("Error in SelectByShapefile: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
-                Debug.WriteLine(_settings.GdalLastErrorMsg);
-                numErrors++;
-            }
-            if (((int[]) resultArray).Length > 0)
+            if (sfPolygon.SelectByShapefile(sfOutside, tkSpatialRelation.srContains, false, ref resultArray))
             {
                 Debug.WriteLine("Error! Shapes found, this is unexpected");
                 numErrors++;
@@ -294,13 +282,7 @@ namespace MapWinGISTests
             var shpInside = new Shape();
             shpInside.Create(ShpfileType.SHP_POINT);
             shpInside.AddPoint(pointInside.x, pointInside.y);
-            if (!sfPolygon.GetRelatedShapes2(shpInside, tkSpatialRelation.srOverlaps, ref resultArray))
-            {
-                Debug.WriteLine("Error in GetRelatedShapes2: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
-                Debug.WriteLine(_settings.GdalLastErrorMsg);
-                numErrors++;
-            }
-            if (((int[]) resultArray).Length == 0)
+            if (!sfPolygon.GetRelatedShapes2(shpInside, tkSpatialRelation.srIntersects, ref resultArray))
             {
                 Debug.WriteLine("Error! No shapes found");
                 numErrors++;
@@ -309,13 +291,7 @@ namespace MapWinGISTests
             var shpOutside = new Shape();
             shpOutside.Create(ShpfileType.SHP_POINT);
             shpOutside.AddPoint(pointOutside.x, pointOutside.y);
-            if (!sfPolygon.GetRelatedShapes2(shpOutside, tkSpatialRelation.srOverlaps, ref resultArray))
-            {
-                Debug.WriteLine("Error in GetRelatedShapes2: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
-                Debug.WriteLine(_settings.GdalLastErrorMsg);
-                numErrors++;
-            }
-            if (((int[]) resultArray).Length > 0)
+            if (sfPolygon.GetRelatedShapes2(shpOutside, tkSpatialRelation.srIntersects, ref resultArray))
             {
                 Debug.WriteLine("Error! Shapes found, this is unexpected");
                 numErrors++;

@@ -2999,7 +2999,7 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
         return;
     }
 
-    this->ReadGeosGeometries(VARIANT_TRUE);
+    this->ReadGeosGeometries(VARIANT_FALSE);
 
     // turns on the quad tree
     VARIANT_BOOL useQTree = VARIANT_FALSE;

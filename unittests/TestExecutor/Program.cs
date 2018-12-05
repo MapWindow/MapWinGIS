@@ -43,10 +43,17 @@ namespace ConsoleApplication1
             //var t = new PostGisTest();
             //t.ReadAttributesFromPostGISLayer();
 
-            var t = new ShapefileTests();
-            t.ImportExportWKT();
+            //var t = new ShapefileTests();
+            //t.ImportExportWKT();
             //t.ShapefileDataTest();
             // t.UnionShapefiles();
+            var t = new PointInPolygonTests();
+            t.TestPointInSimplePolygon();
+            t.TestPointInPolygonM();
+            t.TestPointInPolygonZ();
+            t.TestPointInPolygonWithHole();
+            t.TestPointInMultiPolygon();
+            t.TestPointInLotsOfPolygons();
 
             //t.Reproject2280Test();
             //t.ReadRussionDataFromTable();

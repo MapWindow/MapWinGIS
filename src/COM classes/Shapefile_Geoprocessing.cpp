@@ -2911,50 +2911,64 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
     }
 
     int CrossCount = 0;
+    // work backwards through Parts since we only know the first point of each Part
     for (int nPart = numParts - 1; nPart >= 0; nPart--)
     {
+        const int nPointMin = Parts[nPart];
         const int nPointMax = Parts[nPart + 1] - 1;
-        for (int nPoint = Parts[nPart]; nPoint < nPointMax; nPoint++)
+        int i, j;
+        // algorithm by W. Randolph Franklin; for a detailed explanation, see
+        // https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+        // note that i starts at first point, while j starts at last point, then follows behind i
+        for (i = nPointMin, j = nPointMax - 1; i < nPointMax; j = i++)
         {
-            const double x1 = Points[nPoint].x - x;
-            const double y1 = Points[nPoint].y - y;
-            const double x2 = Points[nPoint + 1].x - x;
-            const double y2 = Points[nPoint + 1].y - y;
-
-            const double y1y2 = y1 * y2;
-            if (y1y2 > 0.0) // If the signs are the same
-            {
-                // Then it does not cross
-                continue;
-            }
-            if (y1y2 == 0.0) // Then it has intesected a vertex
-            {
-                if (y1 == 0.0)
-                {
-                    if (y2 > 0.0)
-                        continue;
-                }
-                else if (y1 > 0.0)
-                    continue;
-            }
-
-            if (x1 > 0.0 && x2 > 0.0)
-            {
+            if ( ((Points[i].y > y) != (Points[j].y > y)) &&
+                 (x < (Points[j].x - Points[i].x) * (y - Points[i].y) / (Points[j].y - Points[i].y) + Points[i].x) )
+                // we have a crossing
                 CrossCount++;
-                continue;
-            }
-
-            // Calculate Intersection
-            const double dy = y2 - y1;
-            const double dx = x2 - x1;
-
-            // CDM March 2008 - if dy is zero (horiz line), this will be a bad idea...
-            if (dy != 0)
-            {
-                if (x1 - y1 * (dx / dy) > 0.0)
-                    CrossCount++;
-            }
         }
+
+        //for (int nPoint = Parts[nPart]; nPoint < nPointMax; nPoint++)
+        //{
+        //    const double x1 = Points[nPoint].x - x;
+        //    const double y1 = Points[nPoint].y - y;
+        //    const double x2 = Points[nPoint + 1].x - x;
+        //    const double y2 = Points[nPoint + 1].y - y;
+
+        //    const double y1y2 = y1 * y2;
+        //    if (y1y2 > 0.0) // If the signs are the same
+        //    {
+        //        // Then it does not cross
+        //        continue;
+        //    }
+        //    if (y1y2 == 0.0) // Then it has intesected a vertex
+        //    {
+        //        if (y1 == 0.0)
+        //        {
+        //            if (y2 > 0.0)
+        //                continue;
+        //        }
+        //        else if (y1 > 0.0)
+        //            continue;
+        //    }
+
+        //    if (x1 > 0.0 && x2 > 0.0)
+        //    {
+        //        CrossCount++;
+        //        continue;
+        //    }
+
+        //    // Calculate Intersection
+        //    const double dy = y2 - y1;
+        //    const double dx = x2 - x1;
+
+        //    // CDM March 2008 - if dy is zero (horiz line), this will be a bad idea...
+        //    if (dy != 0)
+        //    {
+        //        if (x1 - y1 * (dx / dy) > 0.0)
+        //            CrossCount++;
+        //    }
+        //}
     }
     delete [] Points;
     delete [] Parts;
@@ -2985,49 +2999,66 @@ STDMETHODIMP CShapefile::PointInShapefile(DOUBLE x, DOUBLE y, LONG* ShapeIndex)
 
         int CrossCount = 0;
 
+        int i, j;
+        // work backwards through Parts since we only know the first point of each Part
         for (int nPart = sf->shpHeader.NumParts - 1; nPart >= 0; nPart--)
         {
+            const int nPointMin = sf->Parts[nPart];
             const int nPointMax = sf->Parts[nPart + 1] - 1;
-            for (int nPoint = sf->Parts[nPart]; nPoint < nPointMax; nPoint++)
+            // algorithm by W. Randolph Franklin; for a detailed explanation, see
+            // https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+            // note that i starts at first point, while j starts at last point, then follows behind i
+            for (i = nPointMin, j = nPointMax - 1; i < nPointMax; j = i++)
             {
-                const double x1 = sf->Points[nPoint].x - x;
-                const double y1 = sf->Points[nPoint].y - y;
-                const double x2 = sf->Points[nPoint + 1].x - x;
-                const double y2 = sf->Points[nPoint + 1].y - y;
-
-                const double y1y2 = y1 * y2;
-
-                if (y1y2 > 0.0) // If the signs are the same
-                {
-                    // Then it does not cross
-                    continue;
-                }
-                if (y1y2 == 0.0) // Then it has intesected a vertex
-                {
-                    if (y1 == 0.0)
-                    {
-                        if (y2 > 0.0)
-                            continue;
-                    }
-                    else if (y1 > 0.0)
-                        continue;
-                }
-
-                if (x1 > 0.0 && x2 > 0.0)
-                {
-                    CrossCount++;
-                    continue;
-                }
-
-                // Calculate Intersection
-                const double dy = y2 - y1;
-                const double dx = x2 - x1;
-                const double xint = x1 - y1 * (dx / dy);
-
-                if (xint > 0.0)
+                if (((sf->Points[i].y > y) != (sf->Points[j].y > y)) &&
+                    (x < (sf->Points[j].x - sf->Points[i].x) * (y - sf->Points[i].y) / (sf->Points[j].y - sf->Points[i].y) + sf->Points[i].x))
+                    // we have a crossing
                     CrossCount++;
             }
         }
+        //for (int nPart = sf->shpHeader.NumParts - 1; nPart >= 0; nPart--)
+        //{
+        //    const int nPointMax = sf->Parts[nPart + 1] - 1;
+        //    for (int nPoint = sf->Parts[nPart]; nPoint < nPointMax; nPoint++)
+        //    {
+        //        const double x1 = sf->Points[nPoint].x - x;
+        //        const double y1 = sf->Points[nPoint].y - y;
+        //        const double x2 = sf->Points[nPoint + 1].x - x;
+        //        const double y2 = sf->Points[nPoint + 1].y - y;
+
+        //        const double y1y2 = y1 * y2;
+
+        //        if (y1y2 > 0.0) // If the signs are the same
+        //        {
+        //            // Then it does not cross
+        //            continue;
+        //        }
+        //        if (y1y2 == 0.0) // Then it has intesected a vertex
+        //        {
+        //            if (y1 == 0.0)
+        //            {
+        //                if (y2 > 0.0)
+        //                    continue;
+        //            }
+        //            else if (y1 > 0.0)
+        //                continue;
+        //        }
+
+        //        if (x1 > 0.0 && x2 > 0.0)
+        //        {
+        //            CrossCount++;
+        //            continue;
+        //        }
+
+        //        // Calculate Intersection
+        //        const double dy = y2 - y1;
+        //        const double dx = x2 - x1;
+        //        const double xint = x1 - y1 * (dx / dy);
+
+        //        if (xint > 0.0)
+        //            CrossCount++;
+        //    }
+        //}
 
         if (CrossCount & 1)
         {
@@ -3053,7 +3084,8 @@ STDMETHODIMP CShapefile::BeginPointInShapefile(VARIANT_BOOL* retval)
         return S_OK;
     }
 
-    if (_shpfiletype != SHP_POLYGON)
+    // allow all polygon variations
+    if (_shpfiletype != SHP_POLYGON && _shpfiletype != SHP_POLYGONM && _shpfiletype != SHP_POLYGONZ)
     {
         *retval = VARIANT_FALSE;
         ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
@@ -3070,7 +3102,7 @@ STDMETHODIMP CShapefile::BeginPointInShapefile(VARIANT_BOOL* retval)
         fseek(_shpfile, _shpOffsets[nShape] + sizeof(int) * 2, SEEK_SET);
         int shpType;
         fread(&shpType, sizeof(int), 1, _shpfile);
-        if (shpType != SHP_POLYGON)
+        if (shpType != SHP_POLYGON && shpType != SHP_POLYGONM && shpType != SHP_POLYGONZ)
         {
             *retval = VARIANT_FALSE;
             ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
