@@ -441,4 +441,28 @@ public:
 			return GEOSGeom_getCoordSeq(gs);	
 		#endif
 	}
+
+	static GEOSGeometry* Interpolate(GEOSGeometry* gs, double d, bool normalized = false)
+	{
+#ifdef GEOS_NEW
+		if (normalized)
+			return GEOSInterpolateNormalized_r(getGeosHandle(), gs, d);
+		else
+			return GEOSInterpolate_r(getGeosHandle(), gs, d);
+#else
+		if (normalized)
+			return GEOSInterpolateNormalized(gs, d);
+		else
+			return GEOSInterpolate(gs, d);
+#endif
+	}
+
+	static double Project(GEOSGeometry* g1, GEOSGeometry* g2)
+	{
+#ifdef GEOS_NEW
+		return GEOSProject_r(getGeosHandle(), g1, g2);
+#else
+		return GEOSProject(g1, g2);
+#endif
+	}
 };

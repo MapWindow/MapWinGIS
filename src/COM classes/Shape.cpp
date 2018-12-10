@@ -716,7 +716,7 @@ STDMETHODIMP CShape::DeletePoint(long PointIndex, VARIANT_BOOL *retval)
 STDMETHODIMP CShape::get_XY(long PointIndex, double* x, double* y, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = get_XY(PointIndex, x, y);
+	*retval = get_XY(PointIndex, x, y) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -726,7 +726,7 @@ STDMETHODIMP CShape::get_XY(long PointIndex, double* x, double* y, VARIANT_BOOL*
 STDMETHODIMP CShape::put_XY(LONG pointIndex, double x, double y, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = (VARIANT_BOOL)_shp->put_PointXY(pointIndex, x, y);
+	*retVal = _shp->put_PointXY(pointIndex, x, y) ? VARIANT_TRUE : VARIANT_FALSE;
 	if (*retVal == VARIANT_FALSE)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -740,7 +740,7 @@ STDMETHODIMP CShape::put_XY(LONG pointIndex, double x, double y, VARIANT_BOOL* r
 STDMETHODIMP CShape::put_M(LONG pointIndex, double m, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = (VARIANT_BOOL)_shp->put_PointM(pointIndex, m);
+	*retVal = _shp->put_PointM(pointIndex, m) ? VARIANT_TRUE : VARIANT_FALSE;
 	if (!(*retVal))
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -754,7 +754,7 @@ STDMETHODIMP CShape::put_M(LONG pointIndex, double m, VARIANT_BOOL* retVal)
 STDMETHODIMP CShape::put_Z(LONG pointIndex, double z, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = (VARIANT_BOOL)_shp->put_PointZ(pointIndex, z);
+	*retVal = _shp->put_PointZ(pointIndex, z) ? VARIANT_TRUE : VARIANT_FALSE;
 	if (!(*retVal))
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -768,7 +768,7 @@ STDMETHODIMP CShape::put_Z(LONG pointIndex, double z, VARIANT_BOOL* retVal)
 STDMETHODIMP CShape::get_Z(long PointIndex, double* z, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = get_Z(PointIndex, z);
+	*retval = get_Z(PointIndex, z) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -778,7 +778,7 @@ STDMETHODIMP CShape::get_Z(long PointIndex, double* z, VARIANT_BOOL* retval)
 STDMETHODIMP CShape::get_M(long PointIndex, double* m, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = get_M(PointIndex, m);
+	*retval = get_M(PointIndex, m) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -2868,4 +2868,13 @@ STDMETHODIMP CShape::Clear()
 	_shp->Clear();
 
 	return S_OK;
+}
+
+//*****************************************************************
+//*		InterpolatePoint()
+//*****************************************************************
+STDMETHODIMP CShape::InterpolatePoint(IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint **retVal)
+{
+	// simply call Utility function
+	return GetUtils()->LineInterpolatePoint(this, startPoint, distance, normalized, retVal);
 }

@@ -44,6 +44,8 @@
 #include "TableHelper.h"
 #include "xtiffio.h"
 #include "ShapeHelper.h"
+#include "GeosHelper.h"
+#include "GeosConverter.h"
 #include "GeometryHelper.h"
 
 #pragma warning(disable:4996)
@@ -5848,4 +5850,138 @@ STDMETHODIMP CUtils::GetAngle(IPoint* firstPoint, IPoint* secondPoint, double* r
     *retVal = GeometryHelper::GetPointAngleDeg(dx, dy);
     //
     return S_OK;
+}
+
+inline bool CUtils::almostEqual(double d1, double d2, double tolerance)
+{
+	return (abs(d2 - d2) < tolerance);
+}
+
+// *************************************************
+//			LineInterpolatePoint()
+// *************************************************
+STDMETHODIMP CUtils::LineInterpolatePoint(IShape* sourceLine, IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint **retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
+	// initialize return point to null
+	*retVal = nullptr;
+
+	// basic validation
+	if (sourceLine == NULL || startPoint == NULL)
+	{
+		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
+	}
+
+	// source geometry has to be a polyline
+	ShpfileType shapeType;
+	sourceLine->get_ShapeType2D(&shapeType);
+	if (shapeType != ShpfileType::SHP_POLYLINE)
+	{
+		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE, CString("Incoming Shape must be a Polyline"));
+		return S_OK;
+	}
+
+	// line properties
+	double lineLength;
+	sourceLine->get_Length(&lineLength);
+	long numPoints;
+	sourceLine->get_NumPoints(&numPoints);
+	// first and last point
+	IPoint* firstPoint;
+	IPoint* lastPoint;
+	sourceLine->get_Point(0, &firstPoint);
+	sourceLine->get_Point(numPoints-1, &lastPoint);
+
+	// point properties
+	long index;
+	double x, y;
+	startPoint->get_X(&x);
+	startPoint->get_Y(&y);
+
+	// wrap startPoint in Shape
+	IShape* shapePoint = nullptr;
+	ComHelper::CreateShape(&shapePoint);
+	if (shapePoint)
+	{
+		shapePoint->put_ShapeType(ShpfileType::SHP_POINT);
+		shapePoint->AddPoint(x, y, &index);
+	}
+
+	//// is startPoint on the line?
+	///////////////////////////////
+	//// first, project point onto the line
+	//OGRGeometry* ogrLine = OgrConverter::ShapeToGeometry(sourceLine);
+	//GEOSGeometry* geosLine = GeosHelper::ExportToGeos(ogrLine);
+	//OGRGeometry* ogrPoint = OgrConverter::ShapeToGeometry(shapePoint);
+	//GEOSGeometry* geosPoint = GeosHelper::ExportToGeos(ogrPoint);
+	//double startPosition = GeosHelper::Project(geosLine, geosPoint);
+	//// now interpolate from start position (convert back to shape)
+	//geosPoint = GeosHelper::Interpolate(geosLine, startPosition);
+	//ogrPoint = GeosHelper::CreateFromGEOS(geosPoint);
+	//shapePoint = OgrConverter::GeometryToShape(ogrPoint, false);
+	//// if startPoint and interpolated Point are (roughly) the same, then startPoint is on the line
+
+	// I considered validating that the incoming point was indeed on the line, 
+	// but that may not be necessary.  We can leave it up to the caller, and
+	// allow for a point that is 'near' the line, and we use the 'projected'
+	// distance along the line as the start point.
+
+	// out philosophy will be to use the initial distance along the line as
+	// out startint point, add the specified distance to the starting point,
+	// then interpolate the total distance from the starting of the line.
+
+	
+	// project startPoint onto the line (first converting to GEOS geometries)
+	GEOSGeom geosLine = GeosConverter::ShapeToGeom(sourceLine);
+	GEOSGeom geosPoint = GeosConverter::ShapeToGeom(shapePoint);
+	shapePoint->Release();
+	// projected position along line
+	double startPosition = GeosHelper::Project(geosLine, geosPoint);
+	GeosHelper::DestroyGeometry(geosPoint);
+	// now add user-specified distance
+	startPosition += distance;
+	// make sure start point is within the line
+	if (startPosition <= 0.0)
+	{
+		// return start-of-line?
+		firstPoint->get_X(&x);
+		firstPoint->get_Y(&y);
+		ComHelper::CreatePoint(retVal);
+		(*retVal)->Set(x, y);
+	}
+	else if (startPosition >= lineLength)
+	{
+		// return end-of-line?
+		lastPoint->get_X(&x);
+		lastPoint->get_Y(&y);
+		ComHelper::CreatePoint(retVal);
+		(*retVal)->Set(x, y);
+	}
+	else
+	{
+		// else interpolate total distance along line
+		geosPoint = GeosHelper::Interpolate(geosLine, startPosition);
+		GeosHelper::DestroyGeometry(geosLine);
+		if (geosPoint)
+		{
+			// we have a Point, convert to IPoint
+			vector<IShape*> shapes;
+			GeosConverter::GeomToShapes(geosPoint, &shapes, false);
+			if (shapes.size() > 0)
+			{
+				VARIANT_BOOL bVal;
+				shapes[0]->get_XY(0, &x, &y, &bVal);
+				shapes[0]->Release();
+				if (bVal == VARIANT_TRUE)
+				{
+					ComHelper::CreatePoint(retVal);
+					(*retVal)->Set(x, y);
+				}
+			}
+		}
+	}
+
+	return S_OK;
 }

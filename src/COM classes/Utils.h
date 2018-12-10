@@ -191,6 +191,7 @@ public:
 	STDMETHOD(GetProjectionNameByID)(int SRID, BSTR* retVal);
 	STDMETHOD(GetProjectionList)(tkProjectionSet projectionSets, VARIANT* list, VARIANT_BOOL* retVal);
     STDMETHOD(GetAngle)(IPoint* firstPoint, IPoint* secondPoint, double* retVal);
+	STDMETHOD(LineInterpolatePoint)(IShape* sourceLine, IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint **retVal);
 
 private:
 	struct RasterPoint
@@ -317,6 +318,8 @@ private:
 	// support for the load of Projection strings from the GDAL pcs.csv file
 	CString customErrorMessage();
 	bool LoadProjectionStrings();
+
+	inline bool almostEqual(double d1, double d2, double tolerance = FLT_EPSILON);
 
 public:
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);

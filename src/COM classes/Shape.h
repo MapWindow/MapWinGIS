@@ -145,6 +145,7 @@ public:
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	STDMETHOD(Clear)();
 	STDMETHOD(FixUp2)(tkUnitsOfMeasure units, IShape** retVal);
+	STDMETHOD(InterpolatePoint)(IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint **retVal);
 
 private:
 	BSTR _key;
