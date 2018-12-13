@@ -3000,7 +3000,7 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
     }
 
     // rather than generate geometries for all shapes,
-    // only generate shapes within extents (see below)
+    // only generate for those within qtree extent (see below)
     //this->ReadGeosGeometries(VARIANT_FALSE);
 
     // turns on the quad tree
@@ -3015,7 +3015,7 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
         std::vector<int> shapes = this->_qtree->GetNodes(query);
         std::vector<int> arr;
 
-        // generate GEOS geometries only for shapes within extents
+        // generate GEOS geometries only for shapes within qtree extent
         for (size_t i = 0; i < shapes.size(); i++)
             // minimize work by 'select'ing necessary shapes
             this->put_ShapeSelected(shapes[i], VARIANT_TRUE);
