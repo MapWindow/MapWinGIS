@@ -2999,7 +2999,9 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
         return;
     }
 
-    this->ReadGeosGeometries(VARIANT_FALSE);
+    // rather than generate geometries for all shapes,
+    // only generate shapes within extents (see below)
+    //this->ReadGeosGeometries(VARIANT_FALSE);
 
     // turns on the quad tree
     VARIANT_BOOL useQTree = VARIANT_FALSE;
@@ -3012,6 +3014,16 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
         const QTreeExtent query(xMin, xMax, yMax, yMin);
         std::vector<int> shapes = this->_qtree->GetNodes(query);
         std::vector<int> arr;
+
+        // generate GEOS geometries only for shapes within extents
+        for (size_t i = 0; i < shapes.size(); i++)
+            // minimize work by 'select'ing necessary shapes
+            this->put_ShapeSelected(shapes[i], VARIANT_TRUE);
+        // now generate only for 'select'ed shapes
+        this->ReadGeosGeometries(VARIANT_TRUE);
+        // don't leave shapes 'select'ed
+        for (size_t i = 0; i < shapes.size(); i++)
+            this->put_ShapeSelected(shapes[i], VARIANT_FALSE);
 
         GEOSGeom geomBase;
         if (referenceIndex > 0)
