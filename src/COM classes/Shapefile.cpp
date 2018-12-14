@@ -3175,6 +3175,41 @@ STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance
 }
 
 // *****************************************************************
+//		GetClosestSnapPosition()
+// *****************************************************************
+STDMETHODIMP CShapefile::GetClosestSnapPosition(double x, double y, double maxDistance,
+	long* shapeIndex, double* fx, double* fy, double* distance, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = VARIANT_FALSE;
+	*shapeIndex = -1;
+
+	bool result = false;
+	if (maxDistance <= 0.0)
+	{
+		// search through all shapefile
+		std::vector<long> ids;
+		for (size_t i = 0; i < _shapeData.size(); i++)
+		{
+			ids.push_back(i);
+		}
+		result = ShapefileHelper::GetClosestSnapPosition(this, x, y, maxDistance, ids, shapeIndex, *fx, *fy, *distance);
+	}
+	else
+	{
+		std::vector<long> ids;
+		Extent box(x - maxDistance, x + maxDistance, y - maxDistance, y + maxDistance);
+		if (this->SelectShapesCore(box, 0.0, SelectMode::INTERSECTION, ids, false))
+		{
+			result = ShapefileHelper::GetClosestSnapPosition(this, x, y, maxDistance, ids, shapeIndex, *fx, *fy, *distance);
+		}
+	}
+	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+// *****************************************************************
 //		HasInvalidShapes()
 // *****************************************************************
 STDMETHODIMP CShapefile::HasInvalidShapes(VARIANT_BOOL* result)

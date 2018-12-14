@@ -202,6 +202,11 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer,
 		DrawPolygonArea(g, polyData, polySize, dynamicBuffer);
 		delete[] polyData;
 	}
+
+	// finally draw the snap point position if needed
+	if (_showSnapPoint) {
+		g->DrawRectangle(&_redPen, (int)(_snapPointX - 3.0f + 0.5f), (int)(_snapPointY - 3.0f + 0.5f), 6, 6);
+	}
 }
 
 // ****************************************************************

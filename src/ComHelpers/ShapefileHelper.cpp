@@ -382,8 +382,86 @@ bool ShapefileHelper::GetClosestPoint(IShapefile* sf, double x, double y, double
             shp->Release();
         }
     }
-    // dist = minDist;
+    dist = minDist;
     return minDist < maxDistance;
+}
+
+// *****************************************************************
+//		GetClosestPoint()
+// *****************************************************************
+bool ShapefileHelper::GetClosestSnapPosition(IShapefile* sf, double x, double y, double maxDistance, std::vector<long>& ids,
+	long* shapeIndex, double& fx, double& fy, double& dist)
+{
+	if (!sf) return false;
+
+	VARIANT_BOOL vb;
+	double minDist = DBL_MAX;
+	for (long id : ids)
+	{
+		VARIANT_BOOL visible;
+		sf->get_ShapeVisible(id, &visible);
+		if (!visible) continue;
+
+		IShape* shp = nullptr;
+		sf->get_Shape(id, &shp);
+		if (shp)
+		{
+			long numPoints;
+			shp->get_NumPoints(&numPoints);
+			double xSeg, ySeg;
+
+			for (long j = 0; j < numPoints; j++)
+			{			
+				if (j + 1 >= numPoints) {
+					shp->get_XY(j, &xSeg, &ySeg, &vb);
+				}
+				else {
+					double xPnt1, yPnt1;
+					double xPnt2, yPnt2;
+					shp->get_XY(j, &xPnt1, &yPnt1, &vb);
+					shp->get_XY(j+1, &xPnt2, &yPnt2, &vb);
+					ShapefileHelper::GetClosestPointOnSegment(xPnt1, yPnt1, xPnt2, yPnt2, x, y, &xSeg, &ySeg);
+				}
+				const double distance = sqrt(pow(x - xSeg, 2.0) + pow(y - ySeg, 2.0));
+				if (distance < minDist && distance < maxDistance)
+				{
+					minDist = distance;
+					*shapeIndex = id;
+					fx = xSeg;
+					fy = ySeg;
+				}
+			}
+			shp->Release();
+		}
+	}
+	dist = minDist;
+	return minDist < maxDistance;
+}
+
+// *****************************************************************
+//		GetClosestPoint()
+// *****************************************************************
+bool ShapefileHelper::GetClosestPointOnSegment(double ax, double ay, double bx, double by, double px, double py,
+	double *rx, double *ry) {
+
+	double apx = px - ax;
+	double apy = py - ay;
+	double abx = bx - ax;
+	double aby = by - ay;
+
+	double ab2 = abx * abx + aby * aby;
+	double ap_ab = apx * abx + apy * aby;
+	double t = ap_ab / ab2;
+	if (t < 0) {
+		t = 0;
+	}
+	else if (t > 1) {
+		t = 1;
+	}
+	*rx = ax + abx * t;
+	*ry = ay + aby * t;
+
+	return true;
 }
 
 // ********************************************************************

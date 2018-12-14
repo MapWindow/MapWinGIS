@@ -393,6 +393,18 @@ enum tkLayerSelection {
 	lsActiveLayer = 2,
 }tkLayerSelection;
 
+/************************** tkSnapMode Enumeration **********************/
+typedef
+[
+	uuid(AC54A94F-072E-4D91-BD22-E985BF2F957F),
+	helpstring("tkSnapMode"),
+]
+enum tkSnapMode {
+	smVertices = 0,
+	smVerticesAndLines = 1,
+	smLines = 2
+}tkSnapMode;
+
 /************************** tkUndoOperation Enumeration **********************/
 typedef
 [
@@ -3655,6 +3667,8 @@ enum tkScalebarUnits
 		[propput, id(59)] HRESULT ShowLength([in] VARIANT_BOOL newVal);
 		[id(60)] HRESULT Serialize([out, retval] BSTR* retVal);
 		[id(61)] HRESULT Deserialize([in] BSTR state, [out, retval] VARIANT_BOOL* retVal);
+		[propget, id(63)] HRESULT SnapMode([out, retval] tkSnapMode* pVal);
+		[propput, id(63)] HRESULT SnapMode([in] tkSnapMode newVal);
 	};
 
 	
@@ -4170,6 +4184,8 @@ interface IShapefile : IDispatch{
 	[propget, id(142)] HRESULT IsGeographicProjection([out, retval] VARIANT_BOOL* retVal);
 	[propget, id(143)] HRESULT Selectable([out, retval] VARIANT_BOOL* retVal);
 	[propput, id(143)] HRESULT Selectable([in] VARIANT_BOOL newVal);
+	[id(200), helpstring("method GetClosestSnapPosition")] HRESULT GetClosestSnapPosition([in]double x, [in]double y, [in]double maxDistance,
+		[out]long* shapeIndex, [out] double* fx, [out] double* fy, [out] double* distance, [out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Shape Interface ***********************/

@@ -783,6 +783,22 @@ STDMETHODIMP CShapeEditor::put_SnapBehavior(tkLayerSelection newVal)
 }
 
 // *******************************************************
+//		get_SnapMode()
+// *******************************************************
+STDMETHODIMP CShapeEditor::get_SnapMode(tkSnapMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _snapMode;
+	return S_OK;
+}
+STDMETHODIMP CShapeEditor::put_SnapMode(tkSnapMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_snapMode = newVal;
+	return S_OK;
+}
+
+// *******************************************************
 //		EditorState
 // *******************************************************
 STDMETHODIMP CShapeEditor::get_EditorState(tkEditorState* pVal)
