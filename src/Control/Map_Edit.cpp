@@ -128,8 +128,6 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 	}
 	else 
 	{
-		tkSnapMode snapMode;
-		_shapeEditor->get_SnapMode(&snapMode);
 		EditorBase* base = GetEditorBase();
 		bool handled = false;
 
@@ -159,7 +157,6 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 		// highlighting parts
 		if (behavior == ebPartEditor)	//if (nFlags & MK_CONTROL) {
 		{
-			base->ClearSnapPoint();
 
 			if (base->ClearHighlightedVertex())
 				_canUseMainBuffer = false;

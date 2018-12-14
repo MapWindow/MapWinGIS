@@ -39,8 +39,6 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 	double distance;
 
 	double minDist = DBL_MAX;
-	long foundShapeIndex;
-	long foundPointIndex;
 
 	bool digitizing = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode);
 	tkLayerSelection behavior;
@@ -70,33 +68,38 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 			sf->get_Snappable(&snappable);
 			if (snappable)
 			{
+				double xF, yF;
+				bool snapped = false;
 				// Try snapping to a vertex first:
 				if (mode == smVertices || mode == smVerticesAndLines) {
 					sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
 					if (vb && distance < minDist)
 					{
 						IShape* shape = NULL;
-						sf->get_Shape(foundShapeIndex, &shape);
+						sf->get_Shape(shapeIndex, &shape);
 						if (shape)
 						{
 							minDist = distance;
-							shape->get_XY(foundPointIndex, xFound, yFound, &vb);
+							shape->get_XY(pointIndex, &xF, &yF, &vb);
 							shape->Release();
-							result = true;
+							snapped = true;
 						}
 					}
 				}
 				// If not snapped to a vertex, maybe try to snap to a segment:
-				if (!result && (mode == smVerticesAndLines || mode == smLines)) {
-					double xF, yF;
+				if (!snapped && (mode == smVerticesAndLines || mode == smLines)) {
 					sf->GetClosestSnapPosition(x, y, maxDist, &shapeIndex, &xF, &yF, &distance, &vb);
 					if (vb && distance < minDist)
 					{
 						minDist = distance;
-						*xFound = xF;
-						*yFound = yF;
-						result = true;
+						snapped = true;
 					}
+				}
+
+				if (snapped) {
+					*xFound = xF;
+					*yFound = yF;
+					result = true;
 				}
 			}
 		}
