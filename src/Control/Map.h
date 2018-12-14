@@ -620,6 +620,8 @@ public:
 	afx_msg void ClearExtentHistory();
 	afx_msg long GetExtentHistoryUndoCount();
 	afx_msg long GetExtentHistoryRedoCount();
+	afx_msg VARIANT_BOOL StartNewBoundShape(DOUBLE x, DOUBLE y);
+	afx_msg VARIANT_BOOL StartNewBoundShapeEx(long LayerHandle);
 
 	afx_msg void SetUseAlternatePanCursor(VARIANT_BOOL nNewValue);
 	afx_msg VARIANT_BOOL GetUseAlternatePanCursor();
@@ -1187,7 +1189,6 @@ private:
 	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
 	bool DrillDownSelect(double projX, double projY, ISelectionList* list, bool stopOnFirst, bool ctrl);
-	bool StartNewBoundShape(long x, long y);
 	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
 	VARIANT_BOOL LoadOgrStyle(Layer* layer, long layerHandle, CStringW name, bool reportError);
 	VARIANT_BOOL LayerIsIdentifiable(long layerHandle, IShapefile* sf);

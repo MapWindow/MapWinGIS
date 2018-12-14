@@ -3667,6 +3667,7 @@ enum tkScalebarUnits
 		[propput, id(59)] HRESULT ShowLength([in] VARIANT_BOOL newVal);
 		[id(60)] HRESULT Serialize([out, retval] BSTR* retVal);
 		[id(61)] HRESULT Deserialize([in] BSTR state, [out, retval] VARIANT_BOOL* retVal);
+		[id(62)] HRESULT AddPoint([in] IPoint *newPoint, [out, retval] VARIANT_BOOL* retVal);
 		[propget, id(63)] HRESULT SnapMode([out, retval] tkSnapMode* pVal);
 		[propput, id(63)] HRESULT SnapMode([in] tkSnapMode newVal);
 	};
@@ -6841,6 +6842,8 @@ library MapWinGIS
 
             [id(263)] VARIANT_BOOL ReloadOgrLayerFromSource(long OgrLayerHandle);
 			[id(264)] void RestartBackgroundLoading(long OgrLayerHandle);
+			[id(265)] VARIANT_BOOL StartNewBoundShape(DOUBLE x, DOUBLE y);
+			[id(266)] VARIANT_BOOL StartNewBoundShapeEx(long LayerHandle);
 #endif 
 
 #define DRAWING_API

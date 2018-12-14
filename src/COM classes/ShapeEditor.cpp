@@ -704,6 +704,32 @@ void CShapeEditor::DiscardState()
 }
 
 // *******************************************************
+//		AddPoint()
+// *******************************************************
+STDMETHODIMP CShapeEditor::AddPoint(IPoint *newPoint, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	if (newPoint == NULL) {
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+	} else {
+		VARIANT_BOOL digitizing;
+		get_IsDigitizing(&digitizing);
+		tkCursorMode cursor = _mapCallback->_GetCursorMode();
+		if (digitizing) {
+			double x, y;
+			newPoint->get_X(&x);
+			newPoint->get_Y(&y);
+			newPoint->Release();
+			_activeShape->AddPoint(x, y, -1, -1, PartBegin);
+			*retVal = VARIANT_TRUE;
+			return S_OK;
+		}
+	}
+	return S_OK;
+}
+
+// *******************************************************
 //		UndoPoint()
 // *******************************************************
 STDMETHODIMP CShapeEditor::UndoPoint(VARIANT_BOOL* retVal)

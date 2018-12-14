@@ -488,29 +488,44 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 // ***************************************************************
 //	StartNewBoundShape
 // ***************************************************************
-bool CMapView::StartNewBoundShape(long x, long y)
+VARIANT_BOOL CMapView::StartNewBoundShape(DOUBLE x, DOUBLE y)
 {
 	if (m_cursorMode == cmAddShape && EditorHelper::IsEmpty(_shapeEditor))
 	{
 		long layerHandle = -1;
-		FireChooseLayer(x, y, &layerHandle);
-		if (layerHandle == -1) return false;
+		FireEvent(eventidChooseLayer, EVENT_PARAM(VTS_R8 VTS_R8 VTS_PI4), x, y, &layerHandle);
+		if (layerHandle == -1) 
+			return VARIANT_FALSE;
+		else
+			return StartNewBoundShapeEx(layerHandle);
+	}
+	return VARIANT_TRUE;   // no need to choose
+}
+
+// ***************************************************************
+//	StartNewBoundShape
+// ***************************************************************
+VARIANT_BOOL CMapView::StartNewBoundShapeEx(long LayerHandle)
+{
+	if (m_cursorMode == cmAddShape && EditorHelper::IsEmpty(_shapeEditor))
+	{
+		if (LayerHandle == -1) return VARIANT_FALSE;
 
 		CComPtr<IShapefile> sf = NULL;
-		sf.Attach(GetShapefile(layerHandle));
+		sf.Attach(GetShapefile(LayerHandle));
 		if (!sf) {
 			ErrorMessage(tkINVALID_LAYER_HANDLE);
-			return false;
+			return VARIANT_FALSE;
 		}
 
 		if (!ShapefileHelper::InteractiveEditing(sf))
 		{
 			ErrorMessage(tkNO_INTERACTIVE_EDITING);
-			return false;
+			return VARIANT_FALSE;
 		}
-		
-		Digitizer::StartNewBoundShape(_shapeEditor, sf, layerHandle);
-		return true;
+
+		Digitizer::StartNewBoundShape(_shapeEditor, sf, LayerHandle);
+		return VARIANT_TRUE;
 	}
-	return true;   // no need to choose
+	return VARIANT_TRUE;   // no need to choose
 }

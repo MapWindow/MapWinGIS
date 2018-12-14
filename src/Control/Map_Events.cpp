@@ -547,7 +547,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	if (digitizingCursor)
 	{
 		if (m_cursorMode == cmAddShape) {
-			if (!StartNewBoundShape(x, y)) return;
+			if (StartNewBoundShape(projX, projY) != VARIANT_TRUE) return;
 		}
 		
 		if (Digitizer::OnMouseDown(_shapeEditor, projX, projY, ctrl))
