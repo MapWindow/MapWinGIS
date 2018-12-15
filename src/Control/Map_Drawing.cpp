@@ -880,7 +880,8 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 		if (l->IsShapefile() && l->wasRendered)		// if it's hidden don't clear every time
 		{
 			CComPtr<IShapefile> sf = NULL;
-			if (l->QueryShapefile(&sf))
+            // don't mark as 'undrawn' if we're not going to redraw it
+			if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) != layerBuffer)
 			{
 				ShapefileHelper::Cast(sf)->MarkUndrawn();
 			}
@@ -939,6 +940,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 					continue;
 
 				CComPtr<IShapefile> sf = NULL;
+                // layerBuffer == true indicates we're drawing the non-Volatile layers
 				if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
 					continue;
 				
