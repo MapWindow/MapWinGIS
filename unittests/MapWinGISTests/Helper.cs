@@ -479,5 +479,16 @@ namespace MapWinGISTests
             }
             return retVal;
         }
+
+        public static void AddPointToPointSf(Shapefile sfPoints, Point point)
+        {
+            // Save first point to result shapefile:
+            var shp = new Shape();
+            shp.Create(ShpfileType.SHP_POINT);
+            var index = 0;
+            if (!shp.InsertPoint(point, ref index))
+                throw new Exception("Error in inserting point. Error: " + shp.ErrorMsg[shp.LastErrorCode]);
+            sfPoints.EditAddShape(shp);
+        }
     }
 }

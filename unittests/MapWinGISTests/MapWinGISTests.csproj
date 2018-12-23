@@ -121,6 +121,7 @@
     <Compile Include="GridTests.cs" />
     <Compile Include="TilesTests.cs" />
     <Compile Include="AxMapTests.cs" />
+    <Compile Include="NewSfMethodsTests.cs" />
     <Compile Include="UtilTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -490,6 +491,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Testdata\sf\SHP_POLYLINEZ.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\Tracks.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\Tracks.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\Tracks.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\Tracks.shx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Testdata\sf\TypeMismatch.dbf">

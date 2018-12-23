@@ -189,3 +189,4 @@ unittests/packages/
 *.VC.opendb
 docs/Assets/Syncfusion Logos/
 tmp/
+docs/OptimizedImages/
