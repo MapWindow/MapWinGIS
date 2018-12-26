@@ -980,7 +980,7 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 		if (parsingIsNeeded)
 		{
 			// building list of expressions
-			std::vector<CString> expressions;
+			std::vector<CStringW> expressions;
 			for (unsigned int i = 0; i < _categories.size(); i++)
 			{
 				if (i == CategoryIndex || CategoryIndex == -1 )
@@ -989,7 +989,7 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 					if (val->vt != VT_EMPTY && _classificationField != -1)
 					{
 						// we analyzed this one before, so just a dummy string here
-						CString str = "";
+						CStringW str = L"";
 						expressions.push_back(str);
 					}
 					else
@@ -997,14 +997,14 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 						CComBSTR expr;
 						_categories[i]->get_Expression(&expr);
 						USES_CONVERSION;
-						CString str = OLE2CA(expr);	
+						CStringW str = OLE2CW(expr);
 						expressions.push_back(str);
 					}
 				}
 				else
 				{
 					// we don't need this categories, so dummy strings for them
-					CString str = "";
+					CStringW str = L"";
 					expressions.push_back(str);
 				}
 			}
@@ -1732,7 +1732,7 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 		return S_OK;
 	}
 	
-	CString str = OLE2CA(newVal);
+	CStringW str = OLE2CW(newVal);
 	_labelExpression = str;
 
 	if (!_synchronized && _labels.size() > 0)
@@ -1748,7 +1748,7 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 	if (table)
 	{
 		// analyzes expression
-		CString strError;
+		CStringW strError;
 		std::vector<CStringW> results;
 		if (TableHelper::Cast(table)->CalculateCore(str, results, strError, floatFormat))
 		{
@@ -2432,7 +2432,7 @@ STDMETHODIMP CLabels::Generate(BSTR Expression, tkLabelPositioning Method, VARIA
 	CComPtr<ITable> table = NULL;
 	_shapefile->get_Table(&table);
 	
-	CString error;
+	CStringW error;
 	VARIANT_BOOL vbretval;
 	
 	TableHelper::Cast(table)->ParseExpressionCore(Expression, vtString, error, &vbretval);

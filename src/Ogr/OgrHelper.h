@@ -15,7 +15,7 @@ public:
 	static bool IsMsSqlDatasource(GDALDataset* ds);
 	static OGRFieldType GetFieldType(IField* fld);
 	static FieldType GetFieldType(OGRFieldType ogrType);
-	static bool GetFieldList(OGRLayer* layer, vector<CString>& fields);
+	static bool GetFieldList(OGRLayer* layer, vector<CStringW>& fields);
 	static void GetFieldValues(OGRLayer* layer, int featureCount, OGRFieldType fieldType, vector<VARIANT*>& values, ICallback* cback);
 	static COgrLayer* Cast(CComPtr<IOgrLayer>& layer);
 	static ShpfileType ShapeType2D(IOgrLayer* layer);

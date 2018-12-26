@@ -102,8 +102,8 @@ struct CategoriesData
 public:
 	CComVariant minValue;
 	CComVariant maxValue;
-	CString expression;
-	CString name;
+	CStringW expression;
+	CStringW name;
 	tkCategoryValue valueType;
 	int classificationField;
 	bool skip;

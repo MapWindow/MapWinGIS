@@ -262,15 +262,15 @@ next_feature:
 }
 
 // is the specified character one of the valid XBase Logical characters
-bool isXBaseLogicalChar(char c)
+bool isXBaseLogicalChar(wchar_t c)
 {
-	return (c == 'Y' || c == 'N' || c == 'T' || c == 'F' || c == '?'); // || c == 'y' || c == 'n' || c == 't' || c == 'f');
+	return (c == L'Y' || c == L'N' || c == L'T' || c == L'F' || c == L'?'); // || c == 'y' || c == 'n' || c == 't' || c == 'f');
 }
 
 // is the specified character one of the valid XBase Logical characters indicating TRUE
-bool isXBaseLogicalTrue(char c)
+bool isXBaseLogicalTrue(wchar_t c)
 {
-	return (c == 'Y' || c == 'T'); // || c == 'y' || c == 't');
+	return (c == L'Y' || c == L'T'); // || c == 'y' || c == 't');
 }
 
 // *************************************************************

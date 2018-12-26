@@ -204,14 +204,14 @@ bool OgrHelper::IsMsSqlDatasource(GDALDataset* ds)
 // *************************************************************
 //		GetFieldList()
 // *************************************************************
-bool OgrHelper::GetFieldList(OGRLayer* layer, vector<CString>& fields)
+bool OgrHelper::GetFieldList(OGRLayer* layer, vector<CStringW>& fields)
 {
 	if (!layer) return false;
 	fields.clear();
 
 	OGRFeatureDefn *poFields = layer->GetLayerDefn();
 
-	CString s = layer->GetFIDColumn();
+	CStringW s = layer->GetFIDColumn();
 	if (s.GetLength() > 0) {
 		fields.push_back(s);
 	}

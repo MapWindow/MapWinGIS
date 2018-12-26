@@ -31,7 +31,7 @@ void FieldClassification::GetMinValue(vector<VARIANT*>& srcValues, CComVariant& 
 // *****************************************************************
 //			GenerateCategories()
 // *****************************************************************
-vector<CategoriesData>* FieldClassification::GenerateCategories(CString fieldName, FieldType fieldType, 
+vector<CategoriesData>* FieldClassification::GenerateCategories(CStringW fieldName, FieldType fieldType, 
 		vector<VARIANT*>& srcValues, tkClassificationType ClassificationType, 
 		long numClasses, long& errorCode)
 {
@@ -290,22 +290,22 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CString fieldNam
 		for (int i = 0; i < (int)result->size(); i++)
 		{
 			//CString strExpression;
-			CString strValue;
+			CStringW strValue;
 			CComVariant* val = &(*result)[i].minValue;
 			switch (val->vt)
 			{
 				case VT_BSTR:
-					strValue = OLE2CA(val->bstrVal);
+					strValue = OLE2CW(val->bstrVal);
 					(*result)[i].name = strValue;
 					(*result)[i].expression = "[" + fieldName + "] = \"" + strValue + "\"";
 					break;
 				case VT_R8:
-					strValue.Format("%g", val->dblVal);
+					strValue.Format(L"%g", val->dblVal);
 					(*result)[i].name = strValue;
 					(*result)[i].expression = "[" + fieldName + "] = " + strValue;
 					break;
 				case VT_I4:
-					strValue.Format("%i", val->lVal);
+					strValue.Format(L"%i", val->lVal);
 					(*result)[i].name = strValue;
 					(*result)[i].expression = "[" + fieldName + "] = " + strValue;
 					break;
@@ -315,7 +315,7 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CString fieldNam
 	else //if (ClassificationType == ctEqualIntervals || ClassificationType == ctEqualCount)
 	{
 		// in case % is present, we need to put to double it for proper formatting
-		fieldName.Replace("%", "%%");
+		fieldName.Replace(L"%", L"%%");
 
 		for (int i = 0; i < (int)result->size(); i++)
 		{
@@ -332,7 +332,7 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CString fieldNam
 				data->maxValue.dblVal = ceil(data->maxValue.dblVal);
 			}
 
-			CString upperBound = (i == result->size() - 1) ? "<=" : "<";
+			CStringW upperBound = (i == result->size() - 1) ? L"<=" : L"<";
 
 			switch (data->minValue.vt)
 			{

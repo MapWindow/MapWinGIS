@@ -7,7 +7,7 @@
 namespace parser
 {
 	std::vector<CustomFunction*> functions;
-	map<CString, CustomFunction*> fnMap;
+	map<CStringW, CustomFunction*> fnMap;
 
 #pragma region Math functions
 
@@ -754,15 +754,15 @@ namespace parser
 		for (size_t i = 0; i < functions.size(); i++)
 		{
 			CustomFunction* fn = functions[i];
-			vector<CString>* aliases = fn->getAliases();
+			vector<CStringW>* aliases = fn->getAliases();
 
 			for (size_t j = 0; j < aliases->size(); j++)
 			{
-				CString key = (*aliases)[j].MakeLower();
+				CStringW key = (*aliases)[j].MakeLower();
 
 				if (fnMap.find(key) != fnMap.end())
 				{
-					CallbackHelper::AssertionFailed("Duplicate name of the function: " + key);
+					CallbackHelper::AssertionFailed("Duplicate name of the function: " + CString(key));
 				}
 				else
 				{
@@ -800,9 +800,9 @@ namespace parser
 	// *****************************************************************
 	//		GetFunction()
 	// *****************************************************************
-	CustomFunction* GetFunction(CString name)
+	CustomFunction* GetFunction(CStringW name)
 	{
-		map<CString, CustomFunction*>::iterator it = fnMap.find(name.MakeLower());
+		map<CStringW, CustomFunction*>::iterator it = fnMap.find(name.MakeLower());
 		return it != fnMap.end() ? it->second : NULL; 
 	}
 }

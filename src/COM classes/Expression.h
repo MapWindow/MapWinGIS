@@ -65,7 +65,7 @@ public:
 
 private:
 	CustomExpression _expression;
-	CString _lastErrorMessage;
+	CStringW _lastErrorMessage;
 	int _lastErrorPosition;
 	ITable* _table;
 

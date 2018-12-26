@@ -5300,7 +5300,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
     *retVal = VARIANT_FALSE;
 
     CustomExpression expr;
-    CString err;
+    CStringW err;
     GDALDataset* dtOutput = NULL; // used in clean-up when something false, throws an exception when is it not yet created.
 
     // --------------------------------------------------------
@@ -5330,11 +5330,11 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
     GDALAllRegister();
 
     USES_CONVERSION;
-    map<CString, GDALDataset*> datasets;
+    map<CStringW, GDALDataset*> datasets;
     for (int i = 0; i < count; i++)
     {
         CStringW path = OLE2W(names[i]);
-        CString name = W2A(Utility::GetNameFromPath(path));
+        CStringW name = Utility::GetNameFromPath(path);
         name = name.MakeLower();
 
         GDALDataset* dt = GdalHelper::OpenRasterDatasetW(path, GDALAccess::GA_ReadOnly);
@@ -5406,7 +5406,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
     if (!dtOutput)
     {
         ErrorMsg(tkINVALID_FILENAME);
-        *errorMsg = A2BSTR("Failed to create output dataset");
+        *errorMsg = W2BSTR(L"Failed to create output dataset");
         goto cleaning;
     }
 
@@ -5414,10 +5414,10 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
     GDALRasterBand* bandOutput = dtOutput->GetRasterBand(1);
     bandOutput->SetNoDataValue(outputNodataValue);
 
-    if (!expr.Parse(OLE2A(expression), false, err))
+    if (!expr.Parse(OLE2W(expression), false, err))
     {
         ErrorMessage(tkINVALID_EXPRESSION);
-        *errorMsg = A2BSTR(err);
+        *errorMsg = W2BSTR(err);
         goto cleaning;
     }
 
@@ -5427,21 +5427,21 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
     int numFields = expr.get_NumFields();
     for (int i = 0; i < numFields; i++)
     {
-        CString name = expr.get_FieldName(i);
+        CStringW name = expr.get_FieldName(i);
         int pos = name.Find('@', 0);
         if (pos == -1 || pos == name.GetLength() - 1)
         {
             ErrorMessage(tkINVALID_EXPRESSION);
-            err.Format("Invalid formula field: %s; @ sign to separate filename and band index is expected", name);
-            *errorMsg = A2BSTR(err);
+            err.Format(L"Invalid formula field: %s; @ sign to separate filename and band index is expected", name);
+            *errorMsg = W2BSTR(err);
             goto cleaning;
         }
 
-        CString dtName = name.Mid(0, pos).MakeLower();
+        CStringW dtName = name.Mid(0, pos).MakeLower();
         if (datasets.find(dtName) != datasets.end())
         {
             GDALDataset* dt = datasets[dtName];
-            int bandIndex = atoi_custom(name.Mid(pos + 1));
+            int bandIndex = _wtoi(name.Mid(pos + 1));
             GDALRasterBand* band = dt->GetRasterBand(bandIndex);
             if (band)
             {
@@ -5453,16 +5453,16 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
             else
             {
                 ErrorMessage(tkINVALID_EXPRESSION);
-                err.Format("Band wasn't found: %s", name);
-                *errorMsg = A2BSTR(err);
+                err.Format(L"Band wasn't found: %s", name);
+                *errorMsg = W2BSTR(err);
                 goto cleaning;
             }
         }
         else
         {
             ErrorMessage(tkINVALID_EXPRESSION);
-            err.Format("Invalid formula field: %s; no dataset with such name in input names", name);
-            *errorMsg = A2BSTR(err);
+            err.Format(L"Invalid formula field: %s; no dataset with such name in input names", name);
+            *errorMsg = W2BSTR(err);
             goto cleaning;
         }
     }
@@ -5488,7 +5488,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
             band->RasterIO(GF_Read, 0, i, numColumns, 1, val->matrix()->data(), numColumns, 1, GDALDataType::GDT_Float32, 0, 0);
         }
 
-        CString errorMsg;
+        CStringW errorMsg;
         CExpressionValue* resultVal = expr.Calculate(errorMsg);
         if (resultVal)
         {
@@ -5537,7 +5537,7 @@ cleaning:
 
     expr.Clear();
     CallbackHelper::ProgressCompleted(callback);
-    map<CString, GDALDataset*>::iterator it = datasets.begin();
+    map<CStringW, GDALDataset*>::iterator it = datasets.begin();
     while (it != datasets.end())
     {
         GDALDataset* dt = it->second;

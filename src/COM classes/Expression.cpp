@@ -37,7 +37,7 @@ STDMETHODIMP CExpression::get_LastErrorMessage(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = A2BSTR(_lastErrorMessage);
+	*pVal = W2BSTR(_lastErrorMessage);
 
 	return S_OK;
 }
@@ -104,7 +104,7 @@ STDMETHODIMP CExpression::Parse(BSTR expr, VARIANT_BOOL* retVal)
 	Clear();
 
 	USES_CONVERSION;
-	*retVal = _expression.Parse(OLE2A(expr), true, _lastErrorMessage) ? VARIANT_TRUE : VARIANT_FALSE;
+	*retVal = _expression.Parse(OLE2W(expr), true, _lastErrorMessage) ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return S_OK;
 }
@@ -131,7 +131,7 @@ STDMETHODIMP CExpression::ParseForTable(BSTR expr, ITable* table, VARIANT_BOOL* 
 	_expression.ReadFieldNames(table);
 
 	USES_CONVERSION;
-	*retVal = _expression.Parse(OLE2A(expr), true, _lastErrorMessage) ? VARIANT_TRUE : VARIANT_FALSE;
+	*retVal = _expression.Parse(OLE2W(expr), true, _lastErrorMessage) ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return S_OK;
 }

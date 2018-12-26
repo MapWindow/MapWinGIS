@@ -226,7 +226,7 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	//	 Analyzing visibility expression
 	// --------------------------------------------------------------
 	std::vector<long> arr;
-	CString err;
+	CStringW err;
 	bool useAll = true;
 	
 	CComBSTR expr;
@@ -238,7 +238,7 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 		_shapefile->get_Table(&tbl);
 
 		USES_CONVERSION;
-		if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), arr, err))
+		if (TableHelper::Cast(tbl)->QueryCore(OLE2CW(expr), arr, err))
 		{
 			useAll = false;
 		}

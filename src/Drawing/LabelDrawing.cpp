@@ -398,7 +398,7 @@ bool CLabelDrawer::GetExpressionFilter(ILabels* labels, IShapefile* sf, vector<l
 	CComBSTR expr;
 	labels->get_VisibilityExpression(&expr);
 
-	CString err;
+	CStringW err;
 
 	if (SysStringLen(expr) > 0)
 	{
@@ -408,7 +408,7 @@ bool CLabelDrawer::GetExpressionFilter(ILabels* labels, IShapefile* sf, vector<l
 			sf->get_Table(&tbl);
 
 			USES_CONVERSION;
-			if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), filter, err))
+			if (TableHelper::Cast(tbl)->QueryCore(OLE2CW(expr), filter, err))
 			{
 				return true;
 			}

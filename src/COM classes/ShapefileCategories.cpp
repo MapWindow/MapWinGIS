@@ -311,7 +311,6 @@ void CShapefileCategories::GenerateCore(std::vector<CategoriesData>* categories,
 
 	for (auto& categorie : *categories)
 	{
-		CString strValue;
 		CComBSTR bstrName(categorie.name);
 		CComBSTR bstrExpression(categorie.expression);
 		
@@ -549,7 +548,7 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 	if (parsingIsNeeded)
 	{
 		// building list of expressions
-		std::vector<CString> expressions;
+		std::vector<CStringW> expressions;
 		for (unsigned int i = 0; i < _categories.size(); i++)
 		{
 			if (i == CategoryIndex || CategoryIndex == -1 )
@@ -557,13 +556,13 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 				CComBSTR expr;
 				_categories[i]->get_Expression(&expr);
 				USES_CONVERSION;
-				CString str = OLE2CA(expr);
+				CStringW str = OLE2CW(expr);
 				expressions.push_back(str);
 			}
 			else
 			{
 				// we don't need this categories, so dummy strings for them
-				CString str = "";
+				CStringW str = L"";
 				expressions.push_back(str);
 			}
 		}
