@@ -882,8 +882,10 @@ namespace MapWinGIS
         /// The angle returned is the so-called Geographic angle, measured in a clockwise direction
         /// from the positive Y-axis, as opposed to the Arithmetic (Cartesian) angle measured in a
         /// counter-clockwise direction from the positive X-axis.  The returned value can be used 
-        /// as-is to specify Shape or Label Rotation.
+        /// as-is to specify Shape or Label Rotation, which expect the Geographic angle for input.
         /// </remarks>
+        /// \see Shapefile.set_ShapeRotation
+        /// \new500 Added in version 5.0.0
         public double GetAngle(Point firstPoint, Point secondPoint)
         {
             throw new NotImplementedException();
