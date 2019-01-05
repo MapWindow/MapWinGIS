@@ -1666,7 +1666,13 @@ namespace MapWinGIS
         #region Selection
         /// \addtogroup shapefile_selection Shapefile selection
         /// Here is a list of properties and methods for managing shapefile selection.
-        /// This module is a part of the documentation of Shapefile class.
+        /// This module is a part of the documentation of the Shapefile class.
+        /// 
+        /// Historically, using the cmSelection and cmSelectByPolygon tools, you would specify a LayerHandle in the ChooseLayer map event 
+        /// to indicate which single layer you were selecting shapes from.   Starting in v5.0, you can select from multiple layers concurrently 
+        /// by setting the 'Selectable' property of each layer you would like to select shapes from.  If the LayerHandle returned from the
+        /// ChooseLayer event is left unspecified (-1), then instead, all layers having the 'Selectable' property = TRUE
+        /// will be selectable by the tool.
         /// \dot
         /// digraph shapefile_selection {
         /// splines = true;
@@ -1780,6 +1786,21 @@ namespace MapWinGIS
         public void SelectNone()
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this shapefile will be selectable by the cmSelection and cmSelectByPolygon tool.
+        /// </summary>
+        /// <remarks>
+        /// This property allows for multiple shapefiles to be concurrently selectable.
+        /// If only selecting from one layer, you can still use the ChooseLayer map event to specify the selectable layer.
+        /// </remarks>
+        /// \see AxMap.CursorMode
+        /// \new500 Added in version 5.0.0
+        public bool Selectable
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         /// <summary>
