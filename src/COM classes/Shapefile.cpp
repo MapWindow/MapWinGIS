@@ -55,6 +55,7 @@ CShapefile::CShapefile()
     _snappable = VARIANT_TRUE;
     _interactiveEditing = VARIANT_FALSE;
     _hotTracking = VARIANT_TRUE;
+    _selectable = VARIANT_FALSE;
     _geosGeometriesRead = false;
     _stopExecution = nullptr;
 
@@ -3251,6 +3252,23 @@ STDMETHODIMP CShapefile::get_FieldIndexByName(BSTR FieldName, LONG* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
     _table->get_FieldIndexByName(FieldName, pVal);
+    return S_OK;
+}
+
+// ***************************************************
+//		get_Selectable
+// ***************************************************
+STDMETHODIMP CShapefile::get_Selectable(VARIANT_BOOL* retVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *retVal = _selectable;
+    return S_OK;
+}
+
+STDMETHODIMP CShapefile::put_Selectable(VARIANT_BOOL newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    _selectable = newVal;
     return S_OK;
 }
 

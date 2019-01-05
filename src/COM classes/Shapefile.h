@@ -257,6 +257,8 @@ public:
 	STDMETHOD(StopAppendMode)();
 	STDMETHOD(get_AppendMode)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_IsGeographicProjection)(VARIANT_BOOL* pVal);
+    STDMETHOD(get_Selectable)(VARIANT_BOOL* retVal);
+    STDMETHOD(put_Selectable)(VARIANT_BOOL newVal);
 private:
 
 	// data for point in shapefile test
@@ -322,7 +324,8 @@ private:
 	IUndoList* _undoList;
 	
 	VARIANT_BOOL _hotTracking;
-	bool _geosGeometriesRead;
+    VARIANT_BOOL _selectable;
+    bool _geosGeometriesRead;
 	tkCollisionMode _collisionMode;		// collision mode for point shapefiles
 	tkGeometryEngine _geometryEngine;		// GEOS or Clipper
 	bool _writing;		// is currently writing to the file

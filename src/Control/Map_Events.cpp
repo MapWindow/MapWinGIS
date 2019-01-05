@@ -908,13 +908,23 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 {
 	bool ctrl = vbflags & 2 ? true : false;
 	long layerHandle = -1;
+    bool selectingSelectable = false;
 	CComPtr<IShapefile> sf = NULL;
 
 	if (m_cursorMode == cmSelection)
 	{
 		tkMwBoolean cancel = blnFalse;
+        // see if single layer is specified to select
 		FireChooseLayer(x, y, &layerHandle);
-		if (layerHandle != -1) {
+        // if none specified, consider all 'selectable' layers
+        if (layerHandle == -1)
+        {
+            // all selectable layers
+            selectingSelectable = true;
+        }
+		else
+        {
+            // single layer specified for selection
 			sf.Attach(GetShapefile(layerHandle));
 		}
 	}
@@ -922,25 +932,56 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 	_dragging.Operation = DragNone;
 	if (!_dragging.HasRectangle())
 	{
+        // no drag rectangle, mouse click only
 		switch (m_cursorMode)
 		{
 			case cmZoomIn:
 				ZoomToCursorPosition(true);
 				break;
 			case cmSelection:
-				if (sf) 
+				if (sf || selectingSelectable)
 				{
 					double xProj, yProj;
 					PixelToProjection(x, y, xProj, yProj);
-					Extent box = GetPointSelectionBox(sf, xProj, yProj);
-					if (SelectionHelper::SelectByPoint(sf, box, !ctrl)) 
-					{
-						FireSelectionChanged(layerHandle);
-						Redraw();
-						return;
-					}
+                    if (sf)
+                    {
+                        // single layer select
+                        Extent box = GetPointSelectionBox(sf, xProj, yProj);
+                        if (SelectionHelper::SelectByPoint(sf, box, !ctrl))
+                        {
+                            FireSelectionChanged(layerHandle);
+                            Redraw();
+                            return;
+                        }
+                    }
+                    else if (selectingSelectable)
+                    {
+                        // iterate all layers
+                        for (layerHandle = 0; layerHandle < GetNumLayers(); layerHandle++)
+                        {
+                            sf.Attach(GetShapefile(layerHandle));
+                            if (sf)
+                            {
+                                // is layer selectable?
+                                VARIANT_BOOL isSelectable = VARIANT_FALSE;
+                                sf->get_Selectable(&isSelectable);
+                                if (isSelectable == VARIANT_TRUE)
+                                {
+                                    Extent box = GetPointSelectionBox(sf, xProj, yProj);
+                                    // allow also for multiple overlapping shapes
+                                    if (SelectionHelper::SelectByPoint(sf, box, !ctrl, false))
+                                    {
+                                        FireSelectionChanged(layerHandle);
+                                    }
+                                }
+                            }
+                        }
+                        Redraw();
+                        return;
+                    }
 				}
-				else if (m_sendMouseDown) {
+				else if (m_sendMouseDown) 
+                {
 					this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 				}
 				break;
@@ -948,6 +989,7 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 	}
 	else
 	{
+        // get dragging rectangle
 		CRect rect = _dragging.GetRectangle();
 
 		if (HasRotation())
@@ -969,13 +1011,39 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 				SetNewExtentsWithForcedZooming(box, true);
 				break;
 			case cmSelection:
-				if (sf) {
-					if (SelectionHelper::SelectByRectangle(sf, box)) {
+				if (sf) 
+                {
+                    // single layer select
+					if (SelectionHelper::SelectByRectangle(sf, box)) 
+                    {
 						FireSelectionChanged(layerHandle);
 						Redraw();
 						return;
 					}
 				}
+                else if (selectingSelectable)
+                {
+                    // iterate all layers
+                    for (layerHandle = 0; layerHandle < GetNumLayers(); layerHandle++)
+                    {
+                        sf.Attach(GetShapefile(layerHandle));
+                        if (sf)
+                        {
+                            // select all selectable
+                            VARIANT_BOOL isSelectable = VARIANT_FALSE;
+                            sf->get_Selectable(&isSelectable);
+                            if (isSelectable == VARIANT_TRUE)
+                            {
+                                if (SelectionHelper::SelectByRectangle(sf, box))
+                                {
+                                    FireSelectionChanged(layerHandle);
+                                }
+                            }
+                        }
+                    }
+                    Redraw();
+                    return;
+                }
 				break;
 		}
 
