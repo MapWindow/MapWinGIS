@@ -846,6 +846,27 @@ namespace MapWinGIS
         {
             get { throw new NotImplementedException(); }
         }
+
+        /// <summary>
+        /// Return a point at the specified distance (or percentage) along the specified line
+        /// </summary>
+        /// <param name="startPoint">Starting point along this line (specify Point[0] for beginning of line)</param>
+        /// <param name="distance">Distance along this line (or percentage of line length; if a percentage, specify a number between 0.0 and 1.0)</param>
+        /// <param name="normalized">Optional value; if FALSE, 'distance' is actual distance; if TRUE, distance is percentage of length; defaults to FALSE</param>
+        /// <returns>Returns a Point class representing the point along the sourceLine that is the specified distance (or percentage) along the line.</returns>
+        /// <remarks>
+        /// Only applies to a Polyline Shape.  If 'distance' is greater than the the line length, the line's endpoint is returned.
+        /// 
+        /// 'startPoint' does not have to be on the line.  If not on the line, actual starting point will be the nearest point to 'startPoint' that is on the line.
+        /// </remarks>
+        /// \see Utils.LineInterpolatePoint
+        /// 
+        /// \new500 Added in version 5.0.0
+        public Point InterpolatePoint(Point startPoint, double distance, bool normalized)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 #if nsp
 }

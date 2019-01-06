@@ -885,11 +885,34 @@ namespace MapWinGIS
         /// as-is to specify Shape or Label Rotation, which expect the Geographic angle for input.
         /// </remarks>
         /// \see Shapefile.set_ShapeRotation
+        /// 
         /// \new500 Added in version 5.0.0
         public double GetAngle(Point firstPoint, Point secondPoint)
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Return a point at the specified distance (or percentage) along the specified line
+        /// </summary>
+        /// <param name="sourceLine">Polyline shape to traverse</param>
+        /// <param name="startPoint">Starting point along 'sourceLine' (specify Point[0] for beginning of line)</param>
+        /// <param name="distance">Distance along line (or percentage of line length; if a percentage, specify a number between 0.0 and 1.0)</param>
+        /// <param name="normalized">Optional value; if FALSE, 'distance' is actual distance; if TRUE, distance is percentage of length; defaults to FALSE</param>
+        /// <returns>Returns a Point class representing the point along the sourceLine that is the specified distance (or percentage) along the line.</returns>
+        /// <remarks>
+        /// 'sourceLine' must be a Polyline Shape.  If 'distance' is greater than the source line length, the line's endpoint is returned.
+        /// 
+        /// 'startPoint' does not have to be on 'sourceLine'.  If not on the line, actual starting point will be the nearest point to 'startPoint' that is on 'sourceline'.
+        /// </remarks>
+        /// \see Shape.InterpolatePoint
+        /// 
+        /// \new500 Added in version 5.0.0
+        public Point LineInterpolatePoint(Shape sourceLine, Point startPoint, double distance, bool normalized)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 #if nsp
 }
