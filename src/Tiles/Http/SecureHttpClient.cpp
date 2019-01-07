@@ -78,28 +78,30 @@ bool SecureHttpClient::SetProxyAndAuthentication(const CString& userName, const 
     // validate handle
     if (!curl) return false;
 
-    const CURLcode curlCode = curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
+    CURLcode curlCode;
+    curlCode = curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
     if (curlCode != CURLcode::CURLE_OK)
     {
-        /* what to do */
+	    /* what to do */
     }
 
     if (HttpProxyHelper::m_proxyAddress.GetLength() > 0)
     {
-        if (!SetProxy((LPCTSTR)HttpProxyHelper::m_proxyAddress, (long)HttpProxyHelper::m_proxyPort))
-            return false;
+	    if (!SetProxy((LPCTSTR)HttpProxyHelper::m_proxyAddress, (long)HttpProxyHelper::m_proxyPort))
+		    return false;
     }
 
     //curlCode = curl_easy_setopt(curl, CURLOPT_PROXY, (LPCTSTR)domain);
-    curl_easy_setopt(curl, CURLOPT_USERNAME, (LPCTSTR)userName);
-    curl_easy_setopt(curl, CURLOPT_PASSWORD, (LPCTSTR)password);
+    curlCode = curl_easy_setopt(curl, CURLOPT_USERNAME, (LPCTSTR)userName);
+    curlCode = curl_easy_setopt(curl, CURLOPT_PASSWORD, (LPCTSTR)password);
 
+    // TODO: this needs to be expanded to have more options, e.g. hidden auth is now impossible
     if (m_globalSettings.proxyAuthentication == tkProxyAuthentication::asNtlm)
     {
-        return curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM) == CURLcode::CURLE_OK;
+	    return (curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM) == CURLcode::CURLE_OK);
     }
-
-    return curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC) == CURLcode::CURLE_OK;
+    // Let CURL decide:
+    return (curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY) == CURLcode::CURLE_OK);
 }
 
 // *************************************************************
