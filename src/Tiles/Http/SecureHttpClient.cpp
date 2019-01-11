@@ -79,11 +79,11 @@ bool SecureHttpClient::SetProxyAndAuthentication(const CString& userName, const 
     if (!curl) return false;
 
     CURLcode curlCode;
-    curlCode = curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
-    if (curlCode != CURLcode::CURLE_OK)
-    {
-	    /* what to do */
-    }
+    //curlCode = curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
+    //if (curlCode != CURLcode::CURLE_OK)
+    //{
+	   // /* what to do */
+    //}
 
     if (HttpProxyHelper::m_proxyAddress.GetLength() > 0)
     {
