@@ -472,10 +472,12 @@ namespace interopCreator
                 axMap1.KnownExtents = tkKnownExtents.keNetherlands;
             }
 
+            axMap1.Redraw();
             axMap1.ZoomBehavior = tkZoomBehavior.zbUseTileLevels;
             var outputFolder = $@"D:\tmp\axmap.tiles\{axMap1.Tiles.Provider.ToString()}";
             if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
 
+            _settings.StartLogTileRequests(@"D:\tmp\axmap.tiles\TileRequests.log");
             var numTilesToCache = axMap1.Tiles.PrefetchToFolder(axMap1.Extents, axMap1.Tiles.CurrentZoom,
                 Convert.ToInt32(axMap1.Tiles.Provider), outputFolder, ".png", null);
             txtResults.Text += $@"{Environment.NewLine}numTilesToCache: " + numTilesToCache;

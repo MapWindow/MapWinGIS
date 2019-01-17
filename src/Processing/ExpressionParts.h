@@ -207,7 +207,7 @@ public:
 		delete calcVal;
 	}
 
-	CString fieldName;       // name of field (in [square brackets])
+	CStringW fieldName;      // name of field (in [square brackets])
 	tkElementType type;      // type of element
 	tkOperation operation;	 // type of operation
 	CExpressionValue* val;		// initial value
@@ -252,13 +252,13 @@ private:
 	bool _useGeometry;
 	tkFunctionGroup _group;
 	ExpressionFunction _fn;
-	vector<CString> _aliases;
+	vector<CStringW> _aliases;
 	CStringW _description;
 	FunctionId _fnId;
 	vector<FunctionParameter*> _params;
 
 public:
-	CustomFunction(FunctionId fnId, CString name, int numParams, ExpressionFunction function, tkFunctionGroup group, bool useGeometry = false)
+	CustomFunction(FunctionId fnId, CStringW name, int numParams, ExpressionFunction function, tkFunctionGroup group, bool useGeometry = false)
 		: _fnId(fnId), _useGeometry(useGeometry), _group(group), _fn(function)
 	{
 		_numParams = numParams;
@@ -281,11 +281,11 @@ public:
 
 	void InitOverloads();
 
-	void ParseName(CString name);
+	void ParseName(CStringW name);
 
-	vector<CString>* getAliases() { return &_aliases; }
+	vector<CStringW>* getAliases() { return &_aliases; }
 
-	CString GetName()  { return _aliases[0]; }
+	CStringW GetName()  { return _aliases[0]; }
 
 	int numParams() { return _params.size(); }
 
@@ -302,7 +302,7 @@ public:
 
 	// optionally type of parameters can be checked as well, 
 	// provided we define all the types in CustomFunction.InitOverloads
-	bool CheckArguments(int argSize, CString& errorMessage);
+	bool CheckArguments(int argSize, CStringW& errorMessage);
 
 	void AddParameter(CStringW name, CStringW description) 
 	{
@@ -333,7 +333,7 @@ public:
 class CExpressionPart
 {
 public:
-	CString expression;					 // for debugging only
+	CStringW expression;					 // for debugging only
 	bool isArgument;					 // for debugging only
 	vector<CElement*> elements;			 // fields, operators, literals
 	vector<CExpressionPart*> arguments;  // references to other parts

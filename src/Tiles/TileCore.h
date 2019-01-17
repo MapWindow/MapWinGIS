@@ -17,6 +17,8 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
 #pragma once
 #include "InMemoryBitmap.h"
 #include "GeoPoint.h"
@@ -31,16 +33,16 @@ extern Debug::Logger tilesLogger;
 // to the caller via callback
 struct TileRequestInfo
 {
-	TileRequestInfo(CString key, bool isSnapshot)
-		: count(0), totalCount(10000), key(key), isSnapshot(isSnapshot), generation(-1)
-	{
-	}
+    TileRequestInfo(CString key, bool isSnapshot)
+        : key(key), isSnapshot(isSnapshot), totalCount(10000), count(0), generation(-1)
+    {
+    }
 
-	CString key;
-	bool isSnapshot;	
-	unsigned int totalCount;
-	unsigned int count;
-	int generation;
+    CString key;
+    bool isSnapshot;
+    unsigned int totalCount;
+    unsigned int count;
+    int generation;
 };
 
 // ******************************************************
@@ -50,21 +52,22 @@ struct TileRequestInfo
 class TilePoint : public CPoint
 {
 public:
-	TilePoint(int x, int y)
-		: CPoint(x, y), dist(0.0)
-	{
-	}
+    TilePoint(int x, int y)
+        : CPoint(x, y), dist(0.0)
+    {
+    }
 
 public:
-	double dist;
+    double dist;
 
 public:
-	static void ReleaseMemory(vector<TilePoint*>& points)
-	{
-		for (size_t i = 0; i < points.size(); i++) {
-			delete points[i];
-		}
-	}
+    static void ReleaseMemory(vector<TilePoint*>& points)
+    {
+        for (size_t i = 0; i < points.size(); i++)
+        {
+            delete points[i];
+        }
+    }
 };
 
 // ******************************************************
@@ -75,85 +78,87 @@ public:
 class TileCore
 {
 public:
-	TileCore(int providerId, int zoom, CPoint& pnt, BaseProjection* projection)
-		: _scale(zoom), _tileX(pnt.x), _tileY(pnt.y), _providerId(providerId), _projection(projection)
-	{
-		_refCount = 0;
-		_projectionChangeCount = -1;
-		_hasErrors = false;
-		_drawn = false;
-		_toDelete = false;
-		_inBuffer = false;
-		_geogBounds = projection->CalculateGeogBounds(pnt, zoom);
-	}
+    TileCore(int providerId, int zoom, CPoint& pnt, BaseProjection* projection)
+        : _scale(zoom), _tileX(pnt.x), _tileY(pnt.y), _projection(projection), _providerId(providerId)
+    {
+        _refCount = 0;
+        _projectionChangeCount = -1;
+        _hasErrors = false;
+        _drawn = false;
+        _toDelete = false;
+        _inBuffer = false;
+        _geogBounds = projection->CalculateGeogBounds(pnt, zoom);
+    }
 
-	virtual ~TileCore()
-	{
-		ClearOverlays();
-	}
+    virtual ~TileCore()
+    {
+        ClearOverlays();
+    }
 
 private:
-	// a tile can be deleted while:
-	// 1) clearing drawing buffer: Tiles::Clear()
-	// 2) clearing RAM cache: RAMCache::Clear()
-	// 3) after disk caching: SQLiteCache::DoCaching()
-	long _refCount;		// number of references (it can be used in drawing, RAM cache or be scheduled for disk caching)
-	bool _hasErrors;	// there were errors during download, one of several layers weren't loaded
-	long _scale;
-	long _tileX;
-	long _tileY;
-	int _projectionChangeCount;	// position of tile was recalculated using the current projection; number of projection changes
-	BaseProjection* _projection;
-	RectLatLng _projectedBounds;
-	RectLatLng _geogBounds;
-	bool _drawn;			// it's drawn on screen
-	bool _toDelete;		// for inner working of RAM cache
-	bool _inBuffer;		// it's currently displayed or scheduled to be displayed; it must not be destroyed while cleaning the cache
-	int _providerId;
+    // a tile can be deleted while:
+    // 1) clearing drawing buffer: Tiles::Clear()
+    // 2) clearing RAM cache: RAMCache::Clear()
+    // 3) after disk caching: SQLiteCache::DoCaching()
+    long _refCount; // number of references (it can be used in drawing, RAM cache or be scheduled for disk caching)
+    bool _hasErrors; // there were errors during download, one of several layers weren't loaded
+    long _scale;
+    long _tileX;
+    long _tileY;
+    int _projectionChangeCount;
+    // position of tile was recalculated using the current projection; number of projection changes
+    BaseProjection* _projection;
+    RectLatLng _projectedBounds;
+    RectLatLng _geogBounds;
+    bool _drawn; // it's drawn on screen
+    bool _toDelete; // for inner working of RAM cache
+    bool _inBuffer;
+    // it's currently displayed or scheduled to be displayed; it must not be destroyed while cleaning the cache
+    int _providerId;
 
 public:
-	// a tile may be comprised of several semi-transparent bitmaps (e.g. satellite image and labels above it)
-	vector<CMemoryBitmap*> Overlays;
+    // a tile may be comprised of several semi-transparent bitmaps (e.g. satellite image and labels above it)
+    vector<CMemoryBitmap*> Overlays;
 
 public:
-	// properties
-	int get_ProjectionChangeCount() { return _projectionChangeCount; }
-	RectLatLng* get_ProjectedBounds() { return &_projectedBounds; }
-	RectLatLng* get_GeographicBounds() { return &_geogBounds; }
-	BaseProjection* get_Projection() { return _projection; }
-	void set_Projection(BaseProjection* projection) { _projection = projection; }
-	CStringW get_Path(CStringW root, CStringW ext);
-	CMemoryBitmap* get_Bitmap(int overlayIndex);
-	int get_ByteSize();
-	bool IsEmpty() 	{ return Overlays.size() == 0; }
-	bool hasErrors() { return _hasErrors; }
-	void hasErrors(bool value) { _hasErrors = true; }
-	int tileX() { return _tileX; }
-	int tileY() { return _tileY; }
-	int zoom() { return _scale; }
-	int get_ProviderId() { return _providerId; }
-	void set_ProviderId(int value) { _providerId = value; }
-	bool inBuffer() { return _inBuffer; }
-	void inBuffer(bool value) { _inBuffer = value; }
-	bool isDrawn() { return _drawn; }
-	void isDrawn(bool value) { _drawn = value; }
-	bool toDelete() { return _toDelete; }
-	void toDelete(bool value) { _toDelete = value; }
+    // properties
+    int get_ProjectionChangeCount() { return _projectionChangeCount; }
+    RectLatLng* get_ProjectedBounds() { return &_projectedBounds; }
+    RectLatLng* get_GeographicBounds() { return &_geogBounds; }
+    BaseProjection* get_Projection() { return _projection; }
+    void set_Projection(BaseProjection* projection) { _projection = projection; }
+    CStringW GetPath(CStringW root, CStringW ext) const;
+    CMemoryBitmap* get_Bitmap(int overlayIndex);
+    int get_ByteSize();
+    bool IsEmpty() { return Overlays.size() == 0; }
+    bool hasErrors() { return _hasErrors; }
+    void hasErrors(bool value) { _hasErrors = true; }
+    int tileX() { return _tileX; }
+    int tileY() { return _tileY; }
+    int zoom() { return _scale; }
+    int get_ProviderId() { return _providerId; }
+    void set_ProviderId(int value) { _providerId = value; }
+    bool inBuffer() { return _inBuffer; }
+    void inBuffer(bool value) { _inBuffer = value; }
+    bool isDrawn() { return _drawn; }
+    void isDrawn(bool value) { _drawn = value; }
+    bool toDelete() { return _toDelete; }
+    void toDelete(bool value) { _toDelete = value; }
 
 public:
-	//methods
-	void AddOverlay(CMemoryBitmap* bitmap) { Overlays.push_back(bitmap);	}
-	void ClearOverlays();
-	long AddRef();
-	long Release();
+    //methods
+    void AddOverlay(CMemoryBitmap* bitmap) { Overlays.push_back(bitmap); }
+    void ClearOverlays();
+    long AddRef();
+    long Release();
 
-	void UpdateProjectedBounds(RectLatLng bounds, int projectionChangeCount) {
-		_projectedBounds = bounds;
-		_projectionChangeCount = projectionChangeCount;
-	}
+    void UpdateProjectedBounds(RectLatLng bounds, int projectionChangeCount)
+    {
+        _projectedBounds = bounds;
+        _projectionChangeCount = projectionChangeCount;
+    }
 
 public:
-	// operators
-	bool TileCore::operator==(const TileCore &t2);
+    // operators
+    bool TileCore::operator==(const TileCore& t2) const;
 };
-

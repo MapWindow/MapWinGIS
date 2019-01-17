@@ -29,7 +29,7 @@ STDMETHODIMP CFunction::get_Name(BSTR* pVal)
 	}
 
 	USES_CONVERSION;
-	*pVal = A2BSTR(_function->GetName());
+	*pVal = W2BSTR(_function->GetName());
 
 	return S_OK;
 }
@@ -45,7 +45,7 @@ STDMETHODIMP CFunction::get_Alias(long aliasIndex, BSTR* pVal)
 	{
 		aliasIndex++;    // the first alias is name
 
-		vector<CString>* aliases = _function->getAliases();
+		vector<CStringW>* aliases = _function->getAliases();
 
 		if (aliasIndex <= 0 || aliasIndex >= (long)aliases->size())
 		{
@@ -53,7 +53,7 @@ STDMETHODIMP CFunction::get_Alias(long aliasIndex, BSTR* pVal)
 		}
 		else
 		{
-			*pVal = A2BSTR((*aliases)[aliasIndex]);
+			*pVal = W2BSTR((*aliases)[aliasIndex]);
 			return S_OK;
 		}
 	}
@@ -75,7 +75,7 @@ STDMETHODIMP CFunction::get_NumAliases(long* pVal)
 		return S_OK;
 	}
 
-	vector<CString>* aliases = _function->getAliases();
+	vector<CStringW>* aliases = _function->getAliases();
 
 	*pVal = aliases->size() - 1;
 	

@@ -5,23 +5,23 @@
 // *******************************************************************
 //		IsDecimal()
 // *******************************************************************
-bool ExpressionParser::IsDecimal(char chr, bool& exponential)
+bool ExpressionParser::IsDecimal(wchar_t chr, bool& exponential)
 {
-	if (chr >= '0' && chr <= '9')
+	if (chr >= L'0' && chr <= L'9')
 		return true;
 
-	if ((chr == '.') || (chr == ','))	// specify decimal separator explicitly
+	if ((chr == L'.') || (chr == L','))	// specify decimal separator explicitly
 	{
 		return true;
 	}
 
-	if ((chr == 'e') || (chr == 'E'))
+	if ((chr == L'e') || (chr == L'E'))
 	{
 		exponential = true;
 		return true;
 	}
 
-	if (exponential && (chr == '+' || chr == '-'))
+	if (exponential && (chr == L'+' || chr == L'-'))
 	{
 		exponential = false;
 		return true;
@@ -34,14 +34,14 @@ bool ExpressionParser::IsDecimal(char chr, bool& exponential)
 // *******************************************************************
 //		IsDecimal()
 // *******************************************************************
-bool ExpressionParser::IsDecimal(CString& str)
+bool ExpressionParser::IsDecimal(CStringW& str)
 {
 	for (int i = 0; i < str.GetLength(); i++)
 	{
-		if ((str[i] >= '0') && (str[i] < '9'))
+		if ((str[i] >= L'0') && (str[i] < L'9'))
 			continue;
 
-		if ((str[i] == '.') || (str[i] == ',') || (str[i] == 'e') || (str[i] == 'E'))	// specify decimal separator explicitly
+		if ((str[i] == L'.') || (str[i] == L',') || (str[i] == L'e') || (str[i] == L'E'))	// specify decimal separator explicitly
 			continue;
 
 		return false;
@@ -53,11 +53,11 @@ bool ExpressionParser::IsDecimal(CString& str)
 // *******************************************************************
 //		IsDecimalZero()
 // *******************************************************************
-bool ExpressionParser::IsDecimalZero(CString& str)
+bool ExpressionParser::IsDecimalZero(CStringW& str)
 {
 	for (int i = 0; i < str.GetLength(); i++)
 	{
-		if ((str[i] != '0') && (str[i] != '.') && (str[i] != ','))		// TODO: check decimal separator in more general way
+		if ((str[i] != L'0') && (str[i] != L'.') && (str[i] != L','))		// TODO: check decimal separator in more general way
 			return false;
 	}
 	return true;
@@ -66,11 +66,11 @@ bool ExpressionParser::IsDecimalZero(CString& str)
 // *******************************************************************
 //		IsInteger()
 // *******************************************************************
-bool ExpressionParser::IsInteger(CString& str)
+bool ExpressionParser::IsInteger(CStringW& str)
 {
 	for (int i = 0; i < str.GetLength(); i++)
 	{
-		if (str[i] < '0' || str[i] > '9')
+		if (str[i] < L'0' || str[i] > L'9')
 			return false;
 	}
 	return true;
@@ -79,20 +79,20 @@ bool ExpressionParser::IsInteger(CString& str)
 // *******************************************************************
 //		IsOperator()
 // *******************************************************************
-bool ExpressionParser::IsOperator(char s)
+bool ExpressionParser::IsOperator(wchar_t s)
 {
 	switch (s)
 	{
-		case '<':
-		case '>' :
-		case '=' :
-		case '+' :
-		case '-' :
-		case '*' :
-		case '/' :
-		case '\\':
-		case '^':
-		case ':':
+		case L'<':
+		case L'>' :
+		case L'=' :
+		case L'+' :
+		case L'-' :
+		case L'*' :
+		case L'/' :
+		case L'\\':
+		case L'^':
+		case L':':
 			return true;
 	}
 
@@ -102,15 +102,15 @@ bool ExpressionParser::IsOperator(char s)
 // *******************************************************************
 //		IsFunctionName()
 // *******************************************************************
-bool ExpressionParser::IsFunctionName(char s)
+bool ExpressionParser::IsFunctionName(wchar_t s)
 {
-	return isalnum(s) || s == '$' || s == '_';
+	return isalnum(s) || s == L'$' || s == L'_';
 }
 
 // *******************************************************************
 //		IsOperator()
 // *******************************************************************
-bool ExpressionParser::IsOperator(CString s)
+bool ExpressionParser::IsOperator(CStringW s)
 {
 	if (s.GetLength() == 0)
 	{
@@ -120,10 +120,10 @@ bool ExpressionParser::IsOperator(CString s)
 	{
 		s = s.MakeUpper();
 
-		if (s.Compare("AND") == 0 ||
-			s.Compare("OR") == 0 ||
-			s.Compare("XOR") == 0 ||
-			s.Compare("MOD") == 0)
+		if (s.Compare(L"AND") == 0 ||
+			s.Compare(L"OR") == 0 ||
+			s.Compare(L"XOR") == 0 ||
+			s.Compare(L"MOD") == 0)
 		{
 			return true;
 		}
@@ -137,7 +137,7 @@ bool ExpressionParser::IsOperator(CString s)
 // *****************************************************************
 // building list of operation; UseFields: true - only fields form attribute table; 
 // false - variables, the values of which must be set
-bool ExpressionParser::Parse(CustomExpression* expression, CString s, bool useFields)
+bool ExpressionParser::Parse(CustomExpression* expression, CStringW s, bool useFields)
 {
 	_expression = expression;
 
@@ -163,7 +163,7 @@ bool ExpressionParser::Parse(CustomExpression* expression, CString s, bool useFi
 		return false;
 	}
 
-	s.Replace(" ", "");
+	s.Replace(L" ", L"");
 
 	if (!ParseTree(s))
 	{
@@ -176,10 +176,10 @@ bool ExpressionParser::Parse(CustomExpression* expression, CString s, bool useFi
 // *****************************************************************
 //		ParseTree()
 // *****************************************************************
-bool ExpressionParser::ParseTree(CString s)
+bool ExpressionParser::ParseTree(CStringW s)
 {
 	bool found = true;
-	CString temp;
+	CStringW temp;
 
 	while (found)
 	{
@@ -212,7 +212,7 @@ bool ExpressionParser::ParseTree(CString s)
 			}
 		}
 
-		CString expression = found ? GetInnerString(s, begin, end) : s;
+		CStringW expression = found ? GetInnerString(s, begin, end) : s;
 
 		CExpressionPart* part = ParseExpressionPart(expression);
 
@@ -237,7 +237,7 @@ bool ExpressionParser::ParseTree(CString s)
 // *******************************************************************
 //		GetInnerString()
 // *******************************************************************
-CString ExpressionParser::GetInnerString(CString& s, int begin, int end)
+CStringW ExpressionParser::GetInnerString(CStringW& s, int begin, int end)
 {
 	return s.Mid(begin + 1, end - begin - 1);
 }
@@ -246,7 +246,7 @@ CString ExpressionParser::GetInnerString(CString& s, int begin, int end)
 //		GetBrackets()
 // *******************************************************************
 // Returns positions of the first inner brackets
-bool ExpressionParser::GetBrackets(CString expression, int& begin, int& end, CString openingSymbol, CString closingSymbol)
+bool ExpressionParser::GetBrackets(CStringW expression, int& begin, int& end, CStringW openingSymbol, CStringW closingSymbol)
 {
 	// closing bracket
 	end = -1;
@@ -279,11 +279,11 @@ bool ExpressionParser::GetBrackets(CString expression, int& begin, int& end, CSt
 //	 ParseFunction()
 //************************************************************
 // Tries to parse function name from the position of the opening bracket going backwards
-CustomFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
+CustomFunction* ExpressionParser::ParseFunction(CStringW& s, int begin, int& fnBegin)
 {
 	int i = begin;
 
-	CString sub;
+	CStringW sub;
 
 	// reading function name from the end
 	while (i >= 0)
@@ -310,7 +310,7 @@ CustomFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBe
 // ************************************************************
 //	 ParseArgumentList()
 //************************************************************
-bool ExpressionParser::ParseArgumentList(CString s, CustomFunction* fn)
+bool ExpressionParser::ParseArgumentList(CStringW s, CustomFunction* fn)
 {
 	if (!fn) return false;
 
@@ -319,9 +319,9 @@ bool ExpressionParser::ParseArgumentList(CString s, CustomFunction* fn)
 	part->function = fn;
 
 	int pos = 0;
-	CString ct;
+	CStringW ct;
 
-	ct = s.Tokenize(";", pos);
+	ct = s.Tokenize(L";", pos);
 
 	while (ct.GetLength() != 0)
 	{
@@ -343,10 +343,10 @@ bool ExpressionParser::ParseArgumentList(CString s, CustomFunction* fn)
 			return false;
 		}
 
-		ct = s.Tokenize(";", pos);
+		ct = s.Tokenize(L";", pos);
 	};
 
-	CString errorMessage;
+	CStringW errorMessage;
 	if (!fn->CheckArguments(part->arguments.size(), errorMessage))
 	{
 		SetErrorMessage(errorMessage);
@@ -362,7 +362,7 @@ bool ExpressionParser::ParseArgumentList(CString s, CustomFunction* fn)
 //		ParseExpressionPart
 // *****************************************************************
 // Creates elements from the part of expression in the brackets
-CExpressionPart* ExpressionParser::ParseExpressionPart(CString s)
+CExpressionPart* ExpressionParser::ParseExpressionPart(CStringW s)
 {
 	bool readVal = true;	// true - reading values and unary operations; false - reading binary operations
 
@@ -398,14 +398,14 @@ CExpressionPart* ExpressionParser::ParseExpressionPart(CString s)
 
 	if (part->elements.size() == 0)
 	{
-		SetErrorMessage("Expression part is empty");
+		SetErrorMessage(L"Expression part is empty");
 		delete part;
 		return NULL;
 	}
 
 	if (part->elements[part->elements.size() - 1]->type == etOperation)
 	{
-		SetErrorMessage("Operator doesn't have right operand.");
+		SetErrorMessage(L"Operator doesn't have right operand.");
 		delete part;
 		return NULL;
 	}
@@ -417,15 +417,15 @@ CExpressionPart* ExpressionParser::ParseExpressionPart(CString s)
 //		ReadValue()
 // *******************************************************************
 // Parses string from the given position
-bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
+bool ExpressionParser::ReadValue(CStringW s, int& position, CElement* element)
 {
 	USES_CONVERSION;
-	CString sub;		// substring
-	char chr = s[position];
+	CStringW sub;		// substring
+	wchar_t chr = s[position];
 
 	switch (chr)
 	{
-		case '{':
+		case L'{':
 		{
 			sub = "";
 
@@ -445,7 +445,7 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 			// writing the number of bracket
 			if (IsInteger(sub))
 			{
-				unsigned int index = atoi(LPCTSTR(sub));
+				unsigned int index = _wtoi((LPCWSTR)sub);
 				sub = (*_expression->GetStrings())[index];
 			}
 			else
@@ -475,9 +475,9 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 			{
 				// searching the field
 				element->fieldIndex = -1;
-				CString str = sub.MakeLower();
+				CStringW str = sub.MakeLower();
 				
-				vector<CString>* fields = _expression->GetFields();
+				vector<CStringW>* fields = _expression->GetFields();
 
 				for (unsigned int i = 0; i < fields->size(); i++)
 				{
@@ -491,7 +491,7 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 				}
 				if (element->fieldIndex == -1)
 				{
-					SetErrorMessage("Field wasn't found: " + sub);
+					SetErrorMessage(L"Field wasn't found: " + sub);
 					return false;
 				}
 			}
@@ -504,13 +504,13 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 			}
 			break;
 		}
-		case '"':
+		case L'"':
 		{
 			sub = "";
 			position++;
 			chr = s[position];
 
-			while ((position < s.GetLength() - 1) && (chr != '"'))
+			while ((position < s.GetLength() - 1) && (chr != L'"'))
 			{
 				sub += chr;
 				position++;
@@ -519,20 +519,20 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 				chr = s[position];
 			}
 			element->type = etValue;
-			element->val->str(A2W(sub));
+			element->val->str(sub);
 			break;
 		}
 
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
+		case L'0':
+		case L'1':
+		case L'2':
+		case L'3':
+		case L'4':
+		case L'5':
+		case L'6':
+		case L'7':
+		case L'8':
+		case L'9':
 		{
 			sub = "";
 			bool exponential = false;
@@ -546,7 +546,7 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 			}
 			position--;
 
-			double val = Utility::atof_custom((LPCTSTR)sub);
+			double val = Utility::wtof_custom((LPCWSTR)sub);
 			if (val != 0.0)
 			{
 				element->type = etValue;
@@ -561,32 +561,32 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 				}
 				else
 				{
-					SetErrorMessage("The value is not a number: " + sub);
+					SetErrorMessage(L"The value is not a number: " + sub);
 				}
 			}
 			break;
 		}
-		case 'T':
-		case 't':
-			if (s.Mid(position, 4).MakeLower() == "true")
+		case L'T':
+		case L't':
+			if (s.Mid(position, 4).MakeLower() == L"true")
 			{
 				position += 3;
 				element->val->bln(true);
 				element->type = etValue;
 			}
 			break;
-		case 'F':
-		case 'f':
-			if (s.Mid(position, 5).MakeLower() == "false")
+		case L'F':
+		case L'f':
+			if (s.Mid(position, 5).MakeLower() == L"false")
 			{
 				position += 4;
 				element->val->bln(false);
 				element->type = etValue;
 			}
 			break;
-		case 'N':
-		case 'n':
-			if (s.Mid(position, 3).MakeLower() == "not")
+		case L'N':
+		case L'n':
+			if (s.Mid(position, 3).MakeLower() == L"not")
 			{
 				position += 2;
 				element->type = etOperation;
@@ -594,13 +594,13 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 				element->operation = operNOT;
 			}
 			break;
-		case '-':
+		case L'-':
 			element->type = etOperation;
 			element->priority = 3;
 			element->operation = operChangeSign;
 			element->type = etOperation;
 			break;
-		case '&':
+		case L'&':
 			position++;
 			chr = s[position];
 
@@ -618,10 +618,10 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 			if (IsInteger(sub))
 			{
 				element->type = etValue;
-				unsigned int index = atoi(LPCTSTR(sub));
+				unsigned int index = _wtoi(LPCWSTR(sub));
 
-				vector<CString>* strings = _expression->GetStrings();
-				element->val->str(index < strings->size() ? A2W((*strings)[index]) : L"");
+				vector<CStringW>* strings = _expression->GetStrings();
+				element->val->str(index < strings->size() ? (*strings)[index] : L"");
 			}
 			else
 			{
@@ -630,7 +630,7 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 			break;
 
 
-		case '#':
+		case L'#':
 			sub = "";
 			position++;
 			chr = s[position];
@@ -648,7 +648,7 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 			// writing the number of bracket
 			if (IsInteger(sub))
 			{
-				element->partIndex = atoi(LPCTSTR(sub));
+				element->partIndex = _wtoi(LPCWSTR(sub));
 				element->type = etPart;
 			}
 			else
@@ -658,7 +658,7 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 			break;
 		default:
 
-			SetErrorMessage("Operand expected. The character found: " + s.Mid(position, 1));
+			SetErrorMessage(L"Operand expected. The character found: " + s.Mid(position, 1));
 			SetErrorPosition(position);
 			return false;
 	}
@@ -669,21 +669,21 @@ bool ExpressionParser::ReadValue(CString s, int& position, CElement* element)
 //		ReadOperation()
 // *******************************************************************
 // Reading the operation from the given position
-bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element)
+bool ExpressionParser::ReadOperation(CStringW s, int& position, CElement& element)
 {
-	char chr = s[position];
+	wchar_t chr = s[position];
 
 	switch (chr)
 	{
-		case '<':       // <, <>, <, "<:>"
-			if (s.Mid(position, 2) == "<=")
+		case L'<':       // <, <>, <, "<:>"
+			if (s.Mid(position, 2) == L"<=")
 			{
 				element.type = etOperation;
 				element.priority = 4;
 				element.operation = operLessEqual;
 				position++;
 			}
-			else if (s.Mid(position, 2) == "<>")
+			else if (s.Mid(position, 2) == L"<>")
 			{
 				element.type = etOperation;
 				element.priority = 4;
@@ -698,9 +698,9 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 			}
 			break;
 
-		case '>':   // >, >=
+		case L'>':   // >, >=
 
-			if (s.Mid(position, 2) == ">=")
+			if (s.Mid(position, 2) == L">=")
 			{
 				element.type = etOperation;
 				element.priority = 4;
@@ -714,65 +714,65 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 				element.operation = operGreater;
 			}
 			break;
-		case '=':
+		case L'=':
 		{
 			element.type = etOperation;
 			element.priority = 4;
 			element.operation = operEqual;
 			break;
 		}
-		case '+':
+		case L'+':
 		{
 			element.type = etOperation;
 			element.priority = 3;
 			element.operation = operPlus;
 			break;
 		}
-		case '-':
+		case L'-':
 		{
 			element.type = etOperation;
 			element.priority = 3;
 			element.operation = operMinus;
 			break;
 		}
-		case '*':
+		case L'*':
 		{
 			element.type = etOperation;
 			element.priority = 2;
 			element.operation = operMult;
 			break;
 		}
-		case '/':
+		case L'/':
 		{
 			element.type = etOperation;
 			element.priority = 2;
 			element.operation = operDiv;
 			break;
 		}
-		case '\\':
+		case L'\\':
 		{
 			element.type = etOperation;
 			element.priority = 2;
 			element.operation = operDivInt;
 			break;
 		}
-		case '^':
+		case L'^':
 		{
 			element.type = etOperation;
 			element.priority = 1;
 			element.operation = operExpon;
 			break;
 		}
-		case ':':
+		case L':':
 		{
 			element.type = etOperation;
 			element.priority = 7;
 			element.operation = operCONSEQ;
 			break;
 		}
-		case 'l':
-		case 'L':
-			if (s.Mid(position, 4).MakeUpper() == "LIKE")
+		case L'l':
+		case L'L':
+			if (s.Mid(position, 4).MakeUpper() == L"LIKE")
 			{
 				element.type = etOperation;
 				element.priority = 3;
@@ -780,9 +780,9 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 				position += 3;
 			}
 			break;
-		case 'm':
-		case 'M':
-			if (s.Mid(position, 3).MakeUpper() == "MOD")
+		case L'm':
+		case L'M':
+			if (s.Mid(position, 3).MakeUpper() == L"MOD")
 			{
 				element.type = etOperation;
 				element.priority = 3;
@@ -790,9 +790,9 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 				position += 2;
 			}
 			break;
-		case 'a':
-		case 'A':
-			if (s.Mid(position, 3).MakeUpper() == "AND")
+		case L'a':
+		case L'A':
+			if (s.Mid(position, 3).MakeUpper() == L"AND")
 			{
 				element.type = etOperation;
 				element.priority = 5;
@@ -800,9 +800,9 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 				position += 2;
 			}
 			break;
-		case 'o':
-		case 'O':
-			if (s.Mid(position, 2).MakeUpper() == "OR")
+		case L'o':
+		case L'O':
+			if (s.Mid(position, 2).MakeUpper() == L"OR")
 			{
 				element.type = etOperation;
 				element.priority = 6;
@@ -810,9 +810,9 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 				position++;
 			}
 			break;
-		case 'x':
-		case 'X':
-			if (s.Mid(position, 3).MakeUpper() == "XOR")
+		case L'x':
+		case L'X':
+			if (s.Mid(position, 3).MakeUpper() == L"XOR")
 			{
 				element.type = etOperation;
 				element.priority = 6;
@@ -822,7 +822,7 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 			break;
 		default:
 		{
-			SetErrorMessage("Operator expected. The character found: " + s.Mid(position, 1));
+			SetErrorMessage(L"Operator expected. The character found: " + s.Mid(position, 1));
 			SetErrorPosition(position);
 			return false;
 		}
@@ -833,7 +833,7 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 // *****************************************************************
 //		ReplaceStringConstants()
 // *****************************************************************
-bool ExpressionParser::ReplaceStringLiterals(CString& s, int& count)
+bool ExpressionParser::ReplaceStringLiterals(CStringW& s, int& count)
 {
 	bool found = true;
 
@@ -855,8 +855,8 @@ bool ExpressionParser::ReplaceStringLiterals(CString& s, int& count)
 					if (i > begin + 1)   // at least one character
 					{
 						_expression->GetStrings()->push_back(s.Mid(begin + 1, i - begin - 1));
-						CString strReplace;
-						strReplace.Format("&%i", count);
+						CStringW strReplace;
+						strReplace.Format(L"&%i", count);
 						ReplaceSubString(s, begin, i - begin + 1, strReplace);
 						count++;
 						begin = -1;
@@ -884,7 +884,7 @@ bool ExpressionParser::ReplaceStringLiterals(CString& s, int& count)
 // *****************************************************************
 //		ReplaceFieldNames()
 // *****************************************************************
-bool ExpressionParser::ReplaceFieldNames(CString& s, int& count)
+bool ExpressionParser::ReplaceFieldNames(CStringW& s, int& count)
 {
 	bool found = true;
 
@@ -919,8 +919,8 @@ bool ExpressionParser::ReplaceFieldNames(CString& s, int& count)
 					if (i > begin + 1)   // at least one character
 					{
 						_expression->GetStrings()->push_back(s.Mid(begin + 1, i - begin - 1));
-						CString strReplace;
-						strReplace.Format("{%i}", count);
+						CStringW strReplace;
+						strReplace.Format(L"{%i}", count);
 						ReplaceSubString(s, begin, i - begin + 1, strReplace);
 						count++;
 						begin = -1;
@@ -949,20 +949,20 @@ bool ExpressionParser::ReplaceFieldNames(CString& s, int& count)
 // *****************************************************************
 //		ReplacePart()
 // *****************************************************************
-void ExpressionParser::ReplacePart(CString& s, int begin, int end)
+void ExpressionParser::ReplacePart(CStringW& s, int begin, int end)
 {
 	int partCount = _expression->get_PartCount();
-	CString strReplace;
-	strReplace.Format("#%i", partCount - 1);   // refer to previously added part
+	CStringW strReplace;
+	strReplace.Format(L"#%i", partCount - 1);   // refer to previously added part
 	ReplaceSubString(s, begin, end - begin + 1, strReplace);
 }
 
 // ************************************************************
 //	 ReplaceInPosition()
 //************************************************************
-void ExpressionParser::ReplaceSubString(CString& s, int begin, int length, CString replacement)
+void ExpressionParser::ReplaceSubString(CStringW& s, int begin, int length, CStringW replacement)
 {
-	CString part1, part2;
+	CStringW part1, part2;
 
 	if (begin > 0)
 		part1 = s.Left(begin);
@@ -976,13 +976,13 @@ void ExpressionParser::ReplaceSubString(CString& s, int begin, int length, CStri
 // ************************************************************
 //	 ReplaceParameterlessFunctions()
 //************************************************************
-bool ExpressionParser::ReplaceParameterlessFunctions(CString& s)
+bool ExpressionParser::ReplaceParameterlessFunctions(CStringW& s)
 {
-	int pos = s.Find("$");
+	int pos = s.Find(L"$");
 	
 	while (pos != -1)
 	{
-		CString sub;
+		CStringW sub;
 		int i;
 		for (i = pos; i < s.GetLength(); i++)
 		{
@@ -1010,11 +1010,11 @@ bool ExpressionParser::ReplaceParameterlessFunctions(CString& s)
 		}
 		else
 		{
-			SetErrorMessage(Debug::Format("Invalid function name: %s", sub));
+			SetErrorMessage(CStringW(Debug::Format("Invalid function name: %s", CString(sub))));
 			return false;
 		}
 
-		pos = s.Find("$");
+		pos = s.Find(L"$");
 	}
 
 	return true;

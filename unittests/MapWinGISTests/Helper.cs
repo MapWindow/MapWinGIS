@@ -26,6 +26,8 @@ namespace MapWinGISTests
 
         public static void DeleteShapefile(string filename)
         {
+            if (string.IsNullOrEmpty(filename)) return;
+
             var folder = Path.GetDirectoryName(filename);
             if (folder == null) return;
             var filenameBody = Path.GetFileNameWithoutExtension(filename);
@@ -135,6 +137,15 @@ namespace MapWinGISTests
             return sf;
         }
 
+        public static Shapefile CreateSf(ShpfileType shpfileType)
+        {
+            var sf = new Shapefile();
+            if (!sf.CreateNewWithShapeID("", shpfileType))
+                throw new Exception("Can't create shapefile. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+            return sf;
+        }
+
         public static Shapefile OpenShapefile(string fileLocation, bool checkInvalidShapes = true, ICallback callback = null)
         {
             if (!File.Exists(fileLocation))
@@ -159,6 +170,12 @@ namespace MapWinGISTests
             return sf;
         }
 
+        public static Point MakePoint(double x, double y)
+        {
+            var point = new Point();
+            point.Set(x, y);
+            return point;
+        }
 
         public static void CheckValidity(IShapefile sf)
         {
@@ -192,6 +209,144 @@ namespace MapWinGISTests
             stopwatch.Stop();
             DebugMsg("Logging invalid shapes using partioner took: " + stopwatch.Elapsed);
         }
+
+        public static bool GetInfoShapefile(ref Shapefile sf)
+        {
+            if (sf == null)
+                throw new ArgumentNullException(nameof(sf));
+
+            bool retVal;
+
+            try
+            {
+                Console.WriteLine("Working with " + sf.Filename);
+
+                Console.WriteLine("ShapefileType: " + sf.ShapefileType);
+                Console.WriteLine("ShapefileType2D: " + sf.ShapefileType2D);
+                Console.WriteLine("Num fields: " + sf.NumFields);
+                Console.WriteLine("Num shapes: " + sf.NumShapes);
+                Console.WriteLine("HasSpatialIndex: " + sf.HasSpatialIndex);
+                Console.WriteLine("Projection: " + sf.Projection);
+                if (sf.NumShapes < 100)
+                {
+                    Console.WriteLine("HasInvalidShapes: " + sf.HasInvalidShapes());
+                }
+                else
+                {
+                    Console.WriteLine("Warning. Large number of shapes. Skipping HasInvalidShapes check.");
+                }
+
+                if (!sf.GeoProjection.IsEmpty)
+                {
+                    int epsgCode;
+                    sf.GeoProjection.TryAutoDetectEpsg(out epsgCode);
+                    Console.WriteLine("epsgCode: " + epsgCode);
+                }
+
+                if (sf.NumShapes <= 0)
+                    throw new Exception("Shapefile has no shapes");
+
+                var shp = sf.Shape[0];
+                if (shp == null)
+                    throw new NullReferenceException("Cannot get shape: " + sf.ErrorMsg[sf.LastErrorCode]);
+
+                Console.WriteLine("numPoints: " + shp.numPoints);
+                Console.WriteLine("NumParts: " + shp.NumParts);
+                Console.WriteLine("ShapeType: " + shp.ShapeType);
+                Console.WriteLine("ShapeType2D: " + shp.ShapeType2D);
+                var isValid = shp.IsValid;
+                Console.WriteLine("IsValid: " + isValid);
+                if (!isValid)
+                {
+                    Console.WriteLine("IsValidReason: " + shp.IsValidReason);
+                }
+
+                if (sf.ShapefileType != shp.ShapeType)
+                    Console.WriteLine("Warning shape(file) type mismatch");
+
+                double x = 0d, y = 0d;
+                double z, m;
+                if (!shp.XY[0, ref x, ref y])
+                    throw new Exception("Cannot get XY from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                Console.WriteLine("First point X: " + x);
+                Console.WriteLine("First point Y: " + y);
+
+                switch (shp.ShapeType)
+                {
+                    case ShpfileType.SHP_NULLSHAPE:
+                        throw new Exception("Shape is a NULLSHAPE");
+                    case ShpfileType.SHP_POINT:
+                        break;
+                    case ShpfileType.SHP_POLYLINE:
+                        Console.WriteLine("First shape length: " + shp.Length);
+                        break;
+                    case ShpfileType.SHP_POLYGON:
+                        Console.WriteLine("First shape area: " + shp.Area);
+                        Console.WriteLine("First shape perimeter: " + shp.Perimeter);
+                        break;
+                    case ShpfileType.SHP_MULTIPOINT:
+                        break;
+                    case ShpfileType.SHP_POINTZ:
+                        if (!shp.get_Z(0, out z))
+                            throw new Exception("Cannot get Z from first shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("First shape, first point Z: " + z);
+                        break;
+                    case ShpfileType.SHP_POLYLINEZ:
+                        if (!shp.get_Z(0, out z))
+                            throw new Exception("Cannot get Z from first shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("First shape, first point Z: " + z);
+                        Console.WriteLine("First shape length: " + shp.Length);
+                        break;
+                    case ShpfileType.SHP_POLYGONZ:
+                        if (!shp.get_Z(0, out z))
+                            throw new Exception("Cannot get Z from first shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("First shape, first point Z: " + z);
+                        Console.WriteLine("First shape area: " + shp.Area);
+                        Console.WriteLine("First shape perimeter: " + shp.Perimeter);
+                        break;
+                    case ShpfileType.SHP_MULTIPOINTZ:
+                        break;
+                    case ShpfileType.SHP_POINTM:
+                        if (!shp.get_M(0, out m))
+                            throw new Exception("Cannot get M from first shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("First shape, first point M: " + m);
+                        break;
+                    case ShpfileType.SHP_POLYLINEM:
+                        if (!shp.get_M(0, out m))
+                            throw new Exception("Cannot get M from first shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("First shape, first point M: " + m);
+                        Console.WriteLine("First shape length: " + shp.Length);
+                        break;
+                    case ShpfileType.SHP_POLYGONM:
+                        if (!shp.get_M(0, out m))
+                            throw new Exception("Cannot get M from first shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("First shape, first point M: " + m);
+                        Console.WriteLine("First shape area: " + shp.Area);
+                        Console.WriteLine("First shape perimeter: " + shp.Perimeter);
+                        break;
+                    case ShpfileType.SHP_MULTIPOINTM:
+                        if (!shp.get_M(0, out m))
+                            throw new Exception("Cannot get M from first shape: " + shp.ErrorMsg[shp.LastErrorCode]);
+                        Console.WriteLine("First shape, first point M: " + m);
+                        break;
+                    case ShpfileType.SHP_MULTIPATCH:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                retVal = true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                retVal = false;
+            }
+
+            return retVal;
+        }
+
+
 
         public static void DebugMsg(string msg)
         {
@@ -234,7 +389,7 @@ namespace MapWinGISTests
             Application.DoEvents();
             var filename = Path.Combine(Path.GetTempPath(), baseName);
             DeleteFile(filename);
-            
+
             var img = axMap1.SnapShot2(0, axMap1.CurrentZoom + 10, 1000);
             if (img == null) throw new NullReferenceException("Snapshot is null");
 
@@ -258,13 +413,12 @@ namespace MapWinGISTests
         public static string SaveSnapshot(AxMap axMap1, string baseName, IExtents boundBox, double extentEnlarger = 1d)
         {
             Application.DoEvents();
-            var filename = Path.Combine(Path.GetTempPath(), baseName);
+            var filename = Path.Combine(WorkingFolder("mw5-snapshots"), baseName);
             DeleteFile(filename);
 
-            if ((boundBox.Width * boundBox.Height).Equals(0))
+            if ((boundBox.Width * boundBox.Height).Equals(0) || extentEnlarger > 1)
             {
-                double xmin, ymin, xmax, ymax, zmin, zmax;
-                boundBox.GetBounds(out xmin, out ymin, out zmin, out xmax, out ymax, out zmax);
+                boundBox.GetBounds(out var xmin, out var ymin, out var zmin, out var xmax, out var ymax, out var zmax);
                 boundBox.SetBounds(xmin - extentEnlarger, ymin - extentEnlarger, zmin, xmax + extentEnlarger, ymax + extentEnlarger, zmax);
             }
 
@@ -272,10 +426,16 @@ namespace MapWinGISTests
             if (img == null)
                 throw new NullReferenceException("Snapshot is null: " + axMap1.get_ErrorMsg(axMap1.LastErrorCode));
 
-            var retVal = img.Save(filename);
-            img.Close();
-            img = null;
-            if (!retVal) throw new Exception("Snapshot could not be saved: " + img.ErrorMsg[img.LastErrorCode]);
+            try
+            {
+                var retVal = img.Save(filename);
+                if (!retVal) throw new Exception("Snapshot could not be saved: " + img.ErrorMsg[img.LastErrorCode]);
+            }
+            finally
+            {
+                img.Close();
+            }
+
             if (!File.Exists(filename)) throw new FileNotFoundException("The file doesn't exists.", filename);
             DebugMsg(filename);
 
@@ -318,6 +478,48 @@ namespace MapWinGISTests
                 }
             }
             return retVal;
+        }
+
+        public static void AddPointToPointSf(Shapefile sfPoints, Point point)
+        {
+            // Save first point to result shapefile:
+            var shp = new Shape();
+            if (!shp.Create(ShpfileType.SHP_POINT))
+                throw new Exception("Error in creating shape. Error: " + shp.ErrorMsg[shp.LastErrorCode]);
+            var index = 0;
+            if (!shp.InsertPoint(point, ref index))
+                throw new Exception("Error in inserting point. Error: " + shp.ErrorMsg[shp.LastErrorCode]);
+            if (sfPoints.EditAddShape(shp) < 0)
+                throw new Exception("Error in adding shape. Error: " + sfPoints.ErrorMsg[sfPoints.LastErrorCode]);
+        }
+
+        public static Coordinate PointToCoordinate(Point point)
+        {
+            return new Coordinate(point.x, point.y);
+        }
+
+        public struct Coordinate
+        {
+            public double X { get; set; }
+            public double Y { get; set; }
+
+            public Coordinate(double x, double y)
+            {
+                X = x;
+                Y = y;
+            }
+
+            public override string ToString()
+            {
+                return $"X: {X}, Y: {Y}";
+            }
+        }
+
+        public static Point CoordinateToPoint(Coordinate coordinate)
+        {
+            var pnt = new Point();
+            pnt.Set(coordinate.X, coordinate.Y);
+            return pnt;
         }
     }
 }

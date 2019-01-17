@@ -86,7 +86,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 			break;
 	}
 
-	vector<CString> fields;
+	vector<CStringW> fields;
 	if ((generateLabels || categories.size() > 0) && (!loader->HaveWaitingTasks()))
 	{
 		if (!OgrHelper::GetFieldList(layer, fields)) {
@@ -97,7 +97,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 	lock.Unlock();
 
 	if (generateLabels) {
-		CString error;
+		CStringW error;
 		GenerateLabels(list, fields, loader->LabelExpression, error, loader);
 	}
 
@@ -131,7 +131,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 // *************************************************************
 //		ApplyCategories()
 // *************************************************************
-void Ogr2RawData::ApplyCategories(vector<ShapeRecordData*>& data, vector<CString>& fields, vector<CategoriesData*>& categories, OgrDynamicLoader* loader)
+void Ogr2RawData::ApplyCategories(vector<ShapeRecordData*>& data, vector<CStringW>& fields, vector<CategoriesData*>& categories, OgrDynamicLoader* loader)
 {
 	for (size_t i = 0; i < categories.size(); i++)
 	{
@@ -177,7 +177,7 @@ void Ogr2RawData::ApplyCategories(vector<ShapeRecordData*>& data, vector<CString
 		}
 
 		CustomExpression expr;
-		CString error;
+		CStringW error;
 		if (valueType == cvExpression)
 		{
 			expr.SetFields(fields);
@@ -236,7 +236,7 @@ void Ogr2RawData::ApplyCategories(vector<ShapeRecordData*>& data, vector<CString
 // *************************************************************
 //		GetLabelFieldIndex()
 // *************************************************************
-int Ogr2RawData::GetLabelFieldIndex(CString expression, vector<CString>& fields)
+int Ogr2RawData::GetLabelFieldIndex(CStringW expression, vector<CStringW>& fields)
 {
 	expression = expression.Trim();
 	if (expression.Mid(0, 1) == L"[" && expression.Mid(expression.GetLength() - 1, 1) == L"]")
@@ -279,7 +279,7 @@ bool Ogr2RawData::PopulateExpressionFields(vector<ShapeRecordData*>& data, int r
 // *************************************************************
 //		FieldsToShapeRecord()
 // *************************************************************
-bool Ogr2RawData::GenerateLabels(vector<ShapeRecordData*>& data, vector<CString>& fields, CStringW expression, CString& error, OgrDynamicLoader* loader )
+bool Ogr2RawData::GenerateLabels(vector<ShapeRecordData*>& data, vector<CStringW>& fields, CStringW expression, CStringW& error, OgrDynamicLoader* loader )
 {
 	if (expression.GetLength() == 0) return false;
 
@@ -287,7 +287,7 @@ bool Ogr2RawData::GenerateLabels(vector<ShapeRecordData*>& data, vector<CString>
 
 	// maybe it's single field expression; no need for parsing then
 	USES_CONVERSION;
-	int fieldIndex = GetLabelFieldIndex(W2A(expression), fields);
+	int fieldIndex = GetLabelFieldIndex(expression, fields);
 	if (fieldIndex != -1) 
 	{
 		for (size_t i = 0; i < data.size(); i++)
@@ -319,7 +319,7 @@ bool Ogr2RawData::GenerateLabels(vector<ShapeRecordData*>& data, vector<CString>
 	CustomExpression expr;
 	expr.SetFields(fields);
 
-	CString err;
+	CStringW err;
 	
 	if (expr.Parse(W2A(expression), true, error))
 	{

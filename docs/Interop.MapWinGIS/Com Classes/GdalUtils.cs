@@ -158,15 +158,5 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-
-        /// <summary>
-        /// The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications.
-        /// </summary>
-        /// \new495 Added in version 4.9.5
-        ICallback IGdalUtils.GlobalCallback
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
     }
 }

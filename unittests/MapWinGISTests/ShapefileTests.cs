@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using AxMapWinGIS;
@@ -140,9 +141,7 @@ namespace MapWinGISTests
         [TestMethod]
         public void ShapefileDataTest()
         {
-            var tempFolder = Path.GetTempPath();
-            var tempFilename = Path.Combine(tempFolder, "ShapefileDataTest.shp");
-            var esriShapefilePath = @"C:\dev\MapWinGIS\unittests\MapWinGISTests\Testdata\Issues\MWGIS-48-68\EsriShapefile.shp";
+            var tempFilename = Path.Combine(Helper.WorkingFolder("ShapefileDataTest"), "ShapefileDataTest.shp");
             Helper.DeleteShapefile(tempFilename);
 
             bool result;
@@ -184,7 +183,7 @@ namespace MapWinGISTests
                 // Add data:
                 result = sf.EditCellValue(sf.FieldIndexByName["intField"], idx, 99);
                 Assert.IsTrue(result, "Could not edit intField");
-                DateTime dt = System.DateTime.Now;
+                var dt = DateTime.Now;
                 result = sf.EditCellValue(sf.FieldIndexByName["dateField"], idx, dt);
                 Assert.IsTrue(result, "Could not edit dateField");
                 result = sf.EditCellValue(sf.FieldIndexByName["boolField"], idx, true);
@@ -196,11 +195,11 @@ namespace MapWinGISTests
                 // Read back data:
                 for (idx = 0; idx < sf.NumShapes; idx++)
                 {
-                    int iField = (int)sf.CellValue[sf.FieldIndexByName["intField"], idx];
+                    var iField = (int)sf.CellValue[sf.FieldIndexByName["intField"], idx];
                     Assert.AreEqual(iField, 99, "intField value of 99 was not returned");
-                    DateTime dField = (DateTime)sf.CellValue[sf.FieldIndexByName["dateField"], idx];
-                    Assert.IsTrue(DateTime.Now.DayOfYear.Equals(((DateTime)dField).DayOfYear), "dateField value of Now was not returned");
-                    bool bField = (bool)sf.CellValue[sf.FieldIndexByName["boolField"], idx];
+                    var dField = (DateTime)sf.CellValue[sf.FieldIndexByName["dateField"], idx];
+                    Assert.IsTrue(DateTime.Now.DayOfYear.Equals(dField.DayOfYear), "dateField value of Now was not returned");
+                    var bField = (bool)sf.CellValue[sf.FieldIndexByName["boolField"], idx];
                     Assert.AreEqual(bField, true, "boolField value of True was not returned");
                 }
             }
@@ -212,25 +211,24 @@ namespace MapWinGISTests
             }
 
             // although the default setting, indicate intent to interpret Y/N OGR String fields as Boolean
-            GlobalSettings gs = new GlobalSettings();
+            var gs = new GlobalSettings();
             gs.OgrInterpretYNStringAsBoolean = true;  // setting to false results in exception reading boolField below
 
             // open as OGRLayer
-            OgrDatasource _datasource = new OgrDatasource();
-            _datasource.GlobalCallback = this;
+            var _datasource = new OgrDatasource { GlobalCallback = this };
 
             if (_datasource.Open(tempFilename)) // "ESRI Shapefile:" + 
             {
                 // read layer through OGR library
-                IOgrLayer ogrLayer = _datasource.GetLayer(0);
+                var ogrLayer = _datasource.GetLayer(0);
                 sf = ogrLayer.GetBuffer();
-                for (int idx = 0; idx < sf.NumShapes; idx++)
+                for (var idx = 0; idx < sf.NumShapes; idx++)
                 {
-                    int iField = (int)sf.CellValue[sf.FieldIndexByName["intField"], idx];
+                    var iField = (int)sf.CellValue[sf.FieldIndexByName["intField"], idx];
                     Assert.AreEqual(iField, 99, "intField value of 99 was not returned");
-                    DateTime dField = (DateTime)sf.CellValue[sf.FieldIndexByName["dateField"], idx];
+                    var dField = (DateTime)sf.CellValue[sf.FieldIndexByName["dateField"], idx];
                     Assert.IsTrue(DateTime.Now.DayOfYear.Equals(((DateTime)dField).DayOfYear), "dateField value of Now was not returned");
-                    bool bField = (bool)sf.CellValue[sf.FieldIndexByName["boolField"], idx];
+                    var bField = (bool)sf.CellValue[sf.FieldIndexByName["boolField"], idx];
                     Assert.AreEqual(bField, true, "boolField value of True was not returned");
                 }
                 sf.Close();
@@ -238,26 +236,27 @@ namespace MapWinGISTests
 
             // open and read a Shapefile created by ESRI MapObjects, including a Boolean and Date field
             // table has a Boolean 'Inspected' field, and a Date 'InspDate' field
+            const string esriShapefilePath = @"Issues\MWGIS-48-68\EsriShapefile.shp";
             Assert.IsTrue(sf.Open(esriShapefilePath, this));
-            for (int fld = 0; fld < sf.NumFields; fld++)
+            for (var fld = 0; fld < sf.NumFields; fld++)
             {
-                Console.WriteLine(string.Format("Field({0}): Name = '{1}', Fieldtype = {2}", fld, sf.Field[fld].Name, sf.Field[fld].Type));
+                Console.WriteLine($"Field({fld}): Name = '{sf.Field[fld].Name}', Fieldtype = {sf.Field[fld].Type}");
             }
-            for (int idx = 0; idx < sf.NumShapes; idx++)
+
+            for (var idx = 0; idx < sf.NumShapes; idx++)
             {
                 // read 'Inspected' value as object
-                object inspected = sf.CellValue[sf.FieldIndexByName["Inspected"], idx];
+                var inspected = sf.CellValue[sf.FieldIndexByName["Inspected"], idx];
                 // verify that it's a bool
                 Assert.IsTrue(inspected is bool);
                 // watch for Inspected rows (there aren't many)
-                if ((bool)inspected == true)
-                {
-                    // read 'InspDate' value as object
-                    object dt = sf.CellValue[sf.FieldIndexByName["InspDate"], idx];
-                    // verify that it's a Date
-                    Assert.IsTrue(dt is DateTime);
-                    Console.WriteLine(string.Format("idx = {0}, Inspected = true, Inspection Date = {1}", idx, (DateTime)dt));
-                }
+                if ((bool)inspected != true) continue;
+
+                // read 'InspDate' value as object
+                var dt = sf.CellValue[sf.FieldIndexByName["InspDate"], idx];
+                // verify that it's a Date
+                Assert.IsTrue(dt is DateTime);
+                Console.WriteLine($"idx = {idx}, Inspected = true, Inspection Date = {(DateTime)dt}");
             }
             sf.Close();
         }
@@ -467,6 +466,27 @@ namespace MapWinGISTests
             Helper.SaveAsShapefile(sf, Path.Combine(Path.GetTempPath(), "CreateFishnet.shp"));
         }
 
+        [TestMethod]
+        public void ImportExportWKT()
+        {
+            // Create shape from WKT:
+            var shp = new Shape();
+            if (!shp.ImportFromWKT(
+                "POLYGON ((330918.422383554 5914432.9952417,330791.425601288 5914677.56286955,330799.804294765 5914682.67199867,330809.295198231 5914690.83057468,330851.753425698 5914726.8399904,330890.161005985 5914760.37492299,330891.883975456 5914761.87973075,330894.499450693 5914766.14773636,330895.001406323 5914766.9673645,330894.821345632 5914768.00066471,330895.626814712 5914772.6474656,330898.544123647 5914779.26299206,331042.140051675 5914906.23861184,331066.955908721 5914928.22692301,331071.290848669 5914932.66233604,331075.531881961 5914935.23930972,331086.549669788 5914904.76350951,331104.67722032 5914852.28308518,331120.597430814 5914804.83997655,331131.133792741 5914775.21848511,331118.884180716 5914770.93369604,331091.649916887 5914758.80097565,331072.712088731 5914748.36652613,331052.802159239 5914734.4060014,331043.093305417 5914725.75786093,331036.001117512 5914716.44788158,331028.749419581 5914706.61634015,331024.121040336 5914698.88986961,331020.742433359 5914692.31867847,331016.329278393 5914678.37004658,331011.623099594 5914661.25749118,331005.798813818 5914627.24754255,331002.264592162 5914601.86413354,330997.932682632 5914565.92459662,330994.902438802 5914545.28431325,330991.611136112 5914516.84204983,330989.261968268 5914496.56381567,330984.441627117 5914474.55626726,330974.218375295 5914440.74529109,330918.422383554 5914432.9952417))"))
+                Assert.Fail("Could not create shape from wkt: " + shp.ErrorMsg[shp.LastErrorCode]);
+
+            // Convert back to WKT string
+            try
+            {
+                var wkt = shp.ExportToWKT();
+                Console.WriteLine(wkt);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail("Exception exporting to wkt string: " + ex.Message);
+            }
+        }
+
 
         [TestMethod]
         public void SaveAs()
@@ -568,6 +588,27 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
+        public void ReadRussianDataFromOgrDatasource()
+        {
+            // https://github.com/MapWindow/MapWinGIS/issues/121
+            _axMap1 = Helper.GetAxMap();
+            _axMap1.Clear();
+            _axMap1.TileProvider = tkTileProvider.OpenStreetMap;
+            _axMap1.ZoomBehavior = tkZoomBehavior.zbDefault;
+            _axMap1.KnownExtents = tkKnownExtents.keWorld;
+
+            var sfName = @"Issues\MWGIS-72\monitoring_object.shp";
+            var baseName = Path.GetFileNameWithoutExtension(sfName);
+            var query = "Select * from monitoring_object";
+            var layerHandle = _axMap1.AddLayerFromDatabase(sfName, query, true);
+            var shpfile = _axMap1.get_Shapefile(layerHandle);
+            shpfile.Labels.Generate("[Type]", tkLabelPositioning.lpCenter, false);
+            shpfile.Labels.FrameVisible = true;
+            shpfile.Labels.FrameType = tkLabelFrameType.lfRectangle;
+            Helper.SaveSnapshot(_axMap1, $"{baseName}.jpg", _axMap1.get_layerExtents(layerHandle));
+        }
+
+        [TestMethod]
         public void CreateRussianCategories()
         {
             const string sfLocation = @"Issues\MWGIS-72\point.shp";
@@ -656,7 +697,8 @@ namespace MapWinGISTests
         public void SpatialIndexMWGIS98()
         {
             const string sfName = @"Issues\MWGIS-98\3dPoint.shp";
-            GetInfoShapefile(sfName);
+            var result = GetInfoShapefile(sfName);
+            Assert.IsTrue(result);
             TestSpatialIndex(sfName);
         }
 
@@ -683,7 +725,6 @@ namespace MapWinGISTests
             }
 
             Assert.AreEqual(0, numErrors);
-            Console.ReadLine();
         }
 
         private void TestSpatialIndex(string sfName)
@@ -749,21 +790,36 @@ namespace MapWinGISTests
         [TestMethod]
         public void GetInfoAllShapefiles()
         {
+            var failed = 0;
+            var success = 0;
             // Call EnumerateFiles in a foreach-loop.
-            foreach (var filename in Directory.EnumerateFiles(@"D:\dev\MapwinGIS\GitHub\unittests\MapWinGISTests\Testdata\sf", "*.shp", SearchOption.AllDirectories))
+            foreach (var filename in Directory.EnumerateFiles(@"sf", "*.shp", SearchOption.AllDirectories))
             {
                 try
                 {
                     Console.WriteLine("***************************");
-                    GetInfoShapefile(filename);
+                    if (GetInfoShapefile(filename))
+                    {
+                        success++;
+                    }
+                    else
+                    {
+                        failed++;
+                    }
                     Console.WriteLine();
+
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                     // Don't stop
+                    failed++;
                 }
             }
+
+            Console.WriteLine($"{success} files were read successfully, {failed} files failed.");
+
+            Assert.IsTrue(failed == 0, "Not all files could be read.");
         }
 
         [TestMethod]
@@ -809,6 +865,306 @@ namespace MapWinGISTests
 
         }
 
+        [TestMethod]
+        public void UnionShapefiles()
+        {
+            const string sfSoilLocation = @"Issues\MWGIS-125-Union\SoilTest.shp";
+            const string sfUsageLocation = @"Issues\MWGIS-125-Union\UseTest.shp";
+
+            Shapefile sfSoil = null;
+            Shapefile sfUsage = null;
+            Shapefile sfUnion = null;
+
+            var globalSettings = new GlobalSettings
+            {
+                CallbackVerbosity = tkCallbackVerbosity.cvAll,
+                ShapeInputValidationMode = tkShapeValidationMode.AbortOnErrors,
+                MinAreaToPerimeterRatio = 0.021
+            };
+
+            try
+            {
+                sfSoil = Helper.OpenShapefile(sfSoilLocation, true, this);
+                var result = Helper.GetInfoShapefile(ref sfSoil);
+                Assert.IsTrue(result);
+
+                sfUsage = Helper.OpenShapefile(sfUsageLocation, true, this);
+                result = Helper.GetInfoShapefile(ref sfUsage);
+                Assert.IsTrue(result);
+
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
+                sfUnion = sfSoil.Union(false, sfUsage, false);
+                stopWatch.Stop();
+                Helper.DebugMsg("Time it took to union 2 shapefile: " + stopWatch.Elapsed);
+                if (sfUnion == null) throw new Exception("Error in union: " + sfSoil.ErrorMsg[sfSoil.LastErrorCode]);
+
+                // Save resulting shapefile:
+                var workingFolder = Helper.WorkingFolder("MWGIS-125-Union");
+                var resultFilename = Path.Combine(workingFolder, "Unioned.shp");
+                Helper.SaveAsShapefile(sfUnion, resultFilename);
+
+                result = Helper.GetInfoShapefile(ref sfUnion);
+                Assert.IsTrue(result);
+
+                Console.WriteLine("*************** Validate union *************");
+                Console.WriteLine("globalSettings.MinPolygonArea: " + globalSettings.MinPolygonArea.ToString(CultureInfo.InvariantCulture));
+                Console.WriteLine("globalSettings.MinAreaToPerimeterRatio: " + globalSettings.MinAreaToPerimeterRatio.ToString(CultureInfo.InvariantCulture));
+
+                // Check all fields:
+                var numFields = sfUnion.NumFields;
+                var numShapes = sfUnion.NumShapes;
+                for (var shapeIndex = 0; shapeIndex < numShapes; shapeIndex++)
+                {
+                    // Get shape:
+                    var shp = sfUnion.Shape[shapeIndex];
+                    Console.WriteLine("Area: " + shp.Area.ToString(CultureInfo.InvariantCulture));
+                    Console.WriteLine("Perimeter: " + shp.Perimeter.ToString(CultureInfo.InvariantCulture));
+                    for (var fieldIndex = 0; fieldIndex < numFields; fieldIndex++)
+                    {
+                        var fieldName = sfUnion.Field[fieldIndex].Name;
+                        var value = sfUnion.CellValue[fieldIndex, shapeIndex].ToString();
+                        Console.WriteLine($"Field name: {fieldName} Value: {value}");
+                        Assert.AreNotEqual(value, string.Empty, "Value is empty");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Assert.Fail(e.Message);
+            }
+            finally
+            {
+                sfSoil?.Close();
+                sfUsage?.Close();
+                sfUnion?.Close();
+            }
+        }
+
+        [TestMethod]
+        public void ClipShapefiles()
+        {
+            const string sfSoilLocation = @"Issues\MWGIS-125-Union\SoilTest.shp";
+            const string sfUsageLocation = @"Issues\MWGIS-125-Union\UseTest.shp";
+
+            Shapefile sfSoil = null;
+            Shapefile sfUsage = null;
+            Shapefile sfClip = null;
+
+            var globalSettings = new GlobalSettings
+            {
+                CallbackVerbosity = tkCallbackVerbosity.cvAll,
+                ShapeInputValidationMode = tkShapeValidationMode.AbortOnErrors
+            };
+
+            try
+            {
+                sfSoil = Helper.OpenShapefile(sfSoilLocation, true, this);
+                var result = Helper.GetInfoShapefile(ref sfSoil);
+                Assert.IsTrue(result);
+
+                sfUsage = Helper.OpenShapefile(sfUsageLocation, true, this);
+                result = Helper.GetInfoShapefile(ref sfUsage);
+                Assert.IsTrue(result);
+
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
+                sfClip = sfSoil.Clip(false, sfUsage, false);
+                stopWatch.Stop();
+                Helper.DebugMsg("Time it took to clip 2 shapefile: " + stopWatch.Elapsed);
+                if (sfClip == null) throw new Exception("Error in Clip: " + sfSoil.ErrorMsg[sfSoil.LastErrorCode]);
+
+                result = Helper.GetInfoShapefile(ref sfClip);
+                Assert.IsTrue(result);
+
+                Console.WriteLine("*************** Validate clip *************");
+                Console.WriteLine("globalSettings.MinPolygonArea: " + globalSettings.MinPolygonArea.ToString(CultureInfo.InvariantCulture));
+                Console.WriteLine("globalSettings.MinAreaToPerimeterRatio: " + globalSettings.MinAreaToPerimeterRatio.ToString(CultureInfo.InvariantCulture));
+
+                // Check all fields:
+                var numFields = sfClip.NumFields;
+                var numShapes = sfClip.NumShapes;
+                for (var shapeIndex = 0; shapeIndex < numShapes; shapeIndex++)
+                {
+                    // Get shape:
+                    var shp = sfClip.Shape[shapeIndex];
+                    Console.WriteLine("Area: " + shp.Area.ToString(CultureInfo.InvariantCulture));
+                    for (var fieldIndex = 0; fieldIndex < numFields; fieldIndex++)
+                    {
+                        var fieldName = sfClip.Field[fieldIndex].Name;
+                        var value = sfClip.CellValue[fieldIndex, shapeIndex].ToString();
+                        Console.WriteLine($"Field name: {fieldName} Value: {value}");
+                        Assert.AreNotEqual(value, string.Empty, "Value is empty");
+                    }
+                }
+
+                // Save resulting shapefile:
+                var workingFolder = Helper.WorkingFolder("MWGIS-125-Union");
+                var resultFilename = Path.Combine(workingFolder, "Clipped.shp");
+                Helper.SaveAsShapefile(sfClip, resultFilename);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Assert.Fail(e.Message);
+            }
+            finally
+            {
+                sfSoil?.Close();
+                sfUsage?.Close();
+                sfClip?.Close();
+            }
+        }
+
+        [TestMethod]
+        public void DifferenceShapefiles()
+        {
+            const string sfSoilLocation = @"Issues\MWGIS-125-Union\SoilTest.shp";
+            const string sfUsageLocation = @"Issues\MWGIS-125-Union\UseTest.shp";
+
+            Shapefile sfSoil = null;
+            Shapefile sfUsage = null;
+            Shapefile sfDifference = null;
+
+            var globalSettings = new GlobalSettings
+            {
+                CallbackVerbosity = tkCallbackVerbosity.cvAll,
+                ShapeInputValidationMode = tkShapeValidationMode.AbortOnErrors
+            };
+
+            try
+            {
+                sfSoil = Helper.OpenShapefile(sfSoilLocation, true, this);
+                var result = Helper.GetInfoShapefile(ref sfSoil);
+                Assert.IsTrue(result);
+
+                sfUsage = Helper.OpenShapefile(sfUsageLocation, true, this);
+                result = Helper.GetInfoShapefile(ref sfUsage);
+                Assert.IsTrue(result);
+
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
+                sfDifference = sfSoil.Difference(false, sfUsage, false);
+                stopWatch.Stop();
+                Helper.DebugMsg("Time it took to difference 2 shapefile: " + stopWatch.Elapsed);
+                if (sfDifference == null) throw new Exception("Error in Clip: " + sfSoil.ErrorMsg[sfSoil.LastErrorCode]);
+
+                result = Helper.GetInfoShapefile(ref sfDifference);
+                Assert.IsTrue(result);
+
+                Console.WriteLine("*************** Validate difference *************");
+                Console.WriteLine("globalSettings.MinPolygonArea: " + globalSettings.MinPolygonArea.ToString(CultureInfo.InvariantCulture));
+                Console.WriteLine("globalSettings.MinAreaToPerimeterRatio: " + globalSettings.MinAreaToPerimeterRatio.ToString(CultureInfo.InvariantCulture));
+
+                // Check all fields:
+                var numFields = sfDifference.NumFields;
+                var numShapes = sfDifference.NumShapes;
+                for (var shapeIndex = 0; shapeIndex < numShapes; shapeIndex++)
+                {
+                    // Get shape:
+                    var shp = sfDifference.Shape[shapeIndex];
+                    Console.WriteLine("Area: " + shp.Area.ToString(CultureInfo.InvariantCulture));
+                    for (var fieldIndex = 0; fieldIndex < numFields; fieldIndex++)
+                    {
+                        var fieldName = sfDifference.Field[fieldIndex].Name;
+                        var value = sfDifference.CellValue[fieldIndex, shapeIndex].ToString();
+                        Console.WriteLine($"Field name: {fieldName} Value: {value}");
+                        Assert.AreNotEqual(value, string.Empty, "Value is empty");
+                    }
+                }
+                // Save resulting shapefile:
+                var workingFolder = Helper.WorkingFolder("MWGIS-125-Union");
+                var resultFilename = Path.Combine(workingFolder, "Difference1.shp");
+                Helper.SaveAsShapefile(sfDifference, resultFilename);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Assert.Fail(e.Message);
+            }
+            finally
+            {
+                sfSoil?.Close();
+                sfUsage?.Close();
+                sfDifference?.Close();
+            }
+        }
+
+        [TestMethod]
+        public void DifferenceReverseShapefiles()
+        {
+            const string sfSoilLocation = @"Issues\MWGIS-125-Union\SoilTest.shp";
+            const string sfUsageLocation = @"Issues\MWGIS-125-Union\UseTest.shp";
+
+            Shapefile sfSoil = null;
+            Shapefile sfUsage = null;
+            Shapefile sfDifference = null;
+
+            var globalSettings = new GlobalSettings
+            {
+                CallbackVerbosity = tkCallbackVerbosity.cvAll,
+                ShapeInputValidationMode = tkShapeValidationMode.AbortOnErrors
+            };
+
+            try
+            {
+                sfSoil = Helper.OpenShapefile(sfSoilLocation, true, this);
+                var result = Helper.GetInfoShapefile(ref sfSoil);
+                Assert.IsTrue(result);
+
+                sfUsage = Helper.OpenShapefile(sfUsageLocation, true, this);
+                result = Helper.GetInfoShapefile(ref sfUsage);
+                Assert.IsTrue(result);
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
+                sfDifference = sfUsage.Difference(false, sfSoil, false);
+                stopWatch.Stop();
+                Helper.DebugMsg("Time it took to difference 2 shapefile: " + stopWatch.Elapsed);
+
+                if (sfDifference == null) throw new Exception("Error in Difference: " + sfSoil.ErrorMsg[sfSoil.LastErrorCode]);
+
+                result = Helper.GetInfoShapefile(ref sfDifference);
+                Assert.IsTrue(result);
+
+                Console.WriteLine("*************** Validate difference reverse *************");
+                Console.WriteLine("globalSettings.MinPolygonArea: " + globalSettings.MinPolygonArea.ToString(CultureInfo.InvariantCulture));
+                Console.WriteLine("globalSettings.MinAreaToPerimeterRatio: " + globalSettings.MinAreaToPerimeterRatio.ToString(CultureInfo.InvariantCulture));
+
+                // Check all fields:
+                var numFields = sfDifference.NumFields;
+                var numShapes = sfDifference.NumShapes;
+                for (var shapeIndex = 0; shapeIndex < numShapes; shapeIndex++)
+                {
+                    // Get shape:
+                    var shp = sfDifference.Shape[shapeIndex];
+                    Console.WriteLine("Area: " + shp.Area.ToString(CultureInfo.InvariantCulture));
+                    for (var fieldIndex = 0; fieldIndex < numFields; fieldIndex++)
+                    {
+                        var fieldName = sfDifference.Field[fieldIndex].Name;
+                        var value = sfDifference.CellValue[fieldIndex, shapeIndex].ToString();
+                        Console.WriteLine($"Field name: {fieldName} Value: {value}");
+                        Assert.AreNotEqual(value, string.Empty, "Value is empty");
+                    }
+                }
+                var workingFolder = Helper.WorkingFolder("MWGIS-125-Union");
+                var resultFilename = Path.Combine(workingFolder, "Difference2.shp");
+                Helper.SaveAsShapefile(sfDifference, resultFilename);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Assert.Fail(e.Message);
+            }
+            finally
+            {
+                sfSoil?.Close();
+                sfUsage?.Close();
+                sfDifference?.Close();
+            }
+        }
+
         private bool GetInfoShapefile(string filename)
         {
             if (!File.Exists(filename))
@@ -816,134 +1172,11 @@ namespace MapWinGISTests
 
             Console.WriteLine("Working with " + filename);
             var sf = new Shapefile { GlobalCallback = this };
-            bool retVal;
+            var result = sf.Open(filename, this);
+            Assert.IsTrue(result, "Could not open shapefile");
 
-            try
-            {
-                if (!sf.Open(filename))
-                    throw new Exception("Cannot open this file: " + sf.ErrorMsg[sf.LastErrorCode]);
-
-                Console.WriteLine("ShapefileType: " + sf.ShapefileType);
-                Console.WriteLine("ShapefileType2D: " + sf.ShapefileType2D);
-                Console.WriteLine("Num fields: " + sf.NumFields);
-                Console.WriteLine("Num shapes: " + sf.NumShapes);
-                Console.WriteLine("HasSpatialIndex: " + sf.HasSpatialIndex);
-                Console.WriteLine("Projection: " + sf.Projection);
-                if (sf.NumShapes < 100)
-                {
-                    Console.WriteLine("HasInvalidShapes: " + sf.HasInvalidShapes());
-                }
-                else
-                {
-                    Console.WriteLine("Warning. Large number of shapes. Skipping HasInvalidShapes check.");
-                }
-
-                if (!sf.GeoProjection.IsEmpty)
-                {
-                    int epsgCode;
-                    sf.GeoProjection.TryAutoDetectEpsg(out epsgCode);
-                    Console.WriteLine("epsgCode: " + epsgCode);
-                }
-
-                if (sf.NumShapes <= 0)
-                    throw new Exception("Shapefile has no shapes");
-
-                var shp = sf.Shape[0];
-                if (shp == null)
-                    throw new NullReferenceException("Cannot get shape: " + sf.ErrorMsg[sf.LastErrorCode]);
-
-                Console.WriteLine("numPoints: " + shp.numPoints);
-                Console.WriteLine("NumParts: " + shp.NumParts);
-                Console.WriteLine("ShapeType: " + shp.ShapeType);
-                Console.WriteLine("ShapeType2D: " + shp.ShapeType2D);
-                var isValid = shp.IsValid;
-                Console.WriteLine("IsValid: " + isValid);
-                if (!isValid)
-                {
-                    Console.WriteLine("IsValidReason: " + shp.IsValidReason);
-                }
-
-                if (sf.ShapefileType != shp.ShapeType)
-                    Console.WriteLine("Warning shape(file) type mismatch");
-
-                double x = 0d, y = 0d;
-                double z, m;
-                if (!shp.XY[0, ref x, ref y])
-                    throw new Exception("Cannot get XY from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
-                Console.WriteLine("X: " + x);
-                Console.WriteLine("Y: " + y);
-
-                switch (shp.ShapeType)
-                {
-                    case ShpfileType.SHP_NULLSHAPE:
-                        throw new Exception("Shape is a NULLSHAPE");
-                    case ShpfileType.SHP_POINT:
-                        break;
-                    case ShpfileType.SHP_POLYLINE:
-                        Console.WriteLine("Length: " + shp.Length);
-                        break;
-                    case ShpfileType.SHP_POLYGON:
-                        Console.WriteLine("Area: " + shp.Area);
-                        Console.WriteLine("Perimeter: " + shp.Perimeter);
-                        break;
-                    case ShpfileType.SHP_MULTIPOINT:
-                        break;
-                    case ShpfileType.SHP_POINTZ:
-                        if (!shp.get_Z(0, out z))
-                            throw new Exception("Cannot get Z from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
-                        Console.WriteLine("Z: " + z);
-                        break;
-                    case ShpfileType.SHP_POLYLINEZ:
-                        if (!shp.get_Z(0, out z))
-                            throw new Exception("Cannot get Z from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
-                        Console.WriteLine("Z: " + z);
-                        Console.WriteLine("Length: " + shp.Length);
-                        break;
-                    case ShpfileType.SHP_POLYGONZ:
-                        if (!shp.get_Z(0, out z))
-                            throw new Exception("Cannot get Z from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
-                        Console.WriteLine("Z: " + z);
-                        Console.WriteLine("Area: " + shp.Area);
-                        Console.WriteLine("Perimeter: " + shp.Perimeter);
-                        break;
-                    case ShpfileType.SHP_MULTIPOINTZ:
-                        break;
-                    case ShpfileType.SHP_POINTM:
-                        if (!shp.get_M(0, out m))
-                            throw new Exception("Cannot get M from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
-                        Console.WriteLine("M: " + m);
-                        break;
-                    case ShpfileType.SHP_POLYLINEM:
-                        if (!shp.get_M(0, out m))
-                            throw new Exception("Cannot get M from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
-                        Console.WriteLine("M: " + m);
-                        Console.WriteLine("Length: " + shp.Length);
-                        break;
-                    case ShpfileType.SHP_POLYGONM:
-                        if (!shp.get_M(0, out m))
-                            throw new Exception("Cannot get M from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
-                        Console.WriteLine("M: " + m);
-                        Console.WriteLine("Area: " + shp.Area);
-                        Console.WriteLine("Perimeter: " + shp.Perimeter);
-                        break;
-                    case ShpfileType.SHP_MULTIPOINTM:
-                        if (!shp.get_M(0, out m))
-                            throw new Exception("Cannot get M from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
-                        Console.WriteLine("M: " + m);
-                        break;
-                    case ShpfileType.SHP_MULTIPATCH:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                retVal = true;
-            }
-            finally
-            {
-                sf.Close();
-            }
-
+            var retVal = Helper.GetInfoShapefile(ref sf);
+            sf.Close();
             return retVal;
         }
 

@@ -40,12 +40,12 @@ static char THIS_FILE[] = __FILE__;
 // *****************************************************
 //	ParseExpressionCore()
 // *****************************************************
-void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, CString& errorString, VARIANT_BOOL* retVal)
+void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, CStringW& errorString, VARIANT_BOOL* retVal)
 {
 	*retVal = VARIANT_FALSE;
 
 	USES_CONVERSION;
-	CString str = OLE2A(Expression);
+	CStringW str = OLE2CW(Expression);
 	CustomExpression expr;	
 	
 	if (!expr.ReadFieldNames(this))
@@ -97,20 +97,20 @@ STDMETHODIMP CTableClass::ParseExpression(BSTR Expression, BSTR* ErrorString, VA
 	*retVal = VARIANT_FALSE;
 	
 	USES_CONVERSION;
-	CString str = OLE2CA(Expression);
+	CStringW str = OLE2CW(Expression);
 	
 	CustomExpression expr;	
 	
 	if (expr.ReadFieldNames(this))
 	{
-		CString err;
+		CStringW err;
 		if (expr.Parse(str, true, err))
 		{
 			*retVal = VARIANT_TRUE;
 		}
 		else
 		{
-			*ErrorString = A2BSTR(err);
+			*ErrorString = W2BSTR(err);
 		}
 	}
 	else
@@ -129,10 +129,10 @@ STDMETHODIMP CTableClass::TestExpression(BSTR Expression, tkValueType ReturnType
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CString err;
+	CStringW err;
 	ParseExpressionCore(Expression, ReturnType, err, retVal);
 
-	*ErrorString = A2BSTR(err);
+	*ErrorString = W2BSTR(err);
 	return S_OK;
 }
 
@@ -144,10 +144,10 @@ STDMETHODIMP CTableClass::Query(BSTR Expression, VARIANT* Result, BSTR* ErrorStr
 	*retVal = VARIANT_FALSE;
 	SysFreeString(*ErrorString);	// do we need it here?
 	USES_CONVERSION;
-	CString str = OLE2CA(Expression);
+	CStringW str = OLE2CW(Expression);
 
 	std::vector<long> indices;
-	CString err;
+	CStringW err;
 	if (QueryCore(str, indices, err))
 	{
 		*ErrorString = SysAllocString(L"");
@@ -164,7 +164,7 @@ STDMETHODIMP CTableClass::Query(BSTR Expression, VARIANT* Result, BSTR* ErrorStr
 	}
 	else
 	{
-		*ErrorString = A2BSTR(err);
+		*ErrorString = W2BSTR(err);
 	}
 	return S_OK;
 }
@@ -186,12 +186,12 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 	}
 
 	USES_CONVERSION;
-	CString str = OLE2A(Expression);
+	CStringW str = OLE2CW(Expression);
 
 	CustomExpression expr;	
 	if (expr.ReadFieldNames(this))
 	{
-		CString err;
+		CStringW err;
 		if (expr.Parse(Expression, true, err))
 		{
 			TableHelper::SetFieldValues(this, RowIndex, expr);
@@ -220,7 +220,7 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 		}
 		else
 		{
-			*ErrorString = A2BSTR(err);
+			*ErrorString = W2BSTR(err);
 		}
 	}
 	else
@@ -233,14 +233,14 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 // ********************************************************************
 //			Query_()
 // ********************************************************************
-bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CString& ErrorString)
+bool CTableClass::QueryCore(CStringW Expression, std::vector<long>& indices, CStringW& ErrorString)
 {
 	indices.clear();
 	
 	CustomExpression expr;	
 	if (expr.ReadFieldNames(this))
 	{
-		CString err;
+		CStringW err;
 		if (expr.Parse(Expression, true, err))
 		{
 			bool error = false;
@@ -289,7 +289,7 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 // ********************************************************************
 //			CalculateCore()
 // ********************************************************************
-bool CTableClass::CalculateCore(CString Expression, std::vector<CStringW>& results, CString& ErrorString, 
+bool CTableClass::CalculateCore(CStringW Expression, std::vector<CStringW>& results, CStringW& ErrorString, 
 								CString floatFormat, int rowIndex /*= -1*/)
 {
 	USES_CONVERSION;
@@ -303,7 +303,7 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CStringW>& resul
 		return false;
 	}
 
-	CString err;
+	CStringW err;
 	if (!expr.Parse(Expression, true, err))
 	{
 		ErrorString = err;
@@ -357,7 +357,7 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CStringW>& resul
 // for each shape index a category is specified. If the given shape didn't fall into
 // any category -1 is used. The first categories in the list have higher priority
 // Results vector with certain categories can be provided by caller; those categories won't be changed
-void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vector<int>& results)
+void CTableClass::AnalyzeExpressions(std::vector<CStringW>& expressions, std::vector<int>& results)
 {
 	// TODO: optimize, if all expressions have the same fields in the same positions
 	// don't read the values multiple times.
@@ -370,7 +370,7 @@ void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vec
 	{
 		if (expressions[categoryId] != "")
 		{
-			CString err;
+			CStringW err;
 			if (expr.Parse(expressions[categoryId], true, err))
 			{
 				for (unsigned int i = 0; i < _rows.size(); i++)
@@ -463,10 +463,10 @@ STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT 
 			}
 			else
 			{
-				VARIANT var;
-				VariantInit(&var);
-				var.vt = VT_EMPTY;
-				pVal = &var;
+				// MWGIS-128
+				// no value, send back EMPTY variant
+				VariantInit(pVal);
+				pVal->vt = VT_EMPTY;
 			}
 			return S_OK;
 		}
@@ -575,7 +575,7 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 
 	if( *retval)
 	{	
-		CStringW name = OLE2W(dbfFilename);
+		CStringW name = OLE2CW(dbfFilename);
 		if (!Utility::FileExistsW(name))
 		{	
 			ErrorMessage(tkDBF_FILE_DOES_NOT_EXIST);
@@ -653,7 +653,7 @@ STDMETHODIMP CTableClass::CreateNew(BSTR dbfFilename, VARIANT_BOOL *retval)
 // ********************************************************
 void CTableClass::CloseUnderlyingFile()
 {
-	_filename = "";
+	_filename = L"";
 	if( _dbfHandle != NULL )
 	{
 		DBFClose(_dbfHandle);
@@ -839,7 +839,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 STDMETHODIMP CTableClass::Dump(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
-	*retval = SaveToFile( OLE2W(dbfFilename), false, cBack) ? VARIANT_TRUE: VARIANT_FALSE;
+	*retval = SaveToFile(OLE2W(dbfFilename), false, cBack) ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -1363,8 +1363,20 @@ bool CTableClass::ReadRecord(long RowIndex)
 					//WCHAR *buffer = Utility::StringToWideChar(v);
 					//val->bstrVal = W2BSTR(buffer);
 					//delete[] buffer;
-					val->bstrVal = W2BSTR(Utility::ConvertFromUtf8(v));
-			    }
+
+					// jf, 12-22-2018
+					// if code page was not provided (via .CPG file), OR if code page is specified UTF-8,
+					// then we will assume we have to unpack it as UTF-8, else we assume the string is 
+					// already encoded properly, or is in the Windows multi-byte charset, and take it as is.
+					// Further reading: https://support.esri.com/en/technical-article/000013192
+					// NOTE that this code differs from shapefiles being read from OGR, which are always UTF-8.
+					if(DBFGetCodePage(_dbfHandle) == nullptr || strcmp(DBFGetCodePage(_dbfHandle), "UTF-8") == 0)
+						// assume UTF-8
+						val->bstrVal = W2BSTR(Utility::ConvertFromUtf8(v));
+					else
+						// else assume it's already interpreted by associated code page
+						val->bstrVal = A2BSTR(v);
+				}
 		    }
 		    else if( type == INTEGER_FIELD )
 		    {	
@@ -2232,7 +2244,7 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 	CComBSTR str;
 	fld->get_Name(&str);
 	USES_CONVERSION;
-	CString fieldName = OLE2CA(str);
+	CStringW fieldName = OLE2CW(str);
 	fld->Release(); fld = NULL;
 	
 	/* we won't define intervals for string values */
@@ -2490,24 +2502,24 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 		for (int i = 0; i < (int)result->size(); i++ )
 		{
 			//CString strExpression;
-			CString strValue;
+			CStringW strValue;
 			CComVariant* val = &(*result)[i].minValue;
 			// TODO: MWGIS-72: Support Russian encoding
 			// https://stackoverflow.com/questions/45484130/how-to-convert-ccomvariant-bstr-to-cstring
 			switch (val->vt)
 			{
 				case VT_BSTR:	
-								strValue = OLE2CA(val->bstrVal);
+								strValue = OLE2W(val->bstrVal);
 								(*result)[i].name = strValue;
 								(*result)[i].expression = "[" + fieldName + "] = \"" + strValue + "\""; 
 								break;
 				case VT_R8:		
-								strValue.Format("%g", val->dblVal);
+								strValue.Format(L"%g", val->dblVal);
 								(*result)[i].name = strValue;
 								(*result)[i].expression = "[" + fieldName + "] = " + strValue;
 								break;
 				case VT_I4:		
-								strValue.Format("%i", val->lVal);
+								strValue.Format(L"%i", val->lVal);
 								(*result)[i].name = strValue;
 								(*result)[i].expression = "[" + fieldName + "] = " + strValue;
 								break;
@@ -2517,7 +2529,7 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 	else //if (ClassificationType == ctEqualIntervals || ClassificationType == ctEqualCount)
 	{
 		// in case % is present, we need to put to double it for proper formatting
-		fieldName.Replace("%", "%%");
+		fieldName.Replace(L"%", L"%%");
 
 		for (int i = 0; i < (int)result->size(); i++ )
 		{
@@ -2534,7 +2546,7 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 				data->maxValue.dblVal = ceil(data->maxValue.dblVal);
 			}
 			
-			CString upperBound = (i == result->size() - 1) ? "<=" : "<";
+			CStringW upperBound = (i == result->size() - 1) ? "<=" : "<";
 
 			switch (data->minValue.vt)
 			{
@@ -2566,15 +2578,15 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 // *****************************************************************
 //		FieldNames()
 // *****************************************************************
-std::vector<CString>* CTableClass::get_FieldNames()
+std::vector<CStringW>* CTableClass::get_FieldNames()
 {
-	std::vector<CString>* names = new std::vector<CString>;
+	std::vector<CStringW>* names = new std::vector<CStringW>;
 	for (unsigned  int i = 0; i < _fields.size(); i++ )
 	{
 		CComBSTR bstr;
 		_fields[i]->field->get_Name(&bstr);
 		USES_CONVERSION;
-		CString str = OLE2CA(bstr);
+		CStringW str = OLE2CW(bstr);
 		names->push_back(str);
 	}
 	return names;
@@ -2906,7 +2918,7 @@ bool CTableClass::MakeUniqueFieldNames()
 // *************************************************************
 //		JoinFields()
 // *************************************************************
-bool CTableClass::JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList)
+bool CTableClass::JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CStringW>& fieldList)
 {
 	USES_CONVERSION;
 	
@@ -2920,7 +2932,7 @@ bool CTableClass::JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping
 		fld->get_Name(&name);
 		
 		// either take all or take those that are in the list provided by user; comparison is case sensitive
-		if (fieldList.size() == 0 || fieldList.find(OLE2A(name)) != fieldList.end())
+		if (fieldList.size() == 0 || fieldList.find(OLE2W(name)) != fieldList.end())
 		{
 			IField* fldNew;
 			fld->Clone(&fldNew);
@@ -2953,8 +2965,8 @@ STDMETHODIMP CTableClass::Join(ITable* table2, BSTR fieldTo, BSTR fieldFrom, VAR
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
-	set<CString> fields;
-	bool res = this->JoinInternal(table2, OLE2A(fieldTo), OLE2A(fieldFrom), "", "", fields);
+	set<CStringW> fields;
+	bool res = this->JoinInternal(table2, OLE2W(fieldTo), OLE2W(fieldFrom), "", "", fields);
 	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
@@ -2966,8 +2978,8 @@ STDMETHODIMP CTableClass::Join2(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BS
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
-	set<CString> fields;
-	bool res = this->JoinInternal(table2, OLE2A(fieldTo), OLE2A(fieldFrom), OLE2W(filenameToReopen), OLE2A(joinOptions), fields);
+	set<CStringW> fields;
+	bool res = this->JoinInternal(table2, OLE2W(fieldTo), OLE2W(fieldFrom), OLE2W(filenameToReopen), OLE2A(joinOptions), fields);
 	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
@@ -2981,7 +2993,7 @@ STDMETHODIMP CTableClass::Join3(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BS
 	USES_CONVERSION;
 
 	// Check dimensions of the array.
-    set<CString> fields;
+    set<CStringW> fields;
 	if (SafeArrayGetDim(filedList) == 1)
 	{
 		LONG lLBound, lUBound;
@@ -2993,12 +3005,12 @@ STDMETHODIMP CTableClass::Join3(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BS
 		{
 			LONG count = lUBound-lLBound + 1;
 			for (int i = 0; i < count; i++){
-				fields.insert(OLE2A(pbstr[i]));
+				fields.insert(OLE2W(pbstr[i]));
 			}		
 		}
 	}
 
-	bool res = this->JoinInternal(table2, OLE2A(fieldTo), OLE2A(fieldFrom), OLE2A(filenameToReopen), OLE2A(joinOptions), fields);
+	bool res = this->JoinInternal(table2, OLE2W(fieldTo), OLE2W(fieldFrom), OLE2W(filenameToReopen), OLE2A(joinOptions), fields);
 	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
@@ -3016,7 +3028,7 @@ STDMETHODIMP CTableClass::TryJoin(ITable* table2, BSTR fieldTo, BSTR fieldFrom, 
 	long index1, index2;
 
 	USES_CONVERSION;
-	if (this->CheckJoinInput(table2, OLE2A(fieldTo), OLE2A(fieldFrom), index1, index2))
+	if (this->CheckJoinInput(table2, OLE2W(fieldTo), OLE2W(fieldFrom), index1, index2))
 	{
 		// building a maps for field of target table
 		std::map<CComVariant, int> vals;
@@ -3057,7 +3069,7 @@ STDMETHODIMP CTableClass::TryJoin(ITable* table2, BSTR fieldTo, BSTR fieldFrom, 
 // *****************************************************
 //		CheckJoinInput()
 // *****************************************************
-bool CTableClass::CheckJoinInput(ITable* table2, CString fieldTo, CString fieldFrom, long& index1, long& index2)
+bool CTableClass::CheckJoinInput(ITable* table2, CStringW fieldTo, CStringW fieldFrom, long& index1, long& index2)
 {
 	if (!table2) 
 	{
@@ -3097,7 +3109,7 @@ bool CTableClass::CheckJoinInput(ITable* table2, CString fieldTo, CString fieldF
 // *****************************************************
 //		JoinInternal()
 // *****************************************************
-bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CStringW filenameToReopen, CString options, set<CString>& fieldList)
+bool CTableClass::JoinInternal(ITable* table2, CStringW fieldTo, CStringW fieldFrom, CStringW filenameToReopen, CString options, set<CStringW>& fieldList)
 {
 	long index1, index2;
 	if (!this->CheckJoinInput(table2, fieldTo, fieldFrom, index1, index2))
@@ -3112,7 +3124,7 @@ bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFro
 	
 	// reading list of fields specified by user
 	CString csvFields;
-	set<CString>::iterator it = fieldList.begin();
+	set<CStringW>::iterator it = fieldList.begin();
 	while(it != fieldList.end())
 	{
 		csvFields += *it + ",";
@@ -3341,7 +3353,7 @@ STDMETHODIMP CTableClass::get_JoinFilename(int joinIndex, BSTR* retVal)
 	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = A2BSTR("");
+		*retVal = W2BSTR(L"");
 	}
 	else 
 	{
@@ -3359,11 +3371,11 @@ STDMETHODIMP CTableClass::get_JoinFromField(int joinIndex, BSTR* retVal)
 	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = A2BSTR("");
+		*retVal = W2BSTR(L"");
 	}
 	else 
 	{
-		*retVal = A2BSTR(_joins[joinIndex]->fieldFrom);
+		*retVal = W2BSTR(_joins[joinIndex]->fieldFrom);
 	}
 	return S_OK;
 }
@@ -3378,11 +3390,11 @@ STDMETHODIMP CTableClass::get_JoinToField(int joinIndex, BSTR* retVal)
 	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = A2BSTR("");
+		*retVal = W2BSTR(L"");
 	}
 	else 
 	{
-		*retVal = A2BSTR(_joins[joinIndex]->fieldTo);
+		*retVal = W2BSTR(_joins[joinIndex]->fieldTo);
 	}
 	return S_OK;
 }
@@ -3397,11 +3409,11 @@ STDMETHODIMP CTableClass::get_JoinFields(LONG joinIndex, BSTR* pVal)
 	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*pVal = A2BSTR("");
+		*pVal = W2BSTR(L"");
 	}
 	else
 	{
-		*pVal = A2BSTR(_joins[joinIndex]->fields);
+		*pVal = W2BSTR(_joins[joinIndex]->fields);
 	}
 
 	return S_OK;
@@ -3495,9 +3507,9 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 				
 				CPLXMLNode* psNode = CPLCreateXMLNode(psJoins, CXT_Element, "Join");
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(Utility::ConvertToUtf8(name)));
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldTo", CPLString().Printf(_joins[i]->fieldTo));
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldFrom", CPLString().Printf(_joins[i]->fieldFrom));
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "Fields", CPLString().Printf(_joins[i]->fields));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldTo", CPLString().Printf(Utility::ConvertToUtf8(_joins[i]->fieldTo)));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldFrom", CPLString().Printf(Utility::ConvertToUtf8(_joins[i]->fieldFrom)));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "Fields", CPLString().Printf(Utility::ConvertToUtf8(_joins[i]->fields)));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Options", CPLString().Printf(_joins[i]->options));
 			}
 		}
@@ -3613,9 +3625,9 @@ void CTableClass::RestoreFields(CPLXMLNode* node)
 // ********************************************************
 void CTableClass::RestoreJoins(CPLXMLNode* node)
 {
-	CStringW folderName = "";
+	CStringW folderName = L"";
 	wchar_t* cwd = NULL;
-	if (this->_filename != "")
+	if (this->_filename != L"")
 	{
 		cwd = new wchar_t[4096];
 		_wgetcwd(cwd, 4096);
@@ -3663,9 +3675,9 @@ void CTableClass::RestoreJoins(CPLXMLNode* node)
 
 				if (numRows > 0 && numCols > 0)
 				{
-					set<CString> fieldList;
+					set<CStringW> fieldList;
 					int pos = 0;
-					CString field = fields.Tokenize(",", pos);
+					CStringW field = fields.Tokenize(",", pos);
 					while (field.GetLength() != 0)
 					{
 						fieldList.insert(field);

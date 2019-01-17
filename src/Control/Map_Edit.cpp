@@ -366,15 +366,35 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 	_shapeEditor->StartUnboundShape((tkCursorMode)m_cursorMode);
 
 	long layerHandle = -1;
-	FireChooseLayer(0, 0, &layerHandle);
-	if (layerHandle == -1) return;
+    bool selectingSelectable = false;
+    CComPtr<IShapefile> sf = NULL;
 
-	CComPtr<IShapefile> sf = NULL;
-	sf.Attach(GetShapefile(layerHandle));
-	if (!sf) {
-		ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return;
-	}
+    FireChooseLayer(0, 0, &layerHandle);
+    // if none specified, consider all 'selectable' layers
+    if (layerHandle == -1)
+    {
+        // only in 'selection' mode is -1 acceptable
+        if (m_cursorMode == cmSelectByPolygon)
+        {
+            // select based on all selectable layers
+            selectingSelectable = true;
+        }
+        else
+        {
+            // any other mode, layerHandle must be specified
+            return;
+        }
+    }
+    else
+    {
+        // single layer specified for selection
+        sf.Attach(GetShapefile(layerHandle));
+        if (!sf)
+        {
+            ErrorMessage(tkINVALID_LAYER_HANDLE);
+            return;
+        }
+    }
 
 	bool editing = m_cursorMode == cmSplitByPolyline ||
 		m_cursorMode == cmSplitByPolygon ||
@@ -390,28 +410,62 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 		}
 	}
 
-	ShpfileType shpType;
-	sf->get_ShapefileType2D(&shpType);
-	if (m_cursorMode == cmSplitByPolyline && shpType != SHP_POLYGON && shpType != SHP_POLYLINE)
-	{
-		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
-		return;
-	}
+    if (m_cursorMode == cmSplitByPolyline)
+    {
+        ShpfileType shpType;
+        sf->get_ShapefileType2D(&shpType);
+        if (shpType != SHP_POLYGON && shpType != SHP_POLYLINE)
+        {
+            ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+            return;
+        }
+    }
 
 	bool redrawNeeded = false;
 	int errorCode = tkNO_ERROR;
 
 	if (m_cursorMode == cmSelectByPolygon)
 	{
-		SelectionHelper::SelectByPolygon(sf, shp, errorCode);
-		FireSelectionChanged(layerHandle);
-		redrawNeeded = true;
-	}
-	else {
+        // if single layer selection
+        if (sf)
+        {
+            SelectionHelper::SelectByPolygon(sf, shp, errorCode);
+            // selection has (likely) changed for this layer
+            FireSelectionChanged(layerHandle);
+            redrawNeeded = true;
+        }
+        else if (selectingSelectable)
+        {
+            // iterate all layers
+            for (layerHandle = 0; layerHandle < GetNumLayers(); layerHandle++)
+            {
+                sf.Attach(GetShapefile(layerHandle));
+                if (sf)
+                {
+                    // is layer selectable?
+                    VARIANT_BOOL isSelectable = VARIANT_FALSE;
+                    sf->get_Selectable(&isSelectable);
+                    if (isSelectable == VARIANT_TRUE)
+                    {
+                        int tempError = tkNO_ERROR;
+                        SelectionHelper::SelectByPolygon(sf, shp, tempError);
+                        // save error code if any layer returns an error
+                        if (tempError != tkNO_ERROR) errorCode = tempError;
+                        // selection has changed for this layer
+                        FireSelectionChanged(layerHandle);
+                        redrawNeeded = true;
+                    }
+                }
+            }
+        }
+    }
+	else
+    {
 		redrawNeeded = GroupOperation::Run((tkCursorMode)m_cursorMode, layerHandle, sf, shp, _undoList, errorCode);
 	}
 
-	if (errorCode != tkNO_ERROR) {
+	if (errorCode != tkNO_ERROR)
+    {
 		ErrorMessage(errorCode);
 	}
 

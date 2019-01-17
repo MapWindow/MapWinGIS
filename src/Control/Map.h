@@ -969,8 +969,17 @@ public:
 	DOUBLE GetPixelsPerDegree(void);
 	DOUBLE PixelsPerMapUnit(void);
 
-	inline void PixelToProjection( double piX, double piY, double & prX, double & prY );
-	inline void ProjectionToPixel( double prX, double prY, double & piX, double & piY );
+	inline void PixelToProjection(double piX, double piY, double & prX, double & prY)
+	{
+		prX = _extents.left + piX * _inversePixelPerProjectionX;
+		prY = _extents.top - piY * _inversePixelPerProjectionY;
+	}
+
+	inline void ProjectionToPixel(double prX, double prY, double & piX, double & piY)
+	{
+		piX = (prX - _extents.left) * _pixelPerProjectionX;
+		piY = (_extents.top - prY) * _pixelPerProjectionY;
+	}
 
 	// some simple encapsulation for code readability
 	IGeoProjection* GetMapToWgs84Transform();

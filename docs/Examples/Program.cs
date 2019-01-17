@@ -1,18 +1,21 @@
-﻿using MapWinGIS;
+﻿// ReSharper disable ArrangeAccessorOwnerBody
+// ReSharper disable DelegateSubtraction
+// ReSharper disable PossibleInvalidCastExceptionInForeachLoop
+// ReSharper disable CheckNamespace
+
+using MapWinGIS;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Examples
 {
-    static class Program
+    public static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -20,10 +23,9 @@ namespace Examples
             Application.Run(new StartForm());
         }
 
-        static void InitGlobalSettings()
+        private static void InitGlobalSettings()
         {
-            var gs = new GlobalSettings();
-            gs.ReprojectLayersOnAdding = true;
+            var globalSettings = new GlobalSettings {ReprojectLayersOnAdding = true};
         }
     }
 

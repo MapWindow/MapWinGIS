@@ -485,7 +485,7 @@ namespace MapWinGIS
         /// <summary>
         /// The objects of the drawing layer are specified in screen coordinates and are not moved after the changes of the extents.
         /// </summary>
-        /// <remarks>To update such layers the full redraw is not needed. Therefore use AxMap.Refresh rather than AxMap.Redraw.</remarks>
+        /// <remarks>To update such layers the full redraw is not needed. Therefore use AxMap.Redraw2 rather than AxMap.Redraw.</remarks>
         dlScreenReferencedList = 0,
 
         /// <summary>
@@ -1688,7 +1688,7 @@ namespace MapWinGIS
         /// <summary>
         /// Map will be rendered from the main buffer. Only measurements and coordinate display will be rendered anew.
         /// </summary>
-        /// <remarks>Corresponds to AxMap.Refresh/AxMap.Invalidate.</remarks>
+        /// <remarks>Corresponds to AxMap.Redraw2/AxMap.Invalidate.</remarks>
         RedrawMinimal = 3,
     }
 

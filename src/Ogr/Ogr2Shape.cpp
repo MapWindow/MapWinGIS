@@ -262,15 +262,15 @@ next_feature:
 }
 
 // is the specified character one of the valid XBase Logical characters
-bool isXBaseLogicalChar(char c)
+bool isXBaseLogicalChar(wchar_t c)
 {
-	return (c == 'Y' || c == 'N' || c == 'T' || c == 'F' || c == '?'); // || c == 'y' || c == 'n' || c == 't' || c == 'f');
+	return (c == L'Y' || c == L'N' || c == L'T' || c == L'F' || c == L'?'); // || c == 'y' || c == 'n' || c == 't' || c == 'f');
 }
 
 // is the specified character one of the valid XBase Logical characters indicating TRUE
-bool isXBaseLogicalTrue(char c)
+bool isXBaseLogicalTrue(wchar_t c)
 {
-	return (c == 'Y' || c == 'T'); // || c == 'y' || c == 't');
+	return (c == L'Y' || c == L'T'); // || c == 'y' || c == 't');
 }
 
 // *************************************************************
@@ -324,7 +324,8 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 			else if (type == OFTString)
 			{
 				// preview string
-				CString str(poFeature->GetFieldAsString(iFld));
+				// NOTE that it is presumed that ALL strings coming from OGR can be interpreted as UTF-8
+				CStringW str = Utility::ConvertFromUtf8(poFeature->GetFieldAsString(iFld));
 				// OGR does not currently support the Logical (boolean) field type.  It is possible that they will exist 
 				// in the file, but OGR will interpret them as Strings.  Since we support boolean field types, we want 
 				// to have a way of copying these particular string fields and interpreting them as booleans.  We will 
@@ -344,7 +345,7 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 				{
 					// else accept as a string
 					var.vt = VT_BSTR;
-					var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+					var.bstrVal = W2BSTR(str);		// BSTR will be cleared by CComVariant destructor
 				}
 			}
 		}

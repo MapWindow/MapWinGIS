@@ -17,41 +17,46 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-#include "stdafx.h"
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#include "StdAfx.h"
 #include "TileCacheManager.h"
 #include "DiskCache.h"
 #include "RamCache.h"
 #include "SQLiteCache.h"
 
-ITileCache* TileCacheManager::_ramCache = NULL;
-ITileCache* TileCacheManager::_sqlLiteCache = NULL;
-ITileCache* TileCacheManager::_diskCache = NULL;
-::CCriticalSection TileCacheManager::_lock;
+ITileCache* TileCacheManager::_ramCache = nullptr;
+ITileCache* TileCacheManager::_sqlLiteCache = nullptr;
+ITileCache* TileCacheManager::_diskCache = nullptr;
+CCriticalSection TileCacheManager::_lock;
 
 // ***********************************************************
 //		get_Cache()
 // ***********************************************************
 ITileCache* TileCacheManager::get_Cache(CacheType type)
 {
-	CSingleLock lock(&_lock, TRUE);
+    CSingleLock lock(&_lock, TRUE);
 
-	switch (type) {
-		case tctDiskCache:
-			// we can't create an instance without path
-			return NULL;
-		case tctRamCache:
-			if (!_ramCache) {
-				_ramCache = new RamCache();
-			}
-			return _ramCache;
-		case tctSqliteCache:
-			if (!_sqlLiteCache) {
-				_sqlLiteCache = new SQLiteCache();
-			}
-			return _sqlLiteCache;
-	}
+    switch (type)
+    {
+    case tctDiskCache:
+        // we can't create an instance without path
+        return nullptr;
+    case tctRamCache:
+        if (!_ramCache)
+        {
+            _ramCache = new RamCache();
+        }
+        return _ramCache;
+    case tctSqliteCache:
+        if (!_sqlLiteCache)
+        {
+            _sqlLiteCache = new SQLiteCache();
+        }
+        return _sqlLiteCache;
+    }
 
-	return NULL;
+    return nullptr;
 }
 
 // ***********************************************************
@@ -59,15 +64,18 @@ ITileCache* TileCacheManager::get_Cache(CacheType type)
 // ***********************************************************
 void TileCacheManager::CloseAll()
 {
-	if (_ramCache) {
-		_ramCache->Close();
-	}
+    if (_ramCache)
+    {
+        _ramCache->Close();
+    }
 
-	if (_ramCache) {
-		_ramCache->Close();
-	}
+    if (_ramCache)
+    {
+        _ramCache->Close();
+    }
 
-	if (_diskCache) {
-		_diskCache->Close();
-	}
+    if (_diskCache)
+    {
+        _diskCache->Close();
+    }
 }

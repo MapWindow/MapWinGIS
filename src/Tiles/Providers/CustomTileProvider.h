@@ -30,12 +30,13 @@
 class CustomTileProvider : public BaseProvider
 {
 public:
-	CustomTileProvider(int id, CString name, CString urlPattern, tkTileProjection projection, int minZoom, int maxZoom) throw(...)
+	CustomTileProvider(int id, CString name, CString urlPattern, tkTileProjection projection, int minZoom, int maxZoom, CString Copyright) throw(...)
 	{
 		this->Id = (tkTileProvider)id;
 		this->Name = name;
 		this->_minZoom = minZoom;
 		this->_maxZoom = maxZoom;
+		this->_copyright = Copyright;
 		_projectionId = projection;
 		_subProviders.push_back(this);
 

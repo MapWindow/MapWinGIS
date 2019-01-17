@@ -80,7 +80,8 @@ HCURSOR CMapView::GetCursorIcon()
 					newCursor = (_useAlternatePanCursor == TRUE) ? _cursorAlternatePan : _cursorPan;
 					break;
 
-				case cmSelection:
+                case cmSelection:
+                case cmSelectByPolygon:
 					newCursor = _cursorSelect;
 					break;
 

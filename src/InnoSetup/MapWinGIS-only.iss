@@ -2,25 +2,24 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "4.9.6.0"
+#define MyAppVersion "5.0.0.0"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapwinGIS\GitHub\src\InnoSetup"
 #define BinLocation "D:\dev\MapwinGIS\GitHub\src\bin"
-#define x64BitVersion
+;; #define x64BitVersion
 
 #ifdef x64BitVersion
   #define CPU "x64"
-  #define vcredist "vcredist_x64_2013.exe"
+  #define vcredist "vcredist_x64_2015.exe"
   #define MySourceDir BinLocation + "\x64\"
   #define SystemFlag "64bit"
 #else
   #define CPU "Win32"
-  #define vcredist "vcredist_x86-2013.exe"
+  #define vcredist "vcredist_x86-2015.exe"
   #define MySourceDir BinLocation + "\Win32\"
   #define SystemFlag "32bit"
 #endif
-
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -47,7 +46,7 @@ WizardImageFile={#SetupLocation}\WizImage-MW.bmp
 WizardSmallImageFile={#SetupLocation}\WizSmallImage-MW.bmp
 AppCopyright={#MyAppPublisher}
 PrivilegesRequired=admin
-MinVersion=0,5.01sp3   
+MinVersion=0,5.01sp3
 ChangesEnvironment=yes
 AlwaysShowDirOnReadyPage=True
 EnableDirDoesntExistWarning=True
@@ -62,9 +61,15 @@ VersionInfoCopyright=Mozilla Public License (MPL) 1.1
 VersionInfoDescription=MapWindow Open Source GIS [www.mapwindow.org]
 VersionInfoProductName={#MyAppName}
 VersionInfoProductVersion={#MyAppVersion}
+VersionInfoVersion={#MyAppVersion}
 #ifdef x64BitVersion
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
+VersionInfoTextVersion={#MyAppVersion} 64Bit
+VersionInfoProductTextVersion={#MyAppVersion} 64Bit
+#else
+VersionInfoTextVersion={#MyAppVersion}
+VersionInfoProductTextVersion={#MyAppVersion}
 #endif
 
 [Files]
@@ -73,6 +78,8 @@ Source: "{#MySourceDir}\MapWinGIS.ocx"; DestDir: "{app}"; Flags: ignoreversion {
 ;; IntelliSense:
 Source: "{#SetupLocation}\AxInterop.MapWinGIS.XML"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
 Source: "{#SetupLocation}\Interop.MapWinGIS.XML"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
+;; Delphi TAB file
+Source: "{#SetupLocation}\MapWinGIS_TLB.pas"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Delphi
 ;; Licenses
 Source: "{#BinLocation}\Licenses\GDALLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
 Source: "{#BinLocation}\Licenses\GISInternalsLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
@@ -119,9 +126,10 @@ Name: "ECW"; Description: "Add ECW & JPEG2000 support"; Types: full custom
 Name: "MrSID"; Description: "Add MrSID support"; Types: full custom
 ;; Name: "HDF4"; Description: "Add Hierarchical Data Format Release 4 support"; Types: full custom
 Name: "HDF5"; Description: "Add Hierarchical Data Format Release 5 support"; Types: full custom
+Name: "MapWinGIS_Delphi"; Description: "Delphi Unit Source file (MapWinGIS_TLB.pas). If you don't know what it is you probably won't need it."; Types: full custom
 
 [Run]
-; Install VC++ 2013 if needed:
+; Install VC++ 2015 if needed:
 #ifdef x64BitVersion
 Filename: "{tmp}\{#vcredist}"; Parameters: "/quiet"; Flags: waituntilterminated; Check: VCRedistNeedsInstall_x64()
 #else
@@ -129,9 +137,9 @@ Filename: "{tmp}\{#vcredist}"; Parameters: "/quiet"; Flags: waituntilterminated;
 #endif
 ;Run some command files:
 Filename: "{app}\regMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runhidden
-Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/getting_started.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGvInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Go to the online documentation"
-Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/MapWindow49.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the future of MapWinGIS/MapWindow v5"
-Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/version_history.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWGInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the changes in this version"
+Filename: "https://www.mapwindow.org/documentation/mapwingis4.9/getting_started.html?utm_source=MWv50&utm_medium=cpc&utm_campaign=MWGvInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Go to the online documentation"
+Filename: "https://www.mapwindow.org/documentation/mapwingis4.9/MapWindow49.html?utm_source=MWv50&utm_medium=cpc&utm_campaign=MWGInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the future of MapWinGIS/MapWindow v5"
+Filename: "https://www.mapwindow.org/documentation/mapwingis4.9/version_history.html?utm_source=MWv50&utm_medium=cpc&utm_campaign=MWGInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the changes in this version"
 
 [UninstallRun]
 Filename: "{app}\unregMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runhidden
@@ -183,6 +191,9 @@ const
   VC_2013_REDIST_X86 = '{13A4EE12-23EA-3371-91EE-EFB36DDFFF3E}'; //Microsoft.VS.VC_RuntimeMinimumVSU_x86,v12
   VC_2013_REDIST_X64 = '{A749D8E6-B613-3BE3-8F5F-045C84EBA29B}'; //Microsoft.VS.VC_RuntimeMinimumVSU_amd64,v12
 
+  VC_2015_REDIST_X86 = '{8F271F6C-6E7B-3D0A-951B-6E7B694D78BD}'; //Microsoft.VS.VC_RuntimeMinimumVSU_x86,v14
+  VC_2015_REDIST_X64 = '{221D6DB4-46E2-333C-B09B-5F49351D0980}'; //Microsoft.VS.VC_RuntimeMinimumVSU_amd64,v14
+
 function MsiQueryProductState(szProduct: string): INSTALLSTATE; 
   external 'MsiQueryProductState{#AW}@msi.dll stdcall';
 
@@ -198,7 +209,7 @@ begin
   // this statement, the following won't install your VC redist only when
   // the Visual C++ 2008 Redist (x86) and Visual C++ 2008 SP1 Redist(x86)
   // are installed for the current user
-  Result := not (VCVersionInstalled(VC_2013_REDIST_X86));
+  Result := not (VCVersionInstalled(VC_2015_REDIST_X86));
 end;
 
 function VCRedistNeedsInstall_x64(): Boolean;
@@ -208,7 +219,7 @@ begin
   // this statement, the following won't install your VC redist only when
   // the Visual C++ 2008 Redist (x86) and Visual C++ 2008 SP1 Redist(x86)
   // are installed for the current user
-  Result := not (VCVersionInstalled(VC_2013_REDIST_X64));
+  Result := not (VCVersionInstalled(VC_2015_REDIST_X64));
 end;
 
 function NeedsAddPath(Param: string): boolean;

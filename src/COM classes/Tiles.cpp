@@ -1,5 +1,5 @@
 /**************************************************************************************
- * File name: Tiles.h
+ * File name: Tiles.cpp
  *
  * Project: MapWindow Open Source (MapWinGis ActiveX control) 
  * Description: implementation of CTiles
@@ -21,8 +21,9 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- 
-#include "stdafx.h"
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#include "StdAfx.h"
 #include "Tiles.h"
 #include "DiskCache.h"
 #include "TileHelper.h"
@@ -34,9 +35,9 @@
 // ************************************************************
 //		get_Provider()
 // ************************************************************
-BaseProvider* CTiles::get_Provider(int providerId)
+BaseProvider* CTiles::get_Provider(int providerId) const
 {
-	return ((CTileProviders*)_providers)->get_Provider(providerId);
+    return ((CTileProviders*)_providers)->get_Provider(providerId);
 }
 
 // ************************************************************
@@ -44,70 +45,70 @@ BaseProvider* CTiles::get_Provider(int providerId)
 // ************************************************************
 bool CTiles::get_ReloadNeeded()
 {
-	bool val = _reloadNeeded;
-	_reloadNeeded = false;
-	return val;
+    const bool val = _reloadNeeded;
+    _reloadNeeded = false;
+    return val;
 }
 
 // ************************************************************
 //		Stop()
 // ************************************************************
-void CTiles::Stop() 
+void CTiles::Stop()
 {
-	_manager.get_Loader()->Stop();
+    _manager.get_Loader()->Stop();
 
-	put_Visible(VARIANT_FALSE);   // will prevent reloading tiles after remove all layers in map destructor
+    put_Visible(VARIANT_FALSE); // will prevent reloading tiles after remove all layers in map destructor
 }
 
 // ************************************************************
 //		get_GlobalCallback()
 // ************************************************************
-STDMETHODIMP CTiles::get_GlobalCallback(ICallback **pVal)
+STDMETHODIMP CTiles::get_GlobalCallback(ICallback** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = _globalCallback;
+    *pVal = _globalCallback;
 
-	if( _globalCallback != NULL )
-		_globalCallback->AddRef();
+    if (_globalCallback != nullptr)
+        _globalCallback->AddRef();
 
-	return S_OK;
+    return S_OK;
 }
 
 // ************************************************************
 //		put_GlobalCallback()
 // ************************************************************
-STDMETHODIMP CTiles::put_GlobalCallback(ICallback *newVal)
+STDMETHODIMP CTiles::put_GlobalCallback(ICallback* newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
+    return S_OK;
 }
 
 // *****************************************************************
 //	   get_ErrorMsg()
 // *****************************************************************
-STDMETHODIMP CTiles::get_ErrorMsg(long ErrorCode, BSTR *pVal)
+STDMETHODIMP CTiles::get_ErrorMsg(long ErrorCode, BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	USES_CONVERSION;
-	*pVal = A2BSTR(ErrorMsg(ErrorCode));
+    USES_CONVERSION;
+    *pVal = A2BSTR(ErrorMsg(ErrorCode));
 
-	return S_OK;
+    return S_OK;
 }
 
 // ************************************************************
 //		get_LastErrorCode()
 // ************************************************************
-STDMETHODIMP CTiles::get_LastErrorCode(long *pVal)
+STDMETHODIMP CTiles::get_LastErrorCode(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = _lastErrorCode;
-	_lastErrorCode = tkNO_ERROR;
+    *pVal = _lastErrorCode;
+    _lastErrorCode = tkNO_ERROR;
 
-	return S_OK;
+    return S_OK;
 }
 
 // **************************************************************
@@ -115,78 +116,80 @@ STDMETHODIMP CTiles::get_LastErrorCode(long *pVal)
 // **************************************************************
 void CTiles::ErrorMessage(long ErrorCode)
 {
-	_lastErrorCode = ErrorCode;
-	CallbackHelper::ErrorMsg("Tiles", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+    _lastErrorCode = ErrorCode;
+    CallbackHelper::ErrorMsg("Tiles", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ************************************************************
 //		get/put_Key()
 // ************************************************************
-STDMETHODIMP CTiles::get_Key(BSTR *pVal)
+STDMETHODIMP CTiles::get_Key(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	USES_CONVERSION;
-	*pVal = OLE2BSTR(_key);
+    USES_CONVERSION;
+    *pVal = OLE2BSTR(_key);
 
-	return S_OK;
+    return S_OK;
 }
+
 STDMETHODIMP CTiles::put_Key(BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	::SysFreeString(_key);
-	_key = OLE2BSTR(newVal);
+    SysFreeString(_key);
+    _key = OLE2BSTR(newVal);
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
 //	     SleepBeforeRequestTimeout()
 // *********************************************************
-STDMETHODIMP CTiles::get_DelayRequestTimeout(long *pVal)
+STDMETHODIMP CTiles::get_DelayRequestTimeout(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = _manager.get_Loader()->get_DelayRequestTimeout();
+    *pVal = _manager.get_Loader()->get_DelayRequestTimeout();
 
-	return S_OK;
+    return S_OK;
 }
+
 STDMETHODIMP CTiles::put_DelayRequestTimeout(long newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (newVal > 10000) newVal = 10000;
-	if (newVal < 0) newVal = 0;
+    if (newVal > 10000) newVal = 10000;
+    if (newVal < 0) newVal = 0;
 
-	_manager.get_Loader()->set_DelayRequestTimeout(newVal);
+    _manager.get_Loader()->set_DelayRequestTimeout(newVal);
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
 //	     ScalingRatio()
 // *********************************************************
-STDMETHODIMP CTiles::get_ScalingRatio(double *pVal)
+STDMETHODIMP CTiles::get_ScalingRatio(double* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _manager.scalingRatio();;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    *pVal = _manager.scalingRatio();;
+    return S_OK;
 }
 
 STDMETHODIMP CTiles::put_ScalingRatio(double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (newVal < 0.5 || newVal > 4.0)
-	{
-		ErrorMessage(tkINVALID_PARAMETER_VALUE);
-		return S_OK;
-	}
+    if (newVal < 0.5 || newVal > 4.0)
+    {
+        ErrorMessage(tkINVALID_PARAMETER_VALUE);
+        return S_OK;
+    }
 
-	_manager.scalingRatio(newVal);
+    _manager.scalingRatio(newVal);
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
@@ -194,10 +197,10 @@ STDMETHODIMP CTiles::put_ScalingRatio(double newVal)
 // *********************************************************
 STDMETHODIMP CTiles::AutodetectProxy(VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	*retVal = HttpProxyHelper::AutodetectProxy();
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    *retVal = HttpProxyHelper::AutodetectProxy();
+    return S_OK;
 }
 
 // *********************************************************
@@ -205,10 +208,10 @@ STDMETHODIMP CTiles::AutodetectProxy(VARIANT_BOOL* retVal)
 // *********************************************************
 STDMETHODIMP CTiles::SetProxy(BSTR address, int port, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	*retVal = HttpProxyHelper::SetProxy(OLE2A(address), port);
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    USES_CONVERSION;
+    *retVal = HttpProxyHelper::SetProxy(OLE2A(address), port);
+    return S_OK;
 }
 
 // *********************************************************
@@ -216,10 +219,10 @@ STDMETHODIMP CTiles::SetProxy(BSTR address, int port, VARIANT_BOOL* retVal)
 // *********************************************************
 STDMETHODIMP CTiles::SetProxyAuthentication(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	*retVal = _provider->SetAuthorization(username, password, domain) ? VARIANT_TRUE : VARIANT_FALSE;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    USES_CONVERSION;
+    *retVal = BaseProvider::SetAuthorization(username, password, domain) ? VARIANT_TRUE : VARIANT_FALSE;
+    return S_OK;
 }
 
 // *********************************************************
@@ -227,9 +230,9 @@ STDMETHODIMP CTiles::SetProxyAuthentication(BSTR username, BSTR password, BSTR d
 // *********************************************************
 STDMETHODIMP CTiles::ClearProxyAuthorization()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_provider->ClearAuthorization();
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    BaseProvider::ClearAuthorization();
+    return S_OK;
 }
 
 // *********************************************************
@@ -237,24 +240,23 @@ STDMETHODIMP CTiles::ClearProxyAuthorization()
 // *********************************************************
 STDMETHODIMP CTiles::get_Proxy(BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	USES_CONVERSION;
-	CString s;
-	s = HttpProxyHelper::m_proxyAddress;
-	if (s.GetLength() == 0)
-	{
-		*retVal = A2BSTR("");
-	}
-	else
-	{
-		CString format = s + ":%d";
-		short num = HttpProxyHelper::m_proxyPort;
-		s.Format(format, num);
-		*retVal = A2BSTR(s);
-	}
+    USES_CONVERSION;
+    CString s = HttpProxyHelper::m_proxyAddress;
+    if (s.GetLength() == 0)
+    {
+        *retVal = A2BSTR("");
+    }
+    else
+    {
+        const CString format = s + ":%d";
+        const short num = HttpProxyHelper::m_proxyPort;
+        s.Format(format, num);
+        *retVal = A2BSTR(s);
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
 // ************************************************************
@@ -262,16 +264,17 @@ STDMETHODIMP CTiles::get_Proxy(BSTR* retVal)
 // ************************************************************
 STDMETHODIMP CTiles::get_CurrentZoom(int* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = -1;
+    *retVal = -1;
 
-	IMapViewCallback* map = _manager.get_MapCallback();
-	if (map) {
-		*retVal = map->_ChooseZoom(_provider, _manager.scalingRatio(), false);
-	}
+    IMapViewCallback* map = _manager.get_MapCallback();
+    if (map)
+    {
+        *retVal = map->_ChooseZoom(_provider, _manager.scalingRatio(), false);
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
@@ -280,28 +283,29 @@ STDMETHODIMP CTiles::get_CurrentZoom(int* retVal)
 // checks whether all the tiles are present in cache
 bool CTiles::TilesAreInCache(IMapViewCallback* map, tkTileProvider providerId)
 {
-	BaseProvider* provider = providerId == ProviderNone ? _provider : get_Provider(providerId);
+    BaseProvider* provider = providerId == ProviderNone ? _provider : get_Provider(providerId);
 
-	if (!_visible || !provider) {
-		// there is no valid provider, so no need to schedule download
-		return true;
-	}
+    if (!_visible || !provider)
+    {
+        // there is no valid provider, so no need to schedule download
+        return true;
+    }
 
-	return _manager.TilesAreInCache(provider);
+    return _manager.TilesAreInCache(provider);
 }
 
 // *********************************************************
 //	     LoadTiles
 // *********************************************************
-void CTiles::LoadTiles(bool isSnapshot, CString key)
+void CTiles::LoadTiles(bool isSnapshot, const CString& key)
 {
-	if (!_visible) 
-	{
-		_manager.Clear();
-		return;
-	}
+    if (!_visible)
+    {
+        _manager.Clear();
+        return;
+    }
 
-	_manager.LoadTiles(_provider, isSnapshot, key);
+    _manager.LoadTiles(_provider, isSnapshot, key);
 }
 
 // *********************************************************
@@ -309,28 +313,29 @@ void CTiles::LoadTiles(bool isSnapshot, CString key)
 // *********************************************************
 STDMETHODIMP CTiles::get_Provider(tkTileProvider* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CustomTileProvider* p = dynamic_cast<CustomTileProvider*>(_provider);
-	*pVal = p ? tkTileProvider::ProviderCustom : (tkTileProvider)_provider->Id;
+    auto* p = dynamic_cast<CustomTileProvider*>(_provider);
+    *pVal = p ? tkTileProvider::ProviderCustom : (tkTileProvider)_provider->Id;
 
-	return S_OK;
+    return S_OK;
 }
 
 STDMETHODIMP CTiles::put_Provider(tkTileProvider newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (newVal < 0 || newVal >= tkTileProvider::ProviderCustom) {
-		return S_OK;
-	}
+    if (newVal < 0 || newVal >= tkTileProvider::ProviderCustom)
+    {
+        return S_OK;
+    }
 
-	if (_provider->Id != newVal && newVal != tkTileProvider::ProviderCustom) 
-	{
-		put_ProviderId((int)newVal);
-	}
+    if (_provider->Id != newVal && newVal != tkTileProvider::ProviderCustom)
+    {
+        put_ProviderId((int)newVal);
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
@@ -338,12 +343,12 @@ STDMETHODIMP CTiles::put_Provider(tkTileProvider newVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_ProviderName(BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	USES_CONVERSION;
-	*retVal = _provider ? A2BSTR(_provider->Name) : A2BSTR("");
+    USES_CONVERSION;
+    *retVal = _provider ? A2BSTR(_provider->Name) : A2BSTR("");
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
@@ -351,15 +356,16 @@ STDMETHODIMP CTiles::get_ProviderName(BSTR* retVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_GridLinesVisible(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _manager.get_GridLinesVisible() ? VARIANT_TRUE : VARIANT_TRUE;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *pVal = _manager.get_GridLinesVisible() ? VARIANT_TRUE : VARIANT_TRUE;
+    return S_OK;
 }
+
 STDMETHODIMP CTiles::put_GridLinesVisible(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_manager.set_GridLinesVisible(newVal ? true : false);
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    _manager.set_GridLinesVisible(newVal ? true : false);
+    return S_OK;
 }
 
 // *********************************************************
@@ -367,15 +373,16 @@ STDMETHODIMP CTiles::put_GridLinesVisible(VARIANT_BOOL newVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_MinScaleToCache(int* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _minScaleToCache;		// TODO: use in caching process
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *pVal = _minScaleToCache; // TODO: use in caching process
+    return S_OK;
 }
+
 STDMETHODIMP CTiles::put_MinScaleToCache(int newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_minScaleToCache = newVal;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    _minScaleToCache = newVal;
+    return S_OK;
 }
 
 // *********************************************************
@@ -383,15 +390,16 @@ STDMETHODIMP CTiles::put_MinScaleToCache(int newVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_MaxScaleToCache(int* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _maxScaleToCache;		// TODO: use in caching process
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *pVal = _maxScaleToCache; // TODO: use in caching process
+    return S_OK;
 }
+
 STDMETHODIMP CTiles::put_MaxScaleToCache(int newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_maxScaleToCache = newVal;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    _maxScaleToCache = newVal;
+    return S_OK;
 }
 
 // *********************************************************
@@ -399,16 +407,16 @@ STDMETHODIMP CTiles::put_MaxScaleToCache(int newVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_Visible(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _visible;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *pVal = _visible;
+    return S_OK;
 }
 
 STDMETHODIMP CTiles::put_Visible(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_visible = newVal != 0;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    _visible = newVal != 0;
+    return S_OK;
 }
 
 // *********************************************************
@@ -416,11 +424,11 @@ STDMETHODIMP CTiles::put_Visible(VARIANT_BOOL newVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_Providers(ITileProviders** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (_providers)
-		_providers->AddRef();
-	*retVal = _providers;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    if (_providers)
+        _providers->AddRef();
+    *retVal = _providers;
+    return S_OK;
 }
 
 // *********************************************************
@@ -428,20 +436,20 @@ STDMETHODIMP CTiles::get_Providers(ITileProviders** retVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_DoCaching(tkCacheType type, VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = _manager.get_Cache(type)->doCaching ? VARIANT_TRUE : VARIANT_FALSE;
-	
-	return S_OK;
+    *pVal = _manager.get_Cache(type)->doCaching ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
 }
 
 STDMETHODIMP CTiles::put_DoCaching(tkCacheType type, VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	_manager.get_Cache(type)->doCaching = newVal ? true : false;
+    _manager.get_Cache(type)->doCaching = newVal ? true : false;
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
@@ -449,19 +457,20 @@ STDMETHODIMP CTiles::put_DoCaching(tkCacheType type, VARIANT_BOOL newVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_UseCache(tkCacheType type, VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = _manager.get_Cache(type)->useCache ? VARIANT_TRUE : VARIANT_FALSE;
-	
-	return S_OK;
+    *pVal = _manager.get_Cache(type)->useCache ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
 }
+
 STDMETHODIMP CTiles::put_UseCache(tkCacheType type, VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	_manager.get_Cache(type)->useCache = newVal ? true : false;
+    _manager.get_Cache(type)->useCache = newVal ? true : false;
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
@@ -469,16 +478,16 @@ STDMETHODIMP CTiles::put_UseCache(tkCacheType type, VARIANT_BOOL newVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_UseServer(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _manager.useServer();
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *pVal = _manager.useServer();
+    return S_OK;
 }
 
 STDMETHODIMP CTiles::put_UseServer(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_manager.useServer(newVal != 0);
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    _manager.useServer(newVal != 0);
+    return S_OK;
 }
 
 // *********************************************************
@@ -486,12 +495,12 @@ STDMETHODIMP CTiles::put_UseServer(VARIANT_BOOL newVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_DiskCacheFilename(BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	USES_CONVERSION;
-	*retVal = W2BSTR(_manager.get_DiskCache()->cache->get_Filename());
-	
-	return S_OK;
+    USES_CONVERSION;
+    *retVal = W2BSTR(_manager.get_DiskCache()->cache->get_Filename());
+
+    return S_OK;
 }
 
 // *********************************************************
@@ -499,12 +508,12 @@ STDMETHODIMP CTiles::get_DiskCacheFilename(BSTR* retVal)
 // *********************************************************
 STDMETHODIMP CTiles::put_DiskCacheFilename(BSTR pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	USES_CONVERSION;
-	_manager.get_DiskCache()->cache->set_Filename(OLE2W(pVal));
+    USES_CONVERSION;
+    _manager.get_DiskCache()->cache->set_Filename(OLE2W(pVal));
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
@@ -512,25 +521,25 @@ STDMETHODIMP CTiles::put_DiskCacheFilename(BSTR pVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_MaxCacheSize(tkCacheType type, double* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
-	*pVal = cache ? cache->get_MaxSize() : 0.0;
+    ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+    *pVal = cache ? cache->get_MaxSize() : 0.0;
 
-	return S_OK;
+    return S_OK;
 }
 
 STDMETHODIMP CTiles::put_MaxCacheSize(tkCacheType type, double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
-	if (cache)
-	{
-		cache->set_MaxSize(newVal);
-	}
-	
-	return S_OK;
+    ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+    if (cache)
+    {
+        cache->set_MaxSize(newVal);
+    }
+
+    return S_OK;
 }
 
 // *********************************************************
@@ -538,15 +547,15 @@ STDMETHODIMP CTiles::put_MaxCacheSize(tkCacheType type, double newVal)
 // *********************************************************
 STDMETHODIMP CTiles::ClearCache(tkCacheType type)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
-	if (cache)
-	{
-		cache->Clear(tkTileProvider::ProviderNone, 0, 100);
-	}
-	
-	return S_OK;
+    ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+    if (cache)
+    {
+        cache->Clear(tkTileProvider::ProviderNone, 0, 100);
+    }
+
+    return S_OK;
 }
 
 // *********************************************************
@@ -554,15 +563,15 @@ STDMETHODIMP CTiles::ClearCache(tkCacheType type)
 // *********************************************************
 STDMETHODIMP CTiles::ClearCache2(tkCacheType type, int providerId, int fromScale, int toScale)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
-	if (cache)
-	{
-		cache->Clear(providerId, fromScale, toScale);
-	}
-	
-	return S_OK;
+    ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+    if (cache)
+    {
+        cache->Clear(providerId, fromScale, toScale);
+    }
+
+    return S_OK;
 }
 
 // *********************************************************
@@ -570,17 +579,17 @@ STDMETHODIMP CTiles::ClearCache2(tkCacheType type, int providerId, int fromScale
 // *********************************************************
 STDMETHODIMP CTiles::get_CacheSize(tkCacheType type, double* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = 0.0;
+    *retVal = 0.0;
 
-	ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
-	if (cache)
-	{
-		*retVal = cache->get_SizeMB();
-	}
-	
-	return S_OK;
+    ITileCache* cache = TileCacheManager::get_Cache((CacheType)type);
+    if (cache)
+    {
+        *retVal = cache->get_SizeMB();
+    }
+
+    return S_OK;
 }
 
 // *********************************************************
@@ -588,11 +597,11 @@ STDMETHODIMP CTiles::get_CacheSize(tkCacheType type, double* retVal)
 // *********************************************************
 STDMETHODIMP CTiles::get_CacheSize2(tkCacheType type, int providerId, int scale, double* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = _manager.get_Cache(type)->cache->get_SizeMB(providerId, scale);
-	
-	return S_OK;
+    *retVal = _manager.get_Cache(type)->cache->get_SizeMB(providerId, scale);
+
+    return S_OK;
 }
 
 // ********************************************************
@@ -600,90 +609,95 @@ STDMETHODIMP CTiles::get_CacheSize2(tkCacheType type, int providerId, int scale,
 // ********************************************************
 STDMETHODIMP CTiles::Serialize(BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CPLXMLNode* psTree = this->SerializeCore("TilesClass");
-	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CPLXMLNode* psTree = this->SerializeCore("TilesClass");
+    Utility::SerializeAndDestroyXmlTree(psTree, retVal);
+    return S_OK;
 }
 
 // ********************************************************
 //     SerializeCore()
 // ********************************************************
-CPLXMLNode* CTiles::SerializeCore(CString ElementName)
+CPLXMLNode* CTiles::SerializeCore(const CString& elementName)
 {
-	USES_CONVERSION;
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
-	
-	if (!_visible)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_visible));
+    USES_CONVERSION;
+    CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, elementName);
 
-	
-	if (_manager.get_GridLinesVisible())
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "GridLinesVisible", CPLString().Printf("%d", (int)_manager.get_GridLinesVisible()));
+    if (!_visible)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_visible));
 
-	if (_provider->Id != 0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "Provider", CPLString().Printf("%d", (int)_provider->Id));
+    if (_manager.get_GridLinesVisible())
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "GridLinesVisible",
+                                               CPLString().Printf("%d", (int)_manager.get_GridLinesVisible()));
 
-	bool value = _manager.get_RamCache()->doCaching;
-	if (!value)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoRamCaching", CPLString().Printf("%d", (int)value));
+    if (_provider->Id != 0)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "Provider", CPLString().Printf("%d", (int)_provider->Id));
 
-	value = _manager.get_DiskCache()->doCaching;
-	if (value)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoDiskCaching", CPLString().Printf("%d", (int)value));
+    bool value = _manager.get_RamCache()->doCaching;
+    if (!value)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "DoRamCaching", CPLString().Printf("%d", (int)value));
 
-	value = _manager.get_RamCache()->useCache;
-	if (!value)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseRamCache", CPLString().Printf("%d", (int)value));
+    value = _manager.get_DiskCache()->doCaching;
+    if (value)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "DoDiskCaching", CPLString().Printf("%d", (int)value));
 
-	value = _manager.get_DiskCache()->useCache;
-	if (!value)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseDiskCache", CPLString().Printf("%d", (int)value));
+    value = _manager.get_RamCache()->useCache;
+    if (!value)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "UseRamCache", CPLString().Printf("%d", (int)value));
 
-	if (!_manager.useServer())
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseServer", CPLString().Printf("%d", (int)_manager.useServer()));
+    value = _manager.get_DiskCache()->useCache;
+    if (!value)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "UseDiskCache", CPLString().Printf("%d", (int)value));
 
-	double dbl = _manager.get_RamCache()->cache->get_MaxSize();
-	if (dbl != 100.0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxRamCacheSize", CPLString().Printf("%f", dbl));
+    if (!_manager.useServer())
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "UseServer",
+                                               CPLString().Printf("%d", (int)_manager.useServer()));
 
-	dbl = _manager.get_DiskCache()->cache->get_MaxSize();
-	if (dbl != 100.0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxDiskCacheSize", CPLString().Printf("%f", dbl));
+    double dbl = _manager.get_RamCache()->cache->get_MaxSize();
+    if (dbl != 100.0)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxRamCacheSize", CPLString().Printf("%f", dbl));
 
-	if (_minScaleToCache != 0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinScaleToCache", CPLString().Printf("%d", _minScaleToCache));
+    dbl = _manager.get_DiskCache()->cache->get_MaxSize();
+    if (dbl != 100.0)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxDiskCacheSize", CPLString().Printf("%f", dbl));
 
-	if (_maxScaleToCache != 100)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxScaleToCache", CPLString().Printf("%d", _maxScaleToCache));
-	
-	CStringW dbName = _manager.get_DiskCache()->cache->get_Filename();
-	if (dbName.GetLength() != 0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", Utility::ConvertToUtf8(dbName));
-	
-	// serialization of custom providers
-	CPLXMLNode* psProviders = CPLCreateXMLNode( NULL, CXT_Element, "TileProviders");
-	if (psProviders)
-	{
-		vector<BaseProvider*>* providers = ((CTileProviders*)_providers)->GetList();
-		for(size_t i = 0; i < providers->size(); i++)
-		{
-			CustomTileProvider* cp = dynamic_cast<CustomTileProvider*>(providers->at(i));
-			if (cp)
-			{
-				CPLXMLNode* psCustom = CPLCreateXMLNode( NULL, CXT_Element, "TileProvider");
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Id", CPLString().Printf("%d", cp->Id));
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Name", cp->Name);
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Url", cp->get_UrlFormat());
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Projection", CPLString().Printf("%d", (int)cp->get_Projection()));
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MinZoom", CPLString().Printf("%d", cp->get_MinZoom()));
-				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MaxZoom", CPLString().Printf("%d", cp->get_MaxZoom()));
-				CPLAddXMLChild(psProviders, psCustom);
-			}
-		}
-		CPLAddXMLChild(psTree, psProviders);
-	}
-	return psTree;
+    if (_minScaleToCache != 0)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "MinScaleToCache", CPLString().Printf("%d", _minScaleToCache));
+
+    if (_maxScaleToCache != 100)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxScaleToCache", CPLString().Printf("%d", _maxScaleToCache));
+
+    CStringW dbName = _manager.get_DiskCache()->cache->get_Filename();
+    if (dbName.GetLength() != 0)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", Utility::ConvertToUtf8(dbName));
+
+    // serialization of custom providers
+    CPLXMLNode* psProviders = CPLCreateXMLNode(nullptr, CXT_Element, "TileProviders");
+    if (psProviders)
+    {
+        vector<BaseProvider*>* providers = ((CTileProviders*)_providers)->GetList();
+        for (size_t i = 0; i < providers->size(); i++)
+        {
+            CustomTileProvider* cp = dynamic_cast<CustomTileProvider*>(providers->at(i));
+            if (cp)
+            {
+                CPLXMLNode* psCustom = CPLCreateXMLNode(nullptr, CXT_Element, "TileProvider");
+                Utility::CPLCreateXMLAttributeAndValue(psCustom, "Id", CPLString().Printf("%d", cp->Id));
+                Utility::CPLCreateXMLAttributeAndValue(psCustom, "Name", cp->Name);
+                Utility::CPLCreateXMLAttributeAndValue(psCustom, "Url", cp->get_UrlFormat());
+                Utility::CPLCreateXMLAttributeAndValue(psCustom, "Projection",
+                                                       CPLString().Printf("%d", (int)cp->get_Projection()));
+                Utility::CPLCreateXMLAttributeAndValue(psCustom, "MinZoom",
+                                                       CPLString().Printf("%d", cp->get_MinZoom()));
+                Utility::CPLCreateXMLAttributeAndValue(psCustom, "MaxZoom",
+                                                       CPLString().Printf("%d", cp->get_MaxZoom()));
+                Utility::CPLCreateXMLAttributeAndValue(psCustom, "Copyright", cp->get_Copyright());
+                CPLAddXMLChild(psProviders, psCustom);
+            }
+        }
+        CPLAddXMLChild(psTree, psProviders);
+    }
+    return psTree;
 }
 
 // ********************************************************
@@ -691,39 +705,39 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 // ********************************************************
 STDMETHODIMP CTiles::Deserialize(BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    USES_CONVERSION;
 
-	CString s = OLE2CA(newVal);
-	CPLXMLNode* node = CPLParseXMLString(s.GetString());
-	if (node)
-	{
-		CPLXMLNode* nodeTiles = CPLGetXMLNode(node, "=TilesClass");
-		if (nodeTiles)
-		{
-			DeserializeCore(nodeTiles);
-		}
-		CPLDestroyXMLNode(node);
-	}
-	return S_OK;
+    CString s = OLE2CA(newVal);
+    CPLXMLNode* node = CPLParseXMLString(s.GetString());
+    if (node)
+    {
+        CPLXMLNode* nodeTiles = CPLGetXMLNode(node, "=TilesClass");
+        if (nodeTiles)
+        {
+            DeserializeCore(nodeTiles);
+        }
+        CPLDestroyXMLNode(node);
+    }
+    return S_OK;
 }
 
-void setBoolean(CPLXMLNode *node, CString name, bool& value)
+void setBoolean(CPLXMLNode* node, const CString& name, bool& value)
 {
-	CString s = CPLGetXMLValue( node, name, NULL );
-	if (s != "") value = atoi( s ) == 0? false : true;
+    const CString s = CPLGetXMLValue(node, name, nullptr);
+    if (s != "") value = atoi(s) == 0 ? false : true;
 }
 
-void setInteger(CPLXMLNode *node, CString name, int& value)
+void setInteger(CPLXMLNode* node, const CString& name, int& value)
 {
-	CString s = CPLGetXMLValue( node, name, NULL );
-	if (s != "") value = atoi( s );
+    const CString s = CPLGetXMLValue(node, name, nullptr);
+    if (s != "") value = atoi(s);
 }
 
-void setDouble(CPLXMLNode *node, CString name, double& value)
+void setDouble(CPLXMLNode* node, const CString& name, double& value)
 {
-	CString s = CPLGetXMLValue( node, name, NULL );
-	if (s != "") value = Utility::atof_custom( s );
+    const CString s = CPLGetXMLValue(node, name, nullptr);
+    if (s != "") value = Utility::atof_custom(s);
 }
 
 // ********************************************************
@@ -731,95 +745,101 @@ void setDouble(CPLXMLNode *node, CString name, double& value)
 // ********************************************************
 bool CTiles::DeserializeCore(CPLXMLNode* node)
 {
-	if (!node)
-		return false;
+    if (!node)
+        return false;
 
-	SetDefaults();
+    SetDefaults();
 
-	setBoolean(node, "Visible", _visible);
+    setBoolean(node, "Visible", _visible);
 
-	bool temp;
-	setBoolean(node, "GridLinesVisible", temp);
-	_manager.set_GridLinesVisible(temp);
-	
-	setBoolean(node, "DoRamCaching", temp);
-	_manager.get_RamCache()->doCaching = temp;
+    bool temp;
+    setBoolean(node, "GridLinesVisible", temp);
+    _manager.set_GridLinesVisible(temp);
 
-	setBoolean(node, "DoDiskCaching", temp);
-	_manager.get_DiskCache()->doCaching = temp;
+    setBoolean(node, "DoRamCaching", temp);
+    _manager.get_RamCache()->doCaching = temp;
 
-	setBoolean(node, "UseRamCache", temp);
-	_manager.get_RamCache()->useCache = temp;
+    setBoolean(node, "DoDiskCaching", temp);
+    _manager.get_DiskCache()->doCaching = temp;
 
-	setBoolean(node, "UseDiskCache", temp);
-	_manager.get_DiskCache()->useCache = temp;
+    setBoolean(node, "UseRamCache", temp);
+    _manager.get_RamCache()->useCache = temp;
 
-	setBoolean(node, "UseServer", temp);
-	_manager.useServer(temp);
+    setBoolean(node, "UseDiskCache", temp);
+    _manager.get_DiskCache()->useCache = temp;
 
-	CString s = CPLGetXMLValue( node, "Provider", NULL );
-	if (s != "") this->put_ProviderId(atoi( s ));
+    setBoolean(node, "UseServer", temp);
+    _manager.useServer(temp);
 
-	double dbl;
-	setDouble(node, "MaxRamCacheSize", dbl);
-	_manager.get_RamCache()->cache->set_MaxSize(dbl);
+    CString s = CPLGetXMLValue(node, "Provider", nullptr);
+    if (s != "") this->put_ProviderId(atoi(s));
 
-	setDouble(node, "MaxDiskCacheSize", dbl);
-	_manager.get_DiskCache()->cache->set_MaxSize(dbl);
+    double dbl;
+    setDouble(node, "MaxRamCacheSize", dbl);
+    _manager.get_RamCache()->cache->set_MaxSize(dbl);
 
-	setInteger(node, "MinScaleToCache", _minScaleToCache);
-	setInteger(node, "MaxScaleToCache", _maxScaleToCache);
-	
-	USES_CONVERSION;
-	s = CPLGetXMLValue( node, "DiskCacheFilename", NULL );
-	if (s != "")  {
-		_manager.get_DiskCache()->cache->set_Filename(Utility::ConvertFromUtf8(s));
-	}
+    setDouble(node, "MaxDiskCacheSize", dbl);
+    _manager.get_DiskCache()->cache->set_MaxSize(dbl);
 
-	// custom providers
-	CPLXMLNode* nodeProviders = CPLGetXMLNode(node, "TileProviders");
-	if (nodeProviders)
-	{
-		// don't clear providers as it will clear the cache as well,
-		// if provider with certain id exists, it simply won't be added twice
-		vector<BaseProvider*>* providers = ((CTileProviders*)_providers)->GetList();
+    setInteger(node, "MinScaleToCache", _minScaleToCache);
+    setInteger(node, "MaxScaleToCache", _maxScaleToCache);
 
-		CPLXMLNode* nodeProvider = nodeProviders->psChild;
-		while (nodeProvider)
-		{
-			if (strcmp(nodeProvider->pszValue, "TileProvider") == 0)
-			{
-				int id, minZoom, maxZoom, projection;
-				CString url, name;
-				
-				s = CPLGetXMLValue( nodeProvider, "Id", NULL );
-				if (s != "") id = atoi(s);
+    USES_CONVERSION;
+    s = CPLGetXMLValue(node, "DiskCacheFilename", nullptr);
+    if (s != "")
+    {
+        _manager.get_DiskCache()->cache->set_Filename(Utility::ConvertFromUtf8(s));
+    }
 
-				s = CPLGetXMLValue( nodeProvider, "MinZoom", NULL );
-				if (s != "") minZoom = atoi(s);
+    // custom providers
+    CPLXMLNode* nodeProviders = CPLGetXMLNode(node, "TileProviders");
+    if (nodeProviders)
+    {
+        // don't clear providers as it will clear the cache as well,
+        // if provider with certain id exists, it simply won't be added twice
+        // Not used: vector<BaseProvider*>* providers = ((CTileProviders*)_providers)->GetList();
 
-				s = CPLGetXMLValue( nodeProvider, "MaxZoom", NULL );
-				if (s != "") maxZoom = atoi(s);
+        CPLXMLNode* nodeProvider = nodeProviders->psChild;
+        while (nodeProvider)
+        {
+            if (strcmp(nodeProvider->pszValue, "TileProvider") == 0)
+            {
+                int id = 0, minZoom = 0, maxZoom = 0, projection = 0;
+                CString url, name, copyright;
 
-				s = CPLGetXMLValue( nodeProvider, "Projection", NULL );
-				if (s != "") projection = atoi(s);
+                s = CPLGetXMLValue(nodeProvider, "Id", nullptr);
+                if (s != "") id = atoi(s);
 
-				s = CPLGetXMLValue( nodeProvider, "Url", NULL );
-				if (s != "") url = s;
+                s = CPLGetXMLValue(nodeProvider, "MinZoom", nullptr);
+                if (s != "") minZoom = atoi(s);
 
-				s = CPLGetXMLValue( nodeProvider, "Name", NULL );
-				if (s != "") name = s;
+                s = CPLGetXMLValue(nodeProvider, "MaxZoom", nullptr);
+                if (s != "") maxZoom = atoi(s);
 
-				VARIANT_BOOL vb;
-				CComBSTR bstrName(name);
-				CComBSTR bstrUrl(url);
+                s = CPLGetXMLValue(nodeProvider, "Projection", nullptr);
+                if (s != "") projection = atoi(s);
 
-				_providers->Add(id, bstrName, bstrUrl, (tkTileProjection)projection, minZoom, maxZoom, &vb);
-			}
-			nodeProvider = nodeProvider->psNext;
-		}
-	}
-	return true;
+                s = CPLGetXMLValue(nodeProvider, "Url", nullptr);
+                if (s != "") url = s;
+
+                s = CPLGetXMLValue(nodeProvider, "Name", nullptr);
+                if (s != "") name = s;
+
+                s = CPLGetXMLValue(nodeProvider, "Copyright", nullptr);
+                if (s != "") copyright = s;
+
+                VARIANT_BOOL vb;
+                CComBSTR bstrName(name);
+                CComBSTR bstrUrl(url);
+                CComBSTR bstrCopyright(copyright);
+
+                _providers->Add(id, bstrName, bstrUrl, (tkTileProjection)projection, minZoom, maxZoom, bstrCopyright,
+                                &vb);
+            }
+            nodeProvider = nodeProvider->psNext;
+        }
+    }
+    return true;
 }
 
 // *********************************************************
@@ -827,38 +847,38 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 // *********************************************************
 STDMETHODIMP CTiles::get_ProviderId(int* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (!_visible)
-	{
-		*retVal = -1;
-		return S_OK;
-	}
+    if (!_visible)
+    {
+        *retVal = -1;
+        return S_OK;
+    }
 
-	*retVal = _provider->Id;
-	return S_OK;
+    *retVal = _provider->Id;
+    return S_OK;
 }
 
 STDMETHODIMP CTiles::put_ProviderId(int providerId)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	bool visibleOld = _visible;
-	put_Visible(providerId == -1 ? VARIANT_FALSE : VARIANT_TRUE);
+    const bool visibleOld = _visible;
+    put_Visible(providerId == -1 ? VARIANT_FALSE : VARIANT_TRUE);
 
-	BaseProvider* provider = get_Provider(providerId);
+    BaseProvider* provider = get_Provider(providerId);
 
-	if (_provider != provider || visibleOld != _visible)
-	{
-		_reloadNeeded = true;
-	}
+    if (_provider != provider || visibleOld != _visible)
+    {
+        _reloadNeeded = true;
+    }
 
-	if (provider)
-	{
-		_provider = provider;
-	}
+    if (provider)
+    {
+        _provider = provider;
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
@@ -866,133 +886,137 @@ STDMETHODIMP CTiles::put_ProviderId(int providerId)
 // *********************************************************
 STDMETHODIMP CTiles::GetTilesIndices(IExtents* boundsDegrees, int zoom, int providerId, IExtents** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = NULL;
+    *retVal = nullptr;
 
-	if (!boundsDegrees)
-	{
-		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_OK;
-	}
-	
-	double xMin, xMax, yMin, yMax, zMin, zMax;
-	boundsDegrees->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-	
-	BaseProvider* provider = get_Provider(providerId);
-	if (provider)
-	{
-		CPoint p1;
-		provider->get_Projection()->FromLatLngToXY(PointLatLng(yMax, xMin), zoom, p1);
+    if (!boundsDegrees)
+    {
+        ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+        return S_OK;
+    }
 
-		CPoint p2;
-		provider->get_Projection()->FromLatLngToXY(PointLatLng(yMin, xMax), zoom, p2);
+    double xMin, xMax, yMin, yMax, zMin, zMax;
+    boundsDegrees->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 
-		IExtents* ext = NULL;
-		ComHelper::CreateExtents(&ext);
-		ext->SetBounds(p1.x, p1.y, 0.0, p2.x, p2.y, 0.0);
-		*retVal = ext;
-	}
+    BaseProvider* provider = get_Provider(providerId);
+    if (provider)
+    {
+        CPoint p1;
+        provider->get_Projection()->FromLatLngToXY(PointLatLng(yMax, xMin), zoom, p1);
 
-	return S_OK;
+        CPoint p2;
+        provider->get_Projection()->FromLatLngToXY(PointLatLng(yMin, xMax), zoom, p2);
+
+        IExtents* ext = nullptr;
+        ComHelper::CreateExtents(&ext);
+        ext->SetBounds(p1.x, p1.y, 0.0, p2.x, p2.y, 0.0);
+        *retVal = ext;
+    }
+
+    return S_OK;
 }
 
 // *********************************************************
 //	     Prefetch
 // *********************************************************
-STDMETHODIMP CTiles::Prefetch(double minLat, double maxLat, double minLng, double maxLng, int zoom, int providerId, 
-							  IStopExecution* stop, LONG* retVal)
+STDMETHODIMP CTiles::Prefetch(double minLat, double maxLat, double minLng, double maxLng, int zoom, int providerId,
+                              IStopExecution* stop, LONG* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = -1;	
+    *retVal = -1;
 
-	BaseProvider* p = get_Provider(providerId);
-	if (!p)
-	{
-		ErrorMessage(tkINVALID_PROVIDER_ID);
-		return S_OK;
-	}
-	
-	CRect indices;
-	Extent ext(minLng, maxLng, minLat, maxLat);
-	p->get_Projection()->getTileRectXY(ext, zoom, indices);
+    BaseProvider* p = get_Provider(providerId);
+    if (!p)
+    {
+        ErrorMessage(tkINVALID_PROVIDER_ID);
+        return S_OK;
+    }
 
-	Prefetch2(indices.left, indices.right, indices.bottom, indices.top, zoom, providerId, stop, retVal);
+    CRect indices;
+    const Extent ext(minLng, maxLng, minLat, maxLat);
+    p->get_Projection()->getTileRectXY(ext, zoom, indices);
 
-	return S_OK;
+    Prefetch2(indices.left, indices.right, indices.bottom, indices.top, zoom, providerId, stop, retVal);
+
+    return S_OK;
 }
 
 // *********************************************************
 //	     Prefetch2
 // *********************************************************
-STDMETHODIMP CTiles::Prefetch2(int minX, int maxX, int minY, int maxY, int zoom, int providerId, IStopExecution* stop, LONG* retVal)
+STDMETHODIMP CTiles::Prefetch2(int minX, int maxX, int minY, int maxY, int zoom, int providerId, IStopExecution* stop,
+                               LONG* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = -1;
+    *retVal = -1;
 
-	BaseProvider* provider = get_Provider(providerId);
-	if (!provider)
-	{
-		ErrorMessage(tkINVALID_PROVIDER_ID);
-		return S_OK;
-	}
+    BaseProvider* provider = get_Provider(providerId);
+    if (!provider)
+    {
+        ErrorMessage(tkINVALID_PROVIDER_ID);
+        return S_OK;
+    }
 
-	PrefetchManager* manager = PrefetchManagerFactory::Create(TileCacheManager::get_Cache(tctSqliteCache));
-	if (manager)
-	{
-		USES_CONVERSION;
-		CRect rect(minX, minY, maxX, maxY);
-		*retVal = manager->Prefetch(provider, rect, zoom, _globalCallback, stop);
-	}
+    PrefetchManager* manager = PrefetchManagerFactory::Create(TileCacheManager::get_Cache(tctSqliteCache));
+    if (manager)
+    {
+        USES_CONVERSION;
+        const CRect rect(minX, minY, maxX, maxY);
+        *retVal = manager->Prefetch(provider, rect, zoom, _globalCallback, stop);
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
 // *********************************************************
 //	     PrefetchToFolder()
 // *********************************************************
 // Writes tiles to the specified folder
-STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal)
+STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt,
+                                      IStopExecution* stop, LONG* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	BaseProvider* provider = get_Provider(providerId);
-	if (!provider)
-	{
-		ErrorMessage(tkINVALID_PROVIDER_ID);
-		*retVal = -1;
-		return S_OK;
-	}
+    BaseProvider* provider = get_Provider(providerId);
+    if (!provider)
+    {
+        ErrorMessage(tkINVALID_PROVIDER_ID);
+        *retVal = -1;
+        return S_OK;
+    }
 
-	USES_CONVERSION;
-	CStringW path = OLE2W(savePath);
-	if (path.GetLength() > 0 && path.GetAt(path.GetLength() - 1) != L'\\')
-	{
-		path += L"\\";
-	}
+    LogBulkDownloadStarted(ext, zoom, provider, savePath, fileExt);
 
-	if (!Utility::DirExists(path))
-	{
-		CallbackHelper::ErrorMsg("PrefetchManager", NULL, "", "Folder doesn't exist: ", W2A(path));
-		return -1;
-	}
+    USES_CONVERSION;
+    CStringW path = OLE2W(savePath);
+    if (path.GetLength() > 0 && path.GetAt(path.GetLength() - 1) != L'\\')
+    {
+        path += L"\\";
+    }
 
-	DiskCache* cache = new DiskCache(path, fileExt);
+    if (!Utility::DirExists(path))
+    {
+        CallbackHelper::ErrorMsg("PrefetchManager", nullptr, "", "Folder doesn't exist: ", W2A(path));
+        return -1;
+    }
 
-	PrefetchManager* manager = PrefetchManagerFactory::Create(cache);
-	if (manager) 
-	{
-		CRect indices;
-		Extent extents(ext);
-		provider->get_Projection()->getTileRectXY(extents, zoom, indices);
+    DiskCache* cache = new DiskCache(path, fileExt);
 
-		USES_CONVERSION;
-		*retVal = manager->Prefetch(provider, indices, zoom, _globalCallback, stop);
-	}
+    PrefetchManager* manager = PrefetchManagerFactory::Create(cache);
+    if (manager)
+    {
+        CRect indices;
+        const Extent extents(ext);
+        provider->get_Projection()->getTileRectXY(extents, zoom, indices);
 
-	return S_OK;
+        USES_CONVERSION;
+        *retVal = manager->Prefetch(provider, indices, zoom, _globalCallback, stop);
+    }
+
+    return S_OK;
 }
 
 // *********************************************************
@@ -1000,14 +1024,15 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 // *********************************************************
 STDMETHODIMP CTiles::get_DiskCacheCount(int providerId, int zoom, int xMin, int xMax, int yMin, int yMax, LONG* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ITileCache* cache = TileCacheManager::get_Cache(tctSqliteCache);
-	if (cache) {
-		cache->get_TileCount(providerId, zoom, CRect(xMin, yMax, xMax, yMin));
-	}
-	
-	return S_OK;
+    ITileCache* cache = TileCacheManager::get_Cache(tctSqliteCache);
+    if (cache)
+    {
+        cache->get_TileCount(providerId, zoom, CRect(xMin, yMax, xMax, yMin));
+    }
+
+    return S_OK;
 }
 
 // *********************************************************
@@ -1015,16 +1040,17 @@ STDMETHODIMP CTiles::get_DiskCacheCount(int providerId, int zoom, int xMin, int 
 // *********************************************************
 STDMETHODIMP CTiles::CheckConnection(BSTR url, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (_provider != NULL)
-	{
-		USES_CONVERSION;
-		*retVal = SecureHttpClient::CheckConnection(OLE2A(url)) ? VARIANT_TRUE : VARIANT_FALSE;
-	}
-	else {
-		*retVal = VARIANT_FALSE;
-	}
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    if (_provider != nullptr)
+    {
+        USES_CONVERSION;
+        *retVal = SecureHttpClient::CheckConnection(OLE2A(url)) ? VARIANT_TRUE : VARIANT_FALSE;
+    }
+    else
+    {
+        *retVal = VARIANT_FALSE;
+    }
+    return S_OK;
 }
 
 // *********************************************************
@@ -1032,41 +1058,41 @@ STDMETHODIMP CTiles::CheckConnection(BSTR url, VARIANT_BOOL* retVal)
 // *********************************************************
 STDMETHODIMP CTiles::GetTileBounds(int providerId, int zoom, int tileX, int tileY, IExtents** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = VARIANT_FALSE;
+    *retVal = VARIANT_FALSE;
 
-	BaseProvider* provider = get_Provider(providerId);
-	if (!provider)
-	{
-		ErrorMessage(tkINVALID_PROVIDER_ID);
-		return S_OK;
-	}
-	
-	CSize size;
-	provider->get_Projection()->GetTileMatrixSizeXY(zoom, size);
+    BaseProvider* provider = get_Provider(providerId);
+    if (!provider)
+    {
+        ErrorMessage(tkINVALID_PROVIDER_ID);
+        return S_OK;
+    }
 
-	if (tileX < 0 || tileX > size.cx - 1 || tileY < 0 || tileY > size.cy - 1)
-	{
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_OK;
-	}
-	
-	CPoint pnt1(tileX, tileY);
-	CPoint pnt2(tileX + 1, tileY + 1);
-	PointLatLng p1, p2;
+    CSize size;
+    provider->get_Projection()->GetTileMatrixSizeXY(zoom, size);
 
-	provider->get_Projection()->FromXYToLatLng(pnt1, zoom, p1);
-	provider->get_Projection()->FromXYToLatLng(pnt2, zoom, p2);
+    if (tileX < 0 || tileX > size.cx - 1 || tileY < 0 || tileY > size.cy - 1)
+    {
+        ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+        return S_OK;
+    }
 
-	IExtents* ext = NULL;
-	ComHelper::CreateExtents(&ext);
+    const CPoint pnt1(tileX, tileY);
+    const CPoint pnt2(tileX + 1, tileY + 1);
+    PointLatLng p1, p2;
 
-	ext->SetBounds(p1.Lng, p1.Lat, 0.0, p2.Lng, p2.Lat, 0.0);
+    provider->get_Projection()->FromXYToLatLng(pnt1, zoom, p1);
+    provider->get_Projection()->FromXYToLatLng(pnt2, zoom, p2);
 
-	*retVal = ext;
-	
-	return S_OK;
+    IExtents* ext = nullptr;
+    ComHelper::CreateExtents(&ext);
+
+    ext->SetBounds(p1.Lng, p1.Lat, 0.0, p2.Lng, p2.Lat, 0.0);
+
+    *retVal = ext;
+
+    return S_OK;
 }
 
 // ************************************************************
@@ -1074,9 +1100,9 @@ STDMETHODIMP CTiles::GetTileBounds(int providerId, int zoom, int tileX, int tile
 // ************************************************************
 STDMETHODIMP CTiles::get_MaxZoom(int* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _provider->get_MaxZoom();
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *retVal = _provider->get_MaxZoom();
+    return S_OK;
 }
 
 // ************************************************************
@@ -1084,9 +1110,9 @@ STDMETHODIMP CTiles::get_MaxZoom(int* retVal)
 // ************************************************************
 STDMETHODIMP CTiles::get_MinZoom(int* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _provider->get_MinZoom();
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *retVal = _provider->get_MinZoom();
+    return S_OK;
 }
 
 // ************************************************************
@@ -1094,21 +1120,22 @@ STDMETHODIMP CTiles::get_MinZoom(int* retVal)
 // ************************************************************
 STDMETHODIMP CTiles::get_ServerProjection(IGeoProjection** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal= NULL;
+    *retVal = nullptr;
 
-	BaseProjection* p = _provider->get_Projection();
-	if (p) 
-	{
-		*retVal = p->get_ServerProjection();
+    BaseProjection* p = _provider->get_Projection();
+    if (p)
+    {
+        *retVal = p->get_ServerProjection();
 
-		if (*retVal) {
-			(*retVal)->AddRef();
-		}
-	}
+        if (*retVal)
+        {
+            (*retVal)->AddRef();
+        }
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
 // ************************************************************
@@ -1116,39 +1143,41 @@ STDMETHODIMP CTiles::get_ServerProjection(IGeoProjection** retVal)
 // ************************************************************
 STDMETHODIMP CTiles::get_ProjectionStatus(tkTilesProjectionStatus* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = tkTilesProjectionStatus::tpsEmptyOrInvalid;
+    *retVal = tkTilesProjectionStatus::tpsEmptyOrInvalid;
 
-	IMapViewCallback* map = _manager.get_MapCallback();
-	if (!map) {
-		return S_OK;
-	}
+    IMapViewCallback* map = _manager.get_MapCallback();
+    if (!map)
+    {
+        return S_OK;
+    }
 
-	IGeoProjection* gp = map->_GetMapProjection();
+    IGeoProjection* gp = map->_GetMapProjection();
 
-	IGeoProjection* gpServer = _provider->get_Projection()->get_ServerProjection();
+    IGeoProjection* gpServer = _provider->get_Projection()->get_ServerProjection();
 
-	if (gp && gpServer)
-	{
-		VARIANT_BOOL vb;
-		gp->get_IsSame(gpServer, &vb);
+    if (gp && gpServer)
+    {
+        VARIANT_BOOL vb;
+        gp->get_IsSame(gpServer, &vb);
 
-		if (vb) {
-			*retVal = tkTilesProjectionStatus::tpsNative;
-		}
-		else
-		{
-			gpServer->StartTransform(gp, &vb);
-			if (vb)
-			{
-				*retVal = tkTilesProjectionStatus::tpsCompatible;
-				gpServer->StopTransform();
-			}
-		}
-	}
+        if (vb)
+        {
+            *retVal = tkTilesProjectionStatus::tpsNative;
+        }
+        else
+        {
+            gpServer->StartTransform(gp, &vb);
+            if (vb)
+            {
+                *retVal = tkTilesProjectionStatus::tpsCompatible;
+                gpServer->StopTransform();
+            }
+        }
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
 // ************************************************************
@@ -1156,15 +1185,16 @@ STDMETHODIMP CTiles::get_ProjectionStatus(tkTilesProjectionStatus* retVal)
 // ************************************************************
 STDMETHODIMP CTiles::get_ProxyAuthenticationScheme(tkProxyAuthentication* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal  = m_globalSettings.proxyAuthentication;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *pVal = m_globalSettings.proxyAuthentication;
+    return S_OK;
 }
+
 STDMETHODIMP CTiles::put_ProxyAuthenticationScheme(tkProxyAuthentication newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.proxyAuthentication = newVal;
-	return S_OK;
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    m_globalSettings.proxyAuthentication = newVal;
+    return S_OK;
 }
 
 // ************************************************************
@@ -1172,10 +1202,30 @@ STDMETHODIMP CTiles::put_ProxyAuthenticationScheme(tkProxyAuthentication newVal)
 // ************************************************************
 STDMETHODIMP CTiles::get_ProjectionIsSphericalMercator(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = _provider->get_Projection()->IsSphericalMercator() ? VARIANT_TRUE : VARIANT_FALSE;
-	
-	return S_OK;
+    *pVal = _provider->get_Projection()->IsSphericalMercator() ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
 }
 
+// *********************************************************
+//	     LogBulkDownloadStarted
+// *********************************************************
+void CTiles::LogBulkDownloadStarted(IExtents* ext, const int zoom, BaseProvider* provider, BSTR savePath, BSTR fileExt)
+{
+    if (tilesLogger.IsOpened())
+    {
+        CComBSTR extentString;
+        ext->ToDebugString(&extentString);
+
+        tilesLogger.out() << "\n";
+        tilesLogger.out() << "Start PrefetchToFolder:\n";
+        tilesLogger.out() << "Extent " << CString(extentString) << endl;
+        tilesLogger.out() << "Zoom " << zoom << endl;
+        tilesLogger.out() << "Provider " << provider->Name << endl;
+        tilesLogger.out() << "SavePath " << CString(savePath) << endl;
+        tilesLogger.out() << "FileExt " << CString(fileExt) << endl;
+        tilesLogger.out() << "---------------------" << endl;
+    }
+}

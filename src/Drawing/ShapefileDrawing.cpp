@@ -226,7 +226,7 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	//	 Analyzing visibility expression
 	// --------------------------------------------------------------
 	std::vector<long> arr;
-	CString err;
+	CStringW err;
 	bool useAll = true;
 	
 	CComBSTR expr;
@@ -238,7 +238,7 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 		_shapefile->get_Table(&tbl);
 
 		USES_CONVERSION;
-		if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), arr, err))
+		if (TableHelper::Cast(tbl)->QueryCore(OLE2CW(expr), arr, err))
 		{
 			useAll = false;
 		}
@@ -1246,19 +1246,19 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 				}
 				else if ( options->drawingMode == vdmGDIMixed )
 				{
-					//m_hdc = _graphics->GetHDC();
+					m_hdc = _graphics->GetHDC();
 					_dc->EndPath();
 					_dc->StrokePath();
-					//_graphics->ReleaseHDC(m_hdc);
+					_graphics->ReleaseHDC(m_hdc);
 				}
 			}
 		}
 		
 		if (drawingMode == vdmGDIMixed)
 		{
-			//m_hdc = _graphics->GetHDC();
+			m_hdc = _graphics->GetHDC();
 			options->ReleaseGdiBrushAndPen(_dc);
-			//_graphics->ReleaseHDC(m_hdc);
+			_graphics->ReleaseHDC(m_hdc);
 			_dc = NULL;
 		}
 

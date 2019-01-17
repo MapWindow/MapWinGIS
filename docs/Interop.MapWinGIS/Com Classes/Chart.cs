@@ -3,7 +3,6 @@ namespace MapWinGIS
 {
 #endif
     using System;
-    
     /// <summary>
     /// Represents a single chart on the map.
     /// </summary>
@@ -59,7 +58,7 @@ namespace MapWinGIS
     /// \new48 Added in version 4.8
     #if nsp
          #if upd    
-            public class Chart : MapWinGIS.IChart
+            public class Chart : IChart
         #else        
             public class IChart        
         #endif
@@ -107,8 +106,18 @@ namespace MapWinGIS
         /// <remarks>This property will return NULL in case Chart.IsDrawn returns false.</remarks>
         public Extents ScreenExtents
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
+
+
+
+//        public Extents ScreenExtents
+//        {
+//            get { throw new NotImplementedException(); }
+//        }
 
         /// <summary>
         /// Gets or sets the value which indicates whether the chart should be drawn on the map.

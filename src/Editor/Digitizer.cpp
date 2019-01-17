@@ -32,11 +32,6 @@ bool Digitizer::OnMouseDown(CShapeEditor* editor, double projX, double projY, bo
 {
 	if (!editor) return false;
 
-	// an attempt to finish shape
-	if (ctrl) {
-		return editor->TryStop();
-	}
-
 	// add another point
 	editor->HandleProjPointAdd(projX, projY);
 	editor->SetRedrawNeeded(rtShapeEditor);
@@ -46,6 +41,11 @@ bool Digitizer::OnMouseDown(CShapeEditor* editor, double projX, double projY, bo
 	{
 		return editor->TryStop();
 	}
+    else if (ctrl)
+    {
+        // if an attempt to finish a multipoint shape
+        return editor->TryStop();
+    }
 
 	return true;
 }

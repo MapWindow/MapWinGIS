@@ -17,19 +17,21 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- #pragma once
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#pragma once
 #include "ITileCache.h"
 #include <afxmt.h>
 
 class TileCacheManager
 {
 private:
-	static ITileCache* _ramCache;	
-	static ITileCache* _diskCache;
-	static ITileCache* _sqlLiteCache;
-	static ::CCriticalSection _lock;
+    static ITileCache* _ramCache;
+    static ITileCache* _diskCache;
+    static ITileCache* _sqlLiteCache;
+    static CCriticalSection _lock;
 
 public:
-	static ITileCache* get_Cache(CacheType type);
-	static void CloseAll();
+    static ITileCache* get_Cache(CacheType type);
+    static void CloseAll();
 };

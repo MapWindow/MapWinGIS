@@ -17,8 +17,9 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "TileCore.h"
 
 Debug::Logger tilesLogger;
@@ -27,11 +28,11 @@ Debug::Logger tilesLogger;
 //    TileCore
 // ******************************************************
 // gets relative path of tile disk storage
-CStringW TileCore::get_Path(CStringW root, CStringW ext)
+CStringW TileCore::GetPath(const CStringW root, const CStringW ext) const
 {
-	CStringW path;
-	path.Format(L"%s%d\\%d\\%d%s", root, this->_scale, this->_tileX, this->_tileY, ext);
-	return path;
+    CStringW path;
+    path.Format(L"%s%d\\%d\\%d%s", root, this->_scale, this->_tileX, this->_tileY, ext);
+    return path;
 }
 
 // ******************************************************
@@ -39,11 +40,11 @@ CStringW TileCore::get_Path(CStringW root, CStringW ext)
 // ******************************************************
 void TileCore::ClearOverlays()
 {
-	for (size_t i = 0; i < Overlays.size(); i++)
-	{
-		delete Overlays[i];
-	}
-	Overlays.clear();
+    for (size_t i = 0; i < Overlays.size(); i++)
+    {
+        delete Overlays[i];
+    }
+    Overlays.clear();
 }
 
 // ******************************************************
@@ -52,12 +53,12 @@ void TileCore::ClearOverlays()
 // returns combined size of bitmaps for all overlays
 int TileCore::get_ByteSize()
 {
-	int size = 0;
-	for (size_t i = 0; i < Overlays.size(); i++)
-	{
-		size += Overlays[i]->get_Size();
-	}
-	return size;
+    int size = 0;
+    for (size_t i = 0; i < Overlays.size(); i++)
+    {
+        size += Overlays[i]->get_Size();
+    }
+    return size;
 }
 
 // ******************************************************
@@ -65,8 +66,8 @@ int TileCore::get_ByteSize()
 // ******************************************************
 long TileCore::AddRef()
 {
-	InterlockedIncrement(&_refCount);
-	return _refCount;
+    InterlockedIncrement(&_refCount);
+    return _refCount;
 }
 
 // ******************************************************
@@ -75,36 +76,34 @@ long TileCore::AddRef()
 // Attention: object is deleted automatically when reference count is equal to 0
 long TileCore::Release()
 {
-	InterlockedDecrement(&_refCount);
+    InterlockedDecrement(&_refCount);
 
-	if (_refCount < 0)
-		CallbackHelper::AssertionFailed("Invalid reference count for a tile.");
+    if (_refCount < 0)
+        CallbackHelper::AssertionFailed("Invalid reference count for a tile.");
 
-	if (this->_refCount == 0)
-	{
-		delete this;
-		return 0;
-	}
-	else {
-		return _refCount;
-	}
+    if (this->_refCount == 0)
+    {
+        delete this;
+        return 0;
+    }
+    return _refCount;
 }
 
 // ******************************************************
 //    operator==
 // ******************************************************
-bool TileCore::operator==(const TileCore &t2)
+bool TileCore::operator==(const TileCore& t2) const
 {
-	return (this->_tileX == t2._tileX &&
-		this->_tileY == t2._tileY &&
-		this->_scale == t2._scale &&
-		this->_providerId == t2._providerId);
+    return this->_tileX == t2._tileX &&
+        this->_tileY == t2._tileY &&
+        this->_scale == t2._scale &&
+        this->_providerId == t2._providerId;
 }
 
 // ******************************************************
 //    getBitmap
 // ******************************************************
 CMemoryBitmap* TileCore::get_Bitmap(int index)
-{ 
-	return (index >= 0 && index < (int)Overlays.size()) ? Overlays[index] : NULL; 
+{
+    return index >= 0 && index < (int)Overlays.size() ? Overlays[index] : nullptr;
 }

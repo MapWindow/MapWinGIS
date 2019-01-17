@@ -17,6 +17,7 @@
  **************************************************************************************
  * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #pragma once
 #include "BaseProvider.h"
@@ -27,47 +28,48 @@
 class GoogleBaseProvider : public BaseProvider
 {
 protected:
-	CString server;
-	CString UrlFormatServer;
-	CString UrlFormatRequest;
-	CString SecureWord;
-	CString Sec1;
+    CString server;
+    CString UrlFormatServer;
+    CString UrlFormatRequest;
+    CString SecureWord;
+    CString Sec1;
 public:
-	GoogleBaseProvider()
-	{
-		SecureWord = "Galileo";
-		Sec1 = "&s=";
-		server = "google.com";
-		_refererUrl.Format("http://maps.%s/", server);
-		_licenseUrl = "https://mapwingis.codeplex.com/wikipage?title=googletiles";
-		int year = Utility::GetCurrentYear();
-		_copyright.Format(L"©%d Google (FOR PRIVATE USE ONLY)", year);
-		this->_projection = new MercatorProjection();
-		this->_maxZoom = 20;
-	}
+    GoogleBaseProvider()
+    {
+        SecureWord = "Galileo";
+        Sec1 = "&s=";
+        server = "google.com";
+        _refererUrl.Format("http://maps.%s/", server);
+        _licenseUrl = "https://mapwingis.codeplex.com/wikipage?title=googletiles";
+        const int year = Utility::GetCurrentYear();
+        _copyright.Format(L"©%d Google (FOR PRIVATE USE ONLY)", year);
+        this->_projection = new MercatorProjection();
+        this->_maxZoom = 20;
+    }
 
-	CString MakeTileImageUrl(CPoint &pos, int zoom)
-	{
-		CString sec1 = "";
-		CString sec2 = "";
-		GetSecureWords(pos, sec1, sec2);
+    CString MakeTileImageUrl(CPoint& pos, int zoom)
+    {
+        CString sec1 = "";
+        CString sec2 = "";
+        GetSecureWords(pos, sec1, sec2);
 
-		CString s;
-		s.Format(_urlFormat, UrlFormatServer, GetServerNum(pos, 4), server, UrlFormatRequest, Version, LanguageStr, pos.x, sec1, pos.y, zoom, sec2);
-		return s;
-	}
+        CString s;
+        s.Format(_urlFormat, UrlFormatServer, GetServerNum(pos, 4), server, UrlFormatRequest, Version, LanguageStr,
+                 pos.x, sec1, pos.y, zoom, sec2);
+        return s;
+    }
 
-	void GetSecureWords(CPoint &pos, CString &sec1, CString &sec2)
-	{
-		sec1 = "";
-		sec2 = "";
-		int seclen = ((pos.x * 3) + pos.y) % 8;
-		sec2 = SecureWord.Left(seclen);
-		if (pos.y >= 10000 && pos.y < 100000)
-		{
-			sec1 = Sec1;
-		}
-	}
+    void GetSecureWords(CPoint& pos, CString& sec1, CString& sec2) const
+    {
+        sec1 = "";
+        sec2 = "";
+        const int seclen = (pos.x * 3 + pos.y) % 8;
+        sec2 = SecureWord.Left(seclen);
+        if (pos.y >= 10000 && pos.y < 100000)
+        {
+            sec1 = Sec1;
+        }
+    }
 };
 
 // *******************************************************
@@ -76,16 +78,16 @@ public:
 class GoogleMapProvider : public GoogleBaseProvider
 {
 public:
-	GoogleMapProvider()
-	{
-		UrlFormatServer = "mt";
-		UrlFormatRequest = "vt";
-		Version = "m@285000000";
-		Id = tkTileProvider::GoogleMaps;
-		Name = "GoogleMaps";
-		_urlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
-		_subProviders.push_back(this);
-	}
+    GoogleMapProvider()
+    {
+        UrlFormatServer = "mt";
+        UrlFormatRequest = "vt";
+        Version = "m@285000000";
+        Id = tkTileProvider::GoogleMaps;
+        Name = "GoogleMaps";
+        _urlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
+        _subProviders.push_back(this);
+    }
 };
 
 // *******************************************************
@@ -94,16 +96,16 @@ public:
 class GoogleSatelliteProvider : public GoogleBaseProvider
 {
 public:
-	GoogleSatelliteProvider()
-	{
-		UrlFormatServer = "khms";
-		UrlFormatRequest = "kh";
-		Version = "164";
-		Id = tkTileProvider::GoogleSatellite;
-		Name = "GoogleSatellite";
-		_urlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
-		_subProviders.push_back(this);
-	}
+    GoogleSatelliteProvider()
+    {
+        UrlFormatServer = "khms";
+        UrlFormatRequest = "kh";
+        Version = "164";
+        Id = tkTileProvider::GoogleSatellite;
+        Name = "GoogleSatellite";
+        _urlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
+        _subProviders.push_back(this);
+    }
 };
 
 // *******************************************************
@@ -112,17 +114,17 @@ public:
 class GoogleHybridProvider : public GoogleBaseProvider
 {
 public:
-	GoogleHybridProvider(CTileProviders* list)
-	{
-		UrlFormatServer = "mt";
-		UrlFormatRequest = "vt";
-		Version = "h@285000000";
-		Id = tkTileProvider::GoogleHybrid;
-		Name = "GoogleHybrid";
-		_urlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
-		_subProviders.push_back(list->get_Provider(tkTileProvider::GoogleSatellite));
-		_subProviders.push_back(this);
-	}
+    GoogleHybridProvider(CTileProviders* list)
+    {
+        UrlFormatServer = "mt";
+        UrlFormatRequest = "vt";
+        Version = "h@285000000";
+        Id = tkTileProvider::GoogleHybrid;
+        Name = "GoogleHybrid";
+        _urlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
+        _subProviders.push_back(list->get_Provider(tkTileProvider::GoogleSatellite));
+        _subProviders.push_back(this);
+    }
 };
 
 // *******************************************************
@@ -131,14 +133,14 @@ public:
 class GoogleTerrainProvider : public GoogleBaseProvider
 {
 public:
-	GoogleTerrainProvider()
-	{
-		UrlFormatServer = "mt";
-		UrlFormatRequest = "vt";
-		Version = "t@164,r@285000000";
-		Id = tkTileProvider::GoogleTerrain;
-		Name = "GoogleTerrain";
-		_urlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
-		_subProviders.push_back(this);
-	}
+    GoogleTerrainProvider()
+    {
+        UrlFormatServer = "mt";
+        UrlFormatRequest = "vt";
+        Version = "t@164,r@285000000";
+        Id = tkTileProvider::GoogleTerrain;
+        Name = "GoogleTerrain";
+        _urlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
+        _subProviders.push_back(this);
+    }
 };

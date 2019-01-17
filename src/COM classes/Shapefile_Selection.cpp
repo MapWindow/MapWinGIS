@@ -27,6 +27,8 @@
 #include "SelectionHelper.h"
 #include "ExtentsHelper.h"
 #include "ShapefileHelper.h"
+#include "GeosConverter.h"
+#include "GeosHelper.h"
 
 #pragma region SelectShapes
 // ******************************************************************
@@ -78,6 +80,10 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 		b_maxX += halfTolerance;
 		b_maxY += halfTolerance;				
 	}
+
+    // build GEOSGeom for comparison
+    IShape* shpExt = NULL;
+    ComHelper::CreateShape(&shpExt);
 
     bool bPtSelection = b_minX == b_maxX && b_minY == b_maxY;
 	int local_numShapes = _shapeData.size();
@@ -145,7 +151,14 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	// --------------------------------------------------
 	if( b_minX == b_maxX && b_minY == b_maxY )
 	{
-		if( shpType2D == SHP_POLYGON )
+        VARIANT_BOOL ret;
+        shpExt->Create(ShpfileType::SHP_POINT, &ret);
+        long idx;
+        shpExt->AddPoint(b_minX, b_minY, &idx);
+        // convert input point to GEOS
+        GEOSGeom geosPoint = GeosConverter::ShapeToGeom(shpExt);
+
+        if( shpType2D == SHP_POLYGON )
 		{	
 			for(i=0;i<local_numShapes;i++)
 			{
@@ -162,18 +175,35 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 					shapeVal = i;
 				}
 
-				if( ShapefileHelper::PointInPolygon( this, shapeVal, b_minX, b_minY ) )
-				{	
-					selectResult.push_back( shapeVal );
-					continue;														
-				}
+                IShape* shape = _shapeData[shapeVal]->shape;
+                // convert querying shape to GEOS
+                GEOSGeom geosShape = GeosConverter::ShapeToGeom(shape);
+                // check for containment
+                if (GeosHelper::Contains(geosShape, geosPoint))
+                {
+                    selectResult.push_back(shapeVal);
+                    continue;
+                }
+                
 			}
 		}		
 	}
 	//	Rectangle selection
 	else
 	{	
-		for(i=0;i<local_numShapes;i++)
+        VARIANT_BOOL ret;
+        // set up polygon extent
+        shpExt->Create(ShpfileType::SHP_POLYGON, &ret);
+        long idx;
+        shpExt->AddPoint(b_minX, b_minY, &idx);
+        shpExt->AddPoint(b_minX, b_maxY, &idx);
+        shpExt->AddPoint(b_maxX, b_maxY, &idx);
+        shpExt->AddPoint(b_maxX, b_minY, &idx);
+        shpExt->AddPoint(b_minX, b_minY, &idx);
+        // convert extent to GEOS
+        GEOSGeom geosExtent = GeosConverter::ShapeToGeom(shpExt);
+        
+        for(i=0;i<local_numShapes;i++)
 		{	
 			if (useSpatialIndexResults) 
 			{
@@ -197,8 +227,9 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 			// TODO: Re-evaluate need for wasRendered test; it is not done for Polygon features...
 			//if (renderedOnly && !_shapeData[shapeVal]->wasRendered())
 			//	continue;
+            // NOTE: may be resolved now as a result of MWGIS-137, but should still evaluate
 			// ***********************************************************************************
-
+            
 			// bounds
 			if (this->QuickExtentsCore(shapeVal, &s_minX, &s_minY, &s_maxX, &s_maxY))
 			{
@@ -224,24 +255,32 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 
 			if( shpType2D == SHP_POLYLINE && SelectMode == INTERSECTION)
 			{
-				if( DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
-				{
-					if (SelectionHelper::PolylineIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
-						selectResult.push_back( shapeVal );
-				}		
+                // get current shape
+                IShape* shape = _shapeData[shapeVal]->shape;
+                // convert shape to GEOS
+                GEOSGeom geos = GeosConverter::ShapeToGeom(shape);
+                // see if shape intersects polygon extent
+                if (GeosHelper::Intersects(geosExtent, geos))
+                {
+                    selectResult.push_back(shapeVal);
+                }
+    //            if( DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
+				//{
+				//	if (SelectionHelper::PolylineIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
+				//		selectResult.push_back( shapeVal );
+				//}		
 			}
 			else if( shpType2D == SHP_POLYGON && SelectMode == INTERSECTION)
 			{		
-
-				if( DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts) )
-				{
-					if (SelectionHelper::PolygonIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance)) {
-						selectResult.push_back( shapeVal );
-					}
-					else if (ShapefileHelper::BoundsWithinPolygon(this, shapeVal, b_minX, b_maxX, b_minY, b_maxY)) {
-						selectResult.push_back(shapeVal);
-					}
-				}	
+                // get current shape
+                IShape* shape = _shapeData[shapeVal]->shape;
+                // convert shape to GEOS
+                GEOSGeom geos = GeosConverter::ShapeToGeom(shape);
+                // see if shape intersects polygon extent
+                if (GeosHelper::Intersects(geosExtent, geos))
+                {
+                    selectResult.push_back(shapeVal);
+                }
 			}
 			else if( shpType2D == SHP_MULTIPOINT && SelectMode == INTERSECTION)
 			{	

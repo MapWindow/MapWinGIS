@@ -1,8 +1,28 @@
-#include "stdafx.h"
+//********************************************************************************************************
+//File name: GeosConverter.cpp
+//Description: 
+//********************************************************************************************************
+//The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); 
+//you may not use this file except in compliance with the License. You may obtain a copy of the License at 
+//http://www.mozilla.org/MPL/ 
+//Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
+//limitations under the License. 
+//
+//The Original Code is MapWindow Open Source. 
+//
+//The Initial Developer of this version of the Original Code is Daniel P. Ames using portions created by 
+//Utah State University and the Idaho National Engineering and Environmental Lab that were released as 
+//public domain in March 2004.  
+//
+//Contributor(s): (Open source contributors should list themselves and their modifications here). 
+// -------------------------------------------------------------------------------------------------------
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#include "StdAfx.h"
 #include "GeosConverter.h"
 #include "GeosHelper.h"
 #include "OgrConverter.h"
-
 
 // *********************************************************************
 //		DoBuffer()
@@ -15,7 +35,7 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, GEOSGeometry* gsGeom
 	}
 	__except (1)
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -24,8 +44,8 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, GEOSGeometry* gsGeom
 // *********************************************************************
 bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM)
 {
-	bool substitute = false;
-	bool has25D = false;	
+    auto substitute = false;
+    auto has25D = false;	
 
 	if (!GeosHelper::IsValid(gsGeom))
 	{
@@ -36,7 +56,7 @@ bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool
 		// would be better to pass units explicitly
 		// Fixing MWGIS-59: Fixup makes new shape larger: 
 		// GEOSGeometry* gsNew = DoBuffer(m_globalSettings.GetInvalidShapeBufferDistance(umMeters) / 1000.0, 30, gsGeom);
-		GEOSGeometry* gsNew = DoBuffer(0, 30, gsGeom);
+	    const auto gsNew = DoBuffer(0, 30, gsGeom);
 		if (gsNew && GeosHelper::IsValid(gsNew))
 		{
 			gsGeom = gsNew;
@@ -44,17 +64,18 @@ bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool
 		}
 	}
 
-	bool result = false;
-	OGRGeometry* oGeom = GeosHelper::CreateFromGEOS(gsGeom);
+    auto result = false;
+    const auto oGeom = GeosHelper::CreateFromGEOS(gsGeom);
 	if (oGeom)
 	{
-		char* type = GeosHelper::GetGeometryType(gsGeom);
-		CString s = type;
+	    const auto type = GeosHelper::GetGeometryType(gsGeom);
+	    const CString s = type;
 		GeosHelper::Free(type);
 
-		OGRwkbGeometryType oForceType = wkbNone;
-		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing)
-			oForceType = wkbLinearRing;
+        // PM: It seems oForceType is never used:
+	    // auto oForceType = wkbNone;
+		// if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing)
+		// 	oForceType = wkbLinearRing;
 
 		result = OgrConverter::GeometryToShapes(oGeom, vShapes, isM, wkbNone, has25D);
 		OGRGeometryFactory::destroyGeometry(oGeom);
@@ -72,15 +93,14 @@ bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool
 //  Converts MapWinGis shape to GEOS geometry
 GEOSGeom GeosConverter::ShapeToGeom(IShape* shp)
 {
-	OGRGeometry* oGeom = OgrConverter::ShapeToGeometry(shp);
-	if (oGeom != NULL)
+    const auto oGeom = OgrConverter::ShapeToGeometry(shp);
+	if (oGeom != nullptr)
 	{
-		GEOSGeometry* result = GeosHelper::ExportToGeos(oGeom);
+	    const auto result = GeosHelper::ExportToGeos(oGeom);
 		OGRGeometryFactory::destroyGeometry(oGeom);
 		return result;
 	}
-	else
-		return NULL;
+    return nullptr;
 }
 
 // *****************************************************
@@ -90,10 +110,11 @@ GEOSGeom GeosConverter::ShapeToGeom(IShape* shp)
 GEOSGeometry* GeosConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance)
 {
 	const GEOSGeometry* gsRing = GeosHelper::GetExteriorRing(gsGeom);	// no memory is allocated there
-	GEOSGeom gsPoly = GeosHelper::TopologyPreserveSimplify(gsRing, tolerance);		// memory allocation
+    // ReSharper disable once CppLocalVariableMayBeConst
+    GEOSGeom gsPoly = GeosHelper::TopologyPreserveSimplify(gsRing, tolerance);		// memory allocation
 
 	if (!gsPoly)
-		return NULL;
+		return nullptr;
 
 	std::vector<GEOSGeom> holes;
 	for (int n = 0; n < GeosHelper::GetNumInteriorRings(gsGeom); n++)
@@ -105,7 +126,7 @@ GEOSGeometry* GeosConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double 
 			if (gsOut)
 			{
 				char* type = GeosHelper::GetGeometryType(gsOut);
-				CString s = type;
+			    const CString s = type;
 				GeosHelper::Free(type);
 				if (s == "LinearRing")
 					holes.push_back(gsOut);
@@ -113,14 +134,14 @@ GEOSGeometry* GeosConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double 
 		}
 	}
 
-	GEOSGeometry *gsNew = NULL;
-	if (holes.size() > 0)
+	GEOSGeometry *gsNew;
+	if (!holes.empty())
 	{
-		gsNew = GeosHelper::CreatePolygon(gsPoly, &(holes[0]), holes.size()); // memory allocation (should be released by caller)
+		gsNew = GeosHelper::CreatePolygon(gsPoly, &holes[0], holes.size()); // memory allocation (should be released by caller)
 	}
 	else
 	{
-		gsNew = GeosHelper::CreatePolygon(gsPoly, NULL, 0);
+		gsNew = GeosHelper::CreatePolygon(gsPoly, nullptr, 0);
 	}
 	return gsNew;
 }
@@ -132,7 +153,7 @@ void GeosConverter::NormalizeSplitResults(GEOSGeometry* result, GEOSGeometry* su
 {
 	if (!result) return;
 
-	int numGeoms = GeosHelper::GetNumGeometries(result);
+    const int numGeoms = GeosHelper::GetNumGeometries(result);
 	if (numGeoms > 1)
 	{
 		if (shpType == SHP_POLYGON)
@@ -152,7 +173,7 @@ void GeosConverter::NormalizeSplitResults(GEOSGeometry* result, GEOSGeometry* su
 				double polyArea;
 				GeosHelper::Area(polygon, &polyArea);
 
-				double areaRatio = intersectArea / polyArea;
+			    const double areaRatio = intersectArea / polyArea;
 				if (areaRatio > 0.99 && areaRatio < 1.01) {
 					GEOSGeometry* clone = GeosHelper::CloneGeometry(polygon);
 					if (clone) {
@@ -180,18 +201,18 @@ void GeosConverter::NormalizeSplitResults(GEOSGeometry* result, GEOSGeometry* su
 // Returns GEOS geometry which is result of the union operation for the geometries passed
 GEOSGeometry* GeosConverter::MergeGeometries(vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput /*= true*/, bool displayProgress /*= true*/)
 {
-	if (data.size() == 0)
-		return NULL;
+	if (data.empty())
+		return nullptr;
 
 	USES_CONVERSION;
-	GEOSGeometry* g1 = NULL;
-	GEOSGeometry* g2 = NULL;
+	GEOSGeometry* g1 = nullptr;
+	GEOSGeometry* g2 = nullptr;
 
 	bool stop = false;
 	int count = 0;	// number of union operation performed
 	long percent = 0;
 
-	int size = data.size();
+    const int size = data.size();
 	int depth = 0;
 
 	if (size == 1)
@@ -199,11 +220,8 @@ GEOSGeometry* GeosConverter::MergeGeometries(vector<GEOSGeometry*>& data, ICallb
 		// no need for calculation
 		if (deleteInput)
 			return data[0];	 // no need to clone; it will be exactly the same
-		else
-		{
-			GEOSGeometry* geomTemp = GeosHelper::CloneGeometry(data[0]);
-			return geomTemp;
-		}
+	    GEOSGeometry* geomTemp = GeosHelper::CloneGeometry(data[0]);
+	    return geomTemp;
 	}
 
 	while (!stop)
@@ -212,20 +230,20 @@ GEOSGeometry* GeosConverter::MergeGeometries(vector<GEOSGeometry*>& data, ICallb
 
 		for (int i = 0; i < size; i++)
 		{
-			if (data[i] != NULL)
+			if (data[i] != nullptr)
 			{
 				if (!g1)
 				{
 					g1 = data[i];
-					data[i] = NULL;
+					data[i] = nullptr;
 				}
 				else
 				{
 					g2 = data[i];
-					data[i] = NULL;
+					data[i] = nullptr;
 				}
 
-				if (g2 != NULL)
+				if (g2 != nullptr)
 				{
 					GEOSGeometry* geom = GeosHelper::Union(g1, g2);
 					data[i] = geom;		// placing the resulting geometry back for further processing
@@ -238,8 +256,8 @@ GEOSGeometry* GeosConverter::MergeGeometries(vector<GEOSGeometry*>& data, ICallb
 						GeosHelper::DestroyGeometry(g2);
 					}
 
-					g1 = NULL;
-					g2 = NULL;
+					g1 = nullptr;
+					g2 = nullptr;
 					count++;
 					stop = false;		// in case there is at least one union occurred, we shall run once more
 
@@ -248,7 +266,7 @@ GEOSGeometry* GeosConverter::MergeGeometries(vector<GEOSGeometry*>& data, ICallb
 				}
 
 				// it is the last geometry, unpaired one, not the only one, it's the initial and must not be deleted
-				if (i == size - 1 && stop == false && g2 == NULL && g1 != NULL && depth == 0 && !deleteInput)
+				if (i == size - 1 && !stop && g2 == nullptr && g1 != nullptr && depth == 0 && !deleteInput)
 				{
 					// we need to clone it, to be able to apply unified memory management afterwards
 					// when depth > 0 all interim geometries are deleted, while this one should be preserved

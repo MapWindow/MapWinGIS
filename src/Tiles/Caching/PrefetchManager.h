@@ -17,6 +17,8 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
 #pragma once
 #include "TileBulkLoader.h"
 
@@ -28,11 +30,11 @@ class PrefetchManager;
 class PrefetchManagerFactory
 {
 private:
-	static vector<PrefetchManager*> _managers;
-	static ::CCriticalSection _lock;
+    static vector<PrefetchManager*> _managers;
+    static CCriticalSection _lock;
 public:
-	static PrefetchManager* Create(ITileCache* cache);
-	static void Clear();
+    static PrefetchManager* Create(ITileCache* cache);
+    static void Clear();
 };
 
 // ******************************************************
@@ -41,25 +43,23 @@ public:
 class PrefetchManager
 {
 public:
-	PrefetchManager(ITileCache* cache)
-		: _loader(cache)
-	{
-			
-	}
+    PrefetchManager(ITileCache* cache)
+        : _loader(cache)
+    {
+    }
 
 private:
-	TileBulkLoader _loader;
+    TileBulkLoader _loader;
 
 private:
-	// methods
-	void BuildDownloadList(BaseProvider* provider, int zoom, CRect indices, vector<TilePoint*>& points);
-public: 
-	// properties
-	TileBulkLoader* get_Loader() { return &_loader; }
+    // methods
+    void BuildDownloadList(BaseProvider* provider, int zoom, CRect indices, vector<TilePoint*>& points);
+public:
+    // properties
+    TileBulkLoader* get_Loader() { return &_loader; }
 
 public:
-	// methods
-	long Prefetch(BaseProvider* provider, CRect indices, int zoom, ICallback* callback, IStopExecution* stop);
-	void LogBulkDownloadStarted(int zoom);
-	
+    // methods
+    long Prefetch(BaseProvider* provider, CRect indices, int zoom, ICallback* callback, IStopExecution* stop);
+    static void LogBulkDownloadStarted(int zoom);
 };

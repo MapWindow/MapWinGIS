@@ -17,8 +17,11 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- #pragma once
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#pragma once
 #include "ITileLoader.h"
+#include "TileCacheManager.h"
 
 // ******************************************************
 //    TileMapLoader()
@@ -28,37 +31,36 @@
 class TileMapLoader : public ITileLoader
 {
 public:
-	TileMapLoader(CacheType cacheType)
-	{
-		ITileCache* cache = TileCacheManager::get_Cache(cacheType);
-		_cacher = new TileCacher(cache);
-	}
+    TileMapLoader(CacheType cacheType)
+    {
+        ITileCache* cache = TileCacheManager::get_Cache(cacheType);
+        _cacher = new TileCacher(cache);
+    }
 
-	virtual ~TileMapLoader(void)
-	{
-		delete _cacher;
-	}
+    virtual ~TileMapLoader(void)
+    {
+        delete _cacher;
+    }
 
 protected:
-	list<void*> _activeTasks;	// HTTP requests being currently performed
-	::CCriticalSection _activeTasksLock;
-	TileCacher* _cacher;
+    list<void*> _activeTasks; // HTTP requests being currently performed
+    CCriticalSection _activeTasksLock;
+    TileCacher* _cacher;
 
 public:
-	// properties
-	list<void*>& get_ActiveTasks() { return _activeTasks; }
-	bool IsOutdated(int generation) { return _stopped || generation < _lastGeneration; }
+    // properties
+    list<void*>& get_ActiveTasks() { return _activeTasks; }
+    bool IsOutdated(int generation) { return _stopped || generation < _lastGeneration; }
 
 public:
-	//methods
-	ILoadingTask* CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation);
-	void LockActiveTasks(bool lock);
-	void AddActiveTask(void* task);
-	void RemoveActiveTask(void* task);
-	bool HasActiveTask(void* task);
-	void StopCaching();
-	void ScheduleForCaching(TileCore* tile);
-	void RunCaching();
-	void Stop();
+    //methods
+    ILoadingTask* CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation);
+    void LockActiveTasks(bool lock);
+    void AddActiveTask(void* task);
+    void RemoveActiveTask(void* task);
+    bool HasActiveTask(void* task);
+    void StopCaching();
+    void ScheduleForCaching(TileCore* tile);
+    void RunCaching();
+    void Stop();
 };
-

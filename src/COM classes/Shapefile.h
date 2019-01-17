@@ -256,6 +256,9 @@ public:
 	STDMETHOD(StartAppendMode)(VARIANT_BOOL* retVal);
 	STDMETHOD(StopAppendMode)();
 	STDMETHOD(get_AppendMode)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_IsGeographicProjection)(VARIANT_BOOL* pVal);
+    STDMETHOD(get_Selectable)(VARIANT_BOOL* retVal);
+    STDMETHOD(put_Selectable)(VARIANT_BOOL newVal);
 private:
 
 	// data for point in shapefile test
@@ -321,7 +324,8 @@ private:
 	IUndoList* _undoList;
 	
 	VARIANT_BOOL _hotTracking;
-	bool _geosGeometriesRead;
+    VARIANT_BOOL _selectable;
+    bool _geosGeometriesRead;
 	tkCollisionMode _collisionMode;		// collision mode for point shapefiles
 	tkGeometryEngine _geometryEngine;		// GEOS or Clipper
 	bool _writing;		// is currently writing to the file
@@ -408,7 +412,7 @@ private:
 	void AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IFieldStatOperations* statOperations, IShapefile** retval);
 	void DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* statOperations, IShapefile** sf);
 	void CalculateFieldStats(map<int, vector<int>*>& indicesMap, IFieldStatOperations* operations, IShapefile* output);
-	void InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes, IShapefile* sfSubject, long subjectId, std::map<long, long>* fieldMapSubject = NULL,	IShapefile* sfClip = NULL, long clipId = -1, std::map<long, long>* fieldMapClip = NULL);
+    static void InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes, IShapefile* sfSubject, long subjectId, std::map<long, long>* fieldMapSubject = NULL,	IShapefile* sfClip = NULL, long clipId = -1, std::map<long, long>* fieldMapClip = NULL);
 	void GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval);
 	void ReleaseRenderingCache();
 	bool ReadShapeExtents(long ShapeIndex, Extent& result);

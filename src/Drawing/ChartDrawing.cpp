@@ -83,13 +83,13 @@ bool CChartDrawer::PrepareValues(IShapefile* sf, ICharts* charts, ChartOptions* 
 	sf->get_Table(&tbl);
 
 	std::vector<long> arrInit;
-	CString err;
+	CStringW err;
 	bool useAll = true;
 
 	if (SysStringLen(expr) > 0)
 	{
 		USES_CONVERSION;
-		if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), arrInit, err))
+		if (TableHelper::Cast(tbl)->QueryCore(OLE2CW(expr), arrInit, err))
 		{
 			useAll = false;
 		}

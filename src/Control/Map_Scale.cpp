@@ -749,18 +749,6 @@ void CMapView::PixelToProj(double pixelX, double pixelY, double FAR* projX, doub
 	PixelToProjection(pixelX,pixelY,*projX,*projY);
 }
 
-inline void CMapView::PixelToProjection( double piX, double piY, double & prX, double & prY )
-{
-	prX = _extents.left + piX*_inversePixelPerProjectionX;
-	prY = _extents.top - piY*_inversePixelPerProjectionY;
-}
-
-inline void CMapView::ProjectionToPixel( double prX, double prY, double & piX, double & piY )
-{
-	piX = (prX - _extents.left)*_pixelPerProjectionX;
-	piY = (_extents.top - prY) * _pixelPerProjectionY;
-}
-
 // ***********************************************************
 //		UnitsPerPixel
 // ***********************************************************

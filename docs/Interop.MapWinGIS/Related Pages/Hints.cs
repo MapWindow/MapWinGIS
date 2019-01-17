@@ -1,10 +1,10 @@
 ﻿#pragma warning disable 1587
 /// \page hints Hints
 /// 
-/// <b>A. COM objects.</b> \n\n
+/// <b>A. COM objects.</b> \n
 /// MapWinGIS is COM-based, therefore it counts the references of particular objects to determine when they are no longer needed and can be released.
 /// -# Environments like .NET or VB6 add and release these references automatically. Calling the operations 
-/// explicitly (Marshal.AddRef, Marshal.Release for example) in most cases will cause problems and sometimes even crashes.\n\n
+/// explicitly (Marshal.AddRef, Marshal.Release for example) in most cases will cause problems and sometimes even crashes.\n
 /// -# In the languages like unmanaged C++ the client is responsible for maintaining the number of reference, 
 /// so AddRef(), Release() must be called explicitly.\n
 /// .
@@ -26,8 +26,8 @@
 /// \endcode
 /// MapWinGIS objects are not thread-safe. Therefore accessing the same object from several threads should be made with caution especially 
 /// when the editing takes place.\n
-/// 
-/// <b>B. Error handling and progress information.</b> \n\n
+/// \n
+/// <b>B. Error handling and progress information.</b> \n
 /// By design MapWinGIS doesn't throw exceptions to return the information about errors. If an unhandled exception is still thrown,
 /// in the most cases it should be treated as a bug and reported to the <a href="https://github.com/MapWindow/MapWinGIS/issues" target="_blank">Issue tracker.</a>\n
 /// 
@@ -60,7 +60,8 @@
 /// // 1. Class.LastErrorCode and Class.get_ErrorMessage properties, which are defined for all major classes.
 /// If no error took place within this instance of class "No error" string will be return. 
 /// Every call of LastErrorCode property will clear the error, i.e. reset it to the "No error" state.
-/// \code Shapefile sf = some_shapefile;
+/// \code
+/// Shapefile sf = some_shapefile;
 /// Shape shp = sf.get_Shape(sf.NumShapes);              // deliberately faulty line; the last index is NumShapes - 1
 /// Debug.Print(sf.get_ErrorMessage(sf.LastErrorCode));  // "Index Out of Bounds" error will be reported
 /// Debug.Print(sf.get_ErrorMessage(sf.LastErrorCode));  // "No error" will be reported as the error was cleared by previous call
@@ -87,28 +88,30 @@
 ///     }
 /// }
 /// \endcode
-/// 
-/// <b> C. Map redraw.</b>\n\n
+/// \n
+/// <b> C. Map redraw.</b>\n
 /// Map control tracks some of the changes of its properties and data layers and trigger redraws to display them. It's usually applicable
 /// to all the AxMap members. But changes to the data layers made through API of other classes (like Shapefile or Image) will not be tracked. 
 /// Therefore an explicit AxMap.Redraw() call will be needed to display the changes. In general it's a good practice to call redraw explicitly 
 /// and not to rely on built-in tracking of state change. \n
-/// \code AxMap axMap = map_instance;
+/// \code
+/// AxMap axMap = map_instance;
 /// Shapefile sf = some_shapefile;
 /// axMap.AddLayer(sf, true);                // the map will be updated automatically
 /// sf.DefaultDrawingOptions.LineWidth = 3;  // the map wasn't be updated
 /// axMap.Redraw();                          // the thick lines will be shown only here
 /// \endcode
-/// AxMap.Refresh rather AxMap.%Redraw should be called when there is need to update only temporary objects on map (so-called "drawing layers")
+/// AxMap.Redraw2 rather AxMap.Redraw should be called when there is need to update only temporary objects on map (so-called "drawing layers")
 /// rather then to redraw the whole map. The former operation is fast and can be used for display of objects being dragged atop the map for example.
-/// \code AxMap axMap = map_instance;
-/// int handle = axMap.NewDrawing(tkScreenReferencedList);
+/// \code
+/// AxMap axMap = map_instance;
+/// int handle = axMap.NewDrawing(tkDrawReferenceList.dlScreenReferencedList);
 /// axMap.DrawPolygon(arguments);
-/// axMap.Refresh();                        // redraw of drawing layer only to see the polygon (fast)
+/// axMap.Redraw2();                        // redraw of drawing layer only to see the polygon (fast)
 /// axMap.Redraw();                         // complete redraw of the map (slow)
 /// \endcode
-/// 
-/// <b>D. Some aspects of interaction with .NET.</b> \n\n
+/// \n
+/// <b>D. Some aspects of interaction with .NET.</b>
 /// 1. Interop libraries. In order to use MapWinGIS in .NET environment 2 interop assemblies (wrappers) must be generated: AxInteriop.MapWinGIS.dll
 /// and Interop.MapWinGIS dll. Visual Studio generates these assemblies automatically in the process of adding AxMap control on the form. Tlbimp.exe and
 /// Aximp.exe command line utilities can be used to do the same tasks manually.\n\n
@@ -129,13 +132,14 @@
 ///     - to return *any* COM class with IDispath interface (see AxMap.get_GetObject);
 ///     - to return the array of objects (see Shapefile.SelectShapes);
 ///     - to get or set the values in the attribute table, which can be of either double, integer or string type (see Table.get_CellValue).
-///     Use the documentation to find out the data type the output values should be cast to on the .NET side. 
-/// .
+///     Use the documentation to find out the data type the output values should be cast to on the .NET side. \n
+/// \n
+/// 4. Create registrationless COM manifest file. Registrationless COM lets you use MapWinGIS without it being registered in the registry.
+/// This means it's possible to deploy MapWinGIS along with your own application using plain xcopy semantics.\n
+/// <b>How to generate this manifest?</b>
+///     - In Visual Studio right click on the MapWinGIS reference and select Properties
+///     - Click on the Isolated DropDown and select True
+///     - Compile and that's all there's to it. Visual Studio will create a yourApp.exe.manifest file right alongside your application's EXE.
 /// 
-/// <b>E. MapWindow 4</b> \n\n
-/// MapWindow 4 is the largest application build upon MapWinGIS (http://www.mapwindow.org).
-/// -# From version 4.8 (May 2011) MapWinGIS can load MapWindow 4 projects using AxMap.LoadMapState call. 
-/// It provides the the fastest way to setup the visualization options for the layers and pass them to custom application. \n\n
-/// -# The functionality present in MapWindow can be more or less easily implemented in other custom application based on MapWinGIS. 
-/// MapWindow 4 repository is <a href = "http://svn.mapwindow.org/svnroot/MapWindow4Dev/">here.</a>
+///     When you copy the MapWinGIS files to your client, don't forget to include all files including the GDAL files and folders.
 #pragma warning restore 1587

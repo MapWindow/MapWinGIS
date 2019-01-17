@@ -17,50 +17,56 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- #pragma once
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
+
+#pragma once
 #include "ITileLoader.h"
 
 // ******************************************************
 //    TileBulkLoader()
 // ******************************************************
 // Handles the loading queue of map tiles, schedules the loaded tiles for caching
-class TileBulkLoader: public ITileLoader
+class TileBulkLoader : public ITileLoader
 {
 public:
-	TileBulkLoader(ITileCache* cache)
-		: _cache(cache)
-	{
-		_errorCount = 0;
-		_sumCount = 0;
-	}
+    TileBulkLoader(ITileCache* cache)
+        : _cache(cache), _callback(nullptr), _stopCallback(nullptr)
+    {
+        _errorCount = 0;
+        _sumCount = 0;
+    }
 
-	virtual ~TileBulkLoader(void)
-	{
-	}
-
-private:
-	// caching only
-	ITileCache* _cache;
-	ICallback* _callback;			 // to report progress to clients via COM interface
-	IStopExecution* _stopCallback;	 // to stop execution by clients via COM interface
-	int _errorCount;
-	int _sumCount;                   // sums all requests even if generation doesn't match
+    virtual ~TileBulkLoader()
+    = default;
 
 private:
-	void CleanTasks();
+    // caching only
+    ITileCache* _cache;
+    ICallback* _callback; // to report progress to clients via COM interface
+    IStopExecution* _stopCallback; // to stop execution by clients via COM interface
+    int _errorCount;
+    int _sumCount; // sums all requests even if generation doesn't match
+
+private:
+    void CleanTasks();
 
 public:
-	// properties
-	void set_Callback(ICallback* callback) { _callback = callback; }
-	void set_StopCallback(IStopExecution* callback) { _stopCallback = callback; }
-	int get_ErrorCount() { return _errorCount; }
-	int get_SumCount() { return _sumCount; }
-	ITileCache* get_Cache() { return _cache; }
+    // properties
+    void set_Callback(ICallback* callback) { _callback = callback; }
+    void set_StopCallback(IStopExecution* callback) { _stopCallback = callback; }
+    int get_ErrorCount() { return _errorCount; }
+    int get_SumCount() { return _sumCount; }
+    ITileCache* get_Cache() { return _cache; }
 
 public:
-	//methods
-	void TileLoaded(TileCore* tile, int generation);
-	void ResetErrorCount() { _errorCount = 0; _sumCount = 0; }
-	ILoadingTask* CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation);
+    //methods
+    void TileLoaded(TileCore* tile, int generation);
+
+    void ResetErrorCount()
+    {
+        _errorCount = 0;
+        _sumCount = 0;
+    }
+
+    ILoadingTask* CreateTask(int x, int y, int zoom, BaseProvider* provider, int generation);
 };
-

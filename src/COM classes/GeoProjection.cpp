@@ -940,7 +940,7 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 
 	if (proj.GetLength() != 0)
 	{
-		fprintf(prjFile, "%s", proj);
+		fprintf(prjFile, "%s", (LPCSTR)proj);
 	}
 
 	fclose(prjFile);
@@ -1073,7 +1073,7 @@ STDMETHODIMP CGeoProjection::SetNad83Projection(tkNad83Projection projection)
 STDMETHODIMP CGeoProjection::get_HasTransformation(VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retval = _transformation != NULL;
+	*retval = (_transformation != NULL) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -1320,8 +1320,10 @@ bool CGeoProjection::ParseLinearUnits(CString s, tkUnitsOfMeasure& units)
 	{
 		return false;
 	}
-	else if (s.CompareNoCase("meters") == 0 || s.CompareNoCase("metre") == 0)
-	{
+	else if (s.CompareNoCase("meter") == 0 || s.CompareNoCase("metre") == 0 || s.CompareNoCase("meters") == 0 || s.CompareNoCase("metres") == 0)
+	{   // jf: based on input on GitHub from ultraTCS, I'm adding the variations of 'meter(s)';
+        // although I do not see any WKT UNIT references being plural 'meters', we had included 
+        // that case before, so I am leaving it - (and the 'metres' variation for completeness)
 		units = umMeters;
 		return true;
 	}

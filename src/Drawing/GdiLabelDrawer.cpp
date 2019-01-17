@@ -147,11 +147,11 @@ CFont* GdiLabelDrawer::CreateFont(CLabelOptions* options, long fontSize, double 
 		lf.lfWidth = long((double)lf.lfWidth * scaleFactor);
 		lf.lfHeight = long((double)lf.lfHeight * scaleFactor);
 	}
+
+	// MWGIS-121; rather than return null, enforce a minimum font size of 4
 	if (abs(lf.lfHeight) < 4)	// changed 1 to 4; there is no way to read labels smaller than 4, but they slow down the performance
 	{
-		fnt->DeleteObject();
-		delete fnt;
-		return NULL;
+		lf.lfHeight = 4;
 	}
 
 	lf.lfItalic = options->fontStyle & fstItalic;

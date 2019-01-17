@@ -716,7 +716,7 @@ STDMETHODIMP CShape::DeletePoint(long PointIndex, VARIANT_BOOL *retval)
 STDMETHODIMP CShape::get_XY(long PointIndex, double* x, double* y, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = get_XY(PointIndex, x, y);
+	*retval = get_XY(PointIndex, x, y) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -726,7 +726,7 @@ STDMETHODIMP CShape::get_XY(long PointIndex, double* x, double* y, VARIANT_BOOL*
 STDMETHODIMP CShape::put_XY(LONG pointIndex, double x, double y, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = (VARIANT_BOOL)_shp->put_PointXY(pointIndex, x, y);
+	*retVal = _shp->put_PointXY(pointIndex, x, y) ? VARIANT_TRUE : VARIANT_FALSE;
 	if (*retVal == VARIANT_FALSE)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -740,7 +740,7 @@ STDMETHODIMP CShape::put_XY(LONG pointIndex, double x, double y, VARIANT_BOOL* r
 STDMETHODIMP CShape::put_M(LONG pointIndex, double m, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = (VARIANT_BOOL)_shp->put_PointM(pointIndex, m);
+	*retVal = _shp->put_PointM(pointIndex, m) ? VARIANT_TRUE : VARIANT_FALSE;
 	if (!(*retVal))
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -754,7 +754,7 @@ STDMETHODIMP CShape::put_M(LONG pointIndex, double m, VARIANT_BOOL* retVal)
 STDMETHODIMP CShape::put_Z(LONG pointIndex, double z, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = (VARIANT_BOOL)_shp->put_PointZ(pointIndex, z);
+	*retVal = _shp->put_PointZ(pointIndex, z) ? VARIANT_TRUE : VARIANT_FALSE;
 	if (!(*retVal))
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -768,7 +768,7 @@ STDMETHODIMP CShape::put_Z(LONG pointIndex, double z, VARIANT_BOOL* retVal)
 STDMETHODIMP CShape::get_Z(long PointIndex, double* z, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = get_Z(PointIndex, z);
+	*retval = get_Z(PointIndex, z) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -778,7 +778,7 @@ STDMETHODIMP CShape::get_Z(long PointIndex, double* z, VARIANT_BOOL* retval)
 STDMETHODIMP CShape::get_M(long PointIndex, double* m, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = get_M(PointIndex, m);
+	*retval = get_M(PointIndex, m) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -1190,7 +1190,7 @@ STDMETHODIMP CShape::Relates(IShape* Shape, tkSpatialRelation Relation, VARIANT_
 		case srCrosses:		res = oGeom1->Crosses(oGeom2); break;
 		case srDisjoint:	res = oGeom1->Disjoint(oGeom2); break;
 		case srEquals:		res = oGeom1->Equals(oGeom2); break;
-		case srIntersects:	res = oGeom1->Intersect(oGeom2); break;
+		case srIntersects:	res = oGeom1->Intersects(oGeom2); break;
 		case srOverlaps:	res = oGeom1->Overlaps(oGeom2); break;
 		case srTouches:		res = oGeom1->Touches(oGeom2); break;
 		case srWithin:		res = oGeom1->Within(oGeom2); break;
@@ -1261,9 +1261,9 @@ STDMETHODIMP CShape::Within(IShape* Shape, VARIANT_BOOL* retval)
 STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retval = NULL;
+	*retval = nullptr;
 
-	if( Shape == NULL)
+	if( Shape == nullptr)
 	{	
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
@@ -1275,23 +1275,23 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 			return S_OK;
 	}
 
-	OGRGeometry* oGeom1 = NULL;
-	OGRGeometry* oGeom2 = NULL;
+	OGRGeometry* oGeom1 = nullptr;
+	OGRGeometry* oGeom2 = nullptr;
 
 	oGeom1 = OgrConverter::ShapeToGeometry(this);
-	if (oGeom1 == NULL) 
+	if (oGeom1 == nullptr) 
 		return S_OK;
 
 	OGRwkbGeometryType oReturnType = oGeom1->getGeometryType();
 	
 	oGeom2 = OgrConverter::ShapeToGeometry(Shape);
-	if (oGeom2 == NULL) 
+	if (oGeom2 == nullptr) 
 	{	
 		OGRGeometryFactory::destroyGeometry(oGeom1);
 		return S_OK;
 	}
 	
-	OGRGeometry* oGeom3 = NULL;
+	OGRGeometry* oGeom3 = nullptr;
 
 	switch (Operation)
 	{
@@ -1306,7 +1306,7 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 			oGeom3 = oGeom1->Intersection(oGeom2);
 			break;
 		case clSymDifference:
-			oGeom3 = oGeom1->SymmetricDifference(oGeom2);
+			oGeom3 = oGeom1->SymDifference(oGeom2);
 			break;
 		default:
 			break;
@@ -2575,8 +2575,9 @@ STDMETHODIMP CShape::ExportToWKT(BSTR * retVal)
 		geom->exportToWkt(&s);
 		(*retVal) = A2BSTR(s);
 		OGRGeometryFactory::destroyGeometry(geom);
-		delete[] s;
-	}
+        // allocated in GDAL; free using CPLFree
+        CPLFree(s);
+    }
 	else {
 		(*retVal) = A2BSTR("");
 	}
@@ -2867,4 +2868,13 @@ STDMETHODIMP CShape::Clear()
 	_shp->Clear();
 
 	return S_OK;
+}
+
+//*****************************************************************
+//*		InterpolatePoint()
+//*****************************************************************
+STDMETHODIMP CShape::InterpolatePoint(IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint **retVal)
+{
+	// simply call Utility function
+	return GetUtils()->LineInterpolatePoint(this, startPoint, distance, normalized, retVal);
 }

@@ -151,7 +151,6 @@
     <Compile Include="Com Classes\ShapeDrawingOptions.cs" />
     <Compile Include="Com Classes\ShapefileCategories.cs" />
     <Compile Include="Com Classes\ShapefileCategory.cs" />
-    <Compile Include="Com Classes\ShapefileColorScheme.cs" />
     <Compile Include="Com Classes\ShapeNetwork.cs" />
     <Compile Include="Com Classes\TableClass.cs" />
     <Compile Include="Com Classes\TileProviders.cs" />

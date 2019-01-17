@@ -15,17 +15,17 @@ void CustomFunction::Clear()
 // ************************************************************
 //	 ParseName()
 //************************************************************
-void CustomFunction::ParseName(CString name)
+void CustomFunction::ParseName(CStringW name)
 {
 	_aliases.clear();
 
 	int position = 0;
 
-	CString part = name.Tokenize(";", position);
+	CStringW part = name.Tokenize(L";", position);
 	while (part.GetLength() > 0)
 	{
 		_aliases.push_back(part);
-		part = name.Tokenize(";", position);
+		part = name.Tokenize(L";", position);
 	}
 
 	if (_aliases.size() == 0)
@@ -56,7 +56,7 @@ bool CustomFunction::CheckNumParams()
 // ************************************************************
 //	 CheckArguments()
 //************************************************************
-bool CustomFunction::CheckArguments(int argSize, CString& errorMessage)
+bool CustomFunction::CheckArguments(int argSize, CStringW& errorMessage)
 {
 	if (numParams() != argSize && _numParams != -1)
 	{
@@ -303,7 +303,7 @@ void CustomFunction::InitOverloads()
 CStringW CustomFunction::GetSignature()
 {
 	USES_CONVERSION;
-	CStringW name = A2W(GetName());
+	CStringW name = GetName();
 
 	if (name.Left(1) == "$")
 	{

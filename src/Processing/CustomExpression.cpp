@@ -31,7 +31,7 @@
 // *******************************************************************
 //	 Calculate()
 // *******************************************************************
-CExpressionValue* CustomExpression::Calculate(CString& errorMessage)
+CExpressionValue* CustomExpression::Calculate(CStringW& errorMessage)
 {
 	Reset();
     
@@ -81,7 +81,7 @@ CExpressionValue* CustomExpression::Calculate(CString& errorMessage)
 // *******************************************************************
 //		EvaluatePart()
 // *******************************************************************
-bool CustomExpression::EvaluatePart(CExpressionPart* part, CString& errorMessage, int& operationCount)
+bool CustomExpression::EvaluatePart(CExpressionPart* part, CStringW& errorMessage, int& operationCount)
 {
 	do
 	{
@@ -150,7 +150,7 @@ bool CustomExpression::EvaluateFunction(CExpressionPart* part)
 // *******************************************************************
 //		CalculateNextOperationWithinPart()
 // *******************************************************************
-bool CustomExpression::CalculateNextOperationWithinPart(CExpressionPart* part, CString& errorMessage, int& operationCount)
+bool CustomExpression::CalculateNextOperationWithinPart(CExpressionPart* part, CStringW& errorMessage, int& operationCount)
 {
 	bool needReleaseOperation = false;
 	COperation operation;
@@ -754,7 +754,7 @@ bool CustomExpression::ReadFieldNames(ITable* tbl)
 			USES_CONVERSION;
 			CComBSTR bstr;
 			fld->get_Name(&bstr);
-			CString str = OLE2CA(bstr);
+			CStringW str = OLE2CW(bstr);
 			_fields.push_back(str.MakeLower());
 			fld->Release();
 		}
@@ -766,7 +766,7 @@ bool CustomExpression::ReadFieldNames(ITable* tbl)
 // ************************************************************
 //	 SetFields()
 //************************************************************
-void CustomExpression::SetFields(vector<CString>& fields)
+void CustomExpression::SetFields(vector<CStringW>& fields)
 {
 	_fields.clear();
 	_fields.insert(_fields.end(), fields.begin(), fields.end());
@@ -863,7 +863,7 @@ void CustomExpression::ReleaseArrays()
 // building list of operation; 
 // UseFields: true - only fields form attribute table; 
 // false - variables, the values of which must be set
-bool CustomExpression::Parse(CString s, bool useFields, CString& errorMessage)
+bool CustomExpression::Parse(CStringW s, bool useFields, CStringW& errorMessage)
 {
 	Clear();
 
@@ -906,7 +906,7 @@ void CustomExpression::put_FieldValue(int FieldId, BSTR newVal)
 	_variables[FieldId]->val->str(OLE2W(newVal));
 }
 
-void CustomExpression::put_FieldValue(int FieldId, CString newVal) {
+void CustomExpression::put_FieldValue(int FieldId, CStringW newVal) {
 	USES_CONVERSION;
-	_variables[FieldId]->val->str(A2W(newVal));
+	_variables[FieldId]->val->str(newVal);
 }

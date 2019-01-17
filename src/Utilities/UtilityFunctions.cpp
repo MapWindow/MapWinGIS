@@ -530,12 +530,18 @@ namespace Utility
 
 		GetTempPath(MAX_PATH, tmppath);
 	
-		tmpnam(tmpfname);
+		//tmpnam(tmpfname);
+		// replacing tmpnam with the Windows call GetTempFileName
+		// because, at least under certain circumstances, tmpnam was
+		// returning a name including a path, which when concatenated
+		// with tmppath, resulted in an invalid filename.
+		::GetTempFileName(tmppath, "", 0, tmpfname);
 
-		strcat(tmppath, tmpfname);
-		strcat(tmppath, extensionWithLeadingPoint);
+		//strcat(tmppath, tmpfname);
+		//strcat(tmppath, extensionWithLeadingPoint);
 
-		CString result = tmppath;
+		CString result = tmpfname;
+		result.MakeLower().Replace(".tmp", extensionWithLeadingPoint);
 
 		delete[] tmpfname;
 		delete[] tmppath;

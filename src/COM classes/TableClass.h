@@ -164,11 +164,11 @@ private:
 	struct JoinInfo
 	{
 		CStringW filename;
-		CString fieldFrom;
-		CString fieldTo;
+		CStringW fieldFrom;
+		CStringW fieldTo;
 		CString options;
 		int joinId;
-		CString fields; // comma separated list
+		CStringW fields; // comma separated list
 	};
 
 	struct FieldMapping
@@ -210,7 +210,7 @@ private:
 	FieldType GetFieldType(long fieldIndex);
 	long GetFieldPrecision(long fieldIndex);
 	inline void ErrorMessage(long ErrorCode);
-	std::vector<CString>* get_FieldNames();
+	std::vector<CStringW>* get_FieldNames();
 	void RestoreJoins(CPLXMLNode* node);
 	void RestoreFields(CPLXMLNode* node);
 	void ClearFieldCustomizations();
@@ -231,14 +231,14 @@ public:
 	bool GetUids(long fieldIndex, map<long, long>& resutls);
 	bool UpdateTableRow(TableRow* newRow, long rowIndex);
 
-	void ParseExpressionCore(BSTR Expression, tkValueType returnType, CString& ErrorString, VARIANT_BOOL* retVal);
+	void ParseExpressionCore(BSTR Expression, tkValueType returnType, CStringW& ErrorString, VARIANT_BOOL* retVal);
 
 	std::vector<CategoriesData>* GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses);
 	std::vector<CategoriesData>* GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses,
 		CComVariant minValue, CComVariant maxValue);
-	void AnalyzeExpressions(std::vector<CString>& expressions, std::vector<int>& results);
-	bool QueryCore(CString Expression, std::vector<long>& indices, CString& ErrorString);
-	bool CalculateCore(CString Expression, std::vector<CStringW>& results, CString& ErrorString, CString floatFormat, int rowIndex = -1);
+	void AnalyzeExpressions(std::vector<CStringW>& expressions, std::vector<int>& results);
+	bool QueryCore(CStringW Expression, std::vector<long>& indices, CStringW& ErrorString);
+	bool CalculateCore(CStringW Expression, std::vector<CStringW>& results, CStringW& ErrorString, CString floatFormat, int rowIndex = -1);
 
 	bool get_FieldValuesDouble(int FieldIndex, std::vector<double>& values);
 	bool get_FieldValuesInteger(int FieldIndex, std::vector<int>& values);
@@ -246,9 +246,9 @@ public:
 
 	bool set_IndexValue(int rowIndex);
 	bool MakeUniqueFieldNames();
-	bool CheckJoinInput(ITable* table2, CString fieldTo, CString fieldFrom, long& index1, long& index2);
-	bool JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList);
-	bool JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CStringW filenameToReopen, CString options, set<CString>& fieldList);
+	bool CheckJoinInput(ITable* table2, CStringW fieldTo, CStringW fieldFrom, long& index1, long& index2);
+	bool JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CStringW>& fieldList);
+	bool JoinInternal(ITable* table2, CStringW fieldTo, CStringW fieldFrom, CStringW filenameToReopen, CString options, set<CStringW>& fieldList);
 	void RemoveJoinedFields();
 	bool HasFieldChanges();
 	void MarkFieldsAsUnchanged();

@@ -4167,6 +4167,9 @@ interface IShapefile : IDispatch{
 	[id(139)] HRESULT StartAppendMode([out, retval] VARIANT_BOOL* retVal);
 	[id(140)] HRESULT StopAppendMode();
 	[propget, id(141)] HRESULT AppendMode([out, retval] VARIANT_BOOL* pVal);
+	[propget, id(142)] HRESULT IsGeographicProjection([out, retval] VARIANT_BOOL* retVal);
+	[propget, id(143)] HRESULT Selectable([out, retval] VARIANT_BOOL* retVal);
+	[propput, id(143)] HRESULT Selectable([in] VARIANT_BOOL newVal);
 };
 
 /****************************  Shape Interface ***********************/
@@ -4265,6 +4268,7 @@ interface IShape : IDispatch{
 	
 	[id(68)] HRESULT Clear();
 	[id(69)] HRESULT FixUp2([in] tkUnitsOfMeasure units, [out, retval] IShape** retVal);
+	[id(70), helpstring("method InterpolatePoint")] HRESULT InterpolatePoint([in] IPoint* startPoint, [in] double distance, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL normalized, [out, retval] IPoint **retVal);
 };
 
 /****************************  Extents Interface ***********************/
@@ -4596,6 +4600,8 @@ interface IUtils : IDispatch{
 	[id(61), helpstring("method GetWGS84ProjectionName")] HRESULT GetWGS84ProjectionName([in] tkWgs84Projection projectionID, [out, retval] BSTR* retVal);
 	[id(62), helpstring("method GetProjectionNameByID")] HRESULT GetProjectionNameByID([in] int SRID, [out, retval] BSTR* retVal);
 	[id(63), helpstring("method GetProjectionList")] HRESULT GetProjectionList([in] tkProjectionSet projectionSets, [in, out] VARIANT* list, [out, retval] VARIANT_BOOL* retVal);
+    [id(64), helpstring("method GetAngle")] HRESULT GetAngle([in] IPoint* firstPoint, [in] IPoint* secondPoint, [out, retval] double* retVal);
+	[id(65), helpstring("method LineInterpolatePoint")] HRESULT LineInterpolatePoint([in] IShape* sourceLine, [in] IPoint* startPoint, [in] double distance, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL normalized, [out, retval] IPoint **retVal);
 };
 
 /****************************  Vector Interface ***********************/
@@ -6006,7 +6012,8 @@ interface ITileProviders : IDispatch{
 										[in]BSTR UrlPattern, 
 										[in]tkTileProjection Projection, 
 										[in, optional, defaultvalue(0)]int MinZoom, 
-										[in, optional, defaultvalue(17)]int MaxZoom,
+										[in, optional, defaultvalue(17)]int MaxZoom, 
+										[in, optional, defaultvalue("")]BSTR Copyright,
 										[out,retval] VARIANT_BOOL* retVal);
 	[propget, id(5), helpstring("")] HRESULT Id([in] int Index, [out, retval] LONG* retVal);
 	[propget, id(6), helpstring("")] HRESULT Name([in] int Index, [out, retval] BSTR* retVal);
@@ -6619,7 +6626,7 @@ interface IGdalUtils : IDispatch{
 }
 
 [ 
-	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
+	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(5.0),
 	helpfile("MapWinGIS.chm"),
 	helpstring("MapWinGIS Components"),
 	control 
@@ -6641,7 +6648,7 @@ library MapWinGIS
 	//  Primary dispatch interface for CMap
 	
 	[ uuid(1D077739-E866-46A0-B256-8AECC04F2312),
-	  helpstring("Dispatch interface for Map Control"),version(4.9), hidden
+	  helpstring("Dispatch interface for Map Control"),version(5.0), hidden
 	]
 	dispinterface _DMap
 	{

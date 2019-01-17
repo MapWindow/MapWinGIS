@@ -44,7 +44,19 @@ namespace ConsoleApplication1
             //t.ReadAttributesFromPostGISLayer();
 
             //var t = new ShapefileTests();
+            //t.ImportExportWKT();
             //t.ShapefileDataTest();
+            // t.UnionShapefiles();
+            //var t = new PointInPolygonTests();
+            //t.TestPointInSimplePolygon();
+            //t.TestPointInPolygonM();
+            //t.TestPointInPolygonZ();
+            //t.TestPointInPolygonWithHole();
+            //t.TestPointInMultiPolygon();
+            //t.TestPointInLotsOfPolygons();
+
+            var t = new NewSfMethodsTests();
+            t.DifferenceTest2();
 
             //t.Reproject2280Test();
             //t.ReadRussionDataFromTable();
@@ -70,8 +82,8 @@ namespace ConsoleApplication1
             // t.DissolveSmallfileClipper();
             //t.DissolveLargefileClipper();
 
-            var t = new UtilTests();
-            t.ProjectionStrings();
+            //var t = new UtilTests();
+            //t.ProjectionStrings();
             //t.ZonalStatistics();
             //t.ReclassifyRaster();
             //t.ClipPolygon();

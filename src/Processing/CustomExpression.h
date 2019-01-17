@@ -45,12 +45,12 @@ public:
 private:
 	std::vector<CExpressionPart*> _parts;
 	std::vector<CElement*> _variables;
-	std::vector<CString> _fields;
+	std::vector<CStringW> _fields;
 	std::vector<COperation*> _operations;
-	std::vector<CString> _strings;
+	std::vector<CStringW> _strings;
 	bool _useFields;
 	bool _saveOperations;
-	CString _errorMessage;	// the description of error
+	CStringW _errorMessage;	// the description of error
 	int _errorPosition;		// the position of error
 	CString _floatFormat;
 	IShape* _shape;
@@ -64,10 +64,10 @@ private:
 
 	bool EvaluateFunction(CExpressionPart* part);
 	void EvaluatePart();
-	bool EvaluatePart(CExpressionPart* part, CString& errorMessage, int& operationCount);
+	bool EvaluatePart(CExpressionPart* part, CStringW& errorMessage, int& operationCount);
 	bool FinishPart(CExpressionPart* part);
 
-	bool CalculateNextOperationWithinPart(CExpressionPart* part, CString& errorMessage, int& operationCount);
+	bool CalculateNextOperationWithinPart(CExpressionPart* part, CStringW& errorMessage, int& operationCount);
 
 	void SetFieldValues(ITable* tbl);
 	void BuildFieldList();
@@ -78,37 +78,37 @@ private:
 
 public:
 	bool IsEmpty() { return _parts.size() == 0; }
-	bool Parse(CString s, bool useFields, CString& error);
-	CExpressionValue* Calculate(CString& errorMessage);
+	bool Parse(CStringW s, bool useFields, CStringW& error);
+	CExpressionValue* Calculate(CStringW& errorMessage);
 	void Clear();
 	void ReleaseArrays();
 
 	bool ReadFieldNames(ITable* tbl);
-	void SetFields(vector<CString>& fields);
+	void SetFields(vector<CStringW>& fields);
 	void AddPart(CExpressionPart* part) { _parts.push_back(part); }
 
 	CString GetFloatFormat() { return _floatFormat; }
 	void SetFloatFormat(CString value) { _floatFormat = value; }
 	bool GetUseFields() { return _useFields; }
 	
-	vector<CString>* GetStrings() { return &_strings; }
-	vector<CString>* GetFields() { return &_fields; }
+	vector<CStringW>* GetStrings() { return &_strings; }
+	vector<CStringW>* GetFields() { return &_fields; }
 
 	// variable fields
 	int get_NumFields() { return _variables.size(); }
 	int get_FieldIndex(int FieldId)	{ return _variables[FieldId]->fieldIndex; }
-	CString get_FieldName(int FieldId) { return _variables[FieldId]->fieldName; }
+	CStringW get_FieldName(int FieldId) { return _variables[FieldId]->fieldName; }
 	CExpressionValue* get_FieldValue(int FieldId) {	return _variables[FieldId]->val;}
 	void put_FieldValue(int FieldId, double newVal) { _variables[FieldId]->val->dbl(newVal); }
 	void put_FieldValue(int FieldId, BSTR newVal);
-	void put_FieldValue(int FieldId, CString newVal);
+	void put_FieldValue(int FieldId, CStringW newVal);
 	void put_FieldValue(int FieldId, bool newVal) {	_variables[FieldId]->val->bln(newVal);}
 	int get_PartCount() { return _parts.size(); }
 
 	IShape* get_Shape();
 	void put_Shape(IShape* shape);
 
-	void SetErrorMessage(CString msg) { _errorMessage = msg; }
+	void SetErrorMessage(CStringW msg) { _errorMessage = msg; }
 	void SetErrorPosition(int position){ _errorPosition = position; }
 	void ClearOperations();
 	void CacheOperation(COperation& operation);
