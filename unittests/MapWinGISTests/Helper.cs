@@ -389,7 +389,7 @@ namespace MapWinGISTests
             Application.DoEvents();
             var filename = Path.Combine(Path.GetTempPath(), baseName);
             DeleteFile(filename);
-            
+
             var img = axMap1.SnapShot2(0, axMap1.CurrentZoom + 10, 1000);
             if (img == null) throw new NullReferenceException("Snapshot is null");
 
@@ -484,11 +484,42 @@ namespace MapWinGISTests
         {
             // Save first point to result shapefile:
             var shp = new Shape();
-            shp.Create(ShpfileType.SHP_POINT);
+            if (!shp.Create(ShpfileType.SHP_POINT))
+                throw new Exception("Error in creating shape. Error: " + shp.ErrorMsg[shp.LastErrorCode]);
             var index = 0;
             if (!shp.InsertPoint(point, ref index))
                 throw new Exception("Error in inserting point. Error: " + shp.ErrorMsg[shp.LastErrorCode]);
-            sfPoints.EditAddShape(shp);
+            if (sfPoints.EditAddShape(shp) < 0)
+                throw new Exception("Error in adding shape. Error: " + sfPoints.ErrorMsg[sfPoints.LastErrorCode]);
+        }
+
+        public static Coordinate PointToCoordinate(Point point)
+        {
+            return new Coordinate(point.x, point.y);
+        }
+
+        public struct Coordinate
+        {
+            public double X { get; set; }
+            public double Y { get; set; }
+
+            public Coordinate(double x, double y)
+            {
+                X = x;
+                Y = y;
+            }
+
+            public override string ToString()
+            {
+                return $"X: {X}, Y: {Y}";
+            }
+        }
+
+        public static Point CoordinateToPoint(Coordinate coordinate)
+        {
+            var pnt = new Point();
+            pnt.Set(coordinate.X, coordinate.Y);
+            return pnt;
         }
     }
 }

@@ -47,13 +47,16 @@ namespace ConsoleApplication1
             //t.ImportExportWKT();
             //t.ShapefileDataTest();
             // t.UnionShapefiles();
-            var t = new PointInPolygonTests();
-            t.TestPointInSimplePolygon();
-            t.TestPointInPolygonM();
-            t.TestPointInPolygonZ();
-            t.TestPointInPolygonWithHole();
-            t.TestPointInMultiPolygon();
-            t.TestPointInLotsOfPolygons();
+            //var t = new PointInPolygonTests();
+            //t.TestPointInSimplePolygon();
+            //t.TestPointInPolygonM();
+            //t.TestPointInPolygonZ();
+            //t.TestPointInPolygonWithHole();
+            //t.TestPointInMultiPolygon();
+            //t.TestPointInLotsOfPolygons();
+
+            var t = new NewSfMethodsTests();
+            t.DifferenceTest2();
 
             //t.Reproject2280Test();
             //t.ReadRussionDataFromTable();
