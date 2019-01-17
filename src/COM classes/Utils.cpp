@@ -3339,7 +3339,7 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
             oGeom = geomSubject->Intersection(geomClip);
             break;
         case EXCLUSIVEOR_OPERATION:
-            oGeom = geomSubject->SymmetricDifference(geomClip);
+            oGeom = geomSubject->SymDifference(geomClip);
             break;
         case UNION_OPERATION:
             oGeom = geomSubject->Union(geomClip);
