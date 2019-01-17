@@ -1219,8 +1219,8 @@
             <summary>
             Creates a new drawing layer on the map returning its handle.
             </summary>
-            <param name="Projection">Sets the coordinate system to use for the new drawing layer to be created. (ScreenReferenced 
-            uses pixels in screen coordinates. SpatiallyReferenced uses projected map units.)</param>
+            <param name="projection">Sets the coordinate system to use for the new drawing layer to be created. (tkDrawReferenceList.dlScreenReferencedList 
+            uses pixels in screen coordinates. tkDrawReferenceList.dlSpatiallyReferencedList uses projected map units.)</param>
             <returns>The handle for the new drawing layer in the map.</returns>
         </member>
         <member name="M:AxMapWinGIS.AxMap.get_DrawingKey(System.Int32)">

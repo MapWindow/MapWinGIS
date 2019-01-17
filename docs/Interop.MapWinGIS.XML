@@ -8173,7 +8173,7 @@
         </member>
         <member name="M:MapWinGIS.IShape.ExportToWKT">
             <summary>
-            Imports shape data from WKT format.
+            Exports shape data to WKT format.
             </summary>
             <returns>String in WKT format with shape data.</returns>
             \new490 Added in version 4.9.0
@@ -8278,6 +8278,23 @@
             Returns true if the shape doesn't have any points.
             </summary>
             \new493 Added in version 4.9.3
+        </member>
+        <member name="M:MapWinGIS.IShape.InterpolatePoint(MapWinGIS.Point,System.Double,System.Boolean)">
+            <summary>
+            Return a point at the specified distance (or percentage) along the specified line
+            </summary>
+            <param name="startPoint">Starting point along this line (specify Point[0] for beginning of line)</param>
+            <param name="distance">Distance along this line (or percentage of line length; if a percentage, specify a number between 0.0 and 1.0)</param>
+            <param name="normalized">Optional value; if FALSE, 'distance' is actual distance; if TRUE, distance is percentage of length; defaults to FALSE</param>
+            <returns>Returns a Point class representing the point along the sourceLine that is the specified distance (or percentage) along the line.</returns>
+            <remarks>
+            Only applies to a Polyline Shape.  If 'distance' is greater than the the line length, the line's endpoint is returned.
+            
+            'startPoint' does not have to be on the line.  If not on the line, actual starting point will be the nearest point to 'startPoint' that is on the line.
+            </remarks>
+            \see Utils.LineInterpolatePoint
+            
+            \new500 Added in version 5.0.0
         </member>
         <!-- Badly formed XML comment ignored for member "T:MapWinGIS.IShapeDrawingOptions" -->
         <member name="M:MapWinGIS.IShapeDrawingOptions.Clone">
@@ -11177,6 +11194,41 @@
             </remarks>
             \new495 Added in version 4.9.5
         </member>
+        <member name="M:MapWinGIS.IUtils.GetAngle(MapWinGIS.Point,MapWinGIS.Point)">
+            <summary>
+            Calculates the angle defined by the two specified coordinates
+            </summary>
+            <param name="firstPoint"></param>
+            <param name="secondPoint"></param>
+            <returns>Geographic Angle (in degrees) of the vector measured from the first point to the second point</returns>
+            <remarks>
+            The angle returned is the so-called Geographic angle, measured in a clockwise direction
+            from the positive Y-axis, as opposed to the Arithmetic (Cartesian) angle measured in a
+            counter-clockwise direction from the positive X-axis.  The returned value can be used 
+            as-is to specify Shape or Label Rotation, which expect the Geographic angle for input.
+            </remarks>
+            \see Shapefile.set_ShapeRotation
+            
+            \new500 Added in version 5.0.0
+        </member>
+        <member name="M:MapWinGIS.IUtils.LineInterpolatePoint(MapWinGIS.Shape,MapWinGIS.Point,System.Double,System.Boolean)">
+            <summary>
+            Return a point at the specified distance (or percentage) along the specified line
+            </summary>
+            <param name="sourceLine">Polyline shape to traverse</param>
+            <param name="startPoint">Starting point along 'sourceLine' (specify Point[0] for beginning of line)</param>
+            <param name="distance">Distance along line (or percentage of line length; if a percentage, specify a number between 0.0 and 1.0)</param>
+            <param name="normalized">Optional value; if FALSE, 'distance' is actual distance; if TRUE, distance is percentage of length; defaults to FALSE</param>
+            <returns>Returns a Point class representing the point along the sourceLine that is the specified distance (or percentage) along the line.</returns>
+            <remarks>
+            'sourceLine' must be a Polyline Shape.  If 'distance' is greater than the source line length, the line's endpoint is returned.
+            
+            'startPoint' does not have to be on 'sourceLine'.  If not on the line, actual starting point will be the nearest point to 'startPoint' that is on 'sourceline'.
+            </remarks>
+            \see Shape.InterpolatePoint
+            
+            \new500 Added in version 5.0.0
+        </member>
         <member name="T:MapWinGIS.IVector">
             <summary>
             A vector object is used to represent the light source for a grid color scheme. 
@@ -11775,7 +11827,7 @@
             <summary>
             The objects of the drawing layer are specified in screen coordinates and are not moved after the changes of the extents.
             </summary>
-            <remarks>To update such layers the full redraw is not needed. Therefore use AxMap.Refresh rather than AxMap.Redraw.</remarks>
+            <remarks>To update such layers the full redraw is not needed. Therefore use AxMap.Redraw2 rather than AxMap.Redraw.</remarks>
         </member>
         <member name="F:MapWinGIS.tkDrawReferenceList.dlSpatiallyReferencedList">
             <summary>
@@ -12612,7 +12664,7 @@
             <summary>
             Map will be rendered from the main buffer. Only measurements and coordinate display will be rendered anew.
             </summary>
-            <remarks>Corresponds to AxMap.Refresh/AxMap.Invalidate.</remarks>
+            <remarks>Corresponds to AxMap.Redraw2/AxMap.Invalidate.</remarks>
         </member>
         <member name="T:MapWinGIS.tkCoordinatesDisplay">
             <summary>
@@ -14750,7 +14802,13 @@
         <member name="M:MapWinGIS.IShapefile.GetClosestVertex(System.Double,System.Double,System.Double,System.Int32@,System.Int32@,System.Double@)">
             \addtogroup shapefile_selection Shapefile selection
             Here is a list of properties and methods for managing shapefile selection.
-            This module is a part of the documentation of Shapefile class.
+            This module is a part of the documentation of the Shapefile class.
+            
+            Historically, using the cmSelection and cmSelectByPolygon tools, you would specify a LayerHandle in the ChooseLayer map event 
+            to indicate which single layer you were selecting shapes from.   Starting in v5.0, you can select from multiple layers concurrently 
+            by setting the 'Selectable' property of each layer you would like to select shapes from.  If the LayerHandle returned from the
+            ChooseLayer event is left unspecified (-1), then instead, all layers having the 'Selectable' property = TRUE
+            will be selectable by the tool.
             \dot
             digraph shapefile_selection {
             splines = true;
@@ -14837,6 +14895,17 @@
             Clears selection from all shapes.
             </summary>
             \new48 Added in version 4.8
+        </member>
+        <member name="P:MapWinGIS.IShapefile.Selectable">
+            <summary>
+            Gets or sets a value indicating whether this shapefile will be selectable by the cmSelection and cmSelectByPolygon tool.
+            </summary>
+            <remarks>
+            This property allows for multiple shapefiles to be concurrently selectable.
+            If only selecting from one layer, you can still use the ChooseLayer map event to specify the selectable layer.
+            </remarks>
+            \see AxMap.CursorMode
+            \new500 Added in version 5.0.0
         </member>
         <member name="P:MapWinGIS.IShapefile.SelectionAppearance">
             <summary>
