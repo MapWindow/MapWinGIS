@@ -95,8 +95,8 @@ public:
 	int _selectedPart;
 	int _highlightedPart;
 	bool _showSnapPoint;
-	int _snapPointX;
-	int _snapPointY;
+	double _snapPointX;
+    double _snapPointY;
 
 public:
 	

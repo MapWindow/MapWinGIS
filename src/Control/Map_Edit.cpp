@@ -82,13 +82,17 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 	_shapeEditor->get_SnapBehavior(&behavior);
 
 	double projX, projY;
-	bool snapped = FindSnapPointCore(x, y, &projX, &projY);
+    VARIANT_BOOL snapped = FindSnapPointCore(x, y, &projX, &projY);
 	if (!snapped) {
 		PixelToProjection(x, y, projX, projY);
 		GetEditorBase()->ClearSnapPoint();
 	}
-	else
-		GetEditorBase()->SetSnapPoint(projX, projY, true);
+	else {
+        double sX, sY;
+        ProjToPixel(projX, projY, &sX, &sY);
+        GetEditorBase()->SetSnapPoint(sX, sY, true);
+    }
+		
 
 	if ((_dragging.Operation == DragMoveVertex || 
 		 _dragging.Operation == DragMoveShape || 
