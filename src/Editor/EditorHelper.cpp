@@ -134,3 +134,14 @@ tkLayerSelection EditorHelper::GetSnappingBehavior(IShapeEditor* editor)
 	editor->get_SnapBehavior(&behavior);
 	return behavior;
 }
+
+// *******************************************************
+//		GetSnappingBehavior()
+// *******************************************************
+tkSnapMode EditorHelper::GetSnappingMode(IShapeEditor* editor)
+{
+	if (!editor) return smVerticesAndLines;
+	tkSnapMode mode;
+	editor->get_SnapMode(&mode);
+	return mode;
+}

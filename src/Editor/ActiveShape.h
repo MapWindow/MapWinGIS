@@ -27,6 +27,10 @@ public:
 		_highlightedPart = -1;
 		_inputMode = simMeasuring;
 
+		_showSnapPoint = false;
+		_snapPointX = 0;
+		_snapPointY = 0;
+
 		AnglePrecision = 1;
 		AngleFormat = afDegrees;
 		AreaDisplayMode = admMetric;
@@ -90,6 +94,9 @@ public:
 	int _highlightedVertex;
 	int _selectedPart;
 	int _highlightedPart;
+	bool _showSnapPoint;
+	double _snapPointX;
+    double _snapPointY;
 
 public:
 	

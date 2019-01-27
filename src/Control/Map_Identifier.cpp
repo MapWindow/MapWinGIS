@@ -39,18 +39,18 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 	double distance;
 
 	double minDist = DBL_MAX;
-	IShapefile* foundShapefile = NULL;
-	long foundShapeIndex;
-	long foundPointIndex;
 
 	bool digitizing = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode);
 	tkLayerSelection behavior;
 	_shapeEditor->get_SnapBehavior(&behavior);
+	tkSnapMode mode;
+	_shapeEditor->get_SnapMode(&mode);
 	long currentHandle = -1;
 	bool currentLayerOnly = behavior == lsActiveLayer && digitizing;
 	if (currentLayerOnly)
 		_shapeEditor->get_LayerHandle(&currentHandle);
 
+	bool result = false;
 	for (long i = 0; i < this->GetNumLayers(); i++)
 	{
 		long layerHandle = this->GetLayerHandle(i);
@@ -68,31 +68,40 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 			sf->get_Snappable(&snappable);
 			if (snappable)
 			{
-				sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
-				if (vb)
-				{
-					if (distance < minDist)
+				double xF, yF;
+				bool snapped = false;
+				// Try snapping to a vertex first:
+				if (mode == smVertices || mode == smVerticesAndLines) {
+					sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
+					if (vb && distance < minDist)
 					{
-						minDist = distance;
-						foundShapefile = sf;
-						foundPointIndex = pointIndex;
-						foundShapeIndex = shapeIndex;
+						IShape* shape = NULL;
+						sf->get_Shape(shapeIndex, &shape);
+						if (shape)
+						{
+							minDist = distance;
+							shape->get_XY(pointIndex, &xF, &yF, &vb);
+							shape->Release();
+							snapped = true;
+						}
 					}
 				}
-			}
-		}
-	}
+				// If not snapped to a vertex, maybe try to snap to a segment:
+				if (!snapped && (mode == smVerticesAndLines || mode == smLines)) {
+					sf->GetClosestSnapPosition(x, y, maxDist, &shapeIndex, &xF, &yF, &distance, &vb);
+					if (vb && distance < minDist)
+					{
+						minDist = distance;
+						snapped = true;
+					}
+				}
 
-	bool result = false;
-	if (minDist != DBL_MAX && foundShapefile)
-	{
-		IShape* shape = NULL;
-		foundShapefile->get_Shape(foundShapeIndex, &shape);
-		if (shape)
-		{
-			shape->get_XY(foundPointIndex, xFound, yFound, &vb);
-			shape->Release();
-			result = true;
+				if (snapped) {
+					*xFound = xF;
+					*yFound = yF;
+					result = true;
+				}
+			}
 		}
 	}
 	return result;

@@ -39,6 +39,8 @@ public:
 	bool SetSelectedVertex(int index);
 	bool ClearHighlightedPart();
 	bool ClearHighlightedVertex();
+	void SetSnapPoint(double x, double y, bool visible);
+	void ClearSnapPoint();
 	int SelectPart(double xProj, double yProj);
 	int GetClosestVertex(double projX, double projY, double tolerance);
 	bool HasClosedPolygon();
