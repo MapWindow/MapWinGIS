@@ -34,7 +34,7 @@ bool CMapView::HandleLButtonUpDragVertexOrShape(UINT nFlags)
 		if (SnappingIsOn(shift))
 		{
 			VARIANT_BOOL result = this->FindSnapPointCore(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
-			if (!result && shift)
+			if ((result == VARIANT_FALSE) && shift)
 				return true;		// can't proceed without snapping in this mode
 		}
 		GetEditorBase()->MoveVertex(x2, y2);		// don't save state; it's already saved at the beginning of operation
@@ -78,8 +78,9 @@ bool CMapView::SnappingIsOn(bool shift)
 bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 {
 
-	tkLayerSelection behavior;
-	_shapeEditor->get_SnapBehavior(&behavior);
+	tkLayerSelection snapBehavior;
+	// get Snap setting
+	_shapeEditor->get_SnapBehavior(&snapBehavior);
 
 	double projX, projY;
     VARIANT_BOOL snapped = FindSnapPointCore(x, y, &projX, &projY);
@@ -99,7 +100,7 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 		_dragging.Operation == DragMovePart))      // && (nFlags & MK_LBUTTON) && _leftButtonDown
 	{
 		_dragging.Snapped = false;
-		if (behavior == lsAllLayers && _dragging.Operation == DragMoveVertex && snapped)
+		if (snapBehavior == lsAllLayers && _dragging.Operation == DragMoveVertex && snapped)
 			_dragging.SetSnapped(projX, projY);
 		else
 			GetEditorBase()->ClearSnapPoint();
@@ -134,6 +135,10 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 	{
 		EditorBase* base = GetEditorBase();
 		bool handled = false;
+
+		tkEditorBehavior behavior;
+		// get Editor setting
+		_shapeEditor->get_EditorBehavior(&behavior);
 
 		// highlighting of vertices
 		if (behavior == ebVertexEditor)

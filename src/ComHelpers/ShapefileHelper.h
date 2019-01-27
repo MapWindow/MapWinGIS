@@ -21,7 +21,6 @@ public:
 	static bool ShapeSelected(IShapefile* sf, int shapeIndex);
 	static bool GetClosestPoint(IShapefile* sf, double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist);
 	static bool GetClosestSnapPosition(IShapefile * sf, double x, double y, double maxDistance, std::vector<long>& ids, long * shapeIndex, double& fx, double& fy, double & dist);
-	static bool GetClosestPointOnSegment(double ax, double ay, double bx, double by, double px, double py, double * rx, double * ry);
 	static bool PointInPolygon(IShapefile* sf, long ShapeIndex, double x, double y);
 	static bool BoundsWithinPolygon(IShapefile* sf, int shapeIndex, double b_minX, double b_minY, double b_maxX, double b_maxY);
 	static bool ShapeTypeIsM(IShapefile* sf);

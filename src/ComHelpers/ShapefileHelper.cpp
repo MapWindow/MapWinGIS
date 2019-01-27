@@ -387,7 +387,7 @@ bool ShapefileHelper::GetClosestPoint(IShapefile* sf, double x, double y, double
 }
 
 // *****************************************************************
-//		GetClosestPoint()
+//		GetClosestSnapPosition()
 // *****************************************************************
 bool ShapefileHelper::GetClosestSnapPosition(IShapefile* sf, double x, double y, double maxDistance, std::vector<long>& ids,
 	long* shapeIndex, double& fx, double& fy, double& dist)
@@ -405,7 +405,7 @@ bool ShapefileHelper::GetClosestSnapPosition(IShapefile* sf, double x, double y,
 	{
 		VARIANT_BOOL visible;
 		sf->get_ShapeVisible(id, &visible);
-		if (!visible) continue;
+		if (visible == VARIANT_FALSE) continue;
 
 		IShape* shp = NULL;
 		sf->get_Shape(id, &shp);

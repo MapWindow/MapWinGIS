@@ -136,7 +136,7 @@ tkLayerSelection EditorHelper::GetSnappingBehavior(IShapeEditor* editor)
 }
 
 // *******************************************************
-//		GetSnappingBehavior()
+//		GetSnappingMode()
 // *******************************************************
 tkSnapMode EditorHelper::GetSnappingMode(IShapeEditor* editor)
 {
