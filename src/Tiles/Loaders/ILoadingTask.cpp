@@ -33,14 +33,14 @@ void ILoadingTask::DoTask()
 	// HTTP call
 	TileCore* tile = _provider->GetTileImage(CPoint(_x, _y), _zoom);		
 
+	// let descendants do something useful with the tile
+	AfterRequest(tile);
+
 	if (_loader->isStopped())
 	{
 		delete tile;	// requesting from a server takes time; probably the task was already aborted
 		tile = NULL;
 	}
-
-	// let descendants do something useful with the tile
-	AfterRequest(tile);
 
 	unsigned int count = _loader->RegisterTile(_generation);
 
