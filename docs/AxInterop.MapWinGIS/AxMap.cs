@@ -2873,12 +2873,22 @@ namespace AxMapWinGIS
 
         /// <summary>
         /// This event is fired when the user finishes dragging a selection box in the map control. 
-        /// The map property SendSelectBoxFinal must be set to True for this event to be fired. 
+        /// The map property SendSelectBoxFinal must be set to True for this event to be fired.
         /// </summary>
         /// <param name="left">The left boundary of the selection box in pixel coordinates.</param>
         /// <param name="right">The right boundary of the selection box in pixel coordinates.</param>
         /// <param name="bottom">The bottom boundary of the selection box in pixel coordinates.</param>
         /// <param name="top">The top boundary of the selection box in pixel coordinates.</param>
+        /// <remarks>
+        /// Prior to version 5.0, there was ambiguity as to whether or not this event was fired 
+        /// in all circumstances.  In the case of the cmZoomIn tool, this event was always fired.  
+        /// But in the case of the cmSelection tool, it was only fired in the case when no shapes 
+        /// were actually 'selected'.  If any shapes were 'selected', the SelectionChanged event 
+        /// was fired, but the SelectBoxFinal was not.  As of version 5.0, the SelectBoxFinal event 
+        /// will always be fired after dragging a rectangle, whether or not any shapes were actually 
+        /// 'selected'.
+        /// </remarks>
+        /// \new500 Modified in version 5.0
         public event _DMapEvents_SelectBoxFinalEventHandler SelectBoxFinal;
 
         /// <summary>
