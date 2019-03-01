@@ -84,6 +84,18 @@ bool EditorBase::ClearHighlightedVertex()
 	return false;
 }
 
+void EditorBase::SetSnapPoint(double x, double y, bool visible)
+{
+	_snapPointX = x;
+	_snapPointY = y;
+	_showSnapPoint = true;
+}
+
+void EditorBase::ClearSnapPoint()
+{
+	_showSnapPoint = false;
+}
+
 // ************************************************
 //     ClearHighlightedPart
 // ************************************************

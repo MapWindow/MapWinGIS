@@ -951,7 +951,6 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                         {
                             FireSelectionChanged(layerHandle);
                             Redraw();
-                            return;
                         }
                     }
                     else if (selectingSelectable)
@@ -977,7 +976,6 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                             }
                         }
                         Redraw();
-                        return;
                     }
 				}
 				else if (m_sendMouseDown) 
@@ -1018,7 +1016,6 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                     {
 						FireSelectionChanged(layerHandle);
 						Redraw();
-						return;
 					}
 				}
                 else if (selectingSelectable)
@@ -1042,7 +1039,6 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                         }
                     }
                     Redraw();
-                    return;
                 }
 				break;
 		}
@@ -1258,7 +1254,10 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 				snapped = this->FindSnapPointCore(point.x, point.y, &x, &y);
 				if (snapped) {
 					ProjToPixel(x, y, &x, &y);
+					_shapeEditor->GetActiveShape()->SetSnapPoint(x, y, true);
 				}
+				else
+					_shapeEditor->GetActiveShape()->ClearSnapPoint();
 			}
 			shp->SetMousePosition(x, y);
 			refreshNeeded = true;

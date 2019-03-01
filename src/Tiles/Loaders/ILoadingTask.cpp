@@ -38,9 +38,11 @@ void ILoadingTask::DoTask()
 		delete tile;	// requesting from a server takes time; probably the task was already aborted
 		tile = NULL;
 	}
-
-	// let descendants do something useful with the tile
-	AfterRequest(tile);
+	else
+	{
+		// let descendants do something useful with the tile
+		AfterRequest(tile);
+	}
 
 	unsigned int count = _loader->RegisterTile(_generation);
 

@@ -175,8 +175,10 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 					shapeVal = i;
 				}
 
-                IShape* shape = _shapeData[shapeVal]->shape;
-                // convert querying shape to GEOS
+				// get current shape
+				CComPtr<IShape> shape = nullptr;
+				get_Shape(shapeVal, &shape);
+				// convert querying shape to GEOS
                 GEOSGeom geosShape = GeosConverter::ShapeToGeom(shape);
                 // check for containment
                 if (GeosHelper::Contains(geosShape, geosPoint))
@@ -255,9 +257,10 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 
 			if( shpType2D == SHP_POLYLINE && SelectMode == INTERSECTION)
 			{
-                // get current shape
-                IShape* shape = _shapeData[shapeVal]->shape;
-                // convert shape to GEOS
+				// get current shape
+				CComPtr<IShape> shape = nullptr;
+				get_Shape(shapeVal, &shape);
+				// convert shape to GEOS
                 GEOSGeom geos = GeosConverter::ShapeToGeom(shape);
                 // see if shape intersects polygon extent
                 if (GeosHelper::Intersects(geosExtent, geos))
@@ -271,10 +274,11 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 				//}		
 			}
 			else if( shpType2D == SHP_POLYGON && SelectMode == INTERSECTION)
-			{		
-                // get current shape
-                IShape* shape = _shapeData[shapeVal]->shape;
-                // convert shape to GEOS
+			{
+				// get current shape
+				CComPtr<IShape> shape = nullptr;
+				get_Shape(shapeVal, &shape);
+				// convert shape to GEOS
                 GEOSGeom geos = GeosConverter::ShapeToGeom(shape);
                 // see if shape intersects polygon extent
                 if (GeosHelper::Intersects(geosExtent, geos))

@@ -57,8 +57,8 @@ TileCore* BaseProvider::GetTileImage(CPoint& pos, const int zoom)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool recursive)
 {
-    // jf: I don't think we need a mutex here
-    //CSingleLock lock(&_clientLock, TRUE);
+    // single-file access to the tile load
+    CSingleLock lock(&_clientLock, TRUE);
 
     // stack-based instance
     SecureHttpClient client;

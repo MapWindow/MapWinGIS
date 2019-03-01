@@ -11,6 +11,7 @@ public:
 	static void CopyOptionsFrom(IShapeEditor* editor, IShapeDrawingOptions* options);
 	static bool OnCursorChanged(CShapeEditor* editor, bool clearEditor, tkCursorMode newCursor, bool& redrawNeeded);
 	static tkLayerSelection GetSnappingBehavior(IShapeEditor* editor);
+	static tkSnapMode GetSnappingMode(IShapeEditor * editor);
 	static bool IsSnappableCursor(tkCursorMode mode);
 };
 

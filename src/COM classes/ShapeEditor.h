@@ -27,6 +27,7 @@ public:
 		_highlightShapes = lsAllLayers;
 		_snapTolerance = 10;
 		_snapBehavior = lsAllLayers;
+		_snapMode = smVerticesAndLines;
 		_state = esNone;
 		_mapCallback = NULL;
 		_isSubjectShape = false;
@@ -113,6 +114,8 @@ public:
 	STDMETHOD(put_HighlightVertices)(tkLayerSelection newVal);
 	STDMETHOD(get_SnapBehavior)(tkLayerSelection* pVal);
 	STDMETHOD(put_SnapBehavior)(tkLayerSelection newVal);
+	STDMETHOD(get_SnapMode)(tkSnapMode* pVal);
+	STDMETHOD(put_SnapMode)(tkSnapMode newVal);
 	STDMETHOD(get_EditorState)(tkEditorState* pVal);
 	STDMETHOD(put_EditorState)(tkEditorState newVal);
 	STDMETHOD(StartEdit)(LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL* retVal);
@@ -154,6 +157,7 @@ private:
 	ICallback * _globalCallback;
 	VARIANT_BOOL _visible;
 	tkLayerSelection _highlightShapes;
+	tkSnapMode _snapMode;
 	double _snapTolerance;
 	tkLayerSelection _snapBehavior;
 	EditorBase* _activeShape;

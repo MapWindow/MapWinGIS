@@ -34,7 +34,7 @@ bool CMapView::HandleLButtonUpDragVertexOrShape(UINT nFlags)
 		if (SnappingIsOn(shift))
 		{
 			VARIANT_BOOL result = this->FindSnapPointCore(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
-			if (!result && shift)
+			if ((result == VARIANT_FALSE) && shift)
 				return true;		// can't proceed without snapping in this mode
 		}
 		GetEditorBase()->MoveVertex(x2, y2);		// don't save state; it's already saved at the beginning of operation
@@ -77,22 +77,33 @@ bool CMapView::SnappingIsOn(bool shift)
 // ************************************************************
 bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 {
+
+	tkLayerSelection snapBehavior;
+	// get Snap setting
+	_shapeEditor->get_SnapBehavior(&snapBehavior);
+
+	double projX, projY;
+    VARIANT_BOOL snapped = FindSnapPointCore(x, y, &projX, &projY);
+	if (!snapped) {
+		PixelToProjection(x, y, projX, projY);
+		GetEditorBase()->ClearSnapPoint();
+	}
+	else {
+        double sX, sY;
+        ProjToPixel(projX, projY, &sX, &sY);
+        GetEditorBase()->SetSnapPoint(sX, sY, true);
+    }
+		
+
 	if ((_dragging.Operation == DragMoveVertex || 
 		 _dragging.Operation == DragMoveShape || 
 		_dragging.Operation == DragMovePart))      // && (nFlags & MK_LBUTTON) && _leftButtonDown
 	{
 		_dragging.Snapped = false;
-		tkLayerSelection behavior;
-		_shapeEditor->get_SnapBehavior(&behavior);
-		if (behavior == lsAllLayers && _dragging.Operation == DragMoveVertex)
-		{
-			double xFound, yFound;
-			if (this->FindSnapPointCore(x, y, &xFound, &yFound)) {
-				double xNew, yNew;
-				ProjToPixel(xFound, yFound, &xNew, &yNew);
-				_dragging.SetSnapped(xFound, yFound);
-			}
-		}
+		if (snapBehavior == lsAllLayers && _dragging.Operation == DragMoveVertex && snapped)
+			_dragging.SetSnapped(projX, projY);
+		else
+			GetEditorBase()->ClearSnapPoint();
 		_dragging.HasMoved = true;
 
 		// in case of vertex moving underlying data is changed in the process (to update displayed length);
@@ -122,12 +133,12 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 	}
 	else 
 	{
-		tkEditorBehavior behavior;
-		_shapeEditor->get_EditorBehavior(&behavior);
 		EditorBase* base = GetEditorBase();
 		bool handled = false;
-		double projX, projY;
-		this->PixelToProjection(x, y, projX, projY);
+
+		tkEditorBehavior behavior;
+		// get Editor setting
+		_shapeEditor->get_EditorBehavior(&behavior);
 
 		// highlighting of vertices
 		if (behavior == ebVertexEditor)
@@ -146,7 +157,7 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 			}
 			else {
 				if (base->ClearHighlightedVertex()) {
-					_canUseMainBuffer = false;
+					_canUseMainBuffer = false;	
 					return true;
 				}
 			}
@@ -155,6 +166,7 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 		// highlighting parts
 		if (behavior == ebPartEditor)	//if (nFlags & MK_CONTROL) {
 		{
+
 			if (base->ClearHighlightedVertex())
 				_canUseMainBuffer = false;
 

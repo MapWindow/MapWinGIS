@@ -245,8 +245,8 @@ ALIASES                = "new48=\xrefitem newpage48 \"New API 4.8\" \"New API 4.
                          "new493=\xrefitem newpage493 \"New API 4.9.3\" \"New API 4.9.3\"" \
                          "new494=\xrefitem newpage494 \"New API 4.9.4\" \"New API 4.9.4\"" \
                          "new495=\xrefitem newpage495 \"New API 4.9.5\" \"New API 4.9.5\"" \
-                         "new500=\xrefitem newpage500 \"New API 5.0.0\" \"New API 5.0.0\"" \
-                         "removed493=\xrefitem removed493 \"Removed in 4.9.3\" \"Removed in 4.9.3\""
+                         "removed493=\xrefitem removed493 \"Removed in 4.9.3\" \"Removed in 4.9.3\"" \
+                         "new500=\xrefitem newpage500 \"New API 5.0.0\" \"New API 5.0.0\""
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"
@@ -2475,7 +2475,7 @@ DOT_TRANSPARENT        = NO
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_MULTI_TARGETS      = YES
+DOT_MULTI_TARGETS      = NO
 
 # If the GENERATE_LEGEND tag is set to YES doxygen will generate a legend page
 # explaining the meaning of the various boxes and arrows in the dot generated
@@ -2483,11 +2483,11 @@ DOT_MULTI_TARGETS      = YES
 # The default value is: YES.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-GENERATE_LEGEND        = YES
+GENERATE_LEGEND        = NO
 
 # If the DOT_CLEANUP tag is set to YES, doxygen will remove the intermediate dot
 # files that are used to generate the various graphs.
 # The default value is: YES.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_CLEANUP            = YES
+DOT_CLEANUP            = NO

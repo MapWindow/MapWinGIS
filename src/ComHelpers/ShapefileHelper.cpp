@@ -382,8 +382,76 @@ bool ShapefileHelper::GetClosestPoint(IShapefile* sf, double x, double y, double
             shp->Release();
         }
     }
-    // dist = minDist;
+    dist = minDist;
     return minDist < maxDistance;
+}
+
+// *****************************************************************
+//		GetClosestSnapPosition()
+// *****************************************************************
+bool ShapefileHelper::GetClosestSnapPosition(IShapefile* sf, double x, double y, double maxDistance, std::vector<long>& ids,
+	long* shapeIndex, double& fx, double& fy, double& dist)
+{
+	if (!sf) return false;
+
+	VARIANT_BOOL vb;
+	double minDist = DBL_MAX;
+
+    IPoint* pnt = NULL;
+    IShape* ptShp = NULL;
+    IShape* resShp = NULL;
+
+	for (long id : ids)
+	{
+		VARIANT_BOOL visible;
+		sf->get_ShapeVisible(id, &visible);
+		if (visible == VARIANT_FALSE) continue;
+
+		IShape* shp = NULL;
+		sf->get_Shape(id, &shp);
+
+		if (shp != NULL)
+		{
+            // Create point shape
+            ComHelper::CreateShape(&ptShp);
+            ptShp->Create(SHP_POINT, &vb);
+            if (vb != VARIANT_TRUE)
+            {
+                shp->Release();
+                pnt->Release();
+                continue;
+            }
+
+            // Add point
+            ComHelper::CreatePoint(&pnt);
+            pnt->put_X(x);
+            pnt->put_Y(y);
+            long position = 0;
+            ptShp->InsertPoint(pnt, &position, &vb);
+            pnt->Release();
+
+            // Get closest points:
+            shp->ClosestPoints(ptShp , &resShp);
+            ptShp->Release();
+            shp->Release();
+
+            if (resShp != NULL) {
+                // Get the point snapped on geometry
+                double xPnt, yPnt;
+                resShp->get_XY(0, &xPnt, &yPnt, &vb);
+
+                // Check if this is allowed and/or smaller than the previous found point:
+                const double distance = sqrt(pow(x - xPnt, 2.0) + pow(y - yPnt, 2.0));
+                if (distance < minDist && distance < maxDistance) {
+                    fx = xPnt;
+                    fy = yPnt;
+                    minDist = distance;
+                }
+            }            
+		}
+	}
+	dist = minDist;
+	return minDist < maxDistance;
 }
 
 // ********************************************************************

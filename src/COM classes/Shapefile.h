@@ -213,6 +213,7 @@ public:
 	STDMETHOD(EditAddShape)(IShape* shape, long* shapeIndex);
 	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);
 	STDMETHOD(GetClosestVertex)(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal);
+	STDMETHOD(GetClosestSnapPosition)(double x, double y, double maxDistance, long* shapeIndex, double* fx, double* fy, double* distance, VARIANT_BOOL* retVal);
 	STDMETHOD(get_ShapeCategory2)(long ShapeIndex, BSTR* categoryName);
 	STDMETHOD(put_ShapeCategory2)(long ShapeIndex, BSTR categoryName);
 	STDMETHOD(get_ShapeCategory3)(long ShapeIndex, IShapefileCategory** category);
