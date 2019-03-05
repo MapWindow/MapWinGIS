@@ -2722,7 +2722,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
     // ------------------------------------------------------
     CComVariant var;
     const long numShapes = _shapeData.size();
-    long count = 0;
+    long newIndex = 0;
 
     long numFields, percent = 0;
     this->get_NumFields(&numFields);
@@ -2766,6 +2766,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
                 const BOOL res = transf->Transform(numPoints, x, y);
                 if (!res)
                 {
+                    // save error message and continue
                     if (m_globalSettings.gdalErrorMessage == "")
                         m_globalSettings.gdalErrorMessage = CPLGetLastErrorMsg();
                 }
@@ -2779,16 +2780,21 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 
                     if (!reprojectInPlace)
                     {
-                        (*retVal)->get_NumShapes(&count);
-                        (*retVal)->EditInsertShape(shp, &count, &vb);
+                        // get next available index
+                        (*retVal)->get_NumShapes(&newIndex);
+                        // insert Shape into target at new index
+                        (*retVal)->EditInsertShape(shp, &newIndex, &vb);
 
-                        // copying attributes
+                        // copy attributes
                         for (long j = 0; j < numFields; j++)
                         {
+                            // get cell value at source index i
                             this->get_CellValue(j, i, &var);
-                            (*retVal)->EditCellValue(j, i, var, &vb);
+                            // set cell value into target at new index
+                            (*retVal)->EditCellValue(j, newIndex, var, &vb);
                         }
                     }
+                    // 
                     (*reprojectedCount)++;
                 }
                 delete[] x;
@@ -2804,12 +2810,15 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
         transf = nullptr;
     }
 
-    // When creating the new shapefile was successfull:
-    if (vb)
+    // function result will be based on successful projection setting
+    vb = VARIANT_FALSE;
+    // if at least some rows were reprojected...
+    if (*reprojectedCount > 0)
     {
         // setting new projection
         if (reprojectInPlace)
         {
+            // vb result will be used to determine overall success
             _geoProjection->CopyFrom(newProjection, &vb);
         }
         else
@@ -2818,13 +2827,18 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
             (*retVal)->get_GeoProjection(&proj);
             if (proj)
             {
+                // vb result will be used to determine overall success
                 proj->CopyFrom(newProjection, &vb);
                 proj->Release();
             }
         }
     }
 
-    ShapefileHelper::ClearShapefileModifiedFlag(*retVal); // inserted shapes were marked as modified, correct this
+    // inserted shapes were marked as modified, correct this
+    if (reprojectInPlace)
+        ShapefileHelper::ClearShapefileModifiedFlag(this);
+    else
+        ShapefileHelper::ClearShapefileModifiedFlag(*retVal);
 
     // -------------------------------------- 
     //	  Output validation
