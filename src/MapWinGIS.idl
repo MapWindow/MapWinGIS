@@ -6809,8 +6809,7 @@ library MapWinGIS
 			
 			[id(91), propget] BSTR LayerName(LONG LayerHandle);
 			[id(91), propput] void LayerName(LONG LayerHandle, BSTR newVal);
-			[id(143)] void ReSourceLayer(long LayerHandle, BSTR newSrcPath);
-			[id(189), propget] BSTR LayerFilename(LONG layerHandle);
+            [id(189), propget] BSTR LayerFilename(LONG layerHandle);
 			[id(167), propget] DOUBLE LayerMaxVisibleScale(LONG LayerHandle);
 			[id(167), propput] void LayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal);
 			[id(168), propget] DOUBLE LayerMinVisibleScale(LONG LayerHandle);
@@ -6827,15 +6826,17 @@ library MapWinGIS
 			[id(174), propput] void Shapefile(LONG LayerHandle, IShapefile* pVal);
 			[id(175), propget] IImage* Image(LONG LayerHandle);
 			[id(175), propput] void Image(LONG LayerHandle, IImage* pVal);
-			
+
 			[id(90), propget] IDispatch* GetObject(long LayerHandle);
 			[id(238), propget] VARIANT_BOOL LayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
 			[id(259), propget] IWmsLayer* WmsLayer(LONG LayerHandle);
-			[id(48)] IDispatch* GetColorScheme(long LayerHandle);
+            [id(253), propget] IExtents* LayerExtents(LONG LayerHandle);
+            
+            [id(48)] IDispatch* GetColorScheme(long LayerHandle);
 			[id(92)] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
-
-			[id(253), propget] IExtents* LayerExtents(LONG LayerHandle);
+            [id(143)] void ReSourceLayer(long LayerHandle, BSTR newSrcPath);
+            [id(263)] VARIANT_BOOL ReloadOgrLayerFromSource(long OgrLayerHandle);
 #endif 
 
 #define DRAWING_API

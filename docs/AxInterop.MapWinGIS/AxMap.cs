@@ -1368,6 +1368,19 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
+        /// Performs the same operation as OgrLayer.ReloadFromSource, then compares 
+        /// projections with the Map, and if the settings allow, will reproject on-the-fly.
+        /// </summary>
+        /// <param name="OgrLayerHandle">The handle of the layer.  Must be an OGR layer.</param>
+        /// <returns>
+        /// True if successful; False if not an OGR Layer, could not be reloaded, or could not be reprojected (if necessary)
+        /// </returns>
+        public bool ReloadOgrLayerFromSource(int OgrLayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Removes the specified layer from the map
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer to be removed from the map.</param>

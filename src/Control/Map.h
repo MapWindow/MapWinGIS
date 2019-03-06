@@ -526,7 +526,8 @@ public:
 	afx_msg BOOL IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b);
 	afx_msg long HWnd();
 	afx_msg void ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath);
-	afx_msg BOOL AdjustLayerExtents(long LayerHandle);	// Rob Cairns 29-Jun-09
+    afx_msg BOOL ReloadOgrLayerFromSource(long OgrLayerHandle);
+    afx_msg BOOL AdjustLayerExtents(long LayerHandle);	// Rob Cairns 29-Jun-09
 	afx_msg void SetCurrentScale(DOUBLE newVal);
 	afx_msg DOUBLE GetCurrentScale(void);
 	afx_msg void SetMapUnits(tkUnitsOfMeasure units);
