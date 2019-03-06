@@ -91,7 +91,7 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 	else {
         double sX, sY;
         ProjToPixel(projX, projY, &sX, &sY);
-        GetEditorBase()->SetSnapPoint(sX, sY, true);
+        GetEditorBase()->SetSnapPoint(sX, sY);
     }
 		
 

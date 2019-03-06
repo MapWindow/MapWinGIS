@@ -1226,9 +1226,9 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			}
 		case ActShape:	
 			{
-				VARIANT_BOOL isEmpty;
-				_shapeEditor->get_IsEmpty(&isEmpty);
-				return !isEmpty ? true : false;
+				/*VARIANT_BOOL isEmpty;
+				_shapeEditor->get_IsEmpty(&isEmpty);*/
+				return true; // !isEmpty ? true : false;  always draw this to clear snap points
 			}	
 		case ZoomBox:
 			{
@@ -1238,7 +1238,7 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			{
 				if (!GetEditorBase()->GetCreationMode())
 					return false;
-				return GetEditorBase()->GetPointCount() > 0;
+				return true; // GetEditorBase()->GetPointCount() > 0; always draw this to show snap points
 			}
 		case tkDrawingDataAvailable::LayersData:	
 			{

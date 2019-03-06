@@ -1245,20 +1245,22 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	if ((EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmMeasure))
 	{
 		ActiveShape* shp = GetActiveShape();
+
+		VARIANT_BOOL snapped = VARIANT_FALSE;
+		double x = point.x, y = point.y;
+		if (SnappingIsOn(nFlags))
+		{
+			if (this->FindSnapPointCore(point.x, point.y, &x, &y)) {
+				ProjToPixel(x, y, &x, &y);
+				GetEditorBase()->SetSnapPoint(x, y);
+			}
+			else {
+				GetEditorBase()->ClearSnapPoint();
+			}
+		}
+
 		if (shp->IsDynamic() && shp->GetPointCount() > 0)
 		{
-			VARIANT_BOOL snapped = VARIANT_FALSE;
-			double x = point.x, y = point.y;
-			if (SnappingIsOn(nFlags))
-			{
-				snapped = this->FindSnapPointCore(point.x, point.y, &x, &y);
-				if (snapped) {
-					ProjToPixel(x, y, &x, &y);
-					_shapeEditor->GetActiveShape()->SetSnapPoint(x, y, true);
-				}
-				else
-					_shapeEditor->GetActiveShape()->ClearSnapPoint();
-			}
 			shp->SetMousePosition(x, y);
 			refreshNeeded = true;
 		}
