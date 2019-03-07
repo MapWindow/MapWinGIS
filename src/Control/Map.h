@@ -716,6 +716,8 @@ public:
 		{ FireEvent(eventidBeforeLayers, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled); }
 	void FireAfterLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled)
 		{ FireEvent(eventidAfterLayers, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled); }
+    void FireLayerReprojectedIncomplete(LONG LayerHandle, LONG NumReprojected, LONG NumShapes)
+        { FireEvent(eventidLayerReprojectedIncomplete, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), LayerHandle, NumReprojected, NumShapes); }
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()

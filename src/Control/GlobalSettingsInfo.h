@@ -85,6 +85,7 @@ struct GlobalSettingsInfo
     bool ogrShareConnection;
     bool ogrListAllGeometryTypes;
     bool ogrInterpretYNStringAsBoolean;
+    bool allowLayersWithIncompleteReprojection;
 
     ~GlobalSettingsInfo()
     {
@@ -96,6 +97,7 @@ struct GlobalSettingsInfo
 
     GlobalSettingsInfo::GlobalSettingsInfo()
     {
+        allowLayersWithIncompleteReprojection = false;
         ogrInterpretYNStringAsBoolean = true;
         ogrListAllGeometryTypes = true;
         ogrShareConnection = false;

@@ -202,6 +202,8 @@ public:
 	STDMETHOD(put_OgrShareConnection)(VARIANT_BOOL newVal);
 	STDMETHOD(get_OgrInterpretYNStringAsBoolean)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_OgrInterpretYNStringAsBoolean)(VARIANT_BOOL newVal);
+    STDMETHOD(get_AllowLayersWithIncompleteReprojection)(VARIANT_BOOL* pVal);
+    STDMETHOD(put_AllowLayersWithIncompleteReprojection)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

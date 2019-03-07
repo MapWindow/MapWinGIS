@@ -869,7 +869,7 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 	long numShapes = ShapefileHelper::GetNumShapes(sf);
 	if (numShapes > m_globalSettings.maxReprojectionShapeCount) 
 	{
-		// OGR layers can potentially have millions of features, so let's be cautions not too start something to lengthy
+		// OGR layers can potentially have millions of features, so let's be cautions not to start something too lengthy
 		ErrorMessage(tkREPROJECTION_TOO_MUCH_SHAPES);		
 		return false;
 	}
@@ -878,13 +878,20 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 	IShapefile* sfNew = NULL;
 	sf->Reproject(GetMapProjection(), &count, &sfNew);
 
-	if (!sfNew || numShapes != count)
+    // to be considered successful, the new Shapefile (sfNew) must have been allocated AND 
+    // either all shapes have been reprojected OR we are allowing layers with incomplete reprojection;
+	if (!sfNew || (numShapes != count && !m_globalSettings.allowLayersWithIncompleteReprojection))
 	{
 		FireLayerReprojected(layerHandle, VARIANT_FALSE);
 		if (sfNew) sfNew->Release();
 		ErrorMessage(tkFAILED_TO_REPROJECT);
 		return false;
 	}
+    else if (numShapes != count)
+    {
+        // allowing layer with incomplete reprojection, let the world know
+        FireLayerReprojectedIncomplete(layerHandle, count, numShapes);
+    }
 	
 	// let's substitute original shapefile with the reprojected one
 	// don't close the original shapefile; use may still want to interact with it

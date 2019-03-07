@@ -1260,3 +1260,24 @@ STDMETHODIMP CGlobalSettings::put_OgrInterpretYNStringAsBoolean(VARIANT_BOOL new
 
 	return S_OK;
 }
+
+// *********************************************************
+//	     AllowLayersWithIncompleteReprojection()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_AllowLayersWithIncompleteReprojection(VARIANT_BOOL* pVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    *pVal = m_globalSettings.allowLayersWithIncompleteReprojection ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_AllowLayersWithIncompleteReprojection(VARIANT_BOOL newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    m_globalSettings.allowLayersWithIncompleteReprojection = (newVal == VARIANT_TRUE) ? true : false;
+
+    return S_OK;
+}
