@@ -40,7 +40,7 @@ void COgrLayer::InitOpenedLayer()
 	get_FeatureCount(VARIANT_FALSE, &featureCount);
 	
 	CComPtr<IExtents> extents = NULL;
-	get_Extents(&extents, VARIANT_FALSE, &vb);
+	get_Extents(&extents, VARIANT_TRUE, &vb);
 
 	if (m_globalSettings.autoChooseOgrLoadingMode) {
 		long maxCount;
