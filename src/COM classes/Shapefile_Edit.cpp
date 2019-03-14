@@ -614,7 +614,10 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 		data->shape = Shape;
 		data->modified(true);
 		_shapeData.insert(_shapeData.begin() + *ShapeIndex, data);
-						
+		
+		if (_useQTree && !_qtree)
+			GenerateQTree();
+
 		RegisterNewShape(Shape, *ShapeIndex);
 						
 		*retval = VARIANT_TRUE;
@@ -871,6 +874,7 @@ STDMETHODIMP CShapefile::RefreshShapeExtents(LONG ShapeId, VARIANT_BOOL *retval)
 // ********************************************************************
 BOOL CShapefile::ReleaseMemoryShapes()
 {
+
 	int size = (int)_shapeData.size();
 	for( int i = 0; i < size; i++ )
 	{	

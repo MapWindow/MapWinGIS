@@ -15,16 +15,25 @@ struct OgrLoadingTask
 	bool Cancelled;
 	
 	OgrLoadingTask(long layerHandle) : Id(SeedId++), FeatureCount(0), LoadedCount(0), 
-					Finished(false), Cancelled(false)
-	{
-		LayerHandle = layerHandle;
+					Finished(false), Cancelled(false), LayerHandle(layerHandle)
+	{}
+
+	OgrLoadingTask* Clone() {
+		OgrLoadingTask* task = new OgrLoadingTask(LayerHandle);
+		task->FeatureCount = FeatureCount;
+		task->SeedId = SeedId;
+		task->Id = Id;
+		task->LoadedCount = LoadedCount;
+		task->Finished = Finished;
+		task->Cancelled = Cancelled;
+		return task;
 	}
 };
 
 class OgrDynamicLoader
 {
 public:
-	OgrDynamicLoader() 
+	OgrDynamicLoader()
 	{
 		_stop = false;
 		_maxCacheCount = m_globalSettings.ogrLayerMaxFeatureCount;
@@ -34,41 +43,47 @@ public:
 		IsMShapefile = false;
 	}
 	~OgrDynamicLoader() {
-		Clear();
+		CancelAllTasks();
+		ClearFinishedTasks();
 	}
 
 private:
+	::CCriticalSection DataLock;
+	::CCriticalSection QueueLock;
 	bool _stop;
 	int _maxCacheCount;
 	unsigned long _lockCounter;
+	std::queue<OgrLoadingTask*> Queue;
+	vector<ShapeRecordData*> Data;
 
 public:
 	::CCriticalSection ShapefileLock;
 	::CCriticalSection LoadingLock;
-	::CCriticalSection DataLock;
-	::CCriticalSection ProviderLock;
+	::CCriticalSection ProviderLock;	
 
-	std::queue<OgrLoadingTask*> Queue;
 	bool IsMShapefile;
 	CStringW LabelExpression;
-	vector<ShapeRecordData*> Data;
 	Extent LastExtents;
 	Extent LastSuccessExtents;
 	tkLabelPositioning LabelPosition;
 	tkLineLabelOrientation LabelOrientation;
 	tkLabelPositioning GetLabelPosition(ShpfileType type);
 	
-	bool AddWaitingTask(bool terminate = false);
+	void EnqueueTask(OgrLoadingTask* task);
+	bool SignalWaitingTask();
 	void ReleaseWaitingTask() { InterlockedDecrement(&_lockCounter);}
 	bool HaveWaitingTasks() { return _lockCounter > 0; }
+	void CancelAllTasks();
+	void Restart();
+
 	int GetMaxCacheCount() { return _maxCacheCount; }
 	void SetMaxCacheCount(int value) { _maxCacheCount = value; }
 	bool CanLoad(int featureCount) { return featureCount < GetMaxCacheCount(); }
-	void LockLoading(bool lock);
-	void LockData(bool lock);
-	void LockShapefile(bool lock);
-	void LockProvider(bool lock);
-	void Clear();
-	void Restart();
+
+	vector<OgrLoadingTask*> ClearFinishedTasks();
+	vector<OgrLoadingTask*> AwaitTasks();
+	
+	vector<ShapeRecordData*> FetchData();
+	void PutData(vector<ShapeRecordData*> shapeData);
 };
 

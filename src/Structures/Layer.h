@@ -142,7 +142,7 @@ public:
 	bool IsVisible(double scale, int zoom);
 	void GetExtentsAsNewInstance(IExtents** extents);
 	bool UpdateExtentsFromDatasource();
-	void LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandle);
+	void LoadAsync(IMapViewCallback * mapView, Extent extents, long layerHandle, bool bForce);
 	void UpdateShapefile(long layerHandle);
 	void CloseDatasources();
 	bool IsEmpty();

@@ -6837,8 +6837,10 @@ library MapWinGIS
             
             [id(48)] IDispatch* GetColorScheme(long LayerHandle);
 			[id(92)] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
-            [id(143)] void ReSourceLayer(long LayerHandle, BSTR newSrcPath);
+			[id(253), propget] IExtents* LayerExtents(LONG LayerHandle);
+
             [id(263)] VARIANT_BOOL ReloadOgrLayerFromSource(long OgrLayerHandle);
+			[id(264)] void RestartBackgroundLoading(long OgrLayerHandle);
 #endif 
 
 #define DRAWING_API

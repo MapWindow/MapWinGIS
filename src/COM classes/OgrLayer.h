@@ -172,7 +172,6 @@ private:
 
 public:
 	void InjectShapefile(IShapefile* sfNew);
-	IShapefile* GetShapefileNoRef() { return _shapefile; }
 	OGRLayer* GetDatasource() { return _layer; }
 	CPLXMLNode* SerializeCore(CString ElementName);
 	bool DeserializeCore(CPLXMLNode* node);

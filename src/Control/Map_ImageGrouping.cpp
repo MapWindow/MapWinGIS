@@ -404,7 +404,7 @@ void CMapView::ReloadBuffers()
 		// reload dynamic OGR layers as well
 		if (l->get_LayerType() == OgrLayerSource) 
 		{
-			l->LoadAsync(this, _extents, _activeLayers[i]);
+			l->LoadAsync(this, _extents, _activeLayers[i], false);
 		}
 	}
 }

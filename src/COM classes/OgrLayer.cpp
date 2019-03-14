@@ -17,7 +17,8 @@
 //		InjectShapefile()
 // *************************************************************
 void COgrLayer::InjectShapefile(IShapefile* sfNew)
-{
+{ // Lock shape file
+	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
 	CloseShapefile();
 	_shapefile = sfNew;
 }
@@ -73,9 +74,8 @@ void COgrLayer::ClearCachedValues()
 //***********************************************************************
 void COgrLayer::StopBackgroundLoading()
 {
-	_loader.AddWaitingTask(true);  // notify working thread that it's time is over
-	_loader.LockLoading(true);     // wait until it is finished
-	_loader.LockLoading(false);
+	_loader.CancelAllTasks();  // notify working thread that it's time is over
+	CSingleLock lock(&_loader.LoadingLock, _dynamicLoading ? TRUE : FALSE);
 }
 
 //***********************************************************************
@@ -223,7 +223,8 @@ STDMETHODIMP COgrLayer::Close()
 //		CloseShapefile()
 // *************************************************************
 void COgrLayer::CloseShapefile()
-{
+{ // Lock shape file
+	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
 	if (_shapefile)
 	{
 		VARIANT_BOOL vb;
@@ -445,23 +446,19 @@ STDMETHODIMP COgrLayer::GetBuffer(IShapefile** retVal)
 	*retVal = NULL;
 	if (!CheckState()) return S_OK;
 	
-	CSingleLock sfLock(&_loader.ShapefileLock);
-	sfLock.Lock();
-	
+	// Lock shape file
+	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
 	if (!_shapefile)
 	{
-		if (_dynamicLoading) 
-		{
-			CSingleLock lock(&_loader.ProviderLock);
-			lock.Lock();
+		if (_dynamicLoading)
+		{ // Lock provider
+			CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
 			_shapefile = Ogr2Shape::CreateShapefile(_layer, _activeShapeType);
 		}
 		else {
 			_shapefile = LoadShapefile();
 		}
 	}
-	
-	sfLock.Unlock();
 
 	if (_shapefile)
 	{
@@ -486,13 +483,11 @@ STDMETHODIMP COgrLayer::ReloadFromSource(VARIANT_BOOL* retVal)
 		return S_OK;		
 	}
 	
-	CSingleLock sfLock(&_loader.ShapefileLock);
-	sfLock.Lock();
-
+	// Lock shape file
+	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
 	CloseShapefile();
 	_shapefile = LoadShapefile();
-	
-	sfLock.Unlock();
+
 	*retVal = _shapefile ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
@@ -572,11 +567,11 @@ STDMETHODIMP COgrLayer::get_GeoProjection(IGeoProjection** retVal)
 
 	if (!CheckState()) return S_OK;
 
-	CSingleLock lock(&_loader.ProviderLock);
-	if (_dynamicLoading) lock.Lock();
+	// Locking provider here
+	CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE: FALSE);
 
 	OGRSpatialReference* sr = _layer->GetSpatialRef();		// owned by OGRLayer
-	if (sr)((CGeoProjection*)gp)->InjectSpatialReference(sr);
+	if (sr) ((CGeoProjection*)gp)->InjectSpatialReference(sr);
 	return S_OK;
 }
 
@@ -687,12 +682,11 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 		return S_OK;
 	}
 
-	CSingleLock lock(&_loader.ProviderLock);
-	if (_dynamicLoading) lock.Lock();
-
-	*savedCount = Shape2Ogr::SaveShapefileChanges(_layer, _shapefile, shapeCmnId, saveType, validateShapes ? true : false, _updateErrors);
-
-	lock.Unlock();
+	{ // Locking provider & shapefile here
+		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
+		CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+		*savedCount = Shape2Ogr::SaveShapefileChanges(_layer, _shapefile, shapeCmnId, saveType, validateShapes ? true : false, _updateErrors);
+	}
 
 	HasLocalChanges(&hasChanges);
 
@@ -716,63 +710,65 @@ STDMETHODIMP COgrLayer::HasLocalChanges(VARIANT_BOOL* retVal)
 
 	if (!CheckState() || !_shapefile) return S_OK;
 
-	long numShapes;
-	_shapefile->get_NumShapes(&numShapes);
+	{ // Locking provider & shapefile here
+		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
+		CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
 
-	CSingleLock lock(&_loader.ProviderLock);
-	if (_dynamicLoading) lock.Lock();
+		long numShapes;
+		_shapefile->get_NumShapes(&numShapes);
 
-	int featureCount = static_cast<int>(_layer->GetFeatureCount());
-	if (numShapes != featureCount)	   // i.e. deleted or inserted feature
-	{
-		*retVal = VARIANT_TRUE;
-		return S_OK;
-	}
-
-	CComPtr<ITable> table = NULL;
-	_shapefile->get_Table(&table);
-
-	long numFields = ShapefileHelper::GetNumFields(_shapefile);
-	long sourceFieldCount = _layer->GetLayerDefn()->GetFieldCount();
-	
-	// removed fields
-	if (sourceFieldCount > numFields - 1)
-	{
-		// if there are both removed and created fields, the total
-		// count may remain the same, but the will be modified records
-		*retVal = VARIANT_TRUE;
-		return S_OK;
-	}
-
-	// modified fields
-	VARIANT_BOOL modified, rowModified;
-
-	for (long i = 1; i < numFields; i++)
-	{
-		CComPtr<IField> field = NULL;
-		_shapefile->get_Field(i, &field);
-		field->get_Modified(&modified);
-
-		if (modified) {
+		int featureCount = static_cast<int>(_layer->GetFeatureCount());
+		if (numShapes != featureCount)	   // i.e. deleted or inserted feature
+		{
 			*retVal = VARIANT_TRUE;
 			return S_OK;
 		}
-	}
 
-	// modified rows and shapes
-	for (long i = 0; i < numShapes; i++)
-	{
-		_shapefile->get_ShapeModified(i, &modified);
-		table->get_RowIsModified(i, &rowModified);
-		
-		if (modified || rowModified)
+		CComPtr<ITable> table = NULL;
+		_shapefile->get_Table(&table);
+
+		long numFields = ShapefileHelper::GetNumFields(_shapefile);
+		long sourceFieldCount = _layer->GetLayerDefn()->GetFieldCount();
+
+		// removed fields
+		if (sourceFieldCount > numFields - 1)
 		{
+			// if there are both removed and created fields, the total
+			// count may remain the same, but the will be modified records
 			*retVal = VARIANT_TRUE;
-			break;
+			return S_OK;
 		}
-	}
 
-	return S_OK;
+		// modified fields
+		VARIANT_BOOL modified, rowModified;
+
+		for (long i = 1; i < numFields; i++)
+		{
+			CComPtr<IField> field = NULL;
+			_shapefile->get_Field(i, &field);
+			field->get_Modified(&modified);
+
+			if (modified) {
+				*retVal = VARIANT_TRUE;
+				return S_OK;
+			}
+		}
+
+		// modified rows and shapes
+		for (long i = 0; i < numShapes; i++)
+		{
+			_shapefile->get_ShapeModified(i, &modified);
+			table->get_RowIsModified(i, &rowModified);
+
+			if (modified || rowModified)
+			{
+				*retVal = VARIANT_TRUE;
+				break;
+			}
+		}
+
+		return S_OK;
+	}
 }
 
 // *************************************************************
@@ -781,6 +777,8 @@ STDMETHODIMP COgrLayer::HasLocalChanges(VARIANT_BOOL* retVal)
 long COgrLayer::GetFidForShapefile()
 {
 	if (!_layer || !_shapefile) return -1;
+	// Locking shapefile here
+	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
 	CComBSTR bstr;
 	get_FIDColumnName(&bstr);
 	CComPtr<ITable> table = NULL;
@@ -855,17 +853,16 @@ STDMETHODIMP COgrLayer::get_FeatureCount(VARIANT_BOOL forceLoading, int* retVal)
 	
 	if (!CheckState()) return S_OK;
 
-	CSingleLock lock(&_loader.ProviderLock);
-	if (_dynamicLoading)  {
-		lock.Lock();
+	{ // Locking provider here
+		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
+
+		if (_featureCount == -1 || forceLoading)
+		{
+			_featureCount = static_cast<int>(_layer->GetFeatureCount(forceLoading == VARIANT_TRUE));
+		}
+		*retVal = _featureCount;
+		return S_OK;
 	}
-	
-	if (_featureCount == -1 || forceLoading) 
-	{
-		_featureCount = static_cast<int>(_layer->GetFeatureCount(forceLoading == VARIANT_TRUE));
-	}
-	*retVal = _featureCount;
-	return S_OK;
 }
 
 
@@ -878,9 +875,9 @@ void COgrLayer::ForceCreateShapefile()
 	get_SourceType(&sourceType);
 
 	if (_dynamicLoading && !_shapefile && sourceType != ogrUninitialized) 
-	{
-		CSingleLock lock(&_loader.ProviderLock);
-		lock.Lock();
+	{ // Lock the provider & shapefile
+		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
+		CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
 		_shapefile = Ogr2Shape::CreateShapefile(_layer, _activeShapeType);
 	}
 }
@@ -900,11 +897,10 @@ STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoadin
 		_envelope = NULL;
 	}
 
-	if (!_envelope) {
-		
+	if (!_envelope)
+	{ // Locking provider here
+		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
 		_envelope = new OGREnvelope();
-		CSingleLock lock(&_loader.ProviderLock);
-		if (_dynamicLoading) lock.Lock();
 		_layer->GetExtent(_envelope, forceLoading == VARIANT_TRUE);
 	}
 	
@@ -952,34 +948,38 @@ STDMETHODIMP COgrLayer::get_SupportsEditing(tkOgrSaveType editingType, VARIANT_B
 	}
 		
 	// do we have FID column?
-	if (_shapefile)
-	{
-		long fid = GetFidForShapefile();
-		if (fid == -1)
+	{ // Locking shapefile here
+		CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+		if (_shapefile)
 		{
-			ErrorMessage(tkFID_COLUMN_NOT_FOUND);
+			long fid = GetFidForShapefile();
+			if (fid == -1)
+			{
+				ErrorMessage(tkFID_COLUMN_NOT_FOUND);
+				return S_OK;
+			}
+		}
+		else
+		{
+			CString cmn = _layer->GetFIDColumn();
+			if (cmn.GetLength() == 0)
+			{
+				ErrorMessage(tkFID_COLUMN_NOT_FOUND);
+				return S_OK;
+			}
+		}
+
+		// do we have reprojected data?
+		VARIANT_BOOL reprojected;
+		get_DataIsReprojected(&reprojected);
+		if (reprojected && editingType != ostAttributesOnly)
+		{
+			ErrorMessage(tkCANT_SAVE_REPROJECTED_GEOMETRIES);
 			return S_OK;
 		}
-	}
-	else
-	{
-		CString cmn = _layer->GetFIDColumn();
-		if (cmn.GetLength() == 0)
-		{
-			ErrorMessage(tkFID_COLUMN_NOT_FOUND);
-			return S_OK;
-		}
+		*retVal = VARIANT_TRUE;
 	}
 
-	// do we have reprojected data?
-	VARIANT_BOOL reprojected;
-	get_DataIsReprojected(&reprojected);
-	if (reprojected && editingType != ostAttributesOnly)
-	{
-		ErrorMessage(tkCANT_SAVE_REPROJECTED_GEOMETRIES);
-		return S_OK;
-	}
-	*retVal = VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -1016,14 +1016,14 @@ CPLXMLNode* COgrLayer::SerializeCore(CString ElementName)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "LabelOrientation", CPLString().Printf("%d", (int)_loader.LabelOrientation));
 	if (_loader.GetMaxCacheCount() != m_globalSettings.ogrLayerMaxFeatureCount)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxFeatureCount", CPLString().Printf("%d", (int)_loader.GetMaxCacheCount()));
-	
-	if (_shapefile)
-	{
-		CSingleLock sfLock(&_loader.ShapefileLock);
-		sfLock.Lock();
-		CPLXMLNode* sfNode = ((CShapefile*)_shapefile)->SerializeCore(VARIANT_FALSE, "ShapefileData", true);
-		sfLock.Unlock();
-		CPLAddXMLChild(psTree, sfNode);
+
+	{ // Lock shape file
+		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
+		if (_shapefile)
+		{
+			CPLXMLNode* sfNode = ((CShapefile*)_shapefile)->SerializeCore(VARIANT_FALSE, "ShapefileData", true);
+			CPLAddXMLChild(psTree, sfNode);
+		}
 	}
 	return psTree;
 }
@@ -1110,16 +1110,14 @@ bool COgrLayer::DeserializeOptions(CPLXMLNode* node)
 	{
 		CPLXMLNode* psChild = CPLGetXMLNode(node, "ShapefileData");
 		if (psChild)
-		{
+		{ // Lock shape file
+			CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
 			if (!_shapefile) {
-				IShapefile* sf = LoadShapefile();
-				CSingleLock sfLock(&_loader.ShapefileLock);
-				sfLock.Lock();
+				IShapefile * sf = LoadShapefile();
 				_shapefile = sf;
-				sfLock.Unlock();
+				bool result = ((CShapefile*)_shapefile)->DeserializeCore(VARIANT_FALSE, psChild);
+				if (!result) success = false;
 			}
-			bool result = ((CShapefile*)_shapefile)->DeserializeCore(VARIANT_FALSE, psChild);
-			if (!result) success = false;
 		}
 	}
 
@@ -1330,8 +1328,7 @@ STDMETHODIMP COgrLayer::get_StyleName(LONG styleIndex, BSTR* pVal)
 CStringW COgrLayer::LoadStyleXML(CStringW name)
 {
 	if (!CheckState()) return L"";
-	CSingleLock lock(&_loader.ProviderLock);
-	lock.Lock();
+	CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
 	return OgrStyleHelper::LoadStyle(_dataset, GetStyleTableName(), GetLayerName(), name);
 }
 

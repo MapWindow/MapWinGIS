@@ -1219,12 +1219,17 @@ BOOL CMapView::ReloadOgrLayerFromSource(long OgrLayerHandle)
     if (!ogrLayer)
     {
         ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
-        return false;
+		return VARIANT_FALSE;
     }
 
     // reload OGR layer from source
-    VARIANT_BOOL vb = VARIANT_FALSE;
-    ogrLayer->ReloadFromSource(&vb);
+	VARIANT_BOOL vb = VARIANT_FALSE;
+	if (layer->IsDynamicOgrLayer()) {
+		vb = VARIANT_TRUE;
+		RestartBackgroundLoading(OgrLayerHandle);
+	} 
+	else 
+		ogrLayer->ReloadFromSource(&vb);
 
     // we can now Release the IOgrLayer reference
     ogrLayer->Release();
@@ -1233,12 +1238,29 @@ BOOL CMapView::ReloadOgrLayerFromSource(long OgrLayerHandle)
     if (vb == 0)
     {
         ErrorMessage(tkNO_OGR_DATA_WAS_LOADED);
-        return false;
+		return VARIANT_FALSE;
     }
 
     // do we need to reproject?
     // at this point, success here indicates success of function
-    return CheckLayerProjection(layer, OgrLayerHandle);
+	return CheckLayerProjection(layer, OgrLayerHandle) ? VARIANT_TRUE : VARIANT_FALSE;
+}
+
+// ***************************************************************
+//		RestartBackgroundLoading()
+// ***************************************************************
+void CMapView::RestartBackgroundLoading(long OgrLayerHandle)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// get the layer from the specified handle
+	Layer* layer = GetLayer(OgrLayerHandle);
+	// failure here will have already set ErrorMessage
+	if (layer == nullptr) return;
+
+	// reload layer in background thread
+	if (layer->IsDynamicOgrLayer())
+		layer->LoadAsync(this, _extents, OgrLayerHandle, true);
 }
 
 // ****************************************************************** 

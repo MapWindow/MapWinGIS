@@ -903,24 +903,15 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 		{
 			if (l->IsDynamicOgrLayer())
 			{
-				l->UpdateShapefile(layerHandle);
-
 				OgrDynamicLoader* loader = l->GetOgrLoader();
 				if (loader) {
-					while (!loader->Queue.empty())
-					{
-						OgrLoadingTask* task = loader->Queue.front();
-						bool finished = task->Finished;
-						if (finished && !task->Cancelled)
-							FireBackgroundLoadingFinished(task->Id, layerHandle, task->FeatureCount, task->LoadedCount);
-
-						if (finished || task->Cancelled)
-						{
-							delete task;
-							loader->Queue.pop();
-						}
+					// Clear the finished tasks & send events for them:
+					for (auto task : loader->AwaitTasks()) {
+						FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, task->LoadedCount);
 					}
 				}
+				// Try to get the data loaded so far:
+				l->UpdateShapefile(layerHandle);
 			}
 
 			if (l->IsImage())

@@ -586,6 +586,8 @@ type
     procedure set_UDPointFontCharFontSize(LayerHandle: Integer; FontSize: Single); dispid 141;
     property ShapePointFontCharListID[LayerHandle: Integer; Shape: Integer]: Integer dispid 142;
     procedure ReSourceLayer(LayerHandle: Integer; const newSrcPath: WideString); dispid 143;
+	function ReloadOgrLayerFromSource(LayerHandle: Integer): WordBool; dispid 263;
+	procedure RestartBackgroundLoading(LayerHandle: Integer): dispid 264;
     property ShapeLayerStippleColor[LayerHandle: Integer]: OLE_COLOR dispid 144;
     property ShapeStippleColor[LayerHandle: Integer; Shape: Integer]: OLE_COLOR dispid 145;
     property ShapeStippleTransparent[LayerHandle: Integer; Shape: Integer]: WordBool dispid 146;

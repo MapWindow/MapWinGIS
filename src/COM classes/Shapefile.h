@@ -279,6 +279,7 @@ private:
 
 private:
 	::CCriticalSection _readLock;
+
 	std::vector<PolygonShapefile> _polySf;
 	
 	tkShapefileSourceType _sourceType;		// is it disk-based or in-memory?

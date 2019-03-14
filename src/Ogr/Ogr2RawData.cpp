@@ -17,10 +17,12 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 
 	layer->SetSpatialFilterRect(extents->left, extents->bottom, extents->right, extents->top);
 
-	loader->LockProvider(true);
-	int numFeatures = static_cast<int>(layer->GetFeatureCount());
-	loader->LockProvider(false);
-
+	// Get number of loaded features:
+	int numFeatures;
+	{ // Locking the provider in this section
+		CSingleLock lock(&loader->ProviderLock, TRUE);
+		numFeatures = static_cast<int>(layer->GetFeatureCount());
+	}
 	callback->FeatureCount = numFeatures;
 
 	if (!loader->CanLoad(numFeatures))
@@ -29,103 +31,119 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 		return false;
 	}
 
-	// if th loading is aborted by next thread before it's actually loaded, it doesn't matter
-	// the new thread will update this variable
-	loader->LastSuccessExtents = *extents;
-
 	OGRFeature *poFeature;
 	VARIANT_BOOL vb;
+	bool generateLabels = false;
 
-	CSingleLock lock(&loader->ProviderLock);
-	lock.Lock();
+	// ! Don't forget to delete the shape records if data is not used !
+	vector<ShapeRecordData*> shapeData;
+	vector<CStringW> fieldNames;
 
-	CStringA name = layer->GetFIDColumn();
-	bool hasFID = name.GetLength() > 0;
+	{ // Locking the provider in this section
+		CSingleLock lock(&loader->ProviderLock, TRUE);
 
-	map<long, long> fids;
-	OGRFeatureDefn *poFields = layer->GetLayerDefn();
+		CStringA fidColumn = layer->GetFIDColumn();
+		bool hasFID = fidColumn.GetLength() > 0;
 
-	OgrLabelsHelper::LabelFields labelFields;
-	bool hasLabels = false;
-	if (m_globalSettings.saveOgrLabels) 
-		hasLabels = OgrLabelsHelper::GetLabelFields(layer, labelFields);
+		map<long, long> fids;
+		OGRFeatureDefn *poFields = layer->GetLayerDefn();
 
-	bool generateLabels = !hasLabels && numFeatures <= loader->GetMaxCacheCount();
+		OgrLabelsHelper::LabelFields labelFields;
+		bool hasLabels = false;
+		if (m_globalSettings.saveOgrLabels)
+			hasLabels = OgrLabelsHelper::GetLabelFields(layer, labelFields);
 
-	vector<ShapeRecordData*> list;
-	
-	layer->ResetReading();
-	while ((poFeature = layer->GetNextFeature()) != NULL)
-	{
-		OGRGeometry *oGeom = poFeature->GetGeometryRef();
+		generateLabels = !hasLabels && numFeatures <= loader->GetMaxCacheCount();
 
-		IShape* shp = NULL;
-		if (oGeom)
-			shp = OgrConverter::GeometryToShape(oGeom, loader->IsMShapefile);
-
-		if (!shp)  // insert null shape so that client can still access it
-			ComHelper::CreateShape(&shp);
-
-		ShapeRecordData* data = new ShapeRecordData();
-		shp->ExportToBinary(&(data->Shape), &vb);
-
-		if (generateLabels)
+		layer->ResetReading();
+		while ((poFeature = layer->GetNextFeature()) != NULL)
 		{
-			((CShape*)shp)->get_LabelPositionAuto(loader->LabelPosition, 
-				data->LabelX, data->LabelY, data->LabelRotation, loader->LabelOrientation);
+			// Get shape or create empty one:
+			IShape* shp = NULL;
+			OGRGeometry *oGeom = poFeature->GetGeometryRef();
+			if (oGeom)
+				shp = OgrConverter::GeometryToShape(oGeom, loader->IsMShapefile);
+			if (!shp)  // insert null shape so that client can still access it
+				ComHelper::CreateShape(&shp);
+
+			// Get shape record:
+			ShapeRecordData* data = new ShapeRecordData();
+			shp->ExportToBinary(&(data->Shape), &vb);
+
+			if (generateLabels)
+			{
+				((CShape*)shp)->get_LabelPositionAuto(loader->LabelPosition,
+					data->LabelX, data->LabelY, data->LabelRotation, loader->LabelOrientation);
+			}
+
+			shp->Release();
+
+			FieldsToShapeRecord(poFields, poFeature, data, hasFID, hasLabels, labelFields);
+
+			shapeData.push_back(data);
+			OGRFeature::DestroyFeature(poFeature);
+
+			// Check for a cancel request:
+			if (loader->HaveWaitingTasks()) {
+				Debug::WriteWithThreadId("Task cancelling.", DebugOgrLoading);
+				DeleteAndClearShapeData(shapeData);
+				return false;
+			}
 		}
-		
-		shp->Release();
-
-		FieldsToShapeRecord(poFields, poFeature, data, hasFID, hasLabels, labelFields);
-
-		list.push_back(data);
-		OGRFeature::DestroyFeature(poFeature);
-
-		if (loader->HaveWaitingTasks())
-			break;
-	}
-
-	vector<CStringW> fields;
-	if ((generateLabels || categories.size() > 0) && (!loader->HaveWaitingTasks()))
-	{
-		if (!OgrHelper::GetFieldList(layer, fields)) {
-			lock.Unlock();
+	
+		// If we need to generate labels or apply catagories, ensure we have field names:
+		if ((generateLabels || categories.size() > 0) && !OgrHelper::GetFieldList(layer, fieldNames)) {
+			Debug::WriteWithThreadId("Task cancelling.", DebugOgrLoading);
+			DeleteAndClearShapeData(shapeData);
 			return false;
 		}
 	}
-	lock.Unlock();
 
-	if (generateLabels) {
-		CStringW error;
-		GenerateLabels(list, fields, loader->LabelExpression, error, loader);
+	// Check for a cancel request:
+	if (loader->HaveWaitingTasks()) {
+		Debug::WriteWithThreadId("Task cancelling.", DebugOgrLoading);
+		DeleteAndClearShapeData(shapeData);
+		return false;
 	}
-
-	if (categories.size() > 0) {
-		ApplyCategories(list, fields, categories, loader);
-	}
-
-	bool success = false;
-	if (list.size() > 0 && !loader->HaveWaitingTasks())
+		
+	// Process loaded data:
+	if (shapeData.size() > 0)
 	{
-		// copy to the location accessible by map rendering
-		loader->LockData(true);
-		loader->Data.insert(loader->Data.end(), list.begin(), list.end());
-		loader->LockData(false);
-		callback->LoadedCount = list.size();
-		success = true;
-	}
-	else {
-		for (size_t i = 0; i < list.size(); i++) {
-			delete list[i];
+		// Generate labels
+		if (generateLabels) {
+			CStringW error;
+			GenerateLabels(shapeData, fieldNames, loader->LabelExpression, error, loader);
 		}
-	}
 
-	if (success) {
+		// Apply categories
+		if (categories.size() > 0) {
+			ApplyCategories(shapeData, fieldNames, categories, loader);
+		}
+
+		// copy to the location accessible by map rendering
+		loader->PutData(shapeData);
+		callback->LoadedCount = shapeData.size();
+		loader->LastSuccessExtents = *extents;
 		Debug::WriteWithThreadId("Task succeeded.", DebugOgrLoading);
+		return true;
 	}
+	else 
+	{
+		Debug::WriteWithThreadId("Task succeeded but no data loaded.", DebugOgrLoading);
+		DeleteAndClearShapeData(shapeData);
+		return false;
+	}
+}
 
-	return success;
+// *************************************************************
+//		DeleteAndClearShapeData()
+// *************************************************************
+void Ogr2RawData::DeleteAndClearShapeData(vector<ShapeRecordData*>& shapeData) {
+	// Delete referenced objects in the vector
+	for (size_t i = 0; i < shapeData.size(); i++) {
+		delete shapeData[i];
+	}
+	shapeData.clear();
 }
 
 // *************************************************************

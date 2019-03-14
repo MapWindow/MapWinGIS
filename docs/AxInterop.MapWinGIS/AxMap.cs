@@ -1381,6 +1381,15 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
+        /// Restarts the background loading thread of dynamically loaded layers
+        /// </summary>
+        /// <param name="OgrLayerHandle">The handle of the layer.  Must be an OGR layer.</param>
+        public void RestartBackgroundLoading(int OgrLayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Removes the specified layer from the map
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer to be removed from the map.</param>

@@ -16,5 +16,6 @@ private:
 	static int GetLabelFieldIndex(CStringW expression, vector<CStringW>& fields);
 	static void ApplyCategories(vector<ShapeRecordData*>& data, vector<CStringW>& fields, vector<CategoriesData*>& categories, OgrDynamicLoader* loader);
 	static bool PopulateExpressionFields(vector<ShapeRecordData*>& data, int rowIndex, CustomExpression& expr);
+	static void DeleteAndClearShapeData(vector<ShapeRecordData*>& data);
 };
 

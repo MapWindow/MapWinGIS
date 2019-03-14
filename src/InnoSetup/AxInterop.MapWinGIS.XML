@@ -964,6 +964,22 @@
             <param name="LayerHandle">The handle of the layer.</param>
             <param name="newSrcPath">The the name of the new data source.</param>
         </member>
+        <member name="M:AxMapWinGIS.AxMap.ReloadOgrLayerFromSource(System.Int32)">
+            <summary>
+            Performs the same operation as OgrLayer.ReloadFromSource, then compares 
+            projections with the Map, and if the settings allow, will reproject on-the-fly.
+            </summary>
+            <param name="OgrLayerHandle">The handle of the layer.  Must be an OGR layer.</param>
+            <returns>
+            True if successful; False if not an OGR Layer, could not be reloaded, or could not be reprojected (if necessary)
+            </returns>
+        </member>
+        <member name="M:AxMapWinGIS.AxMap.RestartBackgroundLoading(System.Int32)">
+            <summary>
+            Restarts the background loading thread of dynamically loaded layers
+            </summary>
+            <param name="OgrLayerHandle">The handle of the layer.  Must be an OGR layer.</param>
+        </member>
         <member name="M:AxMapWinGIS.AxMap.RemoveLayer(System.Int32)">
             <summary>
             Removes the specified layer from the map
