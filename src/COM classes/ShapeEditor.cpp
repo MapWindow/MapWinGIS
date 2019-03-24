@@ -1252,6 +1252,7 @@ void CShapeEditor::HandleProjPointAdd(double projX, double projY)
 	double pixelX, pixelY;
 	_mapCallback->_ProjectionToPixel(projX, projY, &pixelX, &pixelY);
 	_activeShape->AddPoint(projX, projY, pixelX, pixelY);
+	_activeShape->ClearSnapPoint();
 }
 
 // ***************************************************************

@@ -69,6 +69,7 @@ bool EditorBase::SnapToPreviousVertex(int& vertexIndex, double screenX, double s
 void EditorBase::Clear()
 {
 	SetShapeType(SHP_NULLSHAPE);
+	ClearSnapPoint();
 	ActiveShape::Clear();
 }
 
@@ -84,7 +85,7 @@ bool EditorBase::ClearHighlightedVertex()
 	return false;
 }
 
-void EditorBase::SetSnapPoint(double x, double y, bool visible)
+void EditorBase::SetSnapPoint(double x, double y)
 {
 	_snapPointX = x;
 	_snapPointY = y;
