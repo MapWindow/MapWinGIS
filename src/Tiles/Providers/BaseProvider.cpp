@@ -28,7 +28,6 @@ CString BaseProvider::_proxyUsername = "";
 CString BaseProvider::_proxyPassword = "";
 CString BaseProvider::_proxyDomain = "";
 CCriticalSection BaseProvider::_clientLock;
-const CString filePrefix = "file:///";
 
 // ************************************************************
 //		GetTileImage()
@@ -92,34 +91,6 @@ CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool
 }
 
 // ************************************************************
-//		GetTileFileData()
-// ************************************************************
-CMemoryBitmap* BaseProvider::GetTileFileData(CString url, CString shortUrl, bool recursive)
-{
-	url.Delete(0, filePrefix.GetLength());
-	url.Replace("|", ":");
-	url.Replace("/", "\\");
-
-	std::ifstream fl = std::ifstream(url.GetBuffer(), std::ofstream::binary);
-	if (!fl)
-		return nullptr;
-
-	fl.seekg(0, std::ios::end);
-	int sz = fl.tellg();
-	if (sz == 0)
-		return nullptr;
-
-	std::vector<char> buf(sz);
-
-	fl.seekg(0, std::ios::beg);	
-	fl.read(buf.data(), buf.size());
-	if (!fl)
-		return nullptr;
-
-	return ReadBitmap(buf.data(), buf.size());
-}
-
-// ************************************************************
 //		DownloadBitmap()
 // ************************************************************
 CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
@@ -129,10 +100,9 @@ CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
 
     shortUrl.Format(R"(\zoom=%d\x=%d\y=%d)", zoom, pos.x, pos.y);
 
-	if (url.Find(filePrefix) == 0)
-		return GetTileFileData(url, shortUrl);
-	else
-		return GetTileHttpData(url, shortUrl);
+    CMemoryBitmap* bmp = GetTileHttpData(url, shortUrl);
+
+    return bmp;
 }
 
 // ************************************************************
