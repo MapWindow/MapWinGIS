@@ -512,7 +512,8 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	if (HandleOnZoombarMouseDown(point) || HandleOnCopyrighMouseDown(point))
 		return;
 
-	bool ctrl = nFlags & MK_CONTROL ? true: false;
+	bool ctrl = (nFlags & MK_CONTROL) != 0;
+	bool shift = (nFlags & MK_SHIFT) != 0;
 
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
@@ -524,7 +525,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	double projX;
 	double projY;
-	bool shift = (nFlags & MK_SHIFT) != 0;
 
 	ClearHotTracking();
 
@@ -560,7 +560,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		case cmEditShape:
 			{
-				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl))
+				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl, shift))
 				{
 					long layerHandle, shapeIndex;
 					if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) 
