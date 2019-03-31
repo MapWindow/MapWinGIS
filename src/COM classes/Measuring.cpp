@@ -91,10 +91,11 @@ STDMETHODIMP CMeasuring::get_PointCount(long* retVal)
 STDMETHODIMP CMeasuring::get_PointXY(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	// pre-set to FALSE
+	*retVal = VARIANT_FALSE;
 	if (pointIndex < 0 || pointIndex >= (long)_measuring->GetPointCount())
 	{
 		ErrorMsg(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = VARIANT_FALSE;
 	}
 	else
 	{
@@ -226,7 +227,7 @@ STDMETHODIMP CMeasuring::get_ShowBearing(VARIANT_BOOL* retVal)
 STDMETHODIMP CMeasuring::put_ShowBearing(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_measuring->ShowBearing = newVal ? true: false;
+	_measuring->ShowBearing = (newVal == VARIANT_TRUE);
 	return S_OK;
 }
 
@@ -236,7 +237,7 @@ STDMETHODIMP CMeasuring::put_ShowBearing(VARIANT_BOOL newVal)
 STDMETHODIMP CMeasuring::get_IsUsingEllipsoid(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _measuring->GetTransformationMode() != tmNotDefined;
+	*retVal = (_measuring->GetTransformationMode() != tmNotDefined) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -263,7 +264,7 @@ STDMETHODIMP CMeasuring::put_AreaUnits(tkAreaDisplayMode newVal)
 STDMETHODIMP CMeasuring::get_IsEmpty(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _measuring->GetPointCount() == 0 ? VARIANT_TRUE : VARIANT_FALSE;
+	*pVal = (_measuring->GetPointCount() == 0) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -297,7 +298,7 @@ STDMETHODIMP CMeasuring::get_ShowLength(VARIANT_BOOL* pVal)
 STDMETHODIMP CMeasuring::put_ShowLength(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_measuring->ShowLength = newVal ? true : false;
+	_measuring->ShowLength = (newVal == VARIANT_TRUE);
 	return S_OK;
 }
 
@@ -399,7 +400,7 @@ STDMETHODIMP CMeasuring::get_PointsVisible(VARIANT_BOOL* pVal)
 STDMETHODIMP CMeasuring::put_PointsVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_measuring->PointsVisible = newVal ? true : false;
+	_measuring->PointsVisible = (newVal == VARIANT_TRUE);
 	return S_OK;
 }
 
@@ -501,7 +502,7 @@ STDMETHODIMP CMeasuring::get_PointLabelsVisible(VARIANT_BOOL* pVal)
 STDMETHODIMP CMeasuring::put_PointLabelsVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_measuring->PointLabelsVisible = newVal ? true: false;
+	_measuring->PointLabelsVisible = (newVal == VARIANT_TRUE);
 	return S_OK;
 }
 
@@ -518,7 +519,7 @@ STDMETHODIMP CMeasuring::get_ShowTotalLength(VARIANT_BOOL* pVal)
 STDMETHODIMP CMeasuring::put_ShowTotalLength(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_measuring->ShowTotalLength = newVal ? true : false;
+	_measuring->ShowTotalLength = (newVal == VARIANT_TRUE);
 	return S_OK;
 }
 
