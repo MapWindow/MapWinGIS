@@ -19,6 +19,11 @@
  * (Open source contributors should list themselves and their modifications here). */
 #pragma once
 
+// https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-3-c4839?view=vs-2017
+// the error/warning is actually in Microsoft ATL code, and I could not find an answer, so I am allowing
+// it as a Warning only, and we'll have to see if there are any side-affects or bad behavior.
+#pragma warning(disable: 4839) // non-standard use of class 'type' as an argument to a variadic function
+
 class HttpProxyHelper
 {
 public:
