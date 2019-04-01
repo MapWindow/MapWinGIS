@@ -108,8 +108,8 @@ bool VertexEditor::OnMouseDownEditing(IMapViewCallback* map, CShapeEditor* edito
 		}
 	}
 
-	// start shape moving
-	if (ShapeHelper::PointWithinShape(shp, projX, projY, tol) && shift)
+	// start shape moving (only if 'shift' is pressed)
+	if (shift && ShapeHelper::PointWithinShape(shp, projX, projY, tol))
 	{
 		// it's confusing to have both part and shape move depending on where you clicked
 		if (editor->HasSelectedPart()) return true;
