@@ -108,14 +108,17 @@ bool VertexEditor::OnMouseDownEditing(IMapViewCallback* map, CShapeEditor* edito
 		}
 	}
 
-	// start shape moving (only if 'shift' is pressed)
-	if (shift && ShapeHelper::PointWithinShape(shp, projX, projY, tol))
-	{
-		// it's confusing to have both part and shape move depending on where you clicked
-		if (editor->HasSelectedPart()) return true;
+	// MWGIS-153: until further review, due to difficulty in editing, 
+	// disable 'moving' altogether within the context of the vertex editor
+	//
+	//// start shape moving (only if 'shift' is pressed)
+	//if (shift && ShapeHelper::PointWithinShape(shp, projX, projY, tol))
+	//{
+	//	// it's confusing to have both part and shape move depending on where you clicked
+	//	if (editor->HasSelectedPart()) return true;
 
-		map->_StartDragging(DragMoveShape);
-		return true;
-	}
+	//	map->_StartDragging(DragMoveShape);
+	//	return true;
+	//}
 	return false;
 }
