@@ -77,6 +77,7 @@ public:
 
 private:
     CMemoryBitmap* GetTileHttpData(CString url, CString shortUrl, bool recursive = false);
+	CMemoryBitmap* GetTileFileData(CString url);
     static void PreventParallelExecution();
     CMemoryBitmap* ProcessHttpRequest(void* secureHttpClient, const CString& url, const CString& shortUrl,
                                       bool success);

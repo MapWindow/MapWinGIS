@@ -94,7 +94,7 @@ CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool
 // ************************************************************
 //		GetTileFileData()
 // ************************************************************
-CMemoryBitmap* BaseProvider::GetTileFileData(CString url, CString shortUrl, bool recursive)
+CMemoryBitmap* BaseProvider::GetTileFileData(CString url)
 {
 	url.Delete(0, filePrefix.GetLength());
 	url.Replace("|", ":");
@@ -130,7 +130,7 @@ CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
     shortUrl.Format(R"(\zoom=%d\x=%d\y=%d)", zoom, pos.x, pos.y);
 
 	if (url.Find(filePrefix) == 0)
-		return GetTileFileData(url, shortUrl);
+		return GetTileFileData(url);
 	else
 		return GetTileHttpData(url, shortUrl);
 }
