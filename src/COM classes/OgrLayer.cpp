@@ -84,7 +84,12 @@ void COgrLayer::StopBackgroundLoading()
 IShapefile* COgrLayer::LoadShapefile()
 { 
 	bool isTrimmed = false;	
-	IShapefile* sf = Ogr2Shape::Layer2Shapefile(_layer, _activeShapeType, _loader.GetMaxCacheCount(), isTrimmed, &_loader, _globalCallback); 
+	ShpfileType shpType;
+	get_ShapeType(&shpType);
+
+	shpType = shpType != SHP_NULLSHAPE ? shpType : _activeShapeType;
+
+	IShapefile* sf = Ogr2Shape::Layer2Shapefile(_layer, shpType, _loader.GetMaxCacheCount(), isTrimmed, &_loader, _globalCallback);
 	if (isTrimmed) {
 		ErrorMessage(tkOGR_LAYER_TRIMMED);
 	}

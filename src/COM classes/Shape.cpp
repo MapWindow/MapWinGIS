@@ -2593,11 +2593,22 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 	*retVal = VARIANT_FALSE;
 
 	USES_CONVERSION;
+	/*
 	CString ser = OLE2A(Serialized);
 
 	OGRGeometry* oGeom = NULL;
 	char* buffer = ser.GetBuffer();
 	OGRErr err = OGRGeometryFactory::createFromWkt(&buffer, NULL, &oGeom);
+	*/
+	
+	char* pBuf = _com_util::ConvertBSTRToString(Serialized);
+
+	char *pszBuffBack = pBuf;
+
+	OGRGeometry* oGeom = NULL;
+	OGRErr err = OGRGeometryFactory::createFromWkt(&pBuf, NULL, &oGeom);
+	delete[] pszBuffBack;	
+		
 	if (err != OGRERR_NONE || !oGeom)
 	{
 		ErrorMessage(tkINVALID_SHAPE);

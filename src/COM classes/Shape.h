@@ -20,6 +20,7 @@
 
 #pragma once
 //
+#include <comutil.h>
 #include "ShapeInterfaces.h"
 #include "OgrConverter.h"
 #include "ShapeWrapper.h"
