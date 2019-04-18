@@ -117,11 +117,11 @@
     <Compile Include="GdalUtilsTests.cs" />
     <Compile Include="DrawingTests.cs" />
     <Compile Include="ClipperTests.cs" />
-    <Compile Include="AkkerwebTests.cs" />
     <Compile Include="GridTests.cs" />
     <Compile Include="TilesTests.cs" />
     <Compile Include="AxMapTests.cs" />
     <Compile Include="NewSfMethodsTests.cs" />
+    <Compile Include="ShapefileEditorTests.cs" />
     <Compile Include="UtilTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -282,6 +282,18 @@
     </None>
     <None Include="Testdata\Issues\MWGIS-98\3dPoint.shx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\clipByMapExtents.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\clipByMapExtents.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\clipByMapExtents.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\clipByMapExtents.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Testdata\sf\embankments_buffered_split.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
