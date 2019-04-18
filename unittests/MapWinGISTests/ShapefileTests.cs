@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using System.Windows.Forms;
 using AxMapWinGIS;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -453,6 +454,94 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
+        public void ClipByMapExtents()
+        {
+            _axMap1 = Helper.GetAxMap();
+
+            // Start with fresh map:
+            _axMap1.Clear();
+            _axMap1.TileProvider = tkTileProvider.ProviderNone;
+            _axMap1.ZoomBehavior = tkZoomBehavior.zbDefault;
+            _axMap1.KnownExtents = tkKnownExtents.keUSA;
+
+            // Load shapefile:
+            const string filename = @"sf/clipByMapExtents.shp";
+            var handle = _axMap1.AddLayerFromFilename(filename, tkFileOpenStrategy.fosVectorLayer, true);
+            Assert.IsTrue(handle != -1, "Could not load layer: " + _axMap1.get_ErrorMsg(_axMap1.LastErrorCode));
+            var sf = _axMap1.get_Shapefile(handle);
+            Debug.WriteLine($"Shapefile has {sf.NumShapes} shapes");
+
+            // Save the current view as an image:
+            Helper.SaveSnapshot(_axMap1, "AfterLoading.png", _axMap1.get_layerExtents(handle), 1);
+
+            // Zoom in:
+            Debug.WriteLine("Zoom in");
+            _axMap1.ZoomIn(0.3);
+            // New snapshot
+            Helper.SaveSnapshot(_axMap1, "AfterZooming.png", _axMap1.get_layerExtents(handle), 1);
+
+            // Make shape from map extents:
+            var clipShape = _axMap1.Extents.ToShape();
+            Assert.IsNotNull(clipShape, "Could not make shape from map extents");
+            Debug.WriteLine(clipShape.numPoints);
+            // Make in-memory shapefile from shape:
+            var sfClip = new Shapefile();
+            if (!sfClip.CreateNewWithShapeID("", ShpfileType.SHP_POLYGON))
+                Assert.Fail("Can't create shapefile. Error: " + sfClip.ErrorMsg[sfClip.LastErrorCode]);
+            // Set projection:
+            sfClip.GeoProjection = _axMap1.GeoProjection.Clone();
+            var shpIndex = sfClip.EditAddShape(clipShape);
+            Assert.IsTrue(shpIndex != -1, "Could not add shape: " + sfClip.ErrorMsg[sfClip.LastErrorCode]);
+
+            // Clip:
+            var sfResult = sf.Clip(false, sfClip, false);
+            Debug.WriteLine(sfResult.NumShapes);
+
+            Assert.AreNotEqual(sf.NumShapes, sfResult.NumShapes, "No shapes were clipped.");
+        }
+
+        [TestMethod]
+        public void SnapeShotTest()
+        {
+            _axMap1 = Helper.GetAxMap();
+
+            // Process the list of files found in the directory.
+            var fileEntries = Directory.GetFiles("sf", "*.shp");
+            foreach (var sfName in fileEntries)
+            {
+                // Start with fresh map:
+                _axMap1.Clear();
+                _axMap1.TileProvider = tkTileProvider.ProviderNone;
+                _axMap1.ZoomBehavior = tkZoomBehavior.zbDefault;
+                _axMap1.KnownExtents = tkKnownExtents.keWorld;
+
+                var baseName = Path.GetFileNameWithoutExtension(sfName);
+                // if (baseName == "onepoint") continue;
+
+                Helper.DebugMsg("Working on " + baseName);
+
+                // Load shapefile:
+                var handle = _axMap1.AddLayerFromFilename(sfName, tkFileOpenStrategy.fosVectorLayer, true);
+                Assert.IsTrue(handle != -1, "Could not load layer: " + _axMap1.get_ErrorMsg(_axMap1.LastErrorCode));
+                
+                Helper.DebugMsg(_axMap1.Extents.ToDebugString());
+                Helper.DebugMsg(_axMap1.get_layerExtents(handle).ToDebugString());
+                
+                Helper.SaveSnapshot(_axMap1, baseName + "-loaded.png", _axMap1.Extents);
+                Helper.SaveSnapshot2(_axMap1, baseName + "-loaded2.png");
+                
+
+                // Zoom in:
+                _axMap1.ZoomIn(0.3);
+                Helper.DebugMsg(_axMap1.Extents.ToDebugString());
+                Helper.DebugMsg(_axMap1.get_layerExtents(handle).ToDebugString());
+
+                Helper.SaveSnapshot(_axMap1, baseName + "-zoomin.png", _axMap1.Extents);
+                Helper.SaveSnapshot2(_axMap1, baseName + "-zoomin2.png");
+            }
+        }
+
+        [TestMethod]
         public void CreateFishnet()
         {
             // Create shape from WKT:
@@ -701,6 +790,7 @@ namespace MapWinGISTests
             Assert.IsTrue(result);
             TestSpatialIndex(sfName);
         }
+
 
         [TestMethod]
         public void SpatialIndexAllTypes()
