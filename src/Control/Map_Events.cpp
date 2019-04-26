@@ -512,7 +512,8 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	if (HandleOnZoombarMouseDown(point) || HandleOnCopyrighMouseDown(point))
 		return;
 
-	bool ctrl = nFlags & MK_CONTROL ? true: false;
+	bool ctrl = (nFlags & MK_CONTROL) != 0;
+	bool shift = (nFlags & MK_SHIFT) != 0;
 
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
@@ -524,7 +525,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	double projX;
 	double projY;
-	bool shift = (nFlags & MK_SHIFT) != 0;
 
 	ClearHotTracking();
 
@@ -560,7 +560,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		case cmEditShape:
 			{
-				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl))
+				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl, shift))
 				{
 					long layerHandle, shapeIndex;
 					if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) 
@@ -1245,20 +1245,22 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	if ((EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmMeasure))
 	{
 		ActiveShape* shp = GetActiveShape();
+
+		VARIANT_BOOL snapped = VARIANT_FALSE;
+		double x = point.x, y = point.y;
+		if (SnappingIsOn(nFlags))
+		{
+			if (this->FindSnapPointCore(point.x, point.y, &x, &y)) {
+				ProjToPixel(x, y, &x, &y);
+				GetEditorBase()->SetSnapPoint(x, y);
+			}
+			else {
+				GetEditorBase()->ClearSnapPoint();
+			}
+		}
+
 		if (shp->IsDynamic() && shp->GetPointCount() > 0)
 		{
-			VARIANT_BOOL snapped = VARIANT_FALSE;
-			double x = point.x, y = point.y;
-			if (SnappingIsOn(nFlags))
-			{
-				snapped = this->FindSnapPointCore(point.x, point.y, &x, &y);
-				if (snapped) {
-					ProjToPixel(x, y, &x, &y);
-					_shapeEditor->GetActiveShape()->SetSnapPoint(x, y, true);
-				}
-				else
-					_shapeEditor->GetActiveShape()->ClearSnapPoint();
-			}
 			shp->SetMousePosition(x, y);
 			refreshNeeded = true;
 		}

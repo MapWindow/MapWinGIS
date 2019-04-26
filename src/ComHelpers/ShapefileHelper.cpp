@@ -387,6 +387,36 @@ bool ShapefileHelper::GetClosestPoint(IShapefile* sf, double x, double y, double
 }
 
 // *****************************************************************
+//		tryGetCloserPointForShape()
+// *****************************************************************
+bool tryGetCloserPointForShape(IShape* shp, IShape* ptShp, double& minDist, double maxDistance, double& fx, double& fy) {
+	IShape* resShp = NULL;
+	VARIANT_BOOL vb;
+
+	// Get closest points:
+	shp->ClosestPoints(ptShp, &resShp);
+
+	if (resShp != NULL) {
+		// Get the point snapped on geometry
+		double xPnt, yPnt;
+		resShp->get_XY(0, &xPnt, &yPnt, &vb);
+		// Get the distance
+		double distance;
+		resShp->get_Length(&distance);
+
+		// Check if this is allowed and/or smaller than the previous found point:
+		if (distance < minDist && distance < maxDistance) {
+			fx = xPnt;
+			fy = yPnt;
+			minDist = distance;
+			resShp->Release();
+			return true;
+		}
+	}
+	return false;
+}
+
+// *****************************************************************
 //		GetClosestSnapPosition()
 // *****************************************************************
 bool ShapefileHelper::GetClosestSnapPosition(IShapefile* sf, double x, double y, double maxDistance, std::vector<long>& ids,
@@ -399,7 +429,6 @@ bool ShapefileHelper::GetClosestSnapPosition(IShapefile* sf, double x, double y,
 
     IPoint* pnt = NULL;
     IShape* ptShp = NULL;
-    IShape* resShp = NULL;
 
 	for (long id : ids)
 	{
@@ -430,24 +459,66 @@ bool ShapefileHelper::GetClosestSnapPosition(IShapefile* sf, double x, double y,
             ptShp->InsertPoint(pnt, &position, &vb);
             pnt->Release();
 
-            // Get closest points:
-            shp->ClosestPoints(ptShp , &resShp);
-            ptShp->Release();
-            shp->Release();
+			// If shape is a polygon, extract parts as polyline and snap to them instead
+			ShpfileType shptype = SHP_NULLSHAPE;
+			shp->get_ShapeType(&shptype);
+			if (shptype == SHP_POLYGON || shptype == SHP_POLYGONM || shptype == SHP_POLYGONZ) {
 
-            if (resShp != NULL) {
-                // Get the point snapped on geometry
-                double xPnt, yPnt;
-                resShp->get_XY(0, &xPnt, &yPnt, &vb);
+				long numParts;
+				shp->get_NumParts(&numParts);
+				for (int i = 0; i < numParts; i++) {
+					// Get part start and end index
+					long beg_part, end_part;
+					shp->get_Part(i, &beg_part);
+					shp->get_EndOfPart(i, &end_part);
 
-                // Check if this is allowed and/or smaller than the previous found point:
-                const double distance = sqrt(pow(x - xPnt, 2.0) + pow(y - yPnt, 2.0));
-                if (distance < minDist && distance < maxDistance) {
-                    fx = xPnt;
-                    fy = yPnt;
-                    minDist = distance;
-                }
-            }            
+					// If weirdness occurs, ignore
+					if (beg_part == -1 || end_part == -1)
+						continue;
+
+					// Create a new shape
+					IShape* partShp = NULL;
+					ComHelper::CreateShape(&partShp);
+
+					// Set shape type to polyline
+					if (shptype == SHP_POLYGON)
+						partShp->put_ShapeType(SHP_POLYLINE);
+					else if (shptype == SHP_POLYGONM)
+						partShp->put_ShapeType(SHP_POLYLINEM);
+					else if (shptype == SHP_POLYGONZ)
+						partShp->put_ShapeType(SHP_POLYLINEZ);
+
+					// Insert part
+					long part = 0;
+					VARIANT_BOOL vbretval;
+					partShp->InsertPart(0, &part, &vbretval);
+
+					// Copy & insert points
+					long cnt = 0;
+					IPoint* pntOld = NULL;
+					IPoint* pntNew = NULL;
+					for (int i = beg_part; i <= end_part; i++)
+					{
+						shp->get_Point(i, &pntOld);
+						pntOld->Clone(&pntNew);
+						partShp->InsertPoint(pntNew, &cnt, &vbretval);
+						pntOld->Release();
+						pntNew->Release();
+						cnt++;
+					}
+
+
+					// Test for snap on part polyline point:
+					tryGetCloserPointForShape(partShp, ptShp, minDist, maxDistance, fx, fy);
+					partShp->Release();
+				}
+			}
+			else if (shptype != SHP_NULLSHAPE) {
+				// Test for snap point on original shape:
+				tryGetCloserPointForShape(shp, ptShp, minDist, maxDistance, fx, fy);
+			}           
+			ptShp->Release();
+			shp->Release();
 		}
 	}
 	dist = minDist;

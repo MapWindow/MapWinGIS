@@ -133,7 +133,7 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer,
 {
 	bool hasLine = HasLine(dynamicBuffer);
 	bool hasPolygon = HasPolygon(dynamicBuffer); 
-	if (!hasLine && !hasPolygon) return;
+	if (!hasLine && !hasPolygon && !_showSnapPoint) return;
 
 	_fillBrush.SetColor(Utility::OleColor2GdiPlus(FillColor, FillTransparency)) ;
 	_linePen.SetWidth(LineWidth);

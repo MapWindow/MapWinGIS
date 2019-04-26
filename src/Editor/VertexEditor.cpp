@@ -22,7 +22,7 @@ void VertexEditor::StartEdit(CShapeEditor* editor, long layerHandle, long shapeI
 // ************************************************************
 //		OnMouseDown
 // ************************************************************
-bool VertexEditor::OnMouseDown(IMapViewCallback* map, CShapeEditor* editor, double projX, double projY, bool ctrl)
+bool VertexEditor::OnMouseDown(IMapViewCallback* map, CShapeEditor* editor, double projX, double projY, bool ctrl, bool shift)
 {
 	if (!editor) return true;
 
@@ -40,7 +40,7 @@ bool VertexEditor::OnMouseDown(IMapViewCallback* map, CShapeEditor* editor, doub
 			return true;
 		}
 		
-		if (!OnMouseDownEditing(map, editor, projX, projY, ctrl))
+		if (!OnMouseDownEditing(map, editor, projX, projY, shift))
 		{
 			if (!editor->TryStop())   // it was clicked outside shape; so clear it
 				return true;
@@ -54,7 +54,7 @@ bool VertexEditor::OnMouseDown(IMapViewCallback* map, CShapeEditor* editor, doub
 // ************************************************************
 //		OnMouseDownEditing
 // ************************************************************
-bool VertexEditor::OnMouseDownEditing(IMapViewCallback* map, CShapeEditor* editor, double projX, double projY, bool ctrl)
+bool VertexEditor::OnMouseDownEditing(IMapViewCallback* map, CShapeEditor* editor, double projX, double projY, bool shift)
 {
 	CComPtr<IShape> shp = NULL;
 	editor->get_RawData(&shp);
@@ -108,14 +108,17 @@ bool VertexEditor::OnMouseDownEditing(IMapViewCallback* map, CShapeEditor* edito
 		}
 	}
 
-	// start shape moving
-	if (ShapeHelper::PointWithinShape(shp, projX, projY, tol))
-	{
-		// it's confusing to have both part and shape move depending on where you clicked
-		if (editor->HasSelectedPart()) return true;
+	// MWGIS-153: until further review, due to difficulty in editing, 
+	// disable 'moving' altogether within the context of the vertex editor
+	//
+	//// start shape moving (only if 'shift' is pressed)
+	//if (shift && ShapeHelper::PointWithinShape(shp, projX, projY, tol))
+	//{
+	//	// it's confusing to have both part and shape move depending on where you clicked
+	//	if (editor->HasSelectedPart()) return true;
 
-		map->_StartDragging(DragMoveShape);
-		return true;
-	}
+	//	map->_StartDragging(DragMoveShape);
+	//	return true;
+	//}
 	return false;
 }

@@ -39,7 +39,7 @@ public:
 	bool SetSelectedVertex(int index);
 	bool ClearHighlightedPart();
 	bool ClearHighlightedVertex();
-	void SetSnapPoint(double x, double y, bool visible);
+	void SetSnapPoint(double x, double y);
 	void ClearSnapPoint();
 	int SelectPart(double xProj, double yProj);
 	int GetClosestVertex(double projX, double projY, double tolerance);

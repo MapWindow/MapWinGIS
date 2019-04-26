@@ -26,6 +26,7 @@
 #include "stdafx.h"
 #include "GeoProjection.h"
 #include "ProjectionHelper.h"
+#include <malloc.h>
 
 // ************************************************************
 //		InjectSpatialReference()

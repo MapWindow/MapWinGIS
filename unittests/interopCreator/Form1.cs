@@ -488,5 +488,10 @@ namespace interopCreator
             txtResults.SelectionStart = txtResults.Text.Length;
             txtResults.ScrollToCaret();
         }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            axMap1.ZoomIn(0.3);
+        }
     }
 }
