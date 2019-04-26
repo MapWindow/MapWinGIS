@@ -757,11 +757,22 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 
 		if( type == DOUBLE_FIELD )
 		{
+            // width and precision from OGR datasource come in as zero
+            if (width == 0)
+            {
+                // don't know what we're getting; set to max of 17
+                width = 17;
+                // split down the middle (considering point and sign)
+                precision = 8;
+            }
+            // leaving previous logic alone, setting to 1, perhaps assuming 
+            // that the callers intent was to minimize the significand
 			if( precision <= 0 ) 
 				precision = 1;
 		}
 		else
 		{
+            // all non-doubles have precision of zero
 			precision = 0;
 		}
 
@@ -2816,15 +2827,26 @@ STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision,
 		return S_OK;
 	}
 
-	if (type == DOUBLE_FIELD && precision < 1)
+    // width and precision of doubles
+    if (type == DOUBLE_FIELD)
 	{
-		*fieldIndex = -1;
-		ErrorMessage(tkDBF_PRECISION_TOO_SMALL);
-		return S_OK;
+        if (precision < 1)
+        {
+            *fieldIndex = -1;
+            ErrorMessage(tkDBF_PRECISION_TOO_SMALL);
+            return S_OK;
+        }
+        else if (precision > (width - 2))
+        {
+            // have to allow for point and sign
+            *fieldIndex = -1;
+            ErrorMessage(tkDBF_WIDTH_TOO_SMALL);
+            return S_OK;
+        }
 	}
 
-	// fixed width fields
-	if (type == DATE_FIELD)
+    // the following are fixed-width fields
+	else if (type == DATE_FIELD)
 	{
 		width = 8;
 		precision = 0;
