@@ -137,10 +137,11 @@ void Ogr2Shape::CopyFields(OGRLayer* layer, IShapefile* sf)
 		OGRFieldDefn* oField = poFields->GetFieldDefn(iFld);
 		OGRFieldType type = oField->GetType();
 
-		if (type == OFTInteger)	fld->put_Type(INTEGER_FIELD);
-		else if (type == OFTDate)	fld->put_Type(DATE_FIELD);
-		else if (type == OFTReal)	fld->put_Type(DOUBLE_FIELD);
-		else if (type == OFTString)	fld->put_Type(STRING_FIELD);
+		if (type == OFTInteger)	        fld->put_Type(INTEGER_FIELD);
+		else if (type == OFTDate 
+              || type == OFTDateTime)   fld->put_Type(DATE_FIELD);
+		else if (type == OFTReal)   	fld->put_Type(DOUBLE_FIELD);
+		else if (type == OFTString)	    fld->put_Type(STRING_FIELD);
 
 		CComBSTR bstrName(oField->GetNameRef());
 		fld->put_Name(bstrName);
@@ -309,7 +310,7 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 				var.vt = VT_R8;
 				var.dblVal = poFeature->GetFieldAsDouble(iFld);
 			}
-			else if (type == OFTDate)
+			else if (type == OFTDate || type == OFTDateTime)
 			{
 				int m, d, y, h, min, sec, flag;
 				// should be able to read an an Integer
@@ -317,6 +318,7 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 				//y = (nFullDate / 10000);
 				//m = ((nFullDate / 100) % 100);
 				//d = (nFullDate % 100);
+                // lop off time components
 				COleDateTime dt(y, m, d, 0, 0, 0);
 				var.vt = VT_DATE;
 				var.date = dt.m_dt;
