@@ -122,6 +122,7 @@
     <Compile Include="AxMapTests.cs" />
     <Compile Include="NewSfMethodsTests.cs" />
     <Compile Include="ShapefileEditorTests.cs" />
+    <Compile Include="GeoProjectionTest.cs" />
     <Compile Include="UtilTests.cs" />
   </ItemGroup>
   <ItemGroup>
