@@ -7180,7 +7180,8 @@ library MapWinGIS
 			[id(37)] void BeforeLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
 			[id(38)] void AfterLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
             [id(39)] void LayerReprojectedIncomplete(LONG LayerHandle, Long NumReprojected, Long NumShapes);
-            //}}AFX_ODL_EVENT
+			[id(40)] void AfterVertexDigitized(DOUBLE* pointX, DOUBLE* pointY);
+			//}}AFX_ODL_EVENT
 			
 	};
 
