@@ -402,11 +402,11 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
                 v.push_back(i);
             }
         }
-        *retval = Templates::Vector2SafeArray(&v, VT_I4, arr);
+        *retval = Templates::Vector2SafeArray(&v, VT_I4, arr) ? VARIANT_TRUE : VARIANT_FALSE;
     }
     else
     {
-        *retval = Templates::Set2SafeArray(&result, VT_I4, arr);
+        *retval = Templates::Set2SafeArray(&result, VT_I4, arr) ? VARIANT_TRUE : VARIANT_FALSE;
     }
 
     //  cleaning
