@@ -488,6 +488,9 @@
     <None Include="Testdata\sf\SHP_POLYLINE.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Testdata\sf\SHP_POLYLINE.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Testdata\sf\SHP_POLYLINE.shp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
