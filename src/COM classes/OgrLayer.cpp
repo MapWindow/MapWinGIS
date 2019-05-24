@@ -1112,12 +1112,12 @@ bool COgrLayer::DeserializeOptions(CPLXMLNode* node)
 		if (psChild)
 		{ // Lock shape file
 			CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
-			if (!_shapefile) {
-				IShapefile * sf = LoadShapefile();
-				_shapefile = sf;
-				bool result = ((CShapefile*)_shapefile)->DeserializeCore(VARIANT_FALSE, psChild);
-				if (!result) success = false;
-			}
+            if (!_shapefile) {
+                IShapefile * sf = LoadShapefile();
+                _shapefile = sf;
+            }
+		    bool result = ((CShapefile*)_shapefile)->DeserializeCore(VARIANT_FALSE, psChild);
+			if (!result) success = false;
 		}
 	}
 

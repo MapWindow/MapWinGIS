@@ -727,7 +727,7 @@ VARIANT_BOOL CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW nam
 	if (OgrHelper::GetSourceType(ogrLayer) != ogrDbTable) 
 		return result;
 
-	CStringW xml = OgrHelper::Cast(ogrLayer)->LoadStyleXML(L"");
+	CStringW xml = OgrHelper::Cast(ogrLayer)->LoadStyleXML(name);
 	if (xml.GetLength() == 0)
 	{
 		if (reportError)

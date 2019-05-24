@@ -901,18 +901,12 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 		if (visible)
 		{
-			if (l->IsDynamicOgrLayer())
-			{
-				OgrDynamicLoader* loader = l->GetOgrLoader();
-				if (loader) {
-					// Clear the finished tasks & send events for them:
-					for (auto task : loader->AwaitTasks()) {
-						FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, task->LoadedCount);
-					}
-				}
-				// Try to get the data loaded so far:
-				l->UpdateShapefile(layerHandle);
-			}
+			// This is used for regular & dynamic ogr 'shapefile' layers
+			auto _DrawShapeFileCore = [&](CComPtr<IShapefile> sf) {
+				sfDrawer.Draw(rcBounds, sf);
+				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
+				LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
+			};
 
 			if (l->IsImage())
 			{
@@ -922,24 +916,43 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
 			}
-			else if (l->IsShapefile())
+			else if (l->IsShapefile() || l->IsDynamicOgrLayer())
 			{
-				// grab extents from shapefile in case they changed
-				l->UpdateExtentsFromDatasource();
-
-				if (!l->extents.Intersects(_extents))	
-					continue;
-
 				CComPtr<IShapefile> sf = NULL;
-                // layerBuffer == true indicates we're drawing the non-Volatile layers
-				if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
-					continue;
-				
-				sfDrawer.Draw(rcBounds, sf);
+				if (l->IsDynamicOgrLayer())
+				{
+					OgrDynamicLoader* loader = l->GetOgrLoader();
+					if (loader) {
+						// Clear the finished tasks & send events for them:
+						for (auto task : loader->AwaitTasks()) {
+							FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, task->LoadedCount);
+						}
+					}
+					// Lock everything
+					CSingleLock ldLock(&loader->LoadingLock, TRUE);
+					CSingleLock prLock(&loader->ProviderLock, TRUE);
+					CSingleLock sfLock(&loader->ShapefileLock, TRUE);
+					// Try to get the data loaded so far:
+					l->UpdateShapefile(layerHandle);
+					l->QueryShapefile(&sf);
+					// Perform the draw:
+					_DrawShapeFileCore(sf);
+				}
+				else
+				{
+					// grab extents from shapefile in case they changed
+					l->UpdateExtentsFromDatasource();
 
-				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
+					if (!l->extents.Intersects(_extents))
+						continue;
 
-				LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
+					// layerBuffer == true indicates we're drawing the non-Volatile layers
+					if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
+						continue;
+
+					// Perform the draw:
+					_DrawShapeFileCore(sf);
+				}
 			}
 		}
 	}

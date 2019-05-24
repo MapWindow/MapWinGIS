@@ -380,7 +380,7 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 			ogr->get_LabelExpression(&expr);
 			loader->LabelExpression = OLE2W(expr);
 
-			bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, *options->categories, options->task);
+			bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, options->task);
 
 			options->task->Finished = true;
 			if (!success) {
@@ -419,32 +419,13 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 	// if larger extents were requested previously and features were loaded, skip the new request
 	if (!bForce && extents.Within(loader->LastSuccessExtents)) return;
 
-	// get a copy of categories to apply them in the background thread
-	vector<CategoriesData*>* data = new vector<CategoriesData*>();
-		
-	CComPtr<IShapefile> sf = NULL;
-	this->QueryShapefile(&sf);
-	if (sf) 
-	{
-		ShpfileType shpType = ShapefileHelper::GetShapeType(sf);
-		loader->IsMShapefile = ShapeUtility::IsM(shpType);
-
-		IShapefileCategories* categories = NULL;
-		sf->get_Categories(&categories);
-		if (categories) 
-		{
-			((CShapefileCategories*)categories)->GetCategoryData(*data);
-			categories->Release();
-		}
-	}
-
 	// Prepare a new OgrLoadingTask & queue it for execution
 	OgrLoadingTask* task = new OgrLoadingTask(layerHandle);
 	loader->EnqueueTask(task);
 
 	// First fire the event, then start the thread. 
 	// This prevents race condition between the started & completed event.
-	AsyncLoadingParams* param = new AsyncLoadingParams(mapView, extents, this, data, task);
+	AsyncLoadingParams* param = new AsyncLoadingParams(mapView, extents, this, task);
 	mapView->_FireBackgroundLoadingStarted(task->Id, layerHandle);
 	CWinThread* thread = AfxBeginThread(OgrAsyncLoadingThreadProc, (LPVOID)param);
 }
@@ -501,15 +482,9 @@ void Layer::UpdateShapefile(long layerHandle)
 					shp->Create(shpType, &vb);
 					shp->ImportFromBinary(data[i]->Shape, &vb);
 					sf->EditInsertShape(shp, &count, &vb);
-					sf->put_ShapeCategory(count, data[i]->CategoryIndex);
 
 					tbl->UpdateTableRow(data[i]->Row, count);
 					data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
-
-					if (data[i]->HasLabel()) {
-						CComBSTR bstr(data[i]->LabelText);
-						labels->AddLabel(bstr, data[i]->LabelX, data[i]->LabelY, data[i]->LabelRotation);
-					}
 
 					count++;
 				}
