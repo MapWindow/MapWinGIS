@@ -76,7 +76,7 @@ public:
 		dynamicVisibility = false;
 		maxVisibleScale = 100000000.0;
 		minVisibleScale = 0.0;
-		maxVisibleZoom = 18;
+		maxVisibleZoom = 20;
 		minVisibleZoom = 0;
 		description = "";
 		skipOnSaving = VARIANT_FALSE;
