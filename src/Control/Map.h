@@ -675,6 +675,8 @@ public:
 		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4), layerHandle, shapeIndex, Cancel);	}
 	void FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)	
 		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_DISPATCH VTS_PI4), LayerHandle, Shape, Cancel);	}
+	void FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY)
+		{FireEvent(eventidBeforeVertexDigitized, EVENT_PARAM(VTS_PR8 VTS_PR8), pointX, pointY); }
 	void FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
 	void FireChooseLayer(long x, long y, LONG* LayerHandle)
@@ -1268,6 +1270,7 @@ public:
 	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) { FireValidateShape(LayerHandle, Shape, Cancel); }
 	virtual void _FireAfterShapeEdit(tkUndoOperation NewShape, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(NewShape, LayerHandle, ShapeIndex); }
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
+	virtual void _FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY) { FireBeforeVertexDigitized(pointX, pointY); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }
 	virtual void _SetMapCursor(tkCursorMode mode, bool clearEditor) { UpdateCursor(mode, false); }
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, atOnce, updateTiles); };

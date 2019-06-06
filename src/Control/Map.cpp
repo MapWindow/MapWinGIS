@@ -145,8 +145,9 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("OnDrawBackBuffer2", eventidOnDrawBackBuffer2, FireOnDrawBackBuffer2, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("BeforeLayers", eventidBeforeLayers, FireBeforeLayers, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("AfterLayers", eventidAfterLayers, FireAfterLayers, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
-    EVENT_CUSTOM_ID("LayerReprojectedIncomplete", eventidLayerReprojectedIncomplete, FireLayerReprojectedIncomplete, VTS_I4 VTS_I4 VTS_I4)
-    EVENT_STOCK_DBLCLICK()
+  EVENT_CUSTOM_ID("LayerReprojectedIncomplete", eventidLayerReprojectedIncomplete, FireLayerReprojectedIncomplete, VTS_I4 VTS_I4, VTS_I4)
+	EVENT_CUSTOM_ID("BeforeVertexDigitized", eventidBeforeVertexDigitized, FireBeforeVertexDigitized, VTS_PR8 VTS_PR8)
+	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
 	
 	EVENT_CUSTOM_ID("ShapesIdentified", eventidShapesIdentified, FireShapesIdentified, VTS_DISPATCH VTS_R8 VTS_R8)

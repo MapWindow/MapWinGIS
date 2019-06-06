@@ -299,5 +299,6 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidBeforeLayers = 37L,
 	eventidAfterLayers = 38L,
 	eventidLayerReprojectedIncomplete = 39L,
+	eventidBeforeVertexDigitized = 40L
 	//}}AFX_DISP_ID
 };

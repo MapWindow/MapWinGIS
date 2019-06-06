@@ -2986,6 +2986,14 @@ namespace AxMapWinGIS
         /// by using an RBG image that was created to serve as proxy.</param>
         public event _DMapEvents_GridOpenedEventHandler GridOpened;
 
+        /// <summary>
+        /// This event is fired after the user digitized a new point and held the ALT button.
+        /// Can be used to modify the coordinates.
+        /// </summary>
+        /// <param name="pointX">X coordinate</param>
+        /// <param name="pointY">Y coordinate</param>
+        public event _DMapEvents_BeforeVertexDigitizedEventHandler BeforeVertexDigitized;
+
         /// @}
         #endregion
 
