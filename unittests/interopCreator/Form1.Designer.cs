@@ -44,7 +44,7 @@
             this.button8 = new System.Windows.Forms.Button();
             this.button9 = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
-            this.button11 = new System.Windows.Forms.Button();
+            this.btnPrefetchTiles = new System.Windows.Forms.Button();
             this.axMap1 = new AxMapWinGIS.AxMap();
             this.button12 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
@@ -213,16 +213,16 @@
             this.button10.UseVisualStyleBackColor = true;
             this.button10.Click += new System.EventHandler(this.button10_Click);
             // 
-            // button11
+            // btnPrefetchTiles
             // 
-            this.button11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button11.Location = new System.Drawing.Point(686, 376);
-            this.button11.Name = "button11";
-            this.button11.Size = new System.Drawing.Size(136, 23);
-            this.button11.TabIndex = 16;
-            this.button11.Text = "Prefetch Tiles";
-            this.button11.UseVisualStyleBackColor = true;
-            this.button11.Click += new System.EventHandler(this.button11_Click);
+            this.btnPrefetchTiles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnPrefetchTiles.Location = new System.Drawing.Point(686, 376);
+            this.btnPrefetchTiles.Name = "btnPrefetchTiles";
+            this.btnPrefetchTiles.Size = new System.Drawing.Size(136, 23);
+            this.btnPrefetchTiles.TabIndex = 16;
+            this.btnPrefetchTiles.Text = "Prefetch Tiles";
+            this.btnPrefetchTiles.UseVisualStyleBackColor = true;
+            this.btnPrefetchTiles.Click += new System.EventHandler(this.btnPrefetchTiles_Click);
             // 
             // axMap1
             // 
@@ -255,7 +255,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(831, 699);
             this.Controls.Add(this.button12);
-            this.Controls.Add(this.button11);
+            this.Controls.Add(this.btnPrefetchTiles);
             this.Controls.Add(this.button10);
             this.Controls.Add(this.button9);
             this.Controls.Add(this.button8);
@@ -298,7 +298,7 @@
         private System.Windows.Forms.Button button8;
         private System.Windows.Forms.Button button9;
         private System.Windows.Forms.Button button10;
-        private System.Windows.Forms.Button button11;
+        private System.Windows.Forms.Button btnPrefetchTiles;
         private System.Windows.Forms.Button button12;
     }
 }

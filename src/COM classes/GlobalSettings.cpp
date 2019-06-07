@@ -1177,6 +1177,15 @@ STDMETHODIMP CGlobalSettings::get_TileLogFilename(BSTR* retVal)
 	return S_OK;
 }
 
+STDMETHODIMP CGlobalSettings::SetHttpUserAgent(BSTR userAgent)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	// TODO: Check if not string.empty
+	m_globalSettings.httpUserAgent = OLE2A(userAgent);
+	return S_OK;
+}
+
 // *********************************************************
 //	     WmsDiskCaching()
 // *********************************************************

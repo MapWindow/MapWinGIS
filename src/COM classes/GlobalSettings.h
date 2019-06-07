@@ -73,6 +73,7 @@ public:
 	STDMETHOD(put_MinAreaToPerimeterRatio)(double newVal);
 	STDMETHOD(get_ClipperGcsMultiplicationFactor)(DOUBLE* pVal);
 	STDMETHOD(put_ClipperGcsMultiplicationFactor)(DOUBLE newVal);
+
 	STDMETHOD(CreatePoint)(IPoint** retVal);
 	STDMETHOD(get_ShapefileFastMode)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_ShapefileFastMode)(VARIANT_BOOL newVal);
@@ -80,51 +81,64 @@ public:
 	STDMETHOD(put_InvalidShapesBufferDistance)(DOUBLE newVal);
 	STDMETHOD(get_ShapefileFastUnion)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_ShapefileFastUnion)(VARIANT_BOOL newVal);
+
 	STDMETHOD(get_GdalLastErrorNo)(tkGdalError* pVal);
 	STDMETHOD(get_GdalLastErrorType)(tkGdalErrorType* pVal);
 	STDMETHOD(get_GdalLastErrorMsg)(BSTR* pVal);
 	STDMETHOD(ResetGdalError)(void);
 	STDMETHOD(get_GdalReprojectionErrorMsg)(BSTR* pVal);
+
 	STDMETHOD(get_LabelsSmoothingMode)(tkSmoothingMode* pVal);
 	STDMETHOD(put_LabelsSmoothingMode)(tkSmoothingMode newVal);
 	STDMETHOD(get_LabelsCompositingQuality)(tkCompositingQuality* pVal);
 	STDMETHOD(put_LabelsCompositingQuality)(tkCompositingQuality newVal);
+
 	STDMETHOD(put_LocalizedString)(tkLocalizedStrings unit, BSTR localizedString);
 	STDMETHOD(get_LocalizedString)(tkLocalizedStrings unit, BSTR* retVal);
+
 	STDMETHOD(put_ZoomToFirstLayer)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ZoomToFirstLayer)(VARIANT_BOOL* pVal);
+
 	STDMETHOD(put_LabelsCollisionMode)(tkCollisionMode newVal);
 	STDMETHOD(get_LabelsCollisionMode)(tkCollisionMode* pVal);
+
 	STDMETHOD(get_GridProxyFormat)(tkGridProxyFormat* pVal);
 	STDMETHOD(put_GridProxyFormat)(tkGridProxyFormat newVal);
 	STDMETHOD(get_MaxDirectGridSizeMb)(double* pVal);
 	STDMETHOD(put_MaxDirectGridSizeMb)(double newVal);
 	STDMETHOD(put_GridProxyMode)(tkGridProxyMode newVal);
 	STDMETHOD(get_GridProxyMode)(tkGridProxyMode* pVal);
+
 	STDMETHOD(put_MaxUniqueValuesCountForGridScheme)(int newVal);
 	STDMETHOD(get_MaxUniqueValuesCountForGridScheme)(int* pVal);
 	STDMETHOD(get_RandomColorSchemeForGrids)( VARIANT_BOOL *retVal);
 	STDMETHOD(put_RandomColorSchemeForGrids)( VARIANT_BOOL newVal);
 	STDMETHOD(get_DefaultColorSchemeForGrids)( PredefinedColorScheme *retVal);
 	STDMETHOD(put_DefaultColorSchemeForGrids)( PredefinedColorScheme newVal);
+
 	STDMETHOD(get_ShapeOutputValidationMode)( tkShapeValidationMode *retVal);
 	STDMETHOD(put_ShapeOutputValidationMode)( tkShapeValidationMode newVal);
 	STDMETHOD(get_ShapeInputValidationMode)( tkShapeValidationMode *retVal);
 	STDMETHOD(put_ShapeInputValidationMode)( tkShapeValidationMode newVal);
+
 	STDMETHOD(get_GeometryEngine)( tkGeometryEngine *retVal);
 	STDMETHOD(put_GeometryEngine)( tkGeometryEngine newVal);
+
 	STDMETHOD(get_SaveGridColorSchemeToFile)( VARIANT_BOOL *retVal);
 	STDMETHOD(put_SaveGridColorSchemeToFile)( VARIANT_BOOL newVal);
 	STDMETHOD(get_TiffCompression)( tkTiffCompression *retVal);
 	STDMETHOD(put_TiffCompression)( tkTiffCompression newVal);
+
 	STDMETHOD(get_RasterOverviewCreation)( tkRasterOverviewCreation *retVal);
 	STDMETHOD(put_RasterOverviewCreation)( tkRasterOverviewCreation newVal);
 	STDMETHOD(get_MinOverviewWidth)( int *retVal);
 	STDMETHOD(put_MinOverviewWidth)( int newVal);
 	STDMETHOD(get_RasterOverviewResampling)( tkGDALResamplingMethod *retVal);
 	STDMETHOD(put_RasterOverviewResampling)( tkGDALResamplingMethod newVal);
+
 	STDMETHOD(put_TilesThreadPoolSize)(int newVal);
 	STDMETHOD(get_TilesThreadPoolSize)(int* pVal);
+
 	STDMETHOD(put_LoadSymbologyOnAddLayer)(VARIANT_BOOL newVal);
 	STDMETHOD(get_LoadSymbologyOnAddLayer)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_TilesMinZoomOnProjectionMismatch)(int newVal);
@@ -137,12 +151,14 @@ public:
 	STDMETHOD(put_GridUpsamplingMode)(tkInterpolationMode pVal);
 	STDMETHOD(get_GridDownsamplingMode)(tkInterpolationMode* newVal);
 	STDMETHOD(put_GridDownsamplingMode)(tkInterpolationMode pVal);
+
 	STDMETHOD(get_OgrStringEncoding)(tkOgrEncoding* newVal);
 	STDMETHOD(put_OgrStringEncoding)(tkOgrEncoding pVal);
 	STDMETHOD(get_OgrLayerMaxFeatureCount)(LONG* pVal);
 	STDMETHOD(put_OgrLayerMaxFeatureCount)(LONG newVal);
 	STDMETHOD(get_AutoChooseOgrLoadingMode)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_AutoChooseOgrLoadingMode)(VARIANT_BOOL newVal);
+
 	STDMETHOD(get_AttachMapCallbackToLayers)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_AttachMapCallbackToLayers)(VARIANT_BOOL newVal);
 	STDMETHOD(get_HotTrackingMaxShapeCount)(LONG* pVal);
@@ -155,6 +171,7 @@ public:
 	STDMETHOD(put_ReprojectLayersOnAdding)(VARIANT_BOOL newVal);
 	STDMETHOD(get_MouseTolerance)(DOUBLE* pVal);
 	STDMETHOD(put_MouseTolerance)(DOUBLE newVal);
+
 	STDMETHOD(get_ApplicationCallback)(ICallback** pVal);
 	STDMETHOD(put_ApplicationCallback)(ICallback* newVal);
 	STDMETHOD(get_MaxReprojectionShapeCount)(LONG* pVal);
@@ -172,30 +189,37 @@ public:
 	STDMETHOD(put_GdalPluginPath)(BSTR newVal);
 	STDMETHOD(get_GdalDataPath)(BSTR* pVal);
 	STDMETHOD(put_GdalDataPath)(BSTR newVal);
+	
+	// Tiles:
 	STDMETHOD(get_BingApiKey)(BSTR* pVal);
 	STDMETHOD(put_BingApiKey)(BSTR newVal);
 	STDMETHOD(TestBingApiKey)(BSTR key, VARIANT_BOOL* retVal);
 	STDMETHOD(SetHereMapsApiKey)(BSTR appId, BSTR appCode);
+	STDMETHOD(SetHttpUserAgent)(BSTR userAgent);
+	STDMETHOD(StartLogTileRequests)(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal);
+	STDMETHOD(StopLogTileRequests)();
+	STDMETHOD(get_TileLogFilename)(BSTR* retVal);	
+	STDMETHOD(get_TileLogIsOpened)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_LogTileErrorsOnly)(VARIANT_BOOL* retVal);
+	STDMETHOD(put_LogTileErrorsOnly)(VARIANT_BOOL pVal);
+	STDMETHOD(get_WmsDiskCaching)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_WmsDiskCaching)(VARIANT_BOOL newVal);
+
 	STDMETHOD(get_CompressOverviews)(tkTiffCompression* pVal);
 	STDMETHOD(put_CompressOverviews)(tkTiffCompression newVal);
 	STDMETHOD(get_GridFavorGreyscale)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_GridFavorGreyscale)(VARIANT_BOOL newVal);
 	STDMETHOD(get_GridUseHistogram)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_GridUseHistogram)(VARIANT_BOOL newVal);
+
 	STDMETHOD(get_OverrideLocalCallback)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_OverrideLocalCallback)(VARIANT_BOOL newVal);
+
 	STDMETHOD(get_CacheDbfRecords)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_CacheDbfRecords)(VARIANT_BOOL newVal);
 	STDMETHOD(get_CacheShapeRenderingData)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_CacheShapeRenderingData)(VARIANT_BOOL newVal);
-	STDMETHOD(StartLogTileRequests)(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal);
-	STDMETHOD(StopLogTileRequests)();
-	STDMETHOD(get_TileLogFilename)(BSTR* retVal);
-	STDMETHOD(get_TileLogIsOpened)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_LogTileErrorsOnly)(VARIANT_BOOL* retVal);
-	STDMETHOD(put_LogTileErrorsOnly)(VARIANT_BOOL pVal);
-	STDMETHOD(get_WmsDiskCaching)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_WmsDiskCaching)(VARIANT_BOOL newVal);
+
 	STDMETHOD(get_CallbackVerbosity)(tkCallbackVerbosity* pVal);
 	STDMETHOD(put_CallbackVerbosity)(tkCallbackVerbosity newVal);
 	STDMETHOD(get_OgrShareConnection)(VARIANT_BOOL* pVal);

@@ -33,6 +33,9 @@ SecureHttpClient::SecureHttpClient(): file(nullptr)
     chunk.memory = (char *)malloc(1); /* will be grown as needed */
     chunk.size = 0; /* no data yet */
 
+	/* PM: Add user agent */
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, m_globalSettings.httpUserAgent);
+
     /* send all data to this function */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 

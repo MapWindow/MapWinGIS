@@ -27,6 +27,8 @@ namespace MapWinGISTests
 
             // Tiles settings:
             _axMap1.Tiles.GlobalCallback = this;
+            _settings.SetHttpUserAgent("MapWinGIS Testapplication");
+            _settings.StartLogTileRequests($@"D:\tmp\axmap.tiles\TileRequests-{_axMap1.Tiles.Provider.ToString()}.log");
         }
 
         ~TilesTests()
@@ -50,7 +52,7 @@ namespace MapWinGISTests
             latLongExtents.SetBounds(3.3700, 50.7500, 0, 7.2100, 53.4700, 0); // The Netherlands in WGS84: http://spatialreference.org/ref/epsg/28992/
 
             Helper.DebugMsg("PrefetchToFolderDutchOSM Maxzoom: 11");
-            PrefetchToFolder(tkTileProvider.OpenStreetMap, 11, latLongExtents);
+            PrefetchToFolder(tkTileProvider.OpenStreetMap, 5, latLongExtents);
         }
 
         [TestMethod]
@@ -84,7 +86,6 @@ namespace MapWinGISTests
 
             var outputFolder = $@"D:\tmp\axmap.tiles\{_axMap1.Tiles.Provider.ToString()}";
             if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
-            _settings.StartLogTileRequests($@"D:\tmp\axmap.tiles\TileRequests-{_axMap1.Tiles.Provider.ToString()}.log");
 
             var providerId = Convert.ToInt32(tileProvider);
             var numRounds = 0; // To prevent endless loops
