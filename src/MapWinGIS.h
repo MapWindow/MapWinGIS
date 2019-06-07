@@ -10,8 +10,8 @@
 #include "MapWinGIS_i.h"
 #include "GlobalClassFactory.h"
 
-#define VERSION_MAJOR 4
-#define VERSION_MINOR 9
+#define VERSION_MAJOR 5
+#define VERSION_MINOR 0
 
 extern const GUID CDECL _tlid;
 extern const WORD _wVerMajor;
