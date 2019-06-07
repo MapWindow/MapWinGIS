@@ -1,7 +1,7 @@
 ﻿using System;
-using MapWinGIS;
 
 #if nsp
+// ReSharper disable once CheckNamespace
 namespace MapWinGIS
 {
 #endif
@@ -16,15 +16,15 @@ namespace MapWinGIS
     /// Sometimes properties can be added to this class to provide a switch for testing new functions.
     /// Such properties may be removed afterwards (GlobalSettings.ShapefileFastUnion for example).</remarks>
     /// \new48 Added in version 4.8
-    #if nsp
-        #if upd
-            public class GlobalSettings : MapWinGIS.IGlobalSettings
-        #else        
-            public class IGlobalSettings
-        #endif
-    #else
+#if nsp
+#if upd
+            public class GlobalSettings : IGlobalSettings
+#else
+    public class IGlobalSettings
+#endif
+#else
         public class GlobalSettings
-    #endif
+#endif
     {
         /// <summary>
         /// Gets a sets a value which defines the multiplication coefficient for data in decimal degrees.
@@ -32,8 +32,8 @@ namespace MapWinGIS
         /// <remarks>The value is used for Clipper library due to the lack of built-in scaling in it. The default value is 10000.0.</remarks>
         public double ClipperGcsMultiplicationFactor
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -44,13 +44,8 @@ namespace MapWinGIS
         /// </remarks>
         public double MinAreaToPerimeterRatio
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        public void StopLogTileRequests()
-        {
-            throw new NotImplementedException();
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -61,8 +56,8 @@ namespace MapWinGIS
         /// <remarks>The default value is 1.0.</remarks>
         public double MinPolygonArea
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -72,42 +67,30 @@ namespace MapWinGIS
         /// \see Shapefile.FastMode
         public bool ShapefileFastMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
         /// Extracts the last error message reported by GDAL library.
         /// </summary>
-        public string GdalLastErrorMsg
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public string GdalLastErrorMsg => throw new NotImplementedException();
 
         /// <summary>
         /// Gets a subtype of the last error reported by GDAL library.
         /// </summary>
-        public tkGdalError GdalLastErrorNo
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public tkGdalError GdalLastErrorNo => throw new NotImplementedException();
 
         /// <summary>
         /// Gets a type of the last error reported by GDAL library.
         /// </summary>
-        public tkGdalErrorType GdalLastErrorType
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public tkGdalErrorType GdalLastErrorType => throw new NotImplementedException();
 
         /// <summary>
         /// Gets last error reported by GDAL reprojection routine.
         /// </summary>
         /// <remarks>Can be used to find out the source of failure of Shapefile.Reproject and Shapefile.ReprojectInPlace functions.</remarks>
-        public string GdalReprojectionErrorMsg
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public string GdalReprojectionErrorMsg => throw new NotImplementedException();
 
         /// <summary>
         /// Gets or sets GDI+ compositing quality for label drawing which will be used for all newly added layers.
@@ -115,8 +98,8 @@ namespace MapWinGIS
         /// <remarks>The default value is HighQuality.</remarks>
         public tkCompositingQuality LabelsCompositingQuality
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -125,8 +108,8 @@ namespace MapWinGIS
         /// <remarks>The default value is HighQualityMode.</remarks>
         public tkSmoothingMode LabelsSmoothingMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -144,8 +127,8 @@ namespace MapWinGIS
         /// <remarks>The default value is true.</remarks>
         public bool ShapefileFastUnion
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -156,8 +139,8 @@ namespace MapWinGIS
         /// \new490 Added in version 4.9.0
         public tkGridProxyFormat GridProxyFormat
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -168,8 +151,8 @@ namespace MapWinGIS
         /// \new490 Added in version 4.9.0
         public tkGridProxyMode GridProxyMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -178,8 +161,8 @@ namespace MapWinGIS
         /// \new490 Added in version 4.9.0
         public tkCollisionMode LabelsCollisionMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -195,8 +178,8 @@ namespace MapWinGIS
         /// \new491 Added in version 4.9.1
         public double MaxDirectGridSizeMb
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -206,8 +189,8 @@ namespace MapWinGIS
         /// \new491 Added in version 4.9.1
         public int MaxUniqueValuesCountForGridScheme
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -216,8 +199,8 @@ namespace MapWinGIS
         /// \new491 Added in version 4.9.1
         public bool ZoomToFirstLayer
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -249,8 +232,8 @@ namespace MapWinGIS
         /// \new491 Added in version 4.9.1
         public PredefinedColorScheme DefaultColorSchemeForGrids
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -259,8 +242,8 @@ namespace MapWinGIS
         /// \new491 Added in version 4.9.1
         public tkGeometryEngine GeometryEngine
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -271,8 +254,8 @@ namespace MapWinGIS
         /// \new491 Added in version 4.9.1
         public bool RandomColorSchemeForGrids
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -284,8 +267,8 @@ namespace MapWinGIS
         /// \new491 Added in version 4.9.1
         public bool SaveGridColorSchemeToFile
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -296,8 +279,8 @@ namespace MapWinGIS
         /// \new491 Added in version 4.9.1
         public tkShapeValidationMode ShapeInputValidationMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -308,8 +291,8 @@ namespace MapWinGIS
         /// \new491 Added in version 4.9.1
         public tkShapeValidationMode ShapeOutputValidationMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -318,8 +301,8 @@ namespace MapWinGIS
         /// \new492 Added in version 4.9.2
         public tkInterpolationMode ImageDownsamplingMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -328,8 +311,8 @@ namespace MapWinGIS
         /// \new492 Added in version 4.9.2
         public tkInterpolationMode ImageUpsamplingMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -339,8 +322,8 @@ namespace MapWinGIS
         /// \new492 Added in version 4.9.2
         public bool LoadSymbologyOnAddLayer
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -350,8 +333,8 @@ namespace MapWinGIS
         /// \new492 Added in version 4.9.2
         public int MinOverviewWidth
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -363,8 +346,8 @@ namespace MapWinGIS
         /// \new492 Added in version 4.9.2
         public tkRasterOverviewCreation RasterOverviewCreation
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -373,8 +356,8 @@ namespace MapWinGIS
         /// \new492 Added in version 4.9.2
         public tkGDALResamplingMethod RasterOverviewResampling
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -383,8 +366,8 @@ namespace MapWinGIS
         /// \new492 Added in version 4.9.2
         public tkTiffCompression TiffCompression
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -398,8 +381,8 @@ namespace MapWinGIS
         /// \new492 Added in version 4.9.2
         public int TilesMinZoomOnProjectionMismatch
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -411,8 +394,8 @@ namespace MapWinGIS
         /// \new492 Added in version 4.9.2
         public int TilesThreadPoolSize
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -421,8 +404,8 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public tkOgrEncoding OgrStringEncoding
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -444,6 +427,13 @@ namespace MapWinGIS
         public bool OgrInterpretYNStringAsBoolean { get; set; }
 
         /// <summary>
+        /// Allow layers with incomplete reprojection.
+        /// Default is false.
+        /// </summary>
+        /// \new510 Added in version 5.1.0
+        public bool AllowLayersWithIncompleteReprojection { get; set; }
+
+        /// <summary>
         /// Gets or sets a value which indicates whether OgrLayer.DynamicLoading mode will
         /// chosen automatically based on the number of features. The default value is true.
         /// </summary>
@@ -458,8 +448,8 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public int HotTrackingMaxShapeCount
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -468,7 +458,7 @@ namespace MapWinGIS
         /// <remarks>The default value is true. The decision can also be made on per-layer bases
         /// by handling AxMap.LayerProjectionIsEmpty event.</remarks>
         /// \new493 Added in version 4.9.3
-        public bool AllowLayersWithoutProjections { get; set;}
+        public bool AllowLayersWithoutProjections { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether layers with coordinate system / projection different from those of the map can be added to the map.
@@ -477,7 +467,7 @@ namespace MapWinGIS
         /// projections won't be correct. The default value is false. The decision can also be made on per-layer bases
         /// by handling AxMap.ProjectionMismatch event.</remarks>
         /// \new493 Added in version 4.9.3
-        public bool AllowProjectionMismatch { get; set;}
+        public bool AllowProjectionMismatch { get; set; }
 
         /// <summary>
         /// Gets or sets global callback object to report information about progress and errors taking place inside MapWinGIS.
@@ -486,21 +476,21 @@ namespace MapWinGIS
         /// (like %Shapefile.GlobalCallback, %AxMap.GlobalCallback). Also it will automatically display internal GDAL error messages.</remarks>
         /// \note It's strongly recommended to use this property rather than setting callback for each and every class.
         /// \new493 Added in version 4.9.3
-        public ICallback ApplicationCallback { get; set;}
+        public ICallback ApplicationCallback { get; set; }
 
         /// <summary>
         /// Gets or sets a value which limits the maximum number of shapes within a vector layer to run on-the-fly reprojection.
         /// </summary>
         /// <remarks>This property is taken into account when projection mismatch occurs on adding a new layer to the map.</remarks>
         /// \new493 Added in version 4.9.3
-        public int MaxReprojectionShapeCount { get; set;}
-       
+        public int MaxReprojectionShapeCount { get; set; }
+
         /// <summary>
         /// Gets or sets a value which determines how close to a particular object mouse cursor should be 
         /// in order to select it with mouse click. 
         /// </summary>
         /// \new493 Added in version 4.9.3
-        public double MouseTolerance { get; set;}
+        public double MouseTolerance { get; set; }
 
         /// <summary>
         /// Gets or sets a value which determines whether automatic on-the-fly reprojection of the vector layer
@@ -509,26 +499,26 @@ namespace MapWinGIS
         /// <remarks>The decision can also be made on per-layer bases by handling AxMap.ProjectionMismatch event.</remarks>
         /// \see MaxReprojectionShapeCount
         /// \new493 Added in version 4.9.3
-        public bool ReprojectLayersOnAdding { get; set;}
+        public bool ReprojectLayersOnAdding { get; set; }
 
         /// <summary>
         /// When set to true rendering hint for Labels will be chosen automatically to ensure better performance and visual quality.
         /// </summary>
         /// \see Labels.TextRednderingHint
         /// \new493 Added in version 4.9.3
-        public bool AutoChooseRenderingHintForLabels { get; set;}
+        public bool AutoChooseRenderingHintForLabels { get; set; }
 
         /// <summary>
         /// When set to true, any labels added to any instance of AxMap won't be rendered.
         /// </summary>
         /// \new493 Added in version 4.9.3
-        public bool ForceHideLabels { get; set;}
+        public bool ForceHideLabels { get; set; }
 
         /// <summary>
         /// Gets the version of GDAL library which current build of MapWinGIS uses.
         /// </summary>
         /// \new493 Added in version 4.9.3
-        public string GdalVersion { get { throw new NotImplementedException(); } }
+        public string GdalVersion => throw new NotImplementedException();
 
         /// <summary>
         /// When set to true the opening of any OGR layer will be first made with forUpdate parameter. 
@@ -536,13 +526,13 @@ namespace MapWinGIS
         /// </summary>
         /// \see OgrLayer.SupportsEditing
         /// \new493 Added in version 4.9.3
-        public bool OgrLayerForceUpdateMode { get; set;}
+        public bool OgrLayerForceUpdateMode { get; set; }
 
         /// <summary>
         /// Gets or sets pixel offset mode to be used during the rendering of vector layers.
         /// </summary>
         /// \new493 Added in version 4.9.3
-        public tkPixelOffsetMode PixelOffsetMode { get; set;}
+        public tkPixelOffsetMode PixelOffsetMode { get; set; }
 
         /// <summary>
         /// Gets or sets the path where data necessary for GDAL coordinate systems / projections will be searched for.
@@ -550,7 +540,7 @@ namespace MapWinGIS
         /// <remarks>This property effectively overrides GDAL_DATA environment variable. By default
         /// it's set to gdal-data folder in the directory where MapWinGIS is installed.</remarks>
         /// \new493 Added in version 4.9.3
-        public string GdalDataPath { get; set;}
+        public string GdalDataPath { get; set; }
 
         /// <summary>
         /// Gets or sets the path where GDAL plug-ins will be searched for.
@@ -558,13 +548,13 @@ namespace MapWinGIS
         /// <remarks>This property effectively overrides GDAL_DRIVER_PATH environment variable. By default
         /// it's set to gdalplugins folder in the directory where MapWinGIS is installed.</remarks>
         /// \new493 Added in version 4.9.3
-        public string GdalPluginPath { get; set;}
+        public string GdalPluginPath { get; set; }
 
         /// <summary>
         /// Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available.
         /// </summary>
         /// \new493 Added in version 4.9.3
-        public string BingApiKey { get; set;}
+        public string BingApiKey { get; set; }
 
         /// <summary>
         /// Sets application credentials for Here Maps online tiles. 
@@ -574,6 +564,17 @@ namespace MapWinGIS
         /// <param name="appCode">Application code. Can be obtained by registering on the site of the service.</param>
         /// \new493 Added in version 4.9.3
         public void SetHereMapsApiKey(string appId, string appCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the user-agent string that will be used when requesting tiles.
+        /// Defaults to 'MapWinGIS/5.0'
+        /// </summary>
+        /// <param name="userAgent"></param>
+        /// \new5.1.0 Added in version 5.1.0
+        public void SetHttpUserAgent(string userAgent)
         {
             throw new NotImplementedException();
         }
@@ -671,11 +672,19 @@ namespace MapWinGIS
         /// <summary>
         /// Starts logging of tile requests.
         /// </summary>
-        /// <param name="Filename">The filename.</param>
+        /// <param name="filename">The filename.</param>
         /// <param name="errorsOnly">If set to <c>true</c> only errors will be logged.</param>
         /// <returns>True on success.</returns>
         /// \new494 Added in version 4.9.4
-        public bool StartLogTileRequests(string Filename, bool errorsOnly = false)
+        public bool StartLogTileRequests(string filename, bool errorsOnly = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Stops the logging of the tile requests to a logfile, started with StartLogTileRequests
+        /// </summary>
+        public void StopLogTileRequests()
         {
             throw new NotImplementedException();
         }
