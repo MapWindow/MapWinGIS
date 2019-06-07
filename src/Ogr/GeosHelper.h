@@ -338,6 +338,15 @@ public:
 		#endif
 	}
 
+	static GEOSGeometry* SymDifference(const GEOSGeometry* gsGeom1, const GEOSGeometry* gsGeom2)
+	{
+		#ifdef GEOS_NEW
+			return GEOSSymDifference_r(getGeosHandle(), gsGeom1, gsGeom2);
+		#else
+			return GEOSSymDifference(gsGeom1, gsGeom2);
+		#endif
+	}
+
 	static bool Intersects(GEOSGeometry* gsGeom1, GEOSGeometry* gsGeom2)
 	{
 		#ifdef GEOS_NEW
