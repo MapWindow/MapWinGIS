@@ -712,9 +712,7 @@ public:
 	void FireBackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG numFeatures, LONG numLoaded)
 		{ FireEvent(eventidBackgroundLoadingFinished, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), TaskId, LayerHandle, numFeatures, numLoaded);}
 	void FireGridOpened(LONG LayerHandle, LPCTSTR gridFilename, LONG bandIndex, VARIANT_BOOL isUsingProxy)
-		{ FireEvent(eventidGridOpened, EVENT_PARAM(VTS_I4 VTS_BSTR VTS_I4 VTS_BOOL), LayerHandle, gridFilename, bandIndex, isUsingProxy);	}
-	void FireShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY)
-	    { FireEvent(eventidShapesIdentified, EVENT_PARAM(VTS_DISPATCH VTS_R8 VTS_R8), selectedShapes, projX, projY); }
+		{ FireEvent(eventidGridOpened, EVENT_PARAM(VTS_I4 VTS_BSTR VTS_I4 VTS_BOOL), LayerHandle, gridFilename, bandIndex, isUsingProxy);	}	
 	void FireOnDrawBackBuffer2(LONG height, LONG Width, LONG Stride, LONG pixelFormat, LONG scan0)
 		{ FireEvent(eventidOnDrawBackBuffer2, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), height, Width, Stride, pixelFormat, scan0); }
 	void FireBeforeLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled)
@@ -723,6 +721,8 @@ public:
 		{ FireEvent(eventidAfterLayers, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled); }
     void FireLayerReprojectedIncomplete(LONG LayerHandle, LONG NumReprojected, LONG NumShapes)
         { FireEvent(eventidLayerReprojectedIncomplete, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), LayerHandle, NumReprojected, NumShapes); }
+
+	// Never used: void FireShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY) { FireEvent(eventidShapesIdentified, EVENT_PARAM(VTS_DISPATCH VTS_R8 VTS_R8), selectedShapes, projX, projY); }
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()

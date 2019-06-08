@@ -2234,8 +2234,10 @@ enum tkScalebarUnits
 	{		
 		PointAdded = 0,
 		PointRemoved = 1,
-		MesuringStopped = 2,
+		MesuringStopped = 2,  // Typo, mark deprecated
+		MeasuringStopped = 3
 	} tkMeasuringAction;
+	#pragma deprecated(MesuringStopped)
 
 	/************************** tkCanDisplayGridWoProxy **************************/
 	typedef
@@ -7180,12 +7182,12 @@ library MapWinGIS
 			[id(32)] void BackgroundLoadingStarted(LONG TaskId, LONG LayerHandle);
 			[id(33)] void BackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG NumFeatures, LONG NumLoaded);
 			[id(34)] void GridOpened(LONG LayerHandle, BSTR gridFilename, LONG bandIndex, VARIANT_BOOL isUsingProxy);
-			[id(35)] void ShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY);
+			// NOT USED: [id(35)] void ShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY);
 			[id(36)] void OnDrawBackBuffer2(LONG height, LONG Width, LONG Stride, LONG pixelFormat, LONG scan0);
 			[id(37)] void BeforeLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
 			[id(38)] void AfterLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
             [id(39)] void LayerReprojectedIncomplete(LONG LayerHandle, Long NumReprojected, Long NumShapes);
-			[id(40)] void AfterVertexDigitized(DOUBLE* pointX, DOUBLE* pointY);
+			[id(40)] void BeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY);
 			//}}AFX_ODL_EVENT
 			
 	};
