@@ -1533,6 +1533,7 @@ namespace MapWinGIS
     /// Possible events during the measuring process.
     /// </summary>
     /// \new491 Added in version 4.9.1
+    /// \new510 Modified in version 5.1.0
     public enum tkMeasuringAction
     {
         /// <summary>
@@ -1545,10 +1546,13 @@ namespace MapWinGIS
         /// </summary>
         PointRemoved = 1,
 
+        /// \deprecated v5.1.0 Use tkMeasuringAction.MeasuringStopped instead.
+        MesuringStopped = 2,
+
         /// <summary>
         /// Measuring was stopped.
         /// </summary>
-        MesuringStopped = 2,
+        MeasuringStopped = 3
     }
 
     /// <summary>

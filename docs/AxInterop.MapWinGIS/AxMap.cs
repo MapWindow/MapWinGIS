@@ -51,14 +51,14 @@ namespace AxMapWinGIS
     /// Here are groups of API members for AxMap class:
     /// \dotfile mapgroups.dot
     /// <a href = "diagrams.html">Graph description</a>
-    public class AxMap
+    public class AxMap : _DMapEvents
     {
         #region _DMap Members
 
         /// <summary>
         /// Gets or sets the user defined cursor handle. The handle is a windows cursor handle. 
         /// </summary>
-        public int UDCursorHandle
+        public int UdCursorHandle
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -68,7 +68,7 @@ namespace AxMapWinGIS
         /// Gets or sets the object of Tiles class associated with map.
         /// </summary>
         /// \new490 Added in version 4.9.0
-        public MapWinGIS.Tiles Tiles
+        public Tiles Tiles
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -78,7 +78,7 @@ namespace AxMapWinGIS
         /// Gets FileManager object associated with map. The object is used by AxMap.AddLayerFromFilename methods.
         /// </summary>
         /// \new491 Added in version 4.9.1
-        public MapWinGIS.FileManager FileManager 
+        public FileManager FileManager 
         {
             get { throw new NotImplementedException();}
         }
@@ -99,9 +99,9 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>If the size of the back buffer differ from the provided dimensions, the scaling of the buffer content will be made.</remarks>
         /// <param name="hdc">The handle of the device context.</param>
-        /// <param name="ImageWidth">The width of the resulting image.</param>
-        /// <param name="ImageHeight">The height of the resulting image.</param>
-        public void DrawBackBuffer(IntPtr hdc, int ImageWidth, int ImageHeight)
+        /// <param name="imageWidth">The width of the resulting image.</param>
+        /// <param name="imageHeight">The height of the resulting image.</param>
+        public void DrawBackBuffer(IntPtr hdc, int imageWidth, int imageHeight)
         {
             throw new NotImplementedException();
         }
@@ -148,9 +148,9 @@ namespace AxMapWinGIS
         }
        
         /// <summary>
-        /// Gets or sets the cursor used with the map. When using crsrUserDefined be sure to set a UDCursorHandle. 
+        /// Gets or sets the cursor used with the map. When using tkCursor.crsrUserDefined be sure to set a AxMap.UDCursorHandle. 
         /// </summary>
-        public MapWinGIS.tkCursor MapCursor
+        public tkCursor MapCursor
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -159,7 +159,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets or sets the value which indicates how the control adjust its content after the resizing operations.
         /// </summary>
-        public MapWinGIS.tkResizeBehavior MapResizeBehavior
+        public tkResizeBehavior MapResizeBehavior
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -177,9 +177,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Resizes the map to the given width and height.
         /// </summary>
-        /// <param name="Width">The new width of the control.</param>
-        /// <param name="Height">The new hight of the control.</param>
-        public void Resize(int Width, int Height)
+        /// <param name="width">The new width of the control.</param>
+        /// <param name="height">The new hight of the control.</param>
+        public void Resize(int width, int height)
         {
             throw new NotImplementedException();
         }
@@ -198,9 +198,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Shows tooltip near the mouse cursor.
         /// </summary>
-        /// <param name="Text">Text of the tooltip.</param>
-        /// <param name="Milliseconds">The duration of tooltip display.</param>
-        public void ShowToolTip(string Text, int Milliseconds)
+        /// <param name="text">Text of the tooltip.</param>
+        /// <param name="milliseconds">The duration of tooltip display.</param>
+        public void ShowToolTip(string text, int milliseconds)
         {
             throw new NotImplementedException();
         }
@@ -218,9 +218,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Takes snap shot of the contents of the map within the bounds of the specified rectangle, returning an image of the results. 
         /// </summary>
-        /// <param name="BoundBox">The bounds (rectangle) in map units to get the snapshot from.</param>
+        /// <param name="boundBox">The bounds (rectangle) in map units to get the snapshot from.</param>
         /// <returns>An image of the contents of the map displayed inside the bounds of the specified rectangle.</returns>
-        public object SnapShot(object BoundBox)
+        public object SnapShot(object boundBox)
         {
             throw new NotImplementedException();
         }
@@ -228,11 +228,11 @@ namespace AxMapWinGIS
         /// <summary>
         /// Takes snap shot of the contents of the map and returns it as an image object. 
         /// </summary>
-        /// <param name="ClippingLayerNbr">The position of the layer which extents will be used for taking snapshot.</param>
-        /// <param name="Zoom">The amount of zoom.</param>
+        /// <param name="clippingLayerNbr">The position of the layer which extents will be used for taking snapshot.</param>
+        /// <param name="zoom">The amount of zoom.</param>
         /// <param name="pWidth">The width of the resulting image.</param>
         /// <returns>An image of the contents of the map.</returns>
-        public object SnapShot2(int ClippingLayerNbr, double Zoom, int pWidth)
+        public object SnapShot2(int clippingLayerNbr, double zoom, int pWidth)
         {
             throw new NotImplementedException();
         }
@@ -244,10 +244,10 @@ namespace AxMapWinGIS
         /// <param name="right">The x coordinate of the top right corner of the extents.</param>
         /// <param name="top">The y coordinate of the top right corner of the extents.</param>
         /// <param name="bottom">The y coordinate of the lower left corner of the extents.</param>
-        /// <param name="Width">The width of the resulting image in pixels.</param>
+        /// <param name="width">The width of the resulting image in pixels.</param>
         /// <returns>An image of the contents of the map.</returns>
         /// 
-        public object SnapShot3(double left, double right, double top, double bottom, int Width)
+        public object SnapShot3(double left, double right, double top, double bottom, int width)
         {
             throw new NotImplementedException();
         }
@@ -256,10 +256,10 @@ namespace AxMapWinGIS
         /// Performs drawing of the map contents to the specified device context.
         /// </summary>
         /// <param name="hdc">The handle of the device context.</param>
-        /// <param name="Extents">The map extents to be drawn.</param>
-        /// <param name="Width">The width of the resulting image inShowVersionNumber pixels.</param>
+        /// <param name="extents">The map extents to be drawn.</param>
+        /// <param name="width">The width of the resulting image inShowVersionNumber pixels.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool SnapShotToDC(IntPtr hdc, MapWinGIS.Extents Extents, int Width)
+        public bool SnapShotToDc(IntPtr hdc, Extents extents, int width)
         {
             throw new NotImplementedException();
         }
@@ -277,9 +277,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Retrieves the error message associated with the specified error code.
         /// </summary>
-        /// <param name="ErrorCode">The error code for which the error message is required.  </param>
+        /// <param name="errorCode">The error code for which the error message is required.  </param>
         /// <returns>The error message description for the specified error code.</returns>
-        public string get_ErrorMsg(int ErrorCode)
+        public string get_ErrorMsg(int errorCode)
         {
             throw new NotImplementedException();
         }
@@ -344,7 +344,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Gets list actions performed by user via interactive shape editor. Provides undo/redo capability.
+        /// Gets list actions performed by user via interactive ShapeEditor. Provides undo/redo capability.
         /// </summary>
         /// \new493 Added in version 4.9.3
         public virtual UndoList UndoList
@@ -362,7 +362,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Gets instance of shape editor class associated with map which stores data entered by interactive editing tools.
+        /// Gets instance of ShapeEditor class associated with map which stores data entered by interactive editing tools.
         /// </summary>
         /// \new493 Added in version 4.9.3
         public virtual ShapeEditor ShapeEditor
@@ -411,7 +411,7 @@ namespace AxMapWinGIS
         /// Gets or sets the cursor mode for the map. 
         /// </summary>
         /// <remarks>The cursor mode determines how the map handles mouse click events on the map. The only mode not handled by the map is cmNone.</remarks>
-        public MapWinGIS.tkCursorMode CursorMode
+        public tkCursorMode CursorMode
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -460,7 +460,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Checks to see if the map is currently locked or not.
         /// </summary>
-        public MapWinGIS.tkLockMode IsLocked
+        public tkLockMode IsLocked
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -471,8 +471,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This is very useful if you are making a large number of changes at once and don't want the map to be redrawn between each change.
         /// The changes of drawing options in the related classes (Shapefile, Labels, etc.) won't cause the redraw of the map even if it's not locked.</remarks>
-        /// <param name="LockMode">The state of the lock mode.</param>
-        public void LockWindow(MapWinGIS.tkLockMode LockMode)
+        /// <param name="lockMode">The state of the lock mode.</param>
+        public void LockWindow(tkLockMode lockMode)
         {
             throw new NotImplementedException();
         }
@@ -563,8 +563,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Zooms the display in by the given factor.
         /// </summary>
-        /// <param name="Percent">The factor to zoom in by.</param>
-        public void ZoomIn(double Percent)
+        /// <param name="percent">The factor to zoom in by.</param>
+        public void ZoomIn(double percent)
         {
             throw new NotImplementedException();
         }
@@ -572,8 +572,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Zooms the display out by the specified factor.
         /// </summary>
-        /// <param name="Percent">The factor to zoom out by.</param>
-        public void ZoomOut(double Percent)
+        /// <param name="percent">The factor to zoom out by.</param>
+        public void ZoomOut(double percent)
         {
             throw new NotImplementedException();
         }
@@ -590,8 +590,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Zooms the map display to the specified layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer to zoom to.</param>
-        public void ZoomToLayer(int LayerHandle)
+        /// <param name="layerHandle">The handle of the layer to zoom to.</param>
+        public void ZoomToLayer(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -626,9 +626,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Zooms the map display to the specified shape in the shapefile contained by the specified layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer containing the shape to zoom to.</param>
-        /// <param name="Shape">The index of the shape to zoom to.</param>
-        public void ZoomToShape(int LayerHandle, int Shape)
+        /// <param name="layerHandle">The handle of the layer containing the shape to zoom to.</param>
+        /// <param name="shape">The index of the shape to zoom to.</param>
+        public void ZoomToShape(int layerHandle, int shape)
         {
             throw new NotImplementedException();
         }
@@ -715,7 +715,7 @@ namespace AxMapWinGIS
         public bool RecenterMapOnZoom { get; set; }
 
         /// <summary>
-        /// Reverts the last operation performed by user in interactive shape editor.
+        /// Reverts the last operation performed by user in interactive ShapeEditor.
         /// </summary>
         /// <remarks>This method is preferable over AxMap.UndoList.Undo since it can 
         /// also undo point added during creation of new shape, which are not registered in the undo list.</remarks>
@@ -750,10 +750,10 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>The serialized string will not include information about the data source. Therefore
         /// the same options can later be applied to any data layer of the same type (either shapefile or image).</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>The string with serialized layer settings.</returns>
         /// \new48 Added in version 4.8
-        public string SerializeLayer(int LayerHandle)
+        public string SerializeLayer(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -761,11 +761,11 @@ namespace AxMapWinGIS
         /// <summary>
         /// Restores the state of the layer from the string generated by AxMap.SerializeLayer().
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newVal">The string to restore values from.</param>
         /// <returns>True on success and false otherwise.</returns>
         /// \new48 Added in version 4.8
-        public bool DeserializeLayer(int LayerHandle, string newVal)
+        public bool DeserializeLayer(int layerHandle, string newVal)
         {
             throw new NotImplementedException();
         }
@@ -773,11 +773,11 @@ namespace AxMapWinGIS
         /// <summary>
         /// Serializes map state to the string.
         /// </summary>
-        /// <param name="RelativePaths">A value which indicates whether relative or absolute paths to data sources will be used.</param>
-        /// <param name="BasePath">The path to the base folder starting from which relative paths will be calculated.</param>
+        /// <param name="relativePaths">A value which indicates whether relative or absolute paths to data sources will be used.</param>
+        /// <param name="basePath">The path to the base folder starting from which relative paths will be calculated.</param>
         /// <returns>The string with the serialized map state.</returns>
         /// \new48 Added in version 4.8
-        public string SerializeMapState(bool RelativePaths, string BasePath)
+        public string SerializeMapState(bool relativePaths, string basePath)
         {
             throw new NotImplementedException();
         }
@@ -786,12 +786,12 @@ namespace AxMapWinGIS
         /// Restores map state from the string generated by AxMap.SerializeMapState.
         /// </summary>
         /// <remarks>This method will remove all the existing layers and load the layers specified in the string.</remarks>
-        /// <param name="State">The string with serialized state.</param>
-        /// <param name="LoadLayers">A boolean value which indicates whether layers or only options of the map control will restored.</param>
-        /// <param name="BasePath">The path to the base folder starting from which relative paths were calculated.</param>
+        /// <param name="state">The string with serialized state.</param>
+        /// <param name="loadLayers">A boolean value which indicates whether layers or only options of the map control will restored.</param>
+        /// <param name="basePath">The path to the base folder starting from which relative paths were calculated.</param>
         /// <returns>True on success and false otherwise.</returns>
         /// \new48 Added in version 4.8
-        public bool DeserializeMapState(string State, bool LoadLayers, string BasePath)
+        public bool DeserializeMapState(string state, bool loadLayers, string basePath)
         {
             throw new NotImplementedException();
         }
@@ -800,12 +800,12 @@ namespace AxMapWinGIS
         /// Applies to the layer a set of settings from file with the specified name.
         /// </summary>
         /// <remarks>The options will be loaded from the file with the name [LayerName].[OptionsName].mwsymb</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="OptionsName">The name of the set of options.</param>
-        /// <param name="Description">The output string which will hold the description of the options stored in file.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
+        /// <param name="optionsName">The name of the set of options.</param>
+        /// <param name="description">The output string which will hold the description of the options stored in file.</param>
         /// <returns>True on success and false otherwise.</returns>
         /// \new48 Added in version 4.8
-        public bool LoadLayerOptions(int LayerHandle, string OptionsName, ref string Description)
+        public bool LoadLayerOptions(int layerHandle, string optionsName, ref string description)
         {
             throw new NotImplementedException();
         }
@@ -814,11 +814,11 @@ namespace AxMapWinGIS
         /// Removes set of options for the layer with the specified name.
         /// </summary>
         /// <remarks>The options are stored in files with the name [LayerName].[OptionsName].mwsymb</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="OptionsName">The name of the set of options.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
+        /// <param name="optionsName">The name of the set of options.</param>
         /// <returns>True on success and false otherwise.</returns>
         /// \new48 Added in version 4.8
-        public bool RemoveLayerOptions(int LayerHandle, string OptionsName)
+        public bool RemoveLayerOptions(int layerHandle, string optionsName)
         {
             throw new NotImplementedException();
         }
@@ -827,13 +827,13 @@ namespace AxMapWinGIS
         /// Saves settings of the layer to the file.
         /// </summary>
         /// <remarks>The options are saved to the file with name [LayerName].[OptionsName].mwsymb</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="OptionsName">The name which will be attached to the set of options.</param>
-        /// <param name="Overwrite">A value which indicates whether the existing file will be overwritten.</param>
-        /// <param name="Description">The description associated with the set of options.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
+        /// <param name="optionsName">The name which will be attached to the set of options.</param>
+        /// <param name="overwrite">A value which indicates whether the existing file will be overwritten.</param>
+        /// <param name="description">The description associated with the set of options.</param>
         /// <returns>True on success and false otherwise.</returns>
         /// \new48 Added in version 4.8
-        public bool SaveLayerOptions(int LayerHandle, string OptionsName, bool Overwrite, string Description)
+        public bool SaveLayerOptions(int layerHandle, string optionsName, bool overwrite, string description)
         {
             throw new NotImplementedException();
         }
@@ -841,16 +841,14 @@ namespace AxMapWinGIS
         /// <summary>
         /// Loads the state of the map from the file created by AxMap.SaveMapState method.
         /// </summary>
-        /// <param name="Filename">The name of the file.</param>
-        /// <param name="Callback">A callback object to return information about progress and errors.</param>
+        /// <param name="filename">The name of the file.</param>
+        /// <param name="callback">A callback object to return information about progress and errors.</param>
         /// <returns>True on success and false otherwise.</returns>
         /// \new48 Added in version 4.8
-        public bool LoadMapState(string Filename, object Callback)
+        public bool LoadMapState(string filename, object callback)
         {
             throw new NotImplementedException();
         }
-
-     
 
         /// <summary>
         /// Saves the state of the map to the specified file.
@@ -861,12 +859,12 @@ namespace AxMapWinGIS
         /// - references to the layers;
         /// - drawing options for the layers.
         /// .
-        /// <param name="Filename">The name of the file.</param>
-        /// <param name="RelativePaths">A value which indicates whether absolute or relative paths should be used.</param>
-        /// <param name="Overwrite">A value which indicates whether the exiting file will be overwritten.</param>
+        /// <param name="filename">The name of the file.</param>
+        /// <param name="relativePaths">A value which indicates whether absolute or relative paths should be used.</param>
+        /// <param name="overwrite">A value which indicates whether the exiting file will be overwritten.</param>
         /// <returns>True on success and false otherwise.</returns>
         /// \new48 Added in version 4.8
-        public bool SaveMapState(string Filename, bool RelativePaths, bool Overwrite)
+        public bool SaveMapState(string filename, bool relativePaths, bool overwrite)
         {
             throw new NotImplementedException();
         }
@@ -958,10 +956,10 @@ namespace AxMapWinGIS
         /// Sets the description of the layer.
         /// </summary>
         /// <remarks>The information will be stored in .mwsymb file associated with data layer.</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newValue">The description of the layer.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerDescription(int LayerHandle, string newValue)
+        public void set_LayerDescription(int layerHandle, string newValue)
         {
             throw new NotImplementedException();
         }
@@ -969,10 +967,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the description of the layer from the associated .mwsymb file.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>The string with description.</returns>
         /// \new48 Added in version 4.8
-        public string get_LayerDescription(int LayerHandle)
+        public string get_LayerDescription(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -980,11 +978,11 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the boolean value which indicates whether the layer will be displayed at all scales or only within the chosen range of scales.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>True in case the layer will be displayed between specified scales only.</returns>
         /// \see AxMap.get_LayerMaxVisibleScale, AxMap.get_LayerMinVisibleScale
         /// \new48 Added in version 4.8
-        public bool get_LayerDynamicVisibility(int LayerHandle)
+        public bool get_LayerDynamicVisibility(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -992,11 +990,11 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the boolean value which indicates whether the layer will be displayed at all scales or only within the chosen range of scales.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newValue">True in case the layer will be displayed between specified scales only.</param>
         /// \see set_LayerMaxVisibleScale, set_LayerMinVisibleScale
         /// \new48 Added in version 4.8
-        public void set_LayerDynamicVisibility(int LayerHandle, bool newValue)
+        public void set_LayerDynamicVisibility(int layerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1005,9 +1003,9 @@ namespace AxMapWinGIS
         /// Gets a string associated with a layer in the map. 
         /// </summary>
         /// <remarks>This string can be used to store any string data desired by the developer.</remarks>
-        /// <param name="LayerHandle">The handle for the layer for which the layer key is to be set.</param>
+        /// <param name="layerHandle">The handle for the layer for which the layer key is to be set.</param>
         /// <returns>The layer key for the specified layer in string format.</returns>
-        public string get_LayerKey(int LayerHandle)
+        public string get_LayerKey(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1016,9 +1014,9 @@ namespace AxMapWinGIS
         /// Sets a string associated with a layer in the map. 
         /// </summary>
         /// <remarks>This string can be used to store any string data desired by the developer.</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newValue">The string to be associated with layer.</param>
-        public void set_LayerKey(int LayerHandle, string newValue)
+        public void set_LayerKey(int layerHandle, string newValue)
         {
             throw new NotImplementedException();
         }
@@ -1027,10 +1025,10 @@ namespace AxMapWinGIS
         /// Returns labels associated with layer.
         /// </summary>
         /// <remarks>Labels can also be obtained by using Shapefile.Labels and Image.Labels.</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>The labels associated with the layer.</returns>
         /// \new48 Added in version 4.8
-        public MapWinGIS.Labels get_LayerLabels(int LayerHandle)
+        public Labels get_LayerLabels(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1038,10 +1036,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the labels associated with the layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newValue">The new instance of the Labels class to be associated with the layer.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerLabels(int LayerHandle, MapWinGIS.Labels newValue)
+        public void set_LayerLabels(int layerHandle, Labels newValue)
         {
             throw new NotImplementedException();
         }
@@ -1049,10 +1047,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the maximum scale at which the layer is visible on the map.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>The maximum visible scale for the layer.</returns>
         /// \new48 Added in version 4.8
-        public double get_LayerMaxVisibleScale(int LayerHandle)
+        public double get_LayerMaxVisibleScale(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1060,10 +1058,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the maximum scale at which the layer is visible on the map.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newValue">The maximum visible scale for the layer.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerMaxVisibleScale(int LayerHandle, double newValue)
+        public void set_LayerMaxVisibleScale(int layerHandle, double newValue)
         {
             throw new NotImplementedException();
         }
@@ -1071,10 +1069,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the minimum scale at which the layer is visible on the map.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>The minimum visible scale for the layer.</returns>
         /// \new48 Added in version 4.8
-        public double get_LayerMinVisibleScale(int LayerHandle)
+        public double get_LayerMinVisibleScale(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1082,10 +1080,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the minimum scale at which the layer is visible on the map.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newValue">The minimum visible scale for the layer.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerMinVisibleScale(int LayerHandle, double newValue)
+        public void set_LayerMinVisibleScale(int layerHandle, double newValue)
         {
             throw new NotImplementedException();
         }
@@ -1093,9 +1091,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the name of the specified layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer for which the name is to be set.</param>
+        /// <param name="layerHandle">The handle of the layer for which the name is to be set.</param>
         /// <returns>The layer name for the specified layer. </returns>
-        public string get_LayerName(int LayerHandle)
+        public string get_LayerName(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1103,9 +1101,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the name of the specified layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer for which the name is to be set.</param>
+        /// <param name="layerHandle">The handle of the layer for which the name is to be set.</param>
         /// <param name="newValue">The name to be set for the layer.</param>
-        public void set_LayerName(int LayerHandle, string newValue)
+        public void set_LayerName(int layerHandle, string newValue)
         {
             throw new NotImplementedException();
         }
@@ -1114,10 +1112,10 @@ namespace AxMapWinGIS
         /// Gets a boolean value which indicates whether the layer will be serialized by appropriate routines.
         /// </summary>
         /// <remarks>This property affects AxMap.SaveMapState, AxMap.SerializeMapState.</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>True in case the layer will be excluded from serialization and false otherwise.</returns>
         /// \new48 Added in version 4.8
-        public bool get_LayerSkipOnSaving(int LayerHandle)
+        public bool get_LayerSkipOnSaving(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1126,10 +1124,10 @@ namespace AxMapWinGIS
         /// Sets a boolean value which indicates whether the layer will be serialized by appropriate routines.
         /// </summary>
         /// <remarks>This property affects AxMap.SaveMapState, AxMap.SerializeMapState.</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newValue">True in case the layer will be excluded from serialization and false otherwise.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerSkipOnSaving(int LayerHandle, bool newValue)
+        public void set_LayerSkipOnSaving(int layerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1137,9 +1135,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the visibility of the specified layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer for which the visibility is being set. </param>
+        /// <param name="layerHandle">The handle of the layer for which the visibility is being set. </param>
         /// <returns>A boolean value representing whether the layer is to be visible or not.</returns>
-        public bool get_LayerVisible(int LayerHandle)
+        public bool get_LayerVisible(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1147,9 +1145,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the visibility of the specified layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer for which the visibility is returned. </param>
+        /// <param name="layerHandle">The handle of the layer for which the visibility is returned. </param>
         /// <param name="newValue">A boolean value representing whether the layer is to be visible or not.</param>
-        public void set_LayerVisible(int LayerHandle, bool newValue)
+        public void set_LayerVisible(int layerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1157,9 +1155,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Returns a color scheme for the specified layer.
         /// </summary>
-        /// <param name="LayerHandle">The layer handle of the layer for which the coloring scheme is required</param>
+        /// <param name="layerHandle">The layer handle of the layer for which the coloring scheme is required</param>
         /// <returns>The color scheme for the specified layer</returns>
-        public object GetColorScheme(int LayerHandle)
+        public object GetColorScheme(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1262,9 +1260,9 @@ namespace AxMapWinGIS
         /// an instance of Image class created with Grid.OpenAsImage will be used for rendering.</remarks>
         /// <param name="Object">The object to add to the map. The following types are supported: 
         /// Shapefile, Image, Grid, OgrLayer, OgrDatasource.</param>
-        /// <param name="Visible">Sets whether the layer is visible after being added to the map.</param>
+        /// <param name="visible">Sets whether the layer is visible after being added to the map.</param>
         /// <returns>Returns the integer handle for the layer added to the map.</returns>
-        public int AddLayer(object Object, bool Visible)
+        public int AddLayer(object Object, bool visible)
         {
             throw new NotImplementedException();
         }
@@ -1272,9 +1270,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the handle of the layer at the given position in the map. Returns -1 if there is no layer at the specified position
         /// </summary>
-        /// <param name="LayerPosition">The position of the layer for which the layer handle is required.</param>
+        /// <param name="layerPosition">The position of the layer for which the layer handle is required.</param>
         /// <returns>The layer handle for the layer at the specified position.</returns>
-        public int get_LayerHandle(int LayerPosition)
+        public int get_LayerHandle(int layerPosition)
         {
             throw new NotImplementedException();
         }
@@ -1282,9 +1280,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the position of the specified layer in the map.
         /// </summary>
-        /// <param name="LayerHandle">The layer handle of the layer for which the layer position is required.</param>
+        /// <param name="layerHandle">The layer handle of the layer for which the layer position is required.</param>
         /// <returns>The layer position of the specified layer in the map.</returns>
-        public int get_LayerPosition(int LayerHandle)
+        public int get_LayerPosition(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1292,10 +1290,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// Moves a layer in the map from the initial position to a target position.
         /// </summary>
-        /// <param name="InitialPosition">The initial position of the layer to be moved.</param>
-        /// <param name="TargetPosition">The final position of the layer being moved.</param>
+        /// <param name="initialPosition">The initial position of the layer to be moved.</param>
+        /// <param name="targetPosition">The final position of the layer being moved.</param>
         /// <returns></returns>
-        public bool MoveLayer(int InitialPosition, int TargetPosition)
+        public bool MoveLayer(int initialPosition, int targetPosition)
         {
             throw new NotImplementedException();
         }
@@ -1303,9 +1301,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Moves the specified layer below all other layers.
         /// </summary>
-        /// <param name="InitialPosition">The position of the layer to move to the bottom</param>
+        /// <param name="initialPosition">The position of the layer to move to the bottom</param>
         /// <returns>Boolean value representing success when true, and failure when false.</returns>
-        public bool MoveLayerBottom(int InitialPosition)
+        public bool MoveLayerBottom(int initialPosition)
         {
             throw new NotImplementedException();
         }
@@ -1313,9 +1311,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Moves the specified layer down one layer in the map.
         /// </summary>
-        /// <param name="InitialPosition">The position of the layer to be moved.</param>
+        /// <param name="initialPosition">The position of the layer to be moved.</param>
         /// <returns>Boolean value representing success when true, and failure when false.</returns>
-        public bool MoveLayerDown(int InitialPosition)
+        public bool MoveLayerDown(int initialPosition)
         {
             throw new NotImplementedException();
         }
@@ -1323,9 +1321,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Moves the specified layer to the top of all other layers.
         /// </summary>
-        /// <param name="InitialPosition">The position of the layer to be moved.</param>
+        /// <param name="initialPosition">The position of the layer to be moved.</param>
         /// <returns>Boolean value representing success when true, failure when false.</returns>
-        public bool MoveLayerTop(int InitialPosition)
+        public bool MoveLayerTop(int initialPosition)
         {
             throw new NotImplementedException();
         }
@@ -1333,9 +1331,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Moves the specified layer up one layer in the map.
         /// </summary>
-        /// <param name="InitialPosition">The initial position of the layer to be moved.</param>
+        /// <param name="initialPosition">The initial position of the layer to be moved.</param>
         /// <returns>Boolean value representing success when true, failure when false.</returns>
-        public bool MoveLayerUp(int InitialPosition)
+        public bool MoveLayerUp(int initialPosition)
         {
             throw new NotImplementedException();
         }
@@ -1360,9 +1358,9 @@ namespace AxMapWinGIS
         /// Changes the data source for the specified layer without its closing.
         /// </summary>
         /// <remarks>The new data source must be of the same type, i.e. either Shapefile or Image.</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newSrcPath">The the name of the new data source.</param>
-        public void ReSourceLayer(int LayerHandle, string newSrcPath)
+        public void ReSourceLayer(int layerHandle, string newSrcPath)
         {
             throw new NotImplementedException();
         }
@@ -1371,11 +1369,11 @@ namespace AxMapWinGIS
         /// Performs the same operation as OgrLayer.ReloadFromSource, then compares 
         /// projections with the Map, and if the settings allow, will reproject on-the-fly.
         /// </summary>
-        /// <param name="OgrLayerHandle">The handle of the layer.  Must be an OGR layer.</param>
+        /// <param name="ogrLayerHandle">The handle of the layer.  Must be an OGR layer.</param>
         /// <returns>
         /// True if successful; False if not an OGR Layer, could not be reloaded, or could not be reprojected (if necessary)
         /// </returns>
-        public bool ReloadOgrLayerFromSource(int OgrLayerHandle)
+        public bool ReloadOgrLayerFromSource(int ogrLayerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1383,8 +1381,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Restarts the background loading thread of dynamically loaded layers
         /// </summary>
-        /// <param name="OgrLayerHandle">The handle of the layer.  Must be an OGR layer.</param>
-        public void RestartBackgroundLoading(int OgrLayerHandle)
+        /// <param name="ogrLayerHandle">The handle of the layer.  Must be an OGR layer.</param>
+        public void RestartBackgroundLoading(int ogrLayerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1392,8 +1390,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Removes the specified layer from the map
         /// </summary>
-        /// <param name="LayerHandle">The handle of the layer to be removed from the map.</param>
-        public void RemoveLayer(int LayerHandle)
+        /// <param name="layerHandle">The handle of the layer to be removed from the map.</param>
+        public void RemoveLayer(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1402,8 +1400,8 @@ namespace AxMapWinGIS
         /// Removes layer from the map without its closing.
         /// </summary>
         /// <remarks>Shapefile.Close or Image.Close won't be called while removing the layer.</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
-        public void RemoveLayerWithoutClosing(int LayerHandle)
+        /// <param name="layerHandle">The handle of the layer.</param>
+        public void RemoveLayerWithoutClosing(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1412,10 +1410,10 @@ namespace AxMapWinGIS
         /// Gets image object associated with the layer.
         /// </summary>
         /// <remarks>This method along with AxMap.get_Shapefile() can used to substitute AxMap.get_GetObject().</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>The reference to the image or NULL reference in case of invalid handle or wrong layer type.</returns>
         /// \new48 Added in version 4.8
-        public Image get_Image(int LayerHandle)
+        public Image get_Image(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1424,10 +1422,10 @@ namespace AxMapWinGIS
         /// Replaces the image object associated with the layer.
         /// </summary>
         /// <remarks>The old image will not be closed.</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newValue">The new image object.</param>
         /// \new48 Added in version 4.8
-        public void set_Image(int LayerHandle, Image newValue)
+        public void set_Image(int layerHandle, Image newValue)
         {
             throw new NotImplementedException();
         }
@@ -1436,10 +1434,10 @@ namespace AxMapWinGIS
         /// Gets shapefile object associated with the layer.
         /// </summary>
         /// <remarks>This method along with AxMap.get_Image() can be used to substitute AxMap.get_GetObject().</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>The reference to the shapefile or NULL reference in case of invalid handle or wrong layer type.</returns>
         /// \new48 Added in version 4.8
-        public Shapefile get_Shapefile(int LayerHandle)
+        public Shapefile get_Shapefile(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1448,10 +1446,10 @@ namespace AxMapWinGIS
         /// Replaces the shapefile object associated with the layer.
         /// </summary>
         /// <remarks>The old shapefile will not be closed.</remarks>
-        /// <param name="LayerHandle">The handle of the layer.</param>
+        /// <param name="layerHandle">The handle of the layer.</param>
         /// <param name="newValue">The new shapefile object.</param>
         /// \new48 Added in version 4.8
-        public void set_Shapefile(int LayerHandle, Shapefile newValue)
+        public void set_Shapefile(int layerHandle, Shapefile newValue)
         {
             throw new NotImplementedException();
         }
@@ -1461,9 +1459,9 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>For OGR layers this method will return underlying shapefile from OgrLayer.GetBuffer(). 
         /// Use AxMap.get_OgrLayer to access instance of OgrLayer itself.</remarks>
-        /// <param name="LayerHandle">The handle of the layer to be retrieved.</param>
+        /// <param name="layerHandle">The handle of the layer to be retrieved.</param>
         /// <returns>A Shapefile, Grid, or Image object.</returns>
-        public object get_GetObject(int LayerHandle)
+        public object get_GetObject(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1517,9 +1515,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Replaces the labels associated with the drawing layer.
         /// </summary>
-        /// <param name="DrawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        /// <param name="drawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <param name="newValue">The new instance of the Labels class to associate with the layer.</param>
-        public void set_DrawingLabels(int DrawingLayerIndex, Labels newValue)
+        public void set_DrawingLabels(int drawingLayerIndex, Labels newValue)
         {
             throw new NotImplementedException();
         }
@@ -1527,9 +1525,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets labels associated with the drawing layer.
         /// </summary>
-        /// <param name="DrawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        /// <param name="drawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <returns>The reference to the Labels class or NULL reference on the invalid handle.</returns>
-        public Labels get_DrawingLabels(int DrawingLayerIndex)
+        public Labels get_DrawingLabels(int drawingLayerIndex)
         {
             throw new NotImplementedException();
         }
@@ -1538,8 +1536,8 @@ namespace AxMapWinGIS
         /// Clears all drawings on the specified drawing layer, and removes the drawing layer. The drawing handle will no longer be valid.
         /// Call AxMap.NewDrawing again to create a new drawing layer to continue adding new elements.
         /// </summary>
-        /// <param name="DrawHandle">Drawing handle of the drawing layer to be cleared (and removed).</param>
-        public void ClearDrawing(int DrawHandle)
+        /// <param name="drawHandle">Drawing handle of the drawing layer to be cleared (and removed).</param>
+        public void ClearDrawing(int drawHandle)
         {
             throw new NotImplementedException();
         }
@@ -1560,9 +1558,9 @@ namespace AxMapWinGIS
         /// <param name="x">Center x coordinate for the circle to be drawn.</param>
         /// <param name="y">Center y coordinate for the circle to be drawn.</param>
         /// <param name="pixelRadius">Radius in pixels of the circle to be drawn.</param>
-        /// <param name="Color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
+        /// <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
-        public void DrawCircle(double x, double y, double pixelRadius, uint Color, bool fill)
+        public void DrawCircle(double x, double y, double pixelRadius, uint color, bool fill)
         {
             throw new NotImplementedException();
         }
@@ -1570,13 +1568,13 @@ namespace AxMapWinGIS
         /// <summary>
         /// Draws a circle on the specified drawing layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
+        /// <param name="layerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
         /// <param name="x">Center x coordinate for the circle to be drawn.</param>
         /// <param name="y">Center y coordinate for the circle to be drawn.</param>
         /// <param name="pixelRadius">Radius in pixels of the circle to be drawn.</param>
-        /// <param name="Color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
+        /// <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
-        public void DrawCircleEx(int LayerHandle, double x, double y, double pixelRadius, uint Color, bool fill)
+        public void DrawCircleEx(int layerHandle, double x, double y, double pixelRadius, uint color, bool fill)
         {
             throw new NotImplementedException();
         }
@@ -1589,8 +1587,8 @@ namespace AxMapWinGIS
         /// <param name="x2">X coordinate of the second point used to draw the line.</param>
         /// <param name="y2">Y coordinate of the second point used to draw the line.</param>
         /// <param name="pixelWidth">Width of the line in pixels.</param>
-        /// <param name="Color">Color to draw the line with. This is a UInt32 representation of an RGB value.</param>
-        public void DrawLine(double x1, double y1, double x2, double y2, int pixelWidth, uint Color)
+        /// <param name="color">Color to draw the line with. This is a UInt32 representation of an RGB value.</param>
+        public void DrawLine(double x1, double y1, double x2, double y2, int pixelWidth, uint color)
         {
             throw new NotImplementedException();
         }
@@ -1598,14 +1596,14 @@ namespace AxMapWinGIS
         /// <summary>
         /// Draws a line on the specified drawing layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
+        /// <param name="layerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
         /// <param name="x1">X coordinate of the first point used to draw the line</param>
         /// <param name="y1">Y coordinate of the first point used to draw the line.</param>
         /// <param name="x2">X coordinate of the second point used to draw the line.</param>
         /// <param name="y2">Y coordinate of the second point used to draw the line.</param>
         /// <param name="pixelWidth">Width of the line in pixels.</param>
-        /// <param name="Color">Color to draw the line with. This is a UInt32 representation of an RGB value.</param>
-        public void DrawLineEx(int LayerHandle, double x1, double y1, double x2, double y2, int pixelWidth, uint Color)
+        /// <param name="color">Color to draw the line with. This is a UInt32 representation of an RGB value.</param>
+        public void DrawLineEx(int layerHandle, double x1, double y1, double x2, double y2, int pixelWidth, uint color)
         {
             throw new NotImplementedException();
         }
@@ -1616,8 +1614,8 @@ namespace AxMapWinGIS
         /// <param name="x">The x coordinate of the point to draw</param>
         /// <param name="y">The y coordinate of the point to draw.</param>
         /// <param name="pixelSize">The size in pixels of the point to be drawn.</param>
-        /// <param name="Color">The color of the point to be drawn. This is a UInt32 representation of an RGB color.</param>
-        public void DrawPoint(double x, double y, int pixelSize, uint Color)
+        /// <param name="color">The color of the point to be drawn. This is a UInt32 representation of an RGB color.</param>
+        public void DrawPoint(double x, double y, int pixelSize, uint color)
         {
             throw new NotImplementedException();
         }
@@ -1625,12 +1623,12 @@ namespace AxMapWinGIS
         /// <summary>
         /// Draws a point on the specified drawing layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
+        /// <param name="layerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
         /// <param name="x">The x coordinate of the point to draw</param>
         /// <param name="y">The y coordinate of the point to draw.</param>
         /// <param name="pixelSize">The size in pixels of the point to be drawn.</param>
-        /// <param name="Color">The color of the point to be drawn. This is a UInt32 representation of an RGB color.</param>
-        public void DrawPointEx(int LayerHandle, double x, double y, int pixelSize, uint Color)
+        /// <param name="color">The color of the point to be drawn. This is a UInt32 representation of an RGB color.</param>
+        public void DrawPointEx(int layerHandle, double x, double y, int pixelSize, uint color)
         {
             throw new NotImplementedException();
         }
@@ -1641,9 +1639,9 @@ namespace AxMapWinGIS
         /// <param name="xPoints">An array containing x-coordinates for each point in the polygon.</param>
         /// <param name="yPoints">An array containing y-coordinates for each point in the polygon.</param>
         /// <param name="numPoints">The number of points in the polygon.</param>
-        /// <param name="Color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
+        /// <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
-        public void DrawPolygon(ref object xPoints, ref object yPoints, int numPoints, uint Color, bool fill)
+        public void DrawPolygon(ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill)
         {
             throw new NotImplementedException();
         }
@@ -1651,13 +1649,13 @@ namespace AxMapWinGIS
         /// <summary>
         /// Draws a polygon on the specified drawing layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
+        /// <param name="layerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
         /// <param name="xPoints">An array containing x-coordinates for each point in the polygon.</param>
         /// <param name="yPoints">An array containing y-coordinates for each point in the polygon.</param>
         /// <param name="numPoints">The number of points in the polygon.</param>
-        /// <param name="Color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
+        /// <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
-        public void DrawPolygonEx(int LayerHandle, ref object xPoints, ref object yPoints, int numPoints, uint Color, bool fill)
+        public void DrawPolygonEx(int layerHandle, ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill)
         {
             throw new NotImplementedException();
         }
@@ -1668,10 +1666,10 @@ namespace AxMapWinGIS
         /// <param name="x">Center x coordinate for the circle to be drawn.</param>
         /// <param name="y">Center y coordinate for the circle to be drawn.</param>
         /// <param name="pixelRadius">Radius in pixels of the circle to be drawn.</param>
-        /// <param name="Color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
+        /// <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
-        /// <param name="Width">The width of the outline.</param>
-        public void DrawWideCircle(double x, double y, double pixelRadius, uint Color, bool fill, short Width)
+        /// <param name="width">The width of the outline.</param>
+        public void DrawWideCircle(double x, double y, double pixelRadius, uint color, bool fill, short width)
         {
             throw new NotImplementedException();
         }
@@ -1679,14 +1677,14 @@ namespace AxMapWinGIS
         /// <summary>
         /// Draws a circle with custom outline width on the specified drawing layer.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
+        /// <param name="layerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
         /// <param name="x">Center x coordinate for the circle to be drawn.</param>
         /// <param name="y">Center y coordinate for the circle to be drawn.</param>
         /// <param name="radius">Radius in pixels of the circle to be drawn.</param>
-        /// <param name="Color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
+        /// <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
-        /// <param name="OutlineWidth">The width of the outline.</param>
-        public void DrawWideCircleEx(int LayerHandle, double x, double y, double radius, uint Color, bool fill, short OutlineWidth)
+        /// <param name="outlineWidth">The width of the outline.</param>
+        public void DrawWideCircleEx(int layerHandle, double x, double y, double radius, uint color, bool fill, short outlineWidth)
         {
             throw new NotImplementedException();
         }
@@ -1697,10 +1695,10 @@ namespace AxMapWinGIS
         /// <param name="xPoints">An array containing x-coordinates for each point in the polygon.</param>
         /// <param name="yPoints">An array containing y-coordinates for each point in the polygon.</param>
         /// <param name="numPoints">The number of points in the polygon.</param>
-        /// <param name="Color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
+        /// <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
-        /// <param name="Width">The width of the outline.</param>
-        public void DrawWidePolygon(ref object xPoints, ref object yPoints, int numPoints, uint Color, bool fill, short Width)
+        /// <param name="width">The width of the outline.</param>
+        public void DrawWidePolygon(ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill, short width)
         {
             throw new NotImplementedException();
         }
@@ -1708,14 +1706,14 @@ namespace AxMapWinGIS
         /// <summary>
         /// Draws a polygon with custom width of outline on the last drawing layer created using AxMap.NewDrawing.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
+        /// <param name="layerHandle">The handle of the drawing layer created with AxMap.NewDrawing call.</param>
         /// <param name="xPoints">An array containing x-coordinates for each point in the polygon.</param>
         /// <param name="yPoints">An array containing y-coordinates for each point in the polygon.</param>
         /// <param name="numPoints">The number of points in the polygon.</param>
-        /// <param name="Color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
+        /// <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
-        /// <param name="OutlineWidth">The width of the outline.</param>
-        public void DrawWidePolygonEx(int LayerHandle, ref object xPoints, ref object yPoints, int numPoints, uint Color, bool fill, short OutlineWidth)
+        /// <param name="outlineWidth">The width of the outline.</param>
+        public void DrawWidePolygonEx(int layerHandle, ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill, short outlineWidth)
         {
             throw new NotImplementedException();
         }
@@ -1734,9 +1732,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the drawing key which may be used by the programmer to store any string for a drawing layer with specified handle.
         /// </summary>
-        /// <param name="DrawHandle">The handle of the drawing layer.</param>
+        /// <param name="drawHandle">The handle of the drawing layer.</param>
         /// <returns>The string associated with the layer.</returns>
-        public string get_DrawingKey(int DrawHandle)
+        public string get_DrawingKey(int drawHandle)
         {
             throw new NotImplementedException();
         }
@@ -1744,9 +1742,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the drawing key may be used by the programmer to store any string for a drawing layer with specified handle.
         /// </summary>
-        /// <param name="DrawHandle">The handle of the drawing layer.</param>
+        /// <param name="drawHandle">The handle of the drawing layer.</param>
         /// <param name="newValue">The string associated with the layer.</param>
-        public void set_DrawingKey(int DrawHandle, string newValue)
+        public void set_DrawingKey(int drawHandle, string newValue)
         {
             throw new NotImplementedException();
         }
@@ -1754,9 +1752,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the boolean value which indicates whether the labels of the drawing layer are visible.
         /// </summary>
-        /// <param name="LayerHandle">The handle of the drawing layer.</param>
-        /// <param name="Visible">A boolean value which indicates whether the labels are visible.</param>
-        public void SetDrawingLayerVisible(int LayerHandle, bool Visible)
+        /// <param name="layerHandle">The handle of the drawing layer.</param>
+        /// <param name="visible">A boolean value which indicates whether the labels are visible.</param>
+        public void SetDrawingLayerVisible(int layerHandle, bool visible)
         {
             throw new NotImplementedException();
         }
@@ -1764,8 +1762,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Clears labels on the specified drawing layer.
         /// </summary>
-        /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        public void ClearDrawingLabels(int DrawHandle)
+        /// <param name="drawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        public void ClearDrawingLabels(int drawHandle)
         {
             throw new NotImplementedException();
         }
@@ -1774,9 +1772,9 @@ namespace AxMapWinGIS
         /// Gets a boolean value which indicates whether labels of the drawing layer are visible.
         /// </summary>
         /// <remarks>This property corresponds to the Labels.Visible property.</remarks>
-        /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        /// <param name="drawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <returns>True in case labels are visible and false otherwise.</returns>
-        public bool get_DrawingLabelsVisible(int DrawHandle)
+        public bool get_DrawingLabelsVisible(int drawHandle)
         {
             throw new NotImplementedException();
         }
@@ -1785,9 +1783,9 @@ namespace AxMapWinGIS
         /// Sets a boolean value which indicates whether labels of the drawing layer are visible.
         /// </summary>
         /// <remarks>This property corresponds to the Labels.Visible property.</remarks>
-        /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        /// <param name="drawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <param name="newValue">True in case labels are visible and false otherwise.</param>
-        public void set_DrawingLabelsVisible(int DrawHandle, bool newValue)
+        public void set_DrawingLabelsVisible(int drawHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1795,13 +1793,13 @@ namespace AxMapWinGIS
         /// <summary>
         /// Draws a label on the current drawing layer.
         /// </summary>
-        /// <param name="Text">Text of the label.</param>
+        /// <param name="text">Text of the label.</param>
         /// <param name="x">X coordinate, in either screen or map units depending on the parameters of AxMap.NewDrawing used to create the layer.</param>
         /// <param name="y">Y coordinate, in either screen or map units depending on the parameters of AxMap.NewDrawing used to create the layer.</param>
-        /// <param name="Rotation">Rotation angle in degrees.</param>
+        /// <param name="rotation">Rotation angle in degrees.</param>
         /// <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
         /// \new493 Added in version 4.9.3
-        public int DrawLabel(string Text, double x, double y, double Rotation)
+        public int DrawLabel(string text, double x, double y, double rotation)
         {
             throw new NotImplementedException();
         }
@@ -1809,14 +1807,14 @@ namespace AxMapWinGIS
         /// <summary>
         /// Draws a label on the specified drawing layer.
         /// </summary>
-        /// <param name="DrawHandle">Handle of the layer.</param>
-        /// <param name="Text">Text of the label.</param>
+        /// <param name="drawHandle">Handle of the layer.</param>
+        /// <param name="text">Text of the label.</param>
         /// <param name="x">X coordinate, in either screen or map units depending on the parameters of AxMap.NewDrawing used to create the layer.</param>
         /// <param name="y">Y coordinate, in either screen or map units depending on the parameters of AxMap.NewDrawing used to create the layer.</param>
-        /// <param name="Rotation">Rotation angle in degrees.</param>
+        /// <param name="rotation">Rotation angle in degrees.</param>
         /// <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
         /// \new493 Added in version 4.9.3
-        public int DrawLabelEx(int DrawHandle, string Text, double x, double y, double Rotation)
+        public int DrawLabelEx(int drawHandle, string text, double x, double y, double rotation)
         {
             throw new NotImplementedException();
         }
@@ -1846,9 +1844,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets whether the specified layer is drawn with a fill. Only works on polygon shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill is to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the fill is to be set.</param>
         /// <returns>Gets whether the layer is being drawn with a fill or not.</returns>
-        public bool get_ShapeLayerDrawFill(int LayerHandle)
+        public bool get_ShapeLayerDrawFill(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1856,9 +1854,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets whether the specified layer is drawn with a fill. Only works on polygon shapefiles. 
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill is to be set. </param>
+        /// <param name="layerHandle">Handle of the layer for which the fill is to be set. </param>
         /// <param name="newValue">Sets whether the layer is drawn with a fill or not.</param>
-        public void set_ShapeLayerDrawFill(int LayerHandle, bool newValue)
+        public void set_ShapeLayerDrawFill(int layerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1866,9 +1864,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets whether the lines for the shapefile in specified layer are drawn. 
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer to test if it is being drawn with a lines or not.</param>
+        /// <param name="layerHandle">Handle of the layer to test if it is being drawn with a lines or not.</param>
         /// <returns>Gets whether the layer is being drawn with lines or not.</returns>
-        public bool get_ShapeLayerDrawLine(int LayerHandle)
+        public bool get_ShapeLayerDrawLine(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1876,9 +1874,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets whether the lines for the shapefile in specified layer are drawn. 
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the lines are to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the lines are to be set.</param>
         /// <param name="newValue">Sets whether the layer is drawn with lines or not.</param>
-        public void set_ShapeLayerDrawLine(int LayerHandle, bool newValue)
+        public void set_ShapeLayerDrawLine(int layerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1886,9 +1884,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets whether the points/vertices for the shapefile in specified layer are drawn. 
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer to test if it is being drawn with a points or not.</param>
+        /// <param name="layerHandle">Handle of the layer to test if it is being drawn with a points or not.</param>
         /// <returns>Gets whether the layer is being drawn with points or not.</returns>
-        public bool get_ShapeLayerDrawPoint(int LayerHandle)
+        public bool get_ShapeLayerDrawPoint(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1896,9 +1894,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets whether the points/vertices for the shapefile in specified layer are drawn.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the points are to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the points are to be set.</param>
         /// <param name="newValue">Sets whether the layer is drawn with points or not.</param>
-        public void set_ShapeLayerDrawPoint(int LayerHandle, bool newValue)
+        public void set_ShapeLayerDrawPoint(int layerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1906,9 +1904,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the fill color for the specified layer. Only works on polygon shapefiles. 
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill color is required. </param>
+        /// <param name="layerHandle">Handle of the layer for which the fill color is required. </param>
         /// <returns>Fill color for the polygon shapefile.</returns>
-        public uint get_ShapeLayerFillColor(int LayerHandle)
+        public uint get_ShapeLayerFillColor(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1916,9 +1914,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the fill color for the specified layer. Only works on polygon shapefiles
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill color is to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the fill color is to be set.</param>
         /// <param name="newValue">Fill color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
-        public void set_ShapeLayerFillColor(int LayerHandle, uint newValue)
+        public void set_ShapeLayerFillColor(int layerHandle, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -1926,9 +1924,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the fill stipple for the specified layer. Only works on polygon shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill stipple is required. </param>
+        /// <param name="layerHandle">Handle of the layer for which the fill stipple is required. </param>
         /// <returns>Gets the fill stipple for the specified layer.</returns>
-        public MapWinGIS.tkFillStipple get_ShapeLayerFillStipple(int LayerHandle)
+        public tkFillStipple get_ShapeLayerFillStipple(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1936,9 +1934,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the fill stipple for the specified layer. Only works on polygon shapefiles. 
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill stipple is to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the fill stipple is to be set.</param>
         /// <param name="newValue">Sets fill stipple for the specified layer.</param>
-        public void set_ShapeLayerFillStipple(int LayerHandle, MapWinGIS.tkFillStipple newValue)
+        public void set_ShapeLayerFillStipple(int layerHandle, tkFillStipple newValue)
         {
             throw new NotImplementedException();
         }
@@ -1946,9 +1944,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles. 
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer to get percentage of fill transparency. </param>
+        /// <param name="layerHandle">Handle of the layer to get percentage of fill transparency. </param>
         /// <returns>Gets the percentage of fill transparency for the specified layer.</returns>
-        public float get_ShapeLayerFillTransparency(int LayerHandle)
+        public float get_ShapeLayerFillTransparency(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1956,9 +1954,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill transparency is to be set. </param>
+        /// <param name="layerHandle">Handle of the layer for which the fill transparency is to be set. </param>
         /// <param name="newValue">Sets the percentage of fill transparency for the specified layer.</param>
-        public void set_ShapeLayerFillTransparency(int LayerHandle, float newValue)
+        public void set_ShapeLayerFillTransparency(int layerHandle, float newValue)
         {
             throw new NotImplementedException();
         }
@@ -1966,9 +1964,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the line color for the specified layer. Only works on shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line color is required. </param>
+        /// <param name="layerHandle">Handle of the layer for which the line color is required. </param>
         /// <returns>Line color for the polygon shapefile. </returns>
-        public uint get_ShapeLayerLineColor(int LayerHandle)
+        public uint get_ShapeLayerLineColor(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1976,9 +1974,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the line color for the specified layer. Only works on shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line color is to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the line color is to be set.</param>
         /// <param name="newValue">Line color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
-        public void set_ShapeLayerLineColor(int LayerHandle, uint newValue)
+        public void set_ShapeLayerLineColor(int layerHandle, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -1986,9 +1984,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the line stipple for the specified layer. Only works on shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line stipple is required.</param>
+        /// <param name="layerHandle">Handle of the layer for which the line stipple is required.</param>
         /// <returns>Line stipple for the shapefile.</returns>
-        public MapWinGIS.tkLineStipple get_ShapeLayerLineStipple(int LayerHandle)
+        public tkLineStipple get_ShapeLayerLineStipple(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1996,9 +1994,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the line stipple for the specified layer. Only works on shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line stipple is required.</param>
+        /// <param name="layerHandle">Handle of the layer for which the line stipple is required.</param>
         /// <param name="newValue">Line stipple for the shapefile.</param>
-        public void set_ShapeLayerLineStipple(int LayerHandle, MapWinGIS.tkLineStipple newValue)
+        public void set_ShapeLayerLineStipple(int layerHandle, tkLineStipple newValue)
         {
             throw new NotImplementedException();
         }
@@ -2007,9 +2005,9 @@ namespace AxMapWinGIS
         /// Gets the line width for the specified layer. Only works on shapefiles.
         /// Suggested values for line width: 1 - 5
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line width is required.</param>
+        /// <param name="layerHandle">Handle of the layer for which the line width is required.</param>
         /// <returns>Line width for the shapefile.</returns>
-        public float get_ShapeLayerLineWidth(int LayerHandle)
+        public float get_ShapeLayerLineWidth(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -2018,9 +2016,9 @@ namespace AxMapWinGIS
         /// Sets the line width for the specified layer. Only works on shapefiles.
         /// Suggested values for line width: 1 - 5
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line width is to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the line width is to be set.</param>
         /// <param name="newValue">Line width for the shapefile.</param>
-        public void set_ShapeLayerLineWidth(int LayerHandle, float newValue)
+        public void set_ShapeLayerLineWidth(int layerHandle, float newValue)
         {
             throw new NotImplementedException();
         }
@@ -2028,9 +2026,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the point color for the specified layer. Only works on shapefiles
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point color is required. </param>
+        /// <param name="layerHandle">Handle of the layer for which the point color is required. </param>
         /// <returns>Point color for the polygon shapefile. </returns>
-        public uint get_ShapeLayerPointColor(int LayerHandle)
+        public uint get_ShapeLayerPointColor(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -2038,9 +2036,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the point color for the specified layer. Only works on shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point color is to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the point color is to be set.</param>
         /// <param name="newValue">Point color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
-        public void set_ShapeLayerPointColor(int LayerHandle, uint newValue)
+        public void set_ShapeLayerPointColor(int layerHandle, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -2048,9 +2046,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the line point/vertex size for the specified layer. Only works on shapefiles. 
         /// </summary>
-        /// <param name="LayerHandle">Gets or sets the line point/vertex size for the specified layer. Only works on shapefiles. </param>
+        /// <param name="layerHandle">Gets or sets the line point/vertex size for the specified layer. Only works on shapefiles. </param>
         /// <returns>Point/vertex size for the shapefile. </returns>
-        public float get_ShapeLayerPointSize(int LayerHandle)
+        public float get_ShapeLayerPointSize(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -2058,9 +2056,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the line point/vertex size for the specified layer. Only works on shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point/vertex size is to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the point/vertex size is to be set.</param>
         /// <param name="newValue">Point/vertex size for the shapefile.</param>
-        public void set_ShapeLayerPointSize(int LayerHandle, float newValue)
+        public void set_ShapeLayerPointSize(int layerHandle, float newValue)
         {
             throw new NotImplementedException();
         }
@@ -2068,9 +2066,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets the line point type for the specified layer. Only works on shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point type is required.</param>
+        /// <param name="layerHandle">Handle of the layer for which the point type is required.</param>
         /// <returns>%Point type for the shapefile.</returns>
-        public MapWinGIS.tkPointType get_ShapeLayerPointType(int LayerHandle)
+        public tkPointType get_ShapeLayerPointType(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -2078,9 +2076,9 @@ namespace AxMapWinGIS
         /// <summary>
         /// Sets the line point type for the specified layer. Only works on shapefiles.
         /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point type is to be set.</param>
+        /// <param name="layerHandle">Handle of the layer for which the point type is to be set.</param>
         /// <param name="newValue">%Point type for the shapefile.</param>
-        public void set_ShapeLayerPointType(int LayerHandle, MapWinGIS.tkPointType newValue)
+        public void set_ShapeLayerPointType(int layerHandle, tkPointType newValue)
         {
             throw new NotImplementedException();
         }
@@ -2089,9 +2087,9 @@ namespace AxMapWinGIS
         /// Gets the color of the polygon stipple for shapefile layer.
         /// </summary>
         /// <remarks>This property corresponds to the ShapeDrawingOptions.FillHatchStyle property.</remarks>
-        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
+        /// <param name="layerHandle">The handle of the shapefile layer.</param>
         /// <returns>The color of stipple.</returns>
-        public uint get_ShapeLayerStippleColor(int LayerHandle)
+        public uint get_ShapeLayerStippleColor(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -2101,10 +2099,10 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
         /// <remarks>This property corresponds to the ShapeDrawingOptions.FillHatchStyle property.</remarks>
-        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
+        /// <param name="layerHandle">The handle of the shapefile layer.</param>
         /// <param name="newValue">The color of stipple.</param>
         /// \see Shapefile.DefaultDrawingOptions
-        public void set_ShapeLayerStippleColor(int LayerHandle, uint newValue)
+        public void set_ShapeLayerStippleColor(int layerHandle, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -2113,9 +2111,9 @@ namespace AxMapWinGIS
         /// Gets a boolean value which indicates whether the background of fill stipple for polygon shapefile layer will be transparent.
         /// </summary>
         /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
-        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
+        /// <param name="layerHandle">The handle of the shapefile layer.</param>
         /// <returns>True in case the background is transparent and false otherwise.</returns>
-        public bool get_ShapeLayerStippleTransparent(int LayerHandle)
+        public bool get_ShapeLayerStippleTransparent(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -2124,9 +2122,9 @@ namespace AxMapWinGIS
         /// Sets a boolean value which indicates whether the background of fill stipple for polygon shapefile layer will be transparent.
         /// </summary>
         /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
-        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
+        /// <param name="layerHandle">The handle of the shapefile layer.</param>
         /// <param name="newValue">True in case the background is transparent and false otherwise.</param>
-        public void set_ShapeLayerStippleTransparent(int LayerHandle, bool newValue)
+        public void set_ShapeLayerStippleTransparent(int layerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -2267,7 +2265,7 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>If the given extents do not fit the aspect ratio of the map, the map will fit the given extents as well as possible.</remarks>
         /// \new495 Return value changed to IExtents in version 4.9.5
-        public MapWinGIS.Extents Extents
+        public Extents Extents
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -2276,7 +2274,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets or sets the extents of the map displayed by the control.
         /// </summary>
-        public MapWinGIS.Extents MaxExtents
+        public Extents MaxExtents
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -2441,7 +2439,7 @@ namespace AxMapWinGIS
         /// <remarks>This units must be the same as the units of the datasources being displayed. 
         /// This method affects the calculation of map scale (see AxMap.CurrentScale).</remarks>
         /// \new48 Added in version 4.8
-        public MapWinGIS.tkUnitsOfMeasure MapUnits
+        public tkUnitsOfMeasure MapUnits
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -2660,9 +2658,12 @@ namespace AxMapWinGIS
         /// <param name="xMax">Maximum X coordinate of the rectangle being rendered.</param>
         /// <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
         /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
-        /// <param name="handled">Passed by reference. 
-        /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        /// <param name="handled">Passed by reference. The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
         public event _DMapEvents_AfterDrawingEventHandler AfterDrawing;
+        void _DMapEvents.AfterDrawing(int hDc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired after the rendering of standard layers. Handle of device context is passed to allow the user to implement custom drawing. 
@@ -2672,23 +2673,30 @@ namespace AxMapWinGIS
         /// <param name="xMax">Maximum X coordinate of the rectangle being rendered.</param>
         /// <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
         /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
-        /// <param name="handled">Passed by reference. 
-        /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        /// <param name="handled">Passed by reference. The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
         /// \new495 Added in version 4.9.5
         public event _DMapEvents_AfterLayersEventHandler AfterLayers;
+        void _DMapEvents.AfterLayers(int hDc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
-        /// This event is fired after interactive editing of shape is finished (AxMap.CursorMode is set to cmEditShape).
+        /// This event is fired after interactive editing of shape is finished (AxMap.CursorMode is set to tkCursorMode.cmEditShape).
         /// </summary>
         /// <param name="operation">The type of editing operation that was performed.</param>
         /// <param name="layerHandle">Handle of the layer the shape being edited belongs to.</param>
         /// <param name="shapeIndex">Index of the shape withing layer.</param>
         /// <remarks>The common use of the event is set attributes of the shape, update its label or style. 
-        /// The operation parameter can be one of the following values: uoAddShape, uoRemoveShape, uoEditShape.</remarks>
+        /// The operation parameter can be one of the following values: tkUndoOperation.uoAddShape, tkUndoOperation.uoRemoveShape, tkUndoOperation.uoEditShape.</remarks>
         public event _DMapEvents_AfterShapeEditEventHandler AfterShapeEdit;
+        void _DMapEvents.AfterShapeEdit(tkUndoOperation operation, int layerHandle, int shapeIndex)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
-        /// This event is fired when background loading of data for OgrLayer.Finishes.
+        /// This event is fired when background loading of data for OgrLayer finishes.
         /// </summary>
         /// <param name="taskId">Unique Id of the loading task.</param>
         /// <param name="layerHandle">Handle of the layer the loading is peformed for.</param>
@@ -2702,27 +2710,39 @@ namespace AxMapWinGIS
         /// of success - from the main thread before the rendering of the loaded data.
         /// </remarks>
         public event _DMapEvents_BackgroundLoadingFinishedEventHandler BackgroundLoadingFinished;
+        void _DMapEvents.BackgroundLoadingFinished(int taskId, int layerHandle, int numFeatures, int numLoaded)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when background loading of data for OgrLayer starts.
         /// </summary>
         /// <param name="taskId">Unique Id of the loading task, 
-        /// which can be tracked down in BackgroundLoadingFinished to determine the results of the operation.</param>
+        /// which can be tracked down in AxMap.BackgroundLoadingFinished to determine the results of the operation.</param>
         /// <param name="layerHandle">Handle of the layer loading starts for.</param>
         /// <remarks>The event is fired after map extents change for each OgrLayer with OgrLayer.DynamicLoading proprety set to true,
         /// when the layer doesn't have the necessary data in its buffer (OgrLayer.GetBuffer). The event can be used
         /// to display some kind of loading indicator to notify the user that some data is still being loaded.</remarks>
         public event _DMapEvents_BackgroundLoadingStartedEventHandler BackgroundLoadingStarted;
+        void _DMapEvents.BackgroundLoadingStarted(int taskId, int layerHandle)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
-        /// This event is fired before shape is deleted in interactive Shape Editor.
+        /// This event is fired before shape is deleted in interactive ShapeEditor.
         /// </summary>
         /// <param name="target">What element of shape (whole shape, part, single vertex) is to be deleted.</param>
-        /// <param name="cancel">Passed by reference. To cancel the operation this value should be set to blnTrue.</param>
-        /// <remarks>This event is fired when shape (or some of its elements) is selected in Shape Editor (AxMap.CursorMode = cmEditShape)
+        /// <param name="cancel">Passed by reference. To cancel the operation this value should be set to tkMwBoolean.blnTrue.</param>
+        /// <remarks>This event is fired when shape (or some of its elements) is selected in ShapeEditor (AxMap.CursorMode = tkCursorMode.cmEditShape)
         /// and user presses Delete button. The common use of his event is to display a message box asking the user whether 
         /// the operation should be performed.</remarks>
         public event _DMapEvents_BeforeDeleteShapeEventHandler BeforeDeleteShape;
+        void _DMapEvents.BeforeDeleteShape(tkDeleteTarget target, ref tkMwBoolean cancel)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired before the rendering of drawing layers. Handle of device context is passed to allow the user to implement custom drawing. 
@@ -2733,9 +2753,13 @@ namespace AxMapWinGIS
         /// <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
         /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
         /// <param name="handled">Passed by reference. 
-        /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        /// The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
         public event _DMapEvents_BeforeDrawingEventHandler BeforeDrawing;
-
+        void _DMapEvents.BeforeDrawing(int hDc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <summary>
         /// This event is fired before the rendering of standard layers. Handle of device context is passed to allow the user to implement custom drawing. 
         /// </summary>
@@ -2745,17 +2769,25 @@ namespace AxMapWinGIS
         /// <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
         /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
         /// <param name="handled">Passed by reference. 
-        /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        /// The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
         /// \new495 Added in version 4.9.5
         public event _DMapEvents_BeforeLayersEventHandler BeforeLayers;
-
+        void _DMapEvents.BeforeLayers(int hDc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <summary>
-        /// This event is fired before editing starts for particular shape (after user click on the shape when map cursor is set to cmEditShape). 
+        /// This event is fired before editing starts for particular shape (after user click on the shape when map cursor is set to tkCursorMode.cmEditShape). 
         /// </summary>
         /// <param name="layerHandle">Handle of the layer the shape was selected from.</param>
         /// <param name="shapeIndex">Index of shape to be edited.</param>
-        /// <param name="cancel">Passed by reference. Allows user to cancel the editing operations by setting the value to blnTrue.</param>
+        /// <param name="cancel">Passed by reference. Allows user to cancel the editing operations by setting the value to tkMwBoolean.blnTrue.</param>
         public event _DMapEvents_BeforeShapeEditEventHandler BeforeShapeEdit;
+        void _DMapEvents.BeforeShapeEdit(int layerHandle, int shapeIndex, ref tkMwBoolean cancel)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// The event is fired when current map tool asks for the layer to work with.
@@ -2763,41 +2795,65 @@ namespace AxMapWinGIS
         /// <param name="xProj">X coordinate of mouse click in map coordinates (if the event was triggered by mouse click).</param>
         /// <param name="yProj">Y coordinate of mouse click in map coordinates (if the event was triggered by mouse click).</param>
         /// <param name="layerHandle">Passed by reference. Handle of the layer to apply the tool to should be set.</param>
-        /// <remarks>LayerHadle parameter in most cases is initially set to -1, which means "layer not defined".
+        /// <remarks>LayerHandle parameter in most cases is initially set to -1, which means "layer not defined".
         /// If this value is left unchanged the pending operation won't be preformed. Further details are provided 
         /// in description of particular tools.</remarks>
         public event _DMapEvents_ChooseLayerEventHandler ChooseLayer;
-
+        void _DMapEvents.ChooseLayer(double xProj, double yProj, ref int layerHandle)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <summary>
         /// The event is fired when user performs double click with left mouse button while cursor is within the map control.
         /// </summary>
         public event EventHandler DblClick;
+        void _DMapEvents.DblClick()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when the extents of the map change. 
         /// </summary>
         public event EventHandler ExtentsChanged;
+        void _DMapEvents.ExtentsChanged()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when a user drags a file and drops it on the map. 
         /// </summary>
         /// <param name="filename">The filename of the file dropped on the map.</param>
         public event _DMapEvents_FileDroppedEventHandler FileDropped;
+        void _DMapEvents.FileDropped(string filename)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when a new layer has been added to the map.
         /// </summary>
         /// <param name="layerHandle">Handle of the newly added layer.</param>
         public event _DMapEvents_LayerAddedEventHandler LayerAdded;
+        void _DMapEvents.LayerAdded(int layerHandle)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when a new layer has been added to the map and it has no metadata about its coordinate system and projection.
         /// </summary>
         /// <param name="layerHandle">Handle of the layer.</param>
-        /// <param name="cancelAdding">Passed by reference. The value should be set to blnTrue to cancel the adding operation.</param>
+        /// <param name="cancelAdding">Passed by reference. The value should be set to tkMwBoolean.blnTrue to cancel the adding operation.</param>
         /// <remarks>If this event is not handled then decision about the layer will be taken based on 
         /// the value of GlobalSettings.AllowLayersWithoutProjections property.</remarks>
         public event _DMapEvents_LayerProjectionIsEmptyEventHandler LayerProjectionIsEmpty;
+        void _DMapEvents.LayerProjectionIsEmpty(int layerHandle, ref tkMwBoolean cancelAdding)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when a layer has been removed from map.
@@ -2805,97 +2861,168 @@ namespace AxMapWinGIS
         /// <param name="layerHandle">Handle of the layer.</param>
         /// <param name="fromRemoveAllLayers">The value will be set to true in case layer removal is caused by AxMap.RemoveAllLayers call.</param>
         public event _DMapEvents_LayerRemovedEventHandler LayerRemoved;
+        void _DMapEvents.LayerRemoved(int layerHandle, bool fromRemoveAllLayers)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired after a layer was reprojected (its original projection was different from the map projection).
         /// </summary>
         /// <param name="layerHandle">Handle of the layer.</param>
-        /// <param name="success">True in case reprojection was peformed successfully. False</param>
-        /// <remarks>Automatic reprojection if peformed in case of projection mismatch for vector datasources.
+        /// <param name="success">True in case reprojection was performed successfully.</param>
+        /// <remarks>Automatic reprojection if performed in case of projection mismatch for vector datasources.
         /// Reprojected datasource will be represented by in-memory shapefile, no disk version will be saved automatically.
         /// Raster datasource will be rejected without an attempt to reproject them. 
-        /// The projection mismatch behavior is controlled by GlobalSettings.AllowProjectionMismatch, 
-        /// GlobalSettings.ReprojectionLayerOnAdding properties.</remarks>
+        /// The projection mismatch behavior is controlled by the GlobalSettings.AllowProjectionMismatch, 
+        /// GlobalSettings.ReprojectLayersOnAdding properties.</remarks>
         public event _DMapEvents_LayerReprojectedEventHandler LayerReprojected;
+        void _DMapEvents.LayerReprojected(int layerHandle, bool success)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
-        /// This event is fired for each layer in the map when the map state is changed
+        /// This event is fired when a layer was not fully reprojected.
+        /// It is controlled by the GlobalSettings.AllowLayersWithIncompleteReprojection property.
+        /// </summary>
+        /// <param name="layerHandle"></param>
+        /// <param name="numReprojected"></param>
+        /// <param name="numShapes"></param>
+        /// \new510 Added in version 5.1.0
+        public event _DMapEvents_LayerReprojectedIncompleteEventHandler LayerReprojectedIncomplete;
+        void _DMapEvents.LayerReprojectedIncomplete(int layerHandle, int numReprojected, int numShapes)
+        {
+            throw new NotImplementedException();
+        }
+        
+        /// <summary>
+        /// This event is fired for each layer in the map when the map state is changed.
         /// </summary>
         /// <param name="layerHandle">Handle of the layer.</param>
-        public event _DMapEvents_MapStateEventHandler MapStateEvent;
+        public event _DMapEvents_MapStateEventHandler MapState;
+        void _DMapEvents.MapState(int layerHandle)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
-        /// This event is fired after the user adds or removes a point from the path of measuring tool.
+        /// This event is fired after the user adds or removes a point from the path of Measuring tool.
         /// </summary>
-        /// <param name="action">Particular action performed by user.</param>
+        /// <param name="action">Particular action (like tkMeasuringAction.PointAdded) performed by user.</param>
         public event _DMapEvents_MeasuringChangedEventHandler MeasuringChanged;
+        void _DMapEvents.MeasuringChanged(tkMeasuringAction action)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when a user has pressed a mouse button while the cursor is inside the map control. 
-        /// The map property SendMouseDown must be set to True for this event to be fired.
+        /// The map property AxMap.SendMouseDown must be set to True for this event to be fired.
         /// </summary>
-        /// <remarks> </remarks>
-        /// <param name="Button">Mouse button that was pressed.</param>
-        /// <param name="Shift">The shift/ctrl modifiers pressed during the creation of this event. </param>
-        /// <param name="x">X coordinate of mouse cursor position in pixels relative to control's origin.</param>
-        /// <param name="y">Y coordinate of mouse cursor position in pixels relative to control's origin.</param>
-        public event _DMapEvents_MouseDownEventHandler MouseDownEvent;
-
+        /// <param name="button">Mouse button that was pressed.</param>
+        /// <param name="shift">The shift/ctrl modifiers pressed during the creation of this event. </param>
+        /// <param name="x">X coordinate of mouse cursor position in pixels relative to controls origin.</param>
+        /// <param name="y">Y coordinate of mouse cursor position in pixels relative to controls origin.</param>
+        public event _DMapEvents_MouseDownEventHandler MouseDown;
+        void _DMapEvents.MouseDown(short button, short shift, int x, int y)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <summary>
         /// This event is fired when the mouse is moved while the cursor is inside the map control. 
-        /// The map property SendMoveMouse must be set to True for this event to be fired. 
+        /// The map property AxMap.SendMouseMove must be set to True for this event to be fired. 
         /// </summary>
-        /// <param name="Button">Mouse button that was pressed.</param>
-        /// <param name="Shift">The shift/ctrl modifiers pressed during the creation of this event.</param>
-        /// <param name="x">X coordinate of mouse cursor position in pixels relative to control's origin.</param>
-        /// <param name="y">Y coordinate of mouse cursor position in pixels relative to control's origin.</param>
-        public event _DMapEvents_MouseMoveEventHandler MouseMoveEvent;
-
+        /// <param name="button">Mouse button that was pressed.</param>
+        /// <param name="shift">The shift/ctrl modifiers pressed during the creation of this event.</param>
+        /// <param name="x">X coordinate of mouse cursor position in pixels relative to controls origin.</param>
+        /// <param name="y">Y coordinate of mouse cursor position in pixels relative to controls origin.</param>
+        public event _DMapEvents_MouseMoveEventHandler MouseMove;
+        void _DMapEvents.MouseMove(short button, short shift, int x, int y)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <summary>
         /// This event is fired when the mouse button is released while the cursor is in the map control. 
-        /// The map property SendMouseUp must be set to True for this event to be fired. 
+        /// The map property AxMap.SendMouseUp must be set to True for this event to be fired. 
         /// </summary>
-        /// <param name="Button">Mouse button that was pressed.</param>
-        /// <param name="Shift">The shift/ctrl modifiers pressed during the creation of this event.</param>
-        /// <param name="x">X coordinate of mouse cursor position in pixels relative to control's origin.</param>
-        /// <param name="y">Y coordinate of mouse cursor position in pixels relative to control's origin.</param>
-        public event _DMapEvents_MouseUpEventHandler MouseUpEvent;
+        /// <param name="button">Mouse button that was pressed.</param>
+        /// <param name="shift">The shift/ctrl modifiers pressed during the creation of this event.</param>
+        /// <param name="x">X coordinate of mouse cursor position in pixels relative to controls origin.</param>
+        /// <param name="y">Y coordinate of mouse cursor position in pixels relative to controls origin.</param>
+        public event _DMapEvents_MouseUpEventHandler MouseUp;
+        void _DMapEvents.MouseUp(short button, short shift, int x, int y)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired during the rendering of map after data layers and drawing layers were rendered.
-        /// The map property SendMouseUp SendOnDrawBackBuffer must be set to True for this event to be fired. 
+        /// The map property AxMap.SendOnDrawBackBuffer must be set to True for this event to be fired. 
         /// </summary>
-        /// <param name="BackBuffer">Handle of the device context of back buffer bitmap.</param>
+        /// <param name="backBuffer">Handle of the device context of back buffer bitmap.</param>
         public event _DMapEvents_OnDrawBackBufferEventHandler OnDrawBackBuffer;
+        void _DMapEvents.OnDrawBackBuffer(int backBuffer)
+        {
+            throw new NotImplementedException();
+        }
 
+        /// <summary>
+        /// Special version of _DMapEvents.OnDrawBackBuffer
+        /// </summary>
+        /// <param name="height"></param>
+        /// <param name="width"></param>
+        /// <param name="stride"></param>
+        /// <param name="pixelFormat"></param>
+        /// <param name="scan0"></param>
+        public event _DMapEvents_OnDrawBackBuffer2EventHandler OnDrawBackBuffer2;
+        void _DMapEvents.OnDrawBackBuffer2(int height, int width, int stride, int pixelFormat, int scan0)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <summary>
         /// The event is fired when projection of the map control was changed.
         /// </summary>
         public event EventHandler ProjectionChanged;
+        void _DMapEvents.ProjectionChanged()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when a layer was added to the map with projection / coordinate system different from 
         /// those of the map control.
         /// </summary>
         /// <param name="layerHandle">Handle of the layer.</param>
-        /// <param name="cancelAdding">Passed by reference. The value should be set to blnTrue in case the adding of the layer should be cancelled.</param>
-        /// <param name="reproject">Passed by reference. The value should be set to blnTrue to instruct the control 
+        /// <param name="cancelAdding">Passed by reference. The value should be set to tkMwBoolean.blnTrue in case the adding of the layer should be cancelled.</param>
+        /// <param name="reproject">Passed by reference. The value should be set to tkMwBoolean.blnTrue to instruct the control 
         /// to run automatic reprojection of the layer.</param>
         public event _DMapEvents_ProjectionMismatchEventHandler ProjectionMismatch;
-
+        void _DMapEvents.ProjectionMismatch(int layerHandle, ref tkMwBoolean cancelAdding, ref tkMwBoolean reproject)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <summary>
         /// This event is fired while the user is dragging a selection box in the map control. 
-        /// The map property SendSelectBoxDrag must be set to True for this event to be fired. 
+        /// The map property AxMap.SendSelectBoxDrag must be set to True for this event to be fired. 
         /// </summary>
         /// <param name="left">The left boundary of the selection box in pixel coordinates.</param>
         /// <param name="right">The right boundary of the selection box in pixel coordinates.</param>
         /// <param name="bottom">The bottom boundary of the selection box in pixel coordinates.</param>
         /// <param name="top">The top boundary of the selection box in pixel coordinates.</param>
         public event _DMapEvents_SelectBoxDragEventHandler SelectBoxDrag;
+        void _DMapEvents.SelectBoxDrag(int left, int right, int bottom, int top)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when the user finishes dragging a selection box in the map control. 
-        /// The map property SendSelectBoxFinal must be set to True for this event to be fired.
+        /// The map property AxMap.SendSelectBoxFinal must be set to True for this event to be fired.
         /// </summary>
         /// <param name="left">The left boundary of the selection box in pixel coordinates.</param>
         /// <param name="right">The right boundary of the selection box in pixel coordinates.</param>
@@ -2903,26 +3030,33 @@ namespace AxMapWinGIS
         /// <param name="top">The top boundary of the selection box in pixel coordinates.</param>
         /// <remarks>
         /// Prior to version 5.0, there was ambiguity as to whether or not this event was fired 
-        /// in all circumstances.  In the case of the cmZoomIn tool, this event was always fired.  
-        /// But in the case of the cmSelection tool, it was only fired in the case when no shapes 
-        /// were actually 'selected'.  If any shapes were 'selected', the SelectionChanged event 
-        /// was fired, but the SelectBoxFinal was not.  As of version 5.0, the SelectBoxFinal event 
-        /// will always be fired after dragging a rectangle, whether or not any shapes were actually 
-        /// 'selected'.
+        /// in all circumstances.  In the case of the tkCursorMode.cmZoomIn tool, this event was always fired.  
+        /// But in the case of the tkCursorMode.cmSelection tool, it was only fired in the case when no shapes 
+        /// were actually 'selected'.  If any shapes were 'selected', the AxMap.SelectionChanged event 
+        /// was fired, but the AxMap.SelectBoxFinal was not. As of version 5.0, the AxMap.SelectBoxFinal event 
+        /// will always be fired after dragging a rectangle, whether or not any shapes were actually 'selected'.
         /// </remarks>
         /// \new500 Modified in version 5.0
         public event _DMapEvents_SelectBoxFinalEventHandler SelectBoxFinal;
+        void _DMapEvents.SelectBoxFinal(int left, int right, int bottom, int top)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
-        /// This event is fired after shapes were selected with cmSelection tool.
+        /// This event is fired after shapes were selected with tkCursorMode.cmSelection tool.
         /// </summary>
         /// <param name="layerHandle">Handle of the layer the shapes were selected on.</param>
         /// <remarks>The event will be fired only when selection is done by AxMap control internally, i.e.
-        /// - AxMap.CursorMode set to cmSelection;
+        /// - AxMap.CursorMode set to tkCursorMode.cmSelection;
         /// - a layer handle is passed to AxMap.ChooseLayer event handler;
         /// - user changes selection by clicking on shapes or drawing selection box.
-        /// When Shapefile.ShapeSelected property is changed from client code no event is fired.</remarks>
+        /// When Shapefile.set_ShapeSelected() property is changed from client code no event is fired.</remarks>
         public event _DMapEvents_SelectionChangedEventHandler SelectionChanged;
+        void _DMapEvents.SelectionChanged(int layerHandle)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when mouse cursor is being moved by user and the cursor enters or leaves neighborhood of particular shape.
@@ -2930,28 +3064,40 @@ namespace AxMapWinGIS
         /// <param name="layerHandle">Handle of the layer the shape belongs to.</param>
         /// <param name="shapeIndex">Index of the shape.</param>
         /// <remarks>The event is fired when:
-        /// - AxMap.CursorMode is set to cmIdentify tool or one of the editing tools (cmAddShape, cmEditShape, etc.);
+        /// - AxMap.CursorMode is set to tkCursorMode.cmIdentify tool or one of the editing tools (tkCursorMode.cmAddShape, tkCursorMode.cmEditShape, etc.);
         /// - number shapes within visible extents is smaller than GlobalSettings.HotTrackingMaxShapeCount.
         /// 
-        /// For cmIdentify tool the shape will be automatically highlighted (see AxMap.Identifier for details);
+        /// For tkCursorMode.cmIdentify tool the shape will be automatically highlighted (see AxMap.Identifier for details);
         /// For editing cursors vertices of the shape under cursor will be displayed (see ShapeEditor.HighlightVertices property).
         /// </remarks>
         public event _DMapEvents_ShapeHighlightedEventHandler ShapeHighlighted;
+        void _DMapEvents.ShapeHighlighted(int layerHandle, int shapeIndex)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
-        /// This event is fired when user click on a shape with cmIdentify tool active.
+        /// This event is fired when user click on a shape with tkCursorMode.cmIdentify tool active.
         /// </summary>
         /// <param name="layerHandle">Handle of the layer.</param>
         /// <param name="shapeIndex">Index of the shape.</param>
         /// <param name="projX">X coordinate of mouse click position in map coordinates.</param>
         /// <param name="projY">Y coordinate of mouse click position in map coordinates</param>
         public event _DMapEvents_ShapeIdentifiedEventHandler ShapeIdentified;
+        void _DMapEvents.ShapeIdentified(int layerHandle, int shapeIndex, double pointX, double pointY)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when shape being created or edited has topological errors and therefore can't be saved to the layer.
         /// </summary>
         /// <param name="errorMessage">Message about the reasons as to why the validation has failed.</param>
         public event _DMapEvents_ShapeValidationFailedEventHandler ShapeValidationFailed;
+        void _DMapEvents.ShapeValidationFailed(string errorMessage)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired when complete set of tiles has been loaded for the new map extents.
@@ -2959,32 +3105,48 @@ namespace AxMapWinGIS
         /// <param name="snapshot">True in case the loading of tiles was done as a part of making snapshot of the map.</param>
         /// <param name="key">A key of operation set in AxMap.LoadTilesForSnapshot method.</param>
         public event _DMapEvents_TilesLoadedEventHandler TilesLoaded;
+        void _DMapEvents.TilesLoaded(bool snapShot, string key, bool fromCache)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
-        /// This event is fired when an operations is added or removed from undo/redo list of interactive Shape Editor.
+        /// This event is fired when an operations is added or removed from undo/redo list of interactive ShapeEditor.
         /// </summary>
         public event EventHandler UndoListChanged;
-
+        void _DMapEvents.UndoListChanged()
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <summary>
         /// This event is fired before a shape which is being created or edited is about to be saved back to the layer.
         /// </summary>
         /// <param name="layerHandle">Handle of the layer.</param>
         /// <param name="shape">Shape to be validated.</param>
-        /// <param name="cancel">Passed by reference. This value should be set to blnTrue in case shape don't pass custom validation.</param>
-        /// <remarks>Shape Editor performs its own validation determined by ShapeEditor.ValidationMode, so there is 
-        /// no need to run the same checks once again here (like Shape.IsValid). However is some form of custom
-        /// rules should be enforced, there is a right place to do it.</remarks>
+        /// <param name="cancel">Passed by reference. This value should be set to tkMwBoolean.blnTrue in case shape don't pass custom validation.</param>
+        /// <remarks>ShapeEditor performs its own validation determined by ShapeEditor.ValidationMode, so there is 
+        /// no need to run the same checks once again here (like Shape.IsValid). However if some form of custom
+        /// rules should be enforced, this is the right place to do it.</remarks>
         public event _DMapEvents_ValidateShapeEventHandler ValidateShape;
-
+        void _DMapEvents.ValidateShape(int layerHandle, Shape shape, ref tkMwBoolean cancel)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// <summary>
-        /// This event is fired after grid datasource was added to the map.
+        /// This event is fired after grid datasource was added to the map (AxMap.AddLayer).
         /// </summary>
         /// <param name="layerHandle">Handle of the layer.</param>
         /// <param name="gridFilename">The filename of the original datasource.</param>
         /// <param name="bandIndex">Index of band which is used for visualization.</param>
         /// <param name="isUsingProxy">Whether the datasource is rendered by Image class directly or
-        /// by using an RBG image that was created to serve as proxy.</param>
+        /// by using an RBG image that was created to serve as proxy (Grid.CreateImageProxy).</param>
         public event _DMapEvents_GridOpenedEventHandler GridOpened;
+        void _DMapEvents.GridOpened(int layerHandle, string gridFilename, int bandIndex, bool isUsingProxy)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// This event is fired after the user digitized a new point and held the ALT button.
@@ -2992,8 +3154,13 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="pointX">X coordinate</param>
         /// <param name="pointY">Y coordinate</param>
+        /// \new510 Added in version 5.1.0
         public event _DMapEvents_BeforeVertexDigitizedEventHandler BeforeVertexDigitized;
-
+        void _DMapEvents.BeforeVertexDigitized(ref double pointX, ref double pointY)
+        {
+            throw new NotImplementedException();
+        }
+        
         /// @}
         #endregion
 

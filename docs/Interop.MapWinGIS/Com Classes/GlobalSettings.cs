@@ -573,7 +573,7 @@ namespace MapWinGIS
         /// Defaults to 'MapWinGIS/5.0'
         /// </summary>
         /// <param name="userAgent"></param>
-        /// \new5.1.0 Added in version 5.1.0
+        /// \new510 Added in version 5.1.0
         public void SetHttpUserAgent(string userAgent)
         {
             throw new NotImplementedException();
