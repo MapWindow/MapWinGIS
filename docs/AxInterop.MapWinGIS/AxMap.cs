@@ -5,6 +5,7 @@
 
 using System;
 using MapWinGIS;
+// ReSharper disable UnassignedGetOnlyAutoProperty
 #pragma warning disable 67 // Never used warning
 
 #if nsp
@@ -51,18 +52,14 @@ namespace AxMapWinGIS
     /// Here are groups of API members for AxMap class:
     /// \dotfile mapgroups.dot
     /// <a href = "diagrams.html">Graph description</a>
-    public class AxMap : _DMapEvents
+    public class AxMap : _DMap, _DMapEvents
     {
         #region _DMap Members
 
         /// <summary>
         /// Gets or sets the user defined cursor handle. The handle is a windows cursor handle. 
         /// </summary>
-        public int UdCursorHandle
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
+        public int UDCursorHandle { get; set; }
 
         /// <summary>
         /// Gets or sets the object of Tiles class associated with map.
@@ -93,6 +90,7 @@ namespace AxMapWinGIS
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
+        public uint backColor { get; set; }  // TODO: Why does it start with lower-key 'b'?
 
         /// <summary>
         /// Draws the content of the back buffer to specified device context.
@@ -105,6 +103,16 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets the number of previous extents to go to, forward in the undo list
+        /// </summary>
+        public int ExtentHistoryRedoCount { get; }
+
+        /// <summary>
+        /// Gets the number of previous extents to go to, back in the undo list
+        /// </summary>
+        public int ExtentHistoryUndoCount { get; }
 
         /// <summary>
         /// The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications. 
@@ -173,7 +181,6 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
-
         /// <summary>
         /// Resizes the map to the given width and height.
         /// </summary>
@@ -187,7 +194,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets or sets a value which indicates whether the time of map redraw will be displayed on the screen.
         /// </summary>
-        /// <remarks>Only times of full redraws when data layers are drawn anew are displayed.</remarks>
+        /// <remarks>Only times of full redraws when data layers are drawn and are displayed.</remarks>
         /// \new48 Added in version 4.8
         public bool ShowRedrawTime
         {
@@ -216,29 +223,29 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Takes snap shot of the contents of the map within the bounds of the specified rectangle, returning an image of the results. 
+        /// Takes snapshot of the contents of the map within the bounds of the specified rectangle, returning an image of the results. 
         /// </summary>
         /// <param name="boundBox">The bounds (rectangle) in map units to get the snapshot from.</param>
         /// <returns>An image of the contents of the map displayed inside the bounds of the specified rectangle.</returns>
-        public object SnapShot(object boundBox)
+        Image _DMap.SnapShot(object boundBox)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Takes snap shot of the contents of the map and returns it as an image object. 
+        /// Takes snapshot of the contents of the map and returns it as an image object. 
         /// </summary>
         /// <param name="clippingLayerNbr">The position of the layer which extents will be used for taking snapshot.</param>
         /// <param name="zoom">The amount of zoom.</param>
         /// <param name="pWidth">The width of the resulting image.</param>
         /// <returns>An image of the contents of the map.</returns>
-        public object SnapShot2(int clippingLayerNbr, double zoom, int pWidth)
+        Image _DMap.SnapShot2(int clippingLayerNbr, double zoom, int pWidth)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Takes snap shot of the contents of the map in the specified bounding box and returns it as an image object. 
+        /// Takes snapshot of the contents of the map in the specified bounding box and returns it as an image object. 
         /// </summary>
         /// <param name="left">The x coordinate of the lower left corner of the extents.</param>
         /// <param name="right">The x coordinate of the top right corner of the extents.</param>
@@ -246,8 +253,7 @@ namespace AxMapWinGIS
         /// <param name="bottom">The y coordinate of the lower left corner of the extents.</param>
         /// <param name="width">The width of the resulting image in pixels.</param>
         /// <returns>An image of the contents of the map.</returns>
-        /// 
-        public object SnapShot3(double left, double right, double top, double bottom, int width)
+        Image _DMap.SnapShot3(double left, double right, double top, double bottom, int width)
         {
             throw new NotImplementedException();
         }
@@ -255,11 +261,30 @@ namespace AxMapWinGIS
         /// <summary>
         /// Performs drawing of the map contents to the specified device context.
         /// </summary>
-        /// <param name="hdc">The handle of the device context.</param>
+        /// <param name="hDc">The handle of the device context.</param>
         /// <param name="extents">The map extents to be drawn.</param>
-        /// <param name="width">The width of the resulting image inShowVersionNumber pixels.</param>
+        /// <param name="width">The width of the resulting image in pixels.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool SnapShotToDc(IntPtr hdc, Extents extents, int width)
+        bool _DMap.SnapShotToDC(IntPtr hDc, Extents extents, int width)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Performs drawing of the map contents to the specified device context.
+        /// </summary>
+        /// <param name="hDc">The handle of the device context.</param>
+        /// <param name="extents">The map extents to be drawn.</param>
+        /// <param name="width">The width of the resulting image in pixels.</param>
+        /// <param name="offsetX"></param>
+        /// <param name="offsetY"></param>
+        /// <param name="clipX"></param>
+        /// <param name="clipY"></param>
+        /// <param name="clipWidth"></param>
+        /// <param name="clipHeight"></param>
+        /// <returns>True on success and false otherwise.</returns>
+        bool _DMap.SnapShotToDC2(IntPtr hDc, Extents extents, int width, float offsetX, float offsetY, float clipX, float clipY,
+            float clipWidth, float clipHeight)
         {
             throw new NotImplementedException();
         }
@@ -268,7 +293,7 @@ namespace AxMapWinGIS
         /// Gets or sets version number of the control.
         /// </summary>
         /// <remarks>The set part of the property isn't supported.</remarks>
-        public int VersionNumber
+        public string VersionNumber
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -287,8 +312,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets or sets tile provider for the map.
         /// </summary>
-        /// <remarks>This property is a shortcut for AxMap.Tiles.Provider property. 
-        /// Setting it to ProviderNone will change AxMap.Tiles.Visible property to false.</remarks>
+        /// <remarks>This property is a shortcut for Tiles.Provider property. 
+        /// Setting it to tkTileProvider.ProviderNone will change Tiles.Visible property to false.</remarks>
         /// \new491 Added in version 4.9.1
         public tkTileProvider TileProvider { get; set; }
 
@@ -313,12 +338,11 @@ namespace AxMapWinGIS
         /// <param name="extents">Extents to load tiles for (in map coordinates).</param>
         /// <param name="width">The width of the canvas on which the extents will be rendered.</param>
         /// <param name="key">Arbitrary key, to distinguish this request from others in AxMap.TilesLoaded event.</param>
-        /// <param name="provider">Provider to load tiles from.</param>
         /// <remarks>If tiles aren't already loaded in cache, the operation will be performed asynchronously.
-        /// Use AxMap.TilesLoaded event to be notified of it's completion. The main purpose: loading of tiles
+        /// Use AxMap.TilesLoaded event to be notified of its completion. The main purpose: loading of tiles
         /// for printing.</remarks>
         /// \new491 Added in version 4.9.1
-        public void LoadTilesForSnapshot(Extents extents, int width, string key, tkTileProvider provider)
+        public bool LoadTilesForSnapshot(Extents extents, int width, string key)
         {
             throw new NotImplementedException();
         }
@@ -344,6 +368,16 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
+        /// Adveanced version of AxMap.Redraw2
+        /// </summary>
+        /// <param name="redrawType">Type of redraw.</param>
+        /// <param name="reloadTiles">Reload the tiles, defaults to false when AxMap.Redraw2 is used.</param>
+        public void Redraw3(tkRedrawType redrawType, bool reloadTiles)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets list actions performed by user via interactive ShapeEditor. Provides undo/redo capability.
         /// </summary>
         /// \new493 Added in version 4.9.3
@@ -353,7 +387,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Gets an %Identifier object which holds settings of cmIdentify tools.
+        /// Gets an Identifier object which holds settings of tkCursorMode.cmIdentify tools.
         /// </summary>
         /// \new493 Added in version 4.9.3
         public virtual Identifier Identifier
@@ -424,6 +458,14 @@ namespace AxMapWinGIS
         public tkZoomBehavior ZoomBehavior { get; set; }
 
         /// <summary>
+        /// Clears the extent history.
+        /// </summary>
+        public void ClearExtentHistory()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Zoomes map to display selected shapes of the specified shapefile.
         /// </summary>
         /// <param name="layerHandle">Layer handle of shapefile layer with selected shapes.</param>
@@ -436,9 +478,9 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Zooms map to specified zoom level of the active tile provider (Map.Tiles.Provider).
+        /// Zooms map to specified zoom level of the active tile provider (Tiles.Provider).
         /// </summary>
-        /// <param name="zoom">Zoom</param>
+        /// <param name="zoom">Zoom level</param>
         /// <returns>True if the zooming took place.</returns>
         /// \new491 Added in version 4.9.1
         public bool ZoomToTileLevel(int zoom)
@@ -608,7 +650,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Zooms the map to the maximum extents of all loaded visible layers.
         /// </summary>
-        /// <remarks> Layers which are not visible are not used to compute maximum extents.</remarks>
+        /// <remarks>Layers which are not visible are not used to compute maximum extents.</remarks>
         public void ZoomToMaxVisibleExtents()
         {
             throw new NotImplementedException();
@@ -619,6 +661,15 @@ namespace AxMapWinGIS
         /// </summary>
         /// <returns>Returns the number of extents left in the extents history after zooming to previous extents.</returns>
         public int ZoomToPrev()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Zooms the map view to the next extents if there are next extents in the extents history.
+        /// </summary>
+        /// <returns>Returns the number of extents left in the extents history after zooming to previous extents.</returns>
+        public int ZoomToNext()
         {
             throw new NotImplementedException();
         }
@@ -1162,6 +1213,17 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Sets the color scheme of an image layer
+        /// </summary>
+        /// <param name="layerHandle">The handle if the layer the color scheme needs to set</param>
+        /// <param name="colorScheme">The color scheme</param>
+        /// <returns>True on success</returns>
+        public bool SetImageLayerColorScheme(int layerHandle, object colorScheme)
+        {
+            throw new NotImplementedException();
+        }
+
         /// @}
 
         #endregion
@@ -1381,8 +1443,32 @@ namespace AxMapWinGIS
         /// <summary>
         /// Restarts the background loading thread of dynamically loaded layers
         /// </summary>
-        /// <param name="ogrLayerHandle">The handle of the layer.  Must be an OGR layer.</param>
+        /// <param name="ogrLayerHandle">The handle of the layer. Must be an OGR layer.</param>
+        /// \new510 Adding in v5.1.0
         public void RestartBackgroundLoading(int ogrLayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Allow to initiate digitizing a new shape with a starting point
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns>True on success</returns>
+        /// \new510 Added in v5.1.0
+        public bool StartNewBoundShape(double x, double y)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Allow to initiate digitizing a new shape with a starting point
+        /// </summary>
+        /// <param name="layerHandle"></param>
+        /// <returns>True on success</returns>
+        /// \new510 Added in v5.1.0
+        public bool StartNewBoundShapeEx(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -1473,6 +1559,27 @@ namespace AxMapWinGIS
         /// <returns>OGR layer or null in case of invalid layer index or wrong layer type.</returns>
         /// \new493 Added in version 4.9.3
         public OgrLayer get_OgrLayer(int layerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the WmsLayer
+        /// </summary>
+        /// <param name="layerHandle">The handle of the layer.</param>
+        /// <returns>The WmsLayer object</returns>
+        public WmsLayer get_WmsLayer(int layerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the layer extents
+        /// </summary>
+        /// <param name="layerHandle">The handle of the layer.</param>
+        /// <returns>The extents</returns>
+        /// \new510 Added in version 5.1.0
+        public Extents get_layerExtents(int layerHandle)
         {
             throw new NotImplementedException();
         }
@@ -2434,6 +2541,26 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
+        /// Get the identified shapes
+        /// </summary>
+        public SelectionList IdentifiedShapes { get; }
+
+        /// <summary>
+        /// For selection boxes or dragging operations, updated with tkRedrawType.Minimal
+        /// </summary>
+        public DrawingRectangle FocusRectangle { get; }
+
+        /// <summary>
+        /// Set custom drawing flags
+        /// </summary>
+        public tkCustomDrawingFlags CustomDrawingFlags { get; set; }
+
+        /// <summary>
+        /// Allows to format coordinates in top right corner in degrees/minutes/seconds format; by default the former minutes format is used
+        /// </summary>
+        public tkAngleFormat ShowCoordinatesFormat { get; set; }
+        
+        /// <summary>
         /// Gets or sets the units of measure for the map.
         /// </summary>
         /// <remarks>This units must be the same as the units of the datasources being displayed. 
@@ -2628,7 +2755,6 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
-        
 
         /// @}
         #endregion

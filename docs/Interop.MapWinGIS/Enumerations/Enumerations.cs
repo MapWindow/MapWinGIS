@@ -1,6 +1,6 @@
 ﻿// An example of comments for enumerated constants
 
-using System;
+// ReSharper disable InconsistentNaming
 #if nsp
 
 namespace MapWinGIS
@@ -2815,6 +2815,90 @@ namespace MapWinGIS
         psAll_Projections = 1,
         psNAD83_Subset = 2,
         psWGS84_Subset = 4,
+    }
+
+    /// <summary>
+    /// Tile providers enumeration
+    /// </summary>
+    public enum tkTileProvider
+    {
+        ProviderNone = -1,
+        OpenStreetMap = 0,
+        /// <summary>
+        /// Needs API key now, not implemented yet
+        /// </summary>
+        OpenCycleMap = 1,
+        /// <summary>
+        /// Needs API key now, not implemented yet
+        /// </summary>
+        OpenTransportMap = 2,
+        /// <summary>
+        /// Needs API key now, see GlobalSettings.BingApiKey
+        /// </summary>
+        BingMaps = 3,
+        /// <summary>
+        /// Needs API key now, see GlobalSettings.BingApiKey
+        /// </summary>
+        BingSatellite = 4,
+        /// <summary>
+        /// Needs API key now, see GlobalSettings.BingApiKey
+        /// </summary>
+        BingHybrid = 5,
+        /// <summary>
+        /// No longer supported due to their policy
+        /// </summary>
+        GoogleMaps = 6,
+        /// <summary>
+        /// No longer supported due to their policy
+        /// </summary>
+        GoogleSatellite = 7,
+        /// <summary>
+        /// No longer supported due to their policy
+        /// </summary>
+        GoogleHybrid = 8,
+        /// <summary>
+        /// No longer supported due to their policy
+        /// </summary>
+        GoogleTerrain = 9,
+        /// <summary>
+        /// Needs API key now, see GlobalSettings.SetHereMapsApiKey
+        /// </summary>
+        HereMaps = 10,
+        /// <summary>
+        /// Needs API key now, see GlobalSettings.SetHereMapsApiKey
+        /// </summary>
+        HereSatellite = 11,
+        /// <summary>
+        /// Needs API key now, see GlobalSettings.SetHereMapsApiKey
+        /// </summary>
+        HereHybrid = 12,
+        /// <summary>
+        /// Needs API key now, see GlobalSettings.SetHereMapsApiKey
+        /// </summary>
+        HereTerrain = 13,
+        Rosreestr = 21,
+        OpenHumanitarianMap = 22,
+        MapQuestAerial = 23,
+        ProviderCustom = 1024,
+    }
+
+    /// <summary>
+    /// The snap modes as using in the ShapeEditor
+    /// </summary>
+    /// \new510 Added in version 5.1.0
+    public enum tkSnapMode {
+        /// <summary>
+        /// Snap to vertices only
+        /// </summary>
+        smVertices = 0,
+        /// <summary>
+        /// Snap to vertices and lines
+        /// </summary>
+        smVerticesAndLines = 1,
+        /// <summary>
+        /// Snap to lines only
+        /// </summary>
+        smLines = 2
     }
 
 #if nsp
