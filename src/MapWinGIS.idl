@@ -7042,7 +7042,7 @@ library MapWinGIS
 		
 #define SNAPSHOT_API
 #ifdef SNAPSHOT_API
-			[id(40)] IImage* SnapShot(IDispatch* BoundBox);
+			[id(40)] IImage* SnapShot(IExtents* BoundBox);
 			[id(136)] IImage* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);
 			[id(153)] IImage* SnapShot3(double left, double right, double top, double bottom, long Width);
 			[id(159)] VARIANT_BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, long Width);

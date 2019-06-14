@@ -7,7 +7,7 @@
 // *********************************************************
 //		SnapShot()
 // *********************************************************
-LPDISPATCH CMapView::SnapShot(LPDISPATCH BoundBox)
+LPDISPATCH CMapView::SnapShot(IExtents* BoundBox)
 {
 	if( BoundBox == NULL )
 	{	

@@ -489,7 +489,7 @@ public:
 	
 	afx_msg void ClearDrawing(long DrawHandle);
 	afx_msg void ClearDrawings();
-	afx_msg LPDISPATCH SnapShot(LPDISPATCH BoundBox);
+	afx_msg LPDISPATCH SnapShot(IExtents* BoundBox);
 	afx_msg BOOL ApplyLegendColors(LPDISPATCH Legend);
 	afx_msg void LockWindow(short LockMode);
 	afx_msg void Resize(long Width, long Height);
