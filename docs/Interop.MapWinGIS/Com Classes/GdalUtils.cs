@@ -50,7 +50,7 @@ namespace MapWinGIS
         /// <param name="bstrSrcFilename">The source filename.</param>
         /// <param name="bstrDstFilename">The destination filename.</param>
         /// <param name="Options">The options, as a string array</param>
-        /// <remarks>See GDAL's documentation here: http://www.gdal.org/gdalwarp.html</remarks>
+        /// <remarks>See GDAL's documentation here: https://gdal.org/programs/gdalwarp.html</remarks>
         /// \new495 Added in version 4.9.5
         /// 
         /// \code
@@ -62,7 +62,7 @@ namespace MapWinGIS
         ///     "-overwrite"
         /// };
         /// var gdalUtils = new GdalUtils();
-        /// if (!gdalUtils.GDALWarp("test.tif", output, options))
+        /// if (!gdalUtils.GdalWarp("test.tif", output, options))
         /// {
         ///     Debug.WriteLine("GdalWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
         /// }
@@ -72,7 +72,6 @@ namespace MapWinGIS
         /// // Example of cutting a TIFF file with a border file: 
         /// var output = Path.GetTempPath() + "GdalWarpCutline.vrt";
         /// const string border = @"test.shp";
-
         /// var options = new[]
         /// {
         ///     "-of", "vrt",
@@ -81,12 +80,43 @@ namespace MapWinGIS
         ///     "-cutline", border
         /// };
         /// var gdalUtils = new GdalUtils();
-        /// if (!gdalUtils.GDALWarp("test.tif", output, options))
+        /// if (!gdalUtils.GdalWarp("test.tif", output, options))
         /// {
         ///     Debug.WriteLine("GdalWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
         /// }
         /// \endcode
-        public bool GDALWarp(string bstrSrcFilename, string bstrDstFilename, Array Options)
+        public bool GdalWarp(string bstrSrcFilename, string bstrDstFilename, Array Options)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Converts raster data between different formats.
+        /// Implementing the librified function of GDAL's gdal_translate.exe tool
+        /// </summary>
+        /// <param name="bstrSrcFilename">The source filename.</param>
+        /// <param name="bstrDstFilename">The destination filename.</param>
+        /// <param name="Options">The options, as a string array</param>
+        /// <remarks>See GDAL's documentation here: https://gdal.org/programs/gdal_translate.html </remarks>
+        /// \new510 Added in version 5.1.0
+        /// 
+        /// \code
+        /// // Example of changing the resolution of a TIFF file: 
+        /// var output = Path.GetTempPath() + "ChangedResolution.tif";
+        /// var options = new[]
+        /// {
+        ///     "-ot", "Float32",
+        ///     "-tr", "0.2", "0.2",
+        ///     "-r", "average",
+        ///     "-projwin", "-180", "90", "180", "-90"
+        /// };
+        /// var gdalUtils = new GdalUtils();
+        /// if (!gdalUtils.GdalRasterTranslate("test.tif", output, options))
+        /// {
+        ///     Debug.WriteLine("GdalRasterTranslate failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+        /// }
+        /// \endcode
+        public bool GdalRasterTranslate(string bstrSrcFilename, string bstrDstFilename, Array Options)
         {
             throw new NotImplementedException();
         }
@@ -99,7 +129,7 @@ namespace MapWinGIS
         /// <param name="bstrDstFilename">The destination filename.</param>
         /// <param name="Options">The options, as a string array</param>
         /// <param name="useSharedConnection">If set to <c>true</c> improves performance but also might make it instable.</param>
-        /// <remarks>See GDAL's documentation here: http://www.gdal.org/ogr2ogr.html</remarks>
+        /// <remarks>See GDAL's documentation here: https://gdal.org/programs/ogr2ogr.html</remarks>
         /// \new495 Added in version 4.9.5
         /// 
         /// \code
@@ -158,5 +188,7 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        ICallback IGdalUtils.GlobalCallback { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 }

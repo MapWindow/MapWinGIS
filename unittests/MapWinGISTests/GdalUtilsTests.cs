@@ -19,11 +19,33 @@ namespace MapWinGISTests
         }
 
         [TestMethod, Timeout(5 * 60 * 1000)]
+        public void GdalRasterTranslate()
+        {
+            const string inputFilename = @"D:\dev\MapWindow\MapWinGIS\git\unittests\MapWinGISTests\Testdata\GeoTiff\5band.tif";
+            const string outputFilename = inputFilename + "-translated.tif";
+            if (File.Exists(outputFilename)) File.Delete(outputFilename);
+
+            // -tr 0.2 0.2 -r average -projwin -180 90 180 -90 -ot Float32
+            var options = new[]
+            {
+                "-ot", "Float32",
+                "-tr", "0.2", "0.2",
+                "-r", "average",
+                "-projwin", "-180", "90", "180", "-90"
+            };
+            var retVal = _gdalUtils.GdalRasterTranslate(inputFilename, outputFilename, options);
+            WriteLine("retVal: " + retVal);
+            Assert.IsTrue(retVal, "gdalUtils.GdalRasterTranslate() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
+            Assert.IsTrue(File.Exists(outputFilename), "Can't find the output file");
+            WriteLine(outputFilename + " is created");
+        }
+
+        [TestMethod, Timeout(5 * 60 * 1000)]
         public void GdalWarp()
         {
             // gdalwarp -dstnodata 0 -multi -overwrite -crop_to_cutline -cutline border.shp "bc1b395d-5011-4b25-947c-b06db932493b_index_ci_red-uptake.Amersfoort - RD New.tif" clipped.tif
-            const string inputFilename = @"D:\dev\TopX\TopX-Agri\TestData\Chlorofyl-index.tif";
-            const string borderFilename = @"D:\dev\TopX\TopX-Agri\TestData\Valtermond.shp";
+            const string inputFilename = @"D:\dev\MapWindow\MapWinGIS\git\unittests\MapWinGISTests\Testdata\GeoTiff\Chlorofyl.tif";
+            const string borderFilename = @"D:\dev\MapWindow\MapWinGIS\git\unittests\MapWinGISTests\Testdata\sf\ClipForChlorofyl.shp";
             const string outputFilename = inputFilename + "-clipped.vrt";
             if (File.Exists(outputFilename)) File.Delete(outputFilename);
 
@@ -35,7 +57,7 @@ namespace MapWinGISTests
                 "-cutline", borderFilename,
                 "-dstnodata", "0"
             };
-            var retVal = _gdalUtils.GDALWarp(inputFilename, outputFilename, options);
+            var retVal = _gdalUtils.GdalWarp(inputFilename, outputFilename, options);
             WriteLine("retVal: " + retVal);
             Assert.IsTrue(retVal, "gdalUtils.GDALWarp() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(outputFilename), "Can't find the output file");
@@ -56,13 +78,13 @@ namespace MapWinGISTests
                 "-of", "vrt",
                 "-overwrite"
             };
-            var retVal = _gdalUtils.GDALWarp(@"GeoTiff/5band.tif", output, options);
+            var retVal = _gdalUtils.GdalWarp(@"GeoTiff/5band.tif", output, options);
             Assert.IsTrue(retVal, "GdalWarp failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
             Debug.WriteLine(output);
         }
 
-        [TestMethod, Timeout(5 * 60 * 1000)]
+        // Missing data [TestMethod, Timeout(5 * 60 * 1000)]
         public void GdalWarpCutline()
         {
             // Comes from GdalTests.GdalWarpCutline, which uses the old
@@ -79,13 +101,13 @@ namespace MapWinGISTests
                 "-crop_to_cutline",
                 "-cutline", border
             };
-            var retVal = _gdalUtils.GDALWarp(@"J:\_testdata\Haulmkilling2\20171019-Agrifac-586-Prinzen-wdvi\7da7d241-aa4f-4955-861e-62efbe85adf8_index_wdvi.tif", output, options);
+            var retVal = _gdalUtils.GdalWarp(@"J:\_testdata\Haulmkilling2\20171019-Agrifac-586-Prinzen-wdvi\7da7d241-aa4f-4955-861e-62efbe85adf8_index_wdvi.tif", output, options);
             Assert.IsTrue(retVal, "GdalWarp failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
             Debug.WriteLine(output);
         }
 
-        [TestMethod, Timeout(5 * 60 * 1000)]
+        // Missing data [TestMethod, Timeout(5 * 60 * 1000)]
         public void ClipPolygon()
         {
             var settings = new GlobalSettings { OgrShareConnection = true };
@@ -137,7 +159,7 @@ namespace MapWinGISTests
                 "-crop_to_cutline",
                 "-cutline", cutline
             };
-            retVal = _gdalUtils.GDALWarp(input, output, options);
+            retVal = _gdalUtils.GdalWarp(input, output, options);
             Assert.IsTrue(retVal, "Could not ClipGridWithPolygon: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(output), "Output file does not exists");
             Debug.WriteLine(output);
@@ -197,7 +219,7 @@ namespace MapWinGISTests
             WriteLine(outputFilename + " is created");
         }
 
-        [TestMethod, Timeout(5 * 60 * 1000)]
+        // No testdata: [TestMethod, Timeout(5 * 60 * 1000)]
         public void VeryLargeClip()
         {
             var settings = new GlobalSettings { OgrShareConnection = true };
@@ -232,7 +254,7 @@ namespace MapWinGISTests
 
         public void Error(string KeyOfSender, string ErrorMsg)
         {
-            WriteLine("Error: " + ErrorMsg);
+            WriteLine("Error: " + ErrorMsg + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
         }
     }
 }

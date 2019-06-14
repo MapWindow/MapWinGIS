@@ -1109,7 +1109,7 @@ static void CopyBandInfo( GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand
 /************************************************************************/
 /*                             TranslateRaster()                        */
 /************************************************************************/
-
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalRasterTranslate instead"))
 STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 									 BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
 {

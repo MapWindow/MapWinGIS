@@ -23,8 +23,9 @@
 * (Open source contributors should list themselves and their modifications here). */
 // june 2017 PaulM - Initial creation of this file
 // november 2017 PaulM - Added GdalVectorTranslate
+// june 2019 PaulM - Added GdalRasterTranslate
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "GdalUtils.h"
 #include <atlsafe.h>
 // #include "GdalDataset.h"
@@ -48,7 +49,7 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 	_detailedError = "No error";
 
 	USES_CONVERSION;
-	CStringW srcFilename = OLE2W(bstrSrcFilename);
+	const CStringW srcFilename = OLE2W(bstrSrcFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
@@ -77,8 +78,8 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 		goto cleaning;
 	}
 
-	char** warpOptions = ConvertSafeArray(options);
-	GDALWarpAppOptions* gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, NULL);
+	const auto warpOptions = ConvertSafeArray(options);
+	const auto gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, nullptr);
 	if (!gdalWarpOptions)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("The warp options are invalid."));
@@ -89,8 +90,8 @@ STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SA
 
 	// Call the gdalWarp function:
 	CallbackHelper::Progress(_globalCallback, 50, "Start warping", _key);
-	GDALWarpAppOptionsSetProgress(gdalWarpOptions, GDALProgressCallback, NULL);
-	auto dtNew = GDALWarp(OLE2A(bstrDstFilename), NULL, 1, &dt, gdalWarpOptions, NULL);
+	GDALWarpAppOptionsSetProgress(gdalWarpOptions, GDALProgressCallback, nullptr);
+	const auto dtNew = GDALWarp(OLE2A(bstrDstFilename), nullptr, 1, &dt, gdalWarpOptions, nullptr);
 	CallbackHelper::Progress(_globalCallback, 75, "Finished warping", _key);
 	if (dtNew)
 	{
@@ -121,6 +122,89 @@ cleaning:
 }
 
 // *********************************************************
+//	     GdalRasterTranslate()
+// *********************************************************
+STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	_detailedError = "No error";
+
+	USES_CONVERSION;
+	const CStringW srcFilename = OLE2W(bstrSrcFilename);
+	if (!Utility::FileExistsW(srcFilename))
+	{
+		ErrorMessage(tkINVALID_FILENAME);
+		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", srcFilename));
+		_detailedError = "Source file " + srcFilename + " does not exists.";
+		return S_OK;
+	}
+
+	// Open file as GdalDataset:
+	CallbackHelper::Progress(_globalCallback, 0, "Open source file as raster", _key);
+	const GDALDatasetH dt = GdalHelper::OpenRasterDatasetW(srcFilename, GA_ReadOnly);
+	if (!dt)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("Can't open %s as a raster file.", srcFilename));
+		_detailedError = "Can't open " + srcFilename + " as a raster file.";
+		ErrorMsg(tkINVALID_FILENAME);
+		goto cleaning;
+	}
+
+	// Make options:		
+	if (SafeArrayGetDim(options) != 1)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("The translate options are invalid."));
+		_detailedError = "The option array doesn't have 1 dimension";
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		goto cleaning;
+	}
+
+	const auto translateOptions = ConvertSafeArray(options);
+	const auto gdalTranslateOptions = GDALTranslateOptionsNew(translateOptions, nullptr);
+	if (!gdalTranslateOptions)
+	{
+		CallbackHelper::ErrorMsg(Debug::Format("The translate options are invalid."));
+		_detailedError = "Can't convert the option array to GDALTranslateOptions";
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		goto cleaning;
+	}
+
+	// Call the gdalWarp function:
+	CallbackHelper::Progress(_globalCallback, 50, "Start translating", _key);
+	GDALTranslateOptionsSetProgress(gdalTranslateOptions, GDALProgressCallback, nullptr);
+	const auto dtNew = GDALTranslate(OLE2A(bstrDstFilename), dt, gdalTranslateOptions, nullptr);
+	CallbackHelper::Progress(_globalCallback, 75, "Finished translating", _key);
+	if (dtNew)
+	{
+		*retVal = VARIANT_TRUE;
+		GDALClose(dtNew);
+	}
+	else
+	{
+		CallbackHelper::ErrorMsg("GdalUtils", _globalCallback, _key, "Raster translate failed");
+		// TODO: Put GDAL error in Detailed ErrorMsg. Not sure how to get the GDAL error.
+	}
+
+cleaning:
+	// ------------------------------------------------------
+	//	Cleaning
+	// ------------------------------------------------------
+	if (gdalTranslateOptions)
+		GDALTranslateOptionsFree(gdalTranslateOptions);
+
+	if (translateOptions)
+		CSLDestroy(translateOptions);
+
+	if (dt)
+		GDALClose(dt);
+
+	CallbackHelper::ProgressCompleted(_globalCallback);
+
+	return S_OK;
+}
+
+// *********************************************************
 //	     GdalVectorTranslate()
 // *********************************************************
 STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
@@ -130,7 +214,7 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstF
 	_detailedError = "No error";
 
 	USES_CONVERSION;
-	CStringW srcFilename = OLE2W(bstrSrcFilename);
+	const CStringW srcFilename = OLE2W(bstrSrcFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", srcFilename));
@@ -160,8 +244,8 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstF
 		goto cleaning;
 	}
 
-	char** translateOptions = ConvertSafeArray(options);
-	GDALVectorTranslateOptions* gdalVectorTranslateOptions = GDALVectorTranslateOptionsNew(translateOptions, NULL);
+	const auto translateOptions = ConvertSafeArray(options);
+	const auto gdalVectorTranslateOptions = GDALVectorTranslateOptionsNew(translateOptions, nullptr);
 	if (!gdalVectorTranslateOptions)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("The vector translate options are invalid."));
@@ -172,8 +256,8 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstF
 
 	// Call the gdalWarp function:
 	CallbackHelper::Progress(_globalCallback, 50, "Start translating", _key);
-	GDALVectorTranslateOptionsSetProgress(gdalVectorTranslateOptions, GDALProgressCallback, NULL);
-	auto dtNew = GDALVectorTranslate(OLE2A(bstrDstFilename), NULL, 1, &dt, gdalVectorTranslateOptions, NULL);
+	GDALVectorTranslateOptionsSetProgress(gdalVectorTranslateOptions, GDALProgressCallback, nullptr);
+	const auto dtNew = GDALVectorTranslate(OLE2A(bstrDstFilename), nullptr, 1, &dt, gdalVectorTranslateOptions, nullptr);
 	CallbackHelper::Progress(_globalCallback, 75, "Finished translating", _key);
 	if (dtNew)
 	{
@@ -196,7 +280,7 @@ cleaning:
 		CSLDestroy(translateOptions);
 
 	if (dt)
-		GdalHelper::CloseSharedOgrDataset((GDALDataset*)dt);
+		GdalHelper::CloseSharedOgrDataset(static_cast<GDALDataset*>(dt));
 
 	CallbackHelper::ProgressCompleted(_globalCallback);
 
@@ -213,7 +297,7 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR bstrSubjectFilename, BSTR bst
 	_detailedError = "No error";
 
 	USES_CONVERSION;
-	CStringW subjectFilename = OLE2W(bstrSubjectFilename);
+	const CStringW subjectFilename = OLE2W(bstrSubjectFilename);
 	if (!Utility::FileExistsW(subjectFilename))
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Subject file %s does not exists.", subjectFilename));
@@ -222,7 +306,7 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR bstrSubjectFilename, BSTR bst
 		return S_OK;
 	}
 
-	CStringW overlayFilename = OLE2W(bstrOverlayFilename);
+	const CStringW overlayFilename = OLE2W(bstrOverlayFilename);
 	if (!Utility::FileExistsW(overlayFilename))
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("Overlay file %s does not exists.", overlayFilename));
@@ -257,11 +341,11 @@ STDMETHODIMP CGdalUtils::get_LastErrorCode(long *pVal)
 // *********************************************************************
 //		get_ErrorMsg
 // *********************************************************************
-STDMETHODIMP CGdalUtils::get_ErrorMsg(long ErrorCode, BSTR *pVal)
+STDMETHODIMP CGdalUtils::get_ErrorMsg(const long errorCode, BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
-	*pVal = A2BSTR(ErrorMsg(ErrorCode));
+	*pVal = A2BSTR(ErrorMsg(errorCode));
 	return S_OK;
 }
 
@@ -273,7 +357,7 @@ STDMETHODIMP CGdalUtils::get_DetailedErrorMsg(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
 
-	*pVal = A2BSTR((LPCSTR)_detailedError);
+	*pVal = A2BSTR(static_cast<LPCSTR>(_detailedError));
 	return S_OK;
 }
 
@@ -285,7 +369,7 @@ STDMETHODIMP CGdalUtils::get_GlobalCallback(ICallback **pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 		*pVal = _globalCallback;
-	if (_globalCallback != NULL)
+	if (_globalCallback != nullptr)
 	{
 		_globalCallback->AddRef();
 	}
@@ -295,7 +379,7 @@ STDMETHODIMP CGdalUtils::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CGdalUtils::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
+		ComHelper::SetRef(newVal, reinterpret_cast<IDispatch**>(&_globalCallback));
 	return S_OK;
 }
 
@@ -309,12 +393,12 @@ STDMETHODIMP CGdalUtils::get_Key(BSTR *pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGdalUtils::put_Key(BSTR newVal)
+STDMETHODIMP CGdalUtils::put_Key(const BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
 
-	::SysFreeString(_key);
+	SysFreeString(_key);
 	_key = OLE2BSTR(newVal);
 
 	return S_OK;
@@ -323,9 +407,9 @@ STDMETHODIMP CGdalUtils::put_Key(BSTR newVal)
 // **********************************************************
 //		ErrorMessage()
 // **********************************************************
-inline void CGdalUtils::ErrorMessage(long ErrorCode)
+inline void CGdalUtils::ErrorMessage(const long errorCode)
 {
-	_lastErrorCode = ErrorCode;
+	_lastErrorCode = errorCode;
 	CallbackHelper::ErrorMsg("GdalUtils", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
@@ -333,23 +417,23 @@ inline void CGdalUtils::ErrorMessage(long ErrorCode)
 //		ConvertSafeArray()
 //      Convert a safearray (coming outside the ocx) to char** (used internal) 
 // ***************************************************************************************
-char** CGdalUtils::ConvertSafeArray(SAFEARRAY* safeArray)
+char** CGdalUtils::ConvertSafeArray(SAFEARRAY* safeArray) const
 {
 	USES_CONVERSION;
-	char** papsz_str_list = NULL;
+	char** papszStrList = nullptr;
 	LONG lLBound, lUBound;
 	BSTR HUGEP *pbstr;
-	HRESULT hr1 = SafeArrayGetLBound(safeArray, 1, &lLBound);
-	HRESULT hr2 = SafeArrayGetUBound(safeArray, 1, &lUBound);
-	HRESULT hr3 = SafeArrayAccessData(safeArray, (void HUGEP* FAR*)&pbstr);
+	const auto hr1 = SafeArrayGetLBound(safeArray, 1, &lLBound);
+	const auto  hr2 = SafeArrayGetUBound(safeArray, 1, &lUBound);
+	const auto  hr3 = SafeArrayAccessData(safeArray, reinterpret_cast<void HUGEP* FAR*>(&pbstr));
 	if (!FAILED(hr1) && !FAILED(hr2) && !FAILED(hr3))
 	{
-		LONG count = lUBound - lLBound + 1;
-		for (int i = 0; i < count; i++){
+		const auto  count = lUBound - lLBound + 1;
+		for (auto i = 0; i < count; i++){
 			// Create array:
-			papsz_str_list = CSLAddString(papsz_str_list, OLE2A(pbstr[i]));
+			papszStrList = CSLAddString(papszStrList, OLE2A(pbstr[i]));
 		}
 	}
 
-	return papsz_str_list;
+	return papszStrList;
 }

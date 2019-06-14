@@ -1212,10 +1212,10 @@ enum tkScalebarUnits
 		[helpstring("")] BingMaps = 3,
 		[helpstring("")] BingSatellite = 4,
 		[helpstring("")] BingHybrid = 5,
-		[helpstring("")] GoogleMaps = 6,
+		/*[helpstring("")] GoogleMaps = 6,
 		[helpstring("")] GoogleSatellite = 7,
 		[helpstring("")] GoogleHybrid = 8,
-		[helpstring("")] GoogleTerrain = 9,
+		[helpstring("")] GoogleTerrain = 9,*/
 		[helpstring("")] HereMaps = 10,
 		[helpstring("")] HereSatellite = 11,
 		[helpstring("")] HereHybrid = 12,
@@ -4581,7 +4581,7 @@ interface IUtils : IDispatch{
 	[id(32), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useCenterWithinMethod, [out, retval]VARIANT_BOOL* retVal);
 	[id(33), helpstring("method Polygonize")] HRESULT Polygonize([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in, optional, defaultvalue(1)] int iSrcBand, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL NoMask, [in, optional, defaultvalue(NULL)] BSTR pszMaskFilename, [in, optional, defaultvalue("GML")] BSTR pszOGRFormat, [in, optional, defaultvalue("out")] BSTR pszDstLayerName, [in, optional, defaultvalue("DN")] BSTR pszPixValFieldName, [in, optional, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(36), helpstring("method GDALInfo")] HRESULT GDALInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
-	[id(37), helpstring("Deprecated method GDALWarp")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+	// [id(37), helpstring("Deprecated method GDALWarp")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(38), helpstring("method GDALBuildVrt")] HRESULT GDALBuildVrt([in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(39), helpstring("method GDALAddOverviews")] HRESULT GDALAddOverviews([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in] BSTR bstrLevels, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(40), helpstring("method GDALRasterize")] HRESULT GDALRasterize([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
@@ -6645,6 +6645,7 @@ interface IGdalUtils : IDispatch{
 	[id(6), helpstring("method GdalVectorTranslate")] HRESULT GdalVectorTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
 	[id(7), helpstring("method ClipVectorWithVector")] HRESULT ClipVectorWithVector([in] BSTR bstrSubjectFilename, [in] BSTR bstrOverlayFilename, [in] BSTR bstrDstFilename, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(8)] HRESULT DetailedErrorMsg([out, retval] BSTR *pVal);
+	[id(9), helpstring("method GdalRasterTranslate")] HRESULT GdalRasterTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [out, retval] VARIANT_BOOL* retVal);
 }
 
 [ 

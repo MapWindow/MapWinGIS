@@ -65,7 +65,7 @@ namespace interopCreator
             utils.GDALAddOverviews(string.Empty, string.Empty, string.Empty);
             utils.GDALBuildVrt(string.Empty, string.Empty);
             utils.GDALRasterize(string.Empty, string.Empty, string.Empty);
-            utils.GDALWarp(string.Empty, string.Empty, string.Empty);
+            // Removed since v5.1.0: utils.GDALWarp(string.Empty, string.Empty, string.Empty);
 
             var ds = new GdalDataset();
             var subDatasetCount = ds.SubDatasetCount;

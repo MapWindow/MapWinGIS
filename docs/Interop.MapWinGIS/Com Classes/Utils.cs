@@ -345,6 +345,8 @@ namespace MapWinGIS
         /// <param name="bstrOptions">Options of the routine.</param>
         /// <param name="cBack">The callback object.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \deprecated v5.1.0 Use GdalUtils.GdalRasterTranslate instead.
+        [Obsolete("Use GdalUtils.GdalRasterTranslate")]
         public bool TranslateRaster(string bstrSrcFilename, string bstrDstFilename, string bstrOptions, ICallback cBack)
         {
             throw new NotImplementedException();
@@ -471,8 +473,9 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>See documentation here: http://www.gdal.org/gdalwarp.html</remarks>
         /// \new490 Added in version 4.9.0
-        /// \deprecated v4.9.5 Use GdalUtils.GDALWarp instead.
-        [Obsolete("Use GdalUtils.GDALWarp")]
+        /// \deprecated v4.9.5 Use GdalUtils.GdalWarp instead.
+        /// Removed since v5.1.0
+        [Obsolete("Use GdalUtils.GdalWarp")]
         public bool GDALWarp(string bstrSrcFilename, string bstrDstFilename, string bstrOptions, ICallback cBack = null)
         {
             throw new NotImplementedException();

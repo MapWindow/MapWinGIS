@@ -73,7 +73,7 @@ public:
 	CComPtr<IUnknown> m_pUnkMarshaler;
 
 public:
-	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
+	STDMETHOD(get_ErrorMsg)(/*[in]*/ long errorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
 	STDMETHOD(get_DetailedErrorMsg)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
@@ -81,6 +81,7 @@ public:
 	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(GdalWarp)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal);
+	STDMETHOD(GdalRasterTranslate)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal);
 	STDMETHOD(GdalVectorTranslate)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal);
 	STDMETHOD(ClipVectorWithVector)(/*[in]*/ BSTR bstrSubjectFilename, /*[in]*/ BSTR bstrOverlayFilename, /*[in]*/ BSTR bstrDstFilename, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal);
 
@@ -90,14 +91,14 @@ private:
 	BSTR _key;
 	CString _detailedError;
 
-	char** ConvertSafeArray(SAFEARRAY* safeArray);
+	char** ConvertSafeArray(SAFEARRAY* safeArray) const;
 	
 public:
 	// properties
 
 public:
 	// methods
-	inline void ErrorMessage(long ErrorCode);
+	inline void ErrorMessage(long errorCode);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GdalUtils), CGdalUtils)
