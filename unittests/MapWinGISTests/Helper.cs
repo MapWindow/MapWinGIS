@@ -426,7 +426,7 @@ namespace MapWinGISTests
             return filename;
         }
 
-        public static string SaveSnapshot(AxMap axMap1, string baseName, IExtents boundBox, double extentEnlarger = 1d)
+        public static string SaveSnapshot(AxMap axMap1, string baseName, Extents boundBox, double extentEnlarger = 1d)
         {
             Application.DoEvents();
             var filename = Path.Combine(WorkingFolder("mw5-snapshots"), baseName);
