@@ -18,7 +18,7 @@ set _to_dir=%2
 if '%_from_dir%'=='' if '%_to_dir%'=='' GOTO usage
 
 REM Copy gdal plugins:
-FOR %%G IN (gdal_MrSID.dll gdal_netCDF.dll gdal_HDF4.dll gdal_HDF5.dll gdal_HDF5Image.dll) DO (
+FOR %%G IN (gdal_MrSID.dll gdal_netCDF.dll gdal_HDF5.dll gdal_HDF5Image.dll) DO (
 	IF EXIST %_from_dir%\gdal\plugins\%%G (
     xcopy /v /c /r /y %_from_dir%\gdal\plugins\%%G  %_to_dir%gdalplugins\
 	)

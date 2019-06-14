@@ -23,7 +23,7 @@ namespace MapWinGISTests
             _axMap1.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
             _axMap1.KnownExtents = tkKnownExtents.keNetherlands;
             _axMap1.ZoomBehavior = tkZoomBehavior.zbUseTileLevels;
-            _axMap1.Tiles.Provider = tkTileProvider.OpenStreetMap;
+            _axMap1.Tiles.Provider = tkTileProvider.ProviderNone;
 
             // Tiles settings:
             _axMap1.Tiles.GlobalCallback = this;
@@ -55,15 +55,15 @@ namespace MapWinGISTests
             PrefetchToFolder(tkTileProvider.OpenStreetMap, 5, latLongExtents);
         }
 
-        [TestMethod]
-        public void PrefetchToFolderDutchGoogleHybrid()
-        {
-            var latLongExtents = new Extents();
-            latLongExtents.SetBounds(3.3700, 50.7500, 0, 7.2100, 53.4700, 0); // The Netherlands in WGS84: http://spatialreference.org/ref/epsg/28992/
+        //[TestMethod]
+        //public void PrefetchToFolderDutchGoogleHybrid()
+        //{
+        //    var latLongExtents = new Extents();
+        //    latLongExtents.SetBounds(3.3700, 50.7500, 0, 7.2100, 53.4700, 0); // The Netherlands in WGS84: http://spatialreference.org/ref/epsg/28992/
 
-            Helper.DebugMsg("PrefetchToFolderDutchGoogleHybrid Maxzoom: 11");
-            PrefetchToFolder(tkTileProvider.GoogleHybrid, 11, latLongExtents);
-        }
+        //    Helper.DebugMsg("PrefetchToFolderDutchGoogleHybrid Maxzoom: 11");
+        //    PrefetchToFolder(tkTileProvider.GoogleHybrid, 11, latLongExtents);
+        //}
 
         [TestMethod]
         public void PrefetchToFolderDutchBingHybrid()

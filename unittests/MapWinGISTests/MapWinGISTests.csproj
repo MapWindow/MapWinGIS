@@ -72,15 +72,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AxInterop.MapWinGIS">
-      <HintPath>..\interopCreator\bin\x86\Debug\AxInterop.MapWinGIS.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="dotMemory.Unit, Version=111.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
-      <HintPath>..\packages\JetBrains.dotMemoryUnit.3.0.20171219.105559\lib\net35\dotMemory.Unit.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\src\bin\Win32\AxInterop.MapWinGIS.dll</HintPath>
     </Reference>
     <Reference Include="Interop.MapWinGIS">
-      <HintPath>..\interopCreator\bin\x86\Debug\Interop.MapWinGIS.dll</HintPath>
+      <HintPath>..\..\src\bin\Win32\Interop.MapWinGIS.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
