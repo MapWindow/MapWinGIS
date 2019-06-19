@@ -921,22 +921,11 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 				CComPtr<IShapefile> sf = NULL;
 				if (l->IsDynamicOgrLayer())
 				{
-					OgrDynamicLoader* loader = l->GetOgrLoader();
-					if (loader) {
-						// Clear the finished tasks & send events for them:
-						for (auto task : loader->AwaitTasks()) {
-							FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, task->LoadedCount);
-						}
-					}
-					// Lock everything
-					CSingleLock ldLock(&loader->LoadingLock, TRUE);
-					CSingleLock prLock(&loader->ProviderLock, TRUE);
-					CSingleLock sfLock(&loader->ShapefileLock, TRUE);
 					// Try to get the data loaded so far:
-					l->UpdateShapefile(layerHandle);
-					l->QueryShapefile(&sf);
-					// Perform the draw:
-					_DrawShapeFileCore(sf);
+					l->UpdateShapefile();
+					
+					// Get the shapefile
+                    l->QueryShapefile(&sf);
 				}
 				else
 				{
@@ -949,10 +938,10 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 					// layerBuffer == true indicates we're drawing the non-Volatile layers
 					if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
 						continue;
-
-					// Perform the draw:
-					_DrawShapeFileCore(sf);
 				}
+
+                // Perform the draw:
+                _DrawShapeFileCore(sf);
 			}
 		}
 	}

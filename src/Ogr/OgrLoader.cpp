@@ -73,9 +73,8 @@ void OgrDynamicLoader::CancelAllTasks()
 // **********************************************
 //		ClearFinishedTasks()
 // **********************************************
-vector<OgrLoadingTask*> OgrDynamicLoader::ClearFinishedTasks()
+void OgrDynamicLoader::ClearFinishedTasks()
 {
-	vector<OgrLoadingTask*> tasks;
 	CSingleLock queueLock(&QueueLock, TRUE);
 
 	std::queue<OgrLoadingTask*> unfqueue;
@@ -91,7 +90,6 @@ vector<OgrLoadingTask*> OgrDynamicLoader::ClearFinishedTasks()
 			
 		if (!task->Cancelled) { // If succesful return a clone:
 			OgrLoadingTask* infoClone = task->Clone();
-			tasks.push_back(infoClone);
 		}
 
 		delete task;
@@ -99,16 +97,13 @@ vector<OgrLoadingTask*> OgrDynamicLoader::ClearFinishedTasks()
 
 	// Replace queue with the unfinished items queue
 	Queue.swap(unfqueue);
-
-	return tasks;
 }
 
 // **********************************************
 //		AwaitTasks()
 // **********************************************
-vector<OgrLoadingTask*> OgrDynamicLoader::AwaitTasks()
+void OgrDynamicLoader::AwaitTasks()
 {
-	vector<OgrLoadingTask*> tasks;
 	CSingleLock queueLock(&QueueLock, TRUE);
 
 	while (!Queue.empty())
@@ -119,19 +114,13 @@ vector<OgrLoadingTask*> OgrDynamicLoader::AwaitTasks()
 			queueLock.Unlock(); // Unlock briefly so other threads can fetch
 			Sleep(10);
 			queueLock.Lock();
-			continue;
+			continue; // Try next
 		}
-
-		if (!task->Cancelled) { // If succesful return a clone:
-			OgrLoadingTask* infoClone = task->Clone();
-			tasks.push_back(infoClone);
-		}
-
-		delete task;
+        else
+        {
+            delete task;
+        }
 	}
-
-	return tasks;
-
 }
 
 // **********************************************

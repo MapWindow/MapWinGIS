@@ -382,17 +382,12 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 
 			bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, options->task);
 
-			options->task->Finished = true;
-			if (!success) {
-				options->task->Cancelled = true;
-				OgrLoadingTask* task = options->task;
-				options->map->_FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, 0);
-			}
-
+            // Fire event for this task:
+            OgrLoadingTask* task = options->task;
+			task->Finished = true;
+			task->Cancelled = !success;
+            options->map->_FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, 0);
 			loader->ClearFinishedTasks();
-
-			if (success)
-				options->map->_Redraw(RedrawAll, false, false);
 		}
 		layer->put_AsyncLoading(false);
 		Debug::WriteWithThreadId("Releasing loading lock. \n", DebugOgrLoading);
@@ -433,70 +428,16 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 //***********************************************************************
 //*		UpdateShapefile()
 //***********************************************************************
-void Layer::UpdateShapefile(long layerHandle)
+void Layer::UpdateShapefile()
 {
-	// Get the OGR loader:
-	OgrDynamicLoader* loader = GetOgrLoader();
-	if (!loader) return;
+    if (!IsDynamicOgrLayer())
+        return;
 
-	{ // Lock everything
-		CSingleLock ldLock(&loader->LoadingLock, TRUE);
-		CSingleLock prLock(&loader->ProviderLock, TRUE);
-		CSingleLock sfLock(&loader->ShapefileLock, TRUE);
-
-		// Grab the loaded data:
-		vector<ShapeRecordData*> data = loader->FetchData();
-		if (data.size() == 0) return;
-
-		USES_CONVERSION;
-		CComPtr<IShapefile> sf = NULL;
-		if (!QueryShapefile(&sf))
-			return;
-
-		VARIANT_BOOL vb;
-		sf->EditClear(&vb);
-
-		ShpfileType shpType;
-		sf->get_ShapefileType(&shpType);
-
-		Debug::WriteWithThreadId(Debug::Format("Update shapefile: %d\n", data.size()), DebugOgrLoading);
-
-		CComPtr<ITable> table = NULL;
-		sf->get_Table(&table);
-
-		CComPtr<ILabels> labels = NULL;
-		sf->get_Labels(&labels);
-		labels->Clear();
-
-		if (table)
-		{
-			CTableClass* tbl = TableHelper::Cast(table);
-			sf->StartEditingShapes(VARIANT_TRUE, NULL, &vb);
-			long count = 0;
-			for (size_t i = 0; i < data.size(); i++)
-			{
-				CComPtr<IShape> shp = NULL;
-				ComHelper::CreateShape(&shp);
-				if (shp)
-				{
-					shp->Create(shpType, &vb);
-					shp->ImportFromBinary(data[i]->Shape, &vb);
-					sf->EditInsertShape(shp, &count, &vb);
-
-					tbl->UpdateTableRow(data[i]->Row, count);
-					data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
-
-					count++;
-				}
-			}
-			ShapefileHelper::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
-		}
-
-		// clean the data
-		for (size_t i = 0; i < data.size(); i++) {
-			delete data[i];
-		}
-	}
+    // Get the OGR layer:
+    IOgrLayer* layer = NULL;
+    if (!QueryOgrLayer(&layer)) return;
+    
+    ((COgrLayer*) layer)->UpdateShapefileFromOGRLoader();
 }
 
 //****************************************************

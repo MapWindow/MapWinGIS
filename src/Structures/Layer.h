@@ -134,7 +134,7 @@ public:
 	void GetExtentsAsNewInstance(IExtents** extents);
 	bool UpdateExtentsFromDatasource();
 	void LoadAsync(IMapViewCallback * mapView, Extent extents, long layerHandle, bool bForce);
-	void UpdateShapefile(long layerHandle);
+	void UpdateShapefile();
 	void CloseDatasources();
 	bool IsEmpty();
 	bool IsDiskBased();

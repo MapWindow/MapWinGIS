@@ -57,7 +57,6 @@ private:
 	vector<ShapeRecordData*> Data;
 
 public:
-	::CCriticalSection ShapefileLock;
 	::CCriticalSection LoadingLock;
 	::CCriticalSection ProviderLock;	
 
@@ -80,8 +79,8 @@ public:
 	void SetMaxCacheCount(int value) { _maxCacheCount = value; }
 	bool CanLoad(int featureCount) { return featureCount < GetMaxCacheCount(); }
 
-	vector<OgrLoadingTask*> ClearFinishedTasks();
-	vector<OgrLoadingTask*> AwaitTasks();
+	void ClearFinishedTasks();
+	void AwaitTasks();
 	
 	vector<ShapeRecordData*> FetchData();
 	void PutData(vector<ShapeRecordData*> shapeData);
