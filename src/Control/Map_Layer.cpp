@@ -1219,7 +1219,7 @@ BOOL CMapView::ReloadOgrLayerFromSource(long OgrLayerHandle)
     if (!ogrLayer)
     {
         ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
-		return VARIANT_FALSE;
+		return false;
     }
 
     // reload OGR layer from source
@@ -1243,7 +1243,7 @@ BOOL CMapView::ReloadOgrLayerFromSource(long OgrLayerHandle)
 
     // do we need to reproject?
     // at this point, success here indicates success of function
-	return CheckLayerProjection(layer, OgrLayerHandle) ? VARIANT_TRUE : VARIANT_FALSE;
+	return CheckLayerProjection(layer, OgrLayerHandle) ? TRUE : FALSE;
 }
 
 // ***************************************************************
