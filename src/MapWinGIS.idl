@@ -4570,7 +4570,7 @@ interface IUtils : IDispatch{
 	[id(21), helpstring("method hBitmapToPicture")] HRESULT hBitmapToPicture([in] long hBitmap, [out, retval] IPictureDisp ** retval);
 	[id(22), helpstring("method GenerateHillShade")] HRESULT GenerateHillShade([in] BSTR bstrGridFilename, [in] BSTR bstrShadeFilename, [in, optional, defaultvalue(1)] float z, [in, optional, defaultvalue(1)] float scale, [in, optional, defaultvalue(315)] float az, [in, optional, defaultvalue(45)] float alt, [out, retval] VARIANT_BOOL * retval);
 	[id(23), helpstring("method GenerateContour")] HRESULT GenerateContour([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in] double dfInterval, [in, optional, defaultvalue(0)] double dfNoData, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL Is3D, [in, optional,defaultvalue(NULL)] VARIANT dblFLArray, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
-	[id(24), helpstring("method TranslateRaster")] HRESULT TranslateRaster([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(24), helpstring("Deprecated method GDALWarp, use CGdalUtils::GdalRasterTranslate instead")] HRESULT TranslateRaster([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(25), helpstring("Reads vector layer through GDAL/OGR library and converts it to the in-memory shapefile. Layer format is defined automatically. For formats which can store geometries of different types the type of resulting shapefile should be specified in shpType parameter.")] 
 			HRESULT OGRLayerToShapefile([in]BSTR Filename, [in, optional, defaultvalue(SHP_NULLSHAPE)] ShpfileType shpType, [in, optional, defaultvalue(NULL)]ICallback *cBack, [out, retval] IShapefile** sf);
 	[id(26), helpstring("method MergeImages")] HRESULT MergeImages([in]SAFEARRAY(BSTR) InputNames, [in] BSTR OutputName, [out, retval]VARIANT_BOOL* retVal);
@@ -4581,7 +4581,7 @@ interface IUtils : IDispatch{
 	[id(32), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useCenterWithinMethod, [out, retval]VARIANT_BOOL* retVal);
 	[id(33), helpstring("method Polygonize")] HRESULT Polygonize([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in, optional, defaultvalue(1)] int iSrcBand, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL NoMask, [in, optional, defaultvalue(NULL)] BSTR pszMaskFilename, [in, optional, defaultvalue("GML")] BSTR pszOGRFormat, [in, optional, defaultvalue("out")] BSTR pszDstLayerName, [in, optional, defaultvalue("DN")] BSTR pszPixValFieldName, [in, optional, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(36), helpstring("method GDALInfo")] HRESULT GDALInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
-	// [id(37), helpstring("Deprecated method GDALWarp")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+ 	[id(37), helpstring("Deprecated method GDALWarp, use CGdalUtils::GdalRasterWarp instead")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(38), helpstring("method GDALBuildVrt")] HRESULT GDALBuildVrt([in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(39), helpstring("method GDALAddOverviews")] HRESULT GDALAddOverviews([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in] BSTR bstrLevels, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(40), helpstring("method GDALRasterize")] HRESULT GDALRasterize([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
@@ -6627,6 +6627,7 @@ interface IWmsLayer : IDispatch{
 	[propput, id(28)] HRESULT Styles([in] BSTR newVal);
 };
 
+/****************************  Gdal Utils Interface ***********************/
 [
 	object,
 	uuid(5EFD0C96-0C97-4573-B80B-12FC75C06E76),
@@ -6637,7 +6638,7 @@ interface IWmsLayer : IDispatch{
 interface IGdalUtils : IDispatch{
 	[propget, id(1)] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(2)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[id(3), helpstring("method GdalWarp")] HRESULT GdalWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [out, retval] VARIANT_BOOL* retVal);
+	[id(3), helpstring("Image reprojection and warping utility")] HRESULT GdalRasterWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(4), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
 	[propput, id(4), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
 	[propget, id(5), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);

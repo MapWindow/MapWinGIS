@@ -3222,7 +3222,7 @@ char *SanitizeSRS( const char *pszUserInput )
 /************************************************************************/
 /*                                GDALWarp()                            */
 /************************************************************************/
-__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalWarp instead"))
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalRasterWarp instead"))
 STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 							  BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
 {

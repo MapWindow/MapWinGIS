@@ -1,4 +1,5 @@
 ﻿// ReSharper disable UnassignedGetOnlyAutoProperty
+// ReSharper disable CheckNamespace
 #if nsp
 namespace MapWinGIS
 {
@@ -52,6 +53,7 @@ namespace MapWinGIS
         /// <param name="Options">The options, as a string array</param>
         /// <remarks>See GDAL's documentation here: https://gdal.org/programs/gdalwarp.html</remarks>
         /// \new495 Added in version 4.9.5
+        /// \new510 Renamed from GdalWarp in version 5.1.0
         /// 
         /// \code
         /// // Example of creating VRT file from TIFF file. More options are possible:
@@ -62,9 +64,9 @@ namespace MapWinGIS
         ///     "-overwrite"
         /// };
         /// var gdalUtils = new GdalUtils();
-        /// if (!gdalUtils.GdalWarp("test.tif", output, options))
+        /// if (!gdalUtils.GdalRasterWarp("test.tif", output, options))
         /// {
-        ///     Debug.WriteLine("GdalWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+        ///     Debug.WriteLine("GdalRasterWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
         /// }
         /// \endcode 
         /// 
@@ -80,12 +82,12 @@ namespace MapWinGIS
         ///     "-cutline", border
         /// };
         /// var gdalUtils = new GdalUtils();
-        /// if (!gdalUtils.GdalWarp("test.tif", output, options))
+        /// if (!gdalUtils.GdalRasterWarp("test.tif", output, options))
         /// {
-        ///     Debug.WriteLine("GdalWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+        ///     Debug.WriteLine("GdalRasterWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
         /// }
         /// \endcode
-        public bool GdalWarp(string bstrSrcFilename, string bstrDstFilename, Array Options)
+        public bool GdalRasterWarp(string bstrSrcFilename, string bstrDstFilename, Array Options)
         {
             throw new NotImplementedException();
         }
@@ -181,14 +183,15 @@ namespace MapWinGIS
         /// <summary>
         /// Retrieves the error message associated with the specified error code. 
         /// </summary>
-        /// <param name="ErrorCode">The error code for which the error message is required.</param>
+        /// <param name="errorCode">The error code for which the error message is required.</param>
         /// <returns>The error message description for the specified error code. </returns>
         /// \new495 Added in version 4.9.5
-        public string get_ErrorMsg(int ErrorCode)
+        public string get_ErrorMsg(int errorCode)
         {
             throw new NotImplementedException();
         }
-
-        ICallback IGdalUtils.GlobalCallback { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
+#if nsp
 }
+#endif
+

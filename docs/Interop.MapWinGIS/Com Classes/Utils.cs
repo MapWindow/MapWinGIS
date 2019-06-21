@@ -473,9 +473,8 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>See documentation here: http://www.gdal.org/gdalwarp.html</remarks>
         /// \new490 Added in version 4.9.0
-        /// \deprecated v4.9.5 Use GdalUtils.GdalWarp instead.
-        /// Removed since v5.1.0
-        [Obsolete("Use GdalUtils.GdalWarp")]
+        /// \deprecated v4.9.5 Use GdalUtils.GdalRasterWarp instead.
+        [Obsolete("Use GdalUtils.GdalRasterWarp")]
         public bool GDALWarp(string bstrSrcFilename, string bstrDstFilename, string bstrOptions, ICallback cBack = null)
         {
             throw new NotImplementedException();

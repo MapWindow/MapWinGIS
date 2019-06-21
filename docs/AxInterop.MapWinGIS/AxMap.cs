@@ -227,7 +227,7 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="boundBox">The bounds (rectangle) in map units to get the snapshot from.</param>
         /// <returns>An image of the contents of the map displayed inside the bounds of the specified rectangle.</returns>
-        Image _DMap.SnapShot(object boundBox)
+        Image _DMap.SnapShot(Extents boundBox)
         {
             throw new NotImplementedException();
         }
@@ -2522,7 +2522,7 @@ namespace AxMapWinGIS
         /// 
         /// 2. What data you plan to display and what projection it's using. It's possible to do a reprojection with:
         /// - Utils.ReprojectShapefile for shapefiles;
-        /// - Utils.GDALWarp for images and grids.
+        /// - GdalUtils.GdalRasterWarp for images and grids.
         /// 
         /// But it should be considered whether it is worth the effort.
         /// 

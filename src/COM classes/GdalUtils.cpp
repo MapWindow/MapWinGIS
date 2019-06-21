@@ -23,7 +23,7 @@
 * (Open source contributors should list themselves and their modifications here). */
 // june 2017 PaulM - Initial creation of this file
 // november 2017 PaulM - Added GdalVectorTranslate
-// june 2019 PaulM - Added GdalRasterTranslate
+// june 2019 PaulM - Added GdalRasterTranslate, renamed GdalWarp to GdalRasterWarp due to IDL conflicts.
 
 #include "StdAfx.h"
 #include "GdalUtils.h"
@@ -40,9 +40,9 @@ CGdalUtils::~CGdalUtils()
 }
 
 // *********************************************************
-//	     GdalWarp()
+//	     GdalRasterWarp()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::GdalRasterWarp(const BSTR bstrSrcFilename, const BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -124,7 +124,7 @@ cleaning:
 // *********************************************************
 //	     GdalRasterTranslate()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::GdalRasterTranslate(const BSTR bstrSrcFilename, const BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -207,7 +207,7 @@ cleaning:
 // *********************************************************
 //	     GdalVectorTranslate()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR bstrSrcFilename, BSTR bstrDstFilename, SAFEARRAY* options, VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::GdalVectorTranslate(const BSTR bstrSrcFilename, const BSTR bstrDstFilename, SAFEARRAY* options, const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -290,7 +290,7 @@ cleaning:
 // *********************************************************
 //	     ClipVectorWithVector()
 // *********************************************************
-STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR bstrSubjectFilename, BSTR bstrOverlayFilename, BSTR bstrDstFilename, VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::ClipVectorWithVector(const BSTR bstrSubjectFilename, const BSTR bstrOverlayFilename, const BSTR bstrDstFilename, const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;

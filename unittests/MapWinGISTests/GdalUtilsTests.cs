@@ -57,7 +57,7 @@ namespace MapWinGISTests
                 "-cutline", borderFilename,
                 "-dstnodata", "0"
             };
-            var retVal = _gdalUtils.GdalWarp(inputFilename, outputFilename, options);
+            var retVal = _gdalUtils.GdalRasterWarp(inputFilename, outputFilename, options);
             WriteLine("retVal: " + retVal);
             Assert.IsTrue(retVal, "gdalUtils.GDALWarp() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(outputFilename), "Can't find the output file");
@@ -78,7 +78,7 @@ namespace MapWinGISTests
                 "-of", "vrt",
                 "-overwrite"
             };
-            var retVal = _gdalUtils.GdalWarp(@"GeoTiff/5band.tif", output, options);
+            var retVal = _gdalUtils.GdalRasterWarp(@"GeoTiff/5band.tif", output, options);
             Assert.IsTrue(retVal, "GdalWarp failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
             Debug.WriteLine(output);
@@ -101,7 +101,7 @@ namespace MapWinGISTests
                 "-crop_to_cutline",
                 "-cutline", border
             };
-            var retVal = _gdalUtils.GdalWarp(@"J:\_testdata\Haulmkilling2\20171019-Agrifac-586-Prinzen-wdvi\7da7d241-aa4f-4955-861e-62efbe85adf8_index_wdvi.tif", output, options);
+            var retVal = _gdalUtils.GdalRasterWarp(@"J:\_testdata\Haulmkilling2\20171019-Agrifac-586-Prinzen-wdvi\7da7d241-aa4f-4955-861e-62efbe85adf8_index_wdvi.tif", output, options);
             Assert.IsTrue(retVal, "GdalWarp failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
             Debug.WriteLine(output);
@@ -159,7 +159,7 @@ namespace MapWinGISTests
                 "-crop_to_cutline",
                 "-cutline", cutline
             };
-            retVal = _gdalUtils.GdalWarp(input, output, options);
+            retVal = _gdalUtils.GdalRasterWarp(input, output, options);
             Assert.IsTrue(retVal, "Could not ClipGridWithPolygon: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(output), "Output file does not exists");
             Debug.WriteLine(output);
