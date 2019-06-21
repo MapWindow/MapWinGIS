@@ -30,6 +30,17 @@ public:
 	};
 	QTreeExtent(double left,double right,double top ,double bottom)
 	{
+        // Ensure the extent has a width > 0
+        if (abs(left - right) < 0.0005) {
+            left -= 0.00025;
+            right += 0.00025;
+        }
+        // Ensure the extent has a height > 0
+        if (abs(top - bottom) < 0.0005) {
+            bottom -= 0.00025;
+            top += 0.00025;
+        }
+
 		this->left = left;
 		this->right = right;
 		this->top  = top;
