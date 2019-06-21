@@ -2464,7 +2464,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
     }
 
     CPLXMLNode* nodeCats = CPLGetXMLNode(node, "CategoryIndices");
-
+    bool needsApplyExpression = true;
     if (nodeCats)
     {
         CString indices = CPLGetXMLValue(nodeCats, "=CategoryIndices", "");
@@ -2493,13 +2493,14 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
                     ct = indices.Tokenize(",", pos);
                     count++;
                 };
-                // bool hasIndices = true;
+                bool needsApplyExpression = false;
             }
         }
     }
-    else
+
+    // If no indeces or invalid indeces, re-apply:
+    if (needsApplyExpression)
     {
-        // for older versions of file without indices apply previously loaded cats
         ((CShapefileCategories*)_categories)->ApplyExpressions();
     }
 

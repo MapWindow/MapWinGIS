@@ -12,13 +12,15 @@
 #include "ShapefileCategories.h"
 #include "Templates.h"
 #include "ShapefileHelper.h"
+#include "TableClass.h"
+#include "TableHelper.h"
 
 // *************************************************************
 //		InjectShapefile()
 // *************************************************************
 void COgrLayer::InjectShapefile(IShapefile* sfNew)
 { // Lock shape file
-	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+	CSingleLock sfLock(&ShapefileLock, _dynamicLoading ? TRUE : FALSE);
 	CloseShapefile();
 	_shapefile = sfNew;
 }
@@ -83,12 +85,88 @@ void COgrLayer::StopBackgroundLoading()
 //***********************************************************************
 IShapefile* COgrLayer::LoadShapefile()
 { 
+    // Lock it all down:
+    CSingleLock ldLock(&_loader.LoadingLock, TRUE);
+    CSingleLock prLock(&_loader.ProviderLock, TRUE);
+    CSingleLock sfLock(&ShapefileLock, TRUE);
+
 	bool isTrimmed = false;	
 	IShapefile* sf = Ogr2Shape::Layer2Shapefile(_layer, _activeShapeType, _loader.GetMaxCacheCount(), isTrimmed, &_loader, _globalCallback); 
 	if (isTrimmed) {
 		ErrorMessage(tkOGR_LAYER_TRIMMED);
 	}
 	return sf;
+}
+
+//***********************************************************************
+//*		UpdateShapefileFromOGRLoader()
+//***********************************************************************
+void COgrLayer::UpdateShapefileFromOGRLoader()
+{
+    // Wait for tasks to finish loading:
+    _loader.AwaitTasks();
+
+    // Lock it all down:
+    CSingleLock ldLock(&_loader.LoadingLock, TRUE);
+    CSingleLock prLock(&_loader.ProviderLock, TRUE);
+    CSingleLock sfLock(&ShapefileLock, TRUE);
+
+    // Grab the loaded data:
+    vector<ShapeRecordData*> data = _loader.FetchData();
+    if (data.size() == 0) return;
+
+    VARIANT_BOOL vb;
+    _shapefile->EditClear(&vb);
+
+    ShpfileType shpType;
+    _shapefile->get_ShapefileType(&shpType);
+
+    Debug::WriteWithThreadId(Debug::Format("Update shapefile: %d\n", data.size()), DebugOgrLoading);
+
+    CComPtr<ITable> table = NULL;
+    _shapefile->get_Table(&table);
+
+    CComPtr<ILabels> labels = NULL;
+    _shapefile->get_Labels(&labels);
+    labels->Clear();
+
+    if (table)
+    {
+        CTableClass* tbl = TableHelper::Cast(table);
+        _shapefile->StartEditingShapes(VARIANT_TRUE, NULL, &vb);
+        long count = 0;
+        for (size_t i = 0; i < data.size(); i++)
+        {
+            CComPtr<IShape> shp = NULL;
+            ComHelper::CreateShape(&shp);
+            if (shp)
+            {
+                shp->Create(shpType, &vb);
+                shp->ImportFromBinary(data[i]->Shape, &vb);
+                _shapefile->EditInsertShape(shp, &count, &vb);
+
+                tbl->UpdateTableRow(data[i]->Row, count);
+                data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
+
+                count++;
+            }
+        }
+        // inserted shapes were marked as modified, correct this
+        ShapefileHelper::ClearShapefileModifiedFlag(_shapefile);
+
+        // Stop 'fake' editing session
+        _shapefile->StopEditingShapes(VARIANT_TRUE, VARIANT_TRUE, NULL, &vb);
+
+        // Without this, categories are not correctly applied in the drawing function:
+        IShapefileCategories* cat;
+        _shapefile->get_Categories(&cat);
+        cat->ApplyExpressions();
+    }
+
+    // clean the data
+    for (size_t i = 0; i < data.size(); i++) {
+        delete data[i];
+    }
 }
 
 //***********************************************************************
@@ -224,7 +302,7 @@ STDMETHODIMP COgrLayer::Close()
 // *************************************************************
 void COgrLayer::CloseShapefile()
 { // Lock shape file
-	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+	CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (_shapefile)
 	{
 		VARIANT_BOOL vb;
@@ -447,7 +525,7 @@ STDMETHODIMP COgrLayer::GetBuffer(IShapefile** retVal)
 	if (!CheckState()) return S_OK;
 	
 	// Lock shape file
-	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+	CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (!_shapefile)
 	{
 		if (_dynamicLoading)
@@ -484,7 +562,7 @@ STDMETHODIMP COgrLayer::ReloadFromSource(VARIANT_BOOL* retVal)
 	}
 	
 	// Lock shape file
-	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+	CSingleLock sfLock(&ShapefileLock, TRUE);
 	CloseShapefile();
 	_shapefile = LoadShapefile();
 
@@ -683,8 +761,8 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 	}
 
 	{ // Locking provider & shapefile here
-		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
-		CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+		CSingleLock lock(&_loader.ProviderLock, TRUE);
+		CSingleLock sfLock(&ShapefileLock, TRUE);
 		*savedCount = Shape2Ogr::SaveShapefileChanges(_layer, _shapefile, shapeCmnId, saveType, validateShapes ? true : false, _updateErrors);
 	}
 
@@ -711,8 +789,8 @@ STDMETHODIMP COgrLayer::HasLocalChanges(VARIANT_BOOL* retVal)
 	if (!CheckState() || !_shapefile) return S_OK;
 
 	{ // Locking provider & shapefile here
-		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
-		CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+		CSingleLock lock(&_loader.ProviderLock, TRUE);
+		CSingleLock sfLock(&ShapefileLock, TRUE);
 
 		long numShapes;
 		_shapefile->get_NumShapes(&numShapes);
@@ -778,7 +856,7 @@ long COgrLayer::GetFidForShapefile()
 {
 	if (!_layer || !_shapefile) return -1;
 	// Locking shapefile here
-	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+	CSingleLock sfLock(&ShapefileLock, TRUE);
 	CComBSTR bstr;
 	get_FIDColumnName(&bstr);
 	CComPtr<ITable> table = NULL;
@@ -876,8 +954,8 @@ void COgrLayer::ForceCreateShapefile()
 
 	if (_dynamicLoading && !_shapefile && sourceType != ogrUninitialized) 
 	{ // Lock the provider & shapefile
-		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
-		CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+		CSingleLock lock(&_loader.ProviderLock, TRUE);
+		CSingleLock sfLock(&ShapefileLock, TRUE);
 		_shapefile = Ogr2Shape::CreateShapefile(_layer, _activeShapeType);
 	}
 }
@@ -949,7 +1027,7 @@ STDMETHODIMP COgrLayer::get_SupportsEditing(tkOgrSaveType editingType, VARIANT_B
 		
 	// do we have FID column?
 	{ // Locking shapefile here
-		CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+		CSingleLock sfLock(&ShapefileLock, TRUE);
 		if (_shapefile)
 		{
 			long fid = GetFidForShapefile();
@@ -1111,13 +1189,13 @@ bool COgrLayer::DeserializeOptions(CPLXMLNode* node)
 		CPLXMLNode* psChild = CPLGetXMLNode(node, "ShapefileData");
 		if (psChild)
 		{ // Lock shape file
-			CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
-			if (!_shapefile) {
-				IShapefile * sf = LoadShapefile();
-				_shapefile = sf;
-				bool result = ((CShapefile*)_shapefile)->DeserializeCore(VARIANT_FALSE, psChild);
-				if (!result) success = false;
-			}
+			CSingleLock sfLock(&ShapefileLock, TRUE);
+            if (!_shapefile) {
+                IShapefile * sf = LoadShapefile();
+                _shapefile = sf;
+            }
+		    bool result = ((CShapefile*)_shapefile)->DeserializeCore(VARIANT_FALSE, psChild);
+			if (!result) success = false;
 		}
 	}
 

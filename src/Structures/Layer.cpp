@@ -380,19 +380,14 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 			ogr->get_LabelExpression(&expr);
 			loader->LabelExpression = OLE2W(expr);
 
-			bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, *options->categories, options->task);
+			bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, options->task);
 
-			options->task->Finished = true;
-			if (!success) {
-				options->task->Cancelled = true;
-				OgrLoadingTask* task = options->task;
-				options->map->_FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, 0);
-			}
-
+            // Fire event for this task:
+            OgrLoadingTask* task = options->task;
+			task->Finished = true;
+			task->Cancelled = !success;
+            options->map->_FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, 0);
 			loader->ClearFinishedTasks();
-
-			if (success)
-				options->map->_Redraw(RedrawAll, false, false);
 		}
 		layer->put_AsyncLoading(false);
 		Debug::WriteWithThreadId("Releasing loading lock. \n", DebugOgrLoading);
@@ -419,32 +414,13 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 	// if larger extents were requested previously and features were loaded, skip the new request
 	if (!bForce && extents.Within(loader->LastSuccessExtents)) return;
 
-	// get a copy of categories to apply them in the background thread
-	vector<CategoriesData*>* data = new vector<CategoriesData*>();
-		
-	CComPtr<IShapefile> sf = NULL;
-	this->QueryShapefile(&sf);
-	if (sf) 
-	{
-		ShpfileType shpType = ShapefileHelper::GetShapeType(sf);
-		loader->IsMShapefile = ShapeUtility::IsM(shpType);
-
-		IShapefileCategories* categories = NULL;
-		sf->get_Categories(&categories);
-		if (categories) 
-		{
-			((CShapefileCategories*)categories)->GetCategoryData(*data);
-			categories->Release();
-		}
-	}
-
 	// Prepare a new OgrLoadingTask & queue it for execution
 	OgrLoadingTask* task = new OgrLoadingTask(layerHandle);
 	loader->EnqueueTask(task);
 
 	// First fire the event, then start the thread. 
 	// This prevents race condition between the started & completed event.
-	AsyncLoadingParams* param = new AsyncLoadingParams(mapView, extents, this, data, task);
+	AsyncLoadingParams* param = new AsyncLoadingParams(mapView, extents, this, task);
 	mapView->_FireBackgroundLoadingStarted(task->Id, layerHandle);
 	CWinThread* thread = AfxBeginThread(OgrAsyncLoadingThreadProc, (LPVOID)param);
 }
@@ -452,76 +428,16 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 //***********************************************************************
 //*		UpdateShapefile()
 //***********************************************************************
-void Layer::UpdateShapefile(long layerHandle)
+void Layer::UpdateShapefile()
 {
-	// Get the OGR loader:
-	OgrDynamicLoader* loader = GetOgrLoader();
-	if (!loader) return;
+    if (!IsDynamicOgrLayer())
+        return;
 
-	{ // Lock everything
-		CSingleLock ldLock(&loader->LoadingLock, TRUE);
-		CSingleLock prLock(&loader->ProviderLock, TRUE);
-		CSingleLock sfLock(&loader->ShapefileLock, TRUE);
-
-		// Grab the loaded data:
-		vector<ShapeRecordData*> data = loader->FetchData();
-		if (data.size() == 0) return;
-
-		USES_CONVERSION;
-		CComPtr<IShapefile> sf = NULL;
-		if (!QueryShapefile(&sf))
-			return;
-
-		VARIANT_BOOL vb;
-		sf->EditClear(&vb);
-
-		ShpfileType shpType;
-		sf->get_ShapefileType(&shpType);
-
-		Debug::WriteWithThreadId(Debug::Format("Update shapefile: %d\n", data.size()), DebugOgrLoading);
-
-		CComPtr<ITable> table = NULL;
-		sf->get_Table(&table);
-
-		CComPtr<ILabels> labels = NULL;
-		sf->get_Labels(&labels);
-		labels->Clear();
-
-		if (table)
-		{
-			CTableClass* tbl = TableHelper::Cast(table);
-			sf->StartEditingShapes(VARIANT_TRUE, NULL, &vb);
-			long count = 0;
-			for (size_t i = 0; i < data.size(); i++)
-			{
-				CComPtr<IShape> shp = NULL;
-				ComHelper::CreateShape(&shp);
-				if (shp)
-				{
-					shp->Create(shpType, &vb);
-					shp->ImportFromBinary(data[i]->Shape, &vb);
-					sf->EditInsertShape(shp, &count, &vb);
-					sf->put_ShapeCategory(count, data[i]->CategoryIndex);
-
-					tbl->UpdateTableRow(data[i]->Row, count);
-					data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
-
-					if (data[i]->HasLabel()) {
-						CComBSTR bstr(data[i]->LabelText);
-						labels->AddLabel(bstr, data[i]->LabelX, data[i]->LabelY, data[i]->LabelRotation);
-					}
-
-					count++;
-				}
-			}
-			ShapefileHelper::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
-		}
-
-		// clean the data
-		for (size_t i = 0; i < data.size(); i++) {
-			delete data[i];
-		}
-	}
+    // Get the OGR layer:
+    IOgrLayer* layer = NULL;
+    if (!QueryOgrLayer(&layer)) return;
+    
+    ((COgrLayer*) layer)->UpdateShapefileFromOGRLoader();
 }
 
 //****************************************************
