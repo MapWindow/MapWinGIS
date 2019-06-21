@@ -279,23 +279,52 @@ STDMETHODIMP CShapefile::get_UseQTree(VARIANT_BOOL *pVal)
 STDMETHODIMP CShapefile::put_UseQTree(VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
 	if (pVal && !_useQTree)
 	{
 		this->GenerateQTree();
-		_useQTree = VARIANT_TRUE;
+		_useQTree = TRUE;
 	}
 	else if(!pVal && _useQTree)
 	{
+        _useQTree = FALSE;
 		delete _qtree;
 		_qtree = NULL;
-		_useQTree = VARIANT_FALSE;
 	}
 	else
 	{
-		_useQTree = pVal?VARIANT_TRUE:VARIANT_FALSE;
+		_useQTree = (pVal == VARIANT_TRUE) ? TRUE : FALSE;
 	}
 	return S_OK;
+}
+
+// **********************************************************
+//		ClearQTree
+// **********************************************************
+void CShapefile::ClearQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax)
+{
+    if (_qtree)
+    {
+        delete _qtree;
+        _qtree = NULL;
+    }
+
+    _qtree = this->GenerateEmptyQTree(xMin, yMin, zMin, xMax, yMax, zMax);
+}
+
+// **********************************************************
+//		GenerateEmptyQTree
+// **********************************************************
+QTree* CShapefile::GenerateEmptyQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax)
+{
+    IExtents* ext = NULL;
+    this->get_Extents(&ext);
+    if (!ext) return NULL;
+    ext->GetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
+    ext->Release();
+
+    QTree* qtree = new QTree(QTreeExtent(*xMin, *xMax, *yMax, *yMin));
+
+    return qtree;
 }
 
 // **********************************************************
@@ -312,22 +341,18 @@ void CShapefile::GenerateQTree()
 	_qtree = GenerateQTreeCore(false);
 }
 
+
+
 // **********************************************************************
 // 						GenerateQTreeCore()				           
 // **********************************************************************
 QTree* CShapefile::GenerateQTreeCore(bool SelectedOnly)
 {	
-	if (_shapeData.size() == 0)
-		return NULL;
-	
-	IExtents* ext = NULL;
-	double xMin,xMax,yMin,yMax,zMin,zMax;
-	this->get_Extents(&ext);
-	if (!ext) return NULL;
-	ext->GetBounds(&xMin,&yMin,&zMin,&xMax,&yMax,&zMax);
-	ext->Release();
+    double xMin, xMax, yMin, yMax, zMin, zMax;
+    QTree* qtree = this->GenerateEmptyQTree(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
 
-	QTree* qtree = new QTree(QTreeExtent(xMin,xMax,yMax,yMin));
+	if (_shapeData.size() == 0)
+		return qtree;
 
 	long percent;
 	int numShapes = (int)_shapeData.size();

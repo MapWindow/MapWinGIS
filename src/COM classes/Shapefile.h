@@ -394,8 +394,12 @@ private:
 	void put_ReferenceToCharts(bool bNullReference = false);
 
 	// quad tree
+    QTree* GenerateQTreeCore(bool SelectedOnly);
+    QTree* GenerateEmptyQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax);
+    void ClearQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax);
 	void GenerateQTree();
-	QTree* GenerateQTreeCore(bool SelectedOnly);
+
+    // temp quad tree
 	bool GenerateTempQTree(bool SelectedOnly);
 	void ClearTempQTree();
 	QTree* GetTempQTree();

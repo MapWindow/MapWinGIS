@@ -63,22 +63,8 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 		return S_OK;
 	}
 	
-	// quad tree generation
-	IExtents * box = NULL;	
-	double xm,ym,zm,xM,yM,zM;
-	if(_useQTree)
-	{
-		if (_qtree)
-		{
-			delete _qtree;
-			_qtree = NULL;
-		}
-		IExtents * box = NULL;	
-		this->get_Extents(&box);
-		box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
-		box->Release();
-		_qtree = new QTree(QTreeExtent(xm,xM,yM,ym));
-	}
+    double xMin, xMax, yMin, yMax, zMin, zMax;
+    this->ClearQTree(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
 		
 	// reading shapes into memory
 	IShape * shp = NULL;
@@ -102,13 +88,13 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 			
 		if(_useQTree)
 		{
-			QuickExtentsCore(i, &xm, &ym, &xM, &yM);
+			QuickExtentsCore(i, &xMin, &yMin, &xMax, &yMax);
 
 			QTreeNode node;
-			node.Extent.left = xm;
-			node.Extent.right= xM;
-			node.Extent.top = yM;
-			node.Extent.bottom = ym;
+			node.Extent.left = xMin;
+			node.Extent.right= xMax;
+			node.Extent.top = yMax;
+			node.Extent.bottom = yMin;
 			node.index = i;
 			_qtree->AddNode(node);
 		}
@@ -769,10 +755,9 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 		}
 		_shapeData.clear();
 			
-		if(_useQTree == VARIANT_TRUE)
+		if (_useQTree)
 		{
-			delete _qtree;
-			_qtree = NULL;
+            this->GenerateQTree(); // will clear it
 		}
 
 		_sortingChanged = true;
@@ -885,11 +870,10 @@ BOOL CShapefile::ReleaseMemoryShapes()
 		}
 	}
 
-	if(_useQTree == VARIANT_TRUE)
+	if (_useQTree)
 	{
-		delete _qtree;
-		_qtree = NULL;
-	}
+        this->GenerateQTree();
+    }
 	return S_OK;
 }
 

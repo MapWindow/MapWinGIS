@@ -127,6 +127,9 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	}
 	else if(_isEditingShapes && _useQTree)
 	{
+        if (!_qtree)
+            GenerateQTree();
+
 		if(bPtSelection )
 		{
 			qtreeResult = _qtree->GetNodes(QTreeExtent(b_minX,b_minX +1,b_minY + 1,b_minY));
@@ -320,7 +323,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	{
 		delete res;
 	}
-	else if( _useQTree == VARIANT_TRUE && _isEditingShapes != FALSE)
+	else if( _useQTree && _isEditingShapes != FALSE)
 	{
 		qtreeResult.clear();
 	}

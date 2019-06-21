@@ -83,7 +83,7 @@ CShapefile::CShapefile()
     _spatialIndexNodeCapacity = 100;
 
     //Neio 20090721
-    _useQTree = VARIANT_FALSE;
+    _useQTree = FALSE;
     _cacheExtents = FALSE;
     _qtree = nullptr;
     _tempTree = nullptr;
