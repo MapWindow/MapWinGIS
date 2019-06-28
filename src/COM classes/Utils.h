@@ -154,7 +154,7 @@ public:
 	STDMETHOD(OGR2OGR)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 
 	STDMETHOD(OGRLayerToShapefile)(/*[in]*/BSTR Filename, /*[in, optional, defaultvalue(SHP_NULLSHAPE)]*/ ShpfileType shpType, /*[in, optional, defaultvalue(NULL)]*/ICallback *cBack, /*[out, retval]*/IShapefile** sf);
-	STDMETHOD(MergeImages)(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR OutputName, VARIANT_BOOL* retVal);
+	STDMETHOD(MergeImages)(/*[in]*/SAFEARRAY* inputNames, /*[in]*/BSTR outputName, VARIANT_BOOL* retVal);
 	STDMETHOD(ReprojectShapefile)(IShapefile* sf, IGeoProjection* source, IGeoProjection* target, IShapefile** result);
 
 	STDMETHOD(ClipGridWithPolygon)(BSTR inputGridfile, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal);
@@ -300,7 +300,7 @@ private:
 	void ErrorMessage(long ErrorCode);
 	void ErrorMessage(ICallback* callback, long ErrorCode);
 	void ErrorMessage(long ErrorCode, CString customMessage);
-	bool ValidateInputNames(SAFEARRAY* InputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr);
+	bool ValidateInputNames(SAFEARRAY* inputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr);
 	bool ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void **pbstr);
 
 	/* GDAL/OGR functions */

@@ -433,6 +433,12 @@ char** CGdalUtils::ConvertSafeArray(SAFEARRAY* safeArray) const
 			// Create array:
 			papszStrList = CSLAddString(papszStrList, OLE2A(pbstr[i]));
 		}
+
+        // if safeArray was successfully locked, unlock it
+        if (!FAILED(hr3))
+        {
+            SafeArrayUnaccessData(safeArray);
+        }
 	}
 
 	return papszStrList;
