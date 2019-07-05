@@ -90,11 +90,11 @@ cls
   $mwFileManager = $null;
 }
 
-  $mwFunction_ = New-Object -ComObject MapWinGIS.Function_;
+  $mwFunction_ = New-Object -ComObject MapWinGIS.Function;
  if (!$mwFunction_){
-  write-host "Cannot get MapWinGIS.Function_" 
+  write-host "Cannot get MapWinGIS.Function" 
  }else{
-  write-host "TODO: Test MapWinGIS.Function_ functions";
+  write-host "TODO: Test MapWinGIS.Function functions";
   $mwFunction_ = $null;
 }
 
@@ -218,13 +218,6 @@ cls
   $mwLabel = $null;
 }
 
-  $mwLabel_ = New-Object -ComObject MapWinGIS.Label_;
- if (!$mwLabel_){
-  write-host "Cannot get MapWinGIS.Label_" 
- }else{
-  write-host "TODO: Test MapWinGIS.Label_ functions";
-  $mwLabel_ = $null;
-}
 
   $mwLabelCategory = New-Object -ComObject MapWinGIS.LabelCategory;
  if (!$mwLabelCategory){
@@ -258,7 +251,7 @@ cls
   $mwLineSegment = $null;
 }
 
-  $mwMap = New-Object -ComObject MapWinGIS.Map;
+  $mwMap = New-Object -ComObject MapWinGIS.Map.1;
  if (!$mwMap){
   write-host "Cannot get MapWinGIS.Map" 
  }else{
@@ -352,22 +345,6 @@ cls
  }else{
   write-host "TODO: Test MapWinGIS.ShapefileCategory functions";
   $mwShapefileCategory = $null;
-}
-
-  $mwShapefileLegend = New-Object -ComObject MapWinGIS.ShapefileLegend;
- if (!$mwShapefileLegend){
-  write-host "Cannot get MapWinGIS.ShapefileLegend" 
- }else{
-  write-host "TODO: Test MapWinGIS.ShapefileLegend functions";
-  $mwShapefileLegend = $null;
-}
-
-  $mwShapefileLegendBreak = New-Object -ComObject MapWinGIS.ShapefileLegendBreak;
- if (!$mwShapefileLegendBreak){
-  write-host "Cannot get MapWinGIS.ShapefileLegendBreak" 
- }else{
-  write-host "TODO: Test MapWinGIS.ShapefileLegendBreak functions";
-  $mwShapefileLegendBreak = $null;
 }
 
   $mwShapeNetwork = New-Object -ComObject MapWinGIS.ShapeNetwork;

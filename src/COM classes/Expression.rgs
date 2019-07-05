@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.Expression.1 = s 'Expression Class'
+	{
+		CLSID = s '{2DD50E56-B81B-4456-9B32-6B763CB304E2}'
+	}
+	MapWinGIS.Expression = s 'Expression Class'
+	{
+		CLSID = s '{2DD50E56-B81B-4456-9B32-6B763CB304E2}'
+		CurVer = s 'MapWinGIS.Expression.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {2DD50E56-B81B-4456-9B32-6B763CB304E2} = s 'Expression Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.Expression.1'
+			VersionIndependentProgID = s 'MapWinGIS.Expression'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }

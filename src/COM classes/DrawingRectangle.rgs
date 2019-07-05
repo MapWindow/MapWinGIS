@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.DrawingRectangle.1 = s 'DrawingRectangle Class'
+	{
+		CLSID = s '{60C40EC8-F1C5-4197-918C-CF2CEFCAB554}'
+	}
+	MapWinGIS.DrawingRectangle = s 'DrawingRectangle Class'
+	{
+		CLSID = s '{60C40EC8-F1C5-4197-918C-CF2CEFCAB554}'
+		CurVer = s 'MapWinGIS.DrawingRectangle.1'
+	}	
 	NoRemove CLSID
 	{
 		ForceRemove {60C40EC8-F1C5-4197-918C-CF2CEFCAB554} = s 'DrawingRectangle Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.DrawingRectangle.1'
+			VersionIndependentProgID = s 'MapWinGIS.DrawingRectangle'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }

@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.Identifier.1 = s 'Identifier Class'
+	{
+		CLSID = s '{9A7CAA08-4DE0-439F-BA1D-3639513069BE}'
+	}
+	MapWinGIS.Identifier = s 'Identifier Class'
+	{
+		CLSID = s '{9A7CAA08-4DE0-439F-BA1D-3639513069BE}'
+		CurVer = s 'MapWinGIS.Identifier.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {9A7CAA08-4DE0-439F-BA1D-3639513069BE} = s 'Identifier Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.Identifier.1'
+			VersionIndependentProgID = s 'MapWinGIS.Identifier'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }

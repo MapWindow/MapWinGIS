@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.OgrLayer.1 = s 'OgrLayer Class'
+	{
+		CLSID = s '{E13D56FE-78CE-4ECD-BF0F-3E9C9DDC73F9}'
+	}
+	MapWinGIS.OgrLayer = s 'OgrLayer Class'
+	{
+		CLSID = s '{E13D56FE-78CE-4ECD-BF0F-3E9C9DDC73F9}'
+		CurVer = s 'MapWinGIS.OgrLayer.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {E13D56FE-78CE-4ECD-BF0F-3E9C9DDC73F9} = s 'OgrLayer Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.OgrLayer.1'
+			VersionIndependentProgID = s 'MapWinGIS.OgrLayer'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{5863687C-726A-47CE-8BF0-7E8E0D2FDE43}'
-			Version = s '1.0'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }

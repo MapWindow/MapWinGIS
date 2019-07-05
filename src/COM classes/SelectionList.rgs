@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.SelectionList.1 = s 'SelectionList Class'
+	{
+		CLSID = s '{85EA46DF-FCB8-44A2-BFB0-2F5B0162768D}'
+	}
+	MapWinGIS.SelectionList = s 'SelectionList Class'
+	{
+		CLSID = s '{85EA46DF-FCB8-44A2-BFB0-2F5B0162768D}'
+		CurVer = s 'MapWinGIS.SelectionList.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {85EA46DF-FCB8-44A2-BFB0-2F5B0162768D} = s 'SelectionList Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.SelectionList.1'
+			VersionIndependentProgID = s 'MapWinGIS.SelectionList'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }
