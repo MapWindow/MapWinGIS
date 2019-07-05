@@ -132,6 +132,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="CallMapWinGIS.ps1" />
     <None Include="Testdata\HDF5\test.h5">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -543,6 +544,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AxInterop.MapWinGIS.XML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Interop.MapWinGIS.XML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Testdata\GeoTiff\MWGIS-65.tif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

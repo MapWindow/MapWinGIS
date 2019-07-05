@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.GdalUtils.1 = s 'GdalUtils Class'
+	{
+		CLSID = s '{7DDFE06A-0461-4F72-9865-8274A91EB052}'
+	}
+	MapWinGIS.GdalUtils = s 'GdalUtils Class'
+	{
+		CLSID = s '{7DDFE06A-0461-4F72-9865-8274A91EB052}'
+		CurVer = s 'MapWinGIS.GdalUtils.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {7DDFE06A-0461-4F72-9865-8274A91EB052} = s 'GdalUtils Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.GdalUtils.1'
+			VersionIndependentProgID = s 'MapWinGIS.GdalUtils'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }
