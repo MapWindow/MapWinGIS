@@ -171,7 +171,6 @@ private:
 							   VARIANT_BOOL externalDatasource);
 
 public:
-    ::CCriticalSection ShapefileLock;
 
 	void InjectShapefile(IShapefile* sfNew);
     void UpdateShapefileFromOGRLoader();

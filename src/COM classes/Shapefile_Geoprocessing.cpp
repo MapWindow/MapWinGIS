@@ -80,6 +80,11 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape*>& vShapes,
                                     IShapefile* sfSubject, long subjectId, std::map<long, long>* fieldMapSubject,
                                     IShapefile* sfClip, long clipId, std::map<long, long>* fieldMapClip)
 {
+    if (!sf || !sfSubject) return;
+
+    CSingleLock sfLock(&((CShapefile*) sf)->ShapefileLock, TRUE);
+    CSingleLock sfSubjectLock(&((CShapefile*) sfSubject)->ShapefileLock, TRUE);
+
     long numFieldSubject, numFieldsClip;
     sfSubject->get_NumFields(&numFieldSubject);
     if (sfClip)
@@ -178,6 +183,10 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape*>& vShapes,
 // initShapeIndex - the index of shape to copy the attribute from
 bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* sfSouce, int initShapeIndex)
 {
+    if (!sfTarget || !sfSouce) return false;
+
+    CSingleLock sfTargetLock(&((CShapefile*)sfTarget)->ShapefileLock, TRUE);
+    CSingleLock sfSourceLock(&((CShapefile*)sfSouce)->ShapefileLock, TRUE);
     if (gsNew)
     {
         ShpfileType shpType;
@@ -220,6 +229,10 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 // The row index of attribute table are taken from the key property of the shape
 void CopyShape(IShapefile* sfSource, IShape* shp, IShapefile* sfResult)
 {
+    if (!sfSource || !sfResult) return;
+
+    CSingleLock sfSourceLock(&((CShapefile*)sfSource)->ShapefileLock, TRUE);
+    CSingleLock sfResultLock(&((CShapefile*)sfResult)->ShapefileLock, TRUE);
     if (shp)
     {
         USES_CONVERSION;
@@ -278,7 +291,9 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
                                            VARIANT_BOOL SelectedOnly, VARIANT* arr, ICallback* cBack,
                                            VARIANT_BOOL* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    
+    AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
     *retval = VARIANT_FALSE;
 
@@ -293,6 +308,8 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
         ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
         return S_OK;
     }
+
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 
     long _numShapes2;
     const long _numShapes1 = _shapeData.size();
@@ -435,6 +452,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents* BoundBox, double Tolerance, SelectMode SelectMode, VARIANT* arr)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     double xMin, xMax, yMin, yMax, zMin, zMax;
     BoundBox->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
@@ -506,6 +524,9 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents* BoundBox, double Tolerance, S
 STDMETHODIMP CShapefile::Dissolve(long FieldIndex, VARIANT_BOOL SelectedOnly, IShapefile** sf)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    if (!*sf) return S_OK;
+    CSingleLock sfLock(&((CShapefile*)*sf)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     DissolveCore(FieldIndex, SelectedOnly, nullptr, sf);
     return S_OK;
 }
@@ -517,6 +538,9 @@ STDMETHODIMP CShapefile::DissolveWithStats(long FieldIndex, VARIANT_BOOL Selecte
                                            IFieldStatOperations* statOperations, IShapefile** sf)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    if (!*sf) return S_OK;
+    CSingleLock sfLock(&((CShapefile*)*sf)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     DissolveCore(FieldIndex, SelectedOnly, statOperations, sf);
     return S_OK;
 }
@@ -529,6 +553,9 @@ STDMETHODIMP CShapefile::DissolveWithStats(long FieldIndex, VARIANT_BOOL Selecte
 void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* operations,
                               IShapefile** sf)
 {
+    if (!*sf) return;
+    CSingleLock sfLock(&((CShapefile*)*sf)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     // ----------------------------------------------
     //   Validation
     // ----------------------------------------------
@@ -619,6 +646,9 @@ char* GetStatOperationName(tkFieldStatOperation op)
 void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldStatOperations* ioperations,
                                      IShapefile* sf)
 {
+    if (!sf) return;
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     // --------------------------------------------
     // validating operations
     // --------------------------------------------
@@ -842,6 +872,9 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* operations,
                               IShapefile* sf)
 {
+    if (!sf) return;
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     map<int, vector<int>*> fieldMap; // index in output, indices in input
     map<CComVariant, vector<int>*> indicesMap; // value in input, indices in input
     map<CComVariant, vector<GEOSGeometry*>*> shapeMap;
@@ -973,6 +1006,9 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* operations,
                                  IShapefile* sf)
 {
+    if (!sf) return;
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     map<int, vector<int>*> fieldMap; // index in output, indices in input
     map<CComVariant, vector<int>*> indicesMap; // value in input, indices in input
     map<CComVariant, ClipperLib::Clipper*> shapeMap;
@@ -1112,6 +1148,7 @@ STDMETHODIMP CShapefile::AggregateShapesWithStats(VARIANT_BOOL SelectedOnly, LON
                                                   IFieldStatOperations* statOperations, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     AggregateShapesCore(SelectedOnly, FieldIndex, statOperations, retval);
     return S_OK;
 }
@@ -1122,6 +1159,7 @@ STDMETHODIMP CShapefile::AggregateShapesWithStats(VARIANT_BOOL SelectedOnly, LON
 STDMETHODIMP CShapefile::AggregateShapes(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     AggregateShapesCore(SelectedOnly, FieldIndex, nullptr, retval);
     return S_OK;
 }
@@ -1133,6 +1171,9 @@ STDMETHODIMP CShapefile::AggregateShapes(VARIANT_BOOL SelectedOnly, LONG FieldIn
 void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IFieldStatOperations* operations,
                                      IShapefile** retval)
 {
+    if (!*retval) return;
+    CSingleLock sfLock(&((CShapefile*)*retval)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     long numFields;
     this->get_NumFields(&numFields);
 
@@ -1381,6 +1422,10 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
                                           VARIANT_BOOL MergeResults, IShapefile** sf)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    if (!*sf) return S_OK;
+
+    CSingleLock sfLock(&((CShapefile*) *sf)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
 
     if (MergeResults)
     {
@@ -1419,6 +1464,9 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 VARIANT_BOOL CShapefile::BufferByDistanceCore(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly,
                                               VARIANT_BOOL MergeResults, IShapefile* sf)
 {
+    if (!sf) return VARIANT_FALSE;
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     // -------------------------------------------
     //  validating
     // -------------------------------------------
@@ -1545,6 +1593,7 @@ STDMETHODIMP CShapefile::Difference(VARIANT_BOOL SelectedOnlySubject, IShapefile
                                     VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clDifference);
     return S_OK;
 }
@@ -1556,6 +1605,7 @@ STDMETHODIMP CShapefile::Clip(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOv
                               IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clClip);
     // enumeration should be repaired
     return S_OK;
@@ -1569,6 +1619,7 @@ STDMETHODIMP CShapefile::GetIntersection(VARIANT_BOOL SelectedOnlyOfThis, IShape
                                          IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     DoClipOperation(SelectedOnlyOfThis, sf, SelectedOnly, retval, clIntersection, fileType);
     return S_OK;
 }
@@ -1580,6 +1631,7 @@ STDMETHODIMP CShapefile::SymmDifference(VARIANT_BOOL SelectedOnlySubject, IShape
                                         VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clSymDifference);
     // enumeration should be repaired
     return S_OK;
@@ -1592,6 +1644,7 @@ STDMETHODIMP CShapefile::Union(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfO
                                VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clUnion);
     return S_OK;
 }
@@ -1672,6 +1725,7 @@ CString GetClipOperationName(tkClipOperation operation)
 bool CShapefile::ValidateClippingOutputType(ShpfileType type1, ShpfileType type2, ShpfileType returnType,
                                             tkClipOperation operation)
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     switch (operation)
     {
     case clSymDifference:
@@ -1768,6 +1822,9 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
         ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
         return;
     }
+
+    CSingleLock sfOverlayLock(&((CShapefile*)sfOverlay)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
 
     ShpfileType type2;
     const ShpfileType type1 = _shpfiletype;
@@ -1939,6 +1996,11 @@ cleaning:
 void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay,
                           IShapefile* sfResult)
 {
+    if (!sfOverlay || !sfResult) return;
+
+    CSingleLock sfOverlayLock(&((CShapefile*)sfOverlay)->ShapefileLock, TRUE);
+    CSingleLock sfResultLock(&((CShapefile*)sfResult)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQTree();
 
     long numShapesSubject, numShapesClip;
@@ -2038,6 +2100,11 @@ cleaning:
 void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay,
                              IShapefile* sfResult)
 {
+    if (!sfOverlay || !sfResult) return;
+
+    CSingleLock sfOverlayLock(&((CShapefile*)sfOverlay)->ShapefileLock, TRUE);
+    CSingleLock sfResultLock(&((CShapefile*)sfResult)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQTree();
 
     long numShapesSubject, numShapesClip;
@@ -2179,6 +2246,11 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
                                   std::set<int>* subjectShapesToSkip,
                                   std::set<int>* clippingShapesToSkip)
 {
+    if (!sfClip || !sfResult) return;
+
+    CSingleLock sfClipLock(&((CShapefile*)sfClip)->ShapefileLock, TRUE);
+    CSingleLock sfResultLock(&((CShapefile*)sfResult)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     QTree* qTree = ((CShapefile*)sfClip)->GetTempQTree();
 
     long numShapesSubject, numShapesClip;
@@ -2259,6 +2331,9 @@ IShapefile* CShapefile::IntersectionClipperNoAttributes(VARIANT_BOOL SelectedOnl
     if (!sfClip)
         return nullptr;
 
+    CSingleLock sfLock(&((CShapefile*)sfClip)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
+
     IShapefile* sfResult = nullptr;
     this->Clone(&sfResult);
 
@@ -2293,6 +2368,11 @@ void CShapefile::IntersectionClipper(VARIANT_BOOL SelectedOnlySubject, IShapefil
                                      std::set<int>* subjectShapesToSkip,
                                      std::set<int>* clippingShapesToSkip)
 {
+    if (!sfClip || !sfResult) return;
+
+    CSingleLock sfClipLock(&((CShapefile*)sfClip)->ShapefileLock, TRUE);
+    CSingleLock sfResultLock(&((CShapefile*)sfResult)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     QTree* qTree = ((CShapefile*)sfClip)->GetTempQTree();
 
     long numShapesSubject, numShapesClip;
@@ -2489,6 +2569,13 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
                                 VARIANT_BOOL SelectedOnlyOverlay,
                                 IShapefile* sfResult, map<long, long>* fieldMap, set<int>* shapesToSkip)
 {
+    if (!sfOverlay || !sfSubject  || !sfResult) return;
+
+    CSingleLock sfOverlayLock(&((CShapefile*)sfOverlay)->ShapefileLock, TRUE);
+    CSingleLock sfSubjectLock(&((CShapefile*)sfSubject)->ShapefileLock, TRUE);
+    CSingleLock sfResultLock(&((CShapefile*)sfResult)->ShapefileLock, TRUE);
+
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQTree();
 
     long numShapesSubject, numShapesClip;
@@ -2608,6 +2695,7 @@ cleaning:
 #ifdef SERIALIZE_POLYGONS
 void SerializePolygon(ofstream& out, ClipperLib::Polygons* poly)
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (poly && out.good())
 	{
 		out.precision(14);
@@ -2642,6 +2730,12 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
                                    VARIANT_BOOL SelectedOnlyClip,
                                    IShapefile* sfResult, map<long, long>* fieldMap, set<int>* shapesToSkip)
 {
+    if (!sfClip || !sfSubject || !sfResult) return;
+
+    CSingleLock sfClipLock(&((CShapefile*)sfClip)->ShapefileLock, TRUE);
+    CSingleLock sfSubjectLock(&((CShapefile*)sfSubject)->ShapefileLock, TRUE);
+    CSingleLock sfResultLock(&((CShapefile*)sfResult)->ShapefileLock, TRUE);
+    CSingleLock mySfLock(&ShapefileLock, TRUE);
     QTree* qTree = ((CShapefile*)sfClip)->GetTempQTree();
 
     long numShapesSubject, numShapesClip;
@@ -2809,6 +2903,7 @@ cleaning:
 STDMETHODIMP CShapefile::get_GeometryEngine(tkGeometryEngine* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _geometryEngine;
     return S_OK;
 }
@@ -2816,6 +2911,7 @@ STDMETHODIMP CShapefile::get_GeometryEngine(tkGeometryEngine* pVal)
 STDMETHODIMP CShapefile::put_GeometryEngine(tkGeometryEngine newVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     _geometryEngine = newVal;
     return S_OK;
 }
@@ -2831,6 +2927,7 @@ STDMETHODIMP CShapefile::put_GeometryEngine(tkGeometryEngine newVal)
 STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
@@ -2986,6 +3083,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
 STDMETHODIMP CShapefile::PointInShapefile(DOUBLE x, DOUBLE y, LONG* ShapeIndex)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     const int nShapeCount = _polySf.size();
     for (int nShape = nShapeCount - 1; nShape >= 0; nShape--)
@@ -3078,6 +3176,7 @@ STDMETHODIMP CShapefile::PointInShapefile(DOUBLE x, DOUBLE y, LONG* ShapeIndex)
 STDMETHODIMP CShapefile::BeginPointInShapefile(VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_writing)
     {
         //AfxMessageBox("Can't read");
@@ -3138,6 +3237,7 @@ STDMETHODIMP CShapefile::BeginPointInShapefile(VARIANT_BOOL* retval)
 STDMETHODIMP CShapefile::EndPointInShapefile()
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     _polySf.clear();
 
@@ -3155,10 +3255,13 @@ VARIANT_BOOL CShapefile::ExplodeShapesCore(VARIANT_BOOL SelectedOnly, IShapefile
     // ----------------------------------------------
     //   Validation
     // ----------------------------------------------
-    if (!ValidateInput(this, "ExplodeShapes", "this", SelectedOnly))
+    if (!result || !ValidateInput(this, "ExplodeShapes", "this", SelectedOnly))
     {
         return VARIANT_FALSE;
     }
+
+    CSingleLock sfResultLock(&((CShapefile*)result)->ShapefileLock, TRUE);
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     // ----------------------------------------------
     //   Processing
@@ -3225,6 +3328,7 @@ VARIANT_BOOL CShapefile::ExplodeShapesCore(VARIANT_BOOL SelectedOnly, IShapefile
 STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     Clone(retval);
 
@@ -3245,10 +3349,13 @@ VARIANT_BOOL CShapefile::ExportSelectionCore(IShapefile* result)
     // ----------------------------------------------
     //   Validation
     // ----------------------------------------------
-    if (!ValidateInput(this, "Sort", "this", false))
+    if (!result || !ValidateInput(this, "Sort", "this", false))
     {
         return VARIANT_FALSE;
     }
+
+    CSingleLock sfResultLock(&((CShapefile*)result)->ShapefileLock, TRUE);
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     // ----------------------------------------------
     //   Processing
@@ -3318,6 +3425,7 @@ VARIANT_BOOL CShapefile::ExportSelectionCore(IShapefile* result)
 STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     Clone(retval);
 
@@ -3337,6 +3445,8 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
     USES_CONVERSION;
+
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     // ----------------------------------------------
     //   Validation
@@ -3434,6 +3544,9 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
         ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
         return S_OK;
     }
+
+    CSingleLock sfResultLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     const long numShapes1 = _shapeData.size();
     long numShapes2;
@@ -3592,6 +3705,8 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
     USES_CONVERSION;
 
+    CSingleLock sfLock(&ShapefileLock, TRUE);
+
     // ----------------------------------------------
     //	  Validation
     // ----------------------------------------------
@@ -3695,6 +3810,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 STDMETHODIMP CShapefile::Segmentize(double metersTolerance, IShapefile** retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     // ----------------------------------------------
     //    Validating
@@ -3853,6 +3969,7 @@ double CalcMinAngle(GEOSGeometry* geom, double& xCent, double& yCent)
 // **********************************************************************
 Coloring::ColorGraph* CShapefile::GeneratePolygonColors()
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     GenerateTempQTree(false);
     QTree* tree = GetTempQTree();
     ReadGeosGeometries(VARIANT_FALSE);

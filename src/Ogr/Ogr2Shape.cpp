@@ -110,6 +110,9 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer, ShpfileType activeShapeT
 // *************************************************************
 void Ogr2Shape::CopyFields(OGRLayer* layer, IShapefile* sf)
 {
+    if (!sf) return;
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
+
 	IField * fld = NULL;
 	VARIANT_BOOL vb;
 
@@ -173,6 +176,7 @@ void Ogr2Shape::CopyFields(OGRLayer* layer, IShapefile* sf)
 bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCount, bool loadLabels, ICallback* callback, bool& isTrimmed)
 {
 	if (!sf || !layer) return false;
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 
 	layer->ResetReading();
 
@@ -280,6 +284,9 @@ bool isXBaseLogicalTrue(wchar_t c)
 void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, IShapefile* sf, bool hasFID, long numShapes, 
 	bool loadLabels, OgrLabelsHelper::LabelFields labelFields)
 {
+    if (!sf) return;
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
+
 	double x = 0.0, y = 0.0, rotation = 0;
 
 	CStringW text;

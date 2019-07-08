@@ -34,6 +34,7 @@
 STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*retval = VARIANT_FALSE;
 
 	if (_appendMode) {
@@ -142,6 +143,7 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BOOL StopEditTable, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*retval = VARIANT_FALSE;
 
 	if (!_globalCallback && cBack)
@@ -292,7 +294,7 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 //		RestoreShapeRecordsMapping()
 // ***********************************************************
 void CShapefile::RestoreShapeRecordsMapping()
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	// if in memory records still match the disk ones
 	bool clearRecords = _shpOffsets.size() != _shapeData.size();
 	for (size_t i = 0; i < _shapeData.size(); i++)
@@ -333,7 +335,7 @@ void CShapefile::RestoreShapeRecordsMapping()
 // ***********************************************************
 // Must be called after inserting or swapping shape in shape vector
 void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	// shape must have correct underlying data structure
 	if ((_fastMode ? true : false) != ((CShape*)Shape)->get_fastMode())
 	{
@@ -431,6 +433,7 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 STDMETHODIMP CShapefile::EditUpdateShape(long shapeIndex, IShape* shpNew, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*retval = VARIANT_FALSE;
 	if (!_isEditingShapes) 
 	{
@@ -466,7 +469,7 @@ STDMETHODIMP CShapefile::EditUpdateShape(long shapeIndex, IShape* shpNew, VARIAN
 // ***********************************************************
 // should be called when geometry of shape changed
 void CShapefile::ReregisterShape(int shapeIndex)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (!_isEditingShapes) return;
 
 	if (shapeIndex < 0  || shapeIndex >= (int)_shapeData.size())
@@ -525,6 +528,7 @@ void CShapefile::ReregisterShape(int shapeIndex)
 STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*retval = VARIANT_FALSE;
 	
  	if( _table == NULL || _sourceType == sstUninitialized )
@@ -618,7 +622,7 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 //		WriteAppendedShape()
 // *********************************************************************
 bool CShapefile::WriteAppendedShape()
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (!_appendMode || _shapeData.size() == 0) return false;
 
 	if (_shapeData.size() == _appendStartShapeCount) return false;   // no shapes were added
@@ -653,6 +657,7 @@ bool CShapefile::WriteAppendedShape()
 STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*retval = VARIANT_FALSE;
 
 	if( _table == NULL || _sourceType == sstUninitialized )
@@ -712,6 +717,8 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
+
 	*retval = VARIANT_FALSE;
 
 	if (_table == NULL || _sourceType == sstUninitialized)
@@ -774,9 +781,7 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 //		get_CacheExtents()
 // ****************************************************************
 STDMETHODIMP CShapefile::get_CacheExtents(VARIANT_BOOL * pVal)
-{
-	// The property no longer used
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    // The property no longer used	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = VARIANT_FALSE;
 	return S_OK;
 }
@@ -797,6 +802,7 @@ STDMETHODIMP CShapefile::put_CacheExtents(VARIANT_BOOL newVal)
 STDMETHODIMP CShapefile::RefreshExtents(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	*retval = VARIANT_TRUE;
 	if (!_isEditingShapes)	return S_OK;
@@ -847,6 +853,8 @@ STDMETHODIMP CShapefile::RefreshExtents(VARIANT_BOOL *retval)
 STDMETHODIMP CShapefile::RefreshShapeExtents(LONG ShapeId, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
+
 	// The method is no longer used
 	*retval = VARIANT_TRUE;
 	return S_OK;
@@ -858,7 +866,7 @@ STDMETHODIMP CShapefile::RefreshShapeExtents(LONG ShapeId, VARIANT_BOOL *retval)
 //		ReleaseMemoryShapes()
 // ********************************************************************
 BOOL CShapefile::ReleaseMemoryShapes()
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	int size = (int)_shapeData.size();
 	for( int i = 0; i < size; i++ )
@@ -882,7 +890,7 @@ BOOL CShapefile::ReleaseMemoryShapes()
 // ****************************************************************
 //Verify Shapefile Integrity
 BOOL CShapefile::VerifyMemShapes(ICallback * cBack)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	ShpfileType shapetype;
 	long numPoints;
 	long numParts;
@@ -1031,13 +1039,18 @@ BOOL CShapefile::VerifyMemShapes(ICallback * cBack)
 //		get_InteractiveEditing
 // ****************************************************************
 STDMETHODIMP CShapefile::get_InteractiveEditing(VARIANT_BOOL* pVal)
-{
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*pVal = _isEditingShapes && _interactiveEditing;
 	return S_OK;
 }
+
+// ****************************************************************
+//		put_InteractiveEditing
+// ****************************************************************
 STDMETHODIMP CShapefile::put_InteractiveEditing(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (!_isEditingShapes && newVal)
 	{
 		// start edit mode; naturally no interactive editing without it
@@ -1052,7 +1065,7 @@ STDMETHODIMP CShapefile::put_InteractiveEditing(VARIANT_BOOL newVal)
 //		ReopenFiles
 // ****************************************************************
 bool CShapefile::ReopenFiles(bool writeMode)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (_sourceType != sstDiskBased)
 	{
 		return false;
@@ -1084,8 +1097,7 @@ bool CShapefile::ReopenFiles(bool writeMode)
 //		StartAppendMode
 // ****************************************************************
 STDMETHODIMP CShapefile::StartAppendMode(VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	*retVal = VARIANT_FALSE;
 
@@ -1115,8 +1127,7 @@ STDMETHODIMP CShapefile::StartAppendMode(VARIANT_BOOL* retVal)
 //		StopAppendMode
 // ****************************************************************
 STDMETHODIMP CShapefile::StopAppendMode()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	if (_appendMode )
 	{
@@ -1163,8 +1174,7 @@ STDMETHODIMP CShapefile::StopAppendMode()
 //		get_AppendMode
 // ****************************************************************
 STDMETHODIMP CShapefile::get_AppendMode(VARIANT_BOOL* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	*pVal = _appendMode;
 

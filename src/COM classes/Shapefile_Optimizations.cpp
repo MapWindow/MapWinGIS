@@ -30,8 +30,7 @@
 //		get_fastMode()
 // ************************************************************
 STDMETHODIMP CShapefile::get_FastMode (VARIANT_BOOL* retval)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*retval = _fastMode ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
@@ -40,8 +39,7 @@ STDMETHODIMP CShapefile::get_FastMode (VARIANT_BOOL* retval)
 //	  put_FastMode()
 // ************************************************************
 STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	if (!_isEditingShapes) {
 		return S_OK;
@@ -64,7 +62,7 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 //	   ReleaseRenderingData()
 // *****************************************************************
 void CShapefile::ReleaseRenderingCache()
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	for (unsigned int i = 0; i < _shapeData.size(); i++) {
 		_shapeData[i]->ReleaseRenderingData();
 	}
@@ -78,8 +76,7 @@ void CShapefile::ReleaseRenderingCache()
 //	   get_NumPoints()
 // *****************************************************************
 STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	*pVal = 0;
 
@@ -153,8 +150,7 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 // *****************************************************************
 //This function does not extract Z or M values!!!!!!!!
 STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **retval)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
@@ -349,8 +345,8 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 // *****************************************************************
 //This function does not extract Z or M values!!!!!!!!
 STDMETHODIMP CShapefile::QuickPoints(long ShapeIndex, long *NumPoints, SAFEARRAY ** retval)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
+
 	*retval = NULL;
 	*NumPoints = 0;
 
@@ -545,8 +541,8 @@ STDMETHODIMP CShapefile::QuickPoints(long ShapeIndex, long *NumPoints, SAFEARRAY
 // *****************************************************************
 //This function does not extract Z and M values
 STDMETHODIMP CShapefile::QuickExtents(long ShapeIndex, IExtents **retval)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
+
 	*retval = NULL;
 	
 	Extent ext;
@@ -565,7 +561,7 @@ STDMETHODIMP CShapefile::QuickExtents(long ShapeIndex, IExtents **retval)
 //	   QuickExtentsCore()
 // *****************************************************************
 bool CShapefile::QuickExtentsCore(long ShapeIndex, double* xMin, double* yMin, double* xMax, double* yMax)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	Extent ext;
 	if (this->QuickExtentsCore(ShapeIndex, ext))
 	{
@@ -584,7 +580,7 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, double* xMin, double* yMin, d
 // *****************************************************************
 //This function does not extract Z and M values
 bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
 		ErrorMessage( tkINDEX_OUT_OF_BOUNDS );
@@ -616,7 +612,7 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
 //	   ReadShapeExtents()
 // *****************************************************************
 bool CShapefile::ReadShapeExtents(long ShapeIndex, Extent& result)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	CSingleLock lock(&_readLock, TRUE);
 
 	//Get the Info from the disk

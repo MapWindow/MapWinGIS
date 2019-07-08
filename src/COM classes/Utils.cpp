@@ -376,180 +376,182 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 // ************************************************************
 STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTolerance, ICallback *cBack, VARIANT_BOOL *retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (Shapes == NULL)
-		{
-			*retval = NULL;
-			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-			return S_OK;
-		}
+    if (Shapes == NULL)
+    {
+        *retval = NULL;
+        ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+        return S_OK;
+    }
 
-	ICallback* callback = cBack ? cBack : _globalCallback;
+    CSingleLock sfLock(&((CShapefile*) Shapes)->ShapefileLock, TRUE);
 
-	ShpfileType shptype;
-	Shapes->get_ShapefileType(&shptype);
+    ICallback* callback = cBack ? cBack : _globalCallback;
 
-	if (shptype != SHP_POLYLINE && shptype != SHP_POLYGON)
-	{
-		*retval = VARIANT_FALSE;
-		if (shptype == SHP_POLYLINEZ || shptype == SHP_POLYGONZ ||
-			shptype == SHP_POLYLINEM || shptype == SHP_POLYGONM)
-			_lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
-		else
-			_lastErrorCode = tkINCOMPATIBLE_SHAPEFILE_TYPE;
+    ShpfileType shptype;
+    Shapes->get_ShapefileType(&shptype);
 
-		ErrorMessage(callback, _lastErrorCode);
+    if (shptype != SHP_POLYLINE && shptype != SHP_POLYGON)
+    {
+        *retval = VARIANT_FALSE;
+        if (shptype == SHP_POLYLINEZ || shptype == SHP_POLYGONZ ||
+            shptype == SHP_POLYLINEM || shptype == SHP_POLYGONM)
+            _lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
+        else
+            _lastErrorCode = tkINCOMPATIBLE_SHAPEFILE_TYPE;
 
-		return S_OK;
-	}
+        ErrorMessage(callback, _lastErrorCode);
 
-	if (!((CShapefile*)Shapes)->ValidateInput(Shapes, "RemoveColinearPoints", "Shapes", VARIANT_FALSE, "Utils"))
-		return S_OK;
+        return S_OK;
+    }
 
-	VARIANT_BOOL vbretval;
-	Shapes->StartEditingShapes(FALSE, cBack, &vbretval);
-	long numShapes;
-	Shapes->get_NumShapes(&numShapes);
+    if (!((CShapefile*)Shapes)->ValidateInput(Shapes, "RemoveColinearPoints", "Shapes", VARIANT_FALSE, "Utils"))
+        return S_OK;
 
-	long percent = 0, cnt = 0;
-	double total = 2 * numShapes;
+    VARIANT_BOOL vbretval;
+    Shapes->StartEditingShapes(FALSE, cBack, &vbretval);
+    long numShapes;
+    Shapes->get_NumShapes(&numShapes);
 
-	XRedBlack rb;
+    long percent = 0, cnt = 0;
+    double total = 2 * numShapes;
 
-	if (shptype == SHP_POLYLINE)
-	{
-	}
-	else if (shptype == SHP_POLYGON)
-	{
-		for (int currentShape = 0; currentShape < numShapes; currentShape++)
-		{
-			IShape * shape = NULL;
-			((CShapefile*)Shapes)->GetValidatedShape(currentShape, &shape);
-			if (!shape) continue;
+    XRedBlack rb;
 
-			long numPoints = 0, forward_index = 0, backward_index = 0;
-			shape->get_NumPoints(&numPoints);
+    if (shptype == SHP_POLYLINE)
+    {
+    }
+    else if (shptype == SHP_POLYGON)
+    {
+        for (int currentShape = 0; currentShape < numShapes; currentShape++)
+        {
+            IShape * shape = NULL;
+            ((CShapefile*)Shapes)->GetValidatedShape(currentShape, &shape);
+            if (!shape) continue;
 
-			double x, y;
-			VARIANT_BOOL vbretval;
+            long numPoints = 0, forward_index = 0, backward_index = 0;
+            shape->get_NumPoints(&numPoints);
 
-			for (int point_index = 0; point_index < numPoints; point_index++)
-			{
-				shape->get_XY(point_index, &x, &y, &vbretval);
+            double x, y;
+            VARIANT_BOOL vbretval;
 
-				POINT p;
-				p.x = (LONG)x;
-				p.y = (LONG)y;
-				rb.Insert(p);
+            for (int point_index = 0; point_index < numPoints; point_index++)
+            {
+                shape->get_XY(point_index, &x, &y, &vbretval);
 
-				forward_index = point_index + 1;
-				backward_index = point_index - 1;
-				if (forward_index >= numPoints)
-					forward_index = 0;
-				if (backward_index < 0)
-					backward_index = numPoints - 1;
+                POINT p;
+                p.x = (LONG)x;
+                p.y = (LONG)y;
+                rb.Insert(p);
 
-				VARIANT_BOOL vbretval;
-				double onex, oney, twox, twoy, threex, threey;
-				shape->get_XY(backward_index, &onex, &oney, &vbretval);
-				shape->get_XY(forward_index, &twox, &twoy, &vbretval);
-				shape->get_XY(point_index, &threex, &threey, &vbretval);
+                forward_index = point_index + 1;
+                backward_index = point_index - 1;
+                if (forward_index >= numPoints)
+                    forward_index = 0;
+                if (backward_index < 0)
+                    backward_index = numPoints - 1;
 
-				POINT one;
-				one.x = (LONG)onex;
-				one.y = (LONG)oney;
+                VARIANT_BOOL vbretval;
+                double onex, oney, twox, twoy, threex, threey;
+                shape->get_XY(backward_index, &onex, &oney, &vbretval);
+                shape->get_XY(forward_index, &twox, &twoy, &vbretval);
+                shape->get_XY(point_index, &threex, &threey, &vbretval);
 
-				POINT two;
-				two.x = (LONG)twox;
-				two.y = (LONG)twoy;
+                POINT one;
+                one.x = (LONG)onex;
+                one.y = (LONG)oney;
 
-				POINT three;
-				three.x = (LONG)threex;
-				three.y = (LONG)threey;
+                POINT two;
+                two.x = (LONG)twox;
+                two.y = (LONG)twoy;
 
-				YRedBlackNode * prbn = rb.GetNode(three);
-				if (prbn != NULL)
-				{
-					if (prbn->canSetColinear)
-					{
-						if (isColinear(one, two, three, LinearTolerance))
-							prbn->isColinear = true;
-						else
-						{
-							prbn->isColinear = false;
-							prbn->canSetColinear = false;
-						}
-					}
-				}
-			}
+                POINT three;
+                three.x = (LONG)threex;
+                three.y = (LONG)threey;
 
-			cnt++;
+                YRedBlackNode * prbn = rb.GetNode(three);
+                if (prbn != NULL)
+                {
+                    if (prbn->canSetColinear)
+                    {
+                        if (isColinear(one, two, three, LinearTolerance))
+                            prbn->isColinear = true;
+                        else
+                        {
+                            prbn->isColinear = false;
+                            prbn->canSetColinear = false;
+                        }
+                    }
+                }
+            }
 
-			CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
+            cnt++;
 
-			std::deque< POINT > PointsToKeep;
-			for (currentShape = 0; currentShape < numShapes; currentShape++)
-			{
-				double x, y;
-				VARIANT_BOOL vbretval;
+            CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
 
-				for (int point_index = 0; point_index < numPoints; point_index++)
-				{
-					shape->get_XY(point_index, &x, &y, &vbretval);
-					POINT p;
-					p.x = (LONG)x; p.y = (LONG)y;
-					rb.Insert(p);
+            std::deque< POINT > PointsToKeep;
+            for (currentShape = 0; currentShape < numShapes; currentShape++)
+            {
+                double x, y;
+                VARIANT_BOOL vbretval;
 
-					YRedBlackNode * prbn = rb.GetNode(p);
-					if (prbn != NULL)
-					{
-						if (prbn->isColinear == true && prbn->useCount < 2)
-						{	//Don't Keep the Point
-						}
-						else
-							PointsToKeep.push_back(prbn->Element);
-					}
-				}
+                for (int point_index = 0; point_index < numPoints; point_index++)
+                {
+                    shape->get_XY(point_index, &x, &y, &vbretval);
+                    POINT p;
+                    p.x = (LONG)x; p.y = (LONG)y;
+                    rb.Insert(p);
 
-				for (int ns = 0; ns < numPoints; ns++)
-					shape->DeletePoint(0, &vbretval);
+                    YRedBlackNode * prbn = rb.GetNode(p);
+                    if (prbn != NULL)
+                    {
+                        if (prbn->isColinear == true && prbn->useCount < 2)
+                        {	//Don't Keep the Point
+                        }
+                        else
+                            PointsToKeep.push_back(prbn->Element);
+                    }
+                }
 
-				PointsToKeep.push_back(PointsToKeep[0]);
-				for (int i = 0; i < (int)PointsToKeep.size(); i++)
-				{
-					IPoint * pnt = NULL;
-					ComHelper::CreatePoint(&pnt);
+                for (int ns = 0; ns < numPoints; ns++)
+                    shape->DeletePoint(0, &vbretval);
 
-					pnt->put_X(PointsToKeep[i].x);
-					pnt->put_Y(PointsToKeep[i].y);
-					long pntpos = i;
-					shape->InsertPoint(pnt, &pntpos, &vbretval);
-				}
+                PointsToKeep.push_back(PointsToKeep[0]);
+                for (int i = 0; i < (int)PointsToKeep.size(); i++)
+                {
+                    IPoint * pnt = NULL;
+                    ComHelper::CreatePoint(&pnt);
 
-				PointsToKeep.clear();
+                    pnt->put_X(PointsToKeep[i].x);
+                    pnt->put_Y(PointsToKeep[i].y);
+                    long pntpos = i;
+                    shape->InsertPoint(pnt, &pntpos, &vbretval);
+                }
 
-				cnt++;
-				CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
-			}
+                PointsToKeep.clear();
 
-			shape->Release();
-			shape = NULL;
-		}
-	}
+                cnt++;
+                CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
+            }
 
-	// ---------------------------------------------------
-	//	 Validating output
-	// ---------------------------------------------------
-	CallbackHelper::ProgressCompleted(_globalCallback, _key);
+            shape->Release();
+            shape = NULL;
+        }
+    }
 
-	((CShapefile*)Shapes)->ValidateOutput(&Shapes, "RemoveColinearPoints", "Utils");
+    // ---------------------------------------------------
+    //	 Validating output
+    // ---------------------------------------------------
+    CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
-	if (Shapes) {
-		Shapes->StopEditingShapes(TRUE, FALSE, cBack, &vbretval);
-	}
+    ((CShapefile*)Shapes)->ValidateOutput(&Shapes, "RemoveColinearPoints", "Utils");
 
-	return S_OK;
+    if (Shapes) {
+        Shapes->StopEditingShapes(TRUE, FALSE, cBack, &vbretval);
+    }
+
+    return S_OK;
 }
 
 bool CUtils::isColinear(POINT one, POINT two, POINT test, double tolerance)
@@ -1154,12 +1156,14 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (Shapefile == NULL || Grid == NULL)
-		{
-			*retval = NULL;
-			this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-			return S_OK;
-		}
+	if (Shapefile == NULL || Grid == NULL)
+	{
+		*retval = NULL;
+		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
+	}
+
+	CSingleLock sfLock(&((CShapefile*)Shapefile)->ShapefileLock, TRUE);
 
 	long ncols = 0, nrows = 0;
 	IGridHeader * header = NULL;
@@ -2740,6 +2744,8 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		return S_OK;
 	}
 
+	CSingleLock sfLock(&((CShapefile*)Shpfile)->ShapefileLock, TRUE);
+
 	if (!((CShapefile*)Shpfile)->ValidateInput(Shpfile, "ShapefileToGrid", "Shpfile", VARIANT_FALSE, "Utils"))
 		return S_OK;
 
@@ -3583,6 +3589,8 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 		return S_OK;
 	}
 
+	CSingleLock sfLock(&((CShapefile*) sf)->ShapefileLock, TRUE);
+
 	OGRSpatialReference* ref1 = ((CGeoProjection*)source)->get_SpatialReference();
 	OGRSpatialReference* ref2 = ((CGeoProjection*)target)->get_SpatialReference();
 
@@ -4120,6 +4128,8 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
+
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 
 	ShpfileType type;
 	sf->get_ShapefileType(&type);

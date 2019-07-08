@@ -1211,17 +1211,17 @@ bool CShapeEditor::TrySaveShape(IShape* shp)
 	}
 
 	VARIANT_BOOL vb;
-	int shapeIndex = _shapeIndex;
-	int layerHandle = _layerHandle;
+	long shapeIndex = _shapeIndex;
+    long layerHandle = _layerHandle;
 	bool newShape = _shapeIndex == -1;
 
 	if (newShape)
 	{
-		long numShapes = ShapefileHelper::GetNumShapes(sf);
+        long newIndex;
+        sf->EditAddShape(shp, &newIndex);
 		IUndoList* undoList = _mapCallback->_GetUndoList();
-		undoList->Add(uoAddShape, (long)_layerHandle, (long)numShapes, &vb);
-		sf->EditInsertShape(shp, &numShapes, &vb);
-		shapeIndex = numShapes;
+		undoList->Add(uoAddShape, (long)_layerHandle, newIndex, &vb);
+		shapeIndex = newIndex;
 	}
 	else 
 	{
