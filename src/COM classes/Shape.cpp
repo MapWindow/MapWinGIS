@@ -1199,7 +1199,7 @@ STDMETHODIMP CShape::Relates(IShape* Shape, tkSpatialRelation Relation, VARIANT_
 	OGRGeometryFactory::destroyGeometry(oGeom1);
 	OGRGeometryFactory::destroyGeometry(oGeom2);
 
-	*retval = res;
+	*retval = (res == 0) ? VARIANT_FALSE : VARIANT_TRUE;
 	return S_OK;
 }
 
