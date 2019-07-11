@@ -2235,7 +2235,7 @@ enum tkScalebarUnits
 		PointAdded = 0,
 		PointRemoved = 1,
 		MesuringStopped = 2,  // Typo, mark deprecated
-		MeasuringStopped = 3
+		MeasuringStopped = 2
 	} tkMeasuringAction;
 	#pragma deprecated(MesuringStopped)
 

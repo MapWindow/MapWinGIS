@@ -681,7 +681,7 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	if (m_cursorMode == cmMeasure)
 	{
 		_measuring->FinishMeasuring();
-		FireMeasuringChanged(tkMeasuringAction::MesuringStopped);	
+		FireMeasuringChanged(tkMeasuringAction::MeasuringStopped);	
 		Redraw2(RedrawSkipDataLayers);
 		return;
 	}
