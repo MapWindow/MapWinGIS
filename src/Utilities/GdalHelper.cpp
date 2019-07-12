@@ -651,31 +651,31 @@ char** GdalHelper::SetCompressionRasterOptions(GDALDataset* dataset, char** opti
 // ****************************************************************
 //		CopyDataset
 // ****************************************************************
-bool GdalHelper::CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* localCallback, bool createWorldFile)
+bool GdalHelper::CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* localCallback, const bool createWorldFile)
 {
 	if (!dataset) return false;
 
-	GDALDriver* drv = dataset->GetDriver();
+	auto drv = dataset->GetDriver();
 	if (!drv) return false;
 
 	CallbackParams params(localCallback, "Copying dataset");
 	
-	char **papszOptions = NULL;
+	char **papszOptions = nullptr;
 	papszOptions = SetCompressionRasterOptions(dataset, papszOptions);
 
 	if (createWorldFile)
 		papszOptions = CSLSetNameValue(papszOptions, "WORLDFILE", "YES");
 
 	m_globalSettings.SetGdalUtf8(true);
-	CStringA nameUtf8 = Utility::ConvertToUtf8(newName);
-	GDALDataset* dst = drv->CreateCopy(nameUtf8, dataset, 0, papszOptions, (GDALProgressFunc)GDALProgressCallback, &params);
+	const auto nameUtf8 = Utility::ConvertToUtf8(newName);
+	const auto dst = drv->CreateCopy(nameUtf8, dataset, 0, papszOptions, static_cast<GDALProgressFunc>(GDALProgressCallback), &params);
 	m_globalSettings.SetGdalUtf8(false);
 
 	CSLDestroy(papszOptions);
 
 	if (dst)
 	{
-		GdalHelper::CloseDataset(dst);
+		CloseDataset(dst);
 		return true;
 	}
 	return false;
