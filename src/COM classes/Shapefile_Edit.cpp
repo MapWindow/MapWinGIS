@@ -877,11 +877,6 @@ BOOL CShapefile::ReleaseMemoryShapes()
 			_shapeData[i]->shape = NULL;
 		}
 	}
-
-	if (_useQTree)
-	{
-        this->GenerateQTree();
-    }
 	return S_OK;
 }
 

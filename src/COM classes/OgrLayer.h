@@ -79,6 +79,7 @@ public:
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(OpenDatabaseLayer)(BSTR connectionString, int layerIndex, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal);   // not in public API
 	STDMETHOD(OpenFromQuery)(BSTR connectionString, BSTR sql, VARIANT_BOOL* retVal);
+    STDMETHOD(ExtendFromQuery)(BSTR sql, VARIANT_BOOL* retVal);
 	STDMETHOD(OpenFromDatabase)(BSTR connectionString, BSTR layerName, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal);
 	STDMETHOD(Close)();
 	STDMETHOD(get_Name)(BSTR* retVal);

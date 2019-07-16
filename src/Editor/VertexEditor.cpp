@@ -68,15 +68,15 @@ bool VertexEditor::OnMouseDownEditing(IMapViewCallback* map, CShapeEditor* edito
 	if (behavior == ebVertexEditor)
 	{
 		int pntIndex = editor->GetClosestVertex(projX, projY, tol);
-		if (pntIndex != -1)
-		{
-			// start vertex moving
-			bool changed = editor->SetSelectedVertex(pntIndex);
-			map->_StartDragging(DragMoveVertex);
-			editor->SaveState();
-			if (changed) editor->SetRedrawNeeded(rtShapeEditor);
-			return true;
-		}
+        if (pntIndex != -1)
+        {
+            // start vertex moving
+            bool changed = editor->SetSelectedVertex(pntIndex);
+            map->_StartDragging(DragMoveVertex);
+            editor->SaveState();
+            if (changed) editor->SetRedrawNeeded(rtShapeEditor);
+            return true;
+        }
 	}
 
 	// select part
@@ -107,6 +107,9 @@ bool VertexEditor::OnMouseDownEditing(IMapViewCallback* map, CShapeEditor* edito
 			}
 		}
 	}
+
+    if (shift)
+        return true; // use shift to prevent editor from stopping edits
 
 	// MWGIS-153: until further review, due to difficulty in editing, 
 	// disable 'moving' altogether within the context of the vertex editor

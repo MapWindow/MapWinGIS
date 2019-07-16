@@ -6362,6 +6362,7 @@ interface IOgrLayer : IDispatch{
 	[propget, id(49)] HRESULT ActiveShapeType([out, retval] ShpfileType* pVal);
 	[propput, id(49)] HRESULT ActiveShapeType([in] ShpfileType newVal);
 	[propget, id(50)] HRESULT IsExternalDatasource([out, retval] VARIANT_BOOL* pVal);
+    [id(51)] HRESULT ExtendFromQuery([in]BSTR sql, [out, retval]VARIANT_BOOL* retVal);
 };
 
 [
