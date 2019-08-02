@@ -20,7 +20,7 @@
 // 11-06-2018 jfaust - Add GetAngle function
 //********************************************************************************************************
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "Utils.h"
 #include <stack>
 #include "colour.h"
@@ -36,6 +36,7 @@
 #include "GridInterpolate.h"
 #include "PointInPolygon.h"
 #include "Grid.h"
+#undef HOST_FILLORDER /* MWGIS-182 */
 #include "Extents.h"
 #include "Shape.h"
 #include "Vector.h"
@@ -48,7 +49,7 @@
 #include "GeosConverter.h"
 #include "GeometryHelper.h"
 
-#pragma warning(disable:4996)
+// #pragma warning(disable:4996)
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
