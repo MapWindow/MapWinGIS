@@ -105,9 +105,9 @@ CMemoryBitmap* BaseProvider::GetTileFileData(CString url)
 		return nullptr;
 
 	fl.seekg(0, std::ios::end);
-	int sz = fl.tellg();
+	const auto sz = static_cast<size_t>(fl.tellg());
 	if (sz == 0)
-		return nullptr;
+	    return nullptr;
 
 	std::vector<char> buf(sz);
 
