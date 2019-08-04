@@ -915,6 +915,23 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Return a distance along the source polyline to a Point nearest the reference Shape
+        /// </summary>
+        /// <param name="sourceLine">Source Shape, must be a polyline</param>
+        /// <param name="referenceShape">Another Shape of any Shapetype</param>
+        /// <returns>Returns the distance along sourceline to the point nearest the specified referenceShape.</returns>
+        /// <remarks>
+        /// sourceLine must be a Polyline Shape.  Returned Distance is measured from Point[0].  If resulting 'distance' would be greater than the length of sourceLine, then sourceLine's length is returned.
+        /// </remarks>
+        /// \see Shape.ProjectDistanceTo
+        /// 
+        /// \new500 Added in version 5.0.0
+        public Double ProjectDistanceTo(Shape sourceLine, Shape referenceShape)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 #if nsp
 }

@@ -2878,3 +2878,12 @@ STDMETHODIMP CShape::InterpolatePoint(IPoint* startPoint, double distance, VARIA
 	// simply call Utility function
 	return GetUtils()->LineInterpolatePoint(this, startPoint, distance, normalized, retVal);
 }
+
+//*****************************************************************
+//*		ProjectDistanceTo()
+//*****************************************************************
+STDMETHODIMP CShape::ProjectDistanceTo(IShape* referenceShape, double* distance)
+{
+	// call Utility function
+	return GetUtils()->LineProjectDistanceTo(this, referenceShape, distance);
+}

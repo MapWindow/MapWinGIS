@@ -192,6 +192,7 @@ public:
 	STDMETHOD(GetProjectionList)(tkProjectionSet projectionSets, VARIANT* list, VARIANT_BOOL* retVal);
     STDMETHOD(GetAngle)(IPoint* firstPoint, IPoint* secondPoint, double* retVal);
 	STDMETHOD(LineInterpolatePoint)(IShape* sourceLine, IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint **retVal);
+	STDMETHOD(LineProjectDistanceTo)(IShape* sourceLine, IShape* referenceShape, double* distance);
 
 private:
 	struct RasterPoint

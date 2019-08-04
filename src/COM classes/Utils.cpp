@@ -6001,3 +6001,43 @@ STDMETHODIMP CUtils::LineInterpolatePoint(IShape* sourceLine, IPoint* startPoint
 
 	return S_OK;
 }
+
+// *************************************************
+//			LineProjectDistanceTo()
+// *************************************************
+STDMETHODIMP CUtils::LineProjectDistanceTo(IShape* sourceLine, IShape* referenceShape, double* distance)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
+		// initialize return value
+		*distance = 0;
+
+	// basic validation
+	if (sourceLine == NULL || referenceShape == NULL)
+	{
+		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
+	}
+
+	// source geometry has to be a polyline
+	ShpfileType shapeType;
+	sourceLine->get_ShapeType2D(&shapeType);
+	if (shapeType != ShpfileType::SHP_POLYLINE)
+	{
+		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE, CString("Incoming Shape must be a Polyline"));
+		return S_OK;
+	}
+
+	// first convert to GEOS geometries
+	GEOSGeom geosLine = GeosConverter::ShapeToGeom(sourceLine);
+	GEOSGeom geosShape = GeosConverter::ShapeToGeom(referenceShape);
+
+	// call GEOS function
+	*distance = GeosHelper::Project(geosLine, geosShape);
+
+	// clean up
+	GeosHelper::DestroyGeometry(geosLine);
+	GeosHelper::DestroyGeometry(geosShape);
+
+	return S_OK;
+}

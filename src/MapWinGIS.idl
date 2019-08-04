@@ -4288,6 +4288,7 @@ interface IShape : IDispatch{
 	[id(68)] HRESULT Clear();
 	[id(69)] HRESULT FixUp2([in] tkUnitsOfMeasure units, [out, retval] IShape** retVal);
 	[id(70), helpstring("method InterpolatePoint")] HRESULT InterpolatePoint([in] IPoint* startPoint, [in] double distance, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL normalized, [out, retval] IPoint **retVal);
+	[id(71), helpstring("method ProjectDistanceTo")] HRESULT ProjectDistanceTo([in] IShape* referenceShape, [out, retval] double* distance);
 };
 
 /****************************  Extents Interface ***********************/
@@ -4621,6 +4622,7 @@ interface IUtils : IDispatch{
 	[id(63), helpstring("method GetProjectionList")] HRESULT GetProjectionList([in] tkProjectionSet projectionSets, [in, out] VARIANT* list, [out, retval] VARIANT_BOOL* retVal);
     [id(64), helpstring("method GetAngle")] HRESULT GetAngle([in] IPoint* firstPoint, [in] IPoint* secondPoint, [out, retval] double* retVal);
 	[id(65), helpstring("method LineInterpolatePoint")] HRESULT LineInterpolatePoint([in] IShape* sourceLine, [in] IPoint* startPoint, [in] double distance, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL normalized, [out, retval] IPoint **retVal);
+	[id(66), helpstring("method LineProjectDistanceTo")] HRESULT LineProjectDistanceTo([in] IShape* sourceLine, [in] IShape* referenceShape, [out, retval] double* distance);
 };
 
 /****************************  Vector Interface ***********************/
