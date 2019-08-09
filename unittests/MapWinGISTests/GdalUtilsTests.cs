@@ -16,6 +16,7 @@ namespace MapWinGISTests
         {
             // https://github.com/dwtkns/gdal-cheat-sheet
             _gdalUtils = new GdalUtils { GlobalCallback = this };
+            Debug.WriteLine("Start of tests " + DateTime.Now);
         }
 
         [TestMethod, Timeout(5 * 60 * 1000)]
@@ -58,6 +59,7 @@ namespace MapWinGISTests
                 "-dstnodata", "0"
             };
             var retVal = _gdalUtils.GdalRasterWarp(inputFilename, outputFilename, options);
+            WriteLine("options.Length: " + options.Length);
             WriteLine("retVal: " + retVal);
             Assert.IsTrue(retVal, "gdalUtils.GDALWarp() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(outputFilename), "Can't find the output file");
@@ -82,6 +84,49 @@ namespace MapWinGISTests
             Assert.IsTrue(retVal, "GdalWarp failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
             Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
             Debug.WriteLine(output);
+        }
+
+        [TestMethod, Timeout(5 * 60 * 1000)]
+        public void GdalBuildOverviews()
+        {
+            // the list of overview decimation factors to build, or NULL if nOverviews == 0:
+            var overviewList = new[] { 2, 4, 8, 16, 32, 64, 128 };
+            var configOptions = new[] { "COMPRESS_OVERVIEW DEFLATE" };
+            // list of band numbers:
+            var bandList = new[] { 1, 2, 3, 4, 5 };
+            GdalBuildOverviewsCore(@"D:\dev\MapWindow\MapWinGIS\git\unittests\MapWinGISTests\Testdata\GeoTiff\5band.tif", overviewList, bandList, configOptions);
+        }
+
+        [TestMethod, Timeout(5 * 60 * 1000)]
+        public void GdalBuildOverviewsAuto()
+        {
+            var configOptions = new[] { "COMPRESS_OVERVIEW DEFLATE" };
+            GdalBuildOverviewsCore(@"D:\dev\MapWindow\MapWinGIS\git\unittests\MapWinGISTests\Testdata\GeoTiff\5band.tif", null, null, configOptions);
+        }        
+        
+        [TestMethod, Timeout(5 * 60 * 1000)]
+        public void GdalBuildOverviewsAuto2()
+        {
+            var configOptions = new[] { "COMPRESS_OVERVIEW DEFLATE", "INTERLEAVE_OVERVIEW PIXEL" };
+            GdalBuildOverviewsCore(@"D:\dev\MapWindow\MapWinGIS\git\unittests\MapWinGISTests\Testdata\GeoTiff\Chlorofyl.tif", null, null, configOptions);
+        }
+
+        private void GdalBuildOverviewsCore(string inputFilename, int[] overviewList, int[] bandList, string[] configOptions
+            )
+        {
+            if (!File.Exists(inputFilename)) Assert.Fail("Input file doesn't exists: " + inputFilename);
+            var ovrFilename = inputFilename + ".ovr";
+            if (File.Exists(ovrFilename)) File.Delete(ovrFilename);
+
+            // https://gdal.org/programs/gdaladdo.html
+            // https://gdal.org/api/gdaldataset_cpp.html#classGDALDataset_1a2aa6f88b3bbc840a5696236af11dde15
+            // To produce the smallest possible JPEG-In-TIFF overviews, you should use:
+            //--config COMPRESS_OVERVIEW JPEG --config PHOTOMETRIC_OVERVIEW YCBCR --config INTERLEAVE_OVERVIEW PIXEL
+
+            var retVal = _gdalUtils.GdalBuildOverviews(inputFilename, tkGDALResamplingMethod.grmCubic, overviewList, bandList, configOptions);
+            WriteLine("retVal: " + retVal);
+            Assert.IsTrue(retVal, "gdalUtils.GdalBuildOverviews() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
+            Assert.IsTrue(File.Exists(ovrFilename), ".ovr file is not found");
         }
 
         // Missing data [TestMethod, Timeout(5 * 60 * 1000)]
@@ -249,12 +294,12 @@ namespace MapWinGISTests
 
         public void Progress(string KeyOfSender, int Percent, string Message)
         {
-            WriteLine(Message + ": " + Percent);
+            WriteLine("Callback Progress: " + Message + ": " + Percent);
         }
 
         public void Error(string KeyOfSender, string ErrorMsg)
         {
-            WriteLine("Error: " + ErrorMsg + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
+            WriteLine("Callback Error: " + ErrorMsg + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
         }
     }
 }

@@ -433,6 +433,8 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>See documentation here: http://www.gdal.org/gdaladdo.html</remarks>
         /// \new490 Added in version 4.9.0
+        /// \deprecated v5.1.0 Use GdalUtils.GdalBuildOverviews instead.
+        [Obsolete("Use GdalUtils.GdalBuildOverviews")]
         public bool GDALAddOverviews(string bstrSrcFilename, string bstrOptions, string bstrLevels, ICallback cBack = null)
         {
             throw new NotImplementedException();

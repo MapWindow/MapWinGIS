@@ -1667,6 +1667,7 @@ enum tkScalebarUnits
 		imHighQualityBicubic = 7,
 	}tkInterpolationMode;
 
+	/************************* tkGDALResamplingMethod **************************/
 	typedef
 	[	uuid(3BDEA45D-F8D9-4dca-A58B-9BB7F689263A),
 		helpstring("tkGDALResamplingMethod enumeration"),
@@ -1674,10 +1675,15 @@ enum tkScalebarUnits
 	enum tkGDALResamplingMethod
 	{
 		grmNone = 0,
-		grmNearest = 1,
-		grmGauss = 2,
-		grmBicubic = 3,
-		grmAverage = 4,
+		grmNearest,
+		grmGauss,
+		grmCubic,
+		grmCubicSpline,
+		grmAverage,
+		grmAverageMagphase,
+		grmBilinear,
+		grmLanczos,
+		grmMode
 	}tkGDALResamplingMethod;
 
 	typedef
@@ -3893,7 +3899,7 @@ interface IImage : IDispatch{
 	[propput, id(48), helpstring("property ImageColorScheme")] HRESULT ImageColorScheme([in] PredefinedColorScheme newValue);
 	[propget, id(49), helpstring("property DrawingMethod")] HRESULT DrawingMethod([out, retval] int* retVal);
 	[propput, id(49), helpstring("property DrawingMethod")] HRESULT DrawingMethod([in] int newVal);
-	[id(50), helpstring("method BuildOverviews")] HRESULT BuildOverviews([in]tkGDALResamplingMethod ResamplingMethod, [in]int NumOverviews, [in]SAFEARRAY(int) OverviewList, [out, retval]VARIANT_BOOL * retval);
+	[id(50), helpstring("Deprecated method BuildOverviews, use CGdalUtils::GdalBuildOverviews instead")] HRESULT BuildOverviews([in]tkGDALResamplingMethod ResamplingMethod, [in]int NumOverviews, [in]SAFEARRAY(int) OverviewList, [out, retval]VARIANT_BOOL * retval);
 	[propget, id(51), helpstring("property ClearGDALCache")] HRESULT ClearGDALCache([out, retval] VARIANT_BOOL* retVal);
 	[propput, id(51), helpstring("property ClearGDALCache")] HRESULT ClearGDALCache([in] VARIANT_BOOL newVal);
 	[propget, id(52), helpstring("property TransparencyPercent")] HRESULT TransparencyPercent([out, retval] double* retVal);
@@ -4584,7 +4590,7 @@ interface IUtils : IDispatch{
 	[id(36), helpstring("method GDALInfo")] HRESULT GDALInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
  	[id(37), helpstring("Deprecated method GDALWarp, use CGdalUtils::GdalRasterWarp instead")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(38), helpstring("method GDALBuildVrt")] HRESULT GDALBuildVrt([in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
-	[id(39), helpstring("method GDALAddOverviews")] HRESULT GDALAddOverviews([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in] BSTR bstrLevels, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(39), helpstring("method GDALAddOverviews, use CGdalUtils::GdalBuildOverviews instead")] HRESULT GDALAddOverviews([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in] BSTR bstrLevels, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(40), helpstring("method GDALRasterize")] HRESULT GDALRasterize([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(41), helpstring("method OGRInfo")] HRESULT OGRInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] BSTR bstrLayers, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
 	[id(42), helpstring("Deprecated method OGR2OGR")] HRESULT OGR2OGR([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
@@ -6649,6 +6655,7 @@ interface IGdalUtils : IDispatch{
 	[id(7), helpstring("method ClipVectorWithVector")] HRESULT ClipVectorWithVector([in] BSTR bstrSubjectFilename, [in] BSTR bstrOverlayFilename, [in] BSTR bstrDstFilename, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(8)] HRESULT DetailedErrorMsg([out, retval] BSTR *pVal);
 	[id(9), helpstring("method GdalRasterTranslate")] HRESULT GdalRasterTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [out, retval] VARIANT_BOOL* retVal);
+	[id(10), helpstring("Builds or rebuilds overview images.")] HRESULT GdalBuildOverviews([in] const BSTR bstrSrcFilename, [in] tkGDALResamplingMethod resamplingAlgorithm, [in] SAFEARRAY(int) overviewList, [in] SAFEARRAY(int) bandList, [in] SAFEARRAY(BSTR) configOptions, [out, retval] VARIANT_BOOL* retVal);
 }
 
 [ 

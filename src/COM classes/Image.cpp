@@ -1967,6 +1967,7 @@ bool CImageClass::get_BufferIsDownsampled()
 // **************************************************************
 //		BuildOverviews
 // **************************************************************
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalBuildOverviews instead"))
 STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMethod, int numOverviews, SAFEARRAY* OverviewList, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());

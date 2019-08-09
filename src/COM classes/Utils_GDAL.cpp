@@ -6289,7 +6289,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 /************************************************************************/
 /*                                GDALAddOverviews()                    */
 /************************************************************************/
-
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalBuildOverviews instead"))
 STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 									  BSTR bstrLevels, ICallback * cBack, VARIANT_BOOL *retval)
 

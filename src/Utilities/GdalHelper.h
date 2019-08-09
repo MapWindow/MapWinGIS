@@ -6,52 +6,52 @@ int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage,
 class GdalHelper
 {
 public:
-	static GDALDataset* OpenOgrDatasetW(CStringW filenameW, bool forUpdate, bool allowShared);
+	static GDALDataset* OpenOgrDatasetW(const CStringW& filenameW, bool forUpdate, bool allowShared);
 	static GDALDataset* OpenOgrDatasetA(char* filenameUtf8, bool forUpdate);
-	static bool CanOpenAsOgrDataset(CStringW filename);
+	static bool CanOpenAsOgrDataset(const CStringW& filename);
 	static int CloseSharedOgrDataset(GDALDataset* dataset);
 
 	static GDALDataset* OpenRasterDatasetA( char* filenameUtf8 );
 	static GDALDataset* OpenRasterDatasetA( CStringA& filenameUtf8 );
-	static GDALDataset* OpenRasterDatasetW( CStringW filenameW );
+	static GDALDataset* OpenRasterDatasetW(const CStringW& filenameW );
 	static GDALDataset* OpenRasterDatasetA(char* filenameUtf8, GDALAccess accessType );
 	static GDALDataset* OpenRasterDatasetA(CStringA& filenameUtf8, GDALAccess accessType );
-	static GDALDataset* OpenRasterDatasetW(CStringW filenameW, GDALAccess accessType );
+	static GDALDataset* OpenRasterDatasetW(const CStringW& filenameW, GDALAccess accessType );
 
-	static bool CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* localCallback, bool createWorldFile);
+	static bool CopyDataset(GDALDataset* dataset, const CStringW& newName, ICallback* localCallback, bool createWorldFile);
 
-	static void GetProjection(CStringW filename, CString& projection);
+	static void GetProjection(const CStringW& filename, CString& projection);
 
 	static bool IsRgb(GDALDataset* dt);
 
-	static CPLXMLNode* ParseXMLFile(CStringW filename);
-	static int SerializeXMLTreeToFile(CPLXMLNode* psTree, CStringW filename);
+	static CPLXMLNode* ParseXMLFile(const CStringW& filename);
+	static int SerializeXMLTreeToFile(CPLXMLNode* psTree, const CStringW& filename);
 
 	static void CloseDataset(GDALDataset* dt);
-	static bool CanOpenAsGdalRaster(CStringW filename);
-	static bool SupportsOverviews(CStringW filename, ICallback* callback = NULL);
+	static bool CanOpenAsGdalRaster(const CStringW& filename);
+	static bool SupportsOverviews(const CStringW& filename, ICallback* callback = NULL);
 
-	static GdalSupport TryOpenWithGdal(CStringW filename);
+	static GdalSupport TryOpenWithGdal(const CStringW& filename);
 
 	static bool NeedsOverviews(GDALDataset* dt);
 	static bool HasOverviews(GDALDataset* dt);
-	static bool HasOverviews(CStringW filename);
-	static bool RemoveOverviews(CStringW filename);
+	static bool HasOverviews(const CStringW& filename);
+	static bool RemoveOverviews(const CStringW& filename);
 	static bool BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback);
-	static bool BuildOverviewsIfNeeded(CStringW filename, bool external = true, ICallback* callback = NULL);
-	static bool BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resamlingMethod, int* overviewList, int numOverviews, ICallback* callback);
+	static bool BuildOverviewsIfNeeded(const CStringW& filename, bool external = true, ICallback* callback = NULL);
+	static bool BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resamplingMethod, int* overviewList, int numOverviews, ICallback* callback);
 	static bool ClearOverviews(GDALDataset* dt, ICallback* cb = NULL);
 
 	static CStringA GetMetadataNameString(tkGdalDriverMetadata metadata);
 	static void DumpMetadata(GDALDriver* driver);
 	static void DumpDriverInfo();
 
-	static char** ReadFile(CStringW filename);
+	static char** ReadFile(const CStringW& filename);
 	static char** SetCompressionRasterOptions(GDALDataset* dataset, char** options);
 
 	static CString GetConfigPathString(GdalPath option);
 	static CStringW GetDefaultConfigPath(GdalPath option);
-	static void SetConfigPath(GdalPath option, CStringW newPath);
+	static void SetConfigPath(GdalPath option, const CStringW& newPath);
 	static CStringW GetConfigPath(GdalPath option);
 	static void SetDefaultConfigPaths();
 	static void SetDirectory(CStringW path);
@@ -62,7 +62,8 @@ public:
 	static tkGdalDriverMetadata GetMetadataType(CStringA tag);
 
 	static CString TiffCompressionToString(tkTiffCompression compression);
-	static tkTiffCompression ParseTiffCompression(CString option);
+	static tkTiffCompression ParseTiffCompression(const CString& option);
+	static const char* GetResamplingAlgorithm(tkGDALResamplingMethod resamplingAlgorithm);
 
 private:
 	static void RemoveCachedOgrDataset(GDALDataset* ds);

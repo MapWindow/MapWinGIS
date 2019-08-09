@@ -24,7 +24,8 @@
 // june 2017 PaulM - Initial creation of this file
 
 #pragma once
-#include "gdal_utils.h"
+#include "gdal_utils.h" // Is used, don't remove
+
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -38,10 +39,10 @@ class ATL_NO_VTABLE CGdalUtils :
 public:
 	CGdalUtils()
 	{
-		m_pUnkMarshaler = NULL;
+		m_pUnkMarshaler = nullptr;
 		_lastErrorCode = tkNO_ERROR;
-		_globalCallback = NULL;
-		_key = SysAllocString(L"");		
+		_globalCallback = nullptr;
+		_key = SysAllocString(L"");
 		gReferenceCounter.AddRef(idGdalUtils);
 		CPLSetConfigOption("GDAL_NUM_THREADS", "ALL_CPUS");
 	}
@@ -73,27 +74,31 @@ public:
 	CComPtr<IUnknown> m_pUnkMarshaler;
 
 public:
-	STDMETHOD(get_ErrorMsg)(/*[in]*/ long errorCode, /*[out, retval]*/ BSTR *pVal);
-	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
-	STDMETHOD(get_DetailedErrorMsg)(/*[out, retval]*/ BSTR *pVal);
-	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
-	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
-	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
-	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
-	STDMETHOD(GdalRasterWarp)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal);
-	STDMETHOD(GdalRasterTranslate)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal);
-	STDMETHOD(GdalVectorTranslate)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ SAFEARRAY* options, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal);
-	STDMETHOD(ClipVectorWithVector)(/*[in]*/ BSTR bstrSubjectFilename, /*[in]*/ BSTR bstrOverlayFilename, /*[in]*/ BSTR bstrDstFilename, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal);
-
-private:	
+	HRESULT __stdcall get_ErrorMsg(/*[in]*/ long errorCode, /*[out, retval]*/ BSTR *pVal) override;
+	HRESULT __stdcall get_LastErrorCode(/*[out, retval]*/ long *pVal) override;
+	HRESULT __stdcall get_DetailedErrorMsg(/*[out, retval]*/ BSTR *pVal) override;
+	HRESULT __stdcall get_Key(/*[out, retval]*/ BSTR *pVal) override;
+	HRESULT __stdcall put_Key(/*[in]*/ wchar_t* newVal) override;
+	HRESULT __stdcall get_GlobalCallback(/*[out, retval]*/ ICallback * *pVal) override;
+	HRESULT __stdcall put_GlobalCallback(/*[in]*/ ICallback * newVal) override;
+	HRESULT __stdcall GdalRasterWarp(/*[in]*/ wchar_t* sourceFilename, /*[in]*/ wchar_t* destinationFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
+	HRESULT __stdcall GdalRasterTranslate(/*[in]*/ wchar_t* sourceFilename, /*[in]*/ wchar_t* destinationFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
+	HRESULT __stdcall GdalVectorTranslate(/*[in]*/ wchar_t* sourceFilename, /*[in]*/ wchar_t* destinationFilename, /*[in]*/ SAFEARRAY* options, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
+	HRESULT __stdcall ClipVectorWithVector(/*[in]*/ wchar_t* subjectFilename, /*[in]*/ wchar_t* overlayFilename, /*[in]*/ wchar_t* destinationFilename, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
+	HRESULT __stdcall GdalBuildOverviews(wchar_t* sourceFilename, tkGDALResamplingMethod resamplingAlgorithm, SAFEARRAY* overviewList, SAFEARRAY* bandList, SAFEARRAY* configOptions, VARIANT_BOOL* retVal) override;
+	
+private:
 	long _lastErrorCode;
 	ICallback * _globalCallback;
 	BSTR _key;
 	CString _detailedError;
 
-	char** ConvertSafeArray(SAFEARRAY* safeArray) const;
-	
-public:
+	char** ConvertSafeArrayToChar(SAFEARRAY* safeArray) const;
+	static int* ConvertSafeArrayToInt(SAFEARRAY* safeArray, int &size);
+	void SetConfigOptionFromSafeArray(SAFEARRAY* configOptions, bool reset) const;
+	void HandleException(int exception);
+
+//public:
 	// properties
 
 public:

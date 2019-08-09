@@ -118,6 +118,7 @@
     <Compile Include="NewSfMethodsTests.cs" />
     <Compile Include="ShapefileEditorTests.cs" />
     <Compile Include="GeoProjectionTest.cs" />
+    <Compile Include="ShapeDrawingOptionsTests.cs" />
     <Compile Include="UtilTests.cs" />
   </ItemGroup>
   <ItemGroup>

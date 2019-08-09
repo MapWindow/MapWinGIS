@@ -541,17 +541,22 @@ namespace MapWinGIS
     }
 
     /// <summary>
-    /// The resampling mode which is used for building GDAL overlays.
+    /// The resampling mode which is used for building GDAL overviews, controlling the downsampling method applied.
     /// </summary>
-    /// \see Image.BuildOverlays.
+    /// \see GdalUtils.GdalBuildOverviews
     /// \new48 Added in version 4.8
     public enum tkGDALResamplingMethod
     {
         grmNone = 0,
-        grmNearest = 1,
-        grmGauss = 2,
-        grmBicubic = 3,
-        grmAverage = 4,
+        grmNearest,
+        grmGauss,
+        grmCubic,
+        grmCubicSpline,
+        grmAverage,
+        grmAverageMagphase,
+        grmBilinear,
+        grmLanczos,
+        grmMode
     }
 
     /// <summary>
