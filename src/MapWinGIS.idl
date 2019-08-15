@@ -3606,8 +3606,8 @@ enum tkScalebarUnits
 		[id(5)] HRESULT UndoPoint([out, retval] VARIANT_BOOL* retVal);
 		[propget, id(6)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 		[propget, id(7)] HRESULT LastErrorCode([out, retval] long *pVal);
-		[propget, id(8)] HRESULT GlobalCallback([out, retval]ICallback** retVal);
-		[propput, id(8)] HRESULT GlobalCallback([in]ICallback* newVal);
+		[propget, id(8)] HRESULT GlobalCallback([out, retval] ICallback** retVal);
+		[propput, id(8)] HRESULT GlobalCallback([in] ICallback* newVal);
 		[propget, id(9)] HRESULT Key([out, retval]BSTR* retVal);
 		[propput, id(9)] HRESULT Key([in]BSTR newVal);
 		[id(10)] HRESULT Clear();
@@ -3692,7 +3692,7 @@ enum tkScalebarUnits
 ]
 
 interface IGrid : IDispatch{
-		[propget, id(1), helpstring("property Header")] HRESULT Header([out, retval] IGridHeader * *pVal);
+		[propget, id(1), helpstring("property Header")] HRESULT Header([out, retval] IGridHeader**pVal);
 		[propget, id(2), helpstring("property Value")] HRESULT Value([in] long Column, [in] long Row, [out, retval] VARIANT *pVal);
 		[propput, id(2), helpstring("property Value")] HRESULT Value([in] long Column, [in] long Row, [in] VARIANT newVal);
 		[propget, id(3), helpstring("property InRam")] HRESULT InRam([out, retval] VARIANT_BOOL *pVal);
@@ -3702,26 +3702,26 @@ interface IGrid : IDispatch{
 		[propget, id(7), helpstring("property Filename")] HRESULT Filename([out, retval] BSTR *pVal);
 		[propget, id(8), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 		[propget, id(9), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-		[propget, id(10), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-		[propput, id(10), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+		[propget, id(10), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+		[propput, id(10), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 		[propget, id(11), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 		[propput, id(11), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-		[id(12), helpstring("method Open")] HRESULT Open([in] BSTR Filename, [in, optional, defaultvalue(UnknownDataType)] GridDataType DataType, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL InRam, [in, optional, defaultvalue(UseExtension)] GridFileType FileType, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-		[id(13), helpstring("method CreateNew")] HRESULT CreateNew([in] BSTR Filename, [in] IGridHeader * Header, [in] GridDataType DataType, [in] VARIANT InitialValue, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL InRam, [in, optional, defaultvalue(UseExtension)] GridFileType FileType, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-		[id(14), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL * retval);
-		[id(15), helpstring("method Save")] HRESULT Save([in, optional] BSTR Filename, [in, optional, defaultvalue(UseExtension)] GridFileType GridFileType, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-		[id(16), helpstring("method Clear")] HRESULT Clear([in] VARIANT ClearValue, [out, retval] VARIANT_BOOL * retval);
-		[id(17), helpstring("method ProjToCell")] HRESULT ProjToCell([in] double x, [in] double y, [out] long * Column, [out] long * Row);
-		[id(18), helpstring("method CellToProj")] HRESULT CellToProj([in] long Column, [in] long Row, [out] double * x, [out] double * y);
+		[id(12), helpstring("method Open")] HRESULT Open([in] BSTR Filename, [in, defaultvalue(UnknownDataType)] GridDataType DataType, [in, defaultvalue(-1)] VARIANT_BOOL InRam, [in, defaultvalue(UseExtension)] GridFileType FileType, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+		[id(13), helpstring("method CreateNew")] HRESULT CreateNew([in] BSTR Filename, [in] IGridHeader * Header, [in] GridDataType DataType, [in] VARIANT InitialValue, [in, defaultvalue(-1)] VARIANT_BOOL InRam, [in, defaultvalue(UseExtension)] GridFileType FileType, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+		[id(14), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL* retval);
+		[id(15), helpstring("method Save")] HRESULT Save([in, defaultvalue(NULL)] BSTR Filename, [in, defaultvalue(UseExtension)] GridFileType GridFileType, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+		[id(16), helpstring("method Clear")] HRESULT Clear([in] VARIANT ClearValue, [out, retval] VARIANT_BOOL* retval);
+		[id(17), helpstring("method ProjToCell")] HRESULT ProjToCell([in] double x, [in] double y, [out] long* Column, [out] long* Row);
+		[id(18), helpstring("method CellToProj")] HRESULT CellToProj([in] long Column, [in] long Row, [out] double* x, [out] double* y);
 		[propget, id(19), helpstring("property CdlgFilter")] HRESULT CdlgFilter([out, retval] BSTR *pVal);
-		[id(20), helpstring("method AssignNewProjection")] HRESULT AssignNewProjection([in] BSTR projection, [out, retval] VARIANT_BOOL * retval);
-		[propget, id(21), helpstring("property RasterColorTableColoringScheme")] HRESULT RasterColorTableColoringScheme([out, retval] IGridColorScheme * *pVal);
-		[id(22), helpstring("property GetRow")] HRESULT GetRow([in] long Row, [in, out] float * Vals, [out, retval] VARIANT_BOOL * retval);
-		[id(23), helpstring("property PutRow")] HRESULT PutRow([in] long Row, [in, out] float * Vals, [out, retval] VARIANT_BOOL * retval);
+		[id(20), helpstring("method AssignNewProjection")] HRESULT AssignNewProjection([in] BSTR projection, [out, retval] VARIANT_BOOL* retval);
+		[propget, id(21), helpstring("property RasterColorTableColoringScheme")] HRESULT RasterColorTableColoringScheme([out, retval] IGridColorScheme**pVal);
+		[id(22), helpstring("property GetRow")] HRESULT GetRow([in] long Row, [in, out] float* Vals, [out, retval] VARIANT_BOOL* retval);
+		[id(23), helpstring("property PutRow")] HRESULT PutRow([in] long Row, [in, out] float* Vals, [out, retval] VARIANT_BOOL* retval);
 		
-		[id(24), helpstring("property GetFloatWindow")] HRESULT GetFloatWindow([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] float * Vals, [out, retval] VARIANT_BOOL * retval);
-		[id(25), helpstring("property PutFloatWindow")] HRESULT PutFloatWindow([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] float * Vals, [out, retval] VARIANT_BOOL * retval);
-		[id(26), helpstring("method SetInvalidValuesToNodata")] HRESULT SetInvalidValuesToNodata([in] double MinThresholdValue, [in] double MaxThresholdValue, [out, retval] VARIANT_BOOL * retval);
+		[id(24), helpstring("property GetFloatWindow")] HRESULT GetFloatWindow([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] float* Vals, [out, retval] VARIANT_BOOL* retval);
+		[id(25), helpstring("property PutFloatWindow")] HRESULT PutFloatWindow([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] float* Vals, [out, retval] VARIANT_BOOL* retval);
+		[id(26), helpstring("method SetInvalidValuesToNodata")] HRESULT SetInvalidValuesToNodata([in] double MinThresholdValue, [in] double MaxThresholdValue, [out, retval] VARIANT_BOOL* retval);
 		[id(27), helpstring("method Resource")] HRESULT Resource([in] BSTR newSrcPath, [out, retval] VARIANT_BOOL *pVal);
 
 		[propget, id(28), helpstring("property NumBands")] HRESULT NumBands([out, retval]int *retVal);
@@ -3730,7 +3730,7 @@ interface IGrid : IDispatch{
 		[propget, id(31), helpstring("property SourceType")] HRESULT SourceType([out, retval]tkGridSourceType *retVal);
 		[propget, id(32), helpstring("property Extents")] HRESULT Extents([out, retval]IExtents** retVal);
 		[id(33), helpstring("method OpenAsImage")] HRESULT OpenAsImage([in]IGridColorScheme* scheme, 
-							[in, defaultvalue(gpmAuto)] tkGridProxyMode proxyMode, [in, optional, defaultvalue(NULL)]ICallback* cBack, [out, optional,retval]IImage** retVal);
+							[in, defaultvalue(gpmAuto)] tkGridProxyMode proxyMode, [in, defaultvalue(NULL)]ICallback* cBack, [out, retval]IImage** retVal);
 
 		[id(34), helpstring("method RetrieveColorScheme")] HRESULT RetrieveColorScheme([in]tkGridSchemeRetrieval method, [out, retval]IGridColorScheme** retVal);
 		[id(35), helpstring("method GenerateColorScheme")] HRESULT GenerateColorScheme([in]tkGridSchemeGeneration method, [in]PredefinedColorScheme colors, [out,retval]IGridColorScheme** retVal);
@@ -3745,15 +3745,15 @@ interface IGrid : IDispatch{
 		[propget, id(40), helpstring("property HasValidImageProxy")] HRESULT HasValidImageProxy([out, retval] VARIANT_BOOL *retVal);
 
 		[id(41), helpstring("method RetrieveOrGenerateColorScheme")] HRESULT RetrieveOrGenerateColorScheme(
-							[in, optional, defaultvalue(gsrAuto)]tkGridSchemeRetrieval retrievalMethod, 
-							[in, optional, defaultvalue(gsgGradient)]tkGridSchemeGeneration generateMethod, 
-							[in, optional, defaultvalue(FallLeaves)]PredefinedColorScheme colors, 				
+							[in, defaultvalue(gsrAuto)]tkGridSchemeRetrieval retrievalMethod, 
+							[in, defaultvalue(gsgGradient)]tkGridSchemeGeneration generateMethod, 
+							[in, defaultvalue(FallLeaves)]PredefinedColorScheme colors, 				
 							[out, retval]IGridColorScheme** retVal);
 
-		[id(42), helpstring("property GetFloatWindow2")] HRESULT GetFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
-		[id(43), helpstring("property PutFloatWindow2")] HRESULT PutFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
-		[id(44), helpstring("property PutRow")] HRESULT PutRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
-		[id(45), helpstring("property GetRow")] HRESULT GetRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
+		[id(42), helpstring("property GetFloatWindow2")] HRESULT GetFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double* Vals, [out, retval] VARIANT_BOOL* retval);
+		[id(43), helpstring("property PutFloatWindow2")] HRESULT PutFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double* Vals, [out, retval] VARIANT_BOOL* retval);
+		[id(44), helpstring("property PutRow")] HRESULT PutRow2([in] long Row, [in, out] double* Vals, [out, retval] VARIANT_BOOL* retval);
+		[id(45), helpstring("property GetRow")] HRESULT GetRow2([in] long Row, [in, out] double* Vals, [out, retval] VARIANT_BOOL* retval);
 		[propget, id(46)] HRESULT Band([in]long bandIndex, [out, retval]IGdalRasterBand** retVal);
 		[propget, id(47)] HRESULT ActiveBand([out, retval] IGdalRasterBand** pVal);
 };
@@ -3788,12 +3788,12 @@ interface IGridHeader : IDispatch{
 	[propput, id(9), helpstring("property Notes")] HRESULT Notes([in] BSTR newVal);
 	[propget, id(10), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(11), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(12), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(12), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(12), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(12), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(13), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(13), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-	//[propput, id(14), helpstring("property Owner")] HRESULT Owner([in] int * t, [in] int * d, [in] int * s, [in] int * l, [in] int * f);
-	[id(15), helpstring("method CopyFrom")] HRESULT CopyFrom([in] IGridHeader * pVal);
+	//[propput, id(14), helpstring("property Owner")] HRESULT Owner([in] int* t, [in] int* d, [in] int* s, [in] int* l, [in] int* f);
+	[id(15), helpstring("method CopyFrom")] HRESULT CopyFrom([in] IGridHeader* pVal);
 	[propget, id(16), helpstring("property ColorTable")] HRESULT ColorTable([out, retval] BSTR *pVal);
 	[propput, id(16), helpstring("property ColorTable")] HRESULT ColorTable([in] BSTR newVal);
 	[propget, id(17), helpstring("property GeoProjection")] HRESULT GeoProjection([out, retval] IGeoProjection** pVal);
@@ -3812,11 +3812,11 @@ interface IGridHeader : IDispatch{
 interface IESRIGridManager : IDispatch{
 	[propget, id(1), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(2), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
-	[id(4), helpstring("method CanUseESRIGrids")] HRESULT CanUseESRIGrids([out, retval] VARIANT_BOOL * retval);
-	[id(5), helpstring("method DeleteESRIGrids")] HRESULT DeleteESRIGrids([in] BSTR Filename, [out, retval] VARIANT_BOOL * retval);
-	[id(6), helpstring("method IsESRIGrid")] HRESULT IsESRIGrid([in] BSTR Filename, [out, retval] VARIANT_BOOL * retval);
+	[propget, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
+	[id(4), helpstring("method CanUseESRIGrids")] HRESULT CanUseESRIGrids([out, retval] VARIANT_BOOL* retval);
+	[id(5), helpstring("method DeleteESRIGrids")] HRESULT DeleteESRIGrids([in] BSTR Filename, [out, retval] VARIANT_BOOL* retval);
+	[id(6), helpstring("method IsESRIGrid")] HRESULT IsESRIGrid([in] BSTR Filename, [out, retval] VARIANT_BOOL* retval);
 };
 
 
@@ -3830,12 +3830,12 @@ interface IESRIGridManager : IDispatch{
 	pointer_default(unique)
 ]
 interface IImage : IDispatch{
-	[id(1), helpstring("method Open")] HRESULT Open([in]BSTR ImageFileName, [in, optional, defaultvalue(USE_FILE_EXTENSION)]ImageType FileType, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL InRam, [in, optional]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(2), helpstring("method Save")] HRESULT Save([in]BSTR ImageFileName, [in, optional, defaultvalue(FALSE)]VARIANT_BOOL WriteWorldFile,[in, optional, defaultvalue(USE_FILE_EXTENSION)]ImageType FileType, [in, optional]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(3), helpstring("method CreateNew")] HRESULT CreateNew([in]long NewWidth, [in]long NewHeight, [out, retval]VARIANT_BOOL * retval);
-	[id(4), helpstring("method Close")] HRESULT Close([out, retval]VARIANT_BOOL * retval);
-	[id(5), helpstring("method Clear")] HRESULT Clear([in, optional, defaultvalue(0xffffff)] OLE_COLOR CanvasColor, [in, optional]ICallback * CBack, [out, retval]VARIANT_BOOL * retval);
-	[id(6), helpstring("method GetRow")] HRESULT GetRow([in] long Row, [in, out] long * Vals, [out, retval]VARIANT_BOOL * retval);
+	[id(1), helpstring("method Open")] HRESULT Open([in]BSTR ImageFileName, [in, defaultvalue(USE_FILE_EXTENSION)]ImageType FileType, [in, defaultvalue(0)] VARIANT_BOOL InRam, [in, defaultvalue(NULL)]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[id(2), helpstring("method Save")] HRESULT Save([in]BSTR ImageFileName, [in, defaultvalue(0)]VARIANT_BOOL WriteWorldFile,[in, defaultvalue(USE_FILE_EXTENSION)]ImageType FileType, [in, defaultvalue(NULL)]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[id(3), helpstring("method CreateNew")] HRESULT CreateNew([in]long NewWidth, [in]long NewHeight, [out, retval]VARIANT_BOOL* retval);
+	[id(4), helpstring("method Close")] HRESULT Close([out, retval]VARIANT_BOOL* retval);
+	[id(5), helpstring("method Clear")] HRESULT Clear([in, defaultvalue(0xffffff)] OLE_COLOR CanvasColor, [in, defaultvalue(NULL)] ICallback* CBack, [out, retval]VARIANT_BOOL* retval);
+	[id(6), helpstring("method GetRow")] HRESULT GetRow([in] long Row, [in, out] long* Vals, [out, retval]VARIANT_BOOL* retval);
 	[propget, id(7), helpstring("property Width")] HRESULT Width([out, retval] long *pVal);
 	[propget, id(8), helpstring("property Height")] HRESULT Height([out, retval] long *pVal);
 	[propget, id(9), helpstring("property YllCenter")] HRESULT YllCenter([out, retval] double *pVal);
@@ -3854,26 +3854,26 @@ interface IImage : IDispatch{
 	[propget, id(16), helpstring("property UseTransparencyColor")] HRESULT UseTransparencyColor([out, retval] VARIANT_BOOL *pVal);
 	[propput, id(16), helpstring("property UseTransparencyColor")] HRESULT UseTransparencyColor([in] VARIANT_BOOL newVal);
 	[propget, id(17), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
-	[propget, id(18), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in]long ErrorCode, [out, retval] BSTR * pVal);
+	[propget, id(18), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in]long ErrorCode, [out, retval] BSTR* pVal);
 	[propget, id(19), helpstring("property CdlgFilter")] HRESULT CdlgFilter([out, retval] BSTR *pVal);
-	[propget, id(20), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback* *pVal);
+	[propget, id(20), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
 	[propput, id(20), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(21), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(21), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[propget, id(22), helpstring("property FileHandle"), hidden] HRESULT FileHandle([out, retval] long *pVal);
 	[propget, id(23), helpstring("property ImageType")] HRESULT ImageType([out, retval] ImageType *pVal);
-	[propget, id(24), helpstring("property Picture")] HRESULT Picture([out, retval] IPictureDisp * *pVal);
-	[propputref, id(24), helpstring("property Picture")] HRESULT Picture([in] IPictureDisp * newVal);
+	[propget, id(24), helpstring("property Picture")] HRESULT Picture([out, retval] IPictureDisp**pVal);
+	[propputref, id(24), helpstring("property Picture")] HRESULT Picture([in] IPictureDisp* newVal);
 	[propget, id(25), helpstring("property Filename")] HRESULT Filename([out, retval] BSTR *pVal);
-	[id(26), helpstring("method GetImageBitsDC")] HRESULT GetImageBitsDC([in] long hDC, [out, retval] VARIANT_BOOL * retval);
-	[id(27), helpstring("method SetImageBitsDC")] HRESULT SetImageBitsDC([in] long hDC, [out, retval] VARIANT_BOOL * retval);
+	[id(26), helpstring("method GetImageBitsDC")] HRESULT GetImageBitsDC([in] long hDC, [out, retval] VARIANT_BOOL* retval);
+	[id(27), helpstring("method SetImageBitsDC")] HRESULT SetImageBitsDC([in] long hDC, [out, retval] VARIANT_BOOL* retval);
 	[id(28), helpstring("method SetVisibleExtents"), hidden] HRESULT SetVisibleExtents([in] double newMinX, [in] double newMinY,[in] double newMaxX,[in] double newMaxY,[in] long newPixelsInView,[in] float transPercent);
-	[id(29), helpstring("method SetProjection")] HRESULT SetProjection([in] BSTR Proj4, [out, retval] VARIANT_BOOL * retval);
-	[id(30), helpstring("method GetProjection")] HRESULT GetProjection([out, retval] BSTR * Proj4);
+	[id(29), helpstring("method SetProjection")] HRESULT SetProjection([in] BSTR Proj4, [out, retval] VARIANT_BOOL* retval);
+	[id(30), helpstring("method GetProjection")] HRESULT GetProjection([out, retval] BSTR* Proj4);
 	[propget, id(31), helpstring("method OriginalWidth")] HRESULT OriginalWidth([out, retval]LONG* OriginalWidth);
 	[propget, id(32), helpstring("method OriginalHeight")] HRESULT OriginalHeight([out, retval]LONG* OriginalHeight);
 	[id(33), helpstring("method Resource")] HRESULT Resource([in] BSTR newImgPath, [out, retval] VARIANT_BOOL *pVal);
-	[id(34), helpstring("method _pushSchemetkRaster")] HRESULT _pushSchemetkRaster([in] IGridColorScheme * cScheme, [out, retval] VARIANT_BOOL * retval);
+	[id(34), helpstring("method _pushSchemetkRaster")] HRESULT _pushSchemetkRaster([in] IGridColorScheme* cScheme, [out, retval] VARIANT_BOOL* retval);
 
 #ifdef OLD_API	
 	[id(35), helpstring("method GetOriginalXllCenter"), hidden] HRESULT GetOriginalXllCenter([out, retval] double *pVal);
@@ -3899,7 +3899,7 @@ interface IImage : IDispatch{
 	[propput, id(48), helpstring("property ImageColorScheme")] HRESULT ImageColorScheme([in] PredefinedColorScheme newValue);
 	[propget, id(49), helpstring("property DrawingMethod")] HRESULT DrawingMethod([out, retval] int* retVal);
 	[propput, id(49), helpstring("property DrawingMethod")] HRESULT DrawingMethod([in] int newVal);
-	[id(50), helpstring("Deprecated method BuildOverviews, use CGdalUtils::GdalBuildOverviews instead")] HRESULT BuildOverviews([in]tkGDALResamplingMethod ResamplingMethod, [in]int NumOverviews, [in]SAFEARRAY(int) OverviewList, [out, retval]VARIANT_BOOL * retval);
+	[id(50), helpstring("Deprecated method BuildOverviews, use CGdalUtils::GdalBuildOverviews instead")] HRESULT BuildOverviews([in]tkGDALResamplingMethod ResamplingMethod, [in]int NumOverviews, [in]SAFEARRAY(int) OverviewList, [out, retval]VARIANT_BOOL* retval);
 	[propget, id(51), helpstring("property ClearGDALCache")] HRESULT ClearGDALCache([out, retval] VARIANT_BOOL* retVal);
 	[propput, id(51), helpstring("property ClearGDALCache")] HRESULT ClearGDALCache([in] VARIANT_BOOL newVal);
 	[propget, id(52), helpstring("property TransparencyPercent")] HRESULT TransparencyPercent([out, retval] double* retVal);
@@ -3930,7 +3930,7 @@ interface IImage : IDispatch{
 	[id(67), helpstring("method GetUniqueColors")] HRESULT GetUniqueColors([in]double MaxBufferSizeMB, [out] VARIANT* Colors, [out]VARIANT* Frequencies, [out, retval]LONG* Count );
 	[id(68), helpstring("method SetNoDataValue")] HRESULT SetNoDataValue(double Value, VARIANT_BOOL* Result);
 	[propget, id(69), helpstring("property NumOverviews")] HRESULT NumOverviews([out, retval] int* retval);
-	[id(70), helpstring("method LoadBuffer")] HRESULT LoadBuffer([in, optional, defaultvalue(50.0)]double maxBufferSize, [out, retval]VARIANT_BOOL* retVal);
+	[id(70), helpstring("method LoadBuffer")] HRESULT LoadBuffer([in, defaultvalue(50.0)]double maxBufferSize, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(71), helpstring("property SourceType")] HRESULT SourceType([out, retval] tkImageSourceType* pVal);
 	[id(72), helpstring("method Serialize")] HRESULT Serialize([in]VARIANT_BOOL SerializePixels,[out, retval]BSTR* retVal);
 	[id(73), helpstring("method Deserialize")] HRESULT Deserialize([in]BSTR newVal);
@@ -4013,69 +4013,69 @@ interface IImage : IDispatch{
 interface IShapefile : IDispatch{
 	[propget, id(1), helpstring("property NumShapes")] HRESULT NumShapes([out, retval] long *pVal);
 	[propget, id(2), helpstring("property NumFields")] HRESULT NumFields([out, retval] long *pVal);
-	[propget, id(3), helpstring("property Extents")] HRESULT Extents([out, retval] IExtents * *pVal);
+	[propget, id(3), helpstring("property Extents")] HRESULT Extents([out, retval] IExtents**pVal);
 	[propget, id(4), helpstring("property ShapefileType")] HRESULT ShapefileType([out, retval] ShpfileType *pVal);
-	[propget, id(5), helpstring("property Shape")] HRESULT Shape([in]long ShapeIndex, [out, retval] IShape * *pVal);
+	[propget, id(5), helpstring("property Shape")] HRESULT Shape([in]long ShapeIndex, [out, retval] IShape**pVal);
 	[propget, id(6), helpstring("property EditingShapes")] HRESULT EditingShapes([out, retval] VARIANT_BOOL *pVal);
 	[propget, id(7), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(8), helpstring("property CdlgFilter")] HRESULT CdlgFilter([out, retval] BSTR *pVal);
-	[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(10), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(10), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-	[id(11), helpstring("method Open")] HRESULT Open([in] BSTR ShapefileName, [in, optional]ICallback * cBack, [out, retval]VARIANT_BOOL * retval);
-	[id(12), helpstring("method CreateNew")] HRESULT CreateNew([in] BSTR ShapefileName, [in] ShpfileType ShapefileType, [out, retval] VARIANT_BOOL * retval);
-	[id(13), helpstring("method SaveAs")] HRESULT SaveAs([in] BSTR ShapefileName, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(14), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL * retval);
-	[id(15), helpstring("method EditClear")] HRESULT EditClear([out, retval] VARIANT_BOOL * retval);
-	[id(16), helpstring("method EditInsertShape")] HRESULT EditInsertShape([in]IShape * Shape, [in, out] long * ShapeIndex, [out, retval] VARIANT_BOOL * retval);
-	[id(17), helpstring("method EditDeleteShape")] HRESULT EditDeleteShape([in]long ShapeIndex, [out, retval] VARIANT_BOOL * retval);
-	[id(18), helpstring("method SelectShapes")] HRESULT SelectShapes([in] IExtents * BoundBox, [in, optional, defaultvalue(0.0)]double Tolerance, [in, optional, defaultvalue(INTERSECTION)] SelectMode SelectMode, [in, out, optional] VARIANT * Result, [out, retval] VARIANT_BOOL * retval);
-	[id(19), helpstring("method StartEditingShapes")] HRESULT StartEditingShapes([in, optional, defaultvalue(TRUE)] VARIANT_BOOL StartEditTable, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(20), helpstring("method StopEditingShapes")] HRESULT StopEditingShapes([in, optional, defaultvalue(TRUE)] VARIANT_BOOL ApplyChanges, [in, optional, defaultvalue(TRUE)]VARIANT_BOOL StopEditTable, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(22), helpstring("method EditInsertField")] HRESULT EditInsertField([in] IField * NewField, [in, out]long * FieldIndex, [in, optional]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(23), helpstring("method EditDeleteField")] HRESULT EditDeleteField([in] long FieldIndex, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(24), helpstring("method EditCellValue")] HRESULT EditCellValue([in] long FieldIndex, [in] long ShapeIndex, [in] VARIANT NewVal, [out, retval] VARIANT_BOOL * retval);
-	[id(25), helpstring("method StartEditingTable")] HRESULT StartEditingTable([in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(26), helpstring("method StopEditingTable")] HRESULT StopEditingTable([in, optional, defaultvalue(TRUE)] VARIANT_BOOL ApplyChanges, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[propget, id(27), helpstring("property Field")] HRESULT Field([in] long FieldIndex, [out, retval] IField * *pVal);
+	[id(11), helpstring("method Open")] HRESULT Open([in] BSTR ShapefileName, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval]VARIANT_BOOL* retval);
+	[id(12), helpstring("method CreateNew")] HRESULT CreateNew([in] BSTR ShapefileName, [in] ShpfileType ShapefileType, [out, retval] VARIANT_BOOL* retval);
+	[id(13), helpstring("method SaveAs")] HRESULT SaveAs([in] BSTR ShapefileName, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(14), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL* retval);
+	[id(15), helpstring("method EditClear")] HRESULT EditClear([out, retval] VARIANT_BOOL* retval);
+	[id(16), helpstring("method EditInsertShape")] HRESULT EditInsertShape([in]IShape* Shape, [in, out] long* ShapeIndex, [out, retval] VARIANT_BOOL* retval);
+	[id(17), helpstring("method EditDeleteShape")] HRESULT EditDeleteShape([in]long ShapeIndex, [out, retval] VARIANT_BOOL* retval);
+	[id(18), helpstring("method SelectShapes")] HRESULT SelectShapes([in] IExtents* BoundBox, [in, defaultvalue(0.0)]double Tolerance, [in, defaultvalue(INTERSECTION)] SelectMode SelectMode, [in, out, optional] VARIANT* Result, [out, retval] VARIANT_BOOL* retval);
+	[id(19), helpstring("method StartEditingShapes")] HRESULT StartEditingShapes([in, defaultvalue(-1)] VARIANT_BOOL StartEditTable, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[id(20), helpstring("method StopEditingShapes")] HRESULT StopEditingShapes([in, defaultvalue(-1)] VARIANT_BOOL ApplyChanges, [in, defaultvalue(-1)]VARIANT_BOOL StopEditTable, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[id(22), helpstring("method EditInsertField")] HRESULT EditInsertField([in] IField* NewField, [in, out]long* FieldIndex, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(23), helpstring("method EditDeleteField")] HRESULT EditDeleteField([in] long FieldIndex, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(24), helpstring("method EditCellValue")] HRESULT EditCellValue([in] long FieldIndex, [in] long ShapeIndex, [in] VARIANT NewVal, [out, retval] VARIANT_BOOL* retval);
+	[id(25), helpstring("method StartEditingTable")] HRESULT StartEditingTable([in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(26), helpstring("method StopEditingTable")] HRESULT StopEditingTable([in, defaultvalue(-1)] VARIANT_BOOL ApplyChanges, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[propget, id(27), helpstring("property Field")] HRESULT Field([in] long FieldIndex, [out, retval] IField**pVal);
 	[propget, id(28), helpstring("property CellValue")] HRESULT CellValue([in] long FieldIndex, [in] long ShapeIndex, [out, retval] VARIANT *pVal);
 	[propget, id(29), helpstring("property EditingTable")] HRESULT EditingTable([out, retval] VARIANT_BOOL *pVal);
 	[propget, id(21), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(30), helpstring("property FileHandle"), hidden] HRESULT FileHandle([out, retval] long * pVal);
+	[propget, id(30), helpstring("property FileHandle"), hidden] HRESULT FileHandle([out, retval] long* pVal);
 	[propget, id(31), helpstring("property Filename")] HRESULT Filename([out, retval] BSTR *pVal);
 	[id(32), helpstring("method QuickPoint")] HRESULT QuickPoint([in] long ShapeIndex, [in] long PointIndex, [out, retval] IPoint ** retval);
 	[id(33), helpstring("method QuickExtents")] HRESULT QuickExtents([in] long ShapeIndex, [out, retval] IExtents ** retval);
-	[id(34), helpstring("method QuickPoints")] HRESULT QuickPoints([in] long ShapeIndex, [in, out] long * numPoints, [out, retval] SAFEARRAY(double) * retval);
+	[id(34), helpstring("method QuickPoints")] HRESULT QuickPoints([in] long ShapeIndex, [in, out] long* numPoints, [out, retval] SAFEARRAY(double)* retval);
 	[id(35), helpstring("method PointInShape")] HRESULT PointInShape([in] LONG ShapeIndex, [in] DOUBLE x, [in] DOUBLE y, [out, retval] VARIANT_BOOL* retval);
 	[id(36), helpstring("method PointInShapefile")] HRESULT PointInShapefile([in] DOUBLE x, [in] DOUBLE y, [out, retval] LONG* ShapeIndex);
 	[id(37), helpstring("method BeginPointInShapefile")] HRESULT BeginPointInShapefile([out, retval] VARIANT_BOOL* retval);
 	[id(38), helpstring("method EndPointInShapefile")] HRESULT EndPointInShapefile(void);
 	[propget, id(39), helpstring("property Projection")] HRESULT Projection([out, retval] BSTR *pVal);
 	[propput, id(39), helpstring("property Projection")] HRESULT Projection([in] BSTR proj4String);
-	[propget, id(40), helpstring("property FieldByName")] HRESULT FieldByName([in] BSTR FieldName, [out, retval] IField * *pVal);
+	[propget, id(40), helpstring("property FieldByName")] HRESULT FieldByName([in] BSTR FieldName, [out, retval] IField**pVal);
 	[propget, id(41), helpstring("property NumPoints")] HRESULT NumPoints([in] long Shapeindex, [out, retval] long *pVal);
-	[id(42), helpstring("method CreateNewWithShapeID")] HRESULT CreateNewWithShapeID([in] BSTR ShapefileName, [in] ShpfileType ShapefileType, [out, retval] VARIANT_BOOL * retval);
+	[id(42), helpstring("method CreateNewWithShapeID")] HRESULT CreateNewWithShapeID([in] BSTR ShapefileName, [in] ShpfileType ShapefileType, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(43), helpstring("property UseSpatialIndex")] HRESULT UseSpatialIndex([out, retval]  VARIANT_BOOL *pVal);
 	[propput, id(43), helpstring("property UseSpatialIndex")] HRESULT UseSpatialIndex([in] VARIANT_BOOL pVal);
-	[id(44), helpstring("method CreateSpatialIndex")] HRESULT CreateSpatialIndex([in] BSTR ShapefileName, [out, retval] VARIANT_BOOL * retval);
+	[id(44), helpstring("method CreateSpatialIndex")] HRESULT CreateSpatialIndex([in] BSTR ShapefileName, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(45), helpstring("property HasSpatialIndex")] HRESULT HasSpatialIndex([out, retval]  VARIANT_BOOL *pVal);
 	[propput, id(45), helpstring("property HasSpatialIndex")] HRESULT HasSpatialIndex([in] VARIANT_BOOL);
 	[id(46), helpstring("method Resource")] HRESULT Resource([in] BSTR newShpPath, [out, retval] VARIANT_BOOL *pVal);
 	[propget, id(47), helpstring("property CacheExtents")] HRESULT CacheExtents([out, retval] VARIANT_BOOL *pVal);
 	[propput, id(47), helpstring("property CacheExtents")] HRESULT CacheExtents([in] VARIANT_BOOL newVal);
 	[id(48), helpstring("method RefreshExtents")] HRESULT RefreshExtents([out, retval] VARIANT_BOOL *pVal);
-	[id(49), helpstring("method RefreshShapeExtents")] HRESULT RefreshShapeExtents([in] LONG ShapeId, [out, retval] VARIANT_BOOL * pVal);
+	[id(49), helpstring("method RefreshShapeExtents")] HRESULT RefreshShapeExtents([in] LONG ShapeId, [out, retval] VARIANT_BOOL* pVal);
 	//[id(50),helpstring("method QuickQueryInEditMode")] HRESULT QuickQueryInEditMode([in] IExtents *BoundBox, [in, out] int** Result,[in, out] int* ResultCount);
 	[propget, id(51), helpstring("property UseQTree In Edit Mode (default true)")] HRESULT UseQTree([out, retval] VARIANT_BOOL *pVal);
-	[propput, id(51), helpstring("property UseQTree In Edit Mode (default true)")] HRESULT UseQTree([in, defaultvalue(TRUE)] VARIANT_BOOL pVal);
-	[id(52), helpstring("method Save")] HRESULT Save([in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(53), helpstring("method IsSpatialIndexValid")] HRESULT IsSpatialIndexValid([out, retval] VARIANT_BOOL * pVal);
+	[propput, id(51), helpstring("property UseQTree In Edit Mode (default true)")] HRESULT UseQTree([in, defaultvalue(-1)] VARIANT_BOOL pVal);
+	[id(52), helpstring("method Save")] HRESULT Save([in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(53), helpstring("method IsSpatialIndexValid")] HRESULT IsSpatialIndexValid([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(54), helpstring("property SpatialIndexMaxAreaPercent")] HRESULT SpatialIndexMaxAreaPercent([in] DOUBLE newVal);
 	[propget, id(54), helpstring("property SpatialIndexMaxAreaPercent")] HRESULT SpatialIndexMaxAreaPercent([out, retval] DOUBLE* pVal);
 	[propget, id(55), helpstring("property CanUseSpatialIndex")] HRESULT CanUseSpatialIndex([in] IExtents* pArea, [out, retval] VARIANT_BOOL* pVal);
-	[id(56), helpstring("method GetIntersection")] HRESULT GetIntersection([in]VARIANT_BOOL SelectedOnlyOfThis, [in]IShapefile* sf, [in]VARIANT_BOOL SelectedOnly, [in] ShpfileType fileType, [in, optional, defaultvalue(NULL)] ICallback * cBack, [out, retval] IShapefile** retval);
-	[id(57), helpstring("method SelectByShapefile")] HRESULT SelectByShapefile([in]IShapefile* sf, [in]tkSpatialRelation Relation, [in]VARIANT_BOOL SelectedOnly, [in, out] VARIANT *Result, [in, optional, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(56), helpstring("method GetIntersection")] HRESULT GetIntersection([in]VARIANT_BOOL SelectedOnlyOfThis, [in]IShapefile* sf, [in]VARIANT_BOOL SelectedOnly, [in] ShpfileType fileType, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] IShapefile** retval);
+	[id(57), helpstring("method SelectByShapefile")] HRESULT SelectByShapefile([in]IShapefile* sf, [in]tkSpatialRelation Relation, [in]VARIANT_BOOL SelectedOnly, [in, out] VARIANT *Result, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
 	[propget, id(58), helpstring("property NumSelected")] HRESULT NumSelected([out, retval] long* pVal);
 	[propget, id(59), helpstring("property ShapeSelected")] HRESULT ShapeSelected([in]long ShapeIndex, [out, retval] VARIANT_BOOL* pVal);
 	[propput, id(59), helpstring("property ShapeSelected")] HRESULT ShapeSelected([in]long ShapeIndex, [in] VARIANT_BOOL newVal);
@@ -4087,7 +4087,7 @@ interface IShapefile : IDispatch{
 	[id(65), helpstring("method Dissolve")] HRESULT Dissolve([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly, [out, retval]IShapefile** sf);
 	[propget, id(66), helpstring("property Labels")] HRESULT Labels([out, retval] ILabels** pVal);
 	[propput, id(66), helpstring("property Labels")] HRESULT Labels([in] ILabels* newVal);
-	[id(67), helpstring("method GenerateLabels")] HRESULT GenerateLabels([in]long FieldIndex, [in]tkLabelPositioning Method, [in, optional, defaultvalue(FALSE)]VARIANT_BOOL LargestPartOnly, [out, retval] long* count);
+	[id(67), helpstring("method GenerateLabels")] HRESULT GenerateLabels([in]long FieldIndex, [in]tkLabelPositioning Method, [in, defaultvalue(0)]VARIANT_BOOL LargestPartOnly, [out, retval] long* count);
 	[id(68), helpstring("method Clone")] HRESULT Clone([out, retval]IShapefile** retVal);
 	[propget, id(69), helpstring("property DefaultDrawingOptions")] HRESULT DefaultDrawingOptions([out, retval]IShapeDrawingOptions** pVal);
 	[propput, id(69), helpstring("property DefaultDrawingOptions")] HRESULT DefaultDrawingOptions([in]IShapeDrawingOptions* newVal);
@@ -4113,7 +4113,7 @@ interface IShapefile : IDispatch{
 	[id(82), helpstring("method SymmDifference")] HRESULT SymmDifference([in]VARIANT_BOOL SelectedOnlySubject, [in]IShapefile* sfOverlay, [in]VARIANT_BOOL SelectedOnlyOverlay, [out, retval]IShapefile** retval);
 	[id(83), helpstring("method Union")] HRESULT Union([in]VARIANT_BOOL SelectedOnlySubject, [in]IShapefile* sfOverlay, [in]VARIANT_BOOL SelectedOnlyOverlay, [out, retval]IShapefile** retval);
 	[id(84), helpstring("method ExplodeShapes")] HRESULT ExplodeShapes([in]VARIANT_BOOL SelectedOnly, [out, retval]IShapefile** retval);
-	[id(85), helpstring("method AggregateShapes")] HRESULT AggregateShapes([in]VARIANT_BOOL SelectedOnly, [in, optional, defaultvalue(-1)]LONG FieldIndex, [out, retval]IShapefile** retval);
+	[id(85), helpstring("method AggregateShapes")] HRESULT AggregateShapes([in]VARIANT_BOOL SelectedOnly, [in, defaultvalue(-1)]LONG FieldIndex, [out, retval]IShapefile** retval);
 	[id(86), helpstring("method ExportSelection")] HRESULT ExportSelection([out, retval]IShapefile** retval);
 	[id(87), helpstring("method Sort")] HRESULT Sort([in]LONG FieldIndex, [in]VARIANT_BOOL Ascending, [out, retval]IShapefile** retval);
 	[id(88), helpstring("method Merge")] HRESULT Merge([in]VARIANT_BOOL SelectedOnlyThis, [in]IShapefile* sf, [in]VARIANT_BOOL SelectedOnly, [out, retval]IShapefile** retval);
@@ -4151,15 +4151,15 @@ interface IShapefile : IDispatch{
 	[propput, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2([in]long ShapeIndex, [in] BSTR categoryName);
 	[propget, id(111), helpstring("property ShapeCategory3")] HRESULT ShapeCategory3([in]long ShapeIndex, [out, retval] IShapefileCategory** category);
 	[propput, id(111), helpstring("property ShapeCategory3")] HRESULT ShapeCategory3([in]long ShapeIndex, [in] IShapefileCategory* category);
-	[id(112), helpstring("method Dump")] HRESULT Dump([in] BSTR ShapefileName, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(113), helpstring("method LoadDataFrom")] HRESULT LoadDataFrom([in] BSTR ShapefileName, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[id(112), helpstring("method Dump")] HRESULT Dump([in] BSTR ShapefileName, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(113), helpstring("method LoadDataFrom")] HRESULT LoadDataFrom([in] BSTR ShapefileName, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(114), helpstring("property LastInputValidation")] HRESULT LastInputValidation([out, retval] IShapeValidationInfo** retVal);
 	[propget, id(115), helpstring("property LastOutputValidation")] HRESULT LastOutputValidation([out, retval] IShapeValidationInfo** retVal);
 	[id(116), helpstring("property ClearCachedGeometries")] HRESULT ClearCachedGeometries();
 	[id(117), helpstring("method AggregateShapesWithStats")] HRESULT AggregateShapesWithStats([in]VARIANT_BOOL SelectedOnly,
-		[in, optional, defaultvalue(-1)]LONG FieldIndex, [in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** retval);
+		[in, defaultvalue(-1)]LONG FieldIndex, [in, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** retval);
 	[id(118), helpstring("method DissolveWithStats")] HRESULT DissolveWithStats([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly,
-		[in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** sf);
+		[in, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** sf);
 	[propget, id(119)] HRESULT ShapeVisible([in] long ShapeIndex, [out, retval] VARIANT_BOOL* pVal);
 	[propget, id(120)] HRESULT ShapeRotation([in] long ShapeIndex, [out, retval] double* pVal);
 	[propput, id(120)] HRESULT ShapeRotation([in] long ShapeIndex, [in] double newVal);
@@ -4211,25 +4211,25 @@ interface IShape : IDispatch{
 	[propget, id(2), helpstring("property NumParts")] HRESULT NumParts([out, retval] long *pVal);
 	[propget, id(3), helpstring("property ShapeType")] HRESULT ShapeType([out, retval] ShpfileType *pVal);
 	[propput, id(3), helpstring("property ShapeType")] HRESULT ShapeType([in] ShpfileType newVal);
-	[propget, id(4), helpstring("property Point")] HRESULT Point([in] long PointIndex, [out, retval] IPoint * *pVal);
-	[propput, id(4), helpstring("property Point")] HRESULT Point([in] long PointIndex, [in] IPoint * newVal);
+	[propget, id(4), helpstring("property Point")] HRESULT Point([in] long PointIndex, [out, retval] IPoint**pVal);
+	[propput, id(4), helpstring("property Point")] HRESULT Point([in] long PointIndex, [in] IPoint* newVal);
 	[propget, id(5), helpstring("property Part")] HRESULT Part([in] long PartIndex, [out, retval] long *pVal);
 	[propput, id(5), helpstring("property Part")] HRESULT Part([in] long PartIndex, [in] long newVal);
 	[propget, id(6), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(7), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(8), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(8), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(8), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(8), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(9), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(9), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-	[id(10), helpstring("method Create")] HRESULT Create([in] ShpfileType ShpType, [out, retval] VARIANT_BOOL * retval);
-	[id(11), helpstring("method InsertPoint")] HRESULT InsertPoint([in] IPoint * NewPoint, [in, out]long * PointIndex, [out, retval] VARIANT_BOOL * retval);
-	[id(12), helpstring("method DeletePoint")] HRESULT DeletePoint([in] long PointIndex, [out, retval] VARIANT_BOOL * retval);
-	[id(13), helpstring("method InsertPart")] HRESULT InsertPart([in] long PointIndex, [in, out] long * PartIndex, [out, retval] VARIANT_BOOL * retval);
-	[id(14), helpstring("method DeletePart")] HRESULT DeletePart([in] long PartIndex, [out, retval] VARIANT_BOOL * retval);
-	[propget, id(15), helpstring("property Extents")] HRESULT Extents([out, retval] IExtents * *pVal);
-	[id(16), helpstring("method SerializeToString")] HRESULT SerializeToString([out, retval] BSTR * Serialized);
-	[id(17), helpstring("method CreateFromString")] HRESULT CreateFromString([in] BSTR Serialized, [out, retval] VARIANT_BOOL * retval);
-	[id(18), helpstring("method PointInThisPoly")] HRESULT PointInThisPoly([in] IPoint * pt, [out, retval] VARIANT_BOOL *retval);
+	[id(10), helpstring("method Create")] HRESULT Create([in] ShpfileType ShpType, [out, retval] VARIANT_BOOL* retval);
+	[id(11), helpstring("method InsertPoint")] HRESULT InsertPoint([in] IPoint* NewPoint, [in, out]long* PointIndex, [out, retval] VARIANT_BOOL* retval);
+	[id(12), helpstring("method DeletePoint")] HRESULT DeletePoint([in] long PointIndex, [out, retval] VARIANT_BOOL* retval);
+	[id(13), helpstring("method InsertPart")] HRESULT InsertPart([in] long PointIndex, [in, out] long* PartIndex, [out, retval] VARIANT_BOOL* retval);
+	[id(14), helpstring("method DeletePart")] HRESULT DeletePart([in] long PartIndex, [out, retval] VARIANT_BOOL* retval);
+	[propget, id(15), helpstring("property Extents")] HRESULT Extents([out, retval] IExtents**pVal);
+	[id(16), helpstring("method SerializeToString")] HRESULT SerializeToString([out, retval] BSTR* Serialized);
+	[id(17), helpstring("method CreateFromString")] HRESULT CreateFromString([in] BSTR Serialized, [out, retval] VARIANT_BOOL* retval);
+	[id(18), helpstring("method PointInThisPoly")] HRESULT PointInThisPoly([in] IPoint* pt, [out, retval] VARIANT_BOOL *retval);
 	[propget, id(19), helpstring("property Centroid")] HRESULT Centroid([out, retval] IPoint** pVal);
 	[propget, id(24), helpstring("property Length")] HRESULT Length([out, retval] double *pVal);
 	[propget, id(25), helpstring("property Perimeter")] HRESULT Perimeter([out, retval] double *pVal);
@@ -4279,11 +4279,11 @@ interface IShape : IDispatch{
 	[id(60), helpstring("method get_M")] HRESULT get_M([in]LONG pointIndex, [out]double* m, [out, retval]VARIANT_BOOL* retVal);
 	[id(61), helpstring("method get_Z")] HRESULT get_Z([in]LONG pointIndex, [out]double* z, [out, retval]VARIANT_BOOL* retVal);
 	[id(62)] HRESULT BufferWithParams([in] DOUBLE Distance, 
-		[in, optional, defaultvalue(30)] LONG numSegments, 
-		[in, optional, defaultvalue(0)] VARIANT_BOOL singleSided, 
-		[in, optional, defaultvalue(0)] tkBufferCap capStyle, 
-		[in, optional, defaultvalue(0)] tkBufferJoin joinStyle, 
-		[in, optional, defaultvalue(5.0)] DOUBLE mitreLimit, 
+		[in, defaultvalue(30)] LONG numSegments, 
+		[in, defaultvalue(0)] VARIANT_BOOL singleSided, 
+		[in, defaultvalue(0)] tkBufferCap capStyle, 
+		[in, defaultvalue(0)] tkBufferJoin joinStyle, 
+		[in, defaultvalue(5.0)] DOUBLE mitreLimit, 
 		[out, retval] IShape** retVal);
 	[id(63)] HRESULT Move([in] DOUBLE xOffset, [in] DOUBLE yOffset);
 	[id(64)] HRESULT Rotate([in] DOUBLE originX, [in] DOUBLE originY, [in] DOUBLE angle);
@@ -4293,7 +4293,7 @@ interface IShape : IDispatch{
 	
 	[id(68)] HRESULT Clear();
 	[id(69)] HRESULT FixUp2([in] tkUnitsOfMeasure units, [out, retval] IShape** retVal);
-	[id(70), helpstring("method InterpolatePoint")] HRESULT InterpolatePoint([in] IPoint* startPoint, [in] double distance, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL normalized, [out, retval] IPoint **retVal);
+	[id(70), helpstring("method InterpolatePoint")] HRESULT InterpolatePoint([in] IPoint* startPoint, [in] double distance, [in, defaultvalue(0)] VARIANT_BOOL normalized, [out, retval] IPoint **retVal);
 	[id(71), helpstring("method ProjectDistanceTo")] HRESULT ProjectDistanceTo([in] IShape* referenceShape, [out, retval] double* distance);
 };
 
@@ -4308,7 +4308,7 @@ interface IShape : IDispatch{
 ]
 interface IExtents : IDispatch{
 		[id(1), helpstring("method SetBounds")] HRESULT SetBounds([in] double xMin, [in] double yMin, [in] double zMin, [in] double xMax, [in] double yMax, [in] double zMax);		
-		[id(2), helpstring("method GetBounds")] HRESULT GetBounds([out] double * xMin, [out] double * yMin, [out] double * zMin, [out] double * xMax, [out] double * yMax, [out] double * zMax);
+		[id(2), helpstring("method GetBounds")] HRESULT GetBounds([out] double* xMin, [out] double* yMin, [out] double* zMin, [out] double* xMax, [out] double* yMax, [out] double* zMax);
 		[propget, id(3), helpstring("property xMin")] HRESULT xMin([out, retval] double *pVal);
 		[propget, id(4), helpstring("property xMax")] HRESULT xMax([out, retval] double *pVal);
 		[propget, id(5), helpstring("property yMin")] HRESULT yMin([out, retval] double *pVal);
@@ -4317,7 +4317,7 @@ interface IExtents : IDispatch{
 		[propget, id(8), helpstring("property zMax")] HRESULT zMax([out, retval] double *pVal);
 		[propget, id(9), helpstring("property mMin")] HRESULT mMin([out, retval] double *pVal);
 		[propget, id(10), helpstring("property mMax")] HRESULT mMax([out, retval] double *pVal);
-		[id(11), helpstring("method GetMeasureBounds")] HRESULT GetMeasureBounds([out] double * mMin, [out] double * mMax);
+		[id(11), helpstring("method GetMeasureBounds")] HRESULT GetMeasureBounds([out] double* mMin, [out] double* mMax);
 		[id(12), helpstring("method SetMeasureBounds")] HRESULT SetMeasureBounds([in]double mMin, [in]double mMax);
 		[id(13), helpstring("method ToDebugString")] HRESULT ToDebugString([out, retval] BSTR* retVal);
 		[id(14), helpstring("method PointIsWithin")] HRESULT PointIsWithin([in]double x, [in]double y, [out, retval]VARIANT_BOOL* retVal);
@@ -4350,14 +4350,14 @@ interface IPoint : IDispatch{
 	[propput, id(3), helpstring("property Z")] HRESULT Z([in] double newVal);
 	[propget, id(4), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(5), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(6), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(6), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(6), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(6), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(7), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(7), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[propget, id(8), helpstring("property M")] HRESULT M([out, retval] double *pVal);
 	[propput, id(8), helpstring("property M")] HRESULT M([in] double newVal);
 	[id(9), helpstring("method Clone")] HRESULT Clone([out, retval] IPoint** retVal);
-	[id(10), helpstring("Sets X, Y, and Z values")] HRESULT Set([in] double newX, [in] double newY, [in, optional, defaultvalue(0.0)] double newZ);
+	[id(10), helpstring("Sets X, Y, and Z values")] HRESULT Set([in] double newX, [in] double newY, [in, defaultvalue(0.0)] double newZ);
 };
 
 /****************************  Table Interface ***********************/
@@ -4372,30 +4372,30 @@ interface IPoint : IDispatch{
 interface ITable : IDispatch{
 	[propget, id(1), helpstring("property NumRows")] HRESULT NumRows([out, retval] long *pVal);
 	[propget, id(2), helpstring("property NumFields")] HRESULT NumFields([out, retval] long *pVal);
-	[propget, id(3), helpstring("property Field")] HRESULT Field([in] long FieldIndex, [out, retval] IField * *pVal);
+	[propget, id(3), helpstring("property Field")] HRESULT Field([in] long FieldIndex, [out, retval] IField**pVal);
 	[propget, id(4), helpstring("property CellValue")] HRESULT CellValue([in] long FieldIndex, [in] long RowIndex, [out, retval] VARIANT *pVal);
 	[propget, id(5), helpstring("property EditingTable")] HRESULT EditingTable([out, retval] VARIANT_BOOL *pVal);
 	[propget, id(6), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(7), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(8), helpstring("property CdlgFilter")] HRESULT CdlgFilter([out, retval] BSTR *pVal);
-	[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(10), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(10), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-	[id(11), helpstring("method Open")] HRESULT Open([in] BSTR dbfFilename, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(12), helpstring("method CreateNew")] HRESULT CreateNew([in] BSTR dbfFilename, [out, retval] VARIANT_BOOL * retval);
-	[id(13), helpstring("method SaveAs")] HRESULT SaveAs([in] BSTR dbfFilename, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(14), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL * retval);
-	[id(15), helpstring("method EditClear")] HRESULT EditClear([out, retval] VARIANT_BOOL * retval);
-	[id(16), helpstring("method EditInsertField")] HRESULT EditInsertField([in] IField * Field, [in, out] long * FieldIndex, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(17), helpstring("method EditReplaceField")] HRESULT EditReplaceField([in] long FieldIndex, [in] IField * newField, [in, optional]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(18), helpstring("method EditDeleteField")] HRESULT EditDeleteField([in] long FieldIndex, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(19), helpstring("method EditInsertRow")] HRESULT EditInsertRow([in,out] long * RowIndex, [out, retval] VARIANT_BOOL * retval);
-	[id(20), helpstring("method EditCellValue")] HRESULT EditCellValue([in] long FieldIndex, [in] long RowIndex, [in] VARIANT newVal, [out, retval] VARIANT_BOOL * retval);
-	[id(21), helpstring("method StartEditingTable")] HRESULT StartEditingTable([in, optional]  ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(22), helpstring("method StopEditingTable")] HRESULT StopEditingTable([in, optional, defaultvalue(TRUE)] VARIANT_BOOL ApplyChanges, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(23), helpstring("method EditDeleteRow")] HRESULT EditDeleteRow([in] long RowIndex, [out,retval] VARIANT_BOOL * retval);
-	[id(24), helpstring("method Save")] HRESULT Save([in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[id(11), helpstring("method Open")] HRESULT Open([in] BSTR dbfFilename, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(12), helpstring("method CreateNew")] HRESULT CreateNew([in] BSTR dbfFilename, [out, retval] VARIANT_BOOL* retval);
+	[id(13), helpstring("method SaveAs")] HRESULT SaveAs([in] BSTR dbfFilename, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(14), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL* retval);
+	[id(15), helpstring("method EditClear")] HRESULT EditClear([out, retval] VARIANT_BOOL* retval);
+	[id(16), helpstring("method EditInsertField")] HRESULT EditInsertField([in] IField* Field, [in, out] long* FieldIndex, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(17), helpstring("method EditReplaceField")] HRESULT EditReplaceField([in] long FieldIndex, [in] IField* newField, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(18), helpstring("method EditDeleteField")] HRESULT EditDeleteField([in] long FieldIndex, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(19), helpstring("method EditInsertRow")] HRESULT EditInsertRow([in,out] long* RowIndex, [out, retval] VARIANT_BOOL* retval);
+	[id(20), helpstring("method EditCellValue")] HRESULT EditCellValue([in] long FieldIndex, [in] long RowIndex, [in] VARIANT newVal, [out, retval] VARIANT_BOOL* retval);
+	[id(21), helpstring("method StartEditingTable")] HRESULT StartEditingTable([in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(22), helpstring("method StopEditingTable")] HRESULT StopEditingTable([in, defaultvalue(-1)] VARIANT_BOOL ApplyChanges, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[id(23), helpstring("method EditDeleteRow")] HRESULT EditDeleteRow([in] long RowIndex, [out,retval] VARIANT_BOOL* retval);
+	[id(24), helpstring("method Save")] HRESULT Save([in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(25), helpstring("property MinValue")] HRESULT MinValue([in]long FieldIndex, [out, retval] VARIANT* retval);
 	[propget, id(26), helpstring("property MaxValue")] HRESULT MaxValue([in]long FieldIndex, [out, retval] VARIANT* retval);
 	[propget, id(27), helpstring("property MeanValue")] HRESULT MeanValue([in]long FieldIndex, [out, retval] double* retval);
@@ -4432,7 +4432,7 @@ interface ITable : IDispatch{
 	[id(48), helpstring("")] HRESULT TryJoin([in]ITable* table2, [in]BSTR fieldTo, [in]BSTR fieldFrom, [out]int* rowCount, [out]int* joinRowCount, [out, retval]VARIANT_BOOL* retVal);	
 	[id(49), helpstring("")] HRESULT Join3([in]ITable* table2, [in]BSTR field1, [in]BSTR field2, [in]BSTR filenameToReopen, [in]BSTR JoinOptions, [in]SAFEARRAY(BSTR) fieldList, [out, retval]VARIANT_BOOL* retVal);	
 
-	[id(50), helpstring("")] HRESULT Dump([in] BSTR dbfFilename, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);	
+	[id(50), helpstring("")] HRESULT Dump([in] BSTR dbfFilename, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);	
 	[propget, id(51)] HRESULT JoinFields([in] LONG joinIndex, [out, retval] BSTR* pVal);
 	[propget, id(52)] HRESULT Filename([out, retval] BSTR* pVal);
 	[propget, id(53)] HRESULT JoinOptions([in] LONG joinIndex, [out, retval] BSTR* pVal);
@@ -4461,8 +4461,8 @@ interface IField : IDispatch{
 	[propput, id(4), helpstring("property Type")] HRESULT Type([in] FieldType newVal);
 	[propget, id(5), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(6), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(7), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(7), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(7), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(7), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(8), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(8), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[id(9), helpstring("method Clone")] HRESULT Clone([out, retval] IField** retVal);
@@ -4487,15 +4487,15 @@ interface IField : IDispatch{
 	pointer_default(unique)
 ]
 interface IShapeNetwork : IDispatch{
-	[id(1), helpstring("method Build")] HRESULT Build([in]IShapefile *Shapefile, [in]long ShapeIndex, [in]long FinalPointIndex, [in]double Tolerance,[in]AmbiguityResolution ar, [in, optional]ICallback * cBack, [out, retval] long * retval);
-	[id(2), helpstring("method DeleteShape")] HRESULT DeleteShape([in]long ShapeIndex, [out, retval]VARIANT_BOOL * retval);
-	[id(3), helpstring("method RasterizeD8")] HRESULT RasterizeD8([in]VARIANT_BOOL UseNetworkBounds, [in, optional] IGridHeader * Header, [in, optional, defaultvalue(30.0)] double Cellsize, [in, optional]ICallback * cBack, [out, retval] IGrid ** retval);
-	[id(4), helpstring("method MoveUp")] HRESULT MoveUp([in]long UpIndex, [out, retval]VARIANT_BOOL * retval);
+	[id(1), helpstring("method Build")] HRESULT Build([in]IShapefile *Shapefile, [in]long ShapeIndex, [in]long FinalPointIndex, [in]double Tolerance,[in]AmbiguityResolution ar, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] long* retval);
+	[id(2), helpstring("method DeleteShape")] HRESULT DeleteShape([in]long ShapeIndex, [out, retval]VARIANT_BOOL* retval);
+	[id(3), helpstring("method RasterizeD8")] HRESULT RasterizeD8([in]VARIANT_BOOL UseNetworkBounds, [in, defaultvalue(NULL)] IGridHeader* Header, [in, defaultvalue(30.0)] double Cellsize, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] IGrid ** retval);
+	[id(4), helpstring("method MoveUp")] HRESULT MoveUp([in]long UpIndex, [out, retval]VARIANT_BOOL* retval);
 	[id(5), helpstring("method MoveDown")] HRESULT MoveDown([out, retval]VARIANT_BOOL *retval);
-	[id(6), helpstring("method MoveTo")] HRESULT MoveTo([in]long ShapeIndex, [out, retval] VARIANT_BOOL * retval);
-	[id(7), helpstring("method MoveToOutlet")] HRESULT MoveToOutlet([out, retval] VARIANT_BOOL * retval);
-	[propget, id(8), helpstring("property Shapefile")] HRESULT Shapefile([out, retval] IShapefile * *pVal);
-	[propget, id(9), helpstring("property CurrentShape")] HRESULT CurrentShape([out, retval] IShape * *pVal);
+	[id(6), helpstring("method MoveTo")] HRESULT MoveTo([in]long ShapeIndex, [out, retval] VARIANT_BOOL* retval);
+	[id(7), helpstring("method MoveToOutlet")] HRESULT MoveToOutlet([out, retval] VARIANT_BOOL* retval);
+	[propget, id(8), helpstring("property Shapefile")] HRESULT Shapefile([out, retval] IShapefile**pVal);
+	[propget, id(9), helpstring("property CurrentShape")] HRESULT CurrentShape([out, retval] IShape**pVal);
 	[propget, id(10), helpstring("property CurrentShapeIndex")] HRESULT CurrentShapeIndex([out, retval] long *pVal);
 	[propget, id(11), helpstring("property DistanceToOutlet")] HRESULT DistanceToOutlet([in] long PointIndex, [out, retval] double *pVal);
 	[propget, id(12), helpstring("property NumDirectUps")] HRESULT NumDirectUps([out, retval] long *pVal);
@@ -4503,14 +4503,14 @@ interface IShapeNetwork : IDispatch{
 	[propget, id(14), helpstring("property AmbigShapeIndex")] HRESULT AmbigShapeIndex([in] long Index, [out, retval] long *pVal);
 	[propget, id(15), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(16), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(17), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(17), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(17), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(17), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(18), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(18), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[propget, id(19), helpstring("property ParentIndex")] HRESULT ParentIndex([out, retval] long *pVal);
 	[propput, id(19), helpstring("property ParentIndex")] HRESULT ParentIndex([in] long newVal);
-	[id(20), helpstring("method Open")] HRESULT Open([in] IShapefile * sf, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(21), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL * retval);
+	[id(20), helpstring("method Open")] HRESULT Open([in] IShapefile* sf, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(21), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL* retval);
 };
 
 /****************************  Callback Interface ***********************/
@@ -4552,48 +4552,48 @@ interface IShapeNetwork : IDispatch{
 	pointer_default(unique)
 	]
 interface IUtils : IDispatch{
-	[id(1), helpstring("method PointInPolygon")] HRESULT PointInPolygon([in] IShape * Shp, [in]IPoint * TestPoint, [out, retval] VARIANT_BOOL * retval);
-	[id(2), helpstring("method GridReplace")] HRESULT GridReplace([in] IGrid * Grd, [in] VARIANT OldValue, [in] VARIANT NewValue, [in, optional]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(3), helpstring("method GridInterpolateNoData")] HRESULT GridInterpolateNoData([in] IGrid * Grd, [in, optional]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(4), helpstring("method RemoveColinearPoints")] HRESULT RemoveColinearPoints([in] IShapefile * Shapes, [in]double LinearTolerance, [in, optional]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[propget, id(5), helpstring("property Length")] HRESULT Length([in] IShape * Shape, [out, retval] double *pVal);
-	[propget, id(6), helpstring("property Perimeter")] HRESULT Perimeter([in] IShape * Shape, [out, retval] double *pVal);
-	[propget, id(7), helpstring("property Area")] HRESULT Area([in] IShape * Shape, [out, retval] double *pVal);
+	[id(1), helpstring("method PointInPolygon")] HRESULT PointInPolygon([in] IShape* Shp, [in]IPoint* TestPoint, [out, retval] VARIANT_BOOL* retval);
+	[id(2), helpstring("method GridReplace")] HRESULT GridReplace([in] IGrid* Grd, [in] VARIANT OldValue, [in] VARIANT NewValue, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(3), helpstring("method GridInterpolateNoData")] HRESULT GridInterpolateNoData([in] IGrid* Grd, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(4), helpstring("method RemoveColinearPoints")] HRESULT RemoveColinearPoints([in] IShapefile* Shapes, [in]double LinearTolerance, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[propget, id(5), helpstring("property Length")] HRESULT Length([in] IShape* Shape, [out, retval] double *pVal);
+	[propget, id(6), helpstring("property Perimeter")] HRESULT Perimeter([in] IShape* Shape, [out, retval] double *pVal);
+	[propget, id(7), helpstring("property Area")] HRESULT Area([in] IShape* Shape, [out, retval] double *pVal);
 	[propget, id(8), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(9), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(10), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(10), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(10), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(10), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(11), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(11), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-	[id(12), helpstring("method ClipPolygon")] HRESULT ClipPolygon([in] PolygonOperation op, [in] IShape * SubjectPolygon, [in] IShape * ClipPolygon, [out, retval] IShape ** retval);
-	[id(13), helpstring("method GridMerge")] HRESULT GridMerge([in] VARIANT Grids, [in] BSTR MergeFilename, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL InRam, [in, optional, defaultvalue(UseExtension)] GridFileType GrdFileType, [in, optional]ICallback * cBack, [out, retval] IGrid ** retval);
-	[id(14), helpstring("method ShapeMerge")] HRESULT ShapeMerge([in] IShapefile * Shapes, [in]long IndexOne, [in]long IndexTwo, [in, optional]ICallback * cBack, [out, retval] IShape ** retval);
-	[id(15), helpstring("method GridToImage")] HRESULT GridToImage([in] IGrid * Grid, [in] IGridColorScheme * cScheme, [in, optional]ICallback * cBack, [out, retval] IImage ** retval);
-	[id(16), helpstring("method GridToShapefile")] HRESULT GridToShapefile([in] IGrid * Grid, [in, optional, defaultvalue(NULL)] IGrid * ConnectionGrid, [in, optional]ICallback * cBack, [out, retval] IShapefile ** retval);
-	[id(17), helpstring("method GridToGrid")] HRESULT GridToGrid([in] IGrid * Grid, [in] GridDataType OutDataType, [in, optional]ICallback * cBack, [out, retval] IGrid ** retval);
-	[id(18), helpstring("method ShapeToShapeZ")] HRESULT ShapeToShapeZ([in] IShapefile * Shapefile, [in] IGrid * Grid, [in, optional]ICallback * cBack, [out, retval] IShapefile ** retval);
-	[id(19), helpstring("method TinToShapefile")] HRESULT TinToShapefile([in] ITin * Tin, [in] ShpfileType Type, [in, optional]ICallback * cBack, [out, retval] IShapefile ** retval);
-	[id(20), helpstring("method ShapefileToGrid")] HRESULT ShapefileToGrid([in] IShapefile * Shpfile, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL UseShapefileBounds, [in, optional, defaultvalue(NULL)]IGridHeader * GrdHeader, [in,optional, defaultvalue(30.0)]double Cellsize, [in,optional, defaultvalue(TRUE)]VARIANT_BOOL UseShapeNumber, [in,optional, defaultvalue(1)]short SingleValue,[out, retval] IGrid ** retval);
+	[id(12), helpstring("method ClipPolygon")] HRESULT ClipPolygon([in] PolygonOperation op, [in] IShape* SubjectPolygon, [in] IShape* ClipPolygon, [out, retval] IShape ** retval);
+	[id(13), helpstring("method GridMerge")] HRESULT GridMerge([in] VARIANT Grids, [in] BSTR MergeFilename, [in, defaultvalue(-1)] VARIANT_BOOL InRam, [in, defaultvalue(UseExtension)] GridFileType GrdFileType, [in, defaultvalue(NULL)]ICallback * cBack, [out, retval] IGrid ** retval);
+	[id(14), helpstring("method ShapeMerge")] HRESULT ShapeMerge([in] IShapefile* Shapes, [in]long IndexOne, [in]long IndexTwo, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] IShape ** retval);
+	[id(15), helpstring("method GridToImage")] HRESULT GridToImage([in] IGrid* Grid, [in] IGridColorScheme* cScheme, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] IImage ** retval);
+	[id(16), helpstring("method GridToShapefile")] HRESULT GridToShapefile([in] IGrid* Grid, [in, defaultvalue(NULL)] IGrid* ConnectionGrid, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] IShapefile ** retval);
+	[id(17), helpstring("method GridToGrid")] HRESULT GridToGrid([in] IGrid* Grid, [in] GridDataType OutDataType, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] IGrid ** retval);
+	[id(18), helpstring("method ShapeToShapeZ")] HRESULT ShapeToShapeZ([in] IShapefile* Shapefile, [in] IGrid* Grid, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] IShapefile ** retval);
+	[id(19), helpstring("method TinToShapefile")] HRESULT TinToShapefile([in] ITin* Tin, [in] ShpfileType Type, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] IShapefile ** retval);
+	[id(20), helpstring("method ShapefileToGrid")] HRESULT ShapefileToGrid([in] IShapefile * Shpfile, [in, defaultvalue(-1)] VARIANT_BOOL UseShapefileBounds, [in, defaultvalue(NULL)]IGridHeader * GrdHeader, [in,defaultvalue(30.0)]double Cellsize, [in,defaultvalue(-1)]VARIANT_BOOL UseShapeNumber, [in,defaultvalue(1)]short SingleValue,[out, retval] IGrid ** retval);
 	[id(21), helpstring("method hBitmapToPicture")] HRESULT hBitmapToPicture([in] long hBitmap, [out, retval] IPictureDisp ** retval);
-	[id(22), helpstring("method GenerateHillShade")] HRESULT GenerateHillShade([in] BSTR bstrGridFilename, [in] BSTR bstrShadeFilename, [in, optional, defaultvalue(1)] float z, [in, optional, defaultvalue(1)] float scale, [in, optional, defaultvalue(315)] float az, [in, optional, defaultvalue(45)] float alt, [out, retval] VARIANT_BOOL * retval);
-	[id(23), helpstring("method GenerateContour")] HRESULT GenerateContour([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in] double dfInterval, [in, optional, defaultvalue(0)] double dfNoData, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL Is3D, [in, optional,defaultvalue(NULL)] VARIANT dblFLArray, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
-	[id(24), helpstring("Deprecated method GDALWarp, use CGdalUtils::GdalRasterTranslate instead")] HRESULT TranslateRaster([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(22), helpstring("method GenerateHillShade")] HRESULT GenerateHillShade([in] BSTR bstrGridFilename, [in] BSTR bstrShadeFilename, [in, defaultvalue(1)] float z, [in, defaultvalue(1)] float scale, [in, defaultvalue(315)] float az, [in, defaultvalue(45)] float alt, [out, retval] VARIANT_BOOL* retval);
+	[id(23), helpstring("method GenerateContour")] HRESULT GenerateContour([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in] double dfInterval, [in, defaultvalue(0)] double dfNoData, [in, defaultvalue(0)] VARIANT_BOOL Is3D, [in, optional, defaultvalue(NULL)] VARIANT dblFLArray, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(24), helpstring("Deprecated method GDALWarp, use CGdalUtils::GdalRasterTranslate instead")] HRESULT TranslateRaster([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(25), helpstring("Reads vector layer through GDAL/OGR library and converts it to the in-memory shapefile. Layer format is defined automatically. For formats which can store geometries of different types the type of resulting shapefile should be specified in shpType parameter.")] 
-			HRESULT OGRLayerToShapefile([in]BSTR Filename, [in, optional, defaultvalue(SHP_NULLSHAPE)] ShpfileType shpType, [in, optional, defaultvalue(NULL)]ICallback *cBack, [out, retval] IShapefile** sf);
+			HRESULT OGRLayerToShapefile([in]BSTR Filename, [in, defaultvalue(SHP_NULLSHAPE)] ShpfileType shpType, [in, defaultvalue(NULL)] ICallback *cBack, [out, retval] IShapefile** sf);
 	[id(26), helpstring("method MergeImages")] HRESULT MergeImages([in]SAFEARRAY(BSTR) InputNames, [in] BSTR OutputName, [out, retval]VARIANT_BOOL* retVal);
 	[id(27), helpstring("method ReprojectShapefile")] HRESULT ReprojectShapefile([in] IShapefile* sf, [in] IGeoProjection* source, [in] IGeoProjection* target, [out,retval] IShapefile** result);
 	[id(28), helpstring("method ColorByName")] HRESULT ColorByName([in] tkMapColor name, [out,retval] OLE_COLOR* retVal);
 	[id(30), helpstring("method ClipGridWithPolygon")] HRESULT ClipGridWithPolygon([in]BSTR inputGridfile, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
 	[id(31), helpstring("method ClipGridWithPolygon2")] HRESULT ClipGridWithPolygon2([in]IGrid* inputGrid, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
-	[id(32), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useCenterWithinMethod, [out, retval]VARIANT_BOOL* retVal);
-	[id(33), helpstring("method Polygonize")] HRESULT Polygonize([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in, optional, defaultvalue(1)] int iSrcBand, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL NoMask, [in, optional, defaultvalue(NULL)] BSTR pszMaskFilename, [in, optional, defaultvalue("GML")] BSTR pszOGRFormat, [in, optional, defaultvalue("out")] BSTR pszDstLayerName, [in, optional, defaultvalue("DN")] BSTR pszPixValFieldName, [in, optional, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(36), helpstring("method GDALInfo")] HRESULT GDALInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
- 	[id(37), helpstring("Deprecated method GDALWarp, use CGdalUtils::GdalRasterWarp instead")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
-	[id(38), helpstring("method GDALBuildVrt")] HRESULT GDALBuildVrt([in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
-	[id(39), helpstring("method GDALAddOverviews, use CGdalUtils::GdalBuildOverviews instead")] HRESULT GDALAddOverviews([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in] BSTR bstrLevels, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
-	[id(40), helpstring("method GDALRasterize")] HRESULT GDALRasterize([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
-	[id(41), helpstring("method OGRInfo")] HRESULT OGRInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] BSTR bstrLayers, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
-	[id(42), helpstring("Deprecated method OGR2OGR")] HRESULT OGR2OGR([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
+    [id(32), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [in, defaultvalue(-1)] VARIANT_BOOL useCenterWithinMethod, [out, retval]VARIANT_BOOL* retVal);
+    [id(33), helpstring("method Polygonize")] HRESULT Polygonize([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in, defaultvalue(1)] int iSrcBand, [in, defaultvalue(0)] VARIANT_BOOL NoMask, [in, defaultvalue(NULL)] BSTR pszMaskFilename, [in, defaultvalue("GML")] BSTR pszOGRFormat, [in, defaultvalue("out")] BSTR pszDstLayerName, [in, defaultvalue("DN")] BSTR pszPixValFieldName, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+    [id(36), helpstring("method GDALInfo")] HRESULT GDALInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] BSTR* bstrInfo);
+    [id(37), helpstring("Deprecated method GDALWarp, use CGdalUtils::GdalRasterWarp instead")] HRESULT GDALWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
+    [id(38), helpstring("method GDALBuildVrt")] HRESULT GDALBuildVrt([in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
+    [id(39), helpstring("method GDALAddOverviews, use CGdalUtils::GdalBuildOverviews instead")] HRESULT GDALAddOverviews([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in] BSTR bstrLevels, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
+    [id(40), helpstring("method GDALRasterize")] HRESULT GDALRasterize([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
+    [id(41), helpstring("method OGRInfo")] HRESULT OGRInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, defaultvalue(NULL)] BSTR bstrLayers, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] BSTR * bstrInfo);
+    [id(42), helpstring("Deprecated method OGR2OGR")] HRESULT OGR2OGR([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
 	/**** 4.9 only ****/
 	[id(29), helpstring("method ConvertDistance")] HRESULT ConvertDistance([in] tkUnitsOfMeasure sourceUnit, [in] tkUnitsOfMeasure targetUnit, [in,out] DOUBLE* Value, [out,retval] VARIANT_BOOL* retval);
 	[id(34), helpstring("method CreateInstance")] HRESULT CreateInstance([in]tkInterface interfaceId, [out, retval]IDispatch** retVal);
@@ -4604,17 +4604,17 @@ interface IUtils : IDispatch{
 						  									[in]double noDataValue, [in, out]double* meanValue, [in,out]double* minValue, [in,out]double* maxValue, [out,retval]VARIANT_BOOL* retVal);
 	[id(45), helpstring("method CopyNodataValues")] HRESULT CopyNodataValues([in]BSTR sourceFilename, [in]BSTR destFilename, [out,retval]VARIANT_BOOL* retVal);
 
-	[id(46), helpstring("method GridToImage2")] HRESULT GridToImage2([in]IGrid * grid, [in]IGridColorScheme * ci, [in]tkGridProxyFormat imageFormat, [in]VARIANT_BOOL inRam, [in]ICallback* cBack, [out,retval]IImage ** retVal);
-	//[id(47), helpstring("method GridToImageInRam")] HRESULT GridToImageInRam([in]IGrid * grid, [in]IGridColorScheme * ci, [in]ICallback* cBack, [out,retval]IImage ** retVal);
-	[id(48), helpstring("method ErrorMsgFromObject")] HRESULT ErrorMsgFromObject([in]IDispatch * comClass, [out, retval]BSTR* retVal);
+	[id(46), helpstring("method GridToImage2")] HRESULT GridToImage2([in]IGrid* grid, [in]IGridColorScheme* ci, [in]tkGridProxyFormat imageFormat, [in]VARIANT_BOOL inRam, [in] ICallback* cBack, [out,retval]IImage ** retVal);
+	//[id(47), helpstring("method GridToImageInRam")] HRESULT GridToImageInRam([in]IGrid* grid, [in]IGridColorScheme* ci, [in] ICallback* cBack, [out,retval]IImage ** retVal);
+	[id(48), helpstring("method ErrorMsgFromObject")] HRESULT ErrorMsgFromObject([in]IDispatch* comClass, [out, retval]BSTR* retVal);
 	[id(49), helpstring("method TileProjectionToGeoProjection")] HRESULT TileProjectionToGeoProjection(
 		[in]tkTileProjection projection, [out, retval]IGeoProjection** retVal);
 	[propget, id(50), helpstring("method ComUsageReport")] HRESULT ComUsageReport([in]VARIANT_BOOL unreleasedOnly, [out, retval]BSTR* retVal);
 	[id(51)] HRESULT CalculateRaster([in]SAFEARRAY(BSTR) filenames, [in]BSTR expression, [in]BSTR outputFilename, 
-		[in]BSTR gdalOutputFormat, [in] float noDataValue, [in]ICallback* cBack, [out]BSTR* errorMsg, [out, retval]VARIANT_BOOL* retVal);
+		[in]BSTR gdalOutputFormat, [in] float noDataValue, [in] ICallback* cBack, [out]BSTR* errorMsg, [out, retval]VARIANT_BOOL* retVal);
 	[id(52)] HRESULT ReclassifyRaster([in]BSTR Filename, [in]int bandIndex, [in]BSTR outputName, 
 		[in]SAFEARRAY(double) LowerBounds, [in]SAFEARRAY(double) UpperBounds, 
-		[in]SAFEARRAY(double) NewValues, [in]BSTR gdalOutputFormat, [in]ICallback* cBack, [out, retval]VARIANT_BOOL* retVal);
+		[in]SAFEARRAY(double) NewValues, [in]BSTR gdalOutputFormat, [in] ICallback* cBack, [out, retval]VARIANT_BOOL* retVal);
 	[id(53)] HRESULT IsTiffGrid([in] BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	[id(54)] HRESULT GeodesicArea([in] IShape* shapeWgs84, [out, retval] DOUBLE* retVal);
 	[id(55)] HRESULT FixUpShapes([in] IShapefile* subject, [in] VARIANT_BOOL SelectedOnly, [in] BSTR outputFilename, [in] VARIANT_BOOL Overwrite, [out, retval] VARIANT_BOOL* retVal);
@@ -4627,7 +4627,7 @@ interface IUtils : IDispatch{
 	[id(62), helpstring("method GetProjectionNameByID")] HRESULT GetProjectionNameByID([in] int SRID, [out, retval] BSTR* retVal);
 	[id(63), helpstring("method GetProjectionList")] HRESULT GetProjectionList([in] tkProjectionSet projectionSets, [in, out] VARIANT* list, [out, retval] VARIANT_BOOL* retVal);
     [id(64), helpstring("method GetAngle")] HRESULT GetAngle([in] IPoint* firstPoint, [in] IPoint* secondPoint, [out, retval] double* retVal);
-	[id(65), helpstring("method LineInterpolatePoint")] HRESULT LineInterpolatePoint([in] IShape* sourceLine, [in] IPoint* startPoint, [in] double distance, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL normalized, [out, retval] IPoint **retVal);
+	[id(65), helpstring("method LineInterpolatePoint")] HRESULT LineInterpolatePoint([in] IShape* sourceLine, [in] IPoint* startPoint, [in] double distance, [in, defaultvalue(0)] VARIANT_BOOL normalized, [out, retval] IPoint **retVal);
 	[id(66), helpstring("method LineProjectDistanceTo")] HRESULT LineProjectDistanceTo([in] IShape* sourceLine, [in] IShape* referenceShape, [out, retval] double* distance);
 };
 
@@ -4648,12 +4648,12 @@ interface IVector : IDispatch{
 	[propget, id(3), helpstring("property k")] HRESULT k([out, retval] double *pVal);
 	[propput, id(3), helpstring("property k")] HRESULT k([in] double newVal);
 	[id(4), helpstring("method Normalize")] HRESULT Normalize();
-	[id(5), helpstring("method Dot")] HRESULT Dot([in] IVector * V, [out,retval] double * result);
-	[id(6), helpstring("method CrossProduct")] HRESULT CrossProduct([in] IVector * V, [out,retval] IVector ** result);
+	[id(5), helpstring("method Dot")] HRESULT Dot([in] IVector* V, [out,retval] double* result);
+	[id(6), helpstring("method CrossProduct")] HRESULT CrossProduct([in] IVector* V, [out,retval] IVector ** result);
 	[propget, id(7), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(8), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(10), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(10), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 };
@@ -4675,24 +4675,24 @@ interface IGridColorScheme : IDispatch{
 	[propget, id(4), helpstring("property LightSourceAzimuth")] HRESULT LightSourceAzimuth([out, retval] double *pVal);
 	[propget, id(5), helpstring("property LightSourceElevation")] HRESULT LightSourceElevation([out, retval] double *pVal);
 	[id(6), helpstring("method SetLightSource")] HRESULT SetLightSource([in] double Azimuth, [in] double Elevation);
-	[id(7), helpstring("method InsertBreak")] HRESULT InsertBreak([in] IGridColorBreak * BrkInfo);
+	[id(7), helpstring("method InsertBreak")] HRESULT InsertBreak([in] IGridColorBreak* BrkInfo);
 	[propget, id(8), helpstring("property Break")] HRESULT Break([in] long Index, [out, retval] IGridColorBreak ** pVal);
 	[id(9), helpstring("method DeleteBreak")] HRESULT DeleteBreak([in] long Index);
 	[id(10), helpstring("method Clear")] HRESULT Clear();
 	[propget, id(11), helpstring("property NoDataColor")] HRESULT NoDataColor([out, retval] OLE_COLOR *pVal);
 	[propput, id(11), helpstring("property NoDataColor")] HRESULT NoDataColor([in] OLE_COLOR newVal);
-	[id(12), helpstring("method UsePredefined")] HRESULT UsePredefined([in] double LowValue, [in] double HighValue, [in, optional, defaultvalue(SummerMountains)] PredefinedColorScheme Preset);
+	[id(12), helpstring("method UsePredefined")] HRESULT UsePredefined([in] double LowValue, [in] double HighValue, [in, defaultvalue(SummerMountains)] PredefinedColorScheme Preset);
 	[id(13), helpstring("method GetLightSource")] HRESULT GetLightSource([out,retval] IVector ** result);
 	[propget, id(14), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(15), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(16), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(16), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(16), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(16), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(17), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(17), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[id(18), helpstring("method InsertAt")] HRESULT InsertAt([in] int Position, [in] IGridColorBreak *Break);
 	[id(19), helpstring("property Serialize")] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(20), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
-	[id(21), helpstring("property ReadFromFile")] HRESULT ReadFromFile([in]BSTR mwlegFilename, [in, optional, defaultvalue("GridColoringScheme")]BSTR nodeName, [out,retval]VARIANT_BOOL* retVal);
+	[id(21), helpstring("property ReadFromFile")] HRESULT ReadFromFile([in]BSTR mwlegFilename, [in, defaultvalue("GridColoringScheme")]BSTR nodeName, [out,retval]VARIANT_BOOL* retVal);
 	[id(22), helpstring("property WriteToFile")] HRESULT WriteToFile([in]BSTR mwlegFilename, [in, defaultvalue("")]BSTR gridName, [in, defaultvalue(1)]int bandIndex, [out, retval]VARIANT_BOOL* retVal);
 	[id(23), helpstring("property ApplyColoringType")] HRESULT ApplyColoringType([in]ColoringType coloringType);
 	[id(24), helpstring("property ApplyGradientModel")] HRESULT ApplyGradientModel([in]GradientModel gradientModel);
@@ -4725,8 +4725,8 @@ interface IGridColorBreak : IDispatch{
 	[propput, id(6), helpstring("property GradientModel")] HRESULT GradientModel([in] GradientModel newVal);
 	[propget, id(7), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(8), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(10), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(10), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[propget, id(11), helpstring("property Caption")] HRESULT Caption([out, retval] BSTR* pVal);
@@ -4745,27 +4745,27 @@ interface IGridColorBreak : IDispatch{
 	pointer_default(unique)
 ]
 interface ITin : IDispatch{
-	[id(1), helpstring("method Open")] HRESULT Open([in] BSTR TinFile, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(2), helpstring("method CreateNew")] HRESULT CreateNew([in] IGrid * Grid, [in] double Deviation, [in] SplitMethod SplitTest, [in] double STParam, [in] long MeshDivisions, [in, optional, defaultvalue(1073741824)] long MaximumTriangles, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(3), helpstring("method Save")] HRESULT Save([in] BSTR TinFilename, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(4), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL * retval);
-	[id(5), helpstring("method Select")] HRESULT Select([in, out] long * TriangleHint, [in] double X, [in] double Y, [out] double * Z, [out, retval] VARIANT_BOOL * retval);
+	[id(1), helpstring("method Open")] HRESULT Open([in] BSTR TinFile, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(2), helpstring("method CreateNew")] HRESULT CreateNew([in] IGrid* Grid, [in] double Deviation, [in] SplitMethod SplitTest, [in] double STParam, [in] long MeshDivisions, [in, defaultvalue(1073741824)] long MaximumTriangles, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(3), helpstring("method Save")] HRESULT Save([in] BSTR TinFilename, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
+	[id(4), helpstring("method Close")] HRESULT Close([out, retval] VARIANT_BOOL* retval);
+	[id(5), helpstring("method Select")] HRESULT Select([in, out] long* TriangleHint, [in] double X, [in] double Y, [out] double* Z, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(6), helpstring("property NumTriangles")] HRESULT NumTriangles([out, retval] long *pVal);
 	[propget, id(7), helpstring("property NumVertices")] HRESULT NumVertices([out, retval] long *pVal);
 	[propget, id(8), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(9), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(10), helpstring("property CdlgFilter")] HRESULT CdlgFilter([out, retval] BSTR *pVal);
-	[propget, id(11), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(11), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(11), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(11), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(12), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(12), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-	[id(13), helpstring("method Triangle")] HRESULT Triangle([in] long TriIndex, [out] long * vtx1Index, [out] long * vtx2Index, [out] long * vtx3Index);
-	[id(14), helpstring("method Vertex")] HRESULT Vertex([in] long VtxIndex, [out] double * X, [out] double * Y, [out] double * Z);
-	[id(15), helpstring("method Max")] HRESULT Max([out] double * X, [out] double * Y, [out] double * Z);
-	[id(16), helpstring("method Min")] HRESULT Min([out] double * X, [out] double * Y, [out] double * Z);
+	[id(13), helpstring("method Triangle")] HRESULT Triangle([in] long TriIndex, [out] long* vtx1Index, [out] long* vtx2Index, [out] long* vtx3Index);
+	[id(14), helpstring("method Vertex")] HRESULT Vertex([in] long VtxIndex, [out] double* X, [out] double* Y, [out] double* Z);
+	[id(15), helpstring("method Max")] HRESULT Max([out] double* X, [out] double* Y, [out] double* Z);
+	[id(16), helpstring("method Min")] HRESULT Min([out] double* X, [out] double* Y, [out] double* Z);
 	[propget, id(17), helpstring("property Filename")] HRESULT Filename([out, retval] BSTR *pVal);
 	[propget, id(18), helpstring("property IsNDTriangle")] HRESULT IsNDTriangle([in] long TriIndex, [out, retval] VARIANT_BOOL *pVal);
-	[id(19), helpstring("method TriangleNeighbors")] HRESULT TriangleNeighbors([in] long TriIndex, [in, out] long * triIndex1, [in, out] long * triIndex2, [in, out] long * triIndex3);
+	[id(19), helpstring("method TriangleNeighbors")] HRESULT TriangleNeighbors([in] long TriIndex, [in, out] long* triIndex1, [in, out] long* triIndex2, [in, out] long* triIndex3);
 	[id(20), helpstring("method CreateTinFromPoints")] HRESULT CreateTinFromPoints([in] SAFEARRAY (IPoint*) Points, [out,retval] VARIANT_BOOL* retval);
 };
 /**************************  ShapeDrawingOptions Interface  ***************************/
@@ -4852,7 +4852,7 @@ interface IShapeDrawingOptions : IDispatch{
 
 	[id(28), helpstring("method DrawShape")] HRESULT DrawShape([in]int** hdc, [in]float x, [in]float y, [in]IShape* shape, [in]VARIANT_BOOL drawVertices, 
 															   [in]int clipWidth, [in]int clipHeight, 
-															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+															   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 															   [out, retval] VARIANT_BOOL* retVal);
 	
 	[propget, id(29), helpstring("property PointCharacter")] HRESULT PointCharacter([out, retval] short *pVal);
@@ -4867,13 +4867,13 @@ interface IShapeDrawingOptions : IDispatch{
 	[propget, id(33), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 
 	[id(34), helpstring("method DrawRectangle")] HRESULT DrawRectangle([in]int** hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices, 
-																	   [in, optional, defaultvalue(0)]int clipWidth, [in, optional, defaultvalue(0)]int clipHeight, 
-																	   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+																	   [in, defaultvalue(0)]int clipWidth, [in, defaultvalue(0)]int clipHeight, 
+																	   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 																	   [out, retval] VARIANT_BOOL* retVal);
 	
 	[id(35), helpstring("method DrawPoint")] HRESULT DrawPoint([in]int** hdc,  [in]float x, [in]float y,
-															   [in, optional, defaultvalue(0)]int clipWidth, [in, optional, defaultvalue(0)]int clipHeight, 
-															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+															   [in, defaultvalue(0)]int clipWidth, [in, defaultvalue(0)]int clipHeight, 
+															   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 															   [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(36), helpstring("property VerticesVisible")] HRESULT VerticesVisible([out, retval] VARIANT_BOOL* pVal);
@@ -4889,7 +4889,7 @@ interface IShapeDrawingOptions : IDispatch{
 	
 	[id(45), helpstring("method DrawLine")] HRESULT DrawLine([in]int** hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices,
 															 [in]int clipWidth, [in]int clipHeight, 
-															 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+															 [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 															 [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(46), helpstring("property LinePattern")] HRESULT LinePattern([out, retval] ILinePattern** pVal);
@@ -4907,26 +4907,26 @@ interface IShapeDrawingOptions : IDispatch{
 	[id(53), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
 	
 	[id(54), helpstring("method DrawPointVB")] HRESULT DrawPointVB([in]int hdc, [in]float x, [in]float y, 
-																   [in, optional, defaultvalue(0)] int clipWidth, [in, optional, defaultvalue(0)] int clipHeight,  
-																   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+																   [in, defaultvalue(0)] int clipWidth, [in, defaultvalue(0)] int clipHeight,  
+																   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 																   [out, retval] VARIANT_BOOL* retVal);
 
 	[id(55), helpstring("method DrawLineVB")] HRESULT DrawLineVB([in]int hdc, [in]float x, [in]float y, [in]int width, [in]int height,
 																 [in]VARIANT_BOOL drawVertices,														 
 																 [in] int clipWidth, [in] int clipHeight,
-																 [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+																 [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 																 [out, retval] VARIANT_BOOL* retVal);
 	
 	[id(56), helpstring("method DrawRectangleVB")] HRESULT DrawRectangleVB([in] int hdc, [in] float x, [in] float y, [in] int width, [in] int height,
 														   [in] VARIANT_BOOL drawVertices, 
-														   [in, optional, defaultvalue(0)] int clipWidth, [in, optional, defaultvalue(0)] int clipHeight,   
-														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														   [in, defaultvalue(0)] int clipWidth, [in, defaultvalue(0)] int clipHeight,   
+														   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 														   [out, retval] VARIANT_BOOL* retVal);
 	
 	[id(57), helpstring("method DrawShapeVB")] HRESULT DrawShapeVB([in]int hdc, [in]float x, [in]float y, [in]IShape* shape,
 														   [in]VARIANT_BOOL drawVertices, 
 														   [in] int clipWidth, [in] int clipHeight,   
-														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 														   [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(58), helpstring("property DynamicVisibility")] HRESULT DynamicVisibility([out, retval]VARIANT_BOOL* retval);
@@ -4998,8 +4998,8 @@ interface ILabel : IDispatch{
 interface ILabels : IDispatch{
 	[propget, id(1), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(2), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(4), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(4), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	
@@ -5009,12 +5009,12 @@ interface ILabels : IDispatch{
 	[propput, id(6), helpstring("property Category")] HRESULT Category([in]long Index, [in]ILabelCategory* newVal);
 	
 	// methods
-	[id(7), helpstring("method AddLabel")] HRESULT AddLabel([in]BSTR Text, [in]double x, [in]double y, [in, optional,defaultvalue(0)]double Rotation, [in, optional,defaultvalue(-1)]long Category);
-	[id(8), helpstring("method InsertLabel")] HRESULT InsertLabel([in]long Index, [in]BSTR Text, [in]double x, [in]double y, [in, optional,defaultvalue(0)]double Rotation, [in, optional,defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
+	[id(7), helpstring("method AddLabel")] HRESULT AddLabel([in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category);
+	[id(8), helpstring("method InsertLabel")] HRESULT InsertLabel([in]long Index, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
 	[id(9), helpstring("method RemoveLabel")] HRESULT RemoveLabel([in]long Index, [out, retval ]VARIANT_BOOL* retval);
 	
-	[id(10), helpstring("method AddPart")] HRESULT AddPart([in] long Index,[in]BSTR Text, [in]double x, [in]double y, [in, optional,defaultvalue(0)]double Rotation, [in, optional,defaultvalue(-1)]long Category);
-	[id(11), helpstring("method InsertPart")] HRESULT InsertPart([in] long Index, [in] long Part, [in]BSTR Text, [in]double x, [in]double y, [in, optional,defaultvalue(0)]double Rotation, [in, optional,defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
+	[id(10), helpstring("method AddPart")] HRESULT AddPart([in] long Index,[in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category);
+	[id(11), helpstring("method InsertPart")] HRESULT InsertPart([in] long Index, [in] long Part, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
 	[id(12), helpstring("method RemovePart")] HRESULT RemovePart([in]long Index, [in]long Part, [out, retval ]VARIANT_BOOL* vbretval);
 
 	[id(13), helpstring("method AddCategory")] HRESULT AddCategory([in]BSTR Name, [out, retval]ILabelCategory** retVal);
@@ -5025,11 +5025,11 @@ interface ILabels : IDispatch{
 	[id(17), helpstring("method ClearAllCategories")] HRESULT ClearCategories();
 
 	/*[id(18), helpstring("method SetRandomColors")] HRESULT SetRandomColors(tkLabelElements Element, 
-																		   [in,optional,defaultvalue(0)]long MinRed, [in,optional,defaultvalue(0)]long MinGreen, 
-																		   [in,optional,defaultvalue(0)]long MinBlue, [in,optional,defaultvalue(255)]long MaxRed, 
-																		   [in,optional,defaultvalue(255)]long MaxGreen, [in,optional,defaultvalue(255)]long MaxBlue);
-	[id(19), helpstring("method SetGraduatedColors")] HRESULT SetGraduatedColors([in]tkLabelElements Element, [in]OLE_COLOR ColorStart, [in]OLE_COLOR ColorEnd, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL ByCategoryIndex);*/
-	[id(20), helpstring("method Select")] HRESULT Select([in]IExtents* BoundingBox, [in, optional, defaultvalue(0)]long Tolerance, [in, optional, defaultvalue(INTERSECTION)]SelectMode SelectMode, [in, optional, out]VARIANT* LabelIndices, [in, optional, out]VARIANT* PartIndices, [out, retval]VARIANT_BOOL* retval);
+																		   [in,defaultvalue(0)]long MinRed, [in,defaultvalue(0)]long MinGreen, 
+																		   [in,defaultvalue(0)]long MinBlue, [in,defaultvalue(255)]long MaxRed, 
+																		   [in,defaultvalue(255)]long MaxGreen, [in,defaultvalue(255)]long MaxBlue);
+	[id(19), helpstring("method SetGraduatedColors")] HRESULT SetGraduatedColors([in]tkLabelElements Element, [in]OLE_COLOR ColorStart, [in]OLE_COLOR ColorEnd, [in, defaultvalue(0)] VARIANT_BOOL ByCategoryIndex);*/
+	[id(20), helpstring("method Select")] HRESULT Select([in]IExtents* BoundingBox, [in, defaultvalue(0)]long Tolerance, [in, defaultvalue(INTERSECTION)]SelectMode SelectMode, [in, optional, out]VARIANT* LabelIndices, [in, optional, out]VARIANT* PartIndices, [out, retval]VARIANT_BOOL* retval);
 	
 	// class specific properties
 	[propget, id(21), helpstring("property NumLabels")] HRESULT Count([out, retval] long* pVal);
@@ -5199,30 +5199,30 @@ interface ILabels : IDispatch{
 	[id(88), helpstring("method SaveToXML")] HRESULT SaveToXML([in]BSTR Filename, [out,retval]VARIANT_BOOL* retVal);
 	[id(89), helpstring("method LoadFromXML")] HRESULT LoadFromXML([in]BSTR Filename, [out,retval]VARIANT_BOOL* retVal);
 	
-	[id(90), helpstring("method SaveToDbf")] HRESULT SaveToDbf([in, optional, defaultvalue(FALSE)] VARIANT_BOOL saveText, 
-															   [in, optional, defaultvalue(FALSE)] VARIANT_BOOL saveCategory, 
+	[id(90), helpstring("method SaveToDbf")] HRESULT SaveToDbf([in, defaultvalue(0)] VARIANT_BOOL saveText, 
+															   [in, defaultvalue(0)] VARIANT_BOOL saveCategory, 
 															   [out,retval] VARIANT_BOOL* retVal);
 
-	[id(91), helpstring("method SaveToDbf2")] HRESULT SaveToDbf2([in, optional, defaultvalue("_LabelX")]BSTR xField,
-																   [in, optional, defaultvalue("_LabelY")]BSTR yField, 
-																   [in, optional, defaultvalue("_LabelAngle")]BSTR angleField, 
-																   [in, optional, defaultvalue("_LabelText")]BSTR textField,
-																   [in, optional, defaultvalue("_LabelCtg")]BSTR categoryField, 
-																   [in, optional, defaultvalue(FALSE)] VARIANT_BOOL saveText, 
-																   [in, optional, defaultvalue(FALSE)] VARIANT_BOOL saveCategory, 
+	[id(91), helpstring("method SaveToDbf2")] HRESULT SaveToDbf2([in, defaultvalue("_LabelX")]BSTR xField,
+																   [in, defaultvalue("_LabelY")]BSTR yField, 
+																   [in, defaultvalue("_LabelAngle")]BSTR angleField, 
+																   [in, defaultvalue("_LabelText")]BSTR textField,
+																   [in, defaultvalue("_LabelCtg")]BSTR categoryField, 
+																   [in, defaultvalue(0)] VARIANT_BOOL saveText, 
+																   [in, defaultvalue(0)] VARIANT_BOOL saveCategory, 
 																   [out,retval] VARIANT_BOOL* retVal);
 
-	[id(92), helpstring("method LoadFromDbf")] HRESULT LoadFromDbf([in, optional, defaultvalue(FALSE)] VARIANT_BOOL loadText, 
-																   [in, optional, defaultvalue(FALSE)] VARIANT_BOOL loadCategory, 
+	[id(92), helpstring("method LoadFromDbf")] HRESULT LoadFromDbf([in, defaultvalue(0)] VARIANT_BOOL loadText, 
+																   [in, defaultvalue(0)] VARIANT_BOOL loadCategory, 
 																   [out,retval] VARIANT_BOOL* retVal);
 
-	[id(93), helpstring("method LoadFromDbf2")] HRESULT LoadFromDbf2([in, optional, defaultvalue("_LabelX")]BSTR xField,
-																   [in, optional, defaultvalue("_LabelY")]BSTR yField, 
-																   [in, optional, defaultvalue("_LabelAngle")]BSTR angleField, 
-																   [in, optional, defaultvalue("_LabelText")]BSTR textField,
-																   [in, optional, defaultvalue("_LabelCtg")]BSTR categoryField, 
-																   [in, optional, defaultvalue(FALSE)] VARIANT_BOOL loadText, 
-																   [in, optional, defaultvalue(FALSE)] VARIANT_BOOL loadCategory, 
+	[id(93), helpstring("method LoadFromDbf2")] HRESULT LoadFromDbf2([in, defaultvalue("_LabelX")]BSTR xField,
+																   [in, defaultvalue("_LabelY")]BSTR yField, 
+																   [in, defaultvalue("_LabelAngle")]BSTR angleField, 
+																   [in, defaultvalue("_LabelText")]BSTR textField,
+																   [in, defaultvalue("_LabelCtg")]BSTR categoryField, 
+																   [in, defaultvalue(0)] VARIANT_BOOL loadText, 
+																   [in, defaultvalue(0)] VARIANT_BOOL loadCategory, 
 																   [out,retval] VARIANT_BOOL* retVal);
 	
 	[id(94), helpstring("method Generate")] HRESULT Generate([in]BSTR Expression, [in]tkLabelPositioning Method, [in]VARIANT_BOOL LargestPartOnly, [out, retval]long* Count);
@@ -5384,8 +5384,8 @@ interface ILabelCategory : IDispatch{
 interface IShapefileCategories : IDispatch{
 	[propget, id(1), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(2), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(3), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(4), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(4), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 
@@ -5421,7 +5421,7 @@ interface IShapefileCategories : IDispatch{
 
 	[propget, id(24), helpstring("property CategoryIndexByName")] HRESULT CategoryIndexByName([in]BSTR categoryName, [out, retval] int* categoryIndex);
 	[propget, id(25), helpstring("property CategoryIndex")] HRESULT CategoryIndex([in] IShapefileCategory* category, [out, retval]int* categoryIndex);
-	[id(26), helpstring("method GeneratePolygonColors")] HRESULT GeneratePolygonColors([in, optional, defaultvalue(NULL)]IColorScheme* scheme, [out, retval]VARIANT_BOOL* retVal);
+	[id(26), helpstring("method GeneratePolygonColors")] HRESULT GeneratePolygonColors([in, defaultvalue(NULL)]IColorScheme* scheme, [out, retval]VARIANT_BOOL* retVal);
 	
 	[propget, id(27)] HRESULT ClassificationField([out, retval] LONG* pVal);
 	[propput, id(27)] HRESULT ClassificationField([in] LONG newVal);
@@ -5489,7 +5489,7 @@ interface ICharts : IDispatch {
 	[id(15), helpstring("method Generate")] HRESULT Generate([in] tkLabelPositioning Type, [out, retval]VARIANT_BOOL* vbretval);
 	[id(16), helpstring("method Clear")] HRESULT Clear();
 	[id(17), helpstring("method DrawChart")] HRESULT DrawChart([in]int** hdc, [in]float x, [in]float y, [in]VARIANT_BOOL hideLabels, 
-															   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
+															   [in, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(18), helpstring("property Tilt")] HRESULT Tilt([out, retval] double* pVal);
 	[propput, id(18), helpstring("property Tilt")] HRESULT Tilt([in] double newVal);
 	[propget, id(19), helpstring("property Thickness")] HRESULT Thickness([out, retval] double* pVal);
@@ -5517,8 +5517,8 @@ interface ICharts : IDispatch {
 	[id(31), helpstring("method InsertField")] HRESULT InsertField([in]long Index, [in]IChartField* Field, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(32), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(33), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(34), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(34), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(34), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(34), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(35), helpstring("property Count")] HRESULT Count([out, retval] long *retVal);
 	[propget, id(36), helpstring("property MaxVisibleScale")] HRESULT MaxVisibleScale([out, retval]double* retval);
 	[propput, id(36), helpstring("property MaxVisibleScale")] HRESULT MaxVisibleScale([in]double newVal);
@@ -5622,8 +5622,8 @@ interface IColorScheme : IDispatch{
 
 	[propget, id(13), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(14), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(15), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(15), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(15), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(15), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(16), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(16), helpstring("property Key")] HRESULT Key([in] BSTR newVal);	
 
@@ -5660,8 +5660,8 @@ interface IChartField : IDispatch{
 interface ILinePattern : IDispatch{
 	[propget, id(1), helpstring("property Key")] HRESULT Key( [out, retval]BSTR* retVal);
 	[propput, id(1), helpstring("property Key")] HRESULT Key( [in]BSTR newVal);
-	[propget, id(2), helpstring("property GlobalCallback")] HRESULT GlobalCallback( [out, retval]ICallback** retVal);
-	[propput, id(2), helpstring("property GlobalCallback")] HRESULT GlobalCallback( [in]ICallback* newVal);
+	[propget, id(2), helpstring("property GlobalCallback")] HRESULT GlobalCallback( [out, retval] ICallback** retVal);
+	[propput, id(2), helpstring("property GlobalCallback")] HRESULT GlobalCallback( [in] ICallback* newVal);
 	[propget, id(3), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(4), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(5), helpstring("property Line")] HRESULT Line([in]int Index, [out, retval]ILineSegment** retVal);
@@ -5674,7 +5674,7 @@ interface ILinePattern : IDispatch{
 	[id(11), helpstring("method RemoveItem")] HRESULT RemoveItem([in]int Index, [out, retval]VARIANT_BOOL* retVal);
 	[id(12), helpstring("method Clear")] HRESULT Clear();
 	[id(13), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
-													[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 													[out, retval]VARIANT_BOOL* retVal);
 	
 	[propget, id(14), helpstring("property Transparency")] HRESULT Transparency( [out, retval]BYTE* retVal);
@@ -5684,7 +5684,7 @@ interface ILinePattern : IDispatch{
 	[id(16), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
 
 	[id(17), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
-														[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 														[out, retval]VARIANT_BOOL* retVal);
 };
 
@@ -5719,12 +5719,12 @@ interface ILineSegment : IDispatch{
 	[propget, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [out, retval]float* retVal);
 	[propput, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [in]float newVal);
 	[id(11), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
-													[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 													[out, retval]VARIANT_BOOL* retVal);
 	[propget, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [out, retval]OLE_COLOR* retVal);
 	[propput, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [in]OLE_COLOR newVal);
 	[id(13), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
-														[in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [in, optional, defaultvalue(255)]BYTE backAlpha, 
+														[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 														[out, retval]VARIANT_BOOL* retVal);
 };
 
@@ -5744,8 +5744,8 @@ interface IGeoProjection : IDispatch{
 	[id(4), helpstring("method ImportFromEPSG")] HRESULT ImportFromEPSG([in] LONG projCode, [out,retval] VARIANT_BOOL* retVal);
 	[id(5), helpstring("method ExportToWKT")] HRESULT ExportToWKT([out,retval] BSTR* retVal);
 	[id(6), helpstring("method ImportFromWKT")] HRESULT ImportFromWKT([in] BSTR proj, [out,retval] VARIANT_BOOL* retVal);
-	[propget, id(7), helpstring("property GlobalCallback")] HRESULT GlobalCallback( [out, retval]ICallback** retVal);
-	[propput, id(7), helpstring("property GlobalCallback")] HRESULT GlobalCallback( [in]ICallback* newVal);
+	[propget, id(7), helpstring("property GlobalCallback")] HRESULT GlobalCallback( [out, retval] ICallback** retVal);
+	[propput, id(7), helpstring("property GlobalCallback")] HRESULT GlobalCallback( [in] ICallback* newVal);
 	[propget, id(8), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(9), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(10), helpstring("property Key")] HRESULT Key( [out, retval]BSTR* retVal);
@@ -5772,7 +5772,7 @@ interface IGeoProjection : IDispatch{
 	[id(28), helpstring("method SetWgs84Projection")] HRESULT SetWgs84Projection([in] tkWgs84Projection Projection);
 	[id(29), helpstring("method SetNad83Projection")] HRESULT SetNad83Projection([in] tkNad83Projection Projection);
 	[propget, id(30), helpstring("property IsSame")] HRESULT IsSameExt([in] IGeoProjection* proj, [in] IExtents* bounds, 
-																	   [in, optional, defaultvalue(8)]int numSamplingPoints, [out, retval] VARIANT_BOOL* pVal);
+																	   [in, defaultvalue(8)]int numSamplingPoints, [out, retval] VARIANT_BOOL* pVal);
 	[id(31), helpstring("method ReadFromFile")] HRESULT ReadFromFile([in]BSTR Filename, [out, retval]VARIANT_BOOL* retVal);
 	[id(32), helpstring("method WriteToFile")] HRESULT WriteToFile([in]BSTR Filename, [out, retval]VARIANT_BOOL* retVal);
 
@@ -5920,7 +5920,7 @@ interface IGlobalSettings : IDispatch{
 	[propget, id(63)] HRESULT TileLogIsOpened([out, retval]VARIANT_BOOL* retVal);
 	[propget, id(64)] HRESULT LogTileErrorsOnly([out, retval]VARIANT_BOOL* retVal);
 	[propput, id(64)] HRESULT LogTileErrorsOnly([in]VARIANT_BOOL newVal);
-	[id(65)] HRESULT StartLogTileRequests([in]BSTR Filename, [in, defaultvalue(FALSE)]VARIANT_BOOL errorsOnly, [out, retval]VARIANT_BOOL* retVal);
+	[id(65)] HRESULT StartLogTileRequests([in]BSTR Filename, [in, defaultvalue(0)]VARIANT_BOOL errorsOnly, [out, retval]VARIANT_BOOL* retVal);
 	[id(66)] HRESULT StopLogTileRequests();
 	[propget, id(67)] HRESULT WmsDiskCaching([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(67)] HRESULT WmsDiskCaching([in] VARIANT_BOOL newVal);
@@ -5969,19 +5969,19 @@ interface ITiles : IDispatch{
 	[id(11), helpstring("")] HRESULT ClearCache([in]tkCacheType cacheType);
 	[id(12), helpstring("")] HRESULT ClearCache2([in]tkCacheType cacheType, 
 												 [in]int ProviderId, 
-												 [in, optional, defaultvalue(0)]int fromScale, 
-												 [in, optional, defaultvalue(100)]int toScale);
+												 [in, defaultvalue(0)]int fromScale, 
+												 [in, defaultvalue(100)]int toScale);
 	
-	[propget, id(13), helpstring("")] HRESULT GlobalCallback( [out, retval]ICallback** retVal);
-	[propput, id(13), helpstring("")] HRESULT GlobalCallback( [in]ICallback* newVal);
+	[propget, id(13), helpstring("")] HRESULT GlobalCallback( [out, retval] ICallback** retVal);
+	[propput, id(13), helpstring("")] HRESULT GlobalCallback( [in] ICallback* newVal);
 	[propget, id(14), helpstring("")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(15), helpstring("")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(16), helpstring("")] HRESULT Key( [out, retval]BSTR* retVal);
 	[propput, id(16), helpstring("")] HRESULT Key( [in]BSTR newVal);
 
 	[propget, id(18), helpstring("")] HRESULT CacheSize2([in]tkCacheType cacheType, 
-														 [in, optional, defaultvalue(-1)]int provider, 
-														 [in, optional, defaultvalue(-1)]int scale,  
+														 [in, defaultvalue(-1)]int provider, 
+														 [in, defaultvalue(-1)]int scale,  
 														 [out, retval] double* retVal);
 	
 	[id(19), helpstring("")] HRESULT Serialize([out, retval]BSTR* retVal);
@@ -6041,9 +6041,9 @@ interface ITileProviders : IDispatch{
 										[in]BSTR Name, 
 										[in]BSTR UrlPattern, 
 										[in]tkTileProjection Projection, 
-										[in, optional, defaultvalue(0)]int MinZoom, 
-										[in, optional, defaultvalue(17)]int MaxZoom, 
-										[in, optional, defaultvalue("")]BSTR Copyright,
+										[in, defaultvalue(0)]int MinZoom, 
+										[in, defaultvalue(17)]int MaxZoom, 
+										[in, defaultvalue("")]BSTR Copyright,
 										[out,retval] VARIANT_BOOL* retVal);
 	[propget, id(5), helpstring("")] HRESULT Id([in] int Index, [out, retval] LONG* retVal);
 	[propget, id(6), helpstring("")] HRESULT Name([in] int Index, [out, retval] BSTR* retVal);
@@ -6057,8 +6057,8 @@ interface ITileProviders : IDispatch{
 	[propget, id(12), helpstring("")] HRESULT IndexByProvider([in] tkTileProvider provider, [out, retval] int* retVal);
 	[propget, id(13), helpstring("")] HRESULT IndexByProviderId([in] int ProviderId, [out, retval] int* retVal);
 	[propget, id(14), helpstring("")] HRESULT IsCustom([in] int Index, [out, retval] VARIANT_BOOL* retVal);
-	[propget, id(15), helpstring("")] HRESULT GlobalCallback( [out, retval]ICallback** retVal);
-	[propput, id(15), helpstring("")] HRESULT GlobalCallback( [in]ICallback* newVal);
+	[propget, id(15), helpstring("")] HRESULT GlobalCallback( [out, retval] ICallback** retVal);
+	[propput, id(15), helpstring("")] HRESULT GlobalCallback( [in] ICallback* newVal);
 	[propget, id(16), helpstring("")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(17), helpstring("")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(18), helpstring("")] HRESULT Language([in] int Index, [out, retval] BSTR* retVal);
@@ -6093,8 +6093,8 @@ interface IMeasuring : IDispatch{
 	[propget, id(13), helpstring("")] HRESULT IsUsingEllipsoid([out, retval] VARIANT_BOOL* retVal);
 	[propget, id(14), helpstring("")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(15), helpstring("")] HRESULT LastErrorCode([out, retval] long *pVal);
-	[propget, id(16), helpstring("")] HRESULT GlobalCallback( [out, retval]ICallback** retVal);
-	[propput, id(16), helpstring("")] HRESULT GlobalCallback( [in]ICallback* newVal);
+	[propget, id(16), helpstring("")] HRESULT GlobalCallback( [out, retval] ICallback** retVal);
+	[propput, id(16), helpstring("")] HRESULT GlobalCallback( [in] ICallback* newVal);
 	[propget, id(17), helpstring("")] HRESULT Key( [out, retval]BSTR* retVal);
 	[propput, id(17), helpstring("")] HRESULT Key( [in]BSTR newVal);
 	[propget, id(18)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
@@ -6199,14 +6199,14 @@ interface IFileManager : IDispatch{
 	[propget, id(4), helpstring("IsVectorLayer")] HRESULT IsVectorLayer([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(5), helpstring("OpenStrategy")] HRESULT OpenStrategy([in]BSTR Filename, [out, retval] tkFileOpenStrategy* retVal);
 	[propget, id(6), helpstring("CanOpenAs")] HRESULT CanOpenAs([in]BSTR Filename, [in]tkFileOpenStrategy openStrategy, [out, retval] VARIANT_BOOL* retVal);
-	[id(7), helpstring("Open")] HRESULT Open([in]BSTR Filename, [in, optional, defaultvalue(fosAutoDetect)]tkFileOpenStrategy openStrategy, [in, optional, defaultvalue(NULL)]ICallback* cBack, [out, retval]IDispatch** retVal);
-	[id(8), helpstring("OpenShapefile")] HRESULT OpenShapefile([in]BSTR Filename, [in, defaultvalue(NULL)]ICallback* cBack, [out, retval]IShapefile** retVal);
-	[id(9), helpstring("OpenRaster")] HRESULT OpenRaster([in]BSTR Filename, [in]tkFileOpenStrategy openStrategy, [in, defaultvalue(NULL)]ICallback* cBack, [out, retval]IImage** retVal);
+	[id(7), helpstring("Open")] HRESULT Open([in]BSTR Filename, [in, defaultvalue(fosAutoDetect)]tkFileOpenStrategy openStrategy, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval]IDispatch** retVal);
+	[id(8), helpstring("OpenShapefile")] HRESULT OpenShapefile([in]BSTR Filename, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval]IShapefile** retVal);
+	[id(9), helpstring("OpenRaster")] HRESULT OpenRaster([in]BSTR Filename, [in]tkFileOpenStrategy openStrategy, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval]IImage** retVal);
 	[propget, id(10), helpstring("IsSupportedBy")] HRESULT IsSupportedBy([in]BSTR Filename, [in]tkSupportType supportType, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(11), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(12), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(13), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(13), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(13), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(13), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(14), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(14), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[propget, id(15), helpstring("property LastOpenStrategy")] HRESULT LastOpenStrategy([out, retval] tkFileOpenStrategy *pVal);
@@ -6224,8 +6224,8 @@ interface IFileManager : IDispatch{
 	//[propget, id(9), helpstring("IsSameProjection")] HRESULT IsSameProjection([in]BSTR Filename, [in]IGeoProjection* projection,  [out, retval] VARIANT_BOOL* retVal);
 	//[id(13), helpstring("DeleteDatasource")] HRESULT DeleteDatasource([in]BSTR Filename, [out, retval]VARIANT_BOOL* retVal);
 	[id(25)] HRESULT OpenVectorLayer([in] BSTR Filename, 
-		[in, optional, defaultvalue(SHP_NULLSHAPE)] ShpfileType preferedShapeType,
-		[in, optional, defaultvalue(0)] VARIANT_BOOL forUpdate,
+		[in, defaultvalue(SHP_NULLSHAPE)] ShpfileType preferedShapeType,
+		[in, defaultvalue(0)] VARIANT_BOOL forUpdate,
 		[out, retval] IOgrLayer** retVal);
 	[id(26)] HRESULT OpenVectorDatasource([in] BSTR Filename, [out, retval] IOgrDatasource** retVal);
 	[propget, id(27)] HRESULT CdlgFilter([out, retval] BSTR* pVal);
@@ -6245,27 +6245,27 @@ interface IFileManager : IDispatch{
 interface IOgrDatasource : IDispatch{
 	[propget, id(1)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(2)] HRESULT LastErrorCode([out, retval] long *pVal);
-	[propget, id(3)] HRESULT GlobalCallback([out, retval]ICallback** retVal);
-	[propput, id(3)] HRESULT GlobalCallback([in]ICallback* newVal);
+	[propget, id(3)] HRESULT GlobalCallback([out, retval] ICallback** retVal);
+	[propput, id(3)] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(4)] HRESULT Key([out, retval]BSTR* retVal);
 	[propput, id(4)] HRESULT Key([in]BSTR newVal);
 	[id(5)] HRESULT Close();
 	[id(6)] HRESULT Open([in]BSTR connectionString, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(7)] HRESULT LayerCount([out, retval]int* retVal);
-	[id(8)] HRESULT GetLayer([in]int index, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]IOgrLayer** retVal);
+	[id(8)] HRESULT GetLayer([in]int index, [in, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]IOgrLayer** retVal);
 	[propget, id(9)] HRESULT DriverName([out, retval]BSTR* retVal);
 	[id(10)] HRESULT GetLayerName([in]int layerIndex, [out, retval]BSTR* retVal);
-	[id(11)] HRESULT GetLayerByName([in]BSTR LayerName, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]IOgrLayer** retVal);
+	[id(11)] HRESULT GetLayerByName([in]BSTR LayerName, [in, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]IOgrLayer** retVal);
 	[id(12)] HRESULT RunQuery([in]BSTR sql, [out, retval]IOgrLayer** retVal);
 	[id(13)] HRESULT DeleteLayer([in]int layerIndex, [out, retval]VARIANT_BOOL* retVal);
 	[id(14)] HRESULT TestCapability([in]tkOgrDSCapability capability, [out, retval]VARIANT_BOOL* retVal);
 	[id(15)] HRESULT CreateLayer([in]BSTR LayerName, [in]ShpfileType shpType,
-		[in, optional, defaultvalue(NULL)]IGeoProjection* projection, 
-		[in, optional,defaultvalue("")]BSTR creationOptions, [out, retval]VARIANT_BOOL* retVal);
+		[in, defaultvalue(NULL)]IGeoProjection* projection, 
+		[in, defaultvalue("")]BSTR creationOptions, [out, retval]VARIANT_BOOL* retVal);
 	[id(16)] HRESULT LayerIndexByName([in]BSTR LayerName, [out, retval]int* retVal);
 	[id(17)] HRESULT ImportShapefile([in] IShapefile* sf, [in]BSTR LayerName,
-		[in, optional, defaultvalue("")]BSTR creationOptions, 
-		[in, optional, defaultvalue(TryFixSkipOnFailure)]tkShapeValidationMode shapeValidationMode, 
+		[in, defaultvalue("")]BSTR creationOptions, 
+		[in, defaultvalue(TryFixSkipOnFailure)]tkShapeValidationMode shapeValidationMode, 
 		[out, retval]VARIANT_BOOL* retVal);
 	[propget, id(18)] HRESULT DriverMetadata([in]tkGdalDriverMetadata metadata, [out, retval]BSTR* retVal);
 	[propget, id(19)] HRESULT DriverMetadataCount([out, retval]int* retVal);
@@ -6286,8 +6286,8 @@ interface IOgrDatasource : IDispatch{
 interface IOgrLayer : IDispatch{
 	[propget, id(1)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(2)] HRESULT LastErrorCode([out, retval] long *pVal);
-	[propget, id(3)] HRESULT GlobalCallback([out, retval]ICallback** retVal);
-	[propput, id(3)] HRESULT GlobalCallback([in]ICallback* newVal);
+	[propget, id(3)] HRESULT GlobalCallback([out, retval] ICallback** retVal);
+	[propput, id(3)] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(4)] HRESULT Key([out, retval]BSTR* retVal);
 	[propput, id(4)] HRESULT Key([in]BSTR newVal);
 	[id(5)] HRESULT Close();
@@ -6302,20 +6302,20 @@ interface IOgrLayer : IDispatch{
 	[propget, id(14)] HRESULT DataIsReprojected([out, retval]VARIANT_BOOL* retVal);
 	[propget, id(15)] HRESULT FIDColumnName([out, retval]BSTR* retVal);
 	[id(16)] HRESULT SaveChanges([out]int* savedCount, 
-								[in, optional, defaultvalue(ostSaveAll)]tkOgrSaveType saveType, 
-								[in, optional, defaultvalue(1)]VARIANT_BOOL validateShapes, [out, retval]tkOgrSaveResult* retVal);
+								[in, defaultvalue(ostSaveAll)]tkOgrSaveType saveType, 
+								[in, defaultvalue(1)]VARIANT_BOOL validateShapes, [out, retval]tkOgrSaveResult* retVal);
 	[id(17)] HRESULT TestCapability([in]tkOgrLayerCapability capability, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(18)] HRESULT UpdateSourceErrorCount([out, retval]int* retVal);
 	[propget, id(19)] HRESULT UpdateSourceErrorMsg([in]int errorIndex, [out, retval]BSTR* retVal);
 	[propget, id(20)] HRESULT UpdateSourceErrorShapeIndex([in]int errorIndex, [out, retval]int* retVal);
-	[propget, id(21)] HRESULT FeatureCount([in, optional, defaultvalue(0)]VARIANT_BOOL forceLoading, [out, retval]int* retVal);
-	[propget, id(22)] HRESULT Extents([out]IExtents** layerExtents, [in, optional, defaultvalue(0)]VARIANT_BOOL forceLoading, [out, retval]VARIANT_BOOL *retVal);
+	[propget, id(21)] HRESULT FeatureCount([in, defaultvalue(0)]VARIANT_BOOL forceLoading, [out, retval]int* retVal);
+	[propget, id(22)] HRESULT Extents([out]IExtents** layerExtents, [in, defaultvalue(0)]VARIANT_BOOL forceLoading, [out, retval]VARIANT_BOOL *retVal);
 	[propget, id(23)] HRESULT GeometryColumnName([out, retval]BSTR* retVal);
 	[propget, id(24)] HRESULT SupportsEditing([in]tkOgrSaveType editingType, [out, retval]VARIANT_BOOL* retVal);
 	[id(25)] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(26)] HRESULT Deserialize([in]BSTR newVal, [out, retval]VARIANT_BOOL* retVal);
 	[id(27)] HRESULT OpenFromQuery([in]BSTR connectionString, [in]BSTR sql, [out, retval]VARIANT_BOOL* retVal);
-	[id(28)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR LayerName, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
+	[id(28)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR LayerName, [in, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(29)] HRESULT SourceType([out, retval]tkOgrSourceType* retVal);
 	[propget, id(30)] HRESULT GdalLastErrorMsg([out, retval]BSTR* retVal);
 	[propget, id(31)] HRESULT DynamicLoading([out, retval] VARIANT_BOOL* pVal);
@@ -6357,8 +6357,8 @@ interface IUndoList : IDispatch{
 	[propget, id(2)] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(3)] HRESULT Key([out, retval]BSTR* retVal);
 	[propput, id(3)] HRESULT Key([in]BSTR newVal);
-	[id(4)] HRESULT Undo([in, optional, defaultvalue(-1)]VARIANT_BOOL ZoomToShape, [out, retval] VARIANT_BOOL* retVal);
-	[id(5)] HRESULT Redo([in, optional, defaultvalue(-1)]VARIANT_BOOL ZoomToShape, [out, retval] VARIANT_BOOL* retVal);
+	[id(4)] HRESULT Undo([in, defaultvalue(-1)]VARIANT_BOOL ZoomToShape, [out, retval] VARIANT_BOOL* retVal);
+	[id(5)] HRESULT Redo([in, defaultvalue(-1)]VARIANT_BOOL ZoomToShape, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(6)] HRESULT UndoCount([out, retval] LONG* pVal);
 	[propget, id(7)] HRESULT RedoCount([out, retval] LONG* pVal);
 	[propget, id(8)] HRESULT TotalLength([out, retval] LONG* pVal);
@@ -6647,12 +6647,12 @@ interface IGdalUtils : IDispatch{
 	[propget, id(1)] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(2)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[id(3), helpstring("Image reprojection and warping utility")] HRESULT GdalRasterWarp([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [out, retval] VARIANT_BOOL* retVal);
-	[propget, id(4), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-	[propput, id(4), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(4), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+	[propput, id(4), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 	[propget, id(5), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(5), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-	[id(6), helpstring("method GdalVectorTranslate")] HRESULT GdalVectorTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [in, optional, defaultvalue(FALSE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
-	[id(7), helpstring("method ClipVectorWithVector")] HRESULT ClipVectorWithVector([in] BSTR bstrSubjectFilename, [in] BSTR bstrOverlayFilename, [in] BSTR bstrDstFilename, [in, optional, defaultvalue(TRUE)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
+	[id(6), helpstring("method GdalVectorTranslate")] HRESULT GdalVectorTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [in, defaultvalue(0)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
+	[id(7), helpstring("method ClipVectorWithVector")] HRESULT ClipVectorWithVector([in] BSTR bstrSubjectFilename, [in] BSTR bstrOverlayFilename, [in] BSTR bstrDstFilename, [in, defaultvalue(-1)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(8)] HRESULT DetailedErrorMsg([out, retval] BSTR *pVal);
 	[id(9), helpstring("method GdalRasterTranslate")] HRESULT GdalRasterTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [out, retval] VARIANT_BOOL* retVal);
 	[id(10), helpstring("Builds or rebuilds overview images.")] HRESULT GdalBuildOverviews([in] const BSTR bstrSrcFilename, [in] tkGDALResamplingMethod resamplingAlgorithm, [in] SAFEARRAY(int) overviewList, [in] SAFEARRAY(int) bandList, [in] SAFEARRAY(BSTR) configOptions, [out, retval] VARIANT_BOOL* retVal);
@@ -6728,6 +6728,8 @@ library MapWinGIS
 			[id(256), readonly]long ExtentHistoryUndoCount;
 			[id(257), readonly]long ExtentHistoryRedoCount;
 
+            [id(15), nonbrowsable] IDispatch* GlobalCallback;
+            [id(17), nonbrowsable] IExtents* Extents;
 #ifdef OLD_API
 			[id(14)] VARIANT_BOOL DoubleBuffer;
 			[id(20), readonly] BSTR MapState;
@@ -6739,10 +6741,10 @@ library MapWinGIS
 			// NOTE - ClassWizard will maintain method information here.
 			//    Use extreme caution when editing this section.
 			//{{AFX_ODL_METHOD(CMapView)
-			[id(15), propput, nonbrowsable] void GlobalCallback(IDispatch* nNewValue);
-			[id(15), propget, nonbrowsable] IDispatch* GlobalCallback();
-			[id(17), propput, nonbrowsable] void Extents(IExtents* nNewValue);
-			[id(17), propget, nonbrowsable] IExtents* Extents();
+			//[id(15), propput, nonbrowsable] void GlobalCallback(IDispatch* nNewValue);
+			//[id(15), propget, nonbrowsable] IDispatch* GlobalCallback();
+			//[id(17), propput, nonbrowsable] void Extents(IExtents* nNewValue);
+			//[id(17), propget, nonbrowsable] IExtents* Extents();
 
 #define REDRAW_API		
 #ifdef REDRAW_API	
@@ -6758,9 +6760,9 @@ library MapWinGIS
 			[id(217), propget] tkMapProjection Projection();
 			[id(36)] void ProjToPixel(double projX, double projY, double* pixelX, double* pixelY);
 			[id(37)] void PixelToProj(double pixelX, double pixelY, double* projX, double* projY);
-			[id(222)] VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY);
+			[id(222)] VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double* degreesLatY);
 			[id(223)] VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
-			[id(224)] VARIANT_BOOL PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
+			[id(224)] VARIANT_BOOL PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double* degreesLatY);
 			[id(225)] VARIANT_BOOL DegreesToPixel(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
 			[id(188), propget, nonbrowsable] double PixelsPerDegree();
 			[id(247)] DOUBLE GeodesicDistance(DOUBLE projX1, DOUBLE projY1, DOUBLE projX2, DOUBLE projY2);
@@ -7035,9 +7037,9 @@ library MapWinGIS
 			[id(88), propput] void UDFillStipple(long LayerHandle, long StippleRow, long nNewValue);
 			[id(89), propget] IDispatch* UDPointType(long LayerHandle);
 			[id(89), propputref] void UDPointType(long LayerHandle, IDispatch* newValue);
-			[id(100)] void GetLayerStandardViewWidth(long LayerHandle, double * Width);
+			[id(100)] void GetLayerStandardViewWidth(long LayerHandle, double* Width);
 			[id(101)] void SetLayerStandardViewWidth(long LayerHandle, double Width);
-			[id(131)] void GetDrawingStandardViewWidth(long drawHandle, double * Width);
+			[id(131)] void GetDrawingStandardViewWidth(long drawHandle, double* Width);
 			[id(132)] void SetDrawingStandardViewWidth(long drawHandle, double Width);
 			[id(162), propget, nonbrowsable] double MapRotationAngle();
 			[id(162), propput, nonbrowsable] void MapRotationAngle(double nNewValue);
@@ -7212,19 +7214,19 @@ library MapWinGIS
 		pointer_default(unique)
 	]
 	interface IShapefileColorScheme : IDispatch
-	{	[id(1), helpstring("method NumBreaks")] HRESULT NumBreaks([out, retval] long * result);
+	{	[id(1), helpstring("method NumBreaks")] HRESULT NumBreaks([out, retval] long* result);
 		[id(2), helpstring("method Remove")] HRESULT Remove([in] long Index);
-		[id(3), helpstring("method Add")] HRESULT Add([in] IShapefileColorBreak * Break, [out,retval] long * result);
-		[propget, id(4), helpstring("property ColorBreak")] HRESULT ColorBreak([in] long Index, [out, retval] IShapefileColorBreak * *pVal);
-		[propput, id(4), helpstring("property ColorBreak")] HRESULT ColorBreak([in] long Index, [in] IShapefileColorBreak * newVal);
+		[id(3), helpstring("method Add")] HRESULT Add([in] IShapefileColorBreak* Break, [out,retval] long* result);
+		[propget, id(4), helpstring("property ColorBreak")] HRESULT ColorBreak([in] long Index, [out, retval] IShapefileColorBreak**pVal);
+		[propput, id(4), helpstring("property ColorBreak")] HRESULT ColorBreak([in] long Index, [in] IShapefileColorBreak* newVal);
 		[propget, id(5), helpstring("property LayerHandle")] HRESULT LayerHandle([out, retval] long *pVal);
 		[propput, id(5), helpstring("property LayerHandle")] HRESULT LayerHandle([in] long newVal);
 		[propget, id(6), helpstring("property FieldIndex")] HRESULT FieldIndex([out, retval] long *pVal);
 		[propput, id(6), helpstring("property FieldIndex")] HRESULT FieldIndex([in] long newVal);
 		[propget, id(7), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 		[propget, id(8), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-		[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
-		[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+		[propget, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback**pVal);
+		[propput, id(9), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback* newVal);
 		[propget, id(10), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 		[propput, id(10), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 		[id(11), helpstring("method InsertAt")] HRESULT InsertAt([in] int Position, [in] IShapefileColorBreak *Break, [out, retval] long *result);
