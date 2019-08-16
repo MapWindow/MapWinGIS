@@ -4141,7 +4141,7 @@ interface IShapefile : IDispatch{
 	[id(104), helpstring("method GetRelatedShapes2")] HRESULT GetRelatedShapes2([in] IShape* referenceShape, [in] tkSpatialRelation relation, [in, out] VARIANT* resultArray, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(105)] HRESULT Identifiable([out, retval] VARIANT_BOOL* retVal);
 	[propput, id(105)] HRESULT Identifiable([in] VARIANT_BOOL newVal);
-	[id(106), helpstring("method Segmentize")] HRESULT Segmentize([out, retval] IShapefile** retVal);
+	[id(106), helpstring("method Segmentize")] HRESULT Segmentize([in, defaultvalue(0)] double metersTolerance, [out, retval] IShapefile** retVal);
 	[id(107), helpstring("method GetClosestVertex")] HRESULT GetClosestVertex([in]double x, [in]double y, [in]double maxDistance,
 		[out]long* shapeIndex, [out]long* pointIndex, [out] double* distance, [out, retval]VARIANT_BOOL* retVal);
 	/**** Out of order for compatibility reasons. ****/

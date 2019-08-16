@@ -220,7 +220,7 @@ public:
 	STDMETHOD(put_ShapeCategory3)(long ShapeIndex, IShapefileCategory* category);
 	STDMETHOD(Dump)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
 	STDMETHOD(LoadDataFrom)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
-	STDMETHOD(Segmentize)(IShapefile** retVal);
+	STDMETHOD(Segmentize)(double metersTolerance, IShapefile** retVal);
 	STDMETHOD(get_LastInputValidation)(IShapeValidationInfo** retVal);
 	STDMETHOD(get_LastOutputValidation)(IShapeValidationInfo** retVal);
 	STDMETHOD(ClearCachedGeometries)();

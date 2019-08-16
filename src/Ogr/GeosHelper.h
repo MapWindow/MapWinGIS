@@ -474,4 +474,12 @@ public:
 		return GEOSProject(g1, g2);
 #endif
 	}
+    static GEOSGeometry* Snap(GEOSGeometry* g1, GEOSGeometry* g2, double tolerance = 1.0)
+    {
+        #ifdef GEOS_NEW
+            return GEOSSnap_r(getGeosHandle(), g1, g2, tolerance);
+        #else
+            return GEOSSnap(g1, g2, tolerance);
+        #endif
+    }
 };

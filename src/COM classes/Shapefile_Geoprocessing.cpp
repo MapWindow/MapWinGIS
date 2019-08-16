@@ -3691,7 +3691,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 // **********************************************************************
 //		Segmentize()
 // **********************************************************************
-STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
+STDMETHODIMP CShapefile::Segmentize(double metersTolerance, IShapefile** retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -3726,6 +3726,16 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
     const long shapeCount = _shapeData.size();
     long percent = 0;
 
+    // get 'meters' in units of the Shapefile
+    tkUnitsOfMeasure layerUnits;
+    double oneMeter = 1.0;
+    VARIANT_BOOL vb;
+    IGeoProjection* gp;
+    this->get_GeoProjection(&gp);
+    gp->get_LinearUnits(&layerUnits);
+    // convert Shapefile units to meters
+    GetUtils()->ConvertDistance(layerUnits, tkUnitsOfMeasure::umMeters, &oneMeter, &vb);
+
     for (long i = 0; i < shapeCount; i++)
     {
         CallbackHelper::Progress(_globalCallback, i, shapeCount, "Segmentizing...", _key, percent);
@@ -3735,7 +3745,9 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
         double xMin, xMax, yMin, yMax;
         if (this->QuickExtentsCore(i, &xMin, &yMin, &xMax, &yMax))
         {
-            const QTreeExtent query(xMin, xMax, yMax, yMin);
+            //const QTreeExtent query(xMin, xMax, yMax, yMin);
+            const QTreeExtent query(xMin - (metersTolerance * oneMeter), xMax + (metersTolerance * oneMeter),
+                                    yMax + (metersTolerance * oneMeter), yMin - (metersTolerance * oneMeter));
             std::vector<int> shapes = this->_tempTree->GetNodes(query);
 
             // calculation union of all geometries
@@ -3766,7 +3778,20 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
                 // may have had no shapes
                 if (gsUnion)
                 {
-                    GEOSGeometry* gsOut = GeosHelper::Difference(geom1, gsUnion);
+                    GEOSGeometry* gsOut = nullptr;
+                    // in order not to modify original (intolerant) behavior...
+                    if (metersTolerance == 0.0)
+                    {
+                        // is current line distinct from the union?
+                        gsOut = GeosHelper::Difference(geom1, gsUnion);
+                    }
+                    else
+                    {
+                        // otherwise, we first 'snap' geom1 to the Union, to allow for slight misalignment
+                        GEOSGeometry* gsNew = GeosHelper::Snap(geom1, gsUnion, (metersTolerance * oneMeter));
+                        // then see if it is distinct from the union
+                        gsOut = GeosHelper::Difference(gsNew, gsUnion);
+                    }
                     GeosHelper::DestroyGeometry(gsUnion);
                     if (gsOut)
                     {
