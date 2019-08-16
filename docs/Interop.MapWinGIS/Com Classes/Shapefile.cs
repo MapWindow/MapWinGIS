@@ -1284,9 +1284,10 @@ namespace MapWinGIS
         /// <summary>
         /// Splits polylines at intersection with any other polylines. Works for polyline shapefile only.
         /// </summary>
+        /// <param name="metersTolerance">Polyline endpoints within this tolerance will be 'snapped' to adjacent polylines.</param>
         /// <returns>Resulting shapefile or null if the operation wasn't successful.</returns>
         /// \new490 Added in version 4.9.0
-        public Shapefile Segmentize()
+        public Shapefile Segmentize(double metersTolerance = 0.0)
         {
             throw new NotImplementedException();
         }
