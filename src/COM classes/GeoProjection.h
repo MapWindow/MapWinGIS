@@ -31,7 +31,7 @@
 
 // CGeoProjection
 class ATL_NO_VTABLE CGeoProjection :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CGeoProjection, &CLSID_GeoProjection>,
 	public IDispatchImpl<IGeoProjection, &IID_IGeoProjection, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

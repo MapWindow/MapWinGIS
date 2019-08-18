@@ -7,7 +7,7 @@
 #endif
 
 class ATL_NO_VTABLE CGdalDataset :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CGdalDataset, &CLSID_GdalDataset>,
 	public IDispatchImpl<IGdalDataset, &IID_IGdalDataset, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

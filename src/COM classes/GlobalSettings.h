@@ -31,7 +31,7 @@
 
 // CGlobalSettings
 class ATL_NO_VTABLE CGlobalSettings :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CGlobalSettings, &CLSID_GlobalSettings>,
 	public IDispatchImpl<IGlobalSettings, &IID_IGlobalSettings, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

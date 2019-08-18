@@ -34,7 +34,7 @@
 //	   CLinePattern
 // ------------------------------------------------------
 class ATL_NO_VTABLE CLinePattern :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CLinePattern, &CLSID_LinePattern>,
 	public IDispatchImpl<ILinePattern, &IID_ILinePattern, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

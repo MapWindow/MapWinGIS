@@ -27,7 +27,7 @@
 
 // CGridColorScheme
 class ATL_NO_VTABLE CGridColorScheme : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CGridColorScheme, &CLSID_GridColorScheme>,
 	public IDispatchImpl<IGridColorScheme, &IID_IGridColorScheme, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

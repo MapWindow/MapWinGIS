@@ -5,7 +5,7 @@
 #endif
 
 class ATL_NO_VTABLE CHistogram :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CHistogram, &CLSID_Histogram>,
 	public IDispatchImpl<IHistogram, &IID_IHistogram, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

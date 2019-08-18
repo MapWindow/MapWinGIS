@@ -29,7 +29,7 @@ public:
 };
 
 class ATL_NO_VTABLE CImageClass : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CImageClass, &CLSID_Image>,
 	public IDispatchImpl<IImage, &IID_IImage, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

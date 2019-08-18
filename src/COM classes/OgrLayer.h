@@ -10,7 +10,7 @@
 #endif
 
 class ATL_NO_VTABLE COgrLayer :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<COgrLayer, &CLSID_OgrLayer>,
 	public IDispatchImpl<IOgrLayer, &IID_IOgrLayer, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

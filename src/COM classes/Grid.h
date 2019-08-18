@@ -33,7 +33,7 @@
 
 // CGrid
 class ATL_NO_VTABLE CGrid : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CGrid, &CLSID_Grid>,
 	public IDispatchImpl<IGrid, &IID_IGrid, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

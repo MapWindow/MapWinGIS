@@ -8,7 +8,7 @@
 
 // CShapeEditor
 class ATL_NO_VTABLE CShapeEditor :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapeEditor, &CLSID_ShapeEditor>,
 	public IDispatchImpl<IShapeEditor, &IID_IShapeEditor, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

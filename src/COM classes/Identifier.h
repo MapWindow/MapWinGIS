@@ -9,7 +9,7 @@ using namespace ATL;
 
 // CIdentifier
 class ATL_NO_VTABLE CIdentifier :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CIdentifier, &CLSID_Identifier>,
 	public IDispatchImpl<IIdentifier, &IID_IIdentifier, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

@@ -39,7 +39,7 @@
 // CShapefile declaration
 // *********************************************************************
 class ATL_NO_VTABLE CShapefile : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapefile, &CLSID_Shapefile>,
 	public IDispatchImpl<IShapefile, &IID_IShapefile, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

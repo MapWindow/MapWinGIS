@@ -32,7 +32,7 @@
 
 // CLabelClass
 class ATL_NO_VTABLE CLabelClass :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CLabelClass, &CLSID_Label>,
 	public IDispatchImpl<ILabel, &IID_ILabel, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

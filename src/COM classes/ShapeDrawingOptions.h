@@ -34,7 +34,7 @@
 //    CShapeDrawingOptions
 // **************************************************************
 class ATL_NO_VTABLE CShapeDrawingOptions :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapeDrawingOptions, &CLSID_ShapeDrawingOptions>,
 	public IDispatchImpl<IShapeDrawingOptions, &IID_IShapeDrawingOptions, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

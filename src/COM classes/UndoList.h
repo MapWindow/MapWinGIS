@@ -10,7 +10,7 @@ using namespace ATL;
 
 // CUndoList
 class ATL_NO_VTABLE CUndoList :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CUndoList, &CLSID_UndoList>,
 	public IDispatchImpl<IUndoList, &IID_IUndoList, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

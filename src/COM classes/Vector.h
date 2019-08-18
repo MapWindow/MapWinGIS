@@ -27,7 +27,7 @@
 
 // CVector
 class ATL_NO_VTABLE CVector : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CVector, &CLSID_Vector>,
 	public IDispatchImpl<IVector, &IID_IVector, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

@@ -25,7 +25,7 @@
 
 // CField
 class ATL_NO_VTABLE CField : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CField, &CLSID_Field>,
 	public IDispatchImpl<IField, &IID_IField, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

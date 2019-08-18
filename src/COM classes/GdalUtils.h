@@ -32,7 +32,7 @@
 #endif
 
 class ATL_NO_VTABLE CGdalUtils :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CGdalUtils, &CLSID_GdalUtils>,
 	public IDispatchImpl<IGdalUtils, &IID_IGdalUtils, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

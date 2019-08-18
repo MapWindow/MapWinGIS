@@ -30,7 +30,7 @@
 //	 CShape declaration
 // ******************************************************
 class ATL_NO_VTABLE CShape : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShape, &CLSID_Shape>,
 	public IDispatchImpl<IShape, &IID_IShape, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

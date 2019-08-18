@@ -150,7 +150,7 @@ struct ValueRectangle
 //	  CCharts
 // -----------------------------------------
 class ATL_NO_VTABLE CCharts :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CCharts, &CLSID_Charts>,
 	public IDispatchImpl<ICharts, &IID_ICharts, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

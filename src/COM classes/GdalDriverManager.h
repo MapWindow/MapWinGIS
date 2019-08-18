@@ -5,7 +5,7 @@
 #endif
 
 class ATL_NO_VTABLE CGdalDriverManager :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CGdalDriverManager, &CLSID_GdalDriverManager>,
 	public IDispatchImpl<IGdalDriverManager, &IID_IGdalDriverManager, &LIBID_MapWinGIS, /*wMajor =*/ 4, /*wMinor =*/ 9>
 {

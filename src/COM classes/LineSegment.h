@@ -34,7 +34,7 @@
 // CLineSegment interface
 // -------------------------------------------------------
 class ATL_NO_VTABLE CLineSegment :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CLineSegment, &CLSID_LineSegment>,
 	public IDispatchImpl<ILineSegment, &IID_ILineSegment, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

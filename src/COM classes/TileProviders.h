@@ -32,7 +32,7 @@
 #define TILE_PROVIDER_COUNT 23
 
 class ATL_NO_VTABLE CTileProviders :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CTileProviders, &CLSID_TileProviders>,
 	public IDispatchImpl<ITileProviders, &IID_ITileProviders, &LIBID_MapWinGIS, VERSION_MAJOR, VERSION_MINOR>
 {

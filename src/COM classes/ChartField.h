@@ -31,7 +31,7 @@
 
 // CChartField
 class ATL_NO_VTABLE CChartField :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CChartField, &CLSID_ChartField>,
 	public IDispatchImpl<IChartField, &IID_IChartField, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

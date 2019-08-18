@@ -27,7 +27,7 @@
 
 // CESRIGridManager
 class ATL_NO_VTABLE CESRIGridManager : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CESRIGridManager, &CLSID_ESRIGridManager>,
 	public IDispatchImpl<IESRIGridManager, &IID_IESRIGridManager, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

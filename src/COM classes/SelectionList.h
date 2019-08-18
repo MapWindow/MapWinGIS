@@ -9,7 +9,7 @@ using namespace std;
 
 
 class ATL_NO_VTABLE CSelectionList :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CSelectionList, &CLSID_SelectionList>,
 	public IDispatchImpl<ISelectionList, &IID_ISelectionList, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

@@ -26,7 +26,7 @@
 
 // CExtents
 class ATL_NO_VTABLE CExtents : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CExtents, &CLSID_Extents>,
 	public IDispatchImpl<IExtents, &IID_IExtents, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

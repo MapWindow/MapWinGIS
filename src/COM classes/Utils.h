@@ -42,7 +42,7 @@ struct BreakVal
 
 // CUtils
 class ATL_NO_VTABLE CUtils : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CUtils, &CLSID_Utils>,
 	public IDispatchImpl<IUtils, &IID_IUtils, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

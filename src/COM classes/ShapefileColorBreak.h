@@ -30,7 +30,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CShapefileColorBreak
 class ATL_NO_VTABLE CShapefileColorBreak : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapefileColorBreak, &CLSID_ShapefileColorBreak>,
 	public IDispatchImpl<IShapefileColorBreak, &IID_IShapefileColorBreak, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

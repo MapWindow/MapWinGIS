@@ -30,7 +30,7 @@
 #include "_ITableEvents_CP.H"
 
 class ATL_NO_VTABLE CTableClass : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CTableClass, &CLSID_Table>,
 	public IDispatchImpl<ITable, &IID_ITable, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>,
 	public IConnectionPointContainerImpl<CTableClass>,

@@ -31,7 +31,7 @@
 
 // CColorScheme
 class ATL_NO_VTABLE CColorScheme :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CColorScheme, &CLSID_ColorScheme>,
 	public IDispatchImpl<IColorScheme, &IID_IColorScheme, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
