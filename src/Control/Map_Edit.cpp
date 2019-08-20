@@ -31,12 +31,19 @@ bool CMapView::HandleLButtonUpDragVertexOrShape(UINT nFlags)
 	if (_dragging.HasMoved && operation == DragMoveVertex)
 	{
 		bool shift = (nFlags & MK_SHIFT) != 0;
+        bool alt = GetKeyState(VK_MENU) < 0 ? true : false;
+
 		if (SnappingIsOn(shift))
 		{
 			VARIANT_BOOL result = this->FindSnapPointCore(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
 			if ((result == VARIANT_FALSE) && shift)
 				return true;		// can't proceed without snapping in this mode
 		}
+
+        if (alt) { // user wants to intercept coordinates and possibly modify them
+            this->FireBeforeVertexDigitized(&x2, &y2);
+        }
+
 		GetEditorBase()->MoveVertex(x2, y2);		// don't save state; it's already saved at the beginning of operation
 	}
 

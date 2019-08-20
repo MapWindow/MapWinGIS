@@ -689,8 +689,14 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	// add a vertex							
 	if (m_cursorMode == cmEditShape) 
 	{
-		double projX, projY;
-		PixelToProj(point.x, point.y, &projX, &projY);
+        double projX, projY;        
+        this->PixelToProjection(point.x, point.y, projX, projY);
+
+        bool alt = GetKeyState(VK_MENU) < 0 ? true : false;
+        if (alt) { // user wants to intercept coordinates and possibly modify them
+            this->FireBeforeVertexDigitized(&projX, &projY);
+        }
+
 		if (_shapeEditor->GetClosestPoint(projX, projY, projX, projY))
 		{
 			if (_shapeEditor->InsertVertex(projX, projY)) {
