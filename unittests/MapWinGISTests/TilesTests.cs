@@ -104,7 +104,6 @@ namespace MapWinGISTests
                     // Wait a moment:
                     Thread.Sleep(2000);
                 }
-
                 numRounds++;
                 Helper.DebugMsg($"Finished round {numRounds}");
 

@@ -79,7 +79,6 @@ namespace Examples
                 labels.Alignment = tkLabelAlignment.laBottomRight;
 
             Shapefile sf = new Shapefile();
-            string message = "";
             for (int i = 0; i < axMap1.NumLayers; i++)
             {
                 int layerHandle = axMap1.get_LayerHandle(i);

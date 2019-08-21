@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Point = MapWinGIS.Point;
 
 namespace MapWinGISTests
 {
     [TestClass]
     [DeploymentItem("Testdata")]
-    public class NewSfMethodsTests
+    public class NewSfMethodsTests : ICallback
     {
         [TestInitialize]
         public void Start()
@@ -16,6 +18,15 @@ namespace MapWinGISTests
             var utils = new Utils();
             var version = utils.GDALInfo("", "--version");
             Debug.WriteLine(version);
+            var axMap1 = Helper.GetAxMap();
+            axMap1.BackColor = Color.Aquamarine;
+            
+            axMap1.BeforeVertexDigitized += AxMap1_BeforeVertexDigitized;
+        }
+
+        private void AxMap1_BeforeVertexDigitized(object sender, AxMapWinGIS._DMapEvents_BeforeVertexDigitizedEvent e)
+        {
+            throw new NotImplementedException();
         }
 
         [TestMethod]
@@ -262,6 +273,33 @@ namespace MapWinGISTests
             Helper.SaveAsShapefile(sfPolygons, Path.Combine(tempPath, "SprayAreas.shp"));
         }
 
+        [TestMethod]
+        public void CreateRepeatingLabels()
+        {
+            const string filename = @"D:\dev\GIS-data\Joe Rose\Labeling\Contours.shp";
+            var sf = Helper.OpenShapefile(filename, true, this);
+            sf.Labels.SavingMode = tkSavingMode.modeXMLOverwrite;
+            // To test, save new points to new shapefile as well:
+            var sfPoints = Helper.CreateSf(ShpfileType.SHP_POINT);
+
+            // To test, get a long shape (long polyline)
+            var shp = sf.Shape[291];
+            // Get first point
+            var firstPoint = shp.Point[0];
+            const double distance = 0.005; // Without knowing the projection it is hard to set a correct distance
+            var numLabels = (int)Math.Floor(shp.Length / distance);
+            Debug.WriteLine($"Making {numLabels} labels for this shape");
+            for (var i = 0; i < numLabels; i++)
+            {
+                // Get next point on the line 
+                var nextPoint = shp.InterpolatePoint(firstPoint, distance * (i + 1));
+                Helper.AddPointToPointSf(sfPoints, nextPoint);
+                sf.Labels.AddLabel("MyLabel " + i, nextPoint.x, nextPoint.y);
+            }
+            sf.Labels.SaveToXML(Path.ChangeExtension(filename, ".lbl"));
+            Helper.SaveAsShapefile(sfPoints, Path.ChangeExtension(filename, "points.shp"));
+        }
+
         private static Extents PointToExtent(IPoint nextPoint, double enlargeValue)
         {
             var extent = new Extents();
@@ -381,9 +419,9 @@ namespace MapWinGISTests
         }
 
         private static Helper.Coordinate GetIntersection(
-            Helper.Coordinate p1, 
-            Helper.Coordinate p2, 
-            Helper.Coordinate p3, 
+            Helper.Coordinate p1,
+            Helper.Coordinate p2,
+            Helper.Coordinate p3,
             Helper.Coordinate p4)
         {
             // http://csharphelper.com/blog/2014/08/determine-where-two-lines-intersect-in-c/
@@ -393,7 +431,7 @@ namespace MapWinGISTests
             var dy12 = p2.Y - p1.Y;
             var dx34 = p4.X - p3.X;
             var dy34 = p4.Y - p3.Y;
-            
+
             // Solve for t1 and t2
             var denominator = dy12 * dx34 - dx12 * dy34;
 
@@ -407,6 +445,16 @@ namespace MapWinGISTests
 
             // Find the point of intersection.
             return new Helper.Coordinate(p1.X + dx12 * t1, p1.Y + dy12 * t1);
+        }
+
+        public void Progress(string KeyOfSender, int Percent, string Message)
+        {
+            Console.Write(".");
+        }
+
+        public void Error(string KeyOfSender, string ErrorMsg)
+        {
+            Assert.Fail("Found error: " + ErrorMsg);
         }
     }
 }

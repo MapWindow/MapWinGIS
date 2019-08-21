@@ -1,7 +1,8 @@
 ﻿using System;
+using MapWinGIS;
+// ReSharper disable CheckNamespace
 
 #if nsp
-// ReSharper disable once CheckNamespace
 namespace MapWinGIS
 {
 #endif

@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿// ReSharper disable CheckNamespace
 #if nsp
 namespace MapWinGIS
 {
@@ -17,13 +16,13 @@ namespace MapWinGIS
     /// }
     /// class Callback : ICallback
     /// { 
-    ///     public void Error(string KeyOfSender, string ErrorMsg)
+    ///     public void Error(string keyOfSender, string errorMsg)
     ///     {
-    ///         Debug.Print("Error reported: " + ErrorMsg);
+    ///         Debug.Print("Error reported: " + errorMsg);
     ///     }
-    ///     public void Progress(string KeyOfSender, int Percent, string Message)
+    ///     public void Progress(string keyOfSender, int percent, string message)
     ///     {
-    ///         Debug.Print(Message + ": " + Percent + "%");
+    ///         Debug.Print(message + ": " + percent + "%");
     ///     }
     /// }
     /// \endcode
@@ -36,18 +35,18 @@ namespace MapWinGIS
     /// <summary>
     /// A function to report the information about an error.
     /// </summary>
-    /// <param name="KeyOfSender">The key associated with the object in which error took place.</param>
-    /// <param name="ErrorMsg">The description of the error.</param>
-    void Error(string KeyOfSender, string ErrorMsg);
+    /// <param name="keyOfSender">The key associated with the object in which error took place.</param>
+    /// <param name="errorMsg">The description of the error.</param>
+    void Error(string keyOfSender, string errorMsg);
     
 
     /// <summary>
     /// A function to report the information about progress of the task.
     /// </summary>
-    /// <param name="KeyOfSender">The key associated with the object in which error took place.</param>
-    /// <param name="Percent">The percent of completion (from 0 to 100).</param>
-    /// <param name="Message">The information about the task being executed.</param>
-    void Progress(string KeyOfSender, int Percent, string Message);
+    /// <param name="keyOfSender">The key associated with the object in which error took place.</param>
+    /// <param name="percent">The percent of completion (from 0 to 100).</param>
+    /// <param name="message">The information about the task being executed.</param>
+    void Progress(string keyOfSender, int percent, string message);
 }
 #if nsp
 }

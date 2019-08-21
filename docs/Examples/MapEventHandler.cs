@@ -18,31 +18,31 @@ public static class MapEvents
     /// </summary>
     public static void AttachMap(AxMapWinGIS.AxMap axMap1)
     {
-        axMap1.MouseDownEvent += delegate(object sender, AxMapWinGIS._DMapEvents_MouseDownEvent e)
+        axMap1.MouseDownEvent += delegate (object sender, AxMapWinGIS._DMapEvents_MouseDownEvent e)
         {
             var param = new[] { sender, e };
             Invoke(_mouseDownDelegate, param);
         };
 
-        axMap1.MouseMoveEvent += delegate(object sender, AxMapWinGIS._DMapEvents_MouseMoveEvent e)
+        axMap1.MouseMoveEvent += delegate (object sender, AxMapWinGIS._DMapEvents_MouseMoveEvent e)
         {
             var param = new[] { sender, e };
             Invoke(_mouseMoveDelegate, param);
         };
 
-        axMap1.MouseUpEvent += delegate(object sender, AxMapWinGIS._DMapEvents_MouseUpEvent e)
+        axMap1.MouseUpEvent += delegate (object sender, AxMapWinGIS._DMapEvents_MouseUpEvent e)
         {
             var param = new[] { sender, e };
             Invoke(_mouseUpDelegate, param);
         };
 
-        axMap1.SelectBoxFinal += delegate(object sender, AxMapWinGIS._DMapEvents_SelectBoxFinalEvent e)
+        axMap1.SelectBoxFinal += delegate (object sender, AxMapWinGIS._DMapEvents_SelectBoxFinalEvent e)
         {
             var param = new[] { sender, e };
             Invoke(_selectBoxDelegate, param);
         };
 
-        axMap1.ShapeHighlighted += delegate(object sender, AxMapWinGIS._DMapEvents_ShapeHighlightedEvent e)
+        axMap1.ShapeHighlighted += delegate (object sender, AxMapWinGIS._DMapEvents_ShapeHighlightedEvent e)
         {
             var param = new[] { sender, e };
             Invoke(_shapeHighlightedDelegate, param);
@@ -89,24 +89,24 @@ public static class MapEvents
     public static void Clear()
     {
         if (_mouseDownDelegate != null)
-        foreach (AxMapWinGIS._DMapEvents_MouseDownEventHandler del in _mouseDownDelegate.GetInvocationList())
-            _mouseDownDelegate -= del;
+            foreach (AxMapWinGIS._DMapEvents_MouseDownEventHandler del in _mouseDownDelegate.GetInvocationList())
+                _mouseDownDelegate -= del;
 
         if (_mouseMoveDelegate != null)
-        foreach (AxMapWinGIS._DMapEvents_MouseMoveEventHandler del in _mouseMoveDelegate.GetInvocationList())
-            _mouseMoveDelegate -= del;
+            foreach (AxMapWinGIS._DMapEvents_MouseMoveEventHandler del in _mouseMoveDelegate.GetInvocationList())
+                _mouseMoveDelegate -= del;
 
         if (_mouseUpDelegate != null)
-        foreach (AxMapWinGIS._DMapEvents_MouseUpEventHandler del in _mouseUpDelegate.GetInvocationList())
-            _mouseUpDelegate -= del;
+            foreach (AxMapWinGIS._DMapEvents_MouseUpEventHandler del in _mouseUpDelegate.GetInvocationList())
+                _mouseUpDelegate -= del;
 
         if (_selectBoxDelegate != null)
-        foreach (AxMapWinGIS._DMapEvents_SelectBoxFinalEventHandler del in _selectBoxDelegate.GetInvocationList())
-            _selectBoxDelegate -= del;
+            foreach (AxMapWinGIS._DMapEvents_SelectBoxFinalEventHandler del in _selectBoxDelegate.GetInvocationList())
+                _selectBoxDelegate -= del;
 
         if (_shapeHighlightedDelegate != null)
-        foreach (AxMapWinGIS._DMapEvents_ShapeHighlightedEventHandler del in _shapeHighlightedDelegate.GetInvocationList())
-            _shapeHighlightedDelegate -= del;
+            foreach (AxMapWinGIS._DMapEvents_ShapeHighlightedEventHandler del in _shapeHighlightedDelegate.GetInvocationList())
+                _shapeHighlightedDelegate -= del;
     }
     #endregion
 
