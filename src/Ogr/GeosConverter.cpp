@@ -17,12 +17,13 @@
 //
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 // -------------------------------------------------------------------------------------------------------
-// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #include "StdAfx.h"
 #include "GeosConverter.h"
 #include "GeosHelper.h"
 #include "OgrConverter.h"
+
+// ReSharper disable CppUseAuto
 
 // *********************************************************************
 //		DoBuffer()
@@ -44,8 +45,8 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, GEOSGeometry* gsGeom
 // *********************************************************************
 bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM)
 {
-    auto substitute = false;
-    auto has25D = false;	
+	bool substitute = false;
+	bool has25D = false;	
 
 	if (!GeosHelper::IsValid(gsGeom))
 	{
@@ -56,7 +57,7 @@ bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool
 		// would be better to pass units explicitly
 		// Fixing MWGIS-59: Fixup makes new shape larger: 
 		// GEOSGeometry* gsNew = DoBuffer(m_globalSettings.GetInvalidShapeBufferDistance(umMeters) / 1000.0, 30, gsGeom);
-	    const auto gsNew = DoBuffer(0, 30, gsGeom);
+		GEOSGeometry* const gsNew = DoBuffer(0, 30, gsGeom);
 		if (gsNew && GeosHelper::IsValid(gsNew))
 		{
 			gsGeom = gsNew;
@@ -64,11 +65,11 @@ bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool
 		}
 	}
 
-    auto result = false;
-    const auto oGeom = GeosHelper::CreateFromGEOS(gsGeom);
+	bool result = false;
+	OGRGeometry* const oGeom = GeosHelper::CreateFromGEOS(gsGeom);
 	if (oGeom)
 	{
-	    const auto type = GeosHelper::GetGeometryType(gsGeom);
+		char* const type = GeosHelper::GetGeometryType(gsGeom);
 	    const CString s = type;
 		GeosHelper::Free(type);
 
@@ -93,10 +94,10 @@ bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool
 //  Converts MapWinGis shape to GEOS geometry
 GEOSGeom GeosConverter::ShapeToGeom(IShape* shp)
 {
-    const auto oGeom = OgrConverter::ShapeToGeometry(shp);
+	OGRGeometry* const oGeom = OgrConverter::ShapeToGeometry(shp);
 	if (oGeom != nullptr)
 	{
-	    const auto result = GeosHelper::ExportToGeos(oGeom);
+		GEOSGeometry* const result = GeosHelper::ExportToGeos(oGeom);
 		OGRGeometryFactory::destroyGeometry(oGeom);
 		return result;
 	}
@@ -279,3 +280,5 @@ GEOSGeometry* GeosConverter::MergeGeometries(vector<GEOSGeometry*>& data, ICallb
 	}
 	return g1;
 }
+
+// ReSharper restore CppUseAuto
