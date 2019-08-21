@@ -15,13 +15,15 @@
 //10-25-2005 Rob Cairns. Made changes to LoadECW and LoadImageBuffer
 //////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "GdalRaster.h"
 #include "Vector.h"
 #include "gdalwarper.h"
 #include "GridColorScheme.h"
 
 using namespace std;
+
+// ReSharper disable CppUseAuto
 
 // *************************************************************
 //	  Open()
@@ -1408,9 +1410,9 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 			{
 				SetTransparentColor((*ImageData) + i * xBuff + j);
 				continue;
-			} 
+			}
 
-			auto colorBreak = FindBreak( bvals, tmp );
+			const BreakVal* colorBreak = FindBreak(bvals, tmp);
 
 			if (colorBreak == nullptr) //A break is not defined for this value
 			{
@@ -2032,3 +2034,5 @@ IGridColorScheme* GdalRaster::GetActiveColorScheme()
 	// - just set Image.CustomColorScheme
 	return _customColorScheme != NULL ? _customColorScheme : _predefinedColorScheme; 
 }
+
+// ReSharper restore CppUseAuto

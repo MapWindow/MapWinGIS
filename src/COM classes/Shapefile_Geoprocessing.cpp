@@ -18,7 +18,6 @@
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 // -------------------------------------------------------------------------------------------------------
 // lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
-// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #include "StdAfx.h"
 #include "Shapefile.h"
@@ -42,6 +41,8 @@
 #include "FieldHelper.h"
 #include "ShapeHelper.h"
 #include "GeoProcessing.h"
+
+// ReSharper disable CppUseAuto
 
 #pragma region Utilities
 
@@ -94,7 +95,7 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape*>& vShapes,
     VARIANT_BOOL isGeographic = VARIANT_FALSE;
     sf->get_IsGeographicProjection(&isGeographic);
 
-    for (auto shp : vShapes)
+    for (vector<IShape*>::value_type shp : vShapes)
     {
         ShpfileType shpType;
         shp->get_ShapeType(&shpType);
@@ -136,7 +137,7 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape*>& vShapes,
             // can be optimized for not extracting the same values many times
             if (fieldMapSubject)
             {
-                auto p = fieldMapSubject->begin();
+	            std::map<long, long>::iterator p = fieldMapSubject->begin();
                 while (p != fieldMapSubject->end())
                 {
                     sfSubject->get_CellValue(p->first, subjectId, &var);
@@ -156,7 +157,7 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape*>& vShapes,
             // passing the values from clip shapefile
             if (sfClip && fieldMapClip)
             {
-                auto p = fieldMapClip->begin();
+	            std::map<long, long>::iterator p = fieldMapClip->begin();
                 while (p != fieldMapClip->end())
                 {
                     sfClip->get_CellValue(p->first, clipId, &var);
@@ -382,7 +383,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
     if (Relation == srDisjoint)
     {
         vector<long> v;
-        auto p = result.begin();
+        set<long>::iterator p = result.begin();
 
         for (int i = 0; i < _numShapes1; i++)
         {
@@ -629,7 +630,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
     VARIANT_BOOL vb;
     ioperations->Validate(this, &vb);
 
-    for (auto op : *operations)
+    for (vector<FieldOperation*>::value_type op : *operations)
     {
         // creating output field for operation
         if (op->valid)
@@ -685,12 +686,12 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
     sf->get_ShapefileType(&type);
     type = ShapeUtility::Convert2D(type);
 
-    auto p = fieldMap.begin(); // row in the output, rows in the input
+    map<int, vector<int>*>::iterator p = fieldMap.begin(); // row in the output, rows in the input
     while (p != fieldMap.end())
     {
         CallbackHelper::Progress(_globalCallback, index, size, "Calculating stats", _key, percent);
 
-        for (auto op : *operations)
+        for (vector<FieldOperation*>::value_type op : *operations)
         {
             if (!op->valid) continue;
 
@@ -729,7 +730,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
                 if (op->operation == fsoMode)
                 {
                     int max = INT_MIN;
-                    auto frequency = frequencies.begin();
+                    map<CString, int>::iterator frequency = frequencies.begin();
                     while (frequency != frequencies.end())
                     {
                         if (max < frequency->second)
@@ -859,7 +860,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
     ReadGeosGeometries(SelectedOnly);
 
     long percent = 0;
-    auto size = (int)_shapeData.size();
+    int size = (int)_shapeData.size();
     for (long i = 0; i < size; i++)
     {
         CallbackHelper::Progress(_globalCallback, i, size, "Grouping shapes...", _key, percent);
@@ -904,7 +905,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
     size = shapeMap.size();
 
     VARIANT_BOOL vbretval;
-    auto p = shapeMap.begin();
+    map<CComVariant, vector<GEOSGeometry*>*>::iterator p = shapeMap.begin();
 
     ShpfileType targetType;
     sf->get_ShapefileType(&targetType);
@@ -921,7 +922,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
             std::vector<IShape*> vShapes;
             if (GeosConverter::GeomToShapes(gsGeom, &vShapes, isM))
             {
-                for (auto shp : vShapes)
+                for (std::vector<IShape*>::value_type shp : vShapes)
                 {
                     if (shp != nullptr)
                     {
@@ -954,7 +955,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
         CalculateFieldStats(fieldMap, operations, sf);
 
         // delete indices map
-        auto p2 = indicesMap.begin();
+        map<CComVariant, vector<int>*>::iterator p2 = indicesMap.begin();
         while (p2 != indicesMap.end())
         {
             delete p2->second;
@@ -979,7 +980,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IFi
     CComVariant val; // VARIANT hasn't got comparison operators and therefore
     // can't be used with associative containers
     long percent = 0;
-    const auto size = (int)_shapeData.size();
+    const int size = (int)_shapeData.size();
     // std::vector<ClipperLib::Polygons*> polygons;
     std::vector<ClipperLib::Paths*> polygons;
     polygons.resize(size, nullptr);
@@ -1042,7 +1043,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IFi
     // perform clipping and saving the results
     VARIANT_BOOL vbretval;
     long count = 0;
-    auto p = shapeMap.begin();
+    map<CComVariant, ClipperLib::Clipper*>::iterator p = shapeMap.begin();
     while (p != shapeMap.end())
     {
         // ClipperLib::Polygons result;
@@ -1095,7 +1096,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IFi
         CalculateFieldStats(fieldMap, operations, sf);
 
         // delete indices map
-        auto index = indicesMap.begin();
+        map<CComVariant, vector<int>*>::iterator index = indicesMap.begin();
         while (index != indicesMap.end())
         {
             delete index->second;
@@ -1189,7 +1190,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
     }
 
     long percent = 0;
-    auto size = (int)_shapeData.size();
+    int size = (int)_shapeData.size();
 
     for (long i = 0; i < size; i++)
     {
@@ -1235,7 +1236,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
     int i = 0; // for progress bar
     percent = 0;
     size = shapeMap.size();
-    auto p = shapeMap.begin();
+    map<CComVariant, vector<IShape*>*>::iterator p = shapeMap.begin();
 
     while (p != shapeMap.end())
     {
@@ -1354,7 +1355,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
         CalculateFieldStats(fieldMap, operations, *retval);
 
         // delete indices map
-        auto index = indicesMap.begin();
+        map<CComVariant, vector<int>*>::iterator index = indicesMap.begin();
         while (index != indicesMap.end())
         {
             delete index->second;
@@ -3387,7 +3388,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
     // -------------------------------------------
     if (Ascending)
     {
-        auto p = shapeMap.begin();
+	    multimap<CComVariant, IShape*>::iterator p = shapeMap.begin();
 
         while (p != shapeMap.end())
         {
@@ -3400,7 +3401,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
     }
     else
     {
-        auto p = shapeMap.rbegin();
+	    multimap<CComVariant, IShape*>::reverse_iterator p = shapeMap.rbegin();
         while (p != shapeMap.rend())
         {
             CallbackHelper::Progress(_globalCallback, count, numShapes, "Writing...", _key, percent);
@@ -3558,7 +3559,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
             // copying fields
             if (vbretval)
             {
-                auto p = fieldMap.begin();
+	            std::map<long, long>::iterator p = fieldMap.begin();
                 while (p != fieldMap.end())
                 {
                     sf->get_CellValue(p->first, i, &val);
@@ -3620,7 +3621,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
     // long index = 0;
     long percent = 0;
 
-    const auto numShapes = (int)_shapeData.size();
+    const int numShapes = (int)_shapeData.size();
     for (int i = 0; i < numShapes; i++)
     {
         CallbackHelper::Progress(_globalCallback, i, numShapes, "Calculating...", _key, percent);
@@ -3934,3 +3935,5 @@ Coloring::ColorGraph* CShapefile::GeneratePolygonColors()
     return graph;
 }
 #pragma endregion
+
+// ReSharper restore CppUseAuto

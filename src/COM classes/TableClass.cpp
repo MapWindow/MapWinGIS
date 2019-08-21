@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  ************************************************************************************** */
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "TableClass.h"
 #include <algorithm>
 #include "Templates.h"
@@ -36,6 +36,8 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+// ReSharper disable CppUseAuto
 
 // *****************************************************
 //	ParseExpressionCore()
@@ -3022,13 +3024,13 @@ STDMETHODIMP CTableClass::Join3(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BS
 	{
 		LONG lLBound, lUBound;
 		BSTR HUGEP *pbstr;
-		const auto hr1 = SafeArrayGetLBound(filedList, 1, &lLBound);
-		const auto hr2 = SafeArrayGetUBound(filedList, 1, &lUBound);
-		const auto hr3 = SafeArrayAccessData(filedList, reinterpret_cast<void HUGEP* FAR*>(&pbstr));
+		const HRESULT hr1 = SafeArrayGetLBound(filedList, 1, &lLBound);
+		const HRESULT hr2 = SafeArrayGetUBound(filedList, 1, &lUBound);
+		const HRESULT hr3 = SafeArrayAccessData(filedList, reinterpret_cast<void HUGEP* FAR*>(&pbstr));
 		if (!FAILED(hr1) && !FAILED(hr2) && !FAILED(hr3))
 		{
-			const auto count = lUBound - lLBound + 1;
-			for (auto i = 0; i < count; i++) {
+			const long count = lUBound - lLBound + 1;
+			for (int i = 0; i < count; i++) {
 				fields.insert(OLE2W(pbstr[i]));
 			}
 
@@ -3040,7 +3042,8 @@ STDMETHODIMP CTableClass::Join3(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BS
 		}
 	}
 
-	const auto res = this->JoinInternal(table2, OLE2W(fieldTo), OLE2W(fieldFrom), OLE2W(filenameToReopen), OLE2A(joinOptions), fields);
+	const bool res = this->JoinInternal(table2, OLE2W(fieldTo), OLE2W(fieldFrom), OLE2W(filenameToReopen),
+	                                    OLE2A(joinOptions), fields);
 	*retVal = res ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
@@ -4042,3 +4045,5 @@ void CTableClass::SetFieldSourceIndex(int fieldIndex, int sourceIndex)
 
 	_fields[fieldIndex]->oldIndex = sourceIndex;
 }
+
+// ReSharper restore CppUseAuto

@@ -39,6 +39,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// ReSharper disable CppUseAuto
+
 // *********************************************************
 //		WriteWorldFile()
 // *********************************************************
@@ -49,7 +51,7 @@ VARIANT_BOOL CImageClass::WriteWorldFile(const CStringW worldFileName)
 	USES_CONVERSION;
 
 	//19-Oct-09 Rob Cairns: setlocale in case MapWinGIS is made locale aware again in future
-	const auto fout = _wfopen(worldFileName, L"w");
+	FILE* const fout = _wfopen(worldFileName, L"w");
 	
 	if( !fout )
 	{	
@@ -64,8 +66,8 @@ VARIANT_BOOL CImageClass::WriteWorldFile(const CStringW worldFileName)
 	fprintf(fout,"%.14f\n",_dY*-1.0);
 	
 	//convert lower left to upper left pixel
-	const auto xupLeft = _xllCenter;
-	const auto yupLeft = _yllCenter + ( _dY*(_height-1));
+	const double xupLeft = _xllCenter;
+	const double yupLeft = _yllCenter + (_dY * (_height - 1));
 	
 	fprintf(fout,"%.14f\n",xupLeft);
 	fprintf(fout,"%.14f\n",yupLeft);
@@ -1116,9 +1118,9 @@ bool CImageClass::WriteGDIPlus(const CStringW imageFile, const bool worldFile, c
 	}
 
 	CStringW ext;
-	const auto format = GetGdiPlusFormat(type, ext);
+	const CStringW format = GetGdiPlusFormat(type, ext);
 
-	const auto status = GdiPlusHelper::SaveBitmap(imageFile, _width, _height, _imageData, format);
+	const Gdiplus::Status status = GdiPlusHelper::SaveBitmap(imageFile, _width, _height, _imageData, format);
 
 	if (status != Gdiplus::Ok) 
 	{
@@ -1128,7 +1130,7 @@ bool CImageClass::WriteGDIPlus(const CStringW imageFile, const bool worldFile, c
 
 	if(worldFile)
 	{
-		const auto worldFileName = Utility::ChangeExtension(imageFile, ext);
+		const CStringW worldFileName = Utility::ChangeExtension(imageFile, ext);
 
 		if (!this->WriteWorldFile(worldFileName)) {
 			ErrorMessage(tkCANT_WRITE_WORLD_FILE);
@@ -4225,3 +4227,5 @@ STDMETHODIMP CImageClass::put_GeoProjection(IGeoProjection* newVal)
 
 	return S_OK;
 }
+
+// ReSharper restore CppUseAuto

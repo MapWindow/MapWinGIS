@@ -51,6 +51,8 @@
 
 // #pragma warning(disable:4996)
 
+// ReSharper disable CppUseAuto
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -3402,7 +3404,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* inputNames, /*[in]*/
 	}
 
 	LONG lLBound, lUBound;
-	auto hr = SafeArrayGetLBound(inputNames, 1, &lLBound);
+	HRESULT hr = SafeArrayGetLBound(inputNames, 1, &lLBound);
 	if (FAILED(hr))
 	{
 		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
@@ -3429,8 +3431,8 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* inputNames, /*[in]*/
 
 	VARIANT_BOOL vbretval;
 	std::vector<IImage*> images;
-	const auto cElements = lUBound - lLBound + 1;
-	for (auto i = 0; i < cElements; i++)
+	const long cElements = lUBound - lLBound + 1;
+	for (int i = 0; i < cElements; i++)
 	{
 		IImage* img = nullptr;
 		CoCreateInstance(CLSID_Image, nullptr, CLSCTX_INPROC_SERVER, IID_IImage, reinterpret_cast<void**>(&img));
@@ -3480,21 +3482,21 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* inputNames, /*[in]*/
 	}
 
 	// saving and copying the pixels
-	auto pixels = new colour[width * height];
+	colour* pixels = new colour[width * height];
 	for (unsigned int i = 0; i < images.size(); i++)
 	{
 		CString s;
 		CComBSTR name;
 		images[i]->get_Filename(&name);
 		s.Format("Processing image %d: %s", i + 1, OLE2A(name));
-		const auto percent = static_cast<int>(static_cast<double>(i) / static_cast<double>(images.size() - 1) * 100.0);
+		const int percent = static_cast<int>(static_cast<double>(i) / static_cast<double>(images.size() - 1) * 100.0);
 		CallbackHelper::Progress(_globalCallback, percent, s, _key);
 
-		auto img = static_cast<CImageClass*>(images[i]);
+		CImageClass* img = static_cast<CImageClass*>(images[i]);
 		img->SaveNotNullPixels(true);
 
-		const auto source = img->m_pixels;
-		for (auto j = 0; j < img->m_pixelsCount; j++)
+		const DataPixels* source = img->m_pixels;
+		for (int j = 0; j < img->m_pixelsCount; j++)
 		{
 			pixels[(source + j)->position] = (source + j)->value;
 		}
@@ -3505,7 +3507,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* inputNames, /*[in]*/
 	// saving the results
 	CallbackHelper::Progress(_globalCallback, 0, "Saving result...", _key);
 
-	const auto bits = reinterpret_cast<unsigned char*>(pixels);
+	unsigned char* const bits = reinterpret_cast<unsigned char*>(pixels);
 	Utility::SaveBitmap(width, height, bits, outputName);
 
 Cleaning:
@@ -5217,7 +5219,7 @@ bool CUtils::ValidateInputNames(SAFEARRAY* inputNames, LONG& lLBound, LONG& lUBo
 		return false;
 	}
 
-	auto hr = SafeArrayGetLBound(inputNames, 1, &lLBound);
+	HRESULT hr = SafeArrayGetLBound(inputNames, 1, &lLBound);
 	if (FAILED(hr))
 	{
 		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
@@ -5577,7 +5579,7 @@ bool CUtils::ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void *
 		return false;
 	}
 
-	auto hr = SafeArrayGetLBound(arr, 1, &lLBound);
+	HRESULT hr = SafeArrayGetLBound(arr, 1, &lLBound);
 	if (FAILED(hr))
 	{
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
@@ -6041,3 +6043,5 @@ STDMETHODIMP CUtils::LineProjectDistanceTo(IShape* sourceLine, IShape* reference
 
 	return S_OK;
 }
+
+// ReSharper restore CppUseAuto

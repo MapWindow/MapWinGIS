@@ -17,12 +17,13 @@
  **************************************************************************************
  * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
-// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #include "StdAfx.h"
 //#include "Wininet.h"
 #include "BaseProvider.h"
 #include "SecureHttpClient.h"
+
+// ReSharper disable CppUseAuto
 
 CString BaseProvider::_proxyUsername = "";
 CString BaseProvider::_proxyPassword = "";
@@ -34,10 +35,10 @@ const CString filePrefix = "file:///";
 //		GetTileImage()
 // ************************************************************
 TileCore* BaseProvider::GetTileImage(CPoint& pos, const int zoom)
-{
-    auto* tile = new TileCore(this->Id, zoom, pos, this->_projection);
+{	
+	TileCore* tile = new TileCore(this->Id, zoom, pos, this->_projection);  // NOLINT	
 
-    for (size_t i = 0; i < _subProviders.size(); i++)
+	for (size_t i = 0; i < _subProviders.size(); i++)
     {
         CMemoryBitmap* bmp = _subProviders[i]->DownloadBitmap(pos, zoom);
         if (bmp)
@@ -105,7 +106,7 @@ CMemoryBitmap* BaseProvider::GetTileFileData(CString url)
 		return nullptr;
 
 	fl.seekg(0, std::ios::end);
-	const auto sz = static_cast<size_t>(fl.tellg());
+	const size_t sz = static_cast<size_t>(fl.tellg());
 	if (sz == 0)
 	    return nullptr;
 
@@ -141,7 +142,7 @@ CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
 CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, const CString& url, const CString& shortUrl,
                                                 bool success)
 {
-    auto* client = reinterpret_cast<SecureHttpClient*>(secureHttpClient);
+	SecureHttpClient* client = reinterpret_cast<SecureHttpClient*>(secureHttpClient);  // NOLINT
 
     if (_isStopped) return nullptr;
 
@@ -221,9 +222,9 @@ void BaseProvider::PreventParallelExecution()
 // *************************************************************
 //			ReadBitmap()
 // *************************************************************
-CMemoryBitmap* BaseProvider::ReadBitmap(char* body, int bodyLen) const
+CMemoryBitmap* BaseProvider::ReadBitmap(char* body, int bodyLen) const  
 {
-    auto* bmp = new CMemoryBitmap();
+	CMemoryBitmap* bmp = new CMemoryBitmap(); // NOLINT(modernize-use-auto)
     bmp->LoadFromRawData(body, bodyLen);
     bmp->Provider = this->Id;
     return bmp;
@@ -280,3 +281,5 @@ void BaseProvider::ClearSubProviders()
     }
     _subProviders.clear();
 }
+
+// ReSharper restore CppUseAuto

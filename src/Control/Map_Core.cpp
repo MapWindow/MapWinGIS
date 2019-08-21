@@ -13,6 +13,7 @@
 #include "tiffio.h"
 #include "tiffiop.h"
 
+// ReSharper disable CppUseAuto
 
 #pragma region Rotation
 // ****************************************************************
@@ -82,7 +83,7 @@ float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 {
 	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
-		auto l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[LayerHandle];
 		if (l->IsImage())
 		{
 			IImage * iimg = nullptr;
@@ -579,3 +580,4 @@ bool CMapView::VerifySerial(CString str)
 }
 #pragma endregion
 
+// ReSharper restore CppUseAuto

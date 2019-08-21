@@ -18,7 +18,6 @@
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 // -------------------------------------------------------------------------------------------------------
 // lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
-// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #include "StdAfx.h"
 #include "Shapefile.h"
@@ -26,6 +25,8 @@
 #include "OgrConverter.h"
 #include "GeosConverter.h"
 #include "ShapeValidationInfo.h"
+
+// ReSharper disable CppUseAuto
 
 #pragma region Validation
 
@@ -80,9 +81,10 @@ bool CShapefile::ValidateInput(IShapefile* isf, CString methodName,
         return true;
     }
 
-    auto info = ValidateInputCore(isf, methodName, parameterName, selectedOnly, m_globalSettings.inputValidation,
-                                  className);
-    const auto result = info != nullptr;
+    IShapeValidationInfo* info = ValidateInputCore(isf, methodName, parameterName, selectedOnly,
+                                                   m_globalSettings.inputValidation,
+                                                   className);
+    const bool result = info != nullptr;
     if (info) info->Release();
     return result;
 }
@@ -318,7 +320,7 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
     }
 
     long percent = 0;
-    const auto size = (int)_shapeData.size();
+    const int size = (int)_shapeData.size();
     for (int i = 0; i < size; i++)
     {
         CallbackHelper::Progress(_globalCallback, i, size, "Converting to geometries", _key, percent);
@@ -346,3 +348,5 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 }
 
 #pragma endregion
+
+// ReSharper restore CppUseAuto

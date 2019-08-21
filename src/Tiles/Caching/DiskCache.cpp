@@ -17,10 +17,11 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #include "StdAfx.h"
 #include "DiskCache.h"
+
+// ReSharper disable CppUseAuto
 
 // *********************************************************
 //	     InitEncoder()
@@ -99,7 +100,7 @@ void DiskCache::AddTile(TileCore* tile)
 	}
 
 	// TODO: better to get it from provider (as tile size is not necessarily 256 by 256 pixels)
-    auto* bmp = new Gdiplus::Bitmap(256, 256);
+	Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(256, 256);
 	Gdiplus::Graphics* g = Gdiplus::Graphics::FromImage(bmp);
 
 	for (size_t i = 0; i < tile->Overlays.size(); i++)
@@ -120,3 +121,5 @@ void DiskCache::AddTile(TileCore* tile)
 
 	tile->Release();
 }
+
+// ReSharper restore CppUseAuto

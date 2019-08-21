@@ -69,12 +69,12 @@ bool BingBaseProvider::Initialize()
 // ******************************************************
 bool BingBaseProvider::ParseUrlFormat(void* secureHttpClient)
 {
-    auto* client = reinterpret_cast<SecureHttpClient*>(secureHttpClient);
+	SecureHttpClient* client = reinterpret_cast<SecureHttpClient*>(secureHttpClient);
 
     const int bodyLen = client->GetBodyLength();
     if (bodyLen > 0)
     {
-        auto* body = new char[bodyLen + 1];
+	    char* body = new char[bodyLen + 1];
         memcpy(body, client->GetBody(), bodyLen);
         CString s = body;
         delete[] body;

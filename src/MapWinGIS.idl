@@ -6655,7 +6655,7 @@ interface IGdalUtils : IDispatch{
 	[id(7), helpstring("method ClipVectorWithVector")] HRESULT ClipVectorWithVector([in] BSTR bstrSubjectFilename, [in] BSTR bstrOverlayFilename, [in] BSTR bstrDstFilename, [in, defaultvalue(-1)] VARIANT_BOOL useSharedConnection, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(8)] HRESULT DetailedErrorMsg([out, retval] BSTR *pVal);
 	[id(9), helpstring("method GdalRasterTranslate")] HRESULT GdalRasterTranslate([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] SAFEARRAY(BSTR) options, [out, retval] VARIANT_BOOL* retVal);
-	[id(10), helpstring("Builds or rebuilds overview images.")] HRESULT GdalBuildOverviews([in] const BSTR bstrSrcFilename, [in] tkGDALResamplingMethod resamplingAlgorithm, [in] SAFEARRAY(int) overviewList, [in] SAFEARRAY(int) bandList, [in] SAFEARRAY(BSTR) configOptions, [out, retval] VARIANT_BOOL* retVal);
+	[id(10), helpstring("Builds or rebuilds overview images.")] HRESULT GdalBuildOverviews([in] BSTR bstrSrcFilename, [in] tkGDALResamplingMethod resamplingMethod, [in] SAFEARRAY(int) overviewList, [in] SAFEARRAY(int) bandList, [in] SAFEARRAY(BSTR) configOptions, [out, retval] VARIANT_BOOL* retVal);
 }
 
 [ 

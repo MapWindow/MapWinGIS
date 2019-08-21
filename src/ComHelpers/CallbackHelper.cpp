@@ -1,19 +1,21 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "CallbackHelper.h"
+
+// ReSharper disable CppUseAuto
 
 // *****************************************************************
 //	   GDALProgressCallback()
 // *****************************************************************
 int CPL_STDCALL GDALProgressCallback(const double dfComplete, const char* pszMessage, void *pData)
 {
-	const auto params = static_cast<CallbackParams*>(pData);
+	CallbackParams* const params = static_cast<CallbackParams*>(pData);
 
 	// No need to check the presence of local callback, 
 	// global application callback can be used as a fallback.
 	// There is no need to pass it as a parameter from each method.
 	if (params != nullptr)
 	{
-		const auto percent = long(dfComplete * 100.0);
+		const long percent = long(dfComplete * 100.0);
 		CallbackHelper::Progress(params->cBack, percent, params->sMsg);
 	}
 	return TRUE;
@@ -52,10 +54,10 @@ ICallback* CallbackHelper::GetCurrent(ICallback* localCback)
 // ********************************************************************
 void CallbackHelper::Progress(ICallback* localCback, int index, double count, const char* message, BSTR& key, long& lastPercent)
 {
-	auto callback = GetCurrent(localCback);
+	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
-	const auto newpercent = static_cast<long>(static_cast<double>(index + 1) / count * 100);
+	const long newpercent = static_cast<long>(static_cast<double>(index + 1) / count * 100);
 	if (newpercent > lastPercent)
 	{
 		lastPercent = newpercent;
@@ -69,7 +71,7 @@ void CallbackHelper::Progress(ICallback* localCback, int index, double count, co
 // ********************************************************************
 void CallbackHelper::Progress(ICallback* localCback, int percent, const char* message, BSTR& key)
 {
-	auto callback = GetCurrent(localCback);
+	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
 	const CComBSTR bstrMsg(message);
@@ -81,7 +83,7 @@ void CallbackHelper::Progress(ICallback* localCback, int percent, const char* me
 // ********************************************************************
 void CallbackHelper::Progress(ICallback* localCback, int percent, const char* message)
 {
-	auto callback = GetCurrent(localCback);
+	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
 	if (!message) message = "";
@@ -94,7 +96,7 @@ void CallbackHelper::Progress(ICallback* localCback, int percent, const char* me
 // ********************************************************************
 void CallbackHelper::ProgressCompleted(ICallback* localCback, BSTR& key)
 {
-	auto callback = GetCurrent(localCback);
+	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
 	const CComBSTR bstrMsg("Completed");
@@ -115,7 +117,7 @@ void CallbackHelper::ProgressCompleted(ICallback* localCback)
 // ********************************************************************
 void CallbackHelper::ErrorMsg(const CString className, ICallback* localCback, BSTR& key, const char* message, ...)
 {
-	auto callback = GetCurrent(localCback);
+	ICallback* callback = GetCurrent(localCback);
 
 	if (callback || Debug::IsDebugMode())
 	{
@@ -182,3 +184,5 @@ void CallbackHelper::AssertionFailed(CString message)
 			Debug::WriteError(message);
 	}
 }
+
+// ReSharper restore CppUseAuto

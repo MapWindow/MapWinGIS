@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <string>
 
+// ReSharper disable CppUseAuto
+
 namespace Utility
 {
 	_locale_t m_locale = nullptr;
@@ -1390,7 +1392,7 @@ namespace Utility
 	// https://ideone.com/1RCZM8
 	size_t split(const std::string &txt, std::vector<std::string> &strs, const char splittingChar)
 	{
-		auto pos = txt.find(splittingChar);
+		std::string::size_type pos = txt.find(splittingChar);
 		size_t initialPos = 0;
 		strs.clear();
 
@@ -1409,3 +1411,4 @@ namespace Utility
 	}
 }
 
+// ReSharper restore CppUseAuto

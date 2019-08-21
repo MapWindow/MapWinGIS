@@ -17,10 +17,11 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #include "StdAfx.h"
 #include "PrefetchManager.h"
+
+// ReSharper disable CppUseAuto
 
 CCriticalSection PrefetchManagerFactory::_lock;
 vector<PrefetchManager*> PrefetchManagerFactory::_managers;
@@ -67,10 +68,10 @@ void PrefetchManager::BuildDownloadList(BaseProvider* provider, int zoom, CRect 
     provider->get_Projection()->GetTileMatrixMinXY(zoom, size1);
     provider->get_Projection()->GetTileMatrixMaxXY(zoom, size2);
 
-    const auto minX = (int)BaseProjection::Clip(indices.left, size1.cx, size2.cx);
-    const auto maxX = (int)BaseProjection::Clip(indices.right, size1.cy, size2.cy);
-    const auto minY = (int)BaseProjection::Clip(MIN(indices.top, indices.bottom), size1.cx, size2.cx);
-    const auto maxY = (int)BaseProjection::Clip(MAX(indices.top, indices.bottom), size1.cy, size2.cy);
+    const int minX = (int)BaseProjection::Clip(indices.left, size1.cx, size2.cx);
+    const int maxX = (int)BaseProjection::Clip(indices.right, size1.cy, size2.cy);
+    const int minY = (int)BaseProjection::Clip(MIN(indices.top, indices.bottom), size1.cx, size2.cx);
+    const int maxY = (int)BaseProjection::Clip(MAX(indices.top, indices.bottom), size1.cy, size2.cy);
 
     const int centX = (maxX + minX) / 2;
     const int centY = (maxY + minY) / 2;
@@ -157,3 +158,5 @@ void PrefetchManager::LogBulkDownloadStarted(int zoom)
         tilesLogger.out() << "---------------------" << endl;
     }
 }
+
+// ReSharper restore CppUseAuto

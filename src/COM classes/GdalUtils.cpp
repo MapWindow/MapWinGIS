@@ -41,7 +41,7 @@ CGdalUtils::~CGdalUtils()
 // *********************************************************
 //	     GdalRasterWarp()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalRasterWarp(wchar_t* sourceFilename, wchar_t* destinationFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::GdalRasterWarp(BSTR sourceFilename, BSTR destinationFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -127,7 +127,7 @@ cleaning:
 // *********************************************************
 //	     GdalRasterTranslate()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalRasterTranslate(wchar_t* sourceFilename, wchar_t* destinationFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinationFilename, SAFEARRAY* options, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -215,7 +215,7 @@ cleaning:
 // *********************************************************
 //	     GdalVectorTranslate()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalVectorTranslate(wchar_t* sourceFilename, wchar_t* destinationFilename, SAFEARRAY* options, const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR sourceFilename, BSTR destinationFilename, SAFEARRAY* options, const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -302,7 +302,7 @@ cleaning:
 // *********************************************************
 //	     ClipVectorWithVector()
 // *********************************************************
-STDMETHODIMP CGdalUtils::ClipVectorWithVector(wchar_t* subjectFilename, wchar_t* overlayFilename, wchar_t* destinationFilename, const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR subjectFilename, BSTR overlayFilename, BSTR destinationFilename, const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -342,7 +342,7 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(wchar_t* subjectFilename, wchar_t*
 // *********************************************************
 //	     GdalBuildOverviews()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalBuildOverviews(wchar_t* sourceFilename, const tkGDALResamplingMethod resamplingAlgorithm,
+STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALResamplingMethod resamplingMethod,
 	SAFEARRAY* overviewList, SAFEARRAY *bandList, SAFEARRAY* configOptions, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -421,7 +421,8 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(wchar_t* sourceFilename, const tkGDA
 		goto cleaning;
 	}
 
-	const auto pszResampling = GdalHelper::GetResamplingAlgorithm(resamplingAlgorithm);
+	const auto pszResampling = GdalHelper::GetResamplingAlgorithm(resamplingMethod);
+	// TODO: Shouldn't pszResampling be freed?
 
 	// Call the GDALBuildOverviews function:	
 	m_globalSettings.SetGdalUtf8(true);
@@ -452,7 +453,8 @@ cleaning:
 	// cleanup used arrays:
 	delete[] panOverviewList;
 	delete[] panBandList;
-
+	// TODO: Doesn't work: delete[] pszResampling;
+	
 	CallbackHelper::ProgressCompleted(_globalCallback);
 
 	return S_OK;
@@ -539,7 +541,7 @@ STDMETHODIMP CGdalUtils::get_Key(BSTR *pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGdalUtils::put_Key(wchar_t* newVal)
+STDMETHODIMP CGdalUtils::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;

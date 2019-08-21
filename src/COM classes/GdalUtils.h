@@ -74,18 +74,18 @@ public:
 	CComPtr<IUnknown> m_pUnkMarshaler;
 
 public:
-	HRESULT __stdcall get_ErrorMsg(/*[in]*/ long errorCode, /*[out, retval]*/ BSTR *pVal) override;
-	HRESULT __stdcall get_LastErrorCode(/*[out, retval]*/ long *pVal) override;
-	HRESULT __stdcall get_DetailedErrorMsg(/*[out, retval]*/ BSTR *pVal) override;
-	HRESULT __stdcall get_Key(/*[out, retval]*/ BSTR *pVal) override;
-	HRESULT __stdcall put_Key(/*[in]*/ wchar_t* newVal) override;
-	HRESULT __stdcall get_GlobalCallback(/*[out, retval]*/ ICallback * *pVal) override;
-	HRESULT __stdcall put_GlobalCallback(/*[in]*/ ICallback * newVal) override;
-	HRESULT __stdcall GdalRasterWarp(/*[in]*/ wchar_t* sourceFilename, /*[in]*/ wchar_t* destinationFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
-	HRESULT __stdcall GdalRasterTranslate(/*[in]*/ wchar_t* sourceFilename, /*[in]*/ wchar_t* destinationFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
-	HRESULT __stdcall GdalVectorTranslate(/*[in]*/ wchar_t* sourceFilename, /*[in]*/ wchar_t* destinationFilename, /*[in]*/ SAFEARRAY* options, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
-	HRESULT __stdcall ClipVectorWithVector(/*[in]*/ wchar_t* subjectFilename, /*[in]*/ wchar_t* overlayFilename, /*[in]*/ wchar_t* destinationFilename, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
-	HRESULT __stdcall GdalBuildOverviews(wchar_t* sourceFilename, tkGDALResamplingMethod resamplingAlgorithm, SAFEARRAY* overviewList, SAFEARRAY* bandList, SAFEARRAY* configOptions, VARIANT_BOOL* retVal) override;
+	STDMETHOD(get_ErrorMsg)(/*[in]*/ long errorCode, /*[out, retval]*/ BSTR *pVal) override;
+	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal) override;
+	STDMETHOD(get_DetailedErrorMsg)(/*[out, retval]*/ BSTR *pVal) override;
+	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal) override;
+	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal) override;
+	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal) override;
+	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal) override;
+	STDMETHOD(GdalRasterWarp)(/*[in]*/ BSTR sourceFilename, /*[in]*/ BSTR destinationFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
+	STDMETHOD(GdalRasterTranslate)(/*[in]*/ BSTR sourceFilename, /*[in]*/ BSTR destinationFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
+	STDMETHOD(GdalVectorTranslate)(/*[in]*/ BSTR sourceFilename, /*[in]*/ BSTR destinationFilename, /*[in]*/ SAFEARRAY* options, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
+	STDMETHOD(ClipVectorWithVector)(/*[in]*/ BSTR subjectFilename, /*[in]*/ BSTR overlayFilename, /*[in]*/ BSTR destinationFilename, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
+	STDMETHOD(GdalBuildOverviews)(BSTR sourceFilename, tkGDALResamplingMethod resamplingMethod, SAFEARRAY* overviewList, SAFEARRAY* bandList, SAFEARRAY* configOptions, VARIANT_BOOL* retVal) override;
 	
 private:
 	long _lastErrorCode;
