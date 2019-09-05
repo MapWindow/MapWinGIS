@@ -454,11 +454,19 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 				}
 				else
 				{
-					_errorMessage = "NOT operator can can be applied to boolean values only";
+					_errorMessage = "NOT operator can be applied to boolean values only";
 					return false;
 				}
 				break;
 			}
+        case operILike:
+            if (valLeft->isString() && valRight->isString())
+            {
+                // force both sides to lower-case, resulting in case-insensitive operation
+                valLeft->str(valLeft->str().MakeLower());
+                valRight->str(valRight->str().MakeLower());
+            }
+            // don't break; just fall into LIKE logic
 		case operLike:
 			if (valLeft->isString() && valRight->isString())
 			{
