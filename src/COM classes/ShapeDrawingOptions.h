@@ -22,6 +22,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // lsu 22 aug 2009 - Created the file; adapted the code from ShapeInfo.h
+ // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
 
 #pragma once
 #include "DrawingOptions.h"
@@ -158,38 +159,38 @@ public:
 	STDMETHOD(put_AlignPictureByBottom)(VARIANT_BOOL newVal);
 	
 	// .NET overloads
-	STDMETHOD(DrawPoint)(int** hdc, float x, float y, 
+	STDMETHOD(DrawPoint)(int hdc, float x, float y, 
 						 int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha,
 						 VARIANT_BOOL* retVal);
 
-	STDMETHOD(DrawLine)(int** hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
+	STDMETHOD(DrawLine)(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
 						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						VARIANT_BOOL* retVal);
 
-	STDMETHOD(DrawRectangle)(int** hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
+	STDMETHOD(DrawRectangle)(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
 						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						VARIANT_BOOL* retVal);
 
-	STDMETHOD(DrawShape)(int** hdc, float x, float y, IShape* shape,  VARIANT_BOOL drawVertices,
+	STDMETHOD(DrawShape)(int hdc, float x, float y, IShape* shape,  VARIANT_BOOL drawVertices,
 						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 						VARIANT_BOOL* retVal);
 
 	// VB6 overloads
-	STDMETHOD(DrawPointVB)(int hdc, float x, float y, 
-						 int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
-						 VARIANT_BOOL* retVal);
+	//STDMETHOD(DrawPointVB)(int hdc, float x, float y, 
+	//					 int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
+	//					 VARIANT_BOOL* retVal);
 
-	STDMETHOD(DrawLineVB)(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
-						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
-						VARIANT_BOOL* retVal);
+	//STDMETHOD(DrawLineVB)(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
+	//					int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
+	//					VARIANT_BOOL* retVal);
 
-	STDMETHOD(DrawRectangleVB)(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
-						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
-						VARIANT_BOOL* retVal);
+	//STDMETHOD(DrawRectangleVB)(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
+	//					int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
+	//					VARIANT_BOOL* retVal);
 
-	STDMETHOD(DrawShapeVB)(int hdc, float x, float y, IShape* shape,  VARIANT_BOOL drawVertices,
-						int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
-						VARIANT_BOOL* retVal);
+	//STDMETHOD(DrawShapeVB)(int hdc, float x, float y, IShape* shape,  VARIANT_BOOL drawVertices,
+	//					int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
+	//					VARIANT_BOOL* retVal);
 
 	STDMETHOD(get_PointCharacter)(short* retVal);
 	STDMETHOD(put_PointCharacter)(short newVal);
