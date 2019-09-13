@@ -15,6 +15,8 @@
 //Utah State University and the Idaho National Engineering and Environmental Lab that were released as 
 //public domain in March 2004.  
 //********************************************************************************************************
+// Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
+
 #pragma once
 # include <list>
 # include <afxmt.h>
@@ -1110,7 +1112,7 @@ private:
 
 	// drawing layers
 	void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
-	void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
+	void DrawBackBuffer(int hdc, int ImageWidth, int ImageHeight);
 	bool IsValidDrawList(long listHandle);
 	
 	// ---------------------------------------------

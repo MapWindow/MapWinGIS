@@ -7061,7 +7061,7 @@ library MapWinGIS
 			[id(159)] VARIANT_BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, long Width);
 			[id(202)] VARIANT_BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, 
 												 float ClipX, float ClipY, float clipWidth, float clipHeight);
-			[id(170)] void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
+			[id(170)] void DrawBackBuffer(int hdc, int ImageWidth, int ImageHeight);
 			[id(201)] VARIANT_BOOL LoadTilesForSnapshot(IExtents* Extents, long Width, LPCTSTR Key);
 #endif			
 
