@@ -5488,7 +5488,7 @@ interface ICharts : IDispatch {
 	[id(14), helpstring("method MoveBar")] HRESULT MoveField([in]LONG OldIndex, [in]LONG NewIndex, [out, retval]VARIANT_BOOL* vbretval);
 	[id(15), helpstring("method Generate")] HRESULT Generate([in] tkLabelPositioning Type, [out, retval]VARIANT_BOOL* vbretval);
 	[id(16), helpstring("method Clear")] HRESULT Clear();
-	[id(17), helpstring("method DrawChart")] HRESULT DrawChart([in]int** hdc, [in]float x, [in]float y, [in]VARIANT_BOOL hideLabels, 
+	[id(17), helpstring("method DrawChart")] HRESULT DrawChart([in]int hdc, [in]float x, [in]float y, [in]VARIANT_BOOL hideLabels, 
 															   [in, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(18), helpstring("property Tilt")] HRESULT Tilt([out, retval] double* pVal);
 	[propput, id(18), helpstring("property Tilt")] HRESULT Tilt([in] double newVal);

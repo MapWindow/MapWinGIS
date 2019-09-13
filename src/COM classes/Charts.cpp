@@ -22,6 +22,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 19 june 2010 - created the file.
+ // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
 
 #include "stdafx.h"
 #include "Charts.h"
@@ -701,7 +702,7 @@ STDMETHODIMP CCharts::Clear()
 // **************************************************************
 //		DrawChart()
 // **************************************************************
-STDMETHODIMP CCharts::DrawChart(int** hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+STDMETHODIMP CCharts::DrawChart(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
@@ -719,13 +720,13 @@ STDMETHODIMP CCharts::DrawChart(int** hdc, float x, float y, VARIANT_BOOL hideLa
 // **************************************************************
 //		DrawChartVB()
 // **************************************************************
-STDMETHODIMP CCharts::DrawChartVB(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CDC* dc = CDC::FromHandle((HDC)hdc);
-	*retVal = DrawChartCore(dc, x, y, hideLabels, backColor);
-	return S_OK;
-}
+//STDMETHODIMP CCharts::DrawChartVB(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+//{
+//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+//	CDC* dc = CDC::FromHandle((HDC)hdc);
+//	*retVal = DrawChartCore(dc, x, y, hideLabels, backColor);
+//	return S_OK;
+//}
 
 // **************************************************************
 //		DrawChartCore()
