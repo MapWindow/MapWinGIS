@@ -5718,14 +5718,14 @@ interface ILineSegment : IDispatch{
 	[propput, id(9), helpstring("property MarkerFlipFirst")] HRESULT MarkerFlipFirst( [in]VARIANT_BOOL newVal);
 	[propget, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [out, retval]float* retVal);
 	[propput, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [in]float newVal);
-	[id(11), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
+	[id(11), helpstring("method Draw")] HRESULT Draw([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
 													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 													[out, retval]VARIANT_BOOL* retVal);
 	[propget, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [out, retval]OLE_COLOR* retVal);
 	[propput, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [in]OLE_COLOR newVal);
-	[id(13), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
-														[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
-														[out, retval]VARIANT_BOOL* retVal);
+	//[id(13), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
+	//													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
+	//													[out, retval]VARIANT_BOOL* retVal);
 };
 
 /************************************  MapWinGIS Library  ********************************/

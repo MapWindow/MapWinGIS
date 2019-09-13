@@ -23,6 +23,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // lsu 22 aug 2009 - Created the file. Portions of code from MapWindow 6 project were used.
+ // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
 
 #include "stdafx.h"
 #include "ShapeDrawingOptions.h"
