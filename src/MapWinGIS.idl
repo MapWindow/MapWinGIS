@@ -5673,7 +5673,7 @@ interface ILinePattern : IDispatch{
 	[id(10), helpstring("method InsertMarker")] HRESULT InsertMarker([in]int Index, [in]tkDefaultPointSymbol marker, [out, retval]ILineSegment** retVal);
 	[id(11), helpstring("method RemoveItem")] HRESULT RemoveItem([in]int Index, [out, retval]VARIANT_BOOL* retVal);
 	[id(12), helpstring("method Clear")] HRESULT Clear();
-	[id(13), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
+	[id(13), helpstring("method Draw")] HRESULT Draw([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
 													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 													[out, retval]VARIANT_BOOL* retVal);
 	
@@ -5683,9 +5683,9 @@ interface ILinePattern : IDispatch{
 	[id(15), helpstring("property Serialize")] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(16), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
 
-	[id(17), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
-														[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
-														[out, retval]VARIANT_BOOL* retVal);
+	//[id(17), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
+	//													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
+	//													[out, retval]VARIANT_BOOL* retVal);
 };
 
 /***************************  LineSegment Interface  ********************************/

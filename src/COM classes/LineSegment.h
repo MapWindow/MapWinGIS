@@ -22,6 +22,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 18 august 2010 - created the file.
+ // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
 
 #pragma once
 #include "Gdiplus.h"

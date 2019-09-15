@@ -537,7 +537,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 	{
 		VARIANT_BOOL vbretval;
 		HDC hdcTemp = g.GetHDC();
-		_options.linePattern->Draw((int**)hdcTemp, 0.0f, 0.0f, clipWidth, clipHeight, backColor, backAlpha, &vbretval);
+		_options.linePattern->Draw((int)hdcTemp, 0.0f, 0.0f, clipWidth, clipHeight, backColor, backAlpha, &vbretval);
 		g.ReleaseHDC(hdcTemp);
 	}
 	else

@@ -22,6 +22,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 18 august 2010 - created the file.
+ // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
 
 #pragma once
 #include "LineSegment.h"
@@ -102,8 +103,8 @@ public:
 	STDMETHOD(get_Line)(int Index, ILineSegment** retVal);
 	STDMETHOD(put_Line)(int Index, ILineSegment* retVal);
 	
-	STDMETHOD(Draw)(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
-	STDMETHOD(DrawVB)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
+	STDMETHOD(Draw)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
+	//STDMETHOD(DrawVB)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
 
 	STDMETHOD(get_Transparency)(BYTE *retVal);
 	STDMETHOD(put_Transparency)(BYTE newVal);
