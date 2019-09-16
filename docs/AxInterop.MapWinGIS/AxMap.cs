@@ -605,7 +605,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Zooms the display in by the given factor.
         /// </summary>
-        /// <param name="percent">The factor to zoom in by.</param>
+        /// <param name="percent">A number between 0.0 and 1.0, being the factor to zoom in by.</param>
         public void ZoomIn(double percent)
         {
             throw new NotImplementedException();
@@ -614,7 +614,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Zooms the display out by the specified factor.
         /// </summary>
-        /// <param name="percent">The factor to zoom out by.</param>
+        /// <param name="percent">A number between 0.0 and 1.0, being the factor to zoom out by.</param>
         public void ZoomOut(double percent)
         {
             throw new NotImplementedException();
