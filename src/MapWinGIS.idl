@@ -4850,7 +4850,7 @@ interface IShapeDrawingOptions : IDispatch{
 	[propget, id(27), helpstring("property PictureScaleY")] HRESULT PictureScaleY([out, retval] double *pVal);
 	[propput, id(27), helpstring("property PictureScaleY")] HRESULT PictureScaleY([in] double newVal);
 
-	[id(28), helpstring("method DrawShape")] HRESULT DrawShape([in]int** hdc, [in]float x, [in]float y, [in]IShape* shape, [in]VARIANT_BOOL drawVertices, 
+	[id(28), helpstring("method DrawShape")] HRESULT DrawShape([in]int hdc, [in]float x, [in]float y, [in]IShape* shape, [in]VARIANT_BOOL drawVertices, 
 															   [in]int clipWidth, [in]int clipHeight, 
 															   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 															   [out, retval] VARIANT_BOOL* retVal);
@@ -4866,12 +4866,12 @@ interface IShapeDrawingOptions : IDispatch{
 	[propget, id(32), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(33), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 
-	[id(34), helpstring("method DrawRectangle")] HRESULT DrawRectangle([in]int** hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices, 
+	[id(34), helpstring("method DrawRectangle")] HRESULT DrawRectangle([in]int hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices, 
 																	   [in, defaultvalue(0)]int clipWidth, [in, defaultvalue(0)]int clipHeight, 
 																	   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 																	   [out, retval] VARIANT_BOOL* retVal);
 	
-	[id(35), helpstring("method DrawPoint")] HRESULT DrawPoint([in]int** hdc,  [in]float x, [in]float y,
+	[id(35), helpstring("method DrawPoint")] HRESULT DrawPoint([in]int hdc,  [in]float x, [in]float y,
 															   [in, defaultvalue(0)]int clipWidth, [in, defaultvalue(0)]int clipHeight, 
 															   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 															   [out, retval] VARIANT_BOOL* retVal);
@@ -4887,7 +4887,7 @@ interface IShapeDrawingOptions : IDispatch{
 	[propget, id(40), helpstring("property VerticesFillVisible")] HRESULT VerticesFillVisible([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(40), helpstring("property VerticesFillVisible")] HRESULT VerticesFillVisible([in] VARIANT_BOOL newVal);
 	
-	[id(45), helpstring("method DrawLine")] HRESULT DrawLine([in]int** hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices,
+	[id(45), helpstring("method DrawLine")] HRESULT DrawLine([in]int hdc, [in]float x, [in]float y, [in]int width, [in]int height, [in]VARIANT_BOOL drawVertices,
 															 [in]int clipWidth, [in]int clipHeight, 
 															 [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 															 [out, retval] VARIANT_BOOL* retVal);
@@ -4906,28 +4906,28 @@ interface IShapeDrawingOptions : IDispatch{
 	[id(52), helpstring("property Serialize")] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(53), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
 	
-	[id(54), helpstring("method DrawPointVB")] HRESULT DrawPointVB([in]int hdc, [in]float x, [in]float y, 
-																   [in, defaultvalue(0)] int clipWidth, [in, defaultvalue(0)] int clipHeight,  
-																   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
-																   [out, retval] VARIANT_BOOL* retVal);
+	//[id(54), helpstring("method DrawPointVB")] HRESULT DrawPointVB([in]int hdc, [in]float x, [in]float y, 
+	//															   [in, defaultvalue(0)] int clipWidth, [in, defaultvalue(0)] int clipHeight,  
+	//															   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
+	//															   [out, retval] VARIANT_BOOL* retVal);
 
-	[id(55), helpstring("method DrawLineVB")] HRESULT DrawLineVB([in]int hdc, [in]float x, [in]float y, [in]int width, [in]int height,
-																 [in]VARIANT_BOOL drawVertices,														 
-																 [in] int clipWidth, [in] int clipHeight,
-																 [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
-																 [out, retval] VARIANT_BOOL* retVal);
-	
-	[id(56), helpstring("method DrawRectangleVB")] HRESULT DrawRectangleVB([in] int hdc, [in] float x, [in] float y, [in] int width, [in] int height,
-														   [in] VARIANT_BOOL drawVertices, 
-														   [in, defaultvalue(0)] int clipWidth, [in, defaultvalue(0)] int clipHeight,   
-														   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
-														   [out, retval] VARIANT_BOOL* retVal);
-	
-	[id(57), helpstring("method DrawShapeVB")] HRESULT DrawShapeVB([in]int hdc, [in]float x, [in]float y, [in]IShape* shape,
-														   [in]VARIANT_BOOL drawVertices, 
-														   [in] int clipWidth, [in] int clipHeight,   
-														   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
-														   [out, retval] VARIANT_BOOL* retVal);
+	//[id(55), helpstring("method DrawLineVB")] HRESULT DrawLineVB([in]int hdc, [in]float x, [in]float y, [in]int width, [in]int height,
+	//															 [in]VARIANT_BOOL drawVertices,														 
+	//															 [in] int clipWidth, [in] int clipHeight,
+	//															 [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
+	//															 [out, retval] VARIANT_BOOL* retVal);
+	//
+	//[id(56), helpstring("method DrawRectangleVB")] HRESULT DrawRectangleVB([in] int hdc, [in] float x, [in] float y, [in] int width, [in] int height,
+	//													   [in] VARIANT_BOOL drawVertices, 
+	//													   [in, defaultvalue(0)] int clipWidth, [in, defaultvalue(0)] int clipHeight,   
+	//													   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
+	//													   [out, retval] VARIANT_BOOL* retVal);
+	//
+	//[id(57), helpstring("method DrawShapeVB")] HRESULT DrawShapeVB([in]int hdc, [in]float x, [in]float y, [in]IShape* shape,
+	//													   [in]VARIANT_BOOL drawVertices, 
+	//													   [in] int clipWidth, [in] int clipHeight,   
+	//													   [in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
+	//													   [out, retval] VARIANT_BOOL* retVal);
 
 	[propget, id(58), helpstring("property DynamicVisibility")] HRESULT DynamicVisibility([out, retval]VARIANT_BOOL* retval);
 	[propput, id(58), helpstring("property DynamicVisibility")] HRESULT DynamicVisibility([in]VARIANT_BOOL newVal);
@@ -5488,7 +5488,7 @@ interface ICharts : IDispatch {
 	[id(14), helpstring("method MoveBar")] HRESULT MoveField([in]LONG OldIndex, [in]LONG NewIndex, [out, retval]VARIANT_BOOL* vbretval);
 	[id(15), helpstring("method Generate")] HRESULT Generate([in] tkLabelPositioning Type, [out, retval]VARIANT_BOOL* vbretval);
 	[id(16), helpstring("method Clear")] HRESULT Clear();
-	[id(17), helpstring("method DrawChart")] HRESULT DrawChart([in]int** hdc, [in]float x, [in]float y, [in]VARIANT_BOOL hideLabels, 
+	[id(17), helpstring("method DrawChart")] HRESULT DrawChart([in]int hdc, [in]float x, [in]float y, [in]VARIANT_BOOL hideLabels, 
 															   [in, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(18), helpstring("property Tilt")] HRESULT Tilt([out, retval] double* pVal);
 	[propput, id(18), helpstring("property Tilt")] HRESULT Tilt([in] double newVal);
@@ -5673,7 +5673,7 @@ interface ILinePattern : IDispatch{
 	[id(10), helpstring("method InsertMarker")] HRESULT InsertMarker([in]int Index, [in]tkDefaultPointSymbol marker, [out, retval]ILineSegment** retVal);
 	[id(11), helpstring("method RemoveItem")] HRESULT RemoveItem([in]int Index, [out, retval]VARIANT_BOOL* retVal);
 	[id(12), helpstring("method Clear")] HRESULT Clear();
-	[id(13), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
+	[id(13), helpstring("method Draw")] HRESULT Draw([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
 													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 													[out, retval]VARIANT_BOOL* retVal);
 	
@@ -5683,9 +5683,9 @@ interface ILinePattern : IDispatch{
 	[id(15), helpstring("property Serialize")] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(16), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
 
-	[id(17), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
-														[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
-														[out, retval]VARIANT_BOOL* retVal);
+	//[id(17), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight, 
+	//													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
+	//													[out, retval]VARIANT_BOOL* retVal);
 };
 
 /***************************  LineSegment Interface  ********************************/
@@ -5718,14 +5718,14 @@ interface ILineSegment : IDispatch{
 	[propput, id(9), helpstring("property MarkerFlipFirst")] HRESULT MarkerFlipFirst( [in]VARIANT_BOOL newVal);
 	[propget, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [out, retval]float* retVal);
 	[propput, id(10), helpstring("property MarkerOffset")] HRESULT MarkerOffset( [in]float newVal);
-	[id(11), helpstring("method Draw")] HRESULT Draw([in]int** hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
+	[id(11), helpstring("method Draw")] HRESULT Draw([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
 													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 													[out, retval]VARIANT_BOOL* retVal);
 	[propget, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [out, retval]OLE_COLOR* retVal);
 	[propput, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [in]OLE_COLOR newVal);
-	[id(13), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
-														[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
-														[out, retval]VARIANT_BOOL* retVal);
+	//[id(13), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
+	//													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
+	//													[out, retval]VARIANT_BOOL* retVal);
 };
 
 /************************************  MapWinGIS Library  ********************************/
@@ -7061,7 +7061,7 @@ library MapWinGIS
 			[id(159)] VARIANT_BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, long Width);
 			[id(202)] VARIANT_BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, 
 												 float ClipX, float ClipY, float clipWidth, float clipHeight);
-			[id(170)] void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
+			[id(170)] void DrawBackBuffer(int hdc, int ImageWidth, int ImageHeight);
 			[id(201)] VARIANT_BOOL LoadTilesForSnapshot(IExtents* Extents, long Width, LPCTSTR Key);
 #endif			
 

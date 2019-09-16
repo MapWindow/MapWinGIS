@@ -22,6 +22,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 18 august 2010 - created the file.
+ // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
 
 #pragma once
 #include "Gdiplus.h"
@@ -111,8 +112,8 @@ public:
 	STDMETHOD(put_MarkerOffset)(float newVal);
 	STDMETHOD(get_MarkerOutlineColor)(OLE_COLOR* retVal);
 	STDMETHOD(put_MarkerOutlineColor)(OLE_COLOR newVal);
-	STDMETHOD(Draw)(int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
-	STDMETHOD(DrawVB)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
+	STDMETHOD(Draw)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);
+	/*STDMETHOD(DrawVB)(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal);*/
 	STDMETHOD(Draw)(Gdiplus::Graphics& g, BYTE transparency, int ImageWidth, int ImageHeight, int xOrigin, int yOrigin, VARIANT_BOOL* retVal);
 
 private:

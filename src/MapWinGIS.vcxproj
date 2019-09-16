@@ -81,7 +81,7 @@
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
+      <WarningLevel>3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <GenerateStublessProxies>true</GenerateStublessProxies>
