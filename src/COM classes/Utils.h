@@ -269,7 +269,18 @@ private:
 	CStringArray _sConfig;
 
 private:
-	inline long findBreak(std::deque<BreakVal> & bvals, double val);
+	inline long findBreak(std::deque<BreakVal> & bVals, double val)
+	{
+		int sizeBVals = (int)bVals.size();
+		for (int i = 0; i < sizeBVals; i++)
+		{
+			if (val >= bVals[i].lowVal &&
+				val <= bVals[i].highVal)
+				return i;
+		}
+		return -1;
+	}
+
 	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);
 
 	void trace_polygon(long x, long y, std::deque<RasterPoint> & polygon);
