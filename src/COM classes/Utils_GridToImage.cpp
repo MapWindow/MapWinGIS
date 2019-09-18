@@ -31,21 +31,6 @@ void ReadBreaks(IGridColorScheme* ci, std::deque<BreakVal>& result)
 }
 
 // ****************************************************************
-//		findBreak()
-// ****************************************************************
-//long CUtils::findBreak(std::deque<BreakVal> & bVals, double val)
-//{
-//	int sizeBVals = (int)bVals.size();
-//	for (int i = 0; i < sizeBVals; i++)
-//	{
-//		if (val >= bVals[i].lowVal &&
-//			val <= bVals[i].highVal)
-//			return i;
-//	}
-//	return -1;
-//}
-
-// ****************************************************************
 //		GetLightSource()
 // ****************************************************************
 void GetLightSource(IGridColorScheme* ci, cppVector& lightsource)
