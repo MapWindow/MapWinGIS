@@ -4033,7 +4033,7 @@ interface IShapefile : IDispatch{
 	midl_pragma warning(disable:2402)
 	// function effectively requires the Result parameter (to capture the results);
 	// it was made optional only because it follows other optional parameters, and
-	// cannot reasonably be changed without breaking the interface.
+	// cannot reasonably be changed without breaking the interface. (MWGIS-185)
 	// this pragma disables the warning only for this (and similar) functions.
 	[id(18), helpstring("method SelectShapes")] HRESULT SelectShapes([in] IExtents* BoundBox, [in, defaultvalue(0.0)]double Tolerance, [in, defaultvalue(INTERSECTION)] SelectMode SelectMode, [in, out, optional] VARIANT* Result, [out, retval] VARIANT_BOOL* retval);
 	midl_pragma warning(enable:2402)
