@@ -4030,7 +4030,13 @@ interface IShapefile : IDispatch{
 	[id(15), helpstring("method EditClear")] HRESULT EditClear([out, retval] VARIANT_BOOL* retval);
 	[id(16), helpstring("method EditInsertShape")] HRESULT EditInsertShape([in]IShape* Shape, [in, out] long* ShapeIndex, [out, retval] VARIANT_BOOL* retval);
 	[id(17), helpstring("method EditDeleteShape")] HRESULT EditDeleteShape([in]long ShapeIndex, [out, retval] VARIANT_BOOL* retval);
+	midl_pragma warning(disable:2402)
+	// function effectively requires the Result parameter (to capture the results);
+	// it was made optional only because it follows other optional parameters, and
+	// cannot reasonably be changed without breaking the interface.
+	// this pragma disables the warning only for this (and similar) functions.
 	[id(18), helpstring("method SelectShapes")] HRESULT SelectShapes([in] IExtents* BoundBox, [in, defaultvalue(0.0)]double Tolerance, [in, defaultvalue(INTERSECTION)] SelectMode SelectMode, [in, out, optional] VARIANT* Result, [out, retval] VARIANT_BOOL* retval);
+	midl_pragma warning(enable:2402)
 	[id(19), helpstring("method StartEditingShapes")] HRESULT StartEditingShapes([in, defaultvalue(-1)] VARIANT_BOOL StartEditTable, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(20), helpstring("method StopEditingShapes")] HRESULT StopEditingShapes([in, defaultvalue(-1)] VARIANT_BOOL ApplyChanges, [in, defaultvalue(-1)]VARIANT_BOOL StopEditTable, [in, defaultvalue(NULL)] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(22), helpstring("method EditInsertField")] HRESULT EditInsertField([in] IField* NewField, [in, out]long* FieldIndex, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL* retval);
@@ -4576,7 +4582,7 @@ interface IUtils : IDispatch{
 	[id(20), helpstring("method ShapefileToGrid")] HRESULT ShapefileToGrid([in] IShapefile * Shpfile, [in, defaultvalue(-1)] VARIANT_BOOL UseShapefileBounds, [in, defaultvalue(NULL)]IGridHeader * GrdHeader, [in,defaultvalue(30.0)]double Cellsize, [in,defaultvalue(-1)]VARIANT_BOOL UseShapeNumber, [in,defaultvalue(1)]short SingleValue,[out, retval] IGrid ** retval);
 	[id(21), helpstring("method hBitmapToPicture")] HRESULT hBitmapToPicture([in] long hBitmap, [out, retval] IPictureDisp ** retval);
 	[id(22), helpstring("method GenerateHillShade")] HRESULT GenerateHillShade([in] BSTR bstrGridFilename, [in] BSTR bstrShadeFilename, [in, defaultvalue(1)] float z, [in, defaultvalue(1)] float scale, [in, defaultvalue(315)] float az, [in, defaultvalue(45)] float alt, [out, retval] VARIANT_BOOL* retval);
-	[id(23), helpstring("method GenerateContour")] HRESULT GenerateContour([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in] double dfInterval, [in, defaultvalue(0)] double dfNoData, [in, defaultvalue(0)] VARIANT_BOOL Is3D, [in, optional, defaultvalue(NULL)] VARIANT dblFLArray, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
+	[id(23), helpstring("method GenerateContour")] HRESULT GenerateContour([in] BSTR pszSrcFilename, [in] BSTR pszDstFilename, [in] double dfInterval, [in, defaultvalue(0)] double dfNoData, [in, defaultvalue(0)] VARIANT_BOOL Is3D, [in, defaultvalue(NULL)] VARIANT dblFLArray, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(24), helpstring("Deprecated method GDALWarp, use CGdalUtils::GdalRasterTranslate instead")] HRESULT TranslateRaster([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(25), helpstring("Reads vector layer through GDAL/OGR library and converts it to the in-memory shapefile. Layer format is defined automatically. For formats which can store geometries of different types the type of resulting shapefile should be specified in shpType parameter.")] 
 			HRESULT OGRLayerToShapefile([in]BSTR Filename, [in, defaultvalue(SHP_NULLSHAPE)] ShpfileType shpType, [in, defaultvalue(NULL)] ICallback *cBack, [out, retval] IShapefile** sf);
@@ -4766,7 +4772,14 @@ interface ITin : IDispatch{
 	[propget, id(17), helpstring("property Filename")] HRESULT Filename([out, retval] BSTR *pVal);
 	[propget, id(18), helpstring("property IsNDTriangle")] HRESULT IsNDTriangle([in] long TriIndex, [out, retval] VARIANT_BOOL *pVal);
 	[id(19), helpstring("method TriangleNeighbors")] HRESULT TriangleNeighbors([in] long TriIndex, [in, out] long* triIndex1, [in, out] long* triIndex2, [in, out] long* triIndex3);
+	midl_pragma warning(disable:2456)
+	// this function passes a SAFEARRAY of pointers to interfaces, and the warning 
+	// would indicate that this cannot work.  It is unclear if anyone is using this
+	// function, and it cannot reasonably be changed without breaking the interface.
+	// we have chosen to disable this warning for now, and only for this function.
+	// any new functions will still raise the warning, and hopefully be corrected.
 	[id(20), helpstring("method CreateTinFromPoints")] HRESULT CreateTinFromPoints([in] SAFEARRAY (IPoint*) Points, [out,retval] VARIANT_BOOL* retval);
+	midl_pragma warning(enable:2456)
 };
 /**************************  ShapeDrawingOptions Interface  ***************************/
 [
@@ -5029,8 +5042,14 @@ interface ILabels : IDispatch{
 																		   [in,defaultvalue(0)]long MinBlue, [in,defaultvalue(255)]long MaxRed, 
 																		   [in,defaultvalue(255)]long MaxGreen, [in,defaultvalue(255)]long MaxBlue);
 	[id(19), helpstring("method SetGraduatedColors")] HRESULT SetGraduatedColors([in]tkLabelElements Element, [in]OLE_COLOR ColorStart, [in]OLE_COLOR ColorEnd, [in, defaultvalue(0)] VARIANT_BOOL ByCategoryIndex);*/
+	midl_pragma warning(disable:2402)
+	// function effectively requires the LabelIndices and PartIndices parameters, 
+	// they were made optional only because they follow other optional parameters, 
+	// and cannot reasonably be changed without breaking the interface.
+	// this pragma disables the warning only for this (and similar) functions.
 	[id(20), helpstring("method Select")] HRESULT Select([in]IExtents* BoundingBox, [in, defaultvalue(0)]long Tolerance, [in, defaultvalue(INTERSECTION)]SelectMode SelectMode, [in, optional, out]VARIANT* LabelIndices, [in, optional, out]VARIANT* PartIndices, [out, retval]VARIANT_BOOL* retval);
-	
+	midl_pragma warning(enable:2402)
+
 	// class specific properties
 	[propget, id(21), helpstring("property NumLabels")] HRESULT Count([out, retval] long* pVal);
 	[propget, id(22), helpstring("property NumParts")] HRESULT NumParts([in]long Index, [out, retval] long* pVal);
