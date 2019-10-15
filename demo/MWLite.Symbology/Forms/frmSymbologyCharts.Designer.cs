@@ -74,9 +74,9 @@ namespace MWLite.Symbology.Forms
                 MapWinGIS.Charts charts = _shapefile.Charts;
 
                 if (charts.ChartType == MapWinGIS.tkChartType.chtPieChart)
-                    charts.DrawChart(ptr, (width - charts.IconWidth) / 2, (height - charts.IconHeight) / 2, false, Colors.ColorToUInteger(Color.White));
+                    charts.DrawChart(ptr.ToInt32(), (width - charts.IconWidth) / 2, (height - charts.IconHeight) / 2, false, Colors.ColorToUInteger(Color.White));
                 else
-                    charts.DrawChart(ptr, (width - charts.IconWidth) / 2, (height - charts.IconHeight) / 2, false, Colors.ColorToUInteger(Color.White));
+                    charts.DrawChart(ptr.ToInt32(), (width - charts.IconWidth) / 2, (height - charts.IconHeight) / 2, false, Colors.ColorToUInteger(Color.White));
 
                 g.ReleaseHdc(ptr);
             }

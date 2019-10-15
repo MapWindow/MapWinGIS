@@ -2126,11 +2126,11 @@ namespace MWLite.Symbology.LegendControl
                         var sf = m_Map.GetObject[lyr.Handle] as Shapefile;
 
                         if (lyr.Type == eLayerType.PointShapefile)
-                            sf.DefaultDrawingOptions.DrawPoint(hdc, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
+                            sf.DefaultDrawingOptions.DrawPoint(hdc.ToInt32(), left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
                         else if (lyr.Type == eLayerType.LineShapefile)
-                            sf.DefaultDrawingOptions.DrawLine(hdc, left, top, Constants.ICON_SIZE - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
+                            sf.DefaultDrawingOptions.DrawLine(hdc.ToInt32(), left, top, Constants.ICON_SIZE - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
                         else if (lyr.Type == eLayerType.PolygonShapefile)
-                            sf.DefaultDrawingOptions.DrawRectangle(hdc, left, top, Constants.ICON_SIZE - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
+                            sf.DefaultDrawingOptions.DrawRectangle(hdc.ToInt32(), left, top, Constants.ICON_SIZE - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
 
                         DrawTool.ReleaseHdc(hdc);
                     }
@@ -2362,7 +2362,7 @@ namespace MWLite.Symbology.LegendControl
                 uint backColor = Convert.ToUInt32(ColorTranslator.ToOle(this.BackColor));
 
                 left = bounds.Left + Constants.TEXT_LEFT_PAD;
-                sf.Charts.DrawChart(hdc, left, top, true, backColor);
+                sf.Charts.DrawChart(hdc.ToInt32(), left, top, true, backColor);
                 top += sf.Charts.IconHeight + 2;
                 DrawTool.ReleaseHdc(hdc);
 
@@ -2421,11 +2421,11 @@ namespace MWLite.Symbology.LegendControl
             }
 
             if (layer.Type == eLayerType.PointShapefile)
-                options.DrawPoint(hdc, left, top, categoryWidth + 1, categoryHeight + 1, backColor);
+                options.DrawPoint(hdc.ToInt32(), left, top, categoryWidth + 1, categoryHeight + 1, backColor);
             else if (layer.Type == eLayerType.LineShapefile)
-                options.DrawLine(hdc, left, top, categoryWidth - 1, Constants.ICON_HEIGHT - 1, false, categoryWidth, categoryHeight, backColor);
+                options.DrawLine(hdc.ToInt32(), left, top, categoryWidth - 1, Constants.ICON_HEIGHT - 1, false, categoryWidth, categoryHeight, backColor);
             else if (layer.Type == eLayerType.PolygonShapefile)
-                options.DrawRectangle(hdc, left, top, categoryWidth - 1, Constants.ICON_HEIGHT - 1, false, categoryWidth, categoryHeight, backColor);
+                options.DrawRectangle(hdc.ToInt32(), left, top, categoryWidth - 1, Constants.ICON_HEIGHT - 1, false, categoryWidth, categoryHeight, backColor);
 
             DrawTool.ReleaseHdc(hdc);
 
@@ -2457,11 +2457,11 @@ namespace MWLite.Symbology.LegendControl
             }
 
             if (layer.Type == eLayerType.PointShapefile)
-                options.DrawPoint(hdc, left, top, categoryWidth + 1, categoryHeight + 1, backColor);
+                options.DrawPoint(hdc.ToInt32(), left, top, categoryWidth + 1, categoryHeight + 1, backColor);
             else if (layer.Type == eLayerType.LineShapefile)
-                options.DrawLine(hdc, left, top, categoryWidth - 1, Constants.ICON_HEIGHT - 1, false, categoryWidth, categoryHeight, backColor);
+                options.DrawLine(hdc.ToInt32(), left, top, categoryWidth - 1, Constants.ICON_HEIGHT - 1, false, categoryWidth, categoryHeight, backColor);
             else if (layer.Type == eLayerType.PolygonShapefile)
-                options.DrawRectangle(hdc, left, top, categoryWidth - 1, Constants.ICON_HEIGHT - 1, false, categoryWidth, categoryHeight, backColor);
+                options.DrawRectangle(hdc.ToInt32(), left, top, categoryWidth - 1, Constants.ICON_HEIGHT - 1, false, categoryWidth, categoryHeight, backColor);
 
             if (categoryHeight > Constants.CS_ITEM_HEIGHT)
                 top += (categoryHeight - Constants.CS_ITEM_HEIGHT) / 2;
@@ -2527,11 +2527,11 @@ namespace MWLite.Symbology.LegendControl
                         uint backColor = Convert.ToUInt32(ColorTranslator.ToOle(this.BackColor));
 
                         if (layer.Type == eLayerType.PointShapefile)
-                            sf.DefaultDrawingOptions.DrawPoint(hdc, LeftPos, TopPos, Constants.ICON_WIDTH, Constants.ICON_HEIGHT, backColor);
+                            sf.DefaultDrawingOptions.DrawPoint(hdc.ToInt32(), LeftPos, TopPos, Constants.ICON_WIDTH, Constants.ICON_HEIGHT, backColor);
                         else if (layer.Type == eLayerType.LineShapefile)
-                            sf.DefaultDrawingOptions.DrawLine(hdc, LeftPos, TopPos, Constants.ICON_WIDTH - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_WIDTH, Constants.ICON_HEIGHT, backColor);
+                            sf.DefaultDrawingOptions.DrawLine(hdc.ToInt32(), LeftPos, TopPos, Constants.ICON_WIDTH - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_WIDTH, Constants.ICON_HEIGHT, backColor);
                         else if (layer.Type == eLayerType.PolygonShapefile)
-                            sf.DefaultDrawingOptions.DrawRectangle(hdc, LeftPos, TopPos, Constants.ICON_WIDTH - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_WIDTH, Constants.ICON_HEIGHT, backColor);
+                            sf.DefaultDrawingOptions.DrawRectangle(hdc.ToInt32(), LeftPos, TopPos, Constants.ICON_WIDTH - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_WIDTH, Constants.ICON_HEIGHT, backColor);
 
                         DrawTool.ReleaseHdc(hdc);
                         break;

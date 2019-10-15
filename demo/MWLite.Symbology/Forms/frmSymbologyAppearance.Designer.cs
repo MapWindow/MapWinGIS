@@ -148,24 +148,24 @@ namespace MWLite.Symbology.Forms
                 if (shapeType == ShpfileType.SHP_POINT || shapeType == ShpfileType.SHP_POINTM || shapeType == ShpfileType.SHP_POINTZ ||
                     shapeType == ShpfileType.SHP_MULTIPOINT || shapeType == ShpfileType.SHP_MULTIPOINTM || shapeType == ShpfileType.SHP_MULTIPOINTZ)
                 {
-                    sdo.DrawPoint(ptr, 0.0f, 0.0f, rect.Width, rect.Height, Colors.ColorToUInteger(Color.White));
+                    sdo.DrawPoint(ptr.ToInt32(), 0.0f, 0.0f, rect.Width, rect.Height, Colors.ColorToUInteger(Color.White));
                 }
                 else if (shapeType == ShpfileType.SHP_POLYLINE || shapeType == ShpfileType.SHP_POLYLINEZ || shapeType == ShpfileType.SHP_POLYLINEM)
                 {
                     if (sdo.UseLinePattern)
                     {
-                        sdo.DrawLine(ptr, 20.0f, 0.0f, 0, 0, true, rect.Width - 40, rect.Height, Colors.ColorToUInteger(Color.White));
+                        sdo.DrawLine(ptr.ToInt32(), 20.0f, 0.0f, 0, 0, true, rect.Width - 40, rect.Height, Colors.ColorToUInteger(Color.White));
                     }
                     else
                     {
                         int w = rect.Width - 40;
                         int h = rect.Height - 40;
-                        sdo.DrawLine(ptr, (rect.Width - w)/2, (rect.Height - h) / 2, w, h, true, rect.Width, rect.Height, Colors.ColorToUInteger(Color.White));
+                        sdo.DrawLine(ptr.ToInt32(), (rect.Width - w)/2, (rect.Height - h) / 2, w, h, true, rect.Width, rect.Height, Colors.ColorToUInteger(Color.White));
                     }
                 }
                 else if (shapeType == ShpfileType.SHP_POLYGON || shapeType == ShpfileType.SHP_POLYGONZ || shapeType == ShpfileType.SHP_POLYGONM)
                 {
-                    sdo.DrawRectangle(ptr, rect.Width / 2 - 40, rect.Height / 2 - 40, 80, 80, true, rect.Width, rect.Height, Colors.ColorToUInteger(Color.White));
+                    sdo.DrawRectangle(ptr.ToInt32(), rect.Width / 2 - 40, rect.Height / 2 - 40, 80, 80, true, rect.Width, rect.Height, Colors.ColorToUInteger(Color.White));
                 }
 
                 g.ReleaseHdc(ptr);

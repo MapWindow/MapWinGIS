@@ -736,15 +736,15 @@ namespace MWLite.Symbology.Forms.Categories
 
                         if (type == ShpfileType.SHP_POLYGON)
                         {
-                            sdo.DrawRectangle(g.GetHdc(), 0.0f, 0.0f, img.Width - 1, img.Height - 1, true, img.Width, img.Height, Colors.ColorToUInteger(dgvCategories.BackgroundColor));
+                            sdo.DrawRectangle(g.GetHdc().ToInt32(), 0.0f, 0.0f, img.Width - 1, img.Height - 1, true, img.Width, img.Height, Colors.ColorToUInteger(dgvCategories.BackgroundColor));
                         }
                         else if (type == ShpfileType.SHP_POLYLINE)
                         {
-                            sdo.DrawLine(g.GetHdc(), 0.0f, 0.0f, img.Width - 1, img.Height - 1, true, img.Width, img.Height, Colors.ColorToUInteger(dgvCategories.BackgroundColor));
+                            sdo.DrawLine(g.GetHdc().ToInt32(), 0.0f, 0.0f, img.Width - 1, img.Height - 1, true, img.Width, img.Height, Colors.ColorToUInteger(dgvCategories.BackgroundColor));
                         }
                         else if (type == ShpfileType.SHP_POINT)
                         {
-                            sdo.DrawPoint(g.GetHdc(), 0.0f, 0.0f, img.Width, img.Height, Colors.ColorToUInteger(dgvCategories.BackgroundColor));
+                            sdo.DrawPoint(g.GetHdc().ToInt32(), 0.0f, 0.0f, img.Width, img.Height, Colors.ColorToUInteger(dgvCategories.BackgroundColor));
                         }
                         g.ReleaseHdc();
                         g.Dispose();
