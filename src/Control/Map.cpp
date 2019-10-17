@@ -147,6 +147,8 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("AfterLayers", eventidAfterLayers, FireAfterLayers, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
     EVENT_CUSTOM_ID("LayerReprojectedIncomplete", eventidLayerReprojectedIncomplete, FireLayerReprojectedIncomplete, VTS_I4 VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("BeforeVertexDigitized", eventidBeforeVertexDigitized, FireBeforeVertexDigitized, VTS_PR8 VTS_PR8)
+    EVENT_CUSTOM_ID("SnapPointRequested", eventidSnapPointRequested, FireSnapPointRequested, VTS_R8, VTS_R8, VTS_PR8 VTS_PR8, VTS_PI4, VTS_PI4)
+    EVENT_CUSTOM_ID("SnapPointFound", eventidSnapPointFound, FireSnapPointFound, VTS_R8, VTS_R8, VTS_PR8 VTS_PR8)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
 	

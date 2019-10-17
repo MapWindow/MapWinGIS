@@ -7230,6 +7230,8 @@ library MapWinGIS
 			[id(38)] void AfterLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
             [id(39)] void LayerReprojectedIncomplete(LONG LayerHandle, Long NumReprojected, Long NumShapes);
 			[id(40)] void BeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY);
+            [id(41)] void SnapPointRequested(DOUBLE pointX, DOUBLE pointY, DOUBLE* snappedX, DOUBLE* snappedY, tkMwBoolean* isFound, tkMwBoolean* isFinal);
+            [id(42)] void SnapPointFound(DOUBLE pointX, DOUBLE pointY, DOUBLE* snappedX, DOUBLE* snappedY);
 			//}}AFX_ODL_EVENT
 			
 	};

@@ -682,6 +682,10 @@ public:
 		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_DISPATCH VTS_PI4), LayerHandle, Shape, Cancel);	}
 	void FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY)
 		{FireEvent(eventidBeforeVertexDigitized, EVENT_PARAM(VTS_PR8 VTS_PR8), pointX, pointY); }
+	void FireSnapPointRequested(DOUBLE pointX, DOUBLE pointY, DOUBLE* snappedX, DOUBLE* snappedY, tkMwBoolean* isFound, tkMwBoolean* isFinal)
+		{FireEvent(eventidSnapPointRequested, EVENT_PARAM(VTS_R8 VTS_R8 VTS_PR8 VTS_PR8 VTS_PI4 VTS_PI4), pointX, pointY, snappedX, snappedY, isFound, isFinal); }
+	void FireSnapPointFound(DOUBLE pointX, DOUBLE pointY, DOUBLE* snappedX, DOUBLE* snappedY)
+		{FireEvent(eventidSnapPointFound, EVENT_PARAM(VTS_R8 VTS_R8 VTS_PR8 VTS_PR8), pointX, pointY, snappedX, snappedY); }
 	void FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
 	void FireChooseLayer(long x, long y, LONG* LayerHandle)
@@ -1257,6 +1261,9 @@ private:
 	void AdjustWmsLayerVerticalPosition(int layerHandle);
 	void UpdateWmsLayerBounds(IWmsLayer* layer);
 	void UpdateWmsLayerBounds(IWmsLayer* wms, Layer& layer);
+    // Snapping internal algorithm:
+    VARIANT_BOOL DefaultSnappingAlgorithm(double maxDist, double minDist, double x, double y, double *xFound, double *yFound);
+    VARIANT_BOOL CheckSnapPointForTolerance(double maxDist, double x, double y, double xF, double yF, double *xFound, double *yFound);
 #pragma endregion
 
 public:

@@ -301,6 +301,8 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidBeforeLayers = 37L,
 	eventidAfterLayers = 38L,
 	eventidLayerReprojectedIncomplete = 39L,
-	eventidBeforeVertexDigitized = 40L
+	eventidBeforeVertexDigitized = 40L,
+    eventidSnapPointRequested = 41L,
+    eventidSnapPointFound = 42L
 	//}}AFX_DISP_ID
 };
