@@ -848,7 +848,9 @@ bool CMapView::CheckLayerProjection( Layer* layer, int layerHandle )
 		return false;
 	}
 			
-	if (layer->IsShapefile()) {
+	if (layer->IsShapefile()) 
+	{
+		// save reprojected state
 		return ReprojectLayer(layer, layerHandle);
 	}
 
@@ -882,16 +884,12 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
     // either all shapes have been reprojected OR we are allowing layers with incomplete reprojection;
 	if (!sfNew || (numShapes != count && !m_globalSettings.allowLayersWithIncompleteReprojection))
 	{
+        // reprojection failed
 		FireLayerReprojected(layerHandle, VARIANT_FALSE);
 		if (sfNew) sfNew->Release();
 		ErrorMessage(tkFAILED_TO_REPROJECT);
 		return false;
 	}
-    else if (numShapes != count)
-    {
-        // allowing layer with incomplete reprojection, let the world know
-        FireLayerReprojectedIncomplete(layerHandle, count, numShapes);
-    }
 	
 	// let's substitute original shapefile with the reprojected one
 	// don't close the original shapefile; use may still want to interact with it
@@ -915,6 +913,13 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 	}
 	layer->UpdateExtentsFromDatasource();
 
+    // if not all shapes could be reprojected, let the world know
+    if (numShapes != count)
+    {
+        // in case this was an Ogr layer, event should be fired AFTER new Shapefile was 'injected' into OgrLayerSource
+        FireLayerReprojectedIncomplete(layerHandle, count, numShapes);
+    }
+    // always fire LayerReprojected event
 	FireLayerReprojected(layerHandle, VARIANT_TRUE);
 
 	return true;
@@ -1323,7 +1328,7 @@ void CMapView::SetLayerMinVisibleZoom(LONG LayerHandle, int newVal)
 }
 
 // ****************************************************************** 
-//		LayerMaxVisibleScale
+//		LayerMaxVisibleZoom
 // ****************************************************************** 
 int CMapView::GetLayerMaxVisibleZoom(LONG LayerHandle)
 {
