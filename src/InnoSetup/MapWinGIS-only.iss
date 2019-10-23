@@ -2,21 +2,23 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "5.0.2.3"
+#define MyAppVersion "5.1.0"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapWindow\MapWinGIS\git\src\InnoSetup"
 #define BinLocation "D:\dev\MapWindow\MapWinGIS\git\src\bin"
 ;; #define x64BitVersion
+;; #define VsVersion = "2015" 
+#define VsVersion = "2017" 
 
 #ifdef x64BitVersion
   #define CPU "x64"
-  #define vcredist "vcredist_x64_2017.exe"
+  #define vcredist "vcredist_x64-" + VsVersion + ".exe"
   #define MySourceDir BinLocation + "\x64\"
   #define SystemFlag "64bit"
 #else
   #define CPU "Win32"
-  #define vcredist "vcredist_x86-2017.exe"
+  #define vcredist "vcredist_x86-" + VsVersion + ".exe"
   #define MySourceDir BinLocation + "\Win32\"
   #define SystemFlag "32bit"
 #endif
@@ -104,6 +106,9 @@ Source: "{#BinLocation}\Licenses\HDF5License.rtf"; DestDir: "{app}\Licenses\"; F
 ;;Source: "{#MySourceDir}\gdalplugins\gdal_HDF4Image.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF4
 ;;Source: "{#BinLocation}\Licenses\HDF4License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: HDF4
 
+Source: "{#MySourceDir}\gdalplugins\ogr_MSSQLSpatial.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
+Source: "{#MySourceDir}\gdalplugins\ogr_PG.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
+
 ;; GDAL data
 Source: "{#MySourceDir}\gdal-data\*"; DestDir: "{app}\gdal-data"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: MapWinGIS_Core
 Source: "{#BinLocation}\PROJ_NAD\*"; DestDir: "{app}\PROJ_NAD"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: MapWinGIS_Core
@@ -129,7 +134,7 @@ Name: "HDF5"; Description: "Add Hierarchical Data Format Release 5 support"; Typ
 Name: "MapWinGIS_Delphi"; Description: "Delphi Unit Source file (MapWinGIS_TLB.pas). If you don't know what it is you probably won't need it."; Types: full custom
 
 [Run]
-; Install VC++ 2015 if needed:
+; Install VC++ redistributables if needed:
 #ifdef x64BitVersion
 Filename: "{tmp}\{#vcredist}"; Parameters: "/quiet"; Flags: waituntilterminated; Check: VCRedistNeedsInstall_x64()
 #else
@@ -138,8 +143,8 @@ Filename: "{tmp}\{#vcredist}"; Parameters: "/quiet"; Flags: waituntilterminated;
 ;Run some command files:
 Filename: "{app}\regMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runhidden
 Filename: "https://www.mapwindow.org/documentation/mapwingis4.9/getting_started.html?utm_source=MWv50&utm_medium=cpc&utm_campaign=MWGvInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Go to the online documentation"
-Filename: "https://www.mapwindow.org/documentation/mapwingis4.9/MapWindow49.html?utm_source=MWv50&utm_medium=cpc&utm_campaign=MWGInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the future of MapWinGIS/MapWindow v5"
 Filename: "https://www.mapwindow.org/documentation/mapwingis4.9/version_history.html?utm_source=MWv50&utm_medium=cpc&utm_campaign=MWGInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "Read about the changes in this version"
+Filename: "https://mapwindow.discourse.group/?utm_source=MWv50&utm_medium=cpc&utm_campaign=MWGInstaller-v{#MyAppVersion}"; Flags: shellexec runasoriginaluser postinstall nowait skipifsilent; Description: "The official MapWinGIS and MW5 forum"
 
 [UninstallRun]
 Filename: "{app}\unregMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runhidden

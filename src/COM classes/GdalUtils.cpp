@@ -422,7 +422,7 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALRes
 	}
 
 	const auto pszResampling = GdalHelper::GetResamplingAlgorithm(resamplingMethod);
-	// TODO: Shouldn't pszResampling be freed?
+	// It's a stack-based variable rather than an allocated variable.  So no delete is necessary.
 
 	// Call the GDALBuildOverviews function:	
 	m_globalSettings.SetGdalUtf8(true);
