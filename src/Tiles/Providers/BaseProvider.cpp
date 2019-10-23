@@ -17,28 +17,26 @@
  **************************************************************************************
  * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
+// Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #include "StdAfx.h"
 //#include "Wininet.h"
 #include "BaseProvider.h"
 #include "SecureHttpClient.h"
 
-// ReSharper disable CppUseAuto
-
 CString BaseProvider::_proxyUsername = "";
 CString BaseProvider::_proxyPassword = "";
 CString BaseProvider::_proxyDomain = "";
 CCriticalSection BaseProvider::_clientLock;
-const CString filePrefix = "file:///";
 
 // ************************************************************
 //		GetTileImage()
 // ************************************************************
 TileCore* BaseProvider::GetTileImage(CPoint& pos, const int zoom)
-{	
-	TileCore* tile = new TileCore(this->Id, zoom, pos, this->_projection);  // NOLINT	
+{
+    auto* tile = new TileCore(this->Id, zoom, pos, this->_projection);
 
-	for (size_t i = 0; i < _subProviders.size(); i++)
+    for (size_t i = 0; i < _subProviders.size(); i++)
     {
         CMemoryBitmap* bmp = _subProviders[i]->DownloadBitmap(pos, zoom);
         if (bmp)
@@ -93,34 +91,6 @@ CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool
 }
 
 // ************************************************************
-//		GetTileFileData()
-// ************************************************************
-CMemoryBitmap* BaseProvider::GetTileFileData(CString url)
-{
-	url.Delete(0, filePrefix.GetLength());
-	url.Replace("|", ":");
-	url.Replace("/", "\\");
-
-	std::ifstream fl = std::ifstream(url.GetBuffer(), std::ofstream::binary);
-	if (!fl)
-		return nullptr;
-
-	fl.seekg(0, std::ios::end);
-	const size_t sz = static_cast<size_t>(fl.tellg());
-	if (sz == 0)
-	    return nullptr;
-
-	std::vector<char> buf(sz);
-
-	fl.seekg(0, std::ios::beg);	
-	fl.read(buf.data(), buf.size());
-	if (!fl)
-		return nullptr;
-
-	return ReadBitmap(buf.data(), buf.size());
-}
-
-// ************************************************************
 //		DownloadBitmap()
 // ************************************************************
 CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
@@ -130,10 +100,9 @@ CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
 
     shortUrl.Format(R"(\zoom=%d\x=%d\y=%d)", zoom, pos.x, pos.y);
 
-	if (url.Find(filePrefix) == 0)
-		return GetTileFileData(url);
-	else
-		return GetTileHttpData(url, shortUrl);
+    CMemoryBitmap* bmp = GetTileHttpData(url, shortUrl);
+
+    return bmp;
 }
 
 // ************************************************************
@@ -142,7 +111,7 @@ CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
 CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, const CString& url, const CString& shortUrl,
                                                 bool success)
 {
-	SecureHttpClient* client = reinterpret_cast<SecureHttpClient*>(secureHttpClient);  // NOLINT
+    auto* client = reinterpret_cast<SecureHttpClient*>(secureHttpClient);
 
     if (_isStopped) return nullptr;
 
@@ -222,9 +191,9 @@ void BaseProvider::PreventParallelExecution()
 // *************************************************************
 //			ReadBitmap()
 // *************************************************************
-CMemoryBitmap* BaseProvider::ReadBitmap(char* body, int bodyLen) const  
+CMemoryBitmap* BaseProvider::ReadBitmap(char* body, int bodyLen) const
 {
-	CMemoryBitmap* bmp = new CMemoryBitmap(); // NOLINT(modernize-use-auto)
+    auto* bmp = new CMemoryBitmap();
     bmp->LoadFromRawData(body, bodyLen);
     bmp->Provider = this->Id;
     return bmp;
@@ -281,5 +250,3 @@ void BaseProvider::ClearSubProviders()
     }
     _subProviders.clear();
 }
-
-// ReSharper restore CppUseAuto
