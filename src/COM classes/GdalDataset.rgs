@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.GdalDataset.1 = s 'GdalDataset Class'
+	{
+		CLSID = s '{3CD18F05-E70D-4846-81F8-98B14CAD8FA8}'
+	}
+	MapWinGIS.GdalDataset = s 'GdalDataset Class'
+	{
+		CLSID = s '{3CD18F05-E70D-4846-81F8-98B14CAD8FA8}'
+		CurVer = s 'MapWinGIS.GdalDataset.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {3CD18F05-E70D-4846-81F8-98B14CAD8FA8} = s 'GdalDataset Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.GdalDataset.1'
+			VersionIndependentProgID = s 'MapWinGIS.GdalDataset'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }

@@ -44,7 +44,7 @@ struct FieldOperation
 
 // CFieldStatOperations
 class ATL_NO_VTABLE CFieldStatOperations :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CFieldStatOperations, &CLSID_FieldStatOperations>,
 	public IDispatchImpl<IFieldStatOperations, &IID_IFieldStatOperations, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

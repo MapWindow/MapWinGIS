@@ -1,11 +1,11 @@
 # ifndef GRIDMANAGER_H
 # define GRIDMANAGER_H
 
-# include "sGrid.h"
-# include "lGrid.h"
-# include "fGrid.h"
-# include "dGrid.h"
-# include "grdTypes.h"
+// # include "sgrid.h"
+// # include "lGrid.h"
+// # include "fGrid.h"
+// # include "dGrid.h"
+# include "grdtypes.h"
 # include "EsriDll.h"
 
 class __declspec( dllexport ) GridManager

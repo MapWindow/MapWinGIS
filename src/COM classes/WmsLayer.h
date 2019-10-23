@@ -8,7 +8,7 @@
 #endif
 
 class ATL_NO_VTABLE CWmsLayer :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CWmsLayer, &CLSID_WmsLayer>,
 	public IDispatchImpl<IWmsLayer, &IID_IWmsLayer, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

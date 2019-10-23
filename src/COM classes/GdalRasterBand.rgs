@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.GdalRasterBand.1 = s 'GdalRasterBand Class'
+	{
+		CLSID = s '{B451AA42-A353-4AB0-AF0E-88C5BCE3B2B6}'
+	}
+	MapWinGIS.GdalRasterBand = s 'GdalRasterBand Class'
+	{
+		CLSID = s '{B451AA42-A353-4AB0-AF0E-88C5BCE3B2B6}'
+		CurVer = s 'MapWinGIS.GdalRasterBand.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {B451AA42-A353-4AB0-AF0E-88C5BCE3B2B6} = s 'GdalRasterBand Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.GdalRasterBand.1'
+			VersionIndependentProgID = s 'MapWinGIS.GdalRasterBand'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }

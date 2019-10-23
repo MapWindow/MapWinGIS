@@ -345,6 +345,8 @@ namespace MapWinGIS
         /// <param name="bstrOptions">Options of the routine.</param>
         /// <param name="cBack">The callback object.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// \deprecated v5.1.0 Use GdalUtils.GdalRasterTranslate instead.
+        [Obsolete("Use GdalUtils.GdalRasterTranslate")]
         public bool TranslateRaster(string bstrSrcFilename, string bstrDstFilename, string bstrOptions, ICallback cBack)
         {
             throw new NotImplementedException();
@@ -431,6 +433,8 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>See documentation here: http://www.gdal.org/gdaladdo.html</remarks>
         /// \new490 Added in version 4.9.0
+        /// \deprecated v5.1.0 Use GdalUtils.GdalBuildOverviews instead.
+        [Obsolete("Use GdalUtils.GdalBuildOverviews")]
         public bool GDALAddOverviews(string bstrSrcFilename, string bstrOptions, string bstrLevels, ICallback cBack = null)
         {
             throw new NotImplementedException();
@@ -471,8 +475,8 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>See documentation here: http://www.gdal.org/gdalwarp.html</remarks>
         /// \new490 Added in version 4.9.0
-        /// \deprecated v4.9.5 Use GdalUtils.GDALWarp instead.
-        [Obsolete("Use GdalUtils.GDALWarp")]
+        /// \deprecated v4.9.5 Use GdalUtils.GdalRasterWarp instead.
+        [Obsolete("Use GdalUtils.GdalRasterWarp")]
         public bool GDALWarp(string bstrSrcFilename, string bstrDstFilename, string bstrOptions, ICallback cBack = null)
         {
             throw new NotImplementedException();
@@ -909,6 +913,23 @@ namespace MapWinGIS
         /// 
         /// \new500 Added in version 5.0.0
         public Point LineInterpolatePoint(Shape sourceLine, Point startPoint, double distance, bool normalized)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Return a distance along the source polyline to a Point nearest the reference Shape
+        /// </summary>
+        /// <param name="sourceLine">Source Shape, must be a polyline</param>
+        /// <param name="referenceShape">Another Shape of any Shapetype</param>
+        /// <returns>Returns the distance along sourceline to the point nearest the specified referenceShape.</returns>
+        /// <remarks>
+        /// sourceLine must be a Polyline Shape.  Returned Distance is measured from Point[0].  If resulting 'distance' would be greater than the length of sourceLine, then sourceLine's length is returned.
+        /// </remarks>
+        /// \see Shape.ProjectDistanceTo
+        /// 
+        /// \new500 Added in version 5.0.0
+        public Double ProjectDistanceTo(Shape sourceLine, Shape referenceShape)
         {
             throw new NotImplementedException();
         }

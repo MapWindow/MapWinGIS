@@ -1085,7 +1085,9 @@ long CMapView::GetShapePointFontCharListID(long LayerHandle, long Shape)
 // *************************************************************
 STDMETHODIMP CShapefile::SaveAsEx(BSTR newFilename, VARIANT_BOOL stopEditing, VARIANT_BOOL unboundFile, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
+	
 
 	if (unboundFile) {
 		Save(NULL, retVal);

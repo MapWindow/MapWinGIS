@@ -388,7 +388,7 @@ namespace MWLite.Symbology.Forms.Symbology
             IntPtr ptr = g.GetHdc();
 
             // creating shape to draw
-            _options.DrawRectangle(ptr, 40.0f, 40.0f, rect.Width - 80, rect.Height - 80, true, rect.Width, rect.Height, Colors.ColorToUInteger(this.BackColor));
+            _options.DrawRectangle(ptr.ToInt32(), 40.0f, 40.0f, rect.Width - 80, rect.Height - 80, true, rect.Width, rect.Height, Colors.ColorToUInteger(this.BackColor));
 
             g.ReleaseHdc();
             pctPreview.Image = bmp;

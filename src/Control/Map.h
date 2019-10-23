@@ -15,6 +15,8 @@
 //Utah State University and the Idaho National Engineering and Environmental Lab that were released as 
 //public domain in March 2004.  
 //********************************************************************************************************
+// Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
+
 #pragma once
 # include <list>
 # include <afxmt.h>
@@ -489,7 +491,7 @@ public:
 	
 	afx_msg void ClearDrawing(long DrawHandle);
 	afx_msg void ClearDrawings();
-	afx_msg LPDISPATCH SnapShot(LPDISPATCH BoundBox);
+	afx_msg LPDISPATCH SnapShot(IExtents* BoundBox);
 	afx_msg BOOL ApplyLegendColors(LPDISPATCH Legend);
 	afx_msg void LockWindow(short LockMode);
 	afx_msg void Resize(long Width, long Height);
@@ -526,7 +528,9 @@ public:
 	afx_msg BOOL IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b);
 	afx_msg long HWnd();
 	afx_msg void ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath);
-	afx_msg BOOL AdjustLayerExtents(long LayerHandle);	// Rob Cairns 29-Jun-09
+    afx_msg BOOL ReloadOgrLayerFromSource(long OgrLayerHandle);
+	afx_msg void RestartBackgroundLoading(long OgrLayerHandle);
+    afx_msg BOOL AdjustLayerExtents(long LayerHandle);	// Rob Cairns 29-Jun-09
 	afx_msg void SetCurrentScale(DOUBLE newVal);
 	afx_msg DOUBLE GetCurrentScale(void);
 	afx_msg void SetMapUnits(tkUnitsOfMeasure units);
@@ -618,6 +622,8 @@ public:
 	afx_msg void ClearExtentHistory();
 	afx_msg long GetExtentHistoryUndoCount();
 	afx_msg long GetExtentHistoryRedoCount();
+	afx_msg VARIANT_BOOL StartNewBoundShape(DOUBLE x, DOUBLE y);
+	afx_msg VARIANT_BOOL StartNewBoundShapeEx(long LayerHandle);
 
 	afx_msg void SetUseAlternatePanCursor(VARIANT_BOOL nNewValue);
 	afx_msg VARIANT_BOOL GetUseAlternatePanCursor();
@@ -671,6 +677,8 @@ public:
 		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4), layerHandle, shapeIndex, Cancel);	}
 	void FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)	
 		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_DISPATCH VTS_PI4), LayerHandle, Shape, Cancel);	}
+	void FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY)
+		{FireEvent(eventidBeforeVertexDigitized, EVENT_PARAM(VTS_PR8 VTS_PR8), pointX, pointY); }
 	void FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
 	void FireChooseLayer(long x, long y, LONG* LayerHandle)
@@ -706,15 +714,17 @@ public:
 	void FireBackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG numFeatures, LONG numLoaded)
 		{ FireEvent(eventidBackgroundLoadingFinished, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), TaskId, LayerHandle, numFeatures, numLoaded);}
 	void FireGridOpened(LONG LayerHandle, LPCTSTR gridFilename, LONG bandIndex, VARIANT_BOOL isUsingProxy)
-		{ FireEvent(eventidGridOpened, EVENT_PARAM(VTS_I4 VTS_BSTR VTS_I4 VTS_BOOL), LayerHandle, gridFilename, bandIndex, isUsingProxy);	}
-	void FireShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY)
-	    { FireEvent(eventidShapesIdentified, EVENT_PARAM(VTS_DISPATCH VTS_R8 VTS_R8), selectedShapes, projX, projY); }
+		{ FireEvent(eventidGridOpened, EVENT_PARAM(VTS_I4 VTS_BSTR VTS_I4 VTS_BOOL), LayerHandle, gridFilename, bandIndex, isUsingProxy);	}	
 	void FireOnDrawBackBuffer2(LONG height, LONG Width, LONG Stride, LONG pixelFormat, LONG scan0)
 		{ FireEvent(eventidOnDrawBackBuffer2, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), height, Width, Stride, pixelFormat, scan0); }
 	void FireBeforeLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled)
 		{ FireEvent(eventidBeforeLayers, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled); }
 	void FireAfterLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled)
 		{ FireEvent(eventidAfterLayers, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled); }
+    void FireLayerReprojectedIncomplete(LONG LayerHandle, LONG NumReprojected, LONG NumShapes)
+        { FireEvent(eventidLayerReprojectedIncomplete, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), LayerHandle, NumReprojected, NumShapes); }
+
+	// Never used: void FireShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY) { FireEvent(eventidShapesIdentified, EVENT_PARAM(VTS_DISPATCH VTS_R8 VTS_R8), selectedShapes, projX, projY); }
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -1102,7 +1112,7 @@ private:
 
 	// drawing layers
 	void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
-	void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
+	void DrawBackBuffer(int hdc, int ImageWidth, int ImageHeight);
 	bool IsValidDrawList(long listHandle);
 	
 	// ---------------------------------------------
@@ -1183,7 +1193,6 @@ private:
 	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
 	bool DrillDownSelect(double projX, double projY, ISelectionList* list, bool stopOnFirst, bool ctrl);
-	bool StartNewBoundShape(long x, long y);
 	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
 	VARIANT_BOOL LoadOgrStyle(Layer* layer, long layerHandle, CStringW name, bool reportError);
 	VARIANT_BOOL LayerIsIdentifiable(long layerHandle, IShapefile* sf);
@@ -1263,6 +1272,7 @@ public:
 	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) { FireValidateShape(LayerHandle, Shape, Cancel); }
 	virtual void _FireAfterShapeEdit(tkUndoOperation NewShape, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(NewShape, LayerHandle, ShapeIndex); }
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
+	virtual void _FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY) { FireBeforeVertexDigitized(pointX, pointY); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }
 	virtual void _SetMapCursor(tkCursorMode mode, bool clearEditor) { UpdateCursor(mode, false); }
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, atOnce, updateTiles); };

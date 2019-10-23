@@ -33,7 +33,7 @@
 
 // CShapefileCategories
 class ATL_NO_VTABLE CShapefileCategories :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapefileCategories, &CLSID_ShapefileCategories>,
 	public IDispatchImpl<IShapefileCategories, &IID_IShapefileCategories, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

@@ -867,6 +867,22 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Return a distance along the current line to a Point nearest another Shape
+        /// </summary>
+        /// <param name="referenceShape">Another Shape of any Shapetype</param>
+        /// <returns>Returns the distance along this line to the point nearest the specified Shape.</returns>
+        /// <remarks>
+        /// Only applies to a Polyline Shape.  Returned Distance is measured from Point[0].  If resulting 'distance' would be greater than the length of the line, the line's length is returned.
+        /// </remarks>
+        /// \see Utils.LineProjectDistanceTo
+        /// 
+        /// \new500 Added in version 5.0.0
+        public Double ProjectDistanceTo(Shape referenceShape)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 #if nsp
 }

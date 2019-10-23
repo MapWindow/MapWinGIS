@@ -704,6 +704,32 @@ void CShapeEditor::DiscardState()
 }
 
 // *******************************************************
+//		AddPoint()
+// *******************************************************
+STDMETHODIMP CShapeEditor::AddPoint(IPoint *newPoint, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	if (newPoint == NULL) {
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+	} else {
+		VARIANT_BOOL digitizing;
+		get_IsDigitizing(&digitizing);
+		tkCursorMode cursor = _mapCallback->_GetCursorMode();
+		if (digitizing) {
+			double x, y;
+			newPoint->get_X(&x);
+			newPoint->get_Y(&y);
+			newPoint->Release();
+			_activeShape->AddPoint(x, y, -1, -1, PartBegin);
+			*retVal = VARIANT_TRUE;
+			return S_OK;
+		}
+	}
+	return S_OK;
+}
+
+// *******************************************************
 //		UndoPoint()
 // *******************************************************
 STDMETHODIMP CShapeEditor::UndoPoint(VARIANT_BOOL* retVal)
@@ -1185,17 +1211,17 @@ bool CShapeEditor::TrySaveShape(IShape* shp)
 	}
 
 	VARIANT_BOOL vb;
-	int shapeIndex = _shapeIndex;
-	int layerHandle = _layerHandle;
+	long shapeIndex = _shapeIndex;
+    long layerHandle = _layerHandle;
 	bool newShape = _shapeIndex == -1;
 
 	if (newShape)
 	{
-		long numShapes = ShapefileHelper::GetNumShapes(sf);
+        long newIndex;
+        sf->EditAddShape(shp, &newIndex);
 		IUndoList* undoList = _mapCallback->_GetUndoList();
-		undoList->Add(uoAddShape, (long)_layerHandle, (long)numShapes, &vb);
-		sf->EditInsertShape(shp, &numShapes, &vb);
-		shapeIndex = numShapes;
+		undoList->Add(uoAddShape, (long)_layerHandle, newIndex, &vb);
+		shapeIndex = newIndex;
 	}
 	else 
 	{
@@ -1252,6 +1278,7 @@ void CShapeEditor::HandleProjPointAdd(double projX, double projY)
 	double pixelX, pixelY;
 	_mapCallback->_ProjectionToPixel(projX, projY, &pixelX, &pixelY);
 	_activeShape->AddPoint(projX, projY, pixelX, pixelY);
+	_activeShape->ClearSnapPoint();
 }
 
 // ***************************************************************

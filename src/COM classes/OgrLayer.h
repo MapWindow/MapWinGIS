@@ -10,7 +10,7 @@
 #endif
 
 class ATL_NO_VTABLE COgrLayer :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<COgrLayer, &CLSID_OgrLayer>,
 	public IDispatchImpl<IOgrLayer, &IID_IOgrLayer, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -79,6 +79,7 @@ public:
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(OpenDatabaseLayer)(BSTR connectionString, int layerIndex, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal);   // not in public API
 	STDMETHOD(OpenFromQuery)(BSTR connectionString, BSTR sql, VARIANT_BOOL* retVal);
+    STDMETHOD(ExtendFromQuery)(BSTR sql, VARIANT_BOOL* retVal);
 	STDMETHOD(OpenFromDatabase)(BSTR connectionString, BSTR layerName, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal);
 	STDMETHOD(Close)();
 	STDMETHOD(get_Name)(BSTR* retVal);
@@ -171,8 +172,9 @@ private:
 							   VARIANT_BOOL externalDatasource);
 
 public:
+
 	void InjectShapefile(IShapefile* sfNew);
-	IShapefile* GetShapefileNoRef() { return _shapefile; }
+    void UpdateShapefileFromOGRLoader();
 	OGRLayer* GetDatasource() { return _layer; }
 	CPLXMLNode* SerializeCore(CString ElementName);
 	bool DeserializeCore(CPLXMLNode* node);

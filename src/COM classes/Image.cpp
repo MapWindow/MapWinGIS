@@ -39,15 +39,19 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// ReSharper disable CppUseAuto
+
 // *********************************************************
 //		WriteWorldFile()
 // *********************************************************
-VARIANT_BOOL CImageClass::WriteWorldFile(CStringW WorldFileName)
+VARIANT_BOOL CImageClass::WriteWorldFile(const CStringW worldFileName)
 {
+	// July 2019: This function doesn't seems to be used anymore
+
 	USES_CONVERSION;
 
 	//19-Oct-09 Rob Cairns: setlocale in case MapWinGIS is made locale aware again in future
-	FILE* fout = _wfopen(WorldFileName, L"w");
+	FILE* const fout = _wfopen(worldFileName, L"w");
 	
 	if( !fout )
 	{	
@@ -55,19 +59,21 @@ VARIANT_BOOL CImageClass::WriteWorldFile(CStringW WorldFileName)
 		return VARIANT_FALSE;
 	}
 
-	fprintf(fout,"%.14f\n",_dX,setlocale(LC_ALL,"C"));		// TODO: is locale parameter valid?
+	setlocale(LC_ALL,"C");
+	fprintf(fout,"%.14f\n",_dX);	
 	fprintf(fout,"%.14f\n",0.0);
 	fprintf(fout,"%.14f\n",0.0);
 	fprintf(fout,"%.14f\n",_dY*-1.0);
 	
 	//convert lower left to upper left pixel
-	double xupLeft = _xllCenter;
-	double yupLeft = _yllCenter + ( _dY*(_height-1));
+	const double xupLeft = _xllCenter;
+	const double yupLeft = _yllCenter + (_dY * (_height - 1));
 	
 	fprintf(fout,"%.14f\n",xupLeft);
 	fprintf(fout,"%.14f\n",yupLeft);
-	
-	fprintf(fout,"%s\n","[tkImageCom]",setlocale(LC_ALL,""));
+
+	setlocale(LC_ALL,"");
+	fprintf(fout,"%s\n","[tkImageCom]");
 	fprintf(fout,"%s %s\n","ImageFile", W2A(_fileName));		// TODO: use Unicode
 	fflush(fout);
 	fclose(fout);
@@ -355,15 +361,15 @@ bool CImageClass::OpenGdalRaster(const CStringW ImageFile, GDALAccess accessMode
 // *************************************************************
 //	  Save()
 // *************************************************************
-STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, ImageType FileType, ICallback *cBack, VARIANT_BOOL *retval)
+STDMETHODIMP CImageClass::Save(const BSTR imageFileName, const VARIANT_BOOL writeWorldFile, ImageType fileType, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CStringW newName = OLE2CW( ImageFileName );
-	bool bWriteWorldFile = WriteWorldFile == VARIANT_TRUE;
+	const CStringW newName = OLE2CW( imageFileName );
+	const bool bWriteWorldFile = writeWorldFile == VARIANT_TRUE;
 
-	if(FileType == USE_FILE_EXTENSION)
+	if(fileType == USE_FILE_EXTENSION)
 	{
-		if(! getFileType(newName, FileType))
+		if(! getFileType(newName, fileType))
 		{	
 			ErrorMessage(tkUNSUPPORTED_FILE_EXTENSION);
 			*retval = VARIANT_FALSE;
@@ -372,7 +378,7 @@ STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, 
 	}
 	
 	USES_CONVERSION;
-	switch(FileType)
+	switch(fileType)
 	{
 		case BITMAP_FILE:
 			*retval = WriteBMP(newName, bWriteWorldFile, cBack) ? VARIANT_TRUE : VARIANT_FALSE;
@@ -382,12 +388,13 @@ STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, 
 		case GIF_FILE:
 		case TIFF_FILE:
 			{
-				if (CopyGdalDataset(newName, FileType, bWriteWorldFile))
+				if (CopyGdalDataset(newName, fileType, bWriteWorldFile))
 				{
 					*retval = VARIANT_TRUE;
 					return S_OK;
 				}
-				*retval = WriteGDIPlus(newName, bWriteWorldFile, FileType, cBack) ? VARIANT_TRUE : VARIANT_FALSE;
+				// Doesn't seems to be used anymore:
+				*retval = WriteGDIPlus(newName, bWriteWorldFile, fileType, cBack) ? VARIANT_TRUE : VARIANT_FALSE;
 			}
 			break;
 		default:
@@ -395,7 +402,7 @@ STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, 
 				if (!IsGdalImageAvailable())
 					return S_OK;
 
-				if (CopyGdalDataset(newName, FileType, bWriteWorldFile))
+				if (CopyGdalDataset(newName, fileType, bWriteWorldFile))
 				{
 					*retval = VARIANT_TRUE;
 					return S_OK;
@@ -1062,7 +1069,7 @@ bool CImageClass::WriteBMP(CStringW ImageFile, bool WorldFile, ICallback *cBack)
 
 	if (WorldFile)
 	{
-		CStringW worldFileName = Utility::ChangeExtension(ImageFile, L".bpw");
+		CStringW worldFileName = Utility::ChangeExtension(ImageFile, L"bpw");
 		if (!WriteWorldFile(worldFileName))
 			ErrorMessage(tkCANT_WRITE_WORLD_FILE);
 	}
@@ -1096,7 +1103,7 @@ CStringW GetGdiPlusFormat(ImageType type, CStringW& ext)
 // **********************************************************
 //	  WriteGDIPlus()
 // **********************************************************
-bool CImageClass::WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType type, ICallback *cBack)
+bool CImageClass::WriteGDIPlus(const CStringW imageFile, const bool worldFile, const ImageType type, ICallback *cBack)
 {
 	if (!_inRam) 
 	{
@@ -1111,9 +1118,9 @@ bool CImageClass::WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType typ
 	}
 
 	CStringW ext;
-	CStringW format = GetGdiPlusFormat(type, ext);
+	const CStringW format = GetGdiPlusFormat(type, ext);
 
-	Gdiplus::Status status = GdiPlusHelper::SaveBitmap(ImageFile, _width, _height, _imageData, format);
+	const Gdiplus::Status status = GdiPlusHelper::SaveBitmap(imageFile, _width, _height, _imageData, format);
 
 	if (status != Gdiplus::Ok) 
 	{
@@ -1121,11 +1128,11 @@ bool CImageClass::WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType typ
 		return false;
 	}
 
-	if(WorldFile)
+	if(worldFile)
 	{
-		CStringW WorldFileName = Utility::ChangeExtension(ImageFile, ext);
+		const CStringW worldFileName = Utility::ChangeExtension(imageFile, ext);
 
-		if (!this->WriteWorldFile(WorldFileName)) {
+		if (!this->WriteWorldFile(worldFileName)) {
 			ErrorMessage(tkCANT_WRITE_WORLD_FILE);
 		}
 	}
@@ -1962,6 +1969,7 @@ bool CImageClass::get_BufferIsDownsampled()
 // **************************************************************
 //		BuildOverviews
 // **************************************************************
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalBuildOverviews instead"))
 STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMethod, int numOverviews, SAFEARRAY* OverviewList, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -4219,3 +4227,5 @@ STDMETHODIMP CImageClass::put_GeoProjection(IGeoProjection* newVal)
 
 	return S_OK;
 }
+
+// ReSharper restore CppUseAuto

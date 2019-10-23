@@ -28,8 +28,7 @@
 // *****************************************************************
 //ajp June 2008 Property does spatial index exist
 STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL *pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
     
     try 
 	{
@@ -56,8 +55,7 @@ STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL *pVal)
 // *****************************************************************
 //ajp June 2008 Property does spatial index exist
 STDMETHODIMP CShapefile::put_HasSpatialIndex(VARIANT_BOOL pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 	_hasSpatialIndex = pVal;	// CreateSpatialIndex should be used to create it
 	return S_OK;
 }
@@ -80,8 +78,7 @@ bool TestIndexSearching()
 // *****************************************************************
 //ajp June 2008 Property use spatial indexing
 STDMETHODIMP CShapefile::get_UseSpatialIndex(VARIANT_BOOL *pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (_useSpatialIndex)
 	{
 		//useSpatialIndex = TestIndexSearching();
@@ -90,8 +87,7 @@ STDMETHODIMP CShapefile::get_UseSpatialIndex(VARIANT_BOOL *pVal)
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_UseSpatialIndex(VARIANT_BOOL pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 	_useSpatialIndex = pVal;
 	
 	// Unload spatial index in case it needs to be recreated
@@ -107,12 +103,12 @@ STDMETHODIMP CShapefile::put_UseSpatialIndex(VARIANT_BOOL pVal)
 // *****************************************************************
 //08-24-2009 (sm) spatial index performance
 STDMETHODIMP CShapefile::put_SpatialIndexMaxAreaPercent(DOUBLE newVal)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	_spatialIndexMaxAreaPercent = newVal;
 	return S_OK;
 }
 STDMETHODIMP CShapefile::get_SpatialIndexMaxAreaPercent(DOUBLE* pVal)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*pVal = _spatialIndexMaxAreaPercent;
 	return S_OK;
 }
@@ -122,8 +118,7 @@ STDMETHODIMP CShapefile::get_SpatialIndexMaxAreaPercent(DOUBLE* pVal)
 // *****************************************************************
 //Check that the spatial index exists, is set to be used and should be used.
 STDMETHODIMP CShapefile::get_CanUseSpatialIndex(IExtents* pArea, VARIANT_BOOL* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*pVal = VARIANT_FALSE;
 	
 	double xm, xM, ym, yM, zm, zM;
@@ -176,8 +171,7 @@ STDMETHODIMP CShapefile::get_CanUseSpatialIndex(IExtents* pArea, VARIANT_BOOL* p
 // ***********************************************************
 //ajp June 2008 Function to create an Index file
 STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR ShapefileName, VARIANT_BOOL *retval)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 	USES_CONVERSION;
 
 	*retval = VARIANT_TRUE;
@@ -216,7 +210,7 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR ShapefileName, VARIANT_BOOL *re
 //		IsSpatialIndexValid()
 // ***********************************************************
 STDMETHODIMP CShapefile::IsSpatialIndexValid(VARIANT_BOOL *retval)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	VARIANT_BOOL hasSpatialIndex;
 	get_HasSpatialIndex(&hasSpatialIndex);
 	if (!hasSpatialIndex)
@@ -240,8 +234,7 @@ STDMETHODIMP CShapefile::IsSpatialIndexValid(VARIANT_BOOL *retval)
 // ********************************************************************
 //Neio 2009/07/21 
 STDMETHODIMP CShapefile::QuickQueryInEditMode(IExtents *BoundBox, int ** Result, int* ResultCount )
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	if(! _isEditingShapes )
 	{
@@ -267,8 +260,7 @@ STDMETHODIMP CShapefile::QuickQueryInEditMode(IExtents *BoundBox, int ** Result,
 //		get_UseQTree()
 // *****************************************************************
 STDMETHODIMP CShapefile::get_UseQTree(VARIANT_BOOL *pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*pVal = (_useQTree)?VARIANT_TRUE:VARIANT_FALSE;	
 	return S_OK;
 }
@@ -277,32 +269,57 @@ STDMETHODIMP CShapefile::get_UseQTree(VARIANT_BOOL *pVal)
 //		put_UseQTree()
 // *****************************************************************
 STDMETHODIMP CShapefile::put_UseQTree(VARIANT_BOOL pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	if (pVal && !_useQTree)
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
+	if (pVal)
 	{
-		this->GenerateQTree();
-		_useQTree = VARIANT_TRUE;
-	}
-	else if(!pVal && _useQTree)
-	{
-		delete _qtree;
-		_qtree = NULL;
-		_useQTree = VARIANT_FALSE;
+        if (_qtree == NULL)
+		    this->GenerateQTree();
+		_useQTree = TRUE;
 	}
 	else
 	{
-		_useQTree = pVal?VARIANT_TRUE:VARIANT_FALSE;
+        _useQTree = FALSE;
+		delete _qtree;
+		_qtree = NULL;
 	}
 	return S_OK;
+}
+
+// **********************************************************
+//		ClearQTree
+// **********************************************************
+void CShapefile::ClearQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax)
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
+    if (_qtree)
+    {
+        delete _qtree;
+        _qtree = NULL;
+    }
+
+    _qtree = this->GenerateEmptyQTree(xMin, yMin, zMin, xMax, yMax, zMax);
+}
+
+// **********************************************************
+//		GenerateEmptyQTree
+// **********************************************************
+QTree* CShapefile::GenerateEmptyQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax)
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
+    IExtents* ext = NULL;
+    this->get_Extents(&ext);
+    if (!ext) return NULL;
+    ext->GetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
+    ext->Release();
+
+    QTree* qtree = new QTree(QTreeExtent(*xMin, *xMax, *yMax, *yMin));
+
+    return qtree;
 }
 
 // **********************************************************
 //		GenerateQTree
 // **********************************************************
 void CShapefile::GenerateQTree()
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if(_qtree)
 	{
 		delete _qtree;
@@ -312,22 +329,19 @@ void CShapefile::GenerateQTree()
 	_qtree = GenerateQTreeCore(false);
 }
 
+
+
 // **********************************************************************
 // 						GenerateQTreeCore()				           
 // **********************************************************************
 QTree* CShapefile::GenerateQTreeCore(bool SelectedOnly)
 {	
-	if (_shapeData.size() == 0)
-		return NULL;
-	
-	IExtents* ext = NULL;
-	double xMin,xMax,yMin,yMax,zMin,zMax;
-	this->get_Extents(&ext);
-	if (!ext) return NULL;
-	ext->GetBounds(&xMin,&yMin,&zMin,&xMax,&yMax,&zMax);
-	ext->Release();
+    CSingleLock sfLock(&ShapefileLock, TRUE);
+    double xMin, xMax, yMin, yMax, zMin, zMax;
+    QTree* qtree = this->GenerateEmptyQTree(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
 
-	QTree* qtree = new QTree(QTreeExtent(xMin,xMax,yMax,yMin));
+	if (_shapeData.size() == 0)
+		return qtree;
 
 	long percent;
 	int numShapes = (int)_shapeData.size();
@@ -361,7 +375,7 @@ QTree* CShapefile::GenerateQTreeCore(bool SelectedOnly)
 // 						GenerateTempQTree()				           
 // **********************************************************************
 bool CShapefile::GenerateTempQTree(bool SelectedOnly)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	ClearTempQTree();
 	_tempTree = GenerateQTreeCore(SelectedOnly);
 	return _tempTree != NULL;
@@ -371,7 +385,7 @@ bool CShapefile::GenerateTempQTree(bool SelectedOnly)
 // 						ClearTempQTree()				           
 // **********************************************************************
 void CShapefile::ClearTempQTree()
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (_tempTree)
 	{
 		delete _tempTree;
@@ -383,7 +397,7 @@ void CShapefile::ClearTempQTree()
 // 						GetTempQtree()				           
 // **********************************************************************
 QTree* CShapefile::GetTempQTree()
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	return _tempTree;
 }
 
@@ -393,6 +407,7 @@ QTree* CShapefile::GetTempQTree()
 STDMETHODIMP CShapefile::RemoveSpatialIndex(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*retVal = VARIANT_TRUE;
 	CStringW names[] = {L"mwd", L"mwx"};
 

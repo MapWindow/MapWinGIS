@@ -72,15 +72,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AxInterop.MapWinGIS">
-      <HintPath>..\interopCreator\bin\x86\Debug\AxInterop.MapWinGIS.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="dotMemory.Unit, Version=111.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
-      <HintPath>..\packages\JetBrains.dotMemoryUnit.3.0.20171219.105559\lib\net35\dotMemory.Unit.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\src\bin\Win32\AxInterop.MapWinGIS.dll</HintPath>
     </Reference>
     <Reference Include="Interop.MapWinGIS">
-      <HintPath>..\interopCreator\bin\x86\Debug\Interop.MapWinGIS.dll</HintPath>
+      <HintPath>..\..\src\bin\Win32\Interop.MapWinGIS.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -117,11 +112,13 @@
     <Compile Include="GdalUtilsTests.cs" />
     <Compile Include="DrawingTests.cs" />
     <Compile Include="ClipperTests.cs" />
-    <Compile Include="AkkerwebTests.cs" />
     <Compile Include="GridTests.cs" />
     <Compile Include="TilesTests.cs" />
     <Compile Include="AxMapTests.cs" />
     <Compile Include="NewSfMethodsTests.cs" />
+    <Compile Include="ShapefileEditorTests.cs" />
+    <Compile Include="GeoProjectionTest.cs" />
+    <Compile Include="ShapeDrawingOptionsTests.cs" />
     <Compile Include="UtilTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +133,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="CallMapWinGIS.ps1" />
     <None Include="Testdata\HDF5\test.h5">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -282,6 +280,18 @@
     </None>
     <None Include="Testdata\Issues\MWGIS-98\3dPoint.shx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\clipByMapExtents.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\clipByMapExtents.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\clipByMapExtents.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Testdata\sf\clipByMapExtents.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Testdata\sf\embankments_buffered_split.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -475,6 +485,9 @@
     <None Include="Testdata\sf\SHP_POLYLINE.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Testdata\sf\SHP_POLYLINE.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Testdata\sf\SHP_POLYLINE.shp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -532,6 +545,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AxInterop.MapWinGIS.XML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Interop.MapWinGIS.XML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Testdata\GeoTiff\MWGIS-65.tif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

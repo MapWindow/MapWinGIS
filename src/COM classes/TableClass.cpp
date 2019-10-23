@@ -1,13 +1,13 @@
 /**************************************************************************************
  * File name: TableClass.cpp
  *
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  * Description: implementation of CTableClass
  *
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  ************************************************************************************** */
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "TableClass.h"
 #include <algorithm>
 #include "Templates.h"
@@ -37,6 +37,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// ReSharper disable CppUseAuto
+
 // *****************************************************
 //	ParseExpressionCore()
 // *****************************************************
@@ -46,14 +48,14 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 
 	USES_CONVERSION;
 	CStringW str = OLE2CW(Expression);
-	CustomExpression expr;	
-	
+	CustomExpression expr;
+
 	if (!expr.ReadFieldNames(this))
 	{
 		errorString = "Failed to read field names";
 		return;
 	}
-		
+
 
 	if (!expr.Parse(str, true, errorString))
 	{
@@ -64,12 +66,12 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 	int i = 0;
 
 	TableHelper::SetFieldValues(this, i, expr);
-			
+
 	// if expression returns true for the given record we'll save the index 
 	CExpressionValue* result = expr.Calculate(errorString);
-	if ( result )
+	if (result)
 	{
-		if (result->type() != returnType )
+		if (result->type() != returnType)
 		{
 			if (returnType == vtString)
 			{
@@ -81,7 +83,7 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 				errorString = "Invalid resulting type";
 			}
 		}
-		
+
 		*retVal = VARIANT_TRUE;
 	}
 }
@@ -95,12 +97,12 @@ STDMETHODIMP CTableClass::ParseExpression(BSTR Expression, BSTR* ErrorString, VA
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	*retVal = VARIANT_FALSE;
-	
+
 	USES_CONVERSION;
 	CStringW str = OLE2CW(Expression);
-	
-	CustomExpression expr;	
-	
+
+	CustomExpression expr;
+
 	if (expr.ReadFieldNames(this))
 	{
 		CStringW err;
@@ -159,7 +161,7 @@ STDMETHODIMP CTableClass::Query(BSTR Expression, VARIANT* Result, BSTR* ErrorStr
 		else
 		{
 			bool ret = Templates::Vector2SafeArray(&indices, VT_I4, Result);
-			*retVal = ret?VARIANT_TRUE:VARIANT_FALSE;
+			*retVal = ret ? VARIANT_TRUE : VARIANT_FALSE;
 		}
 	}
 	else
@@ -175,11 +177,11 @@ STDMETHODIMP CTableClass::Query(BSTR Expression, VARIANT* Result, BSTR* ErrorStr
 STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Result, BSTR* ErrorString, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
 	*retVal = VARIANT_FALSE;
 	Result->vt = VT_NULL;
 
-	if( RowIndex < 0 || RowIndex >= RowCount())
+	if (RowIndex < 0 || RowIndex >= RowCount())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
@@ -188,14 +190,14 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 	USES_CONVERSION;
 	CStringW str = OLE2CW(Expression);
 
-	CustomExpression expr;	
+	CustomExpression expr;
 	if (expr.ReadFieldNames(this))
 	{
 		CStringW err;
 		if (expr.Parse(Expression, true, err))
 		{
 			TableHelper::SetFieldValues(this, RowIndex, expr);
-				
+
 			// no need to delete the result
 			CExpressionValue* val = expr.Calculate(err);
 			if (val)
@@ -236,8 +238,8 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 bool CTableClass::QueryCore(CStringW Expression, std::vector<long>& indices, CStringW& ErrorString)
 {
 	indices.clear();
-	
-	CustomExpression expr;	
+
+	CustomExpression expr;
 	if (expr.ReadFieldNames(this))
 	{
 		CStringW err;
@@ -247,10 +249,10 @@ bool CTableClass::QueryCore(CStringW Expression, std::vector<long>& indices, CSt
 			for (unsigned int i = 0; i < _rows.size(); i++)
 			{
 				TableHelper::SetFieldValues(this, i, expr);
-				
+
 				// if expression returns true for the given record we'll save the index 
 				CExpressionValue* result = expr.Calculate(err);	//new CExpressionValue();
-				if ( result )
+				if (result)
 				{
 					if (result->isBoolean())
 					{
@@ -289,13 +291,13 @@ bool CTableClass::QueryCore(CStringW Expression, std::vector<long>& indices, CSt
 // ********************************************************************
 //			CalculateCore()
 // ********************************************************************
-bool CTableClass::CalculateCore(CStringW Expression, std::vector<CStringW>& results, CStringW& ErrorString, 
-								CString floatFormat, int rowIndex /*= -1*/)
+bool CTableClass::CalculateCore(CStringW Expression, std::vector<CStringW>& results, CStringW& ErrorString,
+	CString floatFormat, int rowIndex /*= -1*/)
 {
 	USES_CONVERSION;
 	results.clear();
-	
-	CustomExpression expr;	
+
+	CustomExpression expr;
 	expr.SetFloatFormat(floatFormat);
 	if (!expr.ReadFieldNames(this))
 	{
@@ -319,10 +321,10 @@ bool CTableClass::CalculateCore(CStringW Expression, std::vector<CStringW>& resu
 	for (int i = start; i < end; i++)
 	{
 		TableHelper::SetFieldValues(this, i, expr);
-				
+
 		// if expression returns true for the given record we'll save the index 
 		CExpressionValue* result = expr.Calculate(err);
-		if ( result )
+		if (result)
 		{
 			if (result->isString())
 			{
@@ -363,9 +365,9 @@ void CTableClass::AnalyzeExpressions(std::vector<CStringW>& expressions, std::ve
 	// don't read the values multiple times.
 	// For unique values classification it's better to store classification field,
 	// but in older style files it may be not present.
-	CustomExpression expr;	
+	CustomExpression expr;
 	if (!expr.ReadFieldNames(this)) return;
-	
+
 	for (unsigned int categoryId = 0; categoryId < expressions.size(); categoryId++)
 	{
 		if (expressions[categoryId] != "")
@@ -378,10 +380,10 @@ void CTableClass::AnalyzeExpressions(std::vector<CStringW>& expressions, std::ve
 					if (results[i] == -1)
 					{
 						TableHelper::SetFieldValues(this, i, expr);
-						
+
 						// if expression returns true for the given record we'll save the index 
 						CExpressionValue* result = expr.Calculate(err);
-						if ( result )
+						if (result)
 						{
 							if (result->isBoolean() && result->bln())
 							{
@@ -419,10 +421,10 @@ STDMETHODIMP CTableClass::get_NumFields(long *pVal)
 STDMETHODIMP CTableClass::get_Field(long FieldIndex, IField **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 
-	if( FieldIndex < 0 || FieldIndex >= (int)FieldCount() )
-	{	
+	if (FieldIndex < 0 || FieldIndex >= (int)FieldCount())
+	{
 		*pVal = NULL;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
@@ -442,19 +444,19 @@ STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( FieldIndex < 0 || FieldIndex >= FieldCount() || RowIndex < 0 || RowIndex >= RowCount())
-	{	
-		VARIANT var;
-		VariantInit(&var);
-		var.vt = VT_EMPTY;
-		pVal = &var;
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_OK;
-	}
+		if (FieldIndex < 0 || FieldIndex >= FieldCount() || RowIndex < 0 || RowIndex >= RowCount())
+		{
+			VARIANT var;
+			VariantInit(&var);
+			var.vt = VT_EMPTY;
+			pVal = &var;
+			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+			return S_OK;
+		}
 
-	if( ReadRecord(RowIndex) && _rows[RowIndex].row != NULL)
+	if (ReadRecord(RowIndex) && _rows[RowIndex].row != NULL)
 	{
-        VARIANT* var = _rows[RowIndex].row->values[FieldIndex];
+		VARIANT* var = _rows[RowIndex].row->values[FieldIndex];
 		if (var != NULL)
 		{
 			if (var->vt != VT_NULL)
@@ -481,7 +483,7 @@ STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT 
 STDMETHODIMP CTableClass::get_EditingTable(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _isEditingTable?VARIANT_TRUE:VARIANT_FALSE;
+		*pVal = _isEditingTable ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -491,7 +493,7 @@ STDMETHODIMP CTableClass::get_EditingTable(VARIANT_BOOL *pVal)
 STDMETHODIMP CTableClass::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _lastErrorCode;
+		*pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
@@ -502,7 +504,7 @@ STDMETHODIMP CTableClass::get_LastErrorCode(long *pVal)
 STDMETHODIMP CTableClass::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
 	return S_OK;
 }
@@ -513,7 +515,7 @@ STDMETHODIMP CTableClass::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CTableClass::get_CdlgFilter(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	*pVal = A2BSTR("dBase Files (*.dbf)|*.dbf");
 	return S_OK;
 }
@@ -524,15 +526,15 @@ STDMETHODIMP CTableClass::get_CdlgFilter(BSTR *pVal)
 STDMETHODIMP CTableClass::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _globalCallback;
-	if( _globalCallback )
+		*pVal = _globalCallback;
+	if (_globalCallback)
 		_globalCallback->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CTableClass::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
+		ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -542,7 +544,7 @@ STDMETHODIMP CTableClass::put_GlobalCallback(ICallback *newVal)
 STDMETHODIMP CTableClass::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
@@ -550,7 +552,7 @@ STDMETHODIMP CTableClass::get_Key(BSTR *pVal)
 STDMETHODIMP CTableClass::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	::SysFreeString(_key);
 	_key = OLE2BSTR(newVal);
 	return S_OK;
@@ -562,8 +564,8 @@ STDMETHODIMP CTableClass::put_Key(BSTR newVal)
 STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	
+		USES_CONVERSION;
+
 	*retval = VARIANT_FALSE;
 	if ((cBack != NULL) && (_globalCallback == NULL))
 	{
@@ -573,15 +575,15 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 
 	Close(retval);
 
-	if( *retval)
-	{	
+	if (*retval)
+	{
 		CStringW name = OLE2CW(dbfFilename);
 		if (!Utility::FileExistsW(name))
-		{	
+		{
 			ErrorMessage(tkDBF_FILE_DOES_NOT_EXIST);
 			return S_OK;
 		}
-		
+
 		// checking writing permissions
 		//LPCSTR name = OLE2CA(dbfFilename);
 		DWORD dwAttrs = GetFileAttributesW(name);
@@ -597,18 +599,18 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 		}
 
 		if (_dbfHandle == NULL) {
-			_dbfHandle = DBFOpen_MW(name,"rb");
+			_dbfHandle = DBFOpen_MW(name, "rb");
 		}
-		
-		if( _dbfHandle == NULL )
-		{	
+
+		if (_dbfHandle == NULL)
+		{
 			ErrorMessage(tkCANT_OPEN_DBF);
 			return S_OK;
 		}
 
 		_filename = name;
 		*retval = VARIANT_TRUE;
-	
+
 		//After open the dbf file, load all _fields info and create spatial row indices 
 		//with FieldWrapper and RecordWrapper help classes.
 		LoadDefaultFields();
@@ -623,24 +625,24 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 STDMETHODIMP CTableClass::CreateNew(BSTR dbfFilename, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	
+		USES_CONVERSION;
+
 	// closing the existing table
 	this->Close(retval);
-	
-	if( *retval == VARIANT_FALSE )
-	{	
+
+	if (*retval == VARIANT_FALSE)
+	{
 		return S_OK;
 	}
 	else
-	{	
-		if( Utility::FileExistsUnicode( OLE2A(dbfFilename) ) )
-		{	
+	{
+		if (Utility::FileExistsUnicode(OLE2A(dbfFilename)))
+		{
 			*retval = VARIANT_FALSE;
 			ErrorMessage(tkDBF_FILE_EXISTS);
 			return S_OK;
 		}
-				
+
 		_filename = OLE2CA(dbfFilename);
 		_isEditingTable = TRUE;
 		*retval = VARIANT_TRUE;
@@ -654,7 +656,7 @@ STDMETHODIMP CTableClass::CreateNew(BSTR dbfFilename, VARIANT_BOOL *retval)
 void CTableClass::CloseUnderlyingFile()
 {
 	_filename = L"";
-	if( _dbfHandle != NULL )
+	if (_dbfHandle != NULL)
 	{
 		DBFClose(_dbfHandle);
 		_dbfHandle = NULL;
@@ -668,7 +670,7 @@ bool CTableClass::WriteAppendedRow()
 {
 	if (_rows.size() == 0 || _rows.size() == _appendStartShapeCount) return false;
 
-	int rowIndex = _rows.size() - 1;	
+	int rowIndex = _rows.size() - 1;
 
 	if (!WriteRecord(_dbfHandle, rowIndex, rowIndex))
 	{
@@ -676,7 +678,7 @@ bool CTableClass::WriteAppendedRow()
 		return false;
 	}
 
-	if (!m_globalSettings.cacheDbfRecords) 
+	if (!m_globalSettings.cacheDbfRecords)
 	{
 		ClearRow(rowIndex);
 	}
@@ -692,7 +694,7 @@ bool CTableClass::WriteAppendedRow()
 // ********************************************************
 void CTableClass::StopAppendMode()
 {
-	if (_appendMode) 
+	if (_appendMode)
 	{
 		WriteAppendedRow();
 
@@ -712,41 +714,41 @@ void CTableClass::StopAppendMode()
 bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace, ICallback* cBack)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	
+		USES_CONVERSION;
+
 	if (_globalCallback == NULL && cBack != NULL)
 	{
 		_globalCallback = cBack;
 		cBack->AddRef();
 	}
 
-	if( _dbfHandle == NULL && _isEditingTable == FALSE )
-	{	
+	if (_dbfHandle == NULL && _isEditingTable == FALSE)
+	{
 		ErrorMessage(_lastErrorCode);
-		return false;		
+		return false;
 	}
 
-	if ( Utility::FileExistsW(dbfFilename) != FALSE )
-	{	
+	if (Utility::FileExistsW(dbfFilename) != FALSE)
+	{
 		ErrorMessage(tkDBF_FILE_EXISTS);
 		return false;
 	}
 
 	DBFInfo * newdbfHandle = DBFCreate_MW(dbfFilename);
-	if( newdbfHandle == NULL )
-	{	
+	if (newdbfHandle == NULL)
+	{
 		ErrorMessage(tkCANT_CREATE_DBF);
 		return false;
 	}
-	
+
 	// joined fields must be removed; they will be restored in the process of reopening table
 	// after saving operation
 	this->RemoveJoinedFields();
 
-	for( int i = 0; i < FieldCount(); i++ )
-	{	
+	for (int i = 0; i < FieldCount(); i++)
+	{
 		IField * field = NULL;
-		this->get_Field(i,&field);
+		this->get_Field(i, &field);
 		CComBSTR fname;
 		FieldType type;
 		long width, precision;
@@ -755,13 +757,24 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 		field->get_Width(&width);
 		field->get_Precision(&precision);
 
-		if( type == DOUBLE_FIELD )
+		if (type == DOUBLE_FIELD)
 		{
-			if( precision <= 0 ) 
+			// width and precision from OGR datasource come in as zero
+			if (width == 0)
+			{
+				// don't know what we're getting; set to max of 17
+				width = 17;
+				// split down the middle (considering point and sign)
+				precision = 8;
+			}
+			// leaving previous logic alone, setting to 1, perhaps assuming 
+			// that the callers intent was to minimize the significand
+			if (precision <= 0)
 				precision = 1;
 		}
 		else
 		{
+			// all non-doubles have precision of zero
 			precision = 0;
 		}
 
@@ -790,9 +803,9 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 		}
 
 		DBFAddField(newdbfHandle, OLE2CA(fname), (DBFFieldType)type, width, precision);
-		field->Release(); 
+		field->Release();
 	}
-	
+
 	long percent = 0, newpercent = 0;
 	long currentRowIndex = -1;
 	long rowCount = RowCount();
@@ -802,18 +815,18 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 		CallbackHelper::Progress(cBack, rowIndex, rowCount, "Writing .dbf", _key, percent);
 
 		//if updating existing file, only write out modified records
-		if  (updateFileInPlace && 
+		if (updateFileInPlace &&
 			(_rows[rowIndex].row == NULL || _rows[rowIndex].row->status() != TableRow::DATA_MODIFIED))
 		{
 			currentRowIndex++;
 			continue;
 		}
 
-        if (!WriteRecord(newdbfHandle, rowIndex, ++currentRowIndex))
-        {
+		if (!WriteRecord(newdbfHandle, rowIndex, ++currentRowIndex))
+		{
 			ErrorMessage(tkDBF_CANT_WRITE_ROW);
-		    return false;
-        }
+			return false;
+		}
 
 		if (updateFileInPlace) {
 			_rows[rowIndex].row->SetDirty(TableRow::DATA_CLEAN);
@@ -839,7 +852,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 STDMETHODIMP CTableClass::Dump(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
-	*retval = SaveToFile(OLE2W(dbfFilename), false, cBack) ? VARIANT_TRUE: VARIANT_FALSE;
+	*retval = SaveToFile(OLE2W(dbfFilename), false, cBack) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -849,15 +862,15 @@ STDMETHODIMP CTableClass::Dump(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 STDMETHODIMP CTableClass::SaveAs(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
-	if (!SaveToFile( OLE2W(dbfFilename), false, cBack))
+	if (!SaveToFile(OLE2W(dbfFilename), false, cBack))
 	{
 		*retval = VARIANT_FALSE;
 		return S_OK;
 	}
-	
+
 	CComBSTR state;
 	this->Serialize(&state);
-	this->Open(dbfFilename,cBack,retval);		
+	this->Open(dbfFilename, cBack, retval);
 	this->Deserialize(state);
 
 	*retval = VARIANT_TRUE;
@@ -889,7 +902,7 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*retval = VARIANT_TRUE;
+		*retval = VARIANT_TRUE;
 
 	StopAllJoins();
 
@@ -897,7 +910,7 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 
 	ClearRows();
 
-	if (_appendMode) 
+	if (_appendMode)
 	{
 		WriteAppendedRow();
 		_appendMode = false;
@@ -906,12 +919,12 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 
 	_filename = L"";
 
-	if( _dbfHandle != NULL )
+	if (_dbfHandle != NULL)
 	{
 		DBFClose(_dbfHandle);
 		_dbfHandle = NULL;
 	}
-	
+
 	return S_OK;
 }
 
@@ -920,47 +933,47 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 // **************************************************************
 void CTableClass::LoadDefaultFields()
 {
-    USES_CONVERSION;
+	USES_CONVERSION;
 
 	if (_dbfHandle == NULL) return;
 
-    for (size_t i = 0; i < _fields.size(); i++ )	// clear only for disk-based table; otherwise there is no way to restore them
+	for (size_t i = 0; i < _fields.size(); i++)	// clear only for disk-based table; otherwise there is no way to restore them
 		delete _fields[i];
 	_fields.clear();
-	
-    long num_fields = DBFGetFieldCount(_dbfHandle);
+
+	long num_fields = DBFGetFieldCount(_dbfHandle);
 	char * fname = new char[MAX_BUFFER];
 	int fwidth, fdecimals;
 	DBFFieldType type;
 	IField * field = NULL;
 
-    for( long i = 0; i < num_fields; i++ )
+	for (long i = 0; i < num_fields; i++)
 	{
-		type = DBFGetFieldInfo(_dbfHandle,i,fname,&fwidth,&fdecimals);
+		type = DBFGetFieldInfo(_dbfHandle, i, fname, &fwidth, &fdecimals);
 
-		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
+		CoCreateInstance(CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, (void**)&field);
 		field->put_GlobalCallback(_globalCallback);
 		CComBSTR bstrName(fname);
 		field->put_Name(bstrName);
 		field->put_Width(fwidth);
 		field->put_Precision(fdecimals);
 		field->put_Type((FieldType)type);
-		
+
 		FieldWrapper* fw = new FieldWrapper();
-        fw->oldIndex = i;
-        fw->field = field;
+		fw->oldIndex = i;
+		fw->field = field;
 		_fields.push_back(fw);
 		((CField*)field)->SetTable(this);
 	}
 
-	if( fname != NULL) delete [] fname;
+	if (fname != NULL) delete[] fname;
 	fname = NULL;
 }
 
 // **************************************************************
 //	  ClearRows()
 // **************************************************************
-void CTableClass::ClearRows() 
+void CTableClass::ClearRows()
 {
 	for (int j = 0; j < RowCount(); j++)
 	{
@@ -977,37 +990,37 @@ void CTableClass::ClearRows()
 // **************************************************************
 //Initialize RecordWrapper array and set the TableRow pointer to NULL
 void CTableClass::LoadDefaultRows()
-{	
+{
 	ClearRows();
-    
+
 	if (_dbfHandle == NULL) return;
 
 	long num_rows = DBFGetRecordCount(_dbfHandle);
 
-    for (long i = 0; i < num_rows; i++)
-    {
-        RecordWrapper rw;
-        rw.oldIndex = i;
-        rw.row = NULL;
-        _rows.push_back(rw);
-    }
+	for (long i = 0; i < num_rows; i++)
+	{
+		RecordWrapper rw;
+		rw.oldIndex = i;
+		rw.row = NULL;
+		_rows.push_back(rw);
+	}
 }
 
 // **************************************************************
 //	  EditClear()
 // **************************************************************
 STDMETHODIMP CTableClass::EditClear(VARIANT_BOOL *retval)
-{	
-    //Reset all editing bits and reload original _fields info and reinitialize the RowWrapper array
+{
+	//Reset all editing bits and reload original _fields info and reinitialize the RowWrapper array
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-    LoadDefaultFields();
-    LoadDefaultRows();
+		LoadDefaultFields();
+	LoadDefaultRows();
 
-    m_needToSaveAsNewFile = false;
+	m_needToSaveAsNewFile = false;
 	*retval = VARIANT_TRUE;
 	return S_OK;
-	
+
 }
 
 // **************************************************************
@@ -1016,26 +1029,26 @@ STDMETHODIMP CTableClass::EditClear(VARIANT_BOOL *retval)
 STDMETHODIMP CTableClass::EditInsertField(IField *Field, long *FieldIndex, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = VARIANT_FALSE;
-	
+		*retval = VARIANT_FALSE;
+
 	if (cBack != NULL && _globalCallback == NULL)
 	{
 		_globalCallback = cBack;
 		cBack->AddRef();
 	}
 
-	if( _isEditingTable == FALSE )
-	{	
+	if (_isEditingTable == FALSE)
+	{
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
 	}
-	
+
 	// we'll help the user and correct invalid index
-	if( *FieldIndex < 0 )
+	if (*FieldIndex < 0)
 	{
 		*FieldIndex = 0;
 	}
-	else if( *FieldIndex > FieldCount() )
+	else if (*FieldIndex > FieldCount())
 	{
 		*FieldIndex = _fields.size();
 	}
@@ -1043,39 +1056,39 @@ STDMETHODIMP CTableClass::EditInsertField(IField *Field, long *FieldIndex, ICall
 	FieldType type;
 	Field->get_Type(&type);
 
-	for( long i = 0; i < RowCount(); i++ )
-    {
-		if (_rows[i].row == NULL) 
+	for (long i = 0; i < RowCount(); i++)
+	{
+		if (_rows[i].row == NULL)
 			ReadRecord(i);
-	
-		VARIANT * val = NULL;
-        val = new VARIANT;
-	    VariantInit(val);
 
-	    if (type == STRING_FIELD)	 
+		VARIANT * val = NULL;
+		val = new VARIANT;
+		VariantInit(val);
+
+		if (type == STRING_FIELD)
 		{
 			val->vt = VT_BSTR;
 			val->bstrVal = A2BSTR("");
 		}
-		else	
+		else
 			val->vt = VT_NULL;
 
-		_rows[i].row->values.insert( _rows[i].row->values.begin() + *FieldIndex, val);
+		_rows[i].row->values.insert(_rows[i].row->values.begin() + *FieldIndex, val);
 		_rows[i].row->SetDirty(TableRow::DATA_MODIFIED);
-    }
+	}
 
-    FieldWrapper* fw = new FieldWrapper();
-    fw->oldIndex = -1;
-    fw->field = Field;
-    
-	_fields.insert( _fields.begin() + *FieldIndex, fw );
-    _fields[*FieldIndex]->field->AddRef();	
-	*retval = VARIANT_TRUE;	  
-	
+	FieldWrapper* fw = new FieldWrapper();
+	fw->oldIndex = -1;
+	fw->field = Field;
+
+	_fields.insert(_fields.begin() + *FieldIndex, fw);
+	_fields[*FieldIndex]->field->AddRef();
+	*retval = VARIANT_TRUE;
+
 	// in the field class we should know about table editing state
 	((CField*)_fields[*FieldIndex]->field)->SetTable(this);
 
-    m_needToSaveAsNewFile = true;
+	m_needToSaveAsNewFile = true;
 	return S_OK;
 }
 
@@ -1085,13 +1098,13 @@ STDMETHODIMP CTableClass::EditInsertField(IField *Field, long *FieldIndex, ICall
 STDMETHODIMP CTableClass::EditReplaceField(long FieldIndex, IField *newField, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	if( FieldIndex < 0 || FieldIndex >= (int)_fields.size() )
-	{	
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_OK;
-	}
-	
+
+		if (FieldIndex < 0 || FieldIndex >= (int)_fields.size())
+		{
+			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+			return S_OK;
+		}
+
 	if (_fields[FieldIndex]->field == newField)
 	{
 		// it's the same field; no need to do anything
@@ -1100,13 +1113,13 @@ STDMETHODIMP CTableClass::EditReplaceField(long FieldIndex, IField *newField, IC
 
 	// deleting field
 	EditDeleteField(FieldIndex, cBack, retval);
-	
+
 	// inserting the new one
 	if (retval)
 	{
 		EditInsertField(newField, &FieldIndex, cBack, retval);
 	}
-	
+
 	return S_OK;
 }
 
@@ -1116,43 +1129,43 @@ STDMETHODIMP CTableClass::EditReplaceField(long FieldIndex, IField *newField, IC
 STDMETHODIMP CTableClass::EditDeleteField(long FieldIndex, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = VARIANT_FALSE;
-	
-	if(_globalCallback == NULL && cBack != NULL)
+		*retval = VARIANT_FALSE;
+
+	if (_globalCallback == NULL && cBack != NULL)
 	{
 		_globalCallback = cBack;
 		_globalCallback->AddRef();
 	}
 
-	if( _isEditingTable == FALSE )
-	{	
+	if (_isEditingTable == FALSE)
+	{
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
 	}
 
-	if( FieldIndex < 0 || FieldIndex >= (int)_fields.size() )
-	{	
+	if (FieldIndex < 0 || FieldIndex >= (int)_fields.size())
+	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
 
-	for( long i = 0; i < RowCount(); i++ )
-    {	
-        if( _rows[i].row != NULL && _rows[i].row->values[FieldIndex] != NULL )
-        {
-			VariantClear(_rows[i].row->values[FieldIndex]); 
-            _rows[i].row->values[FieldIndex] = NULL;
-            _rows[i].row->values.erase( _rows[i].row->values.begin() + FieldIndex );		
-        }
+	for (long i = 0; i < RowCount(); i++)
+	{
+		if (_rows[i].row != NULL && _rows[i].row->values[FieldIndex] != NULL)
+		{
+			VariantClear(_rows[i].row->values[FieldIndex]);
+			_rows[i].row->values[FieldIndex] = NULL;
+			_rows[i].row->values.erase(_rows[i].row->values.begin() + FieldIndex);
+		}
 	}
 
 	delete _fields[FieldIndex];
-	_fields.erase( _fields.begin() + FieldIndex );
+	_fields.erase(_fields.begin() + FieldIndex);
 
 	//DeleteField operation can't be saved into the original DBF file.
-    m_needToSaveAsNewFile = true;
+	m_needToSaveAsNewFile = true;
 
-	*retval = VARIANT_TRUE;		
+	*retval = VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -1163,42 +1176,42 @@ STDMETHODIMP CTableClass::EditInsertRow(long * RowIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*retval = VARIANT_FALSE;
+		*retval = VARIANT_FALSE;
 
 	bool canAppend = _appendMode && *RowIndex >= (long)_rows.size();
 
 	if (!_isEditingTable && !canAppend)
-	{	
+	{
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
 	}
-	
+
 	// will make users life easy and correct wrong value
-	if( *RowIndex < 0 )
+	if (*RowIndex < 0)
 	{
 		*RowIndex = 0;
 	}
-	else if( *RowIndex > RowCount() )
+	else if (*RowIndex > RowCount())
 	{
 		*RowIndex = RowCount();
 	}
-	
-	TableRow * tr = new TableRow();
-    tr->SetDirty(TableRow::DATA_INSERTED);
 
-	for( long i = 0; i < FieldCount(); i++ )
+	TableRow * tr = new TableRow();
+	tr->SetDirty(TableRow::DATA_INSERTED);
+
+	for (long i = 0; i < FieldCount(); i++)
 	{
 		VARIANT * val = NULL;
-        val = new VARIANT();
-	    VariantInit(val);
+		val = new VARIANT();
+		VariantInit(val);
 
 		FieldType type = GetFieldType(i);
-	    if (type == STRING_FIELD)	 
+		if (type == STRING_FIELD)
 		{
 			val->vt = VT_BSTR;
 			val->bstrVal = A2BSTR("");
 		}
-		else	
+		else
 			val->vt = VT_NULL;
 
 		tr->values.push_back(val);
@@ -1207,12 +1220,12 @@ STDMETHODIMP CTableClass::EditInsertRow(long * RowIndex, VARIANT_BOOL *retval)
 	RecordWrapper rw;
 	rw.row = tr;
 	rw.oldIndex = -1;
-	_rows.insert( _rows.begin() + *RowIndex, rw);
+	_rows.insert(_rows.begin() + *RowIndex, rw);
 
-    m_needToSaveAsNewFile = true;
+	m_needToSaveAsNewFile = true;
 
-	*retval = VARIANT_TRUE;		
-    return S_OK;
+	*retval = VARIANT_TRUE;
+	return S_OK;
 }
 
 // ********************************************************
@@ -1237,11 +1250,11 @@ bool CTableClass::InsertTableRow(TableRow* row, long rowIndex)
 	if (!row) return false;
 	if (rowIndex < 0 || rowIndex >= (long)_rows.size())
 		return false;
-	
+
 	row->SetDirty(TableRow::DATA_INSERTED);
 	RecordWrapper rw;
 	rw.row = row;
-	
+
 	_rows.insert(_rows.begin() + rowIndex, rw);
 
 	m_needToSaveAsNewFile = true;
@@ -1276,7 +1289,7 @@ bool CTableClass::UpdateTableRow(TableRow* newRow, long rowIndex)
 	if (!newRow) return false;
 	if (rowIndex < 0 || rowIndex >= (long)_rows.size())
 		return false;
-	
+
 	if (_rows[rowIndex].row)
 		delete _rows[rowIndex].row;
 
@@ -1308,11 +1321,11 @@ void CTableClass::TryClearLastRecord(long rowIndex)
 // *******************************************************************
 //Read one row values and cached into the RecordWrapper array.
 bool CTableClass::ReadRecord(long RowIndex)
-{			   
+{
 	USES_CONVERSION;
 
 	if (RowIndex < 0 && RowIndex >= RowCount()) {
-        return false;
+		return false;
 	}
 
 	TryClearLastRecord(RowIndex);
@@ -1322,41 +1335,41 @@ bool CTableClass::ReadRecord(long RowIndex)
 	if (_rows[RowIndex].row != NULL)
 		return true;
 
-    if( _dbfHandle == NULL )
-	{	
+	if (_dbfHandle == NULL)
+	{
 		ErrorMessage(tkFILE_NOT_OPEN);
 		return false;
 	}
 
 	long percent = 0, newpercent = 0;
-    _rows[RowIndex].row = new TableRow();
-		
-	for(int i = 0; i < FieldCount(); i++ )
-	{	
-        FieldType type = GetFieldType(i);
+	_rows[RowIndex].row = new TableRow();
+
+	for (int i = 0; i < FieldCount(); i++)
+	{
+		FieldType type = GetFieldType(i);
 		VARIANT * val = NULL;
-        
-        if (_fields[i]->oldIndex != -1)
-        {
-            val = new VARIANT;
-		    VariantInit(val);
-		    bool isNull = false;
-		
-    		//Rob Cairns 14/2/2006
-            if (DBFIsAttributeNULL(_dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex) == 1)
-		    {	
+
+		if (_fields[i]->oldIndex != -1)
+		{
+			val = new VARIANT;
+			VariantInit(val);
+			bool isNull = false;
+
+			//Rob Cairns 14/2/2006
+			if (DBFIsAttributeNULL(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex) == 1)
+			{
 				isNull = true;
-		    }			
-		
-		    if( type == STRING_FIELD )
-		    {	
-			    if (isNull)
-			    {	
-				    val->vt = VT_BSTR;
-				    val->bstrVal = A2BSTR("");
-			    }
-			    else
-			    {	
+			}
+
+			if (type == STRING_FIELD)
+			{
+				if (isNull)
+				{
+					val->vt = VT_BSTR;
+					val->bstrVal = A2BSTR("");
+				}
+				else
+				{
 					val->vt = VT_BSTR;
 					const char* v = DBFReadStringAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
 					// MWGIS-72: Support Russian encoding
@@ -1370,40 +1383,40 @@ bool CTableClass::ReadRecord(long RowIndex)
 					// already encoded properly, or is in the Windows multi-byte charset, and take it as is.
 					// Further reading: https://support.esri.com/en/technical-article/000013192
 					// NOTE that this code differs from shapefiles being read from OGR, which are always UTF-8.
-					if(DBFGetCodePage(_dbfHandle) == nullptr || strcmp(DBFGetCodePage(_dbfHandle), "UTF-8") == 0)
+					if (DBFGetCodePage(_dbfHandle) == nullptr || strcmp(DBFGetCodePage(_dbfHandle), "UTF-8") == 0)
 						// assume UTF-8
 						val->bstrVal = W2BSTR(Utility::ConvertFromUtf8(v));
 					else
 						// else assume it's already interpreted by associated code page
 						val->bstrVal = A2BSTR(v);
 				}
-		    }
-		    else if( type == INTEGER_FIELD )
-		    {	
-			    if (isNull)   
+			}
+			else if (type == INTEGER_FIELD)
+			{
+				if (isNull)
 				{
 					val->vt = VT_NULL;
 				}
-			    else
-			    {	
-					int res = DBFReadIntegerAttribute(_dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex);
-				    val->vt = VT_I4;
-				    val->lVal = res;
-			    }
-		    }
-		    else if( type == DOUBLE_FIELD )
-		    {	
-			    if (isNull)
+				else
+				{
+					int res = DBFReadIntegerAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
+					val->vt = VT_I4;
+					val->lVal = res;
+				}
+			}
+			else if (type == DOUBLE_FIELD)
+			{
+				if (isNull)
 				{
 					val->vt = VT_NULL;
 				}
-			    else
-			    {	
-					double res = DBFReadDoubleAttribute(_dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex);
-				    val->vt = VT_R8;
-				    val->dblVal = res;
-			    }
-		    }
+				else
+				{
+					double res = DBFReadDoubleAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
+					val->vt = VT_R8;
+					val->dblVal = res;
+				}
+			}
 			else if (type == BOOLEAN_FIELD)
 			{
 				if (isNull)
@@ -1439,7 +1452,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 			}
 
 			_rows[RowIndex].row->SetDirty(TableRow::DATA_CLEAN);
-        }
+		}
 		_rows[RowIndex].row->values.push_back(val);
 	}
 
@@ -1453,47 +1466,47 @@ bool CTableClass::ReadRecord(long RowIndex)
 bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 
-    if( dbfHandle == NULL )
-	{	
+	if (dbfHandle == NULL)
+	{
 		ErrorMessage(tkFILE_NOT_OPEN);
 		return false;
 	}
 
-    if (fromRowIndex < 0 || fromRowIndex >= RowCount())
-        return false;
-    
-    char * nonstackString = NULL;
+	if (fromRowIndex < 0 || fromRowIndex >= RowCount())
+		return false;
 
-	for(long i = 0; i < FieldCount(); i++ )
-	{	
-		FieldType type = GetFieldType(i);				
-    	long precision = GetFieldPrecision(i);
+	char * nonstackString = NULL;
+
+	for (long i = 0; i < FieldCount(); i++)
+	{
+		FieldType type = GetFieldType(i);
+		long precision = GetFieldPrecision(i);
 
 		VARIANT val;
 		VariantInit(&val);
-		get_CellValue(i,fromRowIndex,&val);
-		if( type == FTString )
-		{	
-			if( val.vt == VT_BSTR )
-			{	
+		get_CellValue(i, fromRowIndex, &val);
+		if (type == FTString)
+		{
+			if (val.vt == VT_BSTR)
+			{
 				nonstackString = Utility::SYS2A(val.bstrVal);
-				DBFWriteStringAttribute(dbfHandle,toRowIndex,i,nonstackString);
-				delete [] nonstackString;
-				nonstackString = NULL;	
+				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, nonstackString);
+				delete[] nonstackString;
+				nonstackString = NULL;
 			}
-			else if( val.vt == VT_I4 )
-			{	
+			else if (val.vt == VT_I4)
+			{
 				CString cval;
-				cval.Format("%d",val.dblVal);
-				DBFWriteStringAttribute(dbfHandle,toRowIndex,i,cval);
+				cval.Format("%d", val.dblVal);
+				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, cval);
 			}
-			else if( val.vt == VT_R8 )
-			{	
+			else if (val.vt == VT_R8)
+			{
 				CString cval;
-				cval.Format("%i",val.lVal);
-				DBFWriteStringAttribute(dbfHandle,toRowIndex,i,cval);
+				cval.Format("%i", val.lVal);
+				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, cval);
 			}
 			else if (val.vt == VT_BOOL)
 			{
@@ -1509,69 +1522,69 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, cval);
 			}
 			else
-			{	
-				DBFWriteStringAttribute(dbfHandle,toRowIndex,i,"");
+			{
+				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, "");
 			}
 		}
-		else if( type == FTInteger )
-		{	
-			if( val.vt == VT_BSTR )
-			{	
-				nonstackString = Utility::SYS2A(val.bstrVal);							
+		else if (type == FTInteger)
+		{
+			if (val.vt == VT_BSTR)
+			{
+				nonstackString = Utility::SYS2A(val.bstrVal);
 				long lval = atoi(nonstackString);
-				DBFWriteIntegerAttribute(dbfHandle,toRowIndex,i,lval);
-				delete [] nonstackString;
+				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, lval);
+				delete[] nonstackString;
 				nonstackString = NULL;
 			}
-			else if( val.vt == VT_I4 )
-			{	
-				DBFWriteIntegerAttribute(dbfHandle,toRowIndex,i,val.lVal);
+			else if (val.vt == VT_I4)
+			{
+				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, val.lVal);
 			}
-			else if( val.vt == VT_R8 )
-			{	
-				DBFWriteIntegerAttribute(dbfHandle,toRowIndex,i,(int)val.dblVal);
+			else if (val.vt == VT_R8)
+			{
+				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, (int)val.dblVal);
 			}
 			else if (val.vt == VT_DATE)
 			{
 				int ival;
 				COleDateTime dt(val.date);
-				ival= dt.GetYear() * 10000 + dt.GetMonth() * 100 + dt.GetDay();
+				ival = dt.GetYear() * 10000 + dt.GetMonth() * 100 + dt.GetDay();
 				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, ival);
 			}
 			else if (val.vt == VT_NULL)
-			{	
-				DBFWriteNULLAttribute(dbfHandle,toRowIndex,i); 
+			{
+				DBFWriteNULLAttribute(dbfHandle, toRowIndex, i);
 			}
 			else
-			{	
-				DBFWriteIntegerAttribute(dbfHandle,toRowIndex,i,0);
+			{
+				DBFWriteIntegerAttribute(dbfHandle, toRowIndex, i, 0);
 			}
 		}
-		else if( type == FTDouble )
-		{	
-			if( val.vt == VT_BSTR )
-			{	
+		else if (type == FTDouble)
+		{
+			if (val.vt == VT_BSTR)
+			{
 				nonstackString = Utility::SYS2A(val.bstrVal);
 				double dblval = Utility::atof_custom(nonstackString);
-				DBFWriteDoubleAttribute(dbfHandle,toRowIndex,i,dblval);
-				delete [] nonstackString;
+				DBFWriteDoubleAttribute(dbfHandle, toRowIndex, i, dblval);
+				delete[] nonstackString;
 				nonstackString = NULL;
 			}
-			else if( val.vt == VT_I4 )
-			{	
-				DBFWriteDoubleAttribute(dbfHandle,toRowIndex,i,val.lVal);
+			else if (val.vt == VT_I4)
+			{
+				DBFWriteDoubleAttribute(dbfHandle, toRowIndex, i, val.lVal);
 			}
-			else if( val.vt == VT_R8 )
-			{	
-				DBFWriteDoubleAttribute(dbfHandle,toRowIndex,i,val.dblVal);
+			else if (val.vt == VT_R8)
+			{
+				DBFWriteDoubleAttribute(dbfHandle, toRowIndex, i, val.dblVal);
 			}
-			else if( val.vt == VT_NULL )
-			{	
-				DBFWriteNULLAttribute(dbfHandle,toRowIndex,i);
+			else if (val.vt == VT_NULL)
+			{
+				DBFWriteNULLAttribute(dbfHandle, toRowIndex, i);
 			}
 			else
-			{	
-				DBFWriteDoubleAttribute(dbfHandle,toRowIndex,i,0.0);
+			{
+				DBFWriteDoubleAttribute(dbfHandle, toRowIndex, i, 0.0);
 			}
 		}
 		else if (type == FTDate)
@@ -1643,7 +1656,7 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 		}
 		VariantClear(&val);
 	}
-    return true;
+	return true;
 }
 
 // *******************************************************************
@@ -1653,26 +1666,26 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*retval = VARIANT_FALSE;
+		*retval = VARIANT_FALSE;
 
 	bool canAppend = _appendMode && _rows.size() > 0 && RowIndex == _rows.size() - 1;
 
 	if (_isEditingTable == FALSE && !canAppend)
-	{	
+	{
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
 	}
 
-	if( FieldIndex < 0 || FieldIndex >= FieldCount() || RowIndex < 0 || RowIndex >= RowCount())
-	{	
+	if (FieldIndex < 0 || FieldIndex >= FieldCount() || RowIndex < 0 || RowIndex >= RowCount())
+	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
 
 	USES_CONVERSION;
 
-	if( newVal.vt == VT_I2 )
-	{	
+	if (newVal.vt == VT_I2)
+	{
 		long val = newVal.iVal;
 		newVal.vt = VT_I4;
 		newVal.lVal = val;
@@ -1683,45 +1696,45 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 		newVal.vt = VT_I4;
 		newVal.lVal = val;
 	}
-	else if( newVal.vt == (VT_BYREF|VT_I8) )
-	{	
+	else if (newVal.vt == (VT_BYREF | VT_I8))
+	{
 		LONGLONG val = *(newVal.pllVal);
 		newVal.vt = VT_I4;
 		newVal.lVal = (long)val;
 	}
-	else if( newVal.vt == (VT_BYREF|VT_I2) )
-	{	
+	else if (newVal.vt == (VT_BYREF | VT_I2))
+	{
 		long val = *(newVal.piVal);
 		newVal.vt = VT_I4;
 		newVal.lVal = val;
 	}
-	else if( newVal.vt == (VT_BYREF|VT_I4) )
-	{	
+	else if (newVal.vt == (VT_BYREF | VT_I4))
+	{
 		long val = *(newVal.plVal);
 		newVal.vt = VT_I4;
 		newVal.lVal = val;
 	}
-	else if( newVal.vt == VT_R4 )
-	{	
+	else if (newVal.vt == VT_R4)
+	{
 		double val = newVal.fltVal;
 		newVal.vt = VT_R8;
 		newVal.dblVal = val;
 	}
-	else if( newVal.vt == (VT_BYREF|VT_R4) )
-	{	
+	else if (newVal.vt == (VT_BYREF | VT_R4))
+	{
 		double val = *(newVal.pfltVal);
 		newVal.vt = VT_R8;
 		newVal.dblVal = val;
 	}
-	else if( newVal.vt == (VT_BYREF|VT_R8) )
-	{	
+	else if (newVal.vt == (VT_BYREF | VT_R8))
+	{
 		double val = *(newVal.pdblVal);
 		newVal.vt = VT_R8;
 		newVal.dblVal = val;
 	}
-	else if( newVal.vt == (VT_BYREF|VT_BSTR) )
-	{	
-		
+	else if (newVal.vt == (VT_BYREF | VT_BSTR))
+	{
+
 		BSTR val = OLE2BSTR(*(newVal.pbstrVal));
 		newVal.vt = VT_BSTR;
 		newVal.bstrVal = val;
@@ -1739,51 +1752,51 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 
 	/*
 	VT_UI1;
-    VT_I2;  
-    VT_I4;   
-    VT_R4;   
-    VT_R8;   
-    VT_BOOL;
-    VT_ERROR;
-    VT_CY;
-    VT_DATE;
-    VT_BSTR;
-    VT_UNKNOWN;
-    VT_DISPATCH;
-    VT_ARRAY;
-    VT_BYREF|VT_UI1;
-    VT_BYREF|VT_I2;
-    VT_BYREF|VT_I4;
-    VT_BYREF|VT_R4;
-    VT_BYREF|VT_R8;
-    VT_BYREF|VT_BOOL;
-    VT_BYREF|VT_ERROR;
-    VT_BYREF|VT_CY;
-    VT_BYREF|VT_DATE;
-    VT_BYREF|VT_BSTR;
-    VT_BYREF|VT_UNKNOWN;
-    VT_BYREF|VT_DISPATCH;
-    VT_ARRAY;
-    VT_BYREF|VT_VARIANT;
-    */
+	VT_I2;
+	VT_I4;
+	VT_R4;
+	VT_R8;
+	VT_BOOL;
+	VT_ERROR;
+	VT_CY;
+	VT_DATE;
+	VT_BSTR;
+	VT_UNKNOWN;
+	VT_DISPATCH;
+	VT_ARRAY;
+	VT_BYREF|VT_UI1;
+	VT_BYREF|VT_I2;
+	VT_BYREF|VT_I4;
+	VT_BYREF|VT_R4;
+	VT_BYREF|VT_R8;
+	VT_BYREF|VT_BOOL;
+	VT_BYREF|VT_ERROR;
+	VT_BYREF|VT_CY;
+	VT_BYREF|VT_DATE;
+	VT_BYREF|VT_BSTR;
+	VT_BYREF|VT_UNKNOWN;
+	VT_BYREF|VT_DISPATCH;
+	VT_ARRAY;
+	VT_BYREF|VT_VARIANT;
+	*/
 
 	// Darrel Brown, 10/16/2003 Added support for null cell values
 	// jf, 2/17/2018, added support for Dates and Booleans
 	if (newVal.vt != VT_I4 && newVal.vt != VT_R8 && newVal.vt != VT_BSTR && newVal.vt != VT_DATE && newVal.vt != VT_BOOL && newVal.vt != VT_NULL)
-	{	
+	{
 		ErrorMessage(tkINCORRECT_VARIANT_TYPE);
 		return S_OK;
 	}
-	
+
 	if (_rows[RowIndex].row == NULL)
 	{
 		ReadRecord(RowIndex);
 	}
-        
-    if (_rows[RowIndex].row != NULL)
-    {
-        if( _rows[RowIndex].row->values[FieldIndex] == NULL )
-		{   
+
+	if (_rows[RowIndex].row != NULL)
+	{
+		if (_rows[RowIndex].row->values[FieldIndex] == NULL)
+		{
 			// tws  6/7/7 : VariantInit DOES NOT free any old value, but VariantClear and VariantCopy DO 
 			// so only use VariantInit when it is NEW, otherwise it will leak BSTRs
 			// this pair of braces saved 80MB of mem leak on table edit 50k shapes with 40 _fields
@@ -1794,7 +1807,7 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 
 		//Change the width of the field
 		IField * field = NULL;
-		this->get_Field(FieldIndex,&field);
+		this->get_Field(FieldIndex, &field);
 		FieldType type;
 		long precision, width;
 		field->get_Type(&type);
@@ -1802,23 +1815,23 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 		field->get_Precision(&precision);
 
 		long valWidth = 0;
-		if( newVal.vt == VT_BSTR )
-		{	
+		if (newVal.vt == VT_BSTR)
+		{
 			CString cval(OLE2CA(newVal.bstrVal));
 			valWidth = cval.GetLength();
 		}
-		else if( newVal.vt == VT_I4 )
-		{	
+		else if (newVal.vt == VT_I4)
+		{
 			CString cval;
-			cval.Format("%i",newVal.lVal);
+			cval.Format("%i", newVal.lVal);
 			valWidth = cval.GetLength();
 		}
-		else if( newVal.vt == VT_R8 )
-		{	
+		else if (newVal.vt == VT_R8)
+		{
 			CString cval;
 			CString fmat;
-			fmat.Format("%ld",precision);
-			cval.Format("%." + fmat + "d",precision,newVal.dblVal);	
+			fmat.Format("%ld", precision);
+			cval.Format("%." + fmat + "d", precision, newVal.dblVal);
 			valWidth = cval.GetLength();
 		}
 		else if (newVal.vt == VT_DATE)
@@ -1833,11 +1846,11 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 		if (valWidth > width)
 			field->put_Width(valWidth);
 
-		field->Release();  
-        _rows[RowIndex].row->SetDirty(TableRow::DATA_MODIFIED);
+		field->Release();
+		_rows[RowIndex].row->SetDirty(TableRow::DATA_MODIFIED);
 
 		*retval = VARIANT_TRUE;
-    }
+	}
 	return S_OK;
 }
 
@@ -1845,10 +1858,10 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 //		StartEditingTable ()
 // *********************************************************
 STDMETHODIMP CTableClass::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retval)
-{  
-    // StartEditingTable now just simply set the editing flag, not read all records into memory
+{
+	// StartEditingTable now just simply set the editing flag, not read all records into memory
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 
 	if (_isEditingTable)
 	{
@@ -1856,22 +1869,22 @@ STDMETHODIMP CTableClass::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retv
 		return S_OK;
 	}
 
-	if( _dbfHandle == NULL )
-	{	
+	if (_dbfHandle == NULL)
+	{
 		ErrorMessage(tkFILE_NOT_OPEN);
 		*retval = VARIANT_FALSE;
 		return S_OK;
 	}
 
-	if (_appendMode) 
+	if (_appendMode)
 	{
 		ErrorMessage(tkDBF_NO_EDIT_MODE_WHEN_APPENDING);
 		*retval = VARIANT_FALSE;
 		return S_OK;
 	}
 
-	if( _isEditingTable != TRUE )
-	{	
+	if (_isEditingTable != TRUE)
+	{
 		_isEditingTable = TRUE;
 		m_needToSaveAsNewFile = false;
 	}
@@ -1914,18 +1927,18 @@ void CTableClass::MarkFieldsAsUnchanged()
 STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	*retval = VARIANT_FALSE;
 
-	if ( !_globalCallback  && cBack )
+		*retval = VARIANT_FALSE;
+
+	if (!_globalCallback  && cBack)
 	{
 		_globalCallback = cBack;
 		_globalCallback->AddRef();
 	}
 
-	if( !_dbfHandle )
-	{	
-		if( _isEditingTable )
+	if (!_dbfHandle)
+	{
+		if (_isEditingTable)
 		{
 			if (ApplyChanges)
 			{
@@ -1939,51 +1952,51 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 			_isEditingTable = FALSE;
 		}
 		else
-		{		
+		{
 			ErrorMessage(tkFILE_NOT_OPEN);
 		}
 		return S_OK;
 	}
 
-	if( !_isEditingTable )
-	{	
+	if (!_isEditingTable)
+	{
 		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 
-	if( ApplyChanges )
-	{		
+	if (ApplyChanges)
+	{
 		if (m_needToSaveAsNewFile || HasFieldChanges())
-        {
+		{
 			// file should be rewritten completely; writing to temp file first
 			CString tempFilename = Utility::GetTempFilename(".dbf");
 
 			_tempFiles.push_back(new CString(tempFilename));		// will be released in destructor
-		    
+
 			USES_CONVERSION;
 			if (SaveToFile(A2W(tempFilename), false, cBack))
-            {
+			{
 				BOOL result = CopyFile(tempFilename, W2A(_filename), FALSE);
 				_unlink(tempFilename);
-            }
-            else
-            {
-	        	ErrorMessage(tkCANT_CREATE_DBF);
-            }
-        }
-        else
-        {
+			}
+			else
+			{
+				ErrorMessage(tkCANT_CREATE_DBF);
+			}
+		}
+		else
+		{
 			// can edit the file in place, no need to save to a temporary file
 			if (!SaveToFile(_filename, true, cBack))
-            {
-	        	ErrorMessage(tkCANT_CREATE_DBF);
-            }
-        }
-    }
+			{
+				ErrorMessage(tkCANT_CREATE_DBF);
+			}
+		}
+	}
 
 	MarkFieldsAsUnchanged();
 
-    _isEditingTable = FALSE;
+	_isEditingTable = FALSE;
 
 	CComBSTR state;
 	CComBSTR bstrFilename(_filename);
@@ -2000,26 +2013,26 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 STDMETHODIMP CTableClass::EditDeleteRow(long RowIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = VARIANT_FALSE;
+		*retval = VARIANT_FALSE;
 
-	if( _isEditingTable == FALSE )
-	{	
+	if (_isEditingTable == FALSE)
+	{
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
 	}
 
-    if( RowIndex < 0 || RowIndex >= RowCount() )
-	{	
+	if (RowIndex < 0 || RowIndex >= RowCount())
+	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
 
-    if( _rows[RowIndex].row != NULL )
-        delete _rows[RowIndex].row;
-    _rows.erase(_rows.begin() + RowIndex);
+	if (_rows[RowIndex].row != NULL)
+		delete _rows[RowIndex].row;
+	_rows.erase(_rows.begin() + RowIndex);
 
 	*retval = VARIANT_TRUE;
-    m_needToSaveAsNewFile = true;
+	m_needToSaveAsNewFile = true;
 	return S_OK;
 }
 
@@ -2029,8 +2042,8 @@ STDMETHODIMP CTableClass::EditDeleteRow(long RowIndex, VARIANT_BOOL *retval)
 //Neio July 28,2009: this method is simple,but low efficiency
 STDMETHODIMP CTableClass::Save(ICallback *cBack, VARIANT_BOOL *retval)
 {
-	StopEditingTable(VARIANT_TRUE,cBack,retval);
-	StartEditingTable(cBack,retval);
+	StopEditingTable(VARIANT_TRUE, cBack, retval);
+	StartEditingTable(cBack, retval);
 	return S_OK;
 }
 
@@ -2039,12 +2052,12 @@ STDMETHODIMP CTableClass::Save(ICallback *cBack, VARIANT_BOOL *retval)
 // *********************************************************************
 FieldType CTableClass::GetFieldType(long fieldIndex)
 {
-    IField * field = NULL;
-    this->get_Field(fieldIndex,&field);
-    FieldType type;				
-    field->get_Type(&type);
-    field->Release();
-    return type;
+	IField * field = NULL;
+	this->get_Field(fieldIndex, &field);
+	FieldType type;
+	field->get_Type(&type);
+	field->Release();
+	return type;
 }
 
 // *********************************************************************
@@ -2052,12 +2065,12 @@ FieldType CTableClass::GetFieldType(long fieldIndex)
 // *********************************************************************
 long CTableClass::GetFieldPrecision(long fieldIndex)
 {
-    IField * field = NULL;
-    get_Field(fieldIndex,&field);
-    long precision;
-    field->get_Precision(&precision);
-    field->Release();
-    return precision;
+	IField * field = NULL;
+	get_Field(fieldIndex, &field);
+	long precision;
+	field->get_Precision(&precision);
+	field->Release();
+	return precision;
 }
 
 // *********************************************************************
@@ -2065,14 +2078,14 @@ long CTableClass::GetFieldPrecision(long fieldIndex)
 // *********************************************************************
 void CTableClass::ClearRow(long rowIndex)
 {
-    if (rowIndex >= 0 && rowIndex < RowCount())
-    {
-        if (_rows[rowIndex].row)
-        {
-            delete _rows[rowIndex].row;
-            _rows[rowIndex].row = NULL;
-        }
-    }
+	if (rowIndex >= 0 && rowIndex < RowCount())
+	{
+		if (_rows[rowIndex].row)
+		{
+			delete _rows[rowIndex].row;
+			_rows[rowIndex].row = NULL;
+		}
+	}
 }
 
 // *********************************************************************
@@ -2080,18 +2093,18 @@ void CTableClass::ClearRow(long rowIndex)
 // *********************************************************************
 STDMETHODIMP CTableClass::get_MinValue(long FieldIndex, VARIANT* retval)
 {
-	if( FieldIndex < 0 || FieldIndex >= (long)_fields.size())
+	if (FieldIndex < 0 || FieldIndex >= (long)_fields.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		retval = NULL;
 	}
-	else	
+	else
 	{
 		CComVariant min, val;
 		for (unsigned long i = 0; i < _rows.size(); i++)
 		{
-			if( ReadRecord(i) && _rows[i].row != NULL)
-			val.Copy(_rows[i].row->values[FieldIndex]);
+			if (ReadRecord(i) && _rows[i].row != NULL)
+				val.Copy(_rows[i].row->values[FieldIndex]);
 			if (i == 0)	min = val;
 			else if (val < min)	min = val;
 			val.Clear();
@@ -2106,18 +2119,18 @@ STDMETHODIMP CTableClass::get_MinValue(long FieldIndex, VARIANT* retval)
 // *********************************************************************
 STDMETHODIMP CTableClass::get_MaxValue(long FieldIndex, VARIANT* retval)
 {
-	if( FieldIndex < 0 || FieldIndex >= (long)_fields.size())
+	if (FieldIndex < 0 || FieldIndex >= (long)_fields.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		retval = NULL;
 	}
-	else	
+	else
 	{
 		CComVariant max, val;
 		for (long i = 0; i < (long)_rows.size(); i++)
 		{
-			if( ReadRecord(i) && _rows[i].row != NULL)
-			val.Copy(_rows[i].row->values[FieldIndex]);
+			if (ReadRecord(i) && _rows[i].row != NULL)
+				val.Copy(_rows[i].row->values[FieldIndex]);
 			if (i == 0)	max = val;
 			else if (val > max)	max = val;
 			val.Clear();
@@ -2132,12 +2145,12 @@ STDMETHODIMP CTableClass::get_MaxValue(long FieldIndex, VARIANT* retval)
 // *********************************************************************
 STDMETHODIMP CTableClass::get_MeanValue(long FieldIndex, double* retval)
 {
-	if( FieldIndex < 0 || FieldIndex >= (long)_fields.size())
+	if (FieldIndex < 0 || FieldIndex >= (long)_fields.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retval = 0.0;
 	}
-	else	
+	else
 	{
 		FieldType type;
 		_fields[FieldIndex]->field->get_Type(&type);
@@ -2146,13 +2159,13 @@ STDMETHODIMP CTableClass::get_MeanValue(long FieldIndex, double* retval)
 			double sum = 0;
 			for (unsigned long i = 0; i < _rows.size(); i++)
 			{
-				if( ReadRecord(i) && _rows[i].row != NULL)
+				if (ReadRecord(i) && _rows[i].row != NULL)
 				{
 					if (type == DOUBLE_FIELD)	sum += _rows[i].row->values[FieldIndex]->dblVal;
 					else						sum += _rows[i].row->values[FieldIndex]->lVal;
 				}
 			}
-			*retval = sum/(double)_rows.size();
+			*retval = sum / (double)_rows.size();
 		}
 		else
 		{
@@ -2168,12 +2181,12 @@ STDMETHODIMP CTableClass::get_MeanValue(long FieldIndex, double* retval)
 // *********************************************************************
 STDMETHODIMP CTableClass::get_StandardDeviation(long FieldIndex, double* retval)
 {
-	if( FieldIndex < 0 || FieldIndex >= (long)_fields.size())
+	if (FieldIndex < 0 || FieldIndex >= (long)_fields.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		retval = NULL;
 	}
-	else	
+	else
 	{
 		FieldType type;
 		_fields[FieldIndex]->field->get_Type(&type);
@@ -2184,13 +2197,13 @@ STDMETHODIMP CTableClass::get_StandardDeviation(long FieldIndex, double* retval)
 			double std = 0.0;
 			for (unsigned long i = 0; i < _rows.size(); i++)
 			{
-				if( ReadRecord(i) && _rows[i].row != NULL)
+				if (ReadRecord(i) && _rows[i].row != NULL)
 				{
 					if (type == DOUBLE_FIELD)	std += pow(_rows[i].row->values[FieldIndex]->dblVal - mean, 2);
 					else						std += pow((double)_rows[i].row->values[FieldIndex]->lVal - mean, 2);
 				}
 			}
-			*retval = sqrt(std/ (_rows.size() - 1));
+			*retval = sqrt(std / (_rows.size() - 1));
 		}
 		else
 		{
@@ -2225,15 +2238,15 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 // *****************************************************************
 //			GenerateCategories()
 // *****************************************************************
-vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses, 
-														 CComVariant minValue, CComVariant maxValue)
+vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses,
+	CComVariant minValue, CComVariant maxValue)
 {
-	if( FieldIndex < 0 || FieldIndex >= this->FieldCount())
+	if (FieldIndex < 0 || FieldIndex >= this->FieldCount())
 	{
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS); 
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
-	} 
-	
+	}
+
 	long numShapes = this->RowCount();
 
 	// getting field type
@@ -2246,28 +2259,28 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 	USES_CONVERSION;
 	CStringW fieldName = OLE2CW(str);
 	fld->Release(); fld = NULL;
-	
+
 	/* we won't define intervals for string values */
 	if (ClassificationType != ctUniqueValues && fieldType == STRING_FIELD)
 	{
 		CallbackHelper::ErrorMsg("String fields support only unique values classification for categories.");
-		ErrorMessage(tkINVALID_PARAMETER_VALUE); 
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return S_OK;
 	}
-	
+
 	if ((numClasses <= 0 || numClasses > 1000) && (ClassificationType != ctUniqueValues))
 	{
 		CallbackHelper::ErrorMsg("Too many categories for non-unique values classification type.");
-		ErrorMessage(tkINVALID_PARAMETER_VALUE); 
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return S_OK;
 	}
-	
+
 	// natural breaks aren't designed to work otherwise
 	if (numShapes < numClasses && ClassificationType == ctNaturalBreaks)
 	{
 		numClasses = numShapes;
 	}
-	
+
 	// values in specified range should be classified
 	bool useRange = minValue.vt != VT_EMPTY && maxValue.vt != VT_EMPTY && fieldType == DOUBLE_FIELD;
 
@@ -2290,20 +2303,20 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 		std::set<CComVariant> dict;
 		CComVariant val;
 
-		for(long i = 0; i< numShapes; i++)
+		for (long i = 0; i < numShapes; i++)
 		{
 			this->get_CellValue(FieldIndex, i, &val);
 			if (useRange && (val.dblVal < minValue.dblVal || val.dblVal > maxValue.dblVal))
 				continue;
 
 			if (dict.find(val) == dict.end())
-					dict.insert(val);
+				dict.insert(val);
 		}
 		/* creating categories */
 		std::vector<CComVariant> values;
 		copy(dict.begin(), dict.end(), inserter(values, values.end()));
-		
-		for (int i = 0; i < (int)values.size(); i++ )
+
+		for (int i = 0; i < (int)values.size(); i++)
 		{
 			CategoriesData data;
 			data.minValue = values[i];
@@ -2316,14 +2329,14 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 	else if (ClassificationType == ctEqualSumOfValues)
 	{
 		CComVariant val;
-		
+
 		// sorting the values
 		std::vector<double> values;
 		double totalSum = 0, dValue;
-		for(int i=0; i< numShapes; i++)
+		for (int i = 0; i < numShapes; i++)
 		{
 			this->get_CellValue(FieldIndex, i, &val);
-			
+
 			if (useRange && (val.dblVal < minValue.dblVal || val.dblVal > maxValue.dblVal))
 				continue;
 
@@ -2332,30 +2345,30 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 			totalSum += dValue;
 		}
 		sort(values.begin(), values.end());
-		
+
 		double step = totalSum / (double)numClasses;
-		int index = 1; 
+		int index = 1;
 		double sum = 0;
-		
-		for (int i = 0; i < (int)values.size(); i++ )
+
+		for (int i = 0; i < (int)values.size(); i++)
 		{
 			sum += values[i];
-			if (sum >= step * (double)index || i == numShapes - 1)	
+			if (sum >= step * (double)index || i == numShapes - 1)
 			{
 				CategoriesData data;
-				
-				if ( index == numClasses )
+
+				if (index == numClasses)
 					data.maxValue = values[values.size() - 1];
-				else if ( i != 0 )
-					data.maxValue = (values[i] + values[i-1])/2;
+				else if (i != 0)
+					data.maxValue = (values[i] + values[i - 1]) / 2;
 				else
 					data.maxValue = values[0];
 
-				if (index == 1) 
+				if (index == 1)
 					data.minValue = values[0];
-				else			
+				else
 					data.minValue = (*result)[result->size() - 1].maxValue;
-				
+
 				result->push_back(data);
 				index++;
 			}
@@ -2364,7 +2377,7 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 	else if (ClassificationType == ctEqualIntervals)
 	{
 		CComVariant vMin, vMax;
-		
+
 		if (useRange)
 		{
 			vMin = minValue;
@@ -2375,13 +2388,13 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 			this->get_MinValue(FieldIndex, &vMin);
 			this->get_MaxValue(FieldIndex, &vMax);
 		}
-		
+
 		double dMin, dMax;
 		dVal(vMin, dMin); dVal(vMax, dMax);
 		vMin.Clear(); vMax.Clear();
-		
+
 		/*	creating classes */
-		double dStep = (dMax - dMin)/(double)numClasses;
+		double dStep = (dMax - dMin) / (double)numClasses;
 		while (dMin < dMax)
 		{
 			CategoriesData data;
@@ -2405,14 +2418,14 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 			this->get_MinValue(FieldIndex, &vMin);
 			this->get_MaxValue(FieldIndex, &vMax);
 		}
-		
+
 		double dMin, dMax;
 		dVal(vMin, dMin); dVal(vMax, dMax);
 		vMin.Clear(); vMax.Clear();
-		
+
 		// sorting the values
 		std::vector<double> values;
-		for(int i=0; i< numShapes; i++)
+		for (int i = 0; i < numShapes; i++)
 		{
 			this->get_CellValue(FieldIndex, i, &vMin);
 			dVal(vMin, dMin); vMin.Clear();
@@ -2422,8 +2435,8 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 
 		/*	creating classes */
 		int i = 0;
-		int count = numShapes/numClasses;
-		
+		int count = numShapes / numClasses;
+
 		for (int i = 0; i < numShapes; i += count)
 		{
 			dMin = values[i];
@@ -2444,7 +2457,7 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 		CComVariant vMin; double dMin;
 		// sorting the values
 		std::vector<double> values;
-		for(int i=0; i< numShapes; i++)
+		for (int i = 0; i < numShapes; i++)
 		{
 			this->get_CellValue(FieldIndex, i, &vMin);
 			if (useRange && (vMin.dblVal < minValue.dblVal || vMin.dblVal > maxValue.dblVal))
@@ -2471,8 +2484,8 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 					if (i == startIndices->size() - 1)
 						data.maxValue = values[values.size() - 1];
 					else
-						data.maxValue = values[(*startIndices)[i+1]];
-					
+						data.maxValue = values[(*startIndices)[i + 1]];
+
 					result->push_back(data);
 				}
 				delete startIndices;
@@ -2484,8 +2497,8 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 		double mean, sdo;
 		this->get_MeanValue(FieldIndex, &mean);
 		this->get_StandardDeviation(FieldIndex, &sdo);
-		
-		for (int i = -3; i <= 2; i++ )
+
+		for (int i = -3; i <= 2; i++)
 		{
 			CategoriesData data;
 			data.minValue = mean + sdo * i;
@@ -2499,7 +2512,7 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 	// ------------------------------------------------------
 	if (ClassificationType == ctUniqueValues)
 	{
-		for (int i = 0; i < (int)result->size(); i++ )
+		for (int i = 0; i < (int)result->size(); i++)
 		{
 			//CString strExpression;
 			CStringW strValue;
@@ -2508,21 +2521,21 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 			// https://stackoverflow.com/questions/45484130/how-to-convert-ccomvariant-bstr-to-cstring
 			switch (val->vt)
 			{
-				case VT_BSTR:	
-								strValue = OLE2W(val->bstrVal);
-								(*result)[i].name = strValue;
-								(*result)[i].expression = "[" + fieldName + "] = \"" + strValue + "\""; 
-								break;
-				case VT_R8:		
-								strValue.Format(L"%g", val->dblVal);
-								(*result)[i].name = strValue;
-								(*result)[i].expression = "[" + fieldName + "] = " + strValue;
-								break;
-				case VT_I4:		
-								strValue.Format(L"%i", val->lVal);
-								(*result)[i].name = strValue;
-								(*result)[i].expression = "[" + fieldName + "] = " + strValue;
-								break;
+			case VT_BSTR:
+				strValue = OLE2W(val->bstrVal);
+				(*result)[i].name = strValue;
+				(*result)[i].expression = "[" + fieldName + "] = \"" + strValue + "\"";
+				break;
+			case VT_R8:
+				strValue.Format(L"%g", val->dblVal);
+				(*result)[i].name = strValue;
+				(*result)[i].expression = "[" + fieldName + "] = " + strValue;
+				break;
+			case VT_I4:
+				strValue.Format(L"%i", val->lVal);
+				(*result)[i].name = strValue;
+				(*result)[i].expression = "[" + fieldName + "] = " + strValue;
+				break;
 			}
 		}
 	}
@@ -2531,7 +2544,7 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 		// in case % is present, we need to put to double it for proper formatting
 		fieldName.Replace(L"%", L"%%");
 
-		for (int i = 0; i < (int)result->size(); i++ )
+		for (int i = 0; i < (int)result->size(); i++)
 		{
 			CategoriesData* data = &((*result)[i]);
 
@@ -2541,25 +2554,25 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 			{
 				data->minValue.dblVal = floor(data->minValue.dblVal);
 			}
-			else if(i == result->size() - 1)
+			else if (i == result->size() - 1)
 			{
 				data->maxValue.dblVal = ceil(data->maxValue.dblVal);
 			}
-			
+
 			CStringW upperBound = (i == result->size() - 1) ? "<=" : "<";
 
 			switch (data->minValue.vt)
 			{
-				case VT_R8:		
-								sFormat = "%g";
-								data->name = Utility::FormatNumber(data->minValue.dblVal, sFormat) + " - " + Utility::FormatNumber(data->maxValue.dblVal, sFormat);
-								data->expression.Format("[" + fieldName + "] >= %f AND [" + fieldName + "] " + upperBound  + " %f", data->minValue.dblVal, data->maxValue.dblVal);
-								break;
-				case VT_I4:		
-								sFormat = "%i";
-								data->name = Utility::FormatNumber(data->minValue.dblVal, sFormat) + " - " + Utility::FormatNumber(data->maxValue.dblVal, sFormat);
-								data->expression.Format("[" + fieldName + "] >= %i AND [" + fieldName + "] "  + upperBound + " %i", data->minValue.lVal, data->maxValue.lVal);
-								break;
+			case VT_R8:
+				sFormat = "%g";
+				data->name = Utility::FormatNumber(data->minValue.dblVal, sFormat) + " - " + Utility::FormatNumber(data->maxValue.dblVal, sFormat);
+				data->expression.Format("[" + fieldName + "] >= %f AND [" + fieldName + "] " + upperBound + " %f", data->minValue.dblVal, data->maxValue.dblVal);
+				break;
+			case VT_I4:
+				sFormat = "%i";
+				data->name = Utility::FormatNumber(data->minValue.dblVal, sFormat) + " - " + Utility::FormatNumber(data->maxValue.dblVal, sFormat);
+				data->expression.Format("[" + fieldName + "] >= %i AND [" + fieldName + "] " + upperBound + " %i", data->minValue.lVal, data->maxValue.lVal);
+				break;
 			}
 		}
 	}
@@ -2581,7 +2594,7 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 std::vector<CStringW>* CTableClass::get_FieldNames()
 {
 	std::vector<CStringW>* names = new std::vector<CStringW>;
-	for (unsigned  int i = 0; i < _fields.size(); i++ )
+	for (unsigned int i = 0; i < _fields.size(); i++)
 	{
 		CComBSTR bstr;
 		_fields[i]->field->get_Name(&bstr);
@@ -2599,12 +2612,12 @@ STDMETHODIMP CTableClass::get_FieldIndexByName(BSTR FieldName, long* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*retval = -1;
+		*retval = -1;
 	USES_CONVERSION;
 	CString searchName = OLE2CA(FieldName);
 	for (unsigned int i = 0; i < _fields.size(); i++)
-	{	
-		IField* field =_fields[i]->field;
+	{
+		IField* field = _fields[i]->field;
 		if (field)
 		{
 			CComBSTR name;
@@ -2627,14 +2640,14 @@ bool CTableClass::get_FieldValuesDouble(int FieldIndex, std::vector<double>& val
 {
 	values.clear();
 
-	if( FieldIndex < 0 || FieldIndex >= FieldCount())
-	{	
+	if (FieldIndex < 0 || FieldIndex >= FieldCount())
+	{
 		return false;
 	}
-	
+
 	FieldType type;
 	_fields[FieldIndex]->field->get_Type(&type);
-	
+
 	int index = _fields[FieldIndex]->oldIndex;	// real index of the field
 
 	values.reserve(_rows.size());
@@ -2654,7 +2667,7 @@ bool CTableClass::get_FieldValuesDouble(int FieldIndex, std::vector<double>& val
 		}
 		else
 		{
-			values.push_back(DBFReadDoubleAttribute(_dbfHandle,_rows[i].oldIndex,index));
+			values.push_back(DBFReadDoubleAttribute(_dbfHandle, _rows[i].oldIndex, index));
 		}
 	}
 	return true;
@@ -2667,14 +2680,14 @@ bool CTableClass::get_FieldValuesInteger(int FieldIndex, std::vector<int>& value
 {
 	values.clear();
 
-	if( FieldIndex < 0 || FieldIndex >= FieldCount())
-	{	
+	if (FieldIndex < 0 || FieldIndex >= FieldCount())
+	{
 		return false;
 	}
-	
+
 	FieldType type;
 	_fields[FieldIndex]->field->get_Type(&type);
-	
+
 	int index = _fields[FieldIndex]->oldIndex;	// real index of the field
 
 	values.reserve(_rows.size());
@@ -2695,7 +2708,7 @@ bool CTableClass::get_FieldValuesInteger(int FieldIndex, std::vector<int>& value
 		}
 		else
 		{
-			values.push_back(DBFReadIntegerAttribute(_dbfHandle,_rows[i].oldIndex,index));
+			values.push_back(DBFReadIntegerAttribute(_dbfHandle, _rows[i].oldIndex, index));
 		}
 	}
 	return true;
@@ -2710,16 +2723,16 @@ bool CTableClass::get_FieldValuesString(int FieldIndex, std::vector<CString>& va
 
 	values.clear();
 
-	if( FieldIndex < 0 || FieldIndex >= FieldCount())
-	{	
+	if (FieldIndex < 0 || FieldIndex >= FieldCount())
+	{
 		return false;
 	}
-	
+
 	FieldType type;
 	_fields[FieldIndex]->field->get_Type(&type);
-	
+
 	int index = _fields[FieldIndex]->oldIndex;	// real index of the field
-	
+
 	values.reserve(_rows.size());
 	for (unsigned int i = 0; i < _rows.size(); i++)
 	{
@@ -2728,8 +2741,8 @@ bool CTableClass::get_FieldValuesString(int FieldIndex, std::vector<CString>& va
 			VARIANT* var = _rows[i].row->values[FieldIndex];
 			if (var && var->vt != VT_NULL)
 			{
-				
-				values.push_back( OLE2CA(var->bstrVal));
+
+				values.push_back(OLE2CA(var->bstrVal));
 			}
 			else
 			{
@@ -2738,7 +2751,7 @@ bool CTableClass::get_FieldValuesString(int FieldIndex, std::vector<CString>& va
 		}
 		else
 		{
-			values.push_back(DBFReadStringAttribute(_dbfHandle,_rows[i].oldIndex,index));
+			values.push_back(DBFReadStringAttribute(_dbfHandle, _rows[i].oldIndex, index));
 		}
 	}
 	return true;
@@ -2751,12 +2764,12 @@ bool CTableClass::set_IndexValue(int rowIndex)
 {
 	if (!_isEditingTable)
 		return false;
-	
-	if (rowIndex < 0 || rowIndex > (int)_rows.size())
+
+	if (rowIndex < 0 || rowIndex >(int)_rows.size())
 		return false;
 
 	long fieldIndex = -1;
-	
+
 	CComBSTR fieldName("MWShapeID");
 
 	this->get_FieldIndexByName(fieldName, &fieldIndex);
@@ -2788,7 +2801,7 @@ bool CTableClass::set_IndexValue(int rowIndex)
 			}
 		}
 	}
-	
+
 	// setting the value
 	val.vt = VT_I4;
 	val.lVal = m_maxRowId + 1;
@@ -2797,7 +2810,7 @@ bool CTableClass::set_IndexValue(int rowIndex)
 	if (vbretval)
 	{
 		m_maxRowId++;
-		
+
 	}
 	return vbretval == VARIANT_FALSE ? false : true;
 }
@@ -2808,23 +2821,34 @@ bool CTableClass::set_IndexValue(int rowIndex)
 STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision, int width, long* fieldIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	// MWGIS-55: Check inputs:
-	if (width < 1)
+		// MWGIS-55: Check inputs:
+		if (width < 1)
+		{
+			*fieldIndex = -1;
+			ErrorMessage(tkDBF_WIDTH_TOO_SMALL);
+			return S_OK;
+		}
+
+	// width and precision of doubles
+	if (type == DOUBLE_FIELD)
 	{
-		*fieldIndex = -1;
-		ErrorMessage(tkDBF_WIDTH_TOO_SMALL);
-		return S_OK;
+		if (precision < 1)
+		{
+			*fieldIndex = -1;
+			ErrorMessage(tkDBF_PRECISION_TOO_SMALL);
+			return S_OK;
+		}
+		else if (precision > (width - 2))
+		{
+			// have to allow for point and sign
+			*fieldIndex = -1;
+			ErrorMessage(tkDBF_WIDTH_TOO_SMALL);
+			return S_OK;
+		}
 	}
 
-	if (type == DOUBLE_FIELD && precision < 1)
-	{
-		*fieldIndex = -1;
-		ErrorMessage(tkDBF_PRECISION_TOO_SMALL);
-		return S_OK;
-	}
-
-	// fixed width fields
-	if (type == DATE_FIELD)
+	// the following are fixed-width fields
+	else if (type == DATE_FIELD)
 	{
 		width = 8;
 		precision = 0;
@@ -2841,7 +2865,7 @@ STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision,
 	}
 
 	IField* field = NULL;
-	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
+	CoCreateInstance(CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, (void**)&field);
 	field->put_Name(name);
 	field->put_Width(width);
 	field->put_Precision(precision);
@@ -2866,16 +2890,16 @@ bool CTableClass::MakeUniqueFieldNames()
 
 	// Do we need edit mode for editing of the field names?
 	// Yes we do, shapelib doesn't allow it otherwise ;)
-	this->get_EditingTable(&editing);	
-	if (!editing) 
+	this->get_EditingTable(&editing);
+	if (!editing)
 		return false;
-	
+
 	long numFields;
 	this->get_NumFields(&numFields);
-	
+
 	set<CString> fields;
 
-	for(long i = 0; i< numFields; i++)
+	for (long i = 0; i < numFields; i++)
 	{
 		CComBSTR name;
 		IField* fld;
@@ -2889,19 +2913,19 @@ bool CTableClass::MakeUniqueFieldNames()
 			fields.insert(temp);
 		}
 		else
-		{	
-			for(int j =1; ;j++)
+		{
+			for (int j = 1; ; j++)
 			{
 				CString newName = temp;
 
-				int maxLength = j > 10? 7 : 8;		//ensure that length of name is not longer than 10 characters
+				int maxLength = j > 10 ? 7 : 8;		//ensure that length of name is not longer than 10 characters
 				if (newName.GetLength() > maxLength) {
 					newName = newName.Left(maxLength);
 				}
 
 				newName.AppendFormat("_%d", j);
 				if (fields.find(newName) == fields.end())
-				{	
+				{
 					fields.insert(newName);
 					CComBSTR bstrNewName(newName);
 					fld->put_Name(bstrNewName);
@@ -2921,7 +2945,7 @@ bool CTableClass::MakeUniqueFieldNames()
 bool CTableClass::JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CStringW>& fieldList)
 {
 	USES_CONVERSION;
-	
+
 	long numFields;
 	table2->get_NumFields(&numFields);
 	for (long i = 0; i < numFields; i++)
@@ -2930,13 +2954,13 @@ bool CTableClass::JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping
 		table2->get_Field(i, &fld);
 		CComBSTR name;
 		fld->get_Name(&name);
-		
+
 		// either take all or take those that are in the list provided by user; comparison is case sensitive
 		if (fieldList.size() == 0 || fieldList.find(OLE2W(name)) != fieldList.end())
 		{
 			IField* fldNew;
 			fld->Clone(&fldNew);
-			
+
 			long index;
 			VARIANT_BOOL vbretval;
 			this->get_NumFields(&index);
@@ -2949,7 +2973,7 @@ bool CTableClass::JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping
 			fm->destIndex = index;
 			mapping.push_back(fm);
 		}
-		
+
 		fld->Release();
 	}
 
@@ -2967,7 +2991,7 @@ STDMETHODIMP CTableClass::Join(ITable* table2, BSTR fieldTo, BSTR fieldFrom, VAR
 	USES_CONVERSION;
 	set<CStringW> fields;
 	bool res = this->JoinInternal(table2, OLE2W(fieldTo), OLE2W(fieldFrom), "", "", fields);
-	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
+	*retVal = res ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -2980,7 +3004,7 @@ STDMETHODIMP CTableClass::Join2(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BS
 	USES_CONVERSION;
 	set<CStringW> fields;
 	bool res = this->JoinInternal(table2, OLE2W(fieldTo), OLE2W(fieldFrom), OLE2W(filenameToReopen), OLE2A(joinOptions), fields);
-	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
+	*retVal = res ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -2992,26 +3016,35 @@ STDMETHODIMP CTableClass::Join3(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BS
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
 
+	// TODO: Looks very similar to CGdalUtils::ConvertSafeArray
+
 	// Check dimensions of the array.
-    set<CStringW> fields;
+	set<CStringW> fields;
 	if (SafeArrayGetDim(filedList) == 1)
 	{
 		LONG lLBound, lUBound;
 		BSTR HUGEP *pbstr;
-		HRESULT hr1 = SafeArrayGetLBound(filedList, 1, &lLBound);
-		HRESULT hr2 = SafeArrayGetUBound(filedList, 1, &lUBound);
-		HRESULT hr3 = SafeArrayAccessData(filedList, (void HUGEP* FAR*)&pbstr);
+		const HRESULT hr1 = SafeArrayGetLBound(filedList, 1, &lLBound);
+		const HRESULT hr2 = SafeArrayGetUBound(filedList, 1, &lUBound);
+		const HRESULT hr3 = SafeArrayAccessData(filedList, reinterpret_cast<void HUGEP* FAR*>(&pbstr));
 		if (!FAILED(hr1) && !FAILED(hr2) && !FAILED(hr3))
 		{
-			LONG count = lUBound-lLBound + 1;
-			for (int i = 0; i < count; i++){
+			const long count = lUBound - lLBound + 1;
+			for (int i = 0; i < count; i++) {
 				fields.insert(OLE2W(pbstr[i]));
-			}		
+			}
+
+			// if safeArray was successfully locked, unlock it
+			if (!FAILED(hr3))
+			{
+				SafeArrayUnaccessData(filedList);
+			}
 		}
 	}
 
-	bool res = this->JoinInternal(table2, OLE2W(fieldTo), OLE2W(fieldFrom), OLE2W(filenameToReopen), OLE2A(joinOptions), fields);
-	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
+	const bool res = this->JoinInternal(table2, OLE2W(fieldTo), OLE2W(fieldFrom), OLE2W(filenameToReopen),
+	                                    OLE2A(joinOptions), fields);
+	*retVal = res ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -3051,7 +3084,7 @@ STDMETHODIMP CTableClass::TryJoin(ITable* table2, BSTR fieldTo, BSTR fieldFrom, 
 			std::map<CComVariant, int>::iterator it = vals.find(v);
 			if (it != vals.end())
 			{
-				if (it->second == 0 )
+				if (it->second == 0)
 				{
 					countJoin++;
 					it->second = 1;
@@ -3071,17 +3104,17 @@ STDMETHODIMP CTableClass::TryJoin(ITable* table2, BSTR fieldTo, BSTR fieldFrom, 
 // *****************************************************
 bool CTableClass::CheckJoinInput(ITable* table2, CStringW fieldTo, CStringW fieldFrom, long& index1, long& index2)
 {
-	if (!table2) 
+	if (!table2)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return false;
 	}
-	
+
 	CComBSTR bstrTo(fieldTo);
 	CComBSTR bstrFrom(fieldFrom);
 	this->get_FieldIndexByName(bstrTo, &index1);
 	table2->get_FieldIndexByName(bstrFrom, &index2);
-	
+
 	if (index1 == -1 || index2 == -1)
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -3090,8 +3123,8 @@ bool CTableClass::CheckJoinInput(ITable* table2, CStringW fieldTo, CStringW fiel
 
 	CComPtr<IField> fld1 = NULL;
 	CComPtr<IField> fld2 = NULL;
-	this->get_Field(index1, &fld1 );
-	table2->get_Field(index2, &fld2 );
+	this->get_Field(index1, &fld1);
+	table2->get_Field(index2, &fld2);
 
 	FieldType type1;
 	FieldType type2;
@@ -3114,18 +3147,18 @@ bool CTableClass::JoinInternal(ITable* table2, CStringW fieldTo, CStringW fieldF
 	long index1, index2;
 	if (!this->CheckJoinInput(table2, fieldTo, fieldFrom, index1, index2))
 		return false;
-	
+
 	// if edit mode isn't open, will use this hack to get through; rather that calling Table.StartEditMode
 	VARIANT_BOOL editing;
 	this->get_EditingTable(&editing);
 	if (!editing) {
 		this->_isEditingTable = TRUE;
 	}
-	
+
 	// reading list of fields specified by user
 	CString csvFields;
 	set<CStringW>::iterator it = fieldList.begin();
-	while(it != fieldList.end())
+	while (it != fieldList.end())
 	{
 		csvFields += *it + ",";
 		++it;
@@ -3158,7 +3191,7 @@ bool CTableClass::JoinInternal(ITable* table2, CStringW fieldTo, CStringW fieldF
 		table2->get_CellValue(index2, i, &v);
 		vals[v] = i;
 	}
-	
+
 	int count = 0;
 	VARIANT_BOOL vb;
 	for (size_t i = 0; i < _rows.size(); i++)
@@ -3171,7 +3204,7 @@ bool CTableClass::JoinInternal(ITable* table2, CStringW fieldTo, CStringW fieldF
 		{
 			for (size_t j = 0; j < mapping.size(); j++)
 			{
-				table2->get_CellValue(mapping[j]->srcIndex, it->second, &v );
+				table2->get_CellValue(mapping[j]->srcIndex, it->second, &v);
 				this->EditCellValue(mapping[j]->destIndex, i, v, &vb);
 				if (vb) {
 					count++;
@@ -3180,14 +3213,14 @@ bool CTableClass::JoinInternal(ITable* table2, CStringW fieldTo, CStringW fieldF
 		}
 	}
 
-	for (size_t i = 0; i < mapping.size(); i++ ) {
+	for (size_t i = 0; i < mapping.size(); i++) {
 		delete mapping[i];
 	}
 
 	if (!editing) {
 		this->_isEditingTable = FALSE;
 	}
-	
+
 	return true;
 }
 
@@ -3203,9 +3236,9 @@ void CTableClass::RemoveJoinedFields()
 	if (!editing) {
 		this->_isEditingTable = TRUE;
 	}
-	
+
 	VARIANT_BOOL vb;
-	for (int i =_fields.size() - 1; i >= 0 ; i-- )
+	for (int i = _fields.size() - 1; i >= 0; i--)
 	{
 		if (_fields[i]->Joined()) {
 			this->EditDeleteField(i, NULL, &vb);
@@ -3223,7 +3256,7 @@ void CTableClass::RemoveJoinedFields()
 STDMETHODIMP CTableClass::StopAllJoins()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
 	this->RemoveJoinedFields();
 
 	for (size_t i = 0; i < _joins.size(); i++) {
@@ -3244,19 +3277,19 @@ STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
 	}
-	else 
+	else
 	{
 		int id = _joins[joinIndex]->joinId;
 
 		VARIANT_BOOL editing;
 		this->get_EditingTable(&editing);
-		if (!editing)	 {
+		if (!editing) {
 			this->_isEditingTable = TRUE;
 		}
-		
+
 		// remove all fields which belong to this join
 		VARIANT_BOOL vb;
-		for (int i =_fields.size() - 1; i >= 0 ; i-- )
+		for (int i = _fields.size() - 1; i >= 0; i--)
 		{
 			if (_fields[i]->GetJoinId() == id)
 				this->EditDeleteField(i, NULL, &vb);
@@ -3279,7 +3312,7 @@ STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 STDMETHODIMP CTableClass::get_IsJoined(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	for (size_t i =_fields.size() - 1; i >= 0 ; i-- )
+	for (size_t i = _fields.size() - 1; i >= 0; i--)
 	{
 		if (_fields[i]->Joined()) {
 			*retVal = VARIANT_TRUE;
@@ -3313,7 +3346,7 @@ STDMETHODIMP CTableClass::get_FieldIsJoined(int fieldIndex, VARIANT_BOOL* retVal
 		*retVal = VARIANT_FALSE;
 	}
 	else {
-		*retVal = _fields[fieldIndex]->Joined() ? VARIANT_TRUE: VARIANT_FALSE;
+		*retVal = _fields[fieldIndex]->Joined() ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 	return S_OK;
 }
@@ -3329,10 +3362,10 @@ STDMETHODIMP CTableClass::get_FieldJoinIndex(int fieldIndex, int* retVal)
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
-	else 
+	else
 	{
 		int id = _fields[fieldIndex]->GetJoinId();
-		for (size_t i = 0; i < _joins.size(); i++) 
+		for (size_t i = 0; i < _joins.size(); i++)
 		{
 			if (_joins[i]->joinId == id)
 			{
@@ -3343,7 +3376,7 @@ STDMETHODIMP CTableClass::get_FieldJoinIndex(int fieldIndex, int* retVal)
 	}
 	return S_OK;
 }
-	
+
 // *****************************************************
 //		get_JoinFilename()
 // *****************************************************
@@ -3355,13 +3388,13 @@ STDMETHODIMP CTableClass::get_JoinFilename(int joinIndex, BSTR* retVal)
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = W2BSTR(L"");
 	}
-	else 
+	else
 	{
 		*retVal = W2BSTR(_joins[joinIndex]->filename);
 	}
 	return S_OK;
 }
-	
+
 // *****************************************************
 //		get_JoinFromField()
 // *****************************************************
@@ -3373,7 +3406,7 @@ STDMETHODIMP CTableClass::get_JoinFromField(int joinIndex, BSTR* retVal)
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = W2BSTR(L"");
 	}
-	else 
+	else
 	{
 		*retVal = W2BSTR(_joins[joinIndex]->fieldFrom);
 	}
@@ -3392,7 +3425,7 @@ STDMETHODIMP CTableClass::get_JoinToField(int joinIndex, BSTR* retVal)
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = W2BSTR(L"");
 	}
-	else 
+	else
 	{
 		*retVal = W2BSTR(_joins[joinIndex]->fieldTo);
 	}
@@ -3458,9 +3491,9 @@ STDMETHODIMP CTableClass::Deserialize(BSTR newVal)
 CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
+		USES_CONVERSION;
+
+	CPLXMLNode* psTree = CPLCreateXMLNode(NULL, CXT_Element, ElementName);
 
 	CPLXMLNode* psFields = CPLCreateXMLNode(psTree, CXT_Element, "Fields");
 	if (psFields)
@@ -3504,7 +3537,7 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 				{
 					name = Utility::GetRelativePath(this->_filename, name);
 				}
-				
+
 				CPLXMLNode* psNode = CPLCreateXMLNode(psJoins, CXT_Element, "Join");
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(Utility::ConvertToUtf8(name)));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldTo", CPLString().Printf(Utility::ConvertToUtf8(_joins[i]->fieldTo)));
@@ -3568,12 +3601,12 @@ void CTableClass::RestoreFields(CPLXMLNode* node)
 			long index = -1;
 
 			CString s = CPLGetXMLValue(node, "Index", "");
-			if(s != "") index = atoi(s);
+			if (s != "") index = atoi(s);
 
 			if (index >= 0 && index < (long)_fields.size())
 			{
 				s = CPLGetXMLValue(node, "Name", "");
-				if (s != "") 
+				if (s != "")
 				{
 					CStringW name = Utility::ConvertFromUtf8(s);
 					CComBSTR bstrName(name);
@@ -3615,7 +3648,7 @@ void CTableClass::RestoreFields(CPLXMLNode* node)
 				}
 			}
 		}
-		
+
 		node = node->psNext;
 	}
 }
@@ -3709,7 +3742,7 @@ bool CTableClass::GetUids(long fieldIndex, map<long, long>& results)
 	if (!fld) return false;
 
 	if (fld) {
-		FieldType type;	
+		FieldType type;
 		fld->get_Type(&type);
 		if (type != INTEGER_FIELD) return false;
 	}
@@ -3719,7 +3752,7 @@ bool CTableClass::GetUids(long fieldIndex, map<long, long>& results)
 	long numRows;
 	get_NumRows(&numRows);
 	CComVariant var;
-	for (long i = 0; i < numRows; i++) 
+	for (long i = 0; i < numRows; i++)
 	{
 		get_CellValue(fieldIndex, i, &var);
 		long val;
@@ -3799,7 +3832,7 @@ bool CTableClass::GetSorting(long fieldIndex, vector<long>& indices)
 		CallbackHelper::ErrorMsg("Invalid field index for sorting");
 		return false;
 	}
-	
+
 	multimap <CComVariant, long> map;
 	CComVariant val;
 
@@ -3832,7 +3865,7 @@ bool CTableClass::GetSorting(long fieldIndex, vector<long>& indices)
 bool CTableClass::GetRelativeValues(long fieldIndex, bool logScale, vector<double>& values)
 {
 	values.clear();
-	
+
 	if (fieldIndex < 0 || fieldIndex >= (long)_fields.size())
 	{
 		CallbackHelper::ErrorMsg("Invalid field index for sorting.");
@@ -3851,7 +3884,7 @@ bool CTableClass::GetRelativeValues(long fieldIndex, bool logScale, vector<doubl
 	CComVariant min, max;
 	get_MinValue(fieldIndex, &min);
 	get_MaxValue(fieldIndex, &max);
-	
+
 	double dmin, dmax;
 	dVal(min, dmin);
 	dVal(max, dmax);
@@ -3882,7 +3915,7 @@ bool CTableClass::GetRelativeValues(long fieldIndex, bool logScale, vector<doubl
 		get_CellValue(fieldIndex, (long)i, &value);
 		dVal(value, dval);
 
-		if (logScale) 
+		if (logScale)
 		{
 			dval = dmin < 1.0 ? dval + 1.0 - dmin : dval / dmin;
 			values.push_back(log10(dval) / range);
@@ -3904,7 +3937,7 @@ STDMETHODIMP CTableClass::ClearCache()
 
 	for (int j = 0; j < RowCount(); j++)
 	{
-		if (_rows[j].row != NULL && !_rows[j].row->IsModified()) 
+		if (_rows[j].row != NULL && !_rows[j].row->IsModified())
 		{
 			delete _rows[j].row;
 			_rows[j].row = NULL;
@@ -4012,3 +4045,5 @@ void CTableClass::SetFieldSourceIndex(int fieldIndex, int sourceIndex)
 
 	_fields[fieldIndex]->oldIndex = sourceIndex;
 }
+
+// ReSharper restore CppUseAuto

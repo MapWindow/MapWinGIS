@@ -30,7 +30,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CShapefileColorScheme
 class ATL_NO_VTABLE CShapefileColorScheme : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapefileColorScheme, &CLSID_ShapefileColorScheme>,
 	public IDispatchImpl<IShapefileColorScheme, &IID_IShapefileColorScheme, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

@@ -36,7 +36,7 @@ using namespace std;
 #endif
 
 class ATL_NO_VTABLE CTiles :
-    public CComObjectRootEx<CComMultiThreadModel>,
+    public CComObjectRootEx<CComObjectThreadModel>,
     public CComCoClass<CTiles, &CLSID_Tiles>,
     public IDispatchImpl<ITiles, &IID_ITiles, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

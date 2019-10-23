@@ -35,7 +35,7 @@
 //			GetLabelValue
 // ************************************************************
 void CShapefile::GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (fieldIndex != -1)
 	{
 		CComVariant val;
@@ -54,8 +54,7 @@ void CShapefile::GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CS
 // FieldIndex == -1: labels without text will be generated; 
 // Method == lpNone: labels with (0.0,0.0) coordinates will be generated
 STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Method, VARIANT_BOOL LargestPartOnly, long* Count)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*Count = 0;
 	
 	long numFields;
@@ -182,16 +181,14 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 // ******************************************************************
 //  Returns reference to Labels class
 STDMETHODIMP CShapefile::get_Labels(ILabels** pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*pVal = _labels;
 	if (_labels)
 		_labels->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_Labels(ILabels* newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (!newVal)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE); 
@@ -208,7 +205,7 @@ STDMETHODIMP CShapefile::put_Labels(ILabels* newVal)
 /*		put_ReferenceToLabels
 /***********************************************************************/
 void CShapefile::put_ReferenceToLabels(bool bNullReference)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (_labels == NULL) return;
 	((CLabels*)_labels)->put_ParentShapefile(bNullReference ? NULL : this);
 }
@@ -219,16 +216,14 @@ void CShapefile::put_ReferenceToLabels(bool bNullReference)
 //		get/put_Charts()
 // *******************************************************************
 STDMETHODIMP CShapefile::get_Charts (ICharts** pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	*pVal = _charts;
 	if ( _charts != NULL)
 		_charts->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_Charts (ICharts* newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (!newVal)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE); 
@@ -243,7 +238,7 @@ STDMETHODIMP CShapefile::put_Charts (ICharts* newVal)
 /*		put_ReferenceToCharts
 /***********************************************************************/
 void CShapefile::put_ReferenceToCharts(bool bNullReference)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if (!_charts) return;
 	((CCharts*)_charts)->put_ParentShapefile(bNullReference ? NULL: this);
 };
@@ -252,7 +247,7 @@ void CShapefile::put_ReferenceToCharts(bool bNullReference)
 //			SetChartsPositions
 // ********************************************************************
 void CShapefile::SetChartsPositions(tkLabelPositioning Method)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	USES_CONVERSION;
 	double x,y;
 	
@@ -370,7 +365,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 //		ClearChartFrames()
 // *************************************************************
 void CShapefile::ClearChartFrames()
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	for (unsigned int i = 0; i < _shapeData.size(); i++ ) 
 	{
 		CChartInfo* chart = _shapeData[i]->chart;

@@ -1,19 +1,21 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "CallbackHelper.h"
+
+// ReSharper disable CppUseAuto
 
 // *****************************************************************
 //	   GDALProgressCallback()
 // *****************************************************************
-int CPL_STDCALL GDALProgressCallback(double dfComplete, const char* pszMessage, void *pData)
+int CPL_STDCALL GDALProgressCallback(const double dfComplete, const char* pszMessage, void *pData)
 {
-	CallbackParams* params = (CallbackParams*)pData;
+	CallbackParams* const params = static_cast<CallbackParams*>(pData);
 
 	// No need to check the presence of local callback, 
 	// global application callback can be used as a fallback.
 	// There is no need to pass it as a parameter from each method.
-	if (params != NULL)
+	if (params != nullptr)
 	{
-		long percent = long(dfComplete * 100.0);
+		const long percent = long(dfComplete * 100.0);
 		CallbackHelper::Progress(params->cBack, percent, params->sMsg);
 	}
 	return TRUE;
@@ -24,12 +26,12 @@ int CPL_STDCALL GDALProgressCallback(double dfComplete, const char* pszMessage, 
 // ********************************************************************
 void CallbackHelper::Progress(ICallback* localCback, int index, int count, const char* message, long& lastPercent)
 {
-	Progress(localCback, index, (double)count, message, m_globalSettings.emptyBstr, lastPercent);
+	Progress(localCback, index, static_cast<double>(count), message, m_globalSettings.emptyBstr, lastPercent);
 }
 
 void CallbackHelper::Progress(ICallback* localCback, int index, int count, const char* message, BSTR& key, long& lastPercent)
 {
-	Progress(localCback, index, (double)count, message, key, lastPercent);
+	Progress(localCback, index, static_cast<double>(count), message, key, lastPercent);
 }
 
 // ********************************************************************
@@ -55,11 +57,11 @@ void CallbackHelper::Progress(ICallback* localCback, int index, double count, co
 	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
-	long newpercent = (long)(((double)(index + 1) / count) * 100);
+	const long newpercent = static_cast<long>(static_cast<double>(index + 1) / count * 100);
 	if (newpercent > lastPercent)
 	{
 		lastPercent = newpercent;
-		CComBSTR bstrMsg(message);
+		const CComBSTR bstrMsg(message);
 		callback->Progress(key, newpercent, bstrMsg);
 	}
 }
@@ -72,7 +74,7 @@ void CallbackHelper::Progress(ICallback* localCback, int percent, const char* me
 	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
-	CComBSTR bstrMsg(message);
+	const CComBSTR bstrMsg(message);
 	callback->Progress(key, percent, bstrMsg);
 }
 
@@ -85,7 +87,7 @@ void CallbackHelper::Progress(ICallback* localCback, int percent, const char* me
 	if (!callback) return;
 
 	if (!message) message = "";
-	CComBSTR bstrMsg(message);
+	const CComBSTR bstrMsg(message);
 	callback->Progress(m_globalSettings.emptyBstr, percent, bstrMsg);
 }
 
@@ -97,7 +99,7 @@ void CallbackHelper::ProgressCompleted(ICallback* localCback, BSTR& key)
 	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
-	CComBSTR bstrMsg("Completed");
+	const CComBSTR bstrMsg("Completed");
 	callback->Progress(key, 100, bstrMsg);
 	callback->Progress(key, 0, m_globalSettings.emptyBstr);
 }
@@ -113,7 +115,7 @@ void CallbackHelper::ProgressCompleted(ICallback* localCback)
 // ********************************************************************
 //		DisplayErrorMsg()
 // ********************************************************************
-void CallbackHelper::ErrorMsg(CString className, ICallback* localCback, BSTR& key, const char* message, ...)
+void CallbackHelper::ErrorMsg(const CString className, ICallback* localCback, BSTR& key, const char* message, ...)
 {
 	ICallback* callback = GetCurrent(localCback);
 
@@ -128,7 +130,7 @@ void CallbackHelper::ErrorMsg(CString className, ICallback* localCback, BSTR& ke
 		CString s = buffer;
 
 		s = className + ": " + s;
-		CComBSTR bstr(s);
+		const CComBSTR bstr(s);
 
 		if (callback) {
 			callback->Error(key, bstr);
@@ -149,7 +151,7 @@ void CallbackHelper::ErrorMsg(CString className, ICallback* localCallback, CStri
 
 void CallbackHelper::ErrorMsg(const char* message)
 {
-	CString s = message;
+	const CString s = message;
 	ErrorMsg(s);
 }
 
@@ -157,7 +159,7 @@ void CallbackHelper::ErrorMsg(CString message)
 {
 	if (m_globalSettings.callback)
 	{
-		CComBSTR bstr(message);
+		const CComBSTR bstr(message);
 		m_globalSettings.callback->Error(m_globalSettings.emptyBstr, bstr);
 	}
 	else {
@@ -174,7 +176,7 @@ void CallbackHelper::AssertionFailed(CString message)
 	message = "Assertion failed: " + message;
 	if (m_globalSettings.callback)
 	{
-		CComBSTR bstr(message);
+		const CComBSTR bstr(message);
 		m_globalSettings.callback->Error(m_globalSettings.emptyBstr, bstr);
 	}
 	else {
@@ -182,3 +184,5 @@ void CallbackHelper::AssertionFailed(CString message)
 			Debug::WriteError(message);
 	}
 }
+
+// ReSharper restore CppUseAuto

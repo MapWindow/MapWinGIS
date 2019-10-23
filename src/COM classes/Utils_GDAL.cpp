@@ -1109,7 +1109,7 @@ static void CopyBandInfo( GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand
 /************************************************************************/
 /*                             TranslateRaster()                        */
 /************************************************************************/
-
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalRasterTranslate instead"))
 STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 									 BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
 {
@@ -3222,7 +3222,7 @@ char *SanitizeSRS( const char *pszUserInput )
 /************************************************************************/
 /*                                GDALWarp()                            */
 /************************************************************************/
-__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalWarp instead"))
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalRasterWarp instead"))
 STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 							  BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
 {
@@ -6289,7 +6289,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 /************************************************************************/
 /*                                GDALAddOverviews()                    */
 /************************************************************************/
-
+__declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalBuildOverviews instead"))
 STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 									  BSTR bstrLevels, ICallback * cBack, VARIANT_BOOL *retval)
 

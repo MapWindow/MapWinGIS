@@ -13,6 +13,8 @@
 // *************************************************************
 bool Shape2Ogr::Shapefile2OgrLayer(IShapefile* sf, OGRLayer* poLayer, bool saveLabels, ICallback* callback /*= NULL*/)
 {
+    if (!sf) return false;
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 	ShapefileFieldsToOgr(sf, poLayer);
 
 	if (m_globalSettings.saveOgrLabels) {
@@ -398,6 +400,7 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* layer, IShapefile* sf, long shapeC
 	errors.clear();
 
 	if (!sf || !layer || shapeCmnIndex == -1) return 0;
+    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 
 	OGRFeatureDefn* fields = layer->GetLayerDefn();
 	int fieldCount = fields->GetFieldCount();

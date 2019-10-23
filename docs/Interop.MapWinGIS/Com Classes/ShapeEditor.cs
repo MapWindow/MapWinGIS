@@ -129,10 +129,7 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>Precise calculations on ellipsoid will be used if map projection is set and compatible
         /// with WGS84. Otherwise simply Euclidean geometry will be used.</remarks>
-        public double Area
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public double Area => throw new NotImplementedException();
 
         /// <summary>
         /// Gets or sets type of the bearing to be display for line segments.
@@ -140,8 +137,8 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public tkBearingType BearingType
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -149,8 +146,8 @@ namespace MapWinGIS
         /// </summary>
         public tkAreaDisplayMode AreaDisplayMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -167,9 +164,9 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>This method can be used to make the editor look consistent
         /// with the way subject shape looks in regular mode.</remarks>
-        /// <param name="Options">Instance of visualization options.</param>
+        /// <param name="options">Instance of visualization options.</param>
         /// \see Shapefile.DefaultDrawingOptions
-        public void CopyOptionsFrom(ShapeDrawingOptions Options)
+        public void CopyOptionsFrom(ShapeDrawingOptions options)
         {
             throw new NotImplementedException();
         }
@@ -179,25 +176,22 @@ namespace MapWinGIS
         /// </summary>
         public tkEditorBehavior EditorBehavior
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
         /// Gets the state an editor is currently in. See tkEditorState enumeration for details.
         /// </summary>
-        public tkEditorState EditorState
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public tkEditorState EditorState => throw new NotImplementedException();
 
         /// <summary>
         /// Gets or sets fill color for the shape being edited. Applies for polygon shapes only.
         /// </summary>
         public uint FillColor
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -205,8 +199,8 @@ namespace MapWinGIS
         /// </summary>
         public byte FillTransparency
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -215,17 +209,14 @@ namespace MapWinGIS
         /// \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
         public ICallback GlobalCallback
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
         /// Returns true if editor has changes caused by user input.
         /// </summary>
-        public bool HasChanges
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public bool HasChanges => throw new NotImplementedException();
 
         /// <summary>
         /// Gets a value indicating whether calculations are performed taking into account the shape of Earth 
@@ -243,8 +234,8 @@ namespace MapWinGIS
         /// </summary>
         public bool ShowArea
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -253,8 +244,8 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public int AreaPrecision
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -263,8 +254,8 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public int LengthPrecision
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -273,8 +264,8 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public tkAngleFormat AngleFormat
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -284,8 +275,8 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public int AnglePrecision
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -294,8 +285,8 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public bool ShowBearing
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -304,9 +295,15 @@ namespace MapWinGIS
         /// \new493 Added in version 4.9.3
         public bool ShowLength
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets or sets the snap mode of the ShapeEditor
+        /// </summary>
+        /// \new510 Added in version 5.1.0
+        public tkSnapMode SnapMode { get; set; }
 
         /// <summary>
         /// Gets or sets value indicating whether vertices of shapes will be highlighted 
@@ -314,8 +311,8 @@ namespace MapWinGIS
         /// </summary>
         public tkLayerSelection HighlightVertices
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -324,37 +321,28 @@ namespace MapWinGIS
         /// <remarks>The property will return true is ShapeEditor is either in 
         /// esDigitize, esDigitizeUnbound or esOverlay states.</remarks>
         /// \see ShapeEditor.EditorState
-        public bool IsDigitizing
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public bool IsDigitizing => throw new NotImplementedException();
 
         /// <summary>
         /// Returns true if the editor is empty.
         /// </summary>
         /// <remarks>Empty means that its underlying shape object has no points. However 
         /// ShapeEditor.EditorState can be different from esNone.</remarks>
-        public bool IsEmpty
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public bool IsEmpty => throw new NotImplementedException();
 
         /// <summary>
         /// A text string associated with object. Any value can be stored by developer in this property.
         /// </summary>
         public string Key
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
         /// Gets the code of last error which took place inside this object.
         /// </summary>
-        public int LastErrorCode
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public int LastErrorCode => throw new NotImplementedException();
 
         /// <summary>
         /// Gets layer handle of shape currently being edited. 
@@ -363,8 +351,8 @@ namespace MapWinGIS
         /// and reverted back to -1 value by ShapeEditor.Clear or ShapeEditor.SaveChanges methods.</remarks>
         public int LayerHandle
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -372,8 +360,8 @@ namespace MapWinGIS
         /// </summary>
         public tkLengthDisplayMode LengthDisplayMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -381,8 +369,8 @@ namespace MapWinGIS
         /// </summary>
         public uint LineColor
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -390,8 +378,8 @@ namespace MapWinGIS
         /// </summary>
         public float LineWidth
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -399,17 +387,14 @@ namespace MapWinGIS
         /// </summary>
         public bool IndicesVisible
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
         /// Gets underlying shape data without any attempt to validate it.
         /// </summary>
-        public Shape RawData
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public Shape RawData => throw new NotImplementedException();
 
         /// <summary>
         /// Saves any changes made by user.
@@ -452,12 +437,23 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Adds a new point
+        /// </summary>
+        /// <param name="newPoint">The new point</param>
+        /// <returns>True on success.</returns>
+        /// \new510 Added in version 5.1.0
+        public bool AddPoint(Point newPoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets or sets the index of currently selected vertex.
         /// </summary>
         public int SelectedVertex
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -465,18 +461,15 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>This property will be set automatically by ShapeEditor.StartEdit method, 
         /// and reverted back to -1 value by ShapeEditor.Clear or ShapeEditor.SaveChanges methods.</remarks>
-        public int ShapeIndex
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public int ShapeIndex => throw new NotImplementedException();
 
         /// <summary>
         /// Gets shape type of the shape currently being edited.
         /// </summary>
         public ShpfileType ShapeType
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -485,8 +478,8 @@ namespace MapWinGIS
         /// </summary>
         public tkLayerSelection SnapBehavior
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -494,19 +487,19 @@ namespace MapWinGIS
         /// </summary>
         public double SnapTolerance
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
         /// Starts editing of a given shape in specified shapefile.
         /// </summary>
-        /// <param name="LayerHandle">Layer handle of the shapefile.</param>
-        /// <param name="ShapeIndex">Index of shape to edit.</param>
+        /// <param name="layerHandle">Layer handle of the shapefile.</param>
+        /// <param name="shapeIndex">Index of shape to edit.</param>
         /// <returns>True on success.</returns>
         /// <remarks>The method will populate the editor with vertices of specified shape,
         /// hide original shape with Shapefile.put_ShapeIsHidden and set ShapeEditor.EditorState to esEdit.</remarks>
-        public bool StartEdit(int LayerHandle, int ShapeIndex)
+        public bool StartEdit(int layerHandle, int shapeIndex)
         {
             throw new NotImplementedException();
         }
@@ -528,9 +521,9 @@ namespace MapWinGIS
         /// <remarks>Unbound shape is the one which is not linked to particular shapefile. This
         /// method is used internally by a number of built-in tools, 
         /// like cmSelectByPolygon or cmSplitByPolyline.</remarks>
-        /// <param name="ShpType">Type of shape to be created.</param>
+        /// <param name="shpType">Type of shape to be created.</param>
         /// <returns>True on success.</returns>
-        public bool StartUnboundShape(ShpfileType ShpType)
+        public bool StartUnboundShape(ShpfileType shpType)
         {
             throw new NotImplementedException();
         }
@@ -548,10 +541,7 @@ namespace MapWinGIS
         /// <summary>
         /// Validates the data stored by editor and returns it as a shape.
         /// </summary>
-        public Shape ValidatedShape
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public Shape ValidatedShape => throw new NotImplementedException();
 
         /// <summary>
         /// Gets or sets validation mode for the editor. 
@@ -559,8 +549,8 @@ namespace MapWinGIS
         /// <remarks>See tkEditorValidation enumeration for details.</remarks>
         public tkEditorValidation ValidationMode
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
@@ -568,16 +558,16 @@ namespace MapWinGIS
         /// </summary>
         public bool VerticesVisible
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         /// <summary>
         /// Gets the description of the specific error code.
         /// </summary>
-        /// <param name="ErrorCode">The error code returned by LastErrorCode property.</param>
+        /// <param name="errorCode">The error code returned by LastErrorCode property.</param>
         /// <returns>String with the description.</returns>
-        public string get_ErrorMsg(int ErrorCode)
+        public string get_ErrorMsg(int errorCode)
         {
             throw new NotImplementedException();
         }
@@ -631,10 +621,7 @@ namespace MapWinGIS
         /// <summary>
         /// Gets number of points the shape being edited has.
         /// </summary>
-        public int numPoints
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public int numPoints => throw new NotImplementedException();
     }
 #if nsp
 }

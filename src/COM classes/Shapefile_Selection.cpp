@@ -36,8 +36,7 @@
 // ******************************************************************
 CMutex selectShapesMutex(FALSE);
 STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, SelectMode SelectMode, VARIANT *Result, VARIANT_BOOL *retval)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = VARIANT_FALSE;
 
 	selectShapesMutex.Lock();
@@ -60,7 +59,7 @@ STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, Sele
 //		SelectShapesCore()
 // ****************************************************************
 bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult, bool renderedOnly)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
 	double b_minX = extents.left;
 	double b_maxX = extents.right;
 	double b_minY = extents.bottom;
@@ -127,6 +126,9 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	}
 	else if(_isEditingShapes && _useQTree)
 	{
+        if (!_qtree)
+            GenerateQTree();
+
 		if(bPtSelection )
 		{
 			qtreeResult = _qtree->GetNodes(QTreeExtent(b_minX,b_minX +1,b_minY + 1,b_minY));
@@ -320,7 +322,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	{
 		delete res;
 	}
-	else if( _useQTree == VARIANT_TRUE && _isEditingShapes != FALSE)
+	else if( _useQTree && _isEditingShapes != FALSE)
 	{
 		qtreeResult.clear();
 	}
@@ -334,8 +336,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 /***********************************************************************/
 //  Returns and sets the selection state for a shape.
 STDMETHODIMP CShapefile::get_ShapeSelected(long ShapeIndex, VARIANT_BOOL* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
 		*pVal = VARIANT_FALSE;
@@ -348,8 +349,7 @@ STDMETHODIMP CShapefile::get_ShapeSelected(long ShapeIndex, VARIANT_BOOL* pVal)
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_ShapeSelected(long ShapeIndex, VARIANT_BOOL newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -365,8 +365,7 @@ STDMETHODIMP CShapefile::put_ShapeSelected(long ShapeIndex, VARIANT_BOOL newVal)
 //		get_NumSelected
 // *************************************************************
 STDMETHODIMP CShapefile::get_NumSelected(long *pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	long count = 0;
 	for(int i =0; i < (int)_shapeData.size(); i++)
@@ -382,8 +381,7 @@ STDMETHODIMP CShapefile::get_NumSelected(long *pVal)
 //     SelectAll()
 // *************************************************************
 STDMETHODIMP CShapefile::SelectAll()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 	
 	for (int i = 0; i < (int)_shapeData.size(); i++) {
 		_shapeData[i]->selected(true);
@@ -396,8 +394,7 @@ STDMETHODIMP CShapefile::SelectAll()
 //     SelectNone()
 // *************************************************************
 STDMETHODIMP CShapefile::SelectNone()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	for (int i = 0; i < (int)_shapeData.size(); i++) {
 		_shapeData[i]->selected(false);
@@ -410,8 +407,7 @@ STDMETHODIMP CShapefile::SelectNone()
 //     InvertSelection()
 // *************************************************************
 STDMETHODIMP CShapefile::InvertSelection()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState());    CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	for (int i = 0; i < (int)_shapeData.size(); i++) {
 		_shapeData[i]->selected(!_shapeData[i]->selected());

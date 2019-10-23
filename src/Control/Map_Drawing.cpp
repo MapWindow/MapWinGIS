@@ -901,27 +901,12 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 		if (visible)
 		{
-			if (l->IsDynamicOgrLayer())
-			{
-				l->UpdateShapefile(layerHandle);
-
-				OgrDynamicLoader* loader = l->GetOgrLoader();
-				if (loader) {
-					while (!loader->Queue.empty())
-					{
-						OgrLoadingTask* task = loader->Queue.front();
-						bool finished = task->Finished;
-						if (finished && !task->Cancelled)
-							FireBackgroundLoadingFinished(task->Id, layerHandle, task->FeatureCount, task->LoadedCount);
-
-						if (finished || task->Cancelled)
-						{
-							delete task;
-							loader->Queue.pop();
-						}
-					}
-				}
-			}
+			// This is used for regular & dynamic ogr 'shapefile' layers
+			auto _DrawShapeFileCore = [&](CComPtr<IShapefile> sf) {
+				sfDrawer.Draw(rcBounds, sf);
+				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
+				LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
+			};
 
 			if (l->IsImage())
 			{
@@ -931,24 +916,32 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
 			}
-			else if (l->IsShapefile())
+			else if (l->IsShapefile() || l->IsDynamicOgrLayer())
 			{
-				// grab extents from shapefile in case they changed
-				l->UpdateExtentsFromDatasource();
-
-				if (!l->extents.Intersects(_extents))	
-					continue;
-
 				CComPtr<IShapefile> sf = NULL;
-                // layerBuffer == true indicates we're drawing the non-Volatile layers
-				if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
-					continue;
-				
-				sfDrawer.Draw(rcBounds, sf);
+				if (l->IsDynamicOgrLayer())
+				{
+					// Try to get the data loaded so far:
+					l->UpdateShapefile();
+					
+					// Get the shapefile
+                    l->QueryShapefile(&sf);
+				}
+				else
+				{
+					// grab extents from shapefile in case they changed
+					l->UpdateExtentsFromDatasource();
 
-				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
+					if (!l->extents.Intersects(_extents))
+						continue;
 
-				LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
+					// layerBuffer == true indicates we're drawing the non-Volatile layers
+					if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
+						continue;
+				}
+
+                // Perform the draw:
+                _DrawShapeFileCore(sf);
 			}
 		}
 	}
@@ -1226,9 +1219,9 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			}
 		case ActShape:	
 			{
-				VARIANT_BOOL isEmpty;
-				_shapeEditor->get_IsEmpty(&isEmpty);
-				return !isEmpty ? true : false;
+				/*VARIANT_BOOL isEmpty;
+				_shapeEditor->get_IsEmpty(&isEmpty);*/
+				return true; // !isEmpty ? true : false;  always draw this to clear snap points
 			}	
 		case ZoomBox:
 			{
@@ -1238,7 +1231,7 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			{
 				if (!GetEditorBase()->GetCreationMode())
 					return false;
-				return GetEditorBase()->GetPointCount() > 0;
+				return true; // GetEditorBase()->GetPointCount() > 0; always draw this to show snap points
 			}
 		case tkDrawingDataAvailable::LayersData:	
 			{

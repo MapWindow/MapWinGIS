@@ -338,6 +338,15 @@ public:
 		#endif
 	}
 
+	static GEOSGeometry* SymDifference(const GEOSGeometry* gsGeom1, const GEOSGeometry* gsGeom2)
+	{
+		#ifdef GEOS_NEW
+			return GEOSSymDifference_r(getGeosHandle(), gsGeom1, gsGeom2);
+		#else
+			return GEOSSymDifference(gsGeom1, gsGeom2);
+		#endif
+	}
+
 	static bool Intersects(GEOSGeometry* gsGeom1, GEOSGeometry* gsGeom2)
 	{
 		#ifdef GEOS_NEW
@@ -465,4 +474,12 @@ public:
 		return GEOSProject(g1, g2);
 #endif
 	}
+    static GEOSGeometry* Snap(GEOSGeometry* g1, GEOSGeometry* g2, double tolerance = 1.0)
+    {
+        #ifdef GEOS_NEW
+            return GEOSSnap_r(getGeosHandle(), g1, g2, tolerance);
+        #else
+            return GEOSSnap(g1, g2, tolerance);
+        #endif
+    }
 };

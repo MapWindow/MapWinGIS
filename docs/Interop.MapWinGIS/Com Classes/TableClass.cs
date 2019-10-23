@@ -50,8 +50,9 @@ namespace MapWinGIS
     /// 
     /// Expression may include:
     /// - field names (in square brackets);
-    /// - arithmetic operators (+ (also works for concatenation of strings), -, *, /, \ (interger division), ^ (raising to power));
+    /// - arithmetic operators (+ (also works for concatenation of strings), -, *, /, \ (interger division), MOD (modulo), ^ (raising to power));
     /// - comparison operators (&gt;, &lt;, &lt;=, &gt;=, &lt;&gt;, =);
+    /// - wildcard string comparison (LIKE (case-sensitive), and ILIKE (case-insensitive), where "%" represents zero or more characters, "_" represents a single character);
     /// - logical operators (AND, OR, XOR, NOT);
     /// - logical constants (TRUE, FALSE);
     /// - string constants (e.g. "my_string_constant");
@@ -70,9 +71,14 @@ namespace MapWinGIS
     /// Examples:\n
     /// \code
     /// [Area] > 100 AND [Population] < 50  -- Area and Population are field names; resulting value is boolean
-    /// [Area] / 10000 + " ha"              -- Area is field name, " ha" - string constant, "+" - concatenation operator; 
+    /// [Area] / 10000 + " ha"              -- Area is a field name, " ha" - string constant, "+" - concatenation operator; 
     ///                                     -- resulting value is string
     /// ([Pop1990] + [Pop2005])/2           -- Pop1990 and Pop2005 are field names; resulting value is double
+    /// 
+    /// [Word] LIKE "_ain"                  -- Word is a field name; matches "Pain", "Rain", but not "MAIN" or "Sprain"
+    /// [RoadName] = "Main St"              -- RoadName is a field name; only matches streets specifically named "Main St"
+    /// [RoadName] LIKE "Main %"            -- Matches streets like "Main St", "Main Ave", "Main Blvd", but not "main st"
+    /// [RoadName] ILIKE "&main%"           -- Matches streets like "Main St", "main st", "Maintenance Rd", "Charmaine Dr"
     /// \endcode
     /// 
     /// Here is code sample demonstrating how to calculate a new field as an average of 2 existing fields:

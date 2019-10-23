@@ -1,8 +1,9 @@
-# include "stdafx.h"
+# include "StdAfx.h"
 # include "GridManager.h"
+#undef HOST_FILLORDER /* MWGIS-182 */
 # include "xtiffio.h"  /* for TIFF */
 # include "tiff.h"
-# include "grid.h"
+# include "Grid.h"
 
 GridManager::GridManager()
 {

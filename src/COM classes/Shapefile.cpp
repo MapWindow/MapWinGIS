@@ -44,6 +44,8 @@
 
 CShapefile::CShapefile()
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
+
     _pUnkMarshaler = nullptr;
 
     _sortingChanged = true;
@@ -83,7 +85,7 @@ CShapefile::CShapefile()
     _spatialIndexNodeCapacity = 100;
 
     //Neio 20090721
-    _useQTree = VARIANT_FALSE;
+    _useQTree = FALSE;
     _cacheExtents = FALSE;
     _qtree = nullptr;
     _tempTree = nullptr;
@@ -141,6 +143,8 @@ CShapefile::CShapefile()
 
 CShapefile::~CShapefile()
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
+
     VARIANT_BOOL vbretval;
     this->CShapefile::Close(&vbretval);
 
@@ -187,26 +191,31 @@ CShapefile::~CShapefile()
 
 std::vector<ShapeRecord*>* CShapefile::get_ShapeVector()
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     return &_shapeData;
 }
 
 IShapeWrapper* CShapefile::get_ShapeWrapper(int ShapeIndex)
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     return ((CShape*)_shapeData[ShapeIndex]->shape)->get_ShapeWrapper();
 }
 
 IShapeData* CShapefile::get_ShapeRenderingData(int ShapeIndex)
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     return _shapeData[ShapeIndex]->get_RenderingData();
 }
 
 void CShapefile::put_ShapeRenderingData(int ShapeIndex, CShapeData* data)
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     return _shapeData[ShapeIndex]->put_RenderingData(data);
 }
 
 void CShapefile::SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType)
 {
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     ComHelper::SetRef(info,
                       (IDispatch**)&(validationType == svtInput ? _inputValidation : _outputValidation), true);
 }
@@ -219,6 +228,7 @@ void CShapefile::SetValidationInfo(IShapeValidationInfo* info, tkShapeValidation
 STDMETHODIMP CShapefile::get_EditingShapes(VARIANT_BOOL* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _isEditingShapes ? VARIANT_TRUE : VARIANT_FALSE;
     return S_OK;
 }
@@ -229,6 +239,7 @@ STDMETHODIMP CShapefile::get_EditingShapes(VARIANT_BOOL* pVal)
 STDMETHODIMP CShapefile::get_LastErrorCode(long* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _lastErrorCode;
     _lastErrorCode = tkNO_ERROR;
     return S_OK;
@@ -240,6 +251,7 @@ STDMETHODIMP CShapefile::get_LastErrorCode(long* pVal)
 STDMETHODIMP CShapefile::get_CdlgFilter(BSTR* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
     *pVal = A2BSTR("ESRI Shapefiles (*.shp)|*.shp");
     return S_OK;
@@ -251,6 +263,7 @@ STDMETHODIMP CShapefile::get_CdlgFilter(BSTR* pVal)
 STDMETHODIMP CShapefile::get_LastInputValidation(IShapeValidationInfo** retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_inputValidation)
         _inputValidation->AddRef();
     *retVal = _inputValidation;
@@ -263,6 +276,7 @@ STDMETHODIMP CShapefile::get_LastInputValidation(IShapeValidationInfo** retVal)
 STDMETHODIMP CShapefile::get_LastOutputValidation(IShapeValidationInfo** retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_outputValidation)
         _outputValidation->AddRef();
     *retVal = _outputValidation;
@@ -275,6 +289,7 @@ STDMETHODIMP CShapefile::get_LastOutputValidation(IShapeValidationInfo** retVal)
 STDMETHODIMP CShapefile::get_GlobalCallback(ICallback** pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     *pVal = _globalCallback;
     if (_globalCallback != nullptr)
@@ -285,6 +300,7 @@ STDMETHODIMP CShapefile::get_GlobalCallback(ICallback** pVal)
 STDMETHODIMP CShapefile::put_GlobalCallback(ICallback* newVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
     if (_table != nullptr)
         _table->put_GlobalCallback(newVal);
@@ -298,6 +314,7 @@ STDMETHODIMP CShapefile::put_GlobalCallback(ICallback* newVal)
 STDMETHODIMP CShapefile::put_StopExecution(IStopExecution* stopper)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     ComHelper::SetRef((IDispatch*)stopper, (IDispatch**)&_stopExecution, true);
     return S_OK;
 }
@@ -308,6 +325,7 @@ STDMETHODIMP CShapefile::put_StopExecution(IStopExecution* stopper)
 STDMETHODIMP CShapefile::get_Key(BSTR* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
     *pVal = OLE2BSTR(_key);
     return S_OK;
@@ -316,6 +334,7 @@ STDMETHODIMP CShapefile::get_Key(BSTR* pVal)
 STDMETHODIMP CShapefile::put_Key(BSTR newVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     SysFreeString(_key);
     _key = OLE2BSTR(newVal);
     return S_OK;
@@ -327,6 +346,7 @@ STDMETHODIMP CShapefile::put_Key(BSTR newVal)
 STDMETHODIMP CShapefile::get_VisibilityExpression(BSTR* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
     *pVal = OLE2BSTR(_expression);
     return S_OK;
@@ -335,6 +355,7 @@ STDMETHODIMP CShapefile::get_VisibilityExpression(BSTR* pVal)
 STDMETHODIMP CShapefile::put_VisibilityExpression(BSTR newVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     SysFreeString(_expression);
     _expression = OLE2BSTR(newVal);
     return S_OK;
@@ -346,6 +367,7 @@ STDMETHODIMP CShapefile::put_VisibilityExpression(BSTR newVal)
 STDMETHODIMP CShapefile::get_Volatile(VARIANT_BOOL* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_interactiveEditing)
     {
         *pVal = VARIANT_TRUE;
@@ -360,6 +382,7 @@ STDMETHODIMP CShapefile::get_Volatile(VARIANT_BOOL* pVal)
 STDMETHODIMP CShapefile::put_Volatile(VARIANT_BOOL newVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     _volatile = newVal == VARIANT_TRUE;
     return S_OK;
 }
@@ -370,6 +393,7 @@ STDMETHODIMP CShapefile::put_Volatile(VARIANT_BOOL newVal)
 STDMETHODIMP CShapefile::get_NumShapes(long* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _shapeData.size(); //_numShapes;
     return S_OK;
 }
@@ -380,6 +404,7 @@ STDMETHODIMP CShapefile::get_NumShapes(long* pVal)
 STDMETHODIMP CShapefile::get_NumFields(long* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_table != nullptr)
         _table->get_NumFields(pVal);
     else
@@ -394,8 +419,8 @@ STDMETHODIMP CShapefile::get_NumFields(long* pVal)
 //		get_ShapefileType()
 // ************************************************************
 STDMETHODIMP CShapefile::get_ShapefileType(ShpfileType* pVal)
-{
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _shpfiletype;
     return S_OK;
 }
@@ -406,6 +431,7 @@ STDMETHODIMP CShapefile::get_ShapefileType(ShpfileType* pVal)
 STDMETHODIMP CShapefile::get_ErrorMsg(long ErrorCode, BSTR* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
     *pVal = A2BSTR(ErrorMsg(ErrorCode));
     return S_OK;
@@ -415,8 +441,8 @@ STDMETHODIMP CShapefile::get_ErrorMsg(long ErrorCode, BSTR* pVal)
 //	   get_FileHandle()
 // *****************************************************************
 STDMETHODIMP CShapefile::get_FileHandle(long* pVal)
-{
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_shpfile != nullptr)
     {
         const int handle = _fileno(_shpfile);
@@ -432,8 +458,8 @@ STDMETHODIMP CShapefile::get_FileHandle(long* pVal)
 //	   get_Filename()
 // **************************************************************
 STDMETHODIMP CShapefile::get_Filename(BSTR* pVal)
-{
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     *pVal = W2BSTR(_shpfileName);
 
@@ -444,13 +470,13 @@ STDMETHODIMP CShapefile::get_Filename(BSTR* pVal)
 //		ErrorMessage()
 // **************************************************************
 void CShapefile::ErrorMessage(long ErrorCode)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     _lastErrorCode = ErrorCode;
     CallbackHelper::ErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 void CShapefile::ErrorMessage(long ErrorCode, ICallback* cBack)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     _lastErrorCode = ErrorCode;
     CallbackHelper::ErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
     if (cBack != _globalCallback)
@@ -462,14 +488,16 @@ void CShapefile::ErrorMessage(long ErrorCode, ICallback* cBack)
 // ************************************************************
 STDMETHODIMP CShapefile::get_MinDrawingSize(LONG* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _minDrawingSize;
     return S_OK;
 }
 
 STDMETHODIMP CShapefile::put_MinDrawingSize(LONG newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     _minDrawingSize = newVal;
     return S_OK;
 }
@@ -479,7 +507,8 @@ STDMETHODIMP CShapefile::put_MinDrawingSize(LONG newVal)
 // ************************************************************
 STDMETHODIMP CShapefile::get_SourceType(tkShapefileSourceType* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _sourceType;
     return S_OK;
 }
@@ -496,6 +525,7 @@ STDMETHODIMP CShapefile::get_SourceType(tkShapefileSourceType* pVal)
 STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     USES_CONVERSION;
     *retval = VARIANT_FALSE;
@@ -549,7 +579,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback* cBack, VARI
 //		OpenCore()
 // ************************************************************
 bool CShapefile::OpenCore(CStringW tmpShpfileName, ICallback* cBack)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
     VARIANT_BOOL vbretval;
 
@@ -644,6 +674,7 @@ bool CShapefile::OpenCore(CStringW tmpShpfileName, ICallback* cBack)
 STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = VARIANT_FALSE;
     VARIANT_BOOL vbretval;
 
@@ -698,6 +729,7 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL
 STDMETHODIMP CShapefile::CreateNew(BSTR ShapefileName, ShpfileType ShapefileType, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     return this->CreateNewCore(ShapefileName, ShapefileType, true, retval);
 }
 
@@ -706,7 +738,7 @@ STDMETHODIMP CShapefile::CreateNew(BSTR ShapefileName, ShpfileType ShapefileType
 // *********************************************************
 HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType, bool applyRandomOptions,
                                   VARIANT_BOOL* retval)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = VARIANT_FALSE;
     VARIANT_BOOL vb;
 
@@ -857,6 +889,7 @@ STDMETHODIMP CShapefile::CreateNewWithShapeID(BSTR ShapefileName, ShpfileType Sh
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
     USES_CONVERSION;
+    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     CreateNew(ShapefileName, ShapefileType, retval);
 
@@ -873,8 +906,7 @@ STDMETHODIMP CShapefile::CreateNewWithShapeID(BSTR ShapefileName, ShpfileType Sh
 //		Close()
 // *****************************************************************
 STDMETHODIMP CShapefile::Close(VARIANT_BOOL* retval)
-{
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (_appendMode)
     {
@@ -979,6 +1011,7 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL* retval)
 STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = VARIANT_FALSE;
 
     const bool callbackIsNull = _globalCallback == nullptr;
@@ -1114,6 +1147,7 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL
 STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = VARIANT_FALSE;
 
     const bool callbackIsNull = _globalCallback == nullptr;
@@ -1283,6 +1317,7 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback* cBack, VARIANT_BO
 STDMETHODIMP CShapefile::Save(ICallback* cBack, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = VARIANT_FALSE;
 
     if (_globalCallback == nullptr && cBack != nullptr)
@@ -1408,7 +1443,7 @@ STDMETHODIMP CShapefile::Save(ICallback* cBack, VARIANT_BOOL* retval)
 //		Resource()
 // ************************************************************
 STDMETHODIMP CShapefile::Resource(BSTR newShpPath, VARIANT_BOOL* retval)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
     Close(retval);
     Open(newShpPath, nullptr, retval);
@@ -1423,6 +1458,7 @@ STDMETHODIMP CShapefile::Resource(BSTR newShpPath, VARIANT_BOOL* retval)
 STDMETHODIMP CShapefile::Clone(IShapefile** retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     ShapefileHelper::CloneCore(this, retVal, _shpfiletype);
     return S_OK;
 }
@@ -1433,6 +1469,7 @@ STDMETHODIMP CShapefile::Clone(IShapefile** retVal)
 STDMETHODIMP CShapefile::get_Extents(IExtents** pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     IExtents* bBox = nullptr;
     ComHelper::CreateExtents(&bBox);
@@ -1461,6 +1498,7 @@ STDMETHODIMP CShapefile::get_Extents(IExtents** pVal)
 STDMETHODIMP CShapefile::EditInsertField(IField* NewField, long* FieldIndex, ICallback* cBack, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (cBack == nullptr && _globalCallback != nullptr)
         cBack = _globalCallback;
@@ -1492,6 +1530,7 @@ STDMETHODIMP CShapefile::EditInsertField(IField* NewField, long* FieldIndex, ICa
 STDMETHODIMP CShapefile::EditDeleteField(long FieldIndex, ICallback* cBack, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (_globalCallback == nullptr && cBack != nullptr)
     {
@@ -1525,6 +1564,7 @@ STDMETHODIMP CShapefile::EditDeleteField(long FieldIndex, ICallback* cBack, VARI
 STDMETHODIMP CShapefile::EditCellValue(long FieldIndex, long ShapeIndex, VARIANT NewVal, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (_table != nullptr)
     {
@@ -1551,6 +1591,7 @@ STDMETHODIMP CShapefile::EditCellValue(long FieldIndex, long ShapeIndex, VARIANT
 STDMETHODIMP CShapefile::StartEditingTable(ICallback* cBack, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (_appendMode)
     {
@@ -1591,6 +1632,7 @@ STDMETHODIMP CShapefile::StartEditingTable(ICallback* cBack, VARIANT_BOOL* retva
 STDMETHODIMP CShapefile::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback* cBack, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (_globalCallback == nullptr && cBack != nullptr)
     {
@@ -1624,6 +1666,7 @@ STDMETHODIMP CShapefile::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback* 
 STDMETHODIMP CShapefile::get_Field(long FieldIndex, IField** pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (_table != nullptr)
     {
@@ -1654,6 +1697,7 @@ STDMETHODIMP CShapefile::get_Field(long FieldIndex, IField** pVal)
 STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField** pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
 
     long max;
@@ -1704,6 +1748,7 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField** pVal)
 STDMETHODIMP CShapefile::get_CellValue(long FieldIndex, long ShapeIndex, VARIANT* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (_table != nullptr)
     {
@@ -1724,6 +1769,7 @@ STDMETHODIMP CShapefile::get_CellValue(long FieldIndex, long ShapeIndex, VARIANT
 STDMETHODIMP CShapefile::get_EditingTable(VARIANT_BOOL* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_table != nullptr)
     {
         _table->get_EditingTable(pVal);
@@ -1744,6 +1790,7 @@ STDMETHODIMP CShapefile::get_EditingTable(VARIANT_BOOL* pVal)
 STDMETHODIMP CShapefile::get_Table(ITable** retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retVal = _table;
     if (_table)
     {
@@ -1760,7 +1807,8 @@ STDMETHODIMP CShapefile::get_Table(ITable** retVal)
 // *************************************************************
 STDMETHODIMP CShapefile::get_ShapeRotation(long ShapeIndex, double* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
         *pVal = -1;
@@ -1773,7 +1821,8 @@ STDMETHODIMP CShapefile::get_ShapeRotation(long ShapeIndex, double* pVal)
 
 STDMETHODIMP CShapefile::put_ShapeRotation(long ShapeIndex, double newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -1789,7 +1838,8 @@ STDMETHODIMP CShapefile::put_ShapeRotation(long ShapeIndex, double newVal)
 // *************************************************************
 STDMETHODIMP CShapefile::get_ShapeVisible(long ShapeIndex, VARIANT_BOOL* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = VARIANT_FALSE;
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
@@ -1832,7 +1882,8 @@ STDMETHODIMP CShapefile::get_ShapeVisible(long ShapeIndex, VARIANT_BOOL* pVal)
 // *************************************************************
 STDMETHODIMP CShapefile::get_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
     {
         *pVal = VARIANT_FALSE;
@@ -1847,7 +1898,8 @@ STDMETHODIMP CShapefile::get_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL* pVal)
 
 STDMETHODIMP CShapefile::put_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -1863,7 +1915,8 @@ STDMETHODIMP CShapefile::put_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL newVal)
 // *************************************************************
 STDMETHODIMP CShapefile::get_ShapeModified(long ShapeIndex, VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
         *retVal = -1;
@@ -1879,7 +1932,8 @@ STDMETHODIMP CShapefile::get_ShapeModified(long ShapeIndex, VARIANT_BOOL* retVal
 
 STDMETHODIMP CShapefile::put_ShapeModified(long ShapeIndex, VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -1898,7 +1952,8 @@ STDMETHODIMP CShapefile::put_ShapeModified(long ShapeIndex, VARIANT_BOOL newVal)
 // *************************************************************
 STDMETHODIMP CShapefile::get_ShapeCategory(long ShapeIndex, long* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size()) //_numShapes)
     {
         *pVal = -1;
@@ -1911,7 +1966,8 @@ STDMETHODIMP CShapefile::get_ShapeCategory(long ShapeIndex, long* pVal)
 
 STDMETHODIMP CShapefile::put_ShapeCategory(long ShapeIndex, long newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size()) //_numShapes )
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -1927,7 +1983,8 @@ STDMETHODIMP CShapefile::put_ShapeCategory(long ShapeIndex, long newVal)
 // *************************************************************
 STDMETHODIMP CShapefile::put_ShapeCategory2(long ShapeIndex, BSTR categoryName)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -1950,7 +2007,8 @@ STDMETHODIMP CShapefile::put_ShapeCategory2(long ShapeIndex, BSTR categoryName)
 
 STDMETHODIMP CShapefile::get_ShapeCategory2(long ShapeIndex, BSTR* categoryName)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -1979,7 +2037,8 @@ STDMETHODIMP CShapefile::get_ShapeCategory2(long ShapeIndex, BSTR* categoryName)
 // *************************************************************
 STDMETHODIMP CShapefile::put_ShapeCategory3(long ShapeIndex, IShapefileCategory* category)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -2002,7 +2061,8 @@ STDMETHODIMP CShapefile::put_ShapeCategory3(long ShapeIndex, IShapefileCategory*
 
 STDMETHODIMP CShapefile::get_ShapeCategory3(long ShapeIndex, IShapefileCategory** category)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *category = nullptr;
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
     {
@@ -2033,7 +2093,8 @@ STDMETHODIMP CShapefile::get_ShapeCategory3(long ShapeIndex, IShapefileCategory*
 //  Returns and sets parameters used to draw selection for the shapefile.
 STDMETHODIMP CShapefile::get_SelectionDrawingOptions(IShapeDrawingOptions** pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _selectDrawOpt;
     if (_selectDrawOpt)
         _selectDrawOpt->AddRef();
@@ -2042,7 +2103,8 @@ STDMETHODIMP CShapefile::get_SelectionDrawingOptions(IShapeDrawingOptions** pVal
 
 STDMETHODIMP CShapefile::put_SelectionDrawingOptions(IShapeDrawingOptions* newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (!newVal)
     {
         ErrorMessage(tkINVALID_PARAMETER_VALUE);
@@ -2060,7 +2122,8 @@ STDMETHODIMP CShapefile::put_SelectionDrawingOptions(IShapeDrawingOptions* newVa
 // Returns and sets parameters used to draw shapefile by default.
 STDMETHODIMP CShapefile::get_DefaultDrawingOptions(IShapeDrawingOptions** pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _defaultDrawOpt;
     if (_defaultDrawOpt)
         _defaultDrawOpt->AddRef();
@@ -2069,7 +2132,8 @@ STDMETHODIMP CShapefile::get_DefaultDrawingOptions(IShapeDrawingOptions** pVal)
 
 STDMETHODIMP CShapefile::put_DefaultDrawingOptions(IShapeDrawingOptions* newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (!newVal)
     {
@@ -2086,7 +2150,7 @@ STDMETHODIMP CShapefile::put_DefaultDrawingOptions(IShapeDrawingOptions* newVal)
 //		put_ReferenceToCategories
 // ***********************************************************************
 void CShapefile::put_ReferenceToCategories(bool bNullReference)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_categories == nullptr) return;
     auto* coCategories = dynamic_cast<CShapefileCategories*>(_categories);
     if (!bNullReference)
@@ -2099,7 +2163,7 @@ void CShapefile::put_ReferenceToCategories(bool bNullReference)
 //		get/put_Categories
 // ***********************************************************************
 STDMETHODIMP CShapefile::get_Categories(IShapefileCategories** pVal)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _categories;
     if (_categories != nullptr)
         _categories->AddRef();
@@ -2107,7 +2171,7 @@ STDMETHODIMP CShapefile::get_Categories(IShapefileCategories** pVal)
 }
 
 STDMETHODIMP CShapefile::put_Categories(IShapefileCategories* newVal)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (ComHelper::SetRef((IDispatch*)newVal, (IDispatch**)&_categories, false))
     {
         ((CShapefileCategories*)_categories)->put_ParentShapefile(this);
@@ -2121,14 +2185,16 @@ STDMETHODIMP CShapefile::put_Categories(IShapefileCategories* newVal)
 // ********************************************************************
 STDMETHODIMP CShapefile::get_SelectionColor(OLE_COLOR* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = _selectionColor;
     return S_OK;
 }
 
 STDMETHODIMP CShapefile::put_SelectionColor(OLE_COLOR newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     _selectionColor = newVal;
     return S_OK;
 }
@@ -2137,7 +2203,7 @@ STDMETHODIMP CShapefile::put_SelectionColor(OLE_COLOR newVal)
 //		get_SelectionTransparency
 // ********************************************************************
 STDMETHODIMP CShapefile::get_SelectionTransparency(BYTE* retval)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
     *retval = _selectionTransparency;
     return S_OK;
@@ -2145,7 +2211,8 @@ STDMETHODIMP CShapefile::get_SelectionTransparency(BYTE* retval)
 
 STDMETHODIMP CShapefile::put_SelectionTransparency(BYTE newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (newVal > 255) newVal = 255;
     _selectionTransparency = newVal;
     return S_OK;
@@ -2156,14 +2223,16 @@ STDMETHODIMP CShapefile::put_SelectionTransparency(BYTE newVal)
 // ********************************************************************
 STDMETHODIMP CShapefile::get_SelectionAppearance(tkSelectionAppearance* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = _selectionAppearance;
     return S_OK;
 }
 
 STDMETHODIMP CShapefile::put_SelectionAppearance(tkSelectionAppearance newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     _selectionAppearance = newVal;
     return S_OK;
 }
@@ -2173,14 +2242,16 @@ STDMETHODIMP CShapefile::put_SelectionAppearance(tkSelectionAppearance newVal)
 // ********************************************************************
 STDMETHODIMP CShapefile::get_CollisionMode(tkCollisionMode* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = _collisionMode;
     return S_OK;
 }
 
 STDMETHODIMP CShapefile::put_CollisionMode(tkCollisionMode newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     _collisionMode = newVal;
     return S_OK;
 }
@@ -2190,13 +2261,14 @@ STDMETHODIMP CShapefile::put_CollisionMode(tkCollisionMode newVal)
 //     Serialize()
 // ********************************************************
 STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL SaveSelection, BSTR* retVal)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     return Serialize2(SaveSelection, VARIANT_FALSE, retVal);
 }
 
 STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL SerializeCategories, BSTR* retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     CPLXMLNode* psTree = this->SerializeCore(VARIANT_TRUE, "ShapefileClass", SerializeCategories != 0);
     Utility::SerializeAndDestroyXmlTree(psTree, retVal);
     return S_OK;
@@ -2208,6 +2280,7 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName, bool serializeCategories)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
 
     CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, ElementName);
@@ -2375,6 +2448,7 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString Elemen
 STDMETHODIMP CShapefile::Deserialize(VARIANT_BOOL LoadSelection, BSTR newVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
 
     CString s = OLE2CA(newVal);
@@ -2395,7 +2469,7 @@ STDMETHODIMP CShapefile::Deserialize(VARIANT_BOOL LoadSelection, BSTR newVal)
 //     DeserializeCore()
 // ********************************************************
 bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
 
     if (!node)
@@ -2464,7 +2538,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
     }
 
     CPLXMLNode* nodeCats = CPLGetXMLNode(node, "CategoryIndices");
-
+    bool needsApplyExpression = true;
     if (nodeCats)
     {
         CString indices = CPLGetXMLValue(nodeCats, "=CategoryIndices", "");
@@ -2493,13 +2567,14 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
                     ct = indices.Tokenize(",", pos);
                     count++;
                 };
-                // bool hasIndices = true;
+                bool needsApplyExpression = false;
             }
         }
     }
-    else
+
+    // If no indeces or invalid indeces, re-apply:
+    if (needsApplyExpression)
     {
-        // for older versions of file without indices apply previously loaded cats
         ((CShapefileCategories*)_categories)->ApplyExpressions();
     }
 
@@ -2561,6 +2636,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 STDMETHODIMP CShapefile::get_Projection(BSTR* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     _geoProjection->ExportToProj4(pVal);
     return S_OK;
 }
@@ -2571,6 +2647,7 @@ STDMETHODIMP CShapefile::get_Projection(BSTR* pVal)
 STDMETHODIMP CShapefile::put_Projection(BSTR proj4Projection)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     USES_CONVERSION;
 
     VARIANT_BOOL vbretval;
@@ -2588,7 +2665,8 @@ STDMETHODIMP CShapefile::put_Projection(BSTR proj4Projection)
 // *****************************************************************
 STDMETHODIMP CShapefile::get_GeoProjection(IGeoProjection** retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_geoProjection)
         _geoProjection->AddRef();
 
@@ -2601,7 +2679,8 @@ STDMETHODIMP CShapefile::get_GeoProjection(IGeoProjection** retVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::put_GeoProjection(IGeoProjection* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     ComHelper::SetRef((IDispatch*)pVal, (IDispatch**)&_geoProjection, false);
     if (_prjfileName.GetLength() != 0)
     {
@@ -2617,7 +2696,8 @@ STDMETHODIMP CShapefile::put_GeoProjection(IGeoProjection* pVal)
 // ****************************************************************
 STDMETHODIMP CShapefile::get_IsGeographicProjection(VARIANT_BOOL* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     *pVal = VARIANT_FALSE;
 
@@ -2632,7 +2712,8 @@ STDMETHODIMP CShapefile::get_IsGeographicProjection(VARIANT_BOOL* pVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::Reproject(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     if (!this->ReprojectCore(newProjection, reprojectedCount, retVal, false))
         *retVal = nullptr;
@@ -2644,7 +2725,8 @@ STDMETHODIMP CShapefile::Reproject(IGeoProjection* newProjection, LONG* reprojec
 // *****************************************************************
 STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* reprojectedCount, VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (!_isEditingShapes)
     {
         ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
@@ -2677,7 +2759,7 @@ STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* r
 // *****************************************************************
 bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal,
                                bool reprojectInPlace)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     // ------------------------------------------------------
     //   Validation
     // ------------------------------------------------------
@@ -2722,7 +2804,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
     // ------------------------------------------------------
     CComVariant var;
     const long numShapes = _shapeData.size();
-    long count = 0;
+    long newIndex = 0;
 
     long numFields, percent = 0;
     this->get_NumFields(&numFields);
@@ -2766,6 +2848,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
                 const BOOL res = transf->Transform(numPoints, x, y);
                 if (!res)
                 {
+                    // save error message and continue
                     if (m_globalSettings.gdalErrorMessage == "")
                         m_globalSettings.gdalErrorMessage = CPLGetLastErrorMsg();
                 }
@@ -2779,16 +2862,21 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 
                     if (!reprojectInPlace)
                     {
-                        (*retVal)->get_NumShapes(&count);
-                        (*retVal)->EditInsertShape(shp, &count, &vb);
+                        // get next available index
+                        (*retVal)->get_NumShapes(&newIndex);
+                        // insert Shape into target at new index
+                        (*retVal)->EditInsertShape(shp, &newIndex, &vb);
 
-                        // copying attributes
+                        // copy attributes
                         for (long j = 0; j < numFields; j++)
                         {
+                            // get cell value at source index i
                             this->get_CellValue(j, i, &var);
-                            (*retVal)->EditCellValue(j, i, var, &vb);
+                            // set cell value into target at new index
+                            (*retVal)->EditCellValue(j, newIndex, var, &vb);
                         }
                     }
+                    // 
                     (*reprojectedCount)++;
                 }
                 delete[] x;
@@ -2804,12 +2892,15 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
         transf = nullptr;
     }
 
-    // When creating the new shapefile was successfull:
-    if (vb)
+    // function result will be based on successful projection setting
+    vb = VARIANT_FALSE;
+    // if at least some rows were reprojected...
+    if (*reprojectedCount > 0)
     {
         // setting new projection
         if (reprojectInPlace)
         {
+            // vb result will be used to determine overall success
             _geoProjection->CopyFrom(newProjection, &vb);
         }
         else
@@ -2818,13 +2909,18 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
             (*retVal)->get_GeoProjection(&proj);
             if (proj)
             {
+                // vb result will be used to determine overall success
                 proj->CopyFrom(newProjection, &vb);
                 proj->Release();
             }
         }
     }
 
-    ShapefileHelper::ClearShapefileModifiedFlag(*retVal); // inserted shapes were marked as modified, correct this
+    // inserted shapes were marked as modified, correct this
+    if (reprojectInPlace)
+        ShapefileHelper::ClearShapefileModifiedFlag(this);
+    else
+        ShapefileHelper::ClearShapefileModifiedFlag(*retVal);
 
     // -------------------------------------- 
     //	  Output validation
@@ -2850,7 +2946,8 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 // *****************************************************************
 STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     // MWGIS-90: default to all shapes:
     FixUpShapes2(VARIANT_FALSE, retVal, fixed);
@@ -2863,7 +2960,8 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 // *********************************************************
 STDMETHODIMP CShapefile::FixUpShapes2(VARIANT_BOOL SelectedOnly, IShapefile** result, VARIANT_BOOL* fixed)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     *fixed = VARIANT_FALSE;
 
@@ -2881,7 +2979,7 @@ STDMETHODIMP CShapefile::FixUpShapes2(VARIANT_BOOL SelectedOnly, IShapefile** re
 //		FixupShapesCore()
 // *********************************************************
 VARIANT_BOOL CShapefile::FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* result)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (!result) return VARIANT_FALSE;
 
     tkUnitsOfMeasure units;
@@ -2951,7 +3049,8 @@ VARIANT_BOOL CShapefile::FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* 
 STDMETHODIMP CShapefile::GetRelatedShapes(long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray,
                                           VARIANT_BOOL* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = VARIANT_FALSE;
     if (referenceIndex < 0 || referenceIndex > (long)_shapeData.size())
     {
@@ -2975,7 +3074,8 @@ STDMETHODIMP CShapefile::GetRelatedShapes(long referenceIndex, tkSpatialRelation
 STDMETHODIMP CShapefile::GetRelatedShapes2(IShape* referenceShape, tkSpatialRelation relation, VARIANT* resultArray,
                                            VARIANT_BOOL* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    CSingleLock sfLock(&ShapefileLock, TRUE);
     *retval = VARIANT_FALSE;
     if (!referenceShape)
     {
@@ -2992,7 +3092,7 @@ STDMETHODIMP CShapefile::GetRelatedShapes2(IShape* referenceShape, tkSpatialRela
 // *********************************************************
 void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation,
                                      VARIANT* resultArray, VARIANT_BOOL* retval)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (relation == srDisjoint)
     {
         // TODO: implement
@@ -3091,14 +3191,16 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 // ***************************************************
 STDMETHODIMP CShapefile::get_Identifiable(VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retVal = _hotTracking;
     return S_OK;
 }
 
 STDMETHODIMP CShapefile::put_Identifiable(VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     _hotTracking = newVal;
     return S_OK;
 }
@@ -3108,7 +3210,8 @@ STDMETHODIMP CShapefile::put_Identifiable(VARIANT_BOOL newVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::EditAddField(BSTR name, FieldType type, int precision, int width, long* fieldIndex)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (!this->_table)
     {
         this->ErrorMessage(tkDBF_FILE_DOES_NOT_EXIST);
@@ -3125,7 +3228,8 @@ STDMETHODIMP CShapefile::EditAddField(BSTR name, FieldType type, int precision, 
 // *****************************************************************
 STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     VARIANT_BOOL retval;
     *shapeIndex = _shapeData.size();
@@ -3144,7 +3248,8 @@ STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
 STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance,
                                           long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     *retVal = VARIANT_FALSE;
     *shapeIndex = -1;
@@ -3180,7 +3285,8 @@ STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance
 STDMETHODIMP CShapefile::GetClosestSnapPosition(double x, double y, double maxDistance,
 	long* shapeIndex, double* fx, double* fy, double* distance, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
 	*retVal = VARIANT_FALSE;
 	*shapeIndex = -1;
@@ -3214,7 +3320,8 @@ STDMETHODIMP CShapefile::GetClosestSnapPosition(double x, double y, double maxDi
 // *****************************************************************
 STDMETHODIMP CShapefile::HasInvalidShapes(VARIANT_BOOL* result)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *result = VARIANT_FALSE;
     const int numShapes = _shapeData.size();
 
@@ -3246,7 +3353,8 @@ STDMETHODIMP CShapefile::HasInvalidShapes(VARIANT_BOOL* result)
 // *****************************************************************
 STDMETHODIMP CShapefile::get_UndoList(IUndoList** pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_undoList)
         _undoList->AddRef();
     *pVal = _undoList;
@@ -3258,13 +3366,14 @@ STDMETHODIMP CShapefile::get_UndoList(IUndoList** pVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::get_Snappable(VARIANT_BOOL* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = _snappable;
     return S_OK;
 }
 
 STDMETHODIMP CShapefile::put_Snappable(VARIANT_BOOL newVal)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
     _snappable = newVal;
     return S_OK;
@@ -3275,7 +3384,8 @@ STDMETHODIMP CShapefile::put_Snappable(VARIANT_BOOL newVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::get_ShapefileType2D(ShpfileType* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *pVal = ShapeUtility::Convert2D(_shpfiletype);
     return S_OK;
 }
@@ -3285,7 +3395,8 @@ STDMETHODIMP CShapefile::get_ShapefileType2D(ShpfileType* pVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::get_FieldIndexByName(BSTR FieldName, LONG* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     _table->get_FieldIndexByName(FieldName, pVal);
     return S_OK;
 }
@@ -3295,14 +3406,16 @@ STDMETHODIMP CShapefile::get_FieldIndexByName(BSTR FieldName, LONG* pVal)
 // ***************************************************
 STDMETHODIMP CShapefile::get_Selectable(VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retVal = _selectable;
     return S_OK;
 }
 
 STDMETHODIMP CShapefile::put_Selectable(VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     _selectable = newVal;
     return S_OK;
 }
@@ -3312,7 +3425,8 @@ STDMETHODIMP CShapefile::put_Selectable(VARIANT_BOOL newVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::Move(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
     *retVal = VARIANT_FALSE;
     if (_sourceType != sstInMemory)
     {
@@ -3339,7 +3453,8 @@ STDMETHODIMP CShapefile::Move(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BO
 // *****************************************************************
 STDMETHODIMP CShapefile::get_ShapeRendered(LONG ShapeIndex, VARIANT_BOOL* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     *pVal = VARIANT_FALSE;
     if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
@@ -3357,7 +3472,7 @@ STDMETHODIMP CShapefile::get_ShapeRendered(LONG ShapeIndex, VARIANT_BOOL* pVal)
 //		MarkUndrawn()
 // *****************************************************************
 void CShapefile::MarkUndrawn()
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     for (auto& i : _shapeData)
     {
         i->wasRendered(false);
@@ -3369,7 +3484,8 @@ void CShapefile::MarkUndrawn()
 // *************************************************************
 STDMETHODIMP CShapefile::get_SortField(BSTR* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     USES_CONVERSION;
     *pVal = OLE2BSTR(_sortField);
@@ -3379,7 +3495,8 @@ STDMETHODIMP CShapefile::get_SortField(BSTR* pVal)
 
 STDMETHODIMP CShapefile::put_SortField(BSTR newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     SysFreeString(_sortField);
     USES_CONVERSION;
@@ -3400,7 +3517,8 @@ STDMETHODIMP CShapefile::put_SortField(BSTR newVal)
 // *************************************************************
 STDMETHODIMP CShapefile::get_SortAscending(VARIANT_BOOL* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     *pVal = _sortAscending;
 
@@ -3409,7 +3527,8 @@ STDMETHODIMP CShapefile::get_SortAscending(VARIANT_BOOL* pVal)
 
 STDMETHODIMP CShapefile::put_SortAscending(VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     _sortAscending = newVal;
     _sortingChanged = true;
@@ -3422,7 +3541,8 @@ STDMETHODIMP CShapefile::put_SortAscending(VARIANT_BOOL newVal)
 // *************************************************************
 STDMETHODIMP CShapefile::UpdateSortField()
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        CSingleLock sfLock(&ShapefileLock, TRUE);
 
     // this will trigger rereading of the table on next redraw
     _sortingChanged = true;
@@ -3434,7 +3554,7 @@ STDMETHODIMP CShapefile::UpdateSortField()
 //		GetSorting()
 // *************************************************************
 bool CShapefile::GetSorting(vector<long>** indices)
-{
+{    CSingleLock sfLock(&ShapefileLock, TRUE);
     *indices = nullptr;
 
     if (!_sortingChanged)

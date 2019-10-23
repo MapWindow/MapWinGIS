@@ -8,7 +8,7 @@
 
 // CShapeValidationInfo
 class ATL_NO_VTABLE CShapeValidationInfo :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapeValidationInfo, &CLSID_ShapeValidationInfo>,
 	public IDispatchImpl<IShapeValidationInfo, &IID_IShapeValidationInfo, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

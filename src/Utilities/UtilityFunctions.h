@@ -93,4 +93,6 @@ namespace Utility
 
 	// time
 	int GetCurrentYear();
+
+	size_t split(const std::string &txt, std::vector<std::string> &strs, const char splittingChar);
 }

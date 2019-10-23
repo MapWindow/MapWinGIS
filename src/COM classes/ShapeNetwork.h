@@ -34,7 +34,7 @@ struct dPOINT
 
 // CShapeNetwork
 class ATL_NO_VTABLE CShapeNetwork : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapeNetwork, &CLSID_ShapeNetwork>,
 	public IDispatchImpl<IShapeNetwork, &IID_IShapeNetwork, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

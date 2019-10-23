@@ -7,7 +7,7 @@
 
 // COgrDatasource
 class ATL_NO_VTABLE COgrDatasource :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<COgrDatasource, &CLSID_OgrDatasource>,
 	public IDispatchImpl<IOgrDatasource, &IID_IOgrDatasource, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

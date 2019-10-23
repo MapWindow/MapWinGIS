@@ -8,7 +8,7 @@
 
 // CDrawingRectangle
 class ATL_NO_VTABLE CDrawingRectangle :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CDrawingRectangle, &CLSID_DrawingRectangle>,
 	public IDispatchImpl<IDrawingRectangle, &IID_IDrawingRectangle, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

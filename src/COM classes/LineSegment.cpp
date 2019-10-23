@@ -22,6 +22,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 18 august 2010 - created the file.
+ // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
 
 #include "stdafx.h"
 #include "LineSegment.h"
@@ -210,7 +211,7 @@ STDMETHODIMP CLineSegment::put_MarkerOffset(float newVal)
 // *************************************************************
 //		Draw()
 // *************************************************************
-STDMETHODIMP CLineSegment::Draw (int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
+STDMETHODIMP CLineSegment::Draw (int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	if (!hdc) {
 		CallbackHelper::ErrorMsg("Invalid handle of device context.");
@@ -225,17 +226,17 @@ STDMETHODIMP CLineSegment::Draw (int** hdc, float x, float y, int clipWidth, int
 // *************************************************************
 //		Draw()
 // *************************************************************
-STDMETHODIMP CLineSegment::DrawVB (int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
-{
-	if (!hdc) {
-		CallbackHelper::ErrorMsg("Invalid handle of device context.");
-		return S_OK;
-	}
-
-	CDC* dc = CDC::FromHandle((HDC)hdc);
-	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor, backAlpha);
-	return S_OK;
-}
+//STDMETHODIMP CLineSegment::DrawVB (int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
+//{
+//	if (!hdc) {
+//		CallbackHelper::ErrorMsg("Invalid handle of device context.");
+//		return S_OK;
+//	}
+//
+//	CDC* dc = CDC::FromHandle((HDC)hdc);
+//	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor, backAlpha);
+//	return S_OK;
+//}
 
 // *************************************************************
 //		DrawCore()

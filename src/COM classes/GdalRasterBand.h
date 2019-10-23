@@ -6,7 +6,7 @@
 #endif
 
 class ATL_NO_VTABLE CGdalRasterBand :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CGdalRasterBand, &CLSID_GdalRasterBand>,
 	public IDispatchImpl<IGdalRasterBand, &IID_IGdalRasterBand, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

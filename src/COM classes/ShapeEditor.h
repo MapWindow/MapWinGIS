@@ -8,7 +8,7 @@
 
 // CShapeEditor
 class ATL_NO_VTABLE CShapeEditor :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapeEditor, &CLSID_ShapeEditor>,
 	public IDispatchImpl<IShapeEditor, &IID_IShapeEditor, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -81,6 +81,7 @@ public:
 	STDMETHOD(get_PointXY)(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal);
 	STDMETHOD(put_PointXY)(long pointIndex, double x, double y, VARIANT_BOOL* retVal);
 	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);
+	STDMETHOD(AddPoint)(IPoint *newPoint, VARIANT_BOOL* retVal);
 	STDMETHOD(get_SegmentLength)(int segmentIndex, double* retVal);
 	STDMETHOD(get_SegmentAngle)(int segmentIndex, double* retVal);
 	STDMETHOD(get_IsDigitizing)(VARIANT_BOOL* retVal);

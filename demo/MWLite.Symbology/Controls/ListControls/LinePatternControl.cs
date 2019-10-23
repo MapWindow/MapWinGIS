@@ -244,7 +244,7 @@ namespace MWLite.Symbology.Controls.ListControls
         {
             IntPtr ptr = graphics.GetHdc();
             MapWinGIS.LinePattern pattern = _patterns[itemIndex];
-            pattern.Draw(ptr, rect.X + 1.0f, rect.Y + 1.0f, (int)rect.Width - 2, (int)rect.Height - 2, Colors.ColorToUInteger(this.BackColor));
+            pattern.Draw(ptr.ToInt32(), rect.X + 1.0f, rect.Y + 1.0f, (int)rect.Width - 2, (int)rect.Height - 2, Colors.ColorToUInteger(this.BackColor));
             graphics.ReleaseHdc();
         }
         #endregion

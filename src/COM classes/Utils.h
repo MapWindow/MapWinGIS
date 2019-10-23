@@ -42,7 +42,7 @@ struct BreakVal
 
 // CUtils
 class ATL_NO_VTABLE CUtils : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CUtils, &CLSID_Utils>,
 	public IDispatchImpl<IUtils, &IID_IUtils, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -154,7 +154,7 @@ public:
 	STDMETHOD(OGR2OGR)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 
 	STDMETHOD(OGRLayerToShapefile)(/*[in]*/BSTR Filename, /*[in, optional, defaultvalue(SHP_NULLSHAPE)]*/ ShpfileType shpType, /*[in, optional, defaultvalue(NULL)]*/ICallback *cBack, /*[out, retval]*/IShapefile** sf);
-	STDMETHOD(MergeImages)(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR OutputName, VARIANT_BOOL* retVal);
+	STDMETHOD(MergeImages)(/*[in]*/SAFEARRAY* inputNames, /*[in]*/BSTR outputName, VARIANT_BOOL* retVal);
 	STDMETHOD(ReprojectShapefile)(IShapefile* sf, IGeoProjection* source, IGeoProjection* target, IShapefile** result);
 
 	STDMETHOD(ClipGridWithPolygon)(BSTR inputGridfile, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal);
@@ -192,6 +192,7 @@ public:
 	STDMETHOD(GetProjectionList)(tkProjectionSet projectionSets, VARIANT* list, VARIANT_BOOL* retVal);
     STDMETHOD(GetAngle)(IPoint* firstPoint, IPoint* secondPoint, double* retVal);
 	STDMETHOD(LineInterpolatePoint)(IShape* sourceLine, IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint **retVal);
+	STDMETHOD(LineProjectDistanceTo)(IShape* sourceLine, IShape* referenceShape, double* distance);
 
 private:
 	struct RasterPoint
@@ -268,7 +269,18 @@ private:
 	CStringArray _sConfig;
 
 private:
-	inline long findBreak(std::deque<BreakVal> & bvals, double val);
+	inline long findBreak(std::deque<BreakVal> & bVals, double val)
+	{
+		int sizeBVals = (int)bVals.size();
+		for (int i = 0; i < sizeBVals; i++)
+		{
+			if (val >= bVals[i].lowVal &&
+				val <= bVals[i].highVal)
+				return i;
+		}
+		return -1;
+	}
+
 	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);
 
 	void trace_polygon(long x, long y, std::deque<RasterPoint> & polygon);
@@ -300,7 +312,7 @@ private:
 	void ErrorMessage(long ErrorCode);
 	void ErrorMessage(ICallback* callback, long ErrorCode);
 	void ErrorMessage(long ErrorCode, CString customMessage);
-	bool ValidateInputNames(SAFEARRAY* InputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr);
+	bool ValidateInputNames(SAFEARRAY* inputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr);
 	bool ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void **pbstr);
 
 	/* GDAL/OGR functions */

@@ -22,6 +22,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 19 june 2010 - created the file.
+ // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
 
 #include "stdafx.h"
 #include "Charts.h"
@@ -682,6 +683,7 @@ STDMETHODIMP CCharts::Clear()
 	IShapefile* sf = this->get_ParentShapefile();
 	if (sf)
 	{
+        CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 		std::vector<ShapeRecord*>* data = ((CShapefile*)sf)->get_ShapeVector();
 		for (unsigned int i = 0; i < data->size(); i++)
 		{
@@ -701,7 +703,7 @@ STDMETHODIMP CCharts::Clear()
 // **************************************************************
 //		DrawChart()
 // **************************************************************
-STDMETHODIMP CCharts::DrawChart(int** hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+STDMETHODIMP CCharts::DrawChart(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
@@ -719,13 +721,13 @@ STDMETHODIMP CCharts::DrawChart(int** hdc, float x, float y, VARIANT_BOOL hideLa
 // **************************************************************
 //		DrawChartVB()
 // **************************************************************
-STDMETHODIMP CCharts::DrawChartVB(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CDC* dc = CDC::FromHandle((HDC)hdc);
-	*retVal = DrawChartCore(dc, x, y, hideLabels, backColor);
-	return S_OK;
-}
+//STDMETHODIMP CCharts::DrawChartVB(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal)
+//{
+//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+//	CDC* dc = CDC::FromHandle((HDC)hdc);
+//	*retVal = DrawChartCore(dc, x, y, hideLabels, backColor);
+//	return S_OK;
+//}
 
 // **************************************************************
 //		DrawChartCore()
@@ -1246,7 +1248,7 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 	*retval = VARIANT_FALSE;
 	if (!BoundingBox) return S_OK;
 
-	if (!_chartsExist)
+	if (!_chartsExist || !_shapefile)
 	{
 		return S_OK;
 	}
@@ -1824,41 +1826,42 @@ STDMETHODIMP CCharts::LoadFromXML(BSTR Filename, VARIANT_BOOL* retVal)
 // ********************************************************
 bool CCharts::DeserializeChartData(CPLXMLNode* node)
 {
-	if (node)
-	{
-		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
-		if (data)
-		{
-			this->Clear();
-			((CShapefile*)_shapefile)->SetChartsPositions(lpNone);
+    if (!node || !_shapefile)
+        return false;
 
-			CString s;
-			double x,y;
-			int i = 0;
-			
-			node = CPLGetXMLNode(node, "Chart");
-			
-			int count = data->size();
-			while (node && i < count)
-			{
-				s = CPLGetXMLValue(node, "X", "0.0");
-				x = Utility::atof_custom(s);
+    CSingleLock sfLock(&((CShapefile*)_shapefile)->ShapefileLock, TRUE);
 
-				s = CPLGetXMLValue(node, "Y", "0.0");
-				y = Utility::atof_custom(s);
-			
-				CChartInfo* info = (*data)[i]->chart;
-				info->x = x;
-				info->y = y;
-				i++;
-				
-				node = node->psNext;
-			}
-			_chartsExist = true;
-			return true;
-		}
-	}
-	return false;
+	std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
+    if (!data)
+        return false;
+
+    this->Clear();
+    ((CShapefile*)_shapefile)->SetChartsPositions(lpNone);
+
+    CString s;
+    double x, y;
+    int i = 0;
+
+    node = CPLGetXMLNode(node, "Chart");
+
+    int count = data->size();
+    while (node && i < count)
+    {
+        s = CPLGetXMLValue(node, "X", "0.0");
+        x = Utility::atof_custom(s);
+
+        s = CPLGetXMLValue(node, "Y", "0.0");
+        y = Utility::atof_custom(s);
+
+        CChartInfo* info = (*data)[i]->chart;
+        info->x = x;
+        info->y = y;
+        i++;
+
+        node = node->psNext;
+    }
+    _chartsExist = true;
+    return true;
 }
 
 #pragma endregion

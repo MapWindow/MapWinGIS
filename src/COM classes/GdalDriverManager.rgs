@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.GdalDriverManager.1 = s 'GdalDriverManager Class'
+	{
+		CLSID = s '{660E3B2D-D844-4BB3-9050-1D29EE9527B6}'
+	}
+	MapWinGIS.GdalDriverManager = s 'GdalDriverManager Class'
+	{
+		CLSID = s '{660E3B2D-D844-4BB3-9050-1D29EE9527B6}'
+		CurVer = s 'MapWinGIS.GdalDriverManager.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {660E3B2D-D844-4BB3-9050-1D29EE9527B6} = s 'GdalDriverManager Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.GdalDriverManager.1'
+			VersionIndependentProgID = s 'MapWinGIS.GdalDriverManager'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }

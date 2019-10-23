@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Interop.MapWinGIS")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("MapWindow Development Team")]
 [assembly: AssemblyProduct("Interop.MapWinGIS")]
-[assembly: AssemblyCopyright("Copyright ©  2011-2018")]
+[assembly: AssemblyCopyright("Copyright ©  2011-2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

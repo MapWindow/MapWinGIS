@@ -6,7 +6,7 @@
 #endif
 
 class ATL_NO_VTABLE CFunction :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CFunction, &CLSID_Function>,
 	public IDispatchImpl<IFunction, &IID_IFunction, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

@@ -727,7 +727,7 @@ VARIANT_BOOL CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW nam
 	if (OgrHelper::GetSourceType(ogrLayer) != ogrDbTable) 
 		return result;
 
-	CStringW xml = OgrHelper::Cast(ogrLayer)->LoadStyleXML(L"");
+	CStringW xml = OgrHelper::Cast(ogrLayer)->LoadStyleXML(name);
 	if (xml.GetLength() == 0)
 	{
 		if (reportError)
@@ -848,7 +848,9 @@ bool CMapView::CheckLayerProjection( Layer* layer, int layerHandle )
 		return false;
 	}
 			
-	if (layer->IsShapefile()) {
+	if (layer->IsShapefile()) 
+	{
+		// save reprojected state
 		return ReprojectLayer(layer, layerHandle);
 	}
 
@@ -869,7 +871,7 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 	long numShapes = ShapefileHelper::GetNumShapes(sf);
 	if (numShapes > m_globalSettings.maxReprojectionShapeCount) 
 	{
-		// OGR layers can potentially have millions of features, so let's be cautions not too start something to lengthy
+		// OGR layers can potentially have millions of features, so let's be cautions not to start something too lengthy
 		ErrorMessage(tkREPROJECTION_TOO_MUCH_SHAPES);		
 		return false;
 	}
@@ -878,8 +880,11 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 	IShapefile* sfNew = NULL;
 	sf->Reproject(GetMapProjection(), &count, &sfNew);
 
-	if (!sfNew || numShapes != count)
+    // to be considered successful, the new Shapefile (sfNew) must have been allocated AND 
+    // either all shapes have been reprojected OR we are allowing layers with incomplete reprojection;
+	if (!sfNew || (numShapes != count && !m_globalSettings.allowLayersWithIncompleteReprojection))
 	{
+        // reprojection failed
 		FireLayerReprojected(layerHandle, VARIANT_FALSE);
 		if (sfNew) sfNew->Release();
 		ErrorMessage(tkFAILED_TO_REPROJECT);
@@ -908,6 +913,13 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 	}
 	layer->UpdateExtentsFromDatasource();
 
+    // if not all shapes could be reprojected, let the world know
+    if (numShapes != count)
+    {
+        // in case this was an Ogr layer, event should be fired AFTER new Shapefile was 'injected' into OgrLayerSource
+        FireLayerReprojectedIncomplete(layerHandle, count, numShapes);
+    }
+    // always fire LayerReprojected event
 	FireLayerReprojected(layerHandle, VARIANT_TRUE);
 
 	return true;
@@ -1194,6 +1206,68 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 	}
 }
 
+// ***************************************************************
+//		ReloadOgrLayerFromSource()
+// ***************************************************************
+BOOL CMapView::ReloadOgrLayerFromSource(long OgrLayerHandle)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    // get the layer from the specified handle
+    Layer* layer = GetLayer(OgrLayerHandle);
+    // failure here will have already set ErrorMessage
+    if (layer == nullptr) return false;
+
+    // make sure it's an OGR layer
+    IOgrLayer* ogrLayer = NULL;
+    layer->QueryOgrLayer(&ogrLayer);
+    if (!ogrLayer)
+    {
+        ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
+		return false;
+    }
+
+    // reload OGR layer from source
+	VARIANT_BOOL vb = VARIANT_FALSE;
+	if (layer->IsDynamicOgrLayer()) {
+		vb = VARIANT_TRUE;
+		RestartBackgroundLoading(OgrLayerHandle);
+	} 
+	else 
+		ogrLayer->ReloadFromSource(&vb);
+
+    // we can now Release the IOgrLayer reference
+    ogrLayer->Release();
+
+    // if reload failed...
+    if (vb == 0)
+    {
+        ErrorMessage(tkNO_OGR_DATA_WAS_LOADED);
+		return VARIANT_FALSE;
+    }
+
+    // do we need to reproject?
+    // at this point, success here indicates success of function
+	return CheckLayerProjection(layer, OgrLayerHandle) ? TRUE : FALSE;
+}
+
+// ***************************************************************
+//		RestartBackgroundLoading()
+// ***************************************************************
+void CMapView::RestartBackgroundLoading(long OgrLayerHandle)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// get the layer from the specified handle
+	Layer* layer = GetLayer(OgrLayerHandle);
+	// failure here will have already set ErrorMessage
+	if (layer == nullptr) return;
+
+	// reload layer in background thread
+	if (layer->IsDynamicOgrLayer())
+		layer->LoadAsync(this, _extents, OgrLayerHandle, true);
+}
+
 // ****************************************************************** 
 //		LayerMaxVisibleScale
 // ****************************************************************** 
@@ -1254,7 +1328,7 @@ void CMapView::SetLayerMinVisibleZoom(LONG LayerHandle, int newVal)
 }
 
 // ****************************************************************** 
-//		LayerMaxVisibleScale
+//		LayerMaxVisibleZoom
 // ****************************************************************** 
 int CMapView::GetLayerMaxVisibleZoom(LONG LayerHandle)
 {

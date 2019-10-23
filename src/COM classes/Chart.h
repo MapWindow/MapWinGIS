@@ -32,7 +32,7 @@
 
 // CChart
 class ATL_NO_VTABLE CChart :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CChart, &CLSID_Chart>,
 	public IDispatchImpl<IChart, &IID_IChart, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

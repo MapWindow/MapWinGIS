@@ -360,9 +360,12 @@ namespace MapWinGISTests
             return tempFolder;
         }
 
-        public static AxMap GetAxMap()
+        public static AxMap GetAxMap(bool showForm = false)
         {
             if (_axMap1 != null) return _axMap1;
+
+            // Create form and add MapWinGIS:
+            var myForm = new Form {Width = 600, Height = 600};
 
             // Create MapWinGIS:
             _axMap1 = new AxMap();
@@ -370,9 +373,22 @@ namespace MapWinGISTests
             _axMap1.Width = 200;
             _axMap1.Height = 200;
 
-            // Create form and add MapWinGIS:
-            var myForm = new Form();
+            if (showForm)
+            {
+                _axMap1.Dock = DockStyle.Fill;
+                ((System.ComponentModel.ISupportInitialize) (_axMap1)).BeginInit();
+                myForm.SuspendLayout();
+            }
+
             myForm.Controls.Add(_axMap1);
+
+            if (showForm)
+            {
+                ((System.ComponentModel.ISupportInitialize) (_axMap1)).EndInit();
+                myForm.ResumeLayout(false);
+                myForm.PerformLayout();
+                myForm.Show();
+            }
 
             _axMap1.ScalebarVisible = true;
             _axMap1.ShowCoordinates = tkCoordinatesDisplay.cdmAuto;
@@ -387,7 +403,7 @@ namespace MapWinGISTests
         public static string SaveSnapshot2(AxMap axMap1, string baseName, bool shouldFail = false)
         {
             Application.DoEvents();
-            var filename = Path.Combine(Path.GetTempPath(), baseName);
+            var filename = Path.Combine(WorkingFolder("mw5-snapshots"), baseName);
             DeleteFile(filename);
 
             var img = axMap1.SnapShot2(0, axMap1.CurrentZoom + 10, 1000);
@@ -410,7 +426,7 @@ namespace MapWinGISTests
             return filename;
         }
 
-        public static string SaveSnapshot(AxMap axMap1, string baseName, IExtents boundBox, double extentEnlarger = 1d)
+        public static string SaveSnapshot(AxMap axMap1, string baseName, Extents boundBox, double extentEnlarger = 1d)
         {
             Application.DoEvents();
             var filename = Path.Combine(WorkingFolder("mw5-snapshots"), baseName);

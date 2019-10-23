@@ -75,7 +75,7 @@ namespace MWLite.Symbology.Controls.ListControls
         {
             IntPtr ptr = graphics.GetHdc();
             MapWinGIS.ShapeDrawingOptions sdo = _icons[itemIndex];
-            sdo.DrawPoint(ptr, rect.X + 1.0f, rect.Y +1.0f, (int)rect.Width -2, (int)rect.Height -2, Colors.ColorToUInteger(this.BackColor));
+            sdo.DrawPoint(ptr.ToInt32(), rect.X + 1.0f, rect.Y +1.0f, (int)rect.Width -2, (int)rect.Height -2, Colors.ColorToUInteger(this.BackColor));
             graphics.ReleaseHdc();
        }
     }

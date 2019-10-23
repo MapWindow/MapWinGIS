@@ -29,7 +29,7 @@ public:
 };
 
 class ATL_NO_VTABLE CImageClass : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CImageClass, &CLSID_Image>,
 	public IDispatchImpl<IImage, &IID_IImage, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -196,7 +196,7 @@ public:
 	STDMETHOD(Clear)(/*[in, optional, defaultvalue(0xffffff)]*/ OLE_COLOR CanvasColor, /*[in, optional]*/ICallback * CBack, /*[out, retval]*/VARIANT_BOOL * retval);
 	STDMETHOD(Close)(/*[out, retval]*/VARIANT_BOOL * retval);
 	STDMETHOD(CreateNew)(/*[in]*/long NewWidth, /*[in]*/long NewHeight, /*[out, retval]*/VARIANT_BOOL * retval);
-	STDMETHOD(Save)(/*[in]*/BSTR ImageFileName, /*[in, optional, defaultvalue(FALSE)]*/VARIANT_BOOL WriteWorldFile,/*[in, optional, defaultvalue(USE_FILE_EXTENSION)]*/ImageType FileType, /*[in, optional]*/ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(Save)(/*[in]*/BSTR imageFileName, /*[in, optional, defaultvalue(FALSE)]*/VARIANT_BOOL WriteWorldFile,/*[in, optional, defaultvalue(USE_FILE_EXTENSION)]*/ImageType FileType, /*[in, optional]*/ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(Open)(/*[in]*/BSTR ImageFileName, /*[in, optional, defaultvalue(USE_FILE_EXTENSION)]*/ImageType FileType, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL InRam, /*[in, optional]*/ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	//Rob Cairns
 	STDMETHOD (SetVisibleExtents)(/*[in]*/double newMinX,/*[in]*/ double newMinY,/*[in]*/ double newMaxX,/*[in]*/ double newMaxY,/*[in]*/long pixInView, /*[in]*/float transPercent);
@@ -409,9 +409,9 @@ private:
 
 	bool getFileType(const CStringW ImageFile, ImageType &ft);
 	bool WriteBMP(CStringW FileName, bool WriteWorldFile, ICallback *cBack);
-	bool WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType type, ICallback *cBack);
+	bool WriteGDIPlus(CStringW imageFile, bool worldFile, ImageType type, ICallback *cBack);
 
-	VARIANT_BOOL WriteWorldFile(CStringW WorldFileName);
+	VARIANT_BOOL WriteWorldFile(CStringW worldFileName);
 	bool ReadWorldFile(CStringW WorldFileName);
 
 	bool IsGdalImageAvailable();

@@ -22,6 +22,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 19 june 2010 - created the file.
+ // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
 
 #pragma once
 
@@ -150,7 +151,7 @@ struct ValueRectangle
 //	  CCharts
 // -----------------------------------------
 class ATL_NO_VTABLE CCharts :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CCharts, &CLSID_Charts>,
 	public IDispatchImpl<ICharts, &IID_ICharts, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -275,7 +276,7 @@ public:
 	STDMETHOD(get_Count)(/*[out, retval]*/ long *pVal);
 	STDMETHOD(Generate)(tkLabelPositioning Position, VARIANT_BOOL* retVal);
 	STDMETHOD(Clear)();
-	STDMETHOD(DrawChart)(int** hdc, float xOrigin, float yOrigin, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal);
+	STDMETHOD(DrawChart)(int hdc, float xOrigin, float yOrigin, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal);
 	STDMETHOD(get_MaxVisibleScale)(double* retval)			{*retval = _maxVisibleScale;		return S_OK;};		
 	STDMETHOD(put_MaxVisibleScale)(double newVal)			{_maxVisibleScale = newVal;		return S_OK;};
 	STDMETHOD(get_MinVisibleScale)(double* retval)			{*retval = _minVisibleScale;		return S_OK;};		
@@ -329,7 +330,7 @@ public:
 	STDMETHOD(get_SavingMode)(tkSavingMode* retVal);
 	STDMETHOD(put_SavingMode)(tkSavingMode newVal);
 	
-	STDMETHOD(DrawChartVB)(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal);
+	//STDMETHOD(DrawChartVB)(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal);
 
 private:
 	tkSavingMode _savingMode;

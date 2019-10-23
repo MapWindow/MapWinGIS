@@ -770,6 +770,16 @@ bool ExpressionParser::ReadOperation(CStringW s, int& position, CElement& elemen
 			element.operation = operCONSEQ;
 			break;
 		}
+		case L'i':
+		case L'I':
+			if (s.Mid(position, 5).MakeUpper() == L"ILIKE")
+			{
+				element.type = etOperation;
+				element.priority = 3;
+				element.operation = operILike;
+				position += 4;
+			}
+			break;
 		case L'l':
 		case L'L':
 			if (s.Mid(position, 4).MakeUpper() == L"LIKE")

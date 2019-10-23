@@ -200,33 +200,33 @@ namespace MapWinGISTests
             }
         }
 
-        [Obsolete("utils.GDALWarp is deprecated, please use gdalUtils.GDALWarp instead.")]
-        public void GdalWarp()
-        {
-            var utils = new Utils();
-            var output = Path.GetTempPath() + "GdalWarp.vrt";
-            if (File.Exists(output)) File.Delete(output);
+        //[Obsolete("utils.GDALWarp is deprecated, please use gdalUtils.GDALWarp instead.")]
+        //public void GdalWarp()
+        //{
+        //    var utils = new Utils();
+        //    var output = Path.GetTempPath() + "GdalWarp.vrt";
+        //    if (File.Exists(output)) File.Delete(output);
 
-            var retVal = utils.GDALWarp(@"GeoTiff/5band.tif", output, "-of vrt");
-            Assert.IsTrue(retVal, "GdalWarp failed: " + utils.ErrorMsg[utils.LastErrorCode]);
-            Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
-            Debug.WriteLine(output);
-        }
+        //    var retVal = utils.GDALWarp(@"GeoTiff/5band.tif", output, "-of vrt");
+        //    Assert.IsTrue(retVal, "GdalWarp failed: " + utils.ErrorMsg[utils.LastErrorCode]);
+        //    Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
+        //    Debug.WriteLine(output);
+        //}
 
-        [Obsolete("utils.GDALWarp is deprecated, please use gdalUtils.GDALWarp instead.")]
-        public void GdalWarpCutline()
-        {
-            var utils = new Utils();
-            var output = Path.GetTempPath() + "GdalWarpCutline.vrt";
-            if (File.Exists(output)) File.Delete(output);
-            var border = @"J:\NBS3\src\NBS3.Rest\data\1a4be5f3deae4445893cb289c8124a02\border.shp";
+        //[Obsolete("utils.GDALWarp is deprecated, please use gdalUtils.GDALWarp instead.")]
+        //public void GdalWarpCutline()
+        //{
+        //    var utils = new Utils();
+        //    var output = Path.GetTempPath() + "GdalWarpCutline.vrt";
+        //    if (File.Exists(output)) File.Delete(output);
+        //    var border = @"J:\NBS3\src\NBS3.Rest\data\1a4be5f3deae4445893cb289c8124a02\border.shp";
 
-            var options = "-of vrt -overwrite -crop_to_cutline -cutline " + border;
-            var retVal = utils.GDALWarp(@"J:\NBS3\src\NBS3.Rest\data\1a4be5f3deae4445893cb289c8124a02\Smegen.tif", output, options);
-            Assert.IsTrue(retVal, "GdalWarp failed: " + utils.ErrorMsg[utils.LastErrorCode]);
-            Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
-            Debug.WriteLine(output);
-        }
+        //    var options = "-of vrt -overwrite -crop_to_cutline -cutline " + border;
+        //    var retVal = utils.GDALWarp(@"J:\NBS3\src\NBS3.Rest\data\1a4be5f3deae4445893cb289c8124a02\Smegen.tif", output, options);
+        //    Assert.IsTrue(retVal, "GdalWarp failed: " + utils.ErrorMsg[utils.LastErrorCode]);
+        //    Assert.IsTrue(File.Exists(output), "Output file doesn't exists");
+        //    Debug.WriteLine(output);
+        //}
 
         public void OpenPostGISDifferentPortTest()
         {

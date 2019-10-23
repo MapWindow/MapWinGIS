@@ -59,7 +59,7 @@ typedef struct {
 } XYZ;
 
 class ATL_NO_VTABLE CTin : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CTin, &CLSID_Tin>,
 	public IDispatchImpl<ITin, &IID_ITin, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

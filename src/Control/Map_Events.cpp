@@ -512,7 +512,9 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	if (HandleOnZoombarMouseDown(point) || HandleOnCopyrighMouseDown(point))
 		return;
 
-	bool ctrl = nFlags & MK_CONTROL ? true: false;
+	bool ctrl = (nFlags & MK_CONTROL) != 0;
+	bool shift = (nFlags & MK_SHIFT) != 0;
+	bool alt = GetKeyState(VK_MENU) < 0 ? true : false;
 
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
@@ -524,7 +526,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	double projX;
 	double projY;
-	bool shift = (nFlags & MK_SHIFT) != 0;
 
 	ClearHotTracking();
 
@@ -546,12 +547,19 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// digitizing
 	if (digitizingCursor)
 	{
+
 		if (m_cursorMode == cmAddShape) {
-			if (!StartNewBoundShape(x, y)) return;
+			if (StartNewBoundShape(projX, projY) != VARIANT_TRUE) return;
 		}
 		
-		if (Digitizer::OnMouseDown(_shapeEditor, projX, projY, ctrl))
+		if (alt) { // user wants to intercept coordinates and possibly modify them
+			this->FireBeforeVertexDigitized(&projX, &projY);
+		}
+
+		if (Digitizer::OnMouseDown(_shapeEditor, projX, projY, ctrl)) {
 			UpdateShapeEditor();
+		}
+			
 		return;
 	}
 
@@ -560,7 +568,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		case cmEditShape:
 			{
-				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl))
+				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl, shift))
 				{
 					long layerHandle, shapeIndex;
 					if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) 
@@ -673,7 +681,7 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	if (m_cursorMode == cmMeasure)
 	{
 		_measuring->FinishMeasuring();
-		FireMeasuringChanged(tkMeasuringAction::MesuringStopped);	
+		FireMeasuringChanged(tkMeasuringAction::MeasuringStopped);	
 		Redraw2(RedrawSkipDataLayers);
 		return;
 	}
@@ -681,8 +689,14 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	// add a vertex							
 	if (m_cursorMode == cmEditShape) 
 	{
-		double projX, projY;
-		PixelToProj(point.x, point.y, &projX, &projY);
+        double projX, projY;        
+        this->PixelToProjection(point.x, point.y, projX, projY);
+
+        bool alt = GetKeyState(VK_MENU) < 0 ? true : false;
+        if (alt) { // user wants to intercept coordinates and possibly modify them
+            this->FireBeforeVertexDigitized(&projX, &projY);
+        }
+
 		if (_shapeEditor->GetClosestPoint(projX, projY, projX, projY))
 		{
 			if (_shapeEditor->InsertVertex(projX, projY)) {
@@ -1245,20 +1259,22 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	if ((EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmMeasure))
 	{
 		ActiveShape* shp = GetActiveShape();
+
+		VARIANT_BOOL snapped = VARIANT_FALSE;
+		double x = point.x, y = point.y;
+		if (SnappingIsOn(nFlags))
+		{
+			if (this->FindSnapPointCore(point.x, point.y, &x, &y)) {
+				ProjToPixel(x, y, &x, &y);
+				GetEditorBase()->SetSnapPoint(x, y);
+			}
+			else {
+				GetEditorBase()->ClearSnapPoint();
+			}
+		}
+
 		if (shp->IsDynamic() && shp->GetPointCount() > 0)
 		{
-			VARIANT_BOOL snapped = VARIANT_FALSE;
-			double x = point.x, y = point.y;
-			if (SnappingIsOn(nFlags))
-			{
-				snapped = this->FindSnapPointCore(point.x, point.y, &x, &y);
-				if (snapped) {
-					ProjToPixel(x, y, &x, &y);
-					_shapeEditor->GetActiveShape()->SetSnapPoint(x, y, true);
-				}
-				else
-					_shapeEditor->GetActiveShape()->ClearSnapPoint();
-			}
 			shp->SetMousePosition(x, y);
 			refreshNeeded = true;
 		}

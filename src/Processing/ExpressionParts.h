@@ -36,7 +36,8 @@ enum tkOperation
 
 	operNone = 19,
 
-	operLike = 20,
+	operLike = 20,      // default LIKE is case-sensitive
+    operILike = 21,     // case-Insensitive LIKE
 };
 
 class CExpressionValue;

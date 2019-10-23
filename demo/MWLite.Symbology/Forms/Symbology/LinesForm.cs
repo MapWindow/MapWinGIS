@@ -312,7 +312,7 @@ namespace MWLite.Symbology.Forms.Symbology
             IntPtr ptr = g.GetHdc();
 
             uint backColor = Colors.ColorToUInteger(this.BackColor);
-            _options.LinePattern.Draw(ptr, 20, 0, rect.Width - 40, rect.Height, backColor);
+            _options.LinePattern.Draw(ptr.ToInt32(), 20, 0, rect.Width - 40, rect.Height, backColor);
 
             g.ReleaseHdc();
             
@@ -371,7 +371,7 @@ namespace MWLite.Symbology.Forms.Symbology
                             
                             IntPtr ptr = g.GetHdc();
                             uint backColor = Colors.ColorToUInteger(this.BackColor);
-                            line.Draw(ptr, 0, 0, img.Width, img.Height, backColor);
+                            line.Draw(ptr.ToInt32(), 0, 0, img.Width, img.Height, backColor);
                             g.ReleaseHdc();
                             g.Dispose();
 

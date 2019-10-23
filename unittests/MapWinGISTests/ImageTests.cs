@@ -1,5 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections;
+using System.Diagnostics;
 using System.IO;
+using System.Text;
 using MapWinGIS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -102,6 +105,47 @@ namespace MapWinGISTests
             Assert.IsTrue(retVal, "Image could not be saved: " + img.ErrorMsg[img.LastErrorCode]);
             Assert.IsTrue(File.Exists(filename), "The file doesn't exists.");
             Debug.WriteLine(filename);
+        }
+
+        [TestMethod]
+        public void SaveTiffAsBitmap()
+        {
+            // MWGIS-80
+            var filename = Path.Combine(Path.GetTempPath(), "SaveImage.bmp");
+            SaveTiffInOtherFormat(@"GeoTiff/MWGIS-65.tif", ImageType.BITMAP_FILE, filename);
+        }
+
+        [TestMethod]
+        public void SaveTiffAsPng()
+        {
+            // MWGIS-181
+            var filename = Path.Combine(Path.GetTempPath(), "SaveImage.png");
+            SaveTiffInOtherFormat(@"GeoTiff/MWGIS-65.tif", ImageType.PNG_FILE, filename);
+            // Check world file:
+            var worldFile = Path.ChangeExtension(filename, "wld");
+            Assert.IsTrue(File.Exists(worldFile), "World file doesn't exists");
+            var lines = File.ReadAllLines(worldFile, Encoding.UTF8);
+            Assert.AreEqual("6.3157226087", lines[0]);
+            Assert.AreEqual("0.0000000000", lines[1]);
+            Assert.AreEqual("0.0000000000", lines[2]);
+            Assert.AreEqual("-6.5005200000", lines[3]);
+            Assert.AreEqual("682768.3014413044", lines[4]);
+            Assert.AreEqual("5909893.6634800006", lines[5]);
+        }
+
+        private void SaveTiffInOtherFormat(string imageFilename, ImageType imageType, string saveAsFilename)
+        {
+            Assert.IsTrue(File.Exists(imageFilename), "Image file doesn't exists");
+
+            var img = new Image();
+            img.Open(imageFilename);
+            Assert.IsNotNull(img, "Loaded object is not an image");
+            if (File.Exists(saveAsFilename)) File.Delete(saveAsFilename);
+
+            var retVal = img.Save(saveAsFilename, true, imageType);
+            Assert.IsTrue(retVal, "Image could not be saved: " + img.ErrorMsg[img.LastErrorCode]);
+            Assert.IsTrue(File.Exists(saveAsFilename), "The file doesn't exists.");
+            Debug.WriteLine(saveAsFilename);
         }
 
         [TestMethod]

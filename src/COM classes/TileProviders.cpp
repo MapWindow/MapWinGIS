@@ -160,6 +160,7 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider)
     case HereTerrain:
         p = (BaseProvider*)new OviTerrainProvider();
         break;
+/*
     case GoogleMaps:
         p = (BaseProvider*)new GoogleMapProvider();
         break;
@@ -172,6 +173,7 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider)
     case GoogleTerrain:
         p = (BaseProvider*)new GoogleTerrainProvider();
         break;
+*/
     case OpenTransportMap:
         p = (BaseProvider*)new OpenTransportMapProvider();
         break;

@@ -85,6 +85,8 @@ struct GlobalSettingsInfo
     bool ogrShareConnection;
     bool ogrListAllGeometryTypes;
     bool ogrInterpretYNStringAsBoolean;
+    bool allowLayersWithIncompleteReprojection;
+	CString httpUserAgent;
 
     ~GlobalSettingsInfo()
     {
@@ -96,6 +98,7 @@ struct GlobalSettingsInfo
 
     GlobalSettingsInfo::GlobalSettingsInfo()
     {
+        allowLayersWithIncompleteReprojection = false;
         ogrInterpretYNStringAsBoolean = true;
         ogrListAllGeometryTypes = true;
         ogrShareConnection = false;
@@ -105,6 +108,7 @@ struct GlobalSettingsInfo
         cacheDbfRecords = true;
         overrideLocalCallback = true;
         proxyAuthentication = asBasic;
+		httpUserAgent = "MapWinGIS/5.0"; // TODO Use VERSION Macros
         hereAppId = "";
         hereAppCode = "";
         bingApiKey = "";

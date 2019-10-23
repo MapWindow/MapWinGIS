@@ -1177,6 +1177,15 @@ STDMETHODIMP CGlobalSettings::get_TileLogFilename(BSTR* retVal)
 	return S_OK;
 }
 
+STDMETHODIMP CGlobalSettings::SetHttpUserAgent(BSTR userAgent)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	// TODO: Check if not string.empty
+	m_globalSettings.httpUserAgent = OLE2A(userAgent);
+	return S_OK;
+}
+
 // *********************************************************
 //	     WmsDiskCaching()
 // *********************************************************
@@ -1259,4 +1268,25 @@ STDMETHODIMP CGlobalSettings::put_OgrInterpretYNStringAsBoolean(VARIANT_BOOL new
 	m_globalSettings.ogrInterpretYNStringAsBoolean = (newVal == VARIANT_TRUE) ? true : false;
 
 	return S_OK;
+}
+
+// *********************************************************
+//	     AllowLayersWithIncompleteReprojection()
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_AllowLayersWithIncompleteReprojection(VARIANT_BOOL* pVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    *pVal = m_globalSettings.allowLayersWithIncompleteReprojection ? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_AllowLayersWithIncompleteReprojection(VARIANT_BOOL newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    m_globalSettings.allowLayersWithIncompleteReprojection = (newVal == VARIANT_TRUE) ? true : false;
+
+    return S_OK;
 }

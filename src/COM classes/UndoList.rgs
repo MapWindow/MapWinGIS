@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.UndoList.1 = s 'UndoList Class'
+	{
+		CLSID = s '{0E144EFF-81A9-4B83-850C-47D1729331F5}'
+	}
+	MapWinGIS.UndoList = s 'UndoList Class'
+	{
+		CLSID = s '{0E144EFF-81A9-4B83-850C-47D1729331F5}'
+		CurVer = s 'MapWinGIS.UndoList.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {0E144EFF-81A9-4B83-850C-47D1729331F5} = s 'UndoList Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.UndoList.1'
+			VersionIndependentProgID = s 'MapWinGIS.UndoList'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }

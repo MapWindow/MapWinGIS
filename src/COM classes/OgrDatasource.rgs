@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.OgrDatasource.1 = s 'OgrDatasource Class'
+	{
+		CLSID = s '{33F91D20-8EBA-4033-AE3B-15A7041087BB}'
+	}
+	MapWinGIS.OgrDatasource = s 'OgrDatasource Class'
+	{
+		CLSID = s '{33F91D20-8EBA-4033-AE3B-15A7041087BB}'
+		CurVer = s 'MapWinGIS.OgrDatasource.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {33F91D20-8EBA-4033-AE3B-15A7041087BB} = s 'OgrDatasource Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.OgrDatasource.1'
+			VersionIndependentProgID = s 'MapWinGIS.OgrDatasource'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{5863687C-726A-47CE-8BF0-7E8E0D2FDE43}'
-			Version = s '1.0'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }

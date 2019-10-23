@@ -123,6 +123,8 @@ namespace MapWinGIS
         /// <param name="OverviewList">An array of integer type with the specification of overviews (magnification ratios).</param>
         /// <returns>True on success and false otherwise.</returns>
         /// \new48 Added in version 4.8
+        /// \deprecated since v5.1.0 Use GdalUtils.GdalBuildOverviews instead.
+        [Obsolete("Use GdalUtils.GdalBuildOverviews")]
         public bool BuildOverviews(tkGDALResamplingMethod ResamplingMethod, int NumOverviews, Array OverviewList)
         {
             throw new NotImplementedException();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -453,6 +454,111 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
+        public void ClipByMapExtents()
+        {
+            _axMap1 = Helper.GetAxMap(true);
+
+            // Start with fresh map:
+            _axMap1.Clear();
+            _axMap1.TileProvider = tkTileProvider.ProviderNone;
+            _axMap1.ZoomBehavior = tkZoomBehavior.zbDefault;
+            _axMap1.KnownExtents = tkKnownExtents.keWorld;
+
+            // Load shapefile:
+            const string filename = @"sf/clipByMapExtents.shp";
+            var handle = _axMap1.AddLayerFromFilename(filename, tkFileOpenStrategy.fosVectorLayer, true);
+            Assert.IsTrue(handle != -1, "Could not load layer: " + _axMap1.get_ErrorMsg(_axMap1.LastErrorCode));
+            Thread.Sleep(10000);
+            var sf = _axMap1.get_Shapefile(handle);
+            Debug.WriteLine($"Shapefile has {sf.NumShapes} shapes");
+
+            // Save the current view as an image:
+            Helper.SaveSnapshot(_axMap1, "AfterLoading.png", _axMap1.Extents);
+
+            // Zoom in:
+            Debug.WriteLine("Zoom in");
+            _axMap1.ZoomIn(0.3);
+            _axMap1.ZoomIn(0.3);
+            // New snapshot
+            Helper.SaveSnapshot(_axMap1, "AfterZooming.png", _axMap1.Extents);
+            Thread.Sleep(10000);
+
+            // Make shape from map extents:
+            var clipShape = _axMap1.Extents.ToShape();
+            Assert.IsNotNull(clipShape, "Could not make shape from map extents");
+            Debug.WriteLine(clipShape.numPoints);
+            // Make in-memory shapefile from shape:
+            var sfClip = new Shapefile();
+            if (!sfClip.CreateNewWithShapeID("", ShpfileType.SHP_POLYGON))
+                Assert.Fail("Can't create shapefile. Error: " + sfClip.ErrorMsg[sfClip.LastErrorCode]);
+            // Set projection:
+            sfClip.GeoProjection = _axMap1.GeoProjection.Clone();
+            var shpIndex = sfClip.EditAddShape(clipShape);
+            Assert.IsTrue(shpIndex != -1, "Could not add shape: " + sfClip.ErrorMsg[sfClip.LastErrorCode]);
+
+            // Clip:
+            var sfResult = sf.Clip(false, sfClip, false);
+            Debug.WriteLine(sfResult.NumShapes);
+
+            Assert.AreNotEqual(sf.NumShapes, sfResult.NumShapes, "No shapes were clipped.");
+
+            _axMap1.AddLayer(sfResult, true);
+            Thread.Sleep(20000);
+        }
+
+        [TestMethod]
+        public void SnapShotTest()
+        {
+            _axMap1 = Helper.GetAxMap();
+
+            // Process the list of files found in the directory.
+            var fileEntries = Directory.GetFiles("sf", "*.shp");
+            foreach (var sfName in fileEntries)
+            {
+                // Start with fresh map:
+                _axMap1.Clear();
+                _axMap1.TileProvider = tkTileProvider.ProviderNone;
+                _axMap1.ZoomBehavior = tkZoomBehavior.zbDefault;
+                _axMap1.KnownExtents = tkKnownExtents.keWorld;
+
+                var baseName = Path.GetFileNameWithoutExtension(sfName);
+                // if (baseName == "onepoint") continue;
+
+                Helper.DebugMsg("Working on " + baseName);
+
+                // Load shapefile:
+                var handle = _axMap1.AddLayerFromFilename(sfName, tkFileOpenStrategy.fosVectorLayer, true);
+                Assert.IsTrue(handle != -1, "Could not load layer: " + _axMap1.get_ErrorMsg(_axMap1.LastErrorCode));
+
+                Helper.DebugMsg(_axMap1.Extents.ToDebugString());
+
+                try
+                {
+                    Helper.SaveSnapshot(_axMap1, baseName + "-loaded.png", _axMap1.Extents);
+                }
+                catch (Exception e)
+                {
+                    Helper.DebugMsg(e.Message);
+                    // throw; just continue
+                }
+
+                // Zoom in:
+                _axMap1.ZoomIn(0.3);
+                Helper.DebugMsg(_axMap1.Extents.ToDebugString());
+
+                try
+                {
+                    Helper.SaveSnapshot(_axMap1, baseName + "-zoomin.png", _axMap1.Extents);
+                }
+                catch (Exception e)
+                {
+                    Helper.DebugMsg(e.Message);
+                    // throw; just continue
+                }
+            }
+        }
+
+        [TestMethod]
         public void CreateFishnet()
         {
             // Create shape from WKT:
@@ -701,6 +807,7 @@ namespace MapWinGISTests
             Assert.IsTrue(result);
             TestSpatialIndex(sfName);
         }
+
 
         [TestMethod]
         public void SpatialIndexAllTypes()
@@ -1163,6 +1270,135 @@ namespace MapWinGISTests
                 sfUsage?.Close();
                 sfDifference?.Close();
             }
+        }
+
+        [TestMethod]
+        public void CreatePolylineShapefile()
+        {
+            // https://mapwindow.discourse.group/t/create-polyline-shapefile-adding-attributes-issue/147/1
+
+            // First read some coordinates, in this case I read them from another polyline shapefile:
+            var sfInput = Helper.OpenShapefile(@"sf\SHP_POLYLINE.shp");
+            var lines = new List<List<Point>>(); // lines is a list of line and each line is a list of point
+            for (var i = 0; i < sfInput.NumShapes; i++)
+            {
+                var shp = sfInput.Shape[i];
+                var line = new List<Point>();
+                for (var j = 0; j < shp.numPoints; j++)
+                {
+                    line.Add(shp.Point[j]);
+                }
+                lines.Add(line);
+            }
+
+            // Create a new shapefile
+            var sf = new Shapefile { GlobalCallback = this };
+            Assert.IsNotNull(sf, "sf is null");
+            Assert.IsTrue(sf.CreateNewWithShapeID("", ShpfileType.SHP_POLYLINE), "Cannot create shapefile");
+
+            // Create fields:
+            var keyFieldIndex = sf.EditAddField("key", FieldType.INTEGER_FIELD, 0, 5);
+            var evenFieldIndex = sf.EditAddField("even", FieldType.BOOLEAN_FIELD, 0, 1);
+            var dateFieldIndex = sf.EditAddField("date", FieldType.DATE_FIELD, 0, 12);
+
+            // Create new lines:
+            foreach (var line in lines)
+            {
+                var shp = new Shape();
+                Assert.IsTrue(shp.Create(sf.ShapefileType));
+                foreach (var point in line)
+                {
+                    // Add point to shape:
+                    shp.AddPoint(point.x, point.y);
+                }
+
+                // Add the new shape to the shapefile:
+                var shpIndex = sf.EditAddShape(shp);
+                // Add some attributes:
+                Assert.IsTrue(sf.EditCellValue(keyFieldIndex, shpIndex, shpIndex), "Cannot add key attribute");
+                Assert.IsTrue(sf.EditCellValue(evenFieldIndex, shpIndex, shpIndex % 2 == 0), "Cannot add even attribute");
+                Assert.IsTrue(sf.EditCellValue(dateFieldIndex, shpIndex, DateTime.Now), "Cannot add date attribute");
+            }
+
+            // Optional: Add projection:
+            sf.GeoProjection = sfInput.GeoProjection.Clone();
+
+            // Now the new shapefile is created, check it and save it:
+            Assert.IsFalse(sf.HasInvalidShapes(), "sf has invalid shapes");
+            var fileLocation = Path.Combine(Path.GetTempPath(), "NewShapefile.shp");
+            Helper.SaveAsShapefile(sf, fileLocation);
+            Debug.WriteLine(fileLocation);
+        }
+
+        [TestMethod]
+        public void TableQueryTest()
+        {
+            const string sfName = @"D:\dev\GIS-data\Forum\Search-speed-issue\RD12115.shp";
+            // Delete previous spatial index files:
+            Helper.DeleteFile(Path.ChangeExtension(sfName, ".mwd"));
+            Helper.DeleteFile(Path.ChangeExtension(sfName, ".mwx"));
+
+            var sf = Helper.OpenShapefile(sfName, true, this);
+
+            const string query = @"[NAME] =""la France Ave"" and (([FROMLEFT]<=4201 and [TOLEFT]>=4499) or ([FROMRIGHT]<=4200 and [TORIGHT]>=4498)) and ([ZIP_LEFT] = ""34286"" or [ZIP_RIGHT] = ""34286"")";
+            Helper.DebugMsg(query);
+
+            TableQuery(sf, query, "filebased shapefile");
+            TableQuery(sf, query, "filebased shapefile second time");
+
+            // Make memory copy:
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            sf.SelectAll();
+            var sfTemp = sf.ExportSelection();
+            sf.SelectNone();
+            stopWatch.Stop();
+            Helper.DebugMsg($"Time it took to ExportSelection: { stopWatch.Elapsed}");
+
+            TableQuery(sfTemp, query, "memory shapefile");
+            TableQuery(sfTemp, query, "memory shapefile second time");
+            var fileLocation = Path.Combine(Path.GetTempPath(), "speed.shp");
+            Helper.SaveAsShapefile(sfTemp, fileLocation);
+
+            // Again after saving
+            TableQuery(sfTemp, query, "memory shapefile after saving");
+            TableQuery(sfTemp, query, "memory shapefile after saving second time");
+            sfTemp.Close();
+
+            // Use QTree
+            sf.UseQTree = true;
+            TableQuery(sf, query, "shapefile with QTree index");
+            TableQuery(sf, query, "shapefile with QTree index second time");
+
+            // Use spatial index:
+            Assert.IsTrue(sf.CreateSpatialIndex(sf.Filename), "Cannot create spatial index");
+            sf.UseQTree = false;
+            TableQuery(sf, query, "shapefile with spatial index");
+            TableQuery(sf, query, "shapefile with spatial index second time");
+
+            // Open temp shapefile:
+            var sfTemp2 = Helper.OpenShapefile(fileLocation);
+            sfTemp2.UseQTree = true;
+            TableQuery(sfTemp2, query, " temp shapefile with QTree index after loading from disk");
+            TableQuery(sfTemp2, query, " temp shapefile with QTree index after loading from disk second time");
+        }
+
+        private static void TableQuery(IShapefile sf, string query, string logMsg)
+        {
+            object result = null;
+            string errorString = null;
+
+            var stopWatch = new Stopwatch();
+            Helper.DebugMsg("Start sf.Table.Query");
+            stopWatch.Start();
+            Assert.IsTrue(sf.Table.Query(query, ref result, ref errorString), "Table.Query: " + errorString);
+            stopWatch.Stop();
+            Helper.DebugMsg($"Time it took to query {logMsg}: { stopWatch.Elapsed}");
+
+            Assert.IsNotNull(result);
+            var indexes = result as int[];
+            Assert.IsNotNull(indexes);
+            Assert.IsTrue(indexes.Length > 0, "No results found");
         }
 
         private bool GetInfoShapefile(string filename)

@@ -31,7 +31,7 @@
 
 // CMeasuring
 class ATL_NO_VTABLE CMeasuring :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CMeasuring, &CLSID_Measuring>,
 	public IDispatchImpl<IMeasuring, &IID_IMeasuring, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

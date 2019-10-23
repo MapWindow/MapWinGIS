@@ -378,9 +378,9 @@ namespace MWLite.Symbology.Forms.Charts
             if (_charts.Visible)
             {
                 if (_charts.ChartType == MapWinGIS.tkChartType.chtPieChart)
-                    _charts.DrawChart(hdc, (width - _charts.IconWidth) / 2, (height - _charts.IconHeight) / 2,  false, backColor);
+                    _charts.DrawChart(hdc.ToInt32(), (width - _charts.IconWidth) / 2, (height - _charts.IconHeight) / 2,  false, backColor);
                 else
-                    _charts.DrawChart(hdc, (width - _charts.IconWidth) / 2, (height - _charts.IconHeight) / 2, false, backColor);
+                    _charts.DrawChart(hdc.ToInt32(), (width - _charts.IconWidth) / 2, (height - _charts.IconHeight) / 2, false, backColor);
             }
             g.ReleaseHdc();
             pictureBox1.Image = bmp;

@@ -26,7 +26,7 @@
 
 // CGridColorBreak
 class ATL_NO_VTABLE CGridColorBreak : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CGridColorBreak, &CLSID_GridColorBreak>,
 	public IDispatchImpl<IGridColorBreak, &IID_IGridColorBreak, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

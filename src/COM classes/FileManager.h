@@ -3,7 +3,7 @@
 
 // CFileManager
 class ATL_NO_VTABLE CFileManager :
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CFileManager, &CLSID_FileManager>,
 	public IDispatchImpl<IFileManager, &IID_IFileManager, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {

@@ -39,7 +39,7 @@
 // CShapefile declaration
 // *********************************************************************
 class ATL_NO_VTABLE CShapefile : 
-	public CComObjectRootEx<CComMultiThreadModel>,
+	public CComObjectRootEx<CComObjectThreadModel>,
 	public CComCoClass<CShapefile, &CLSID_Shapefile>,
 	public IDispatchImpl<IShapefile, &IID_IShapefile, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -220,7 +220,7 @@ public:
 	STDMETHOD(put_ShapeCategory3)(long ShapeIndex, IShapefileCategory* category);
 	STDMETHOD(Dump)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
 	STDMETHOD(LoadDataFrom)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
-	STDMETHOD(Segmentize)(IShapefile** retVal);
+	STDMETHOD(Segmentize)(double metersTolerance, IShapefile** retVal);
 	STDMETHOD(get_LastInputValidation)(IShapeValidationInfo** retVal);
 	STDMETHOD(get_LastOutputValidation)(IShapeValidationInfo** retVal);
 	STDMETHOD(ClearCachedGeometries)();
@@ -279,6 +279,7 @@ private:
 
 private:
 	::CCriticalSection _readLock;
+
 	std::vector<PolygonShapefile> _polySf;
 	
 	tkShapefileSourceType _sourceType;		// is it disk-based or in-memory?
@@ -393,8 +394,12 @@ private:
 	void put_ReferenceToCharts(bool bNullReference = false);
 
 	// quad tree
+    QTree* GenerateQTreeCore(bool SelectedOnly);
+    QTree* GenerateEmptyQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax);
+    void ClearQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax);
 	void GenerateQTree();
-	QTree* GenerateQTreeCore(bool SelectedOnly);
+
+    // temp quad tree
 	bool GenerateTempQTree(bool SelectedOnly);
 	void ClearTempQTree();
 	QTree* GetTempQTree();
@@ -482,6 +487,7 @@ public:
 	bool GetSorting(vector<long>** indices);
 
 public:	
+    ::CCriticalSection ShapefileLock;
 	// geoprocessing methods
 	VARIANT_BOOL FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* result);
 	VARIANT_BOOL BufferByDistanceCore(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, VARIANT_BOOL MergeResults, IShapefile* result);

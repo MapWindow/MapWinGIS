@@ -26,7 +26,7 @@
 
 // CPointClass
 // In contrast with other classes we are using CComSingleThreadModel base class here.
-// CComSingleMultiThreadModel increases memory usage by 24 more bytes which is unacceptable.
+// CComMultiThreadModel increases memory usage by 24 more bytes which is unacceptable.
 class ATL_NO_VTABLE CPointClass : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CPointClass, &CLSID_Point>,

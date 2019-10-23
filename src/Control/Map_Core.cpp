@@ -1,7 +1,9 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "Map.h"
+#undef HOST_FILLORDER /* MWGIS-182 */
 #include "Projections.h"
 #include "xtiffio.h"  /* for TIFF */
+#undef HOST_FILLORDER /* MWGIS-182 */
 #include "geotiffio.h" /* for GeoTIFF */
 #include "Gdipluspixelformats.h"
 #include "tiff.h"
@@ -11,6 +13,8 @@
 #include "tiffio.h"
 #include "tiffiop.h"
 
+// ReSharper disable CppUseAuto
+
 #pragma region Rotation
 // ****************************************************************
 //		GetRotatedExtent()
@@ -18,26 +22,26 @@
 //ajp (June 2010)
 IPoint* CMapView::GetBaseProjectionPoint(double rotPixX, double rotPixY)
 {
-  IPoint *curPoint = NULL;
-  long basePixX = 0, basePixY = 0; 
-  double baseProjX = 0, baseProjY = 0; 
-	
-  CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&curPoint);
+	IPoint *curPoint = nullptr;
+	long basePixX = 0, basePixY = 0;
+	double baseProjX = 0, baseProjY = 0;
 
-	if (_rotate == NULL || _rotate->degAngle == 0.0)
-  {
-    basePixX = (long)rotPixX;
-    basePixY = (long)rotPixY;
-  }
-  else
-  {
-     _rotate->getOriginalPixelPoint((long) rotPixX, (long) rotPixY, &basePixX, &basePixY);
-  }
-  PixelToProjection( basePixX, basePixY, baseProjX, baseProjY);
-  
-  curPoint->put_X(baseProjX);
-  curPoint->put_Y(baseProjY);
-  return curPoint;
+	CoCreateInstance(CLSID_Point, nullptr, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&curPoint);
+
+	if (_rotate == nullptr || _rotate->degAngle == 0.0)
+	{
+		basePixX = (long)rotPixX;
+		basePixY = (long)rotPixY;
+	}
+	else
+	{
+		_rotate->getOriginalPixelPoint((long)rotPixX, (long)rotPixY, &basePixX, &basePixY);
+	}
+	PixelToProjection(basePixX, basePixY, baseProjX, baseProjY);
+
+	curPoint->put_X(baseProjX);
+	curPoint->put_Y(baseProjY);
+	return curPoint;
 }
 
 // ****************************************************************
@@ -46,25 +50,25 @@ IPoint* CMapView::GetBaseProjectionPoint(double rotPixX, double rotPixY)
 //ajp (June 2010)
 IExtents* CMapView::GetRotatedExtent()
 {
-  Extent rotExtent;
-	IExtents * box = NULL;
+	Extent rotExtent;
+	IExtents * box = nullptr;
 
 	rotExtent = _extents;
 	ComHelper::CreateExtents(&box);
-  box->SetBounds( rotExtent.left, rotExtent.bottom, 0, rotExtent.right, rotExtent.top, 0 );
+	box->SetBounds(rotExtent.left, rotExtent.bottom, 0, rotExtent.right, rotExtent.top, 0);
 
 	if (_rotateAngle == 0)
-	  return box;
+		return box;
 
-	if (_rotate == NULL)
+	if (_rotate == nullptr)
 		_rotate = new Rotate();
 
 	_rotate->calcRotatedExtent(_viewWidth, _viewHeight);
-  rotExtent.right += (_rotate->xAxisDiff * _inversePixelPerProjectionX);
-  rotExtent.bottom -= (_rotate->yAxisDiff * _inversePixelPerProjectionY);
-  rotExtent.left -= (_rotate->xAxisDiff * _inversePixelPerProjectionX);
-  rotExtent.top += (_rotate->yAxisDiff * _inversePixelPerProjectionY);
-  box->SetBounds( rotExtent.left, rotExtent.bottom, 0, rotExtent.right, rotExtent.top, 0 );
+	rotExtent.right += (_rotate->xAxisDiff * _inversePixelPerProjectionX);
+	rotExtent.bottom -= (_rotate->yAxisDiff * _inversePixelPerProjectionY);
+	rotExtent.left -= (_rotate->xAxisDiff * _inversePixelPerProjectionX);
+	rotExtent.top += (_rotate->yAxisDiff * _inversePixelPerProjectionY);
+	box->SetBounds(rotExtent.left, rotExtent.bottom, 0, rotExtent.right, rotExtent.top, 0);
 
 	return box;
 }
@@ -77,32 +81,28 @@ IExtents* CMapView::GetRotatedExtent()
 // ***************************************************
 float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 {
-	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
+	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
-		Layer * l = _allLayers[LayerHandle];
-		if( l->IsImage() )
+		Layer* l = _allLayers[LayerHandle];
+		if (l->IsImage())
 		{
-			IImage * iimg = NULL;
-			
+			IImage * iimg = nullptr;
+
 			if (!l->QueryImage(&iimg))
 				return 1.0;
-			
+
 			double val;
 			iimg->get_TransparencyPercent(&val);
-			iimg->Release(); iimg = NULL;
+			iimg->Release(); iimg = nullptr;
 			return static_cast<float>(val);
 		}
-		else
-		{	
-			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
-			return 0.0f;
-		}
-	}
-	else
-	{	
-		ErrorMessage(tkINVALID_LAYER_HANDLE);
+		
+		ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 		return 0.0f;
 	}
+	
+	ErrorMessage(tkINVALID_LAYER_HANDLE);
+	return 0.0f;
 }
 
 // ***************************************************
@@ -111,21 +111,21 @@ float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 // Will be deprecated
 void CMapView::SetImageLayerPercentTransparent(long LayerHandle, float newValue)
 {
-	if( newValue < 0.0 )		newValue = 0.0;
-	else if( newValue > 1.0 )	newValue = 1.0;
+	if (newValue < 0.0)		newValue = 0.0;
+	else if (newValue > 1.0)	newValue = 1.0;
 
-	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
+	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
 		Layer * l = _allLayers[LayerHandle];
-		if( l->IsImage() )
-		{	
-			IImage * iimg = NULL;
-			
+		if (l->IsImage())
+		{
+			IImage * iimg = nullptr;
+
 			//if( iimg == NULL )	return;
 			if (!l->QueryImage(&iimg))
 				return;
 			iimg->put_TransparencyPercent(newValue);
-			iimg->Release(); iimg = NULL;
+			iimg->Release(); iimg = nullptr;
 		}
 		else
 			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
@@ -142,38 +142,33 @@ VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* Col
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if(IS_VALID_LAYER(LayerHandle,_allLayers))
+	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
 		// redirected to image class for backward compatibility
-		IGridColorScheme* scheme = NULL;
-		ColorScheme->QueryInterface(IID_IGridColorScheme,(void**)&scheme);
+		IGridColorScheme* scheme = nullptr;
+		ColorScheme->QueryInterface(IID_IGridColorScheme, (void**)&scheme);
 		if (scheme)
 		{
 			IImage* img = this->GetImage(LayerHandle);
-			if (img != NULL)
+			if (img != nullptr)
 			{
 				img->put_CustomColorScheme(scheme);
 				img->Release();
+				scheme->Release();
 				return VARIANT_TRUE;
 			}
-			else
-			{
-				ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
-				return VARIANT_FALSE;
-			}
+			
 			scheme->Release();
-		}
-		else
-		{
 			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 			return VARIANT_FALSE;
 		}
-	}
-	else
-	{
-		ErrorMessage(tkINVALID_LAYER_HANDLE);
+		
+		ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 		return VARIANT_FALSE;
 	}
+	
+	ErrorMessage(tkINVALID_LAYER_HANDLE);
+	return VARIANT_FALSE;
 }
 
 // deprecated
@@ -187,8 +182,8 @@ void CMapView::UpdateImage(LONG LayerHandle)
 // ***************************************************************
 bool CMapView::LayerIsEmpty(long LayerHandle)
 {
-	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
-	{	
+	if (IS_VALID_LAYER(LayerHandle, _allLayers))
+	{
 		Layer * l = _allLayers[LayerHandle];
 		if (!l) return true;
 		return l->IsEmpty();
@@ -201,17 +196,15 @@ bool CMapView::LayerIsEmpty(long LayerHandle)
 // ***************************************************************
 BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 {
-	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
-	{	
+	if (IS_VALID_LAYER(LayerHandle, _allLayers))
+	{
 		Layer * l = _allLayers[LayerHandle];
-		if(!l->get_Object()) return FALSE;
-		return l->UpdateExtentsFromDatasource() ? TRUE: FALSE;
+		if (!l->get_Object()) return FALSE;
+		return l->UpdateExtentsFromDatasource() ? TRUE : FALSE;
 	}
-	else
-	{	
-		ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return FALSE;
-	}
+	
+	ErrorMessage(tkINVALID_LAYER_HANDLE);
+	return FALSE;
 }
 
 #pragma endregion
@@ -222,7 +215,7 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 // *************************************************
 void CMapView::LockWindow(short LockMode)
 {
-	if( LockMode == lmUnlock )
+	if (LockMode == lmUnlock)
 	{
 		if (_lockCount == 0)
 		{
@@ -231,13 +224,13 @@ void CMapView::LockWindow(short LockMode)
 
 		_lockCount--;
 
-		if( _lockCount == 0 )
+		if (_lockCount == 0)
 		{
 			_lockCount = 0;
 			RedrawCore(RedrawAll, false, true);
 		}
 	}
-	else if (LockMode == lmLock) 
+	else if (LockMode == lmLock)
 	{
 		_lockCount++;
 	}
@@ -256,23 +249,23 @@ void CMapView::Resize(long Width, long Height)
 	pf.x = (float)Width;
 	pf.y = (float)Height;
 
-	TransformCoords( &pl, &pf, XFORMCOORDS_SIZE | XFORMCOORDS_CONTAINERTOHIMETRIC );
+	TransformCoords(&pl, &pf, XFORMCOORDS_SIZE | XFORMCOORDS_CONTAINERTOHIMETRIC);
 
 	CSize size;
 	size.cx = pl.x;
 	size.cy = pl.y;
 	CDC *dc = GetDC();
-	dc->HIMETRICtoDP( &size );
-	ReleaseDC( dc );
+	dc->HIMETRICtoDP(&size);
+	ReleaseDC(dc);
 
 	CRect rect;
-	GetRectInContainer( rect );
+	GetRectInContainer(rect);
 	rect.right = rect.left + size.cx;
 	rect.bottom = rect.top + size.cy;
 
-	SetRectInContainer( rect );
+	SetRectInContainer(rect);
 
-	OnSize( SIZE_RESTORED, size.cx, size.cy );
+	OnSize(SIZE_RESTORED, size.cx, size.cy);
 }
 
 // *************************************************
@@ -288,7 +281,7 @@ void CMapView::Redraw2(tkRedrawType redrawType)
 // *************************************************
 void CMapView::Redraw3(tkRedrawType redrawType, VARIANT_BOOL reloadTiles)
 {
-	RedrawCore(redrawType, false, reloadTiles ? true : false);
+	RedrawCore(redrawType, false, reloadTiles != 0);
 }
 
 // *************************************************
@@ -313,7 +306,7 @@ void CMapView::ScheduleLayerRedraw()
 // *************************************************
 //			RedrawCore()						  
 // *************************************************
-void CMapView::RedrawCore( tkRedrawType redrawType, bool atOnce, bool forceReloadTiles /*= false */ )
+void CMapView::RedrawCore(tkRedrawType redrawType, bool atOnce, bool forceReloadTiles /*= false */)
 {
 	bool reloaded = ReloadTiles(forceReloadTiles || redrawType == RedrawAll);
 
@@ -326,22 +319,22 @@ void CMapView::RedrawCore( tkRedrawType redrawType, bool atOnce, bool forceReloa
 	// no breaks are needed; it's intentional; redraw type of higher order leads to redraw of lower levels
 	switch (redrawType)
 	{
-		case tkRedrawType::RedrawAll:
-			_canUseLayerBuffer = false;
-			ReloadBuffers();
+	case tkRedrawType::RedrawAll:
+		_canUseLayerBuffer = false;
+		ReloadBuffers();
 
-		case tkRedrawType::RedrawSkipDataLayers:
-			_canUseVolatileBuffer = false;
+	case tkRedrawType::RedrawSkipDataLayers:
+		_canUseVolatileBuffer = false;
 
-		case tkRedrawType::RedrawSkipAllLayers:
-			_canUseMainBuffer = false;
+	case tkRedrawType::RedrawSkipAllLayers:
+		_canUseMainBuffer = false;
 
-		case tkRedrawType::RedrawMinimal:
-			// do nothing, simply invalidate control
-			break;
+	case tkRedrawType::RedrawMinimal:
+		// do nothing, simply invalidate control
+		break;
 	}
 
-	if (atOnce){
+	if (atOnce) {
 		Refresh();
 	}
 	else {
@@ -362,15 +355,15 @@ void CMapView::Redraw()
 // *************************************************
 void CMapView::ShowToolTip(LPCTSTR Text, long Milliseconds)
 {
-	_ttip.UpdateTipText(Text,this,IDC_TTBTN);
-	_ttip.SetDelayTime(TTDT_AUTOPOP,Milliseconds);
+	_ttip.UpdateTipText(Text, this, IDC_TTBTN);
+	_ttip.SetDelayTime(TTDT_AUTOPOP, Milliseconds);
 	KillTimer(HIDETEXT);
-	SetTimer(SHOWTEXT,0,NULL);
+	SetTimer(SHOWTEXT, 0, nullptr);
 
-	if( Milliseconds < 0 )
+	if (Milliseconds < 0)
 		Milliseconds = 0;
 
-	SetTimer(HIDETEXT,Milliseconds,NULL);
+	SetTimer(HIDETEXT, Milliseconds, nullptr);
 }
 
 // *************************************************
@@ -399,7 +392,7 @@ inline void CMapView::ErrorMessage(long ErrorCode, tkCallbackVerbosity verbosity
 	if (verbosity < m_globalSettings.callbackVerbosity) {
 		return;
 	}
-	
+
 	_lastErrorCode = ErrorCode;
 	CallbackHelper::ErrorMsg("Map", _globalCallback, m_key, ErrorMsg(_lastErrorCode));
 }
@@ -424,7 +417,7 @@ BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
 	CComBSTR bstrName(Filename);
 	VARIANT_BOOL vb;
 	GetUtils()->IsTiffGrid(bstrName, &vb);
-	return vb ? TRUE: FALSE;
+	return vb ? TRUE : FALSE;
 }
 #pragma endregion
 
@@ -455,19 +448,19 @@ BOOL CMapView::ApplyLegendColors(LPDISPATCH pLegend)
 // *********************************************************
 LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 {
-	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
-	{	
+	if (IS_VALID_LAYER(LayerHandle, _allLayers))
+	{
 		Layer * l = _allLayers[LayerHandle];
-		if( l->IsShapefile() )
-		{	
-			return NULL;	// probably return ShapeDrawingOptions ?
-		}
-		else if(l->IsImage())
+		if (l->IsShapefile())
 		{
- 			// redirected to image color scheme for backward compatibility
-			IGridColorScheme* scheme = NULL;
+			return nullptr;	// probably return ShapeDrawingOptions ?
+		}
+		else if (l->IsImage())
+		{
+			// redirected to image color scheme for backward compatibility
+			IGridColorScheme* scheme = nullptr;
 			IImage* img = this->GetImage(LayerHandle);
-			if (img != NULL)
+			if (img != nullptr)
 			{
 				img->get_CustomColorScheme(&scheme);
 				img->Release();
@@ -482,20 +475,20 @@ LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 			}
 			else
 			{
-				ErrorMessage(tkUNEXPECTED_LAYER_TYPE);	
+				ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 			}
 			return scheme;
 		}
 		else
 		{
-			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);	
-			return NULL;
+			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
+			return nullptr;
 		}
 	}
 	else
-	{	
+	{
 		ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -507,12 +500,12 @@ BSTR CMapView::GetGridFileName(LONG LayerHandle)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CString retval;
 
-	if(IS_VALID_LAYER(LayerHandle,_allLayers))
+	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
 		// redirected to image class for backward compatibility
 		IImage* img = this->GetImage(LayerHandle);
-		if (img != NULL)
-		{	
+		if (img != nullptr)
+		{
 			BSTR gridName;
 			img->get_SourceGridName(&gridName);
 			img->Release();
@@ -587,3 +580,4 @@ bool CMapView::VerifySerial(CString str)
 }
 #pragma endregion
 
+// ReSharper restore CppUseAuto

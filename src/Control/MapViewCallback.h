@@ -18,6 +18,7 @@ public:
 	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) = 0;
 	virtual void _FireAfterShapeEdit(tkUndoOperation action, LONG LayerHandle, LONG ShapeIndex) = 0;
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) = 0;
+	virtual void _FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY) = 0;
 	virtual void _ZoomToEditor() = 0;
 	virtual void _SetMapCursor(tkCursorMode mode, bool clearEditor) = 0;
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce) = 0;

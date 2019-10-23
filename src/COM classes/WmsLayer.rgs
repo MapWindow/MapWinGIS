@@ -1,16 +1,26 @@
 HKCR
 {
+	MapWinGIS.WmsLayer.1 = s 'WmsLayer Class'
+	{
+		CLSID = s '{EE9A0CDA-162C-4663-A48F-A5A29C1071C6}'
+	}
+	MapWinGIS.WmsLayer = s 'WmsLayer Class'
+	{
+		CLSID = s '{EE9A0CDA-162C-4663-A48F-A5A29C1071C6}'
+		CurVer = s 'MapWinGIS.WmsLayer.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {EE9A0CDA-162C-4663-A48F-A5A29C1071C6} = s 'WmsLayer Class'
 		{
-			ForceRemove Programmable
+			ProgID = s 'MapWinGIS.WmsLayer.1'
+			VersionIndependentProgID = s 'MapWinGIS.WmsLayer'
+			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Both'
 			}
-			TypeLib = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
-			Version = s '4.9'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
 		}
 	}
 }
