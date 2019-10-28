@@ -168,6 +168,8 @@ IShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString metho
             ErrorMessage(errorCode);
 
         VARIANT_BOOL vb;
+		// have to release lock prior to destruction
+		sfLock.Unlock();
         (*isf)->Close(&vb);
         (*isf)->Release();
         *isf = nullptr;
