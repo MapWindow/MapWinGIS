@@ -25,6 +25,7 @@
 #include "Charts.h"
 #include "Shape.h"
 #include "ShapeHelper.h"
+#include "Propvarutil.h"
 
 #pragma region StartEditing
 
@@ -343,7 +344,7 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 	// updating labels and charts
 	if (_table) 
 	{
-		double x = 0.0, y = 0.0, rotation = 0.0;
+		double x = 0.0, y = 0.0, rotation = 0.0, offsetX = 0.0, offsetY = 0.0;
 		VARIANT_BOOL vbretval;
 
 		VARIANT_BOOL bSynchronized;
@@ -364,9 +365,19 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 		
 		if (bSynchronized)
 		{
+            long offsetXField, offsetYField;
+
+            _labels->get_OffsetXField(&offsetXField);
+            if (offsetXField >= 0)
+                GetLabelOffset(offsetXField, ShapeIndex, &offsetX);
+
+            _labels->get_OffsetYField(&offsetYField);
+            if (offsetYField >= 0)
+                GetLabelOffset(offsetYField, ShapeIndex, &offsetX);
+
 			// it doesn't make sense to recalculate expression as DBF cells are empty all the same
 			CComBSTR bstrText("");
-			_labels->InsertLabel(ShapeIndex, bstrText, x, y, rotation, -1, &vbretval);
+			_labels->InsertLabel(ShapeIndex, bstrText, x, y, offsetX, offsetY, rotation, -1, &vbretval);
 		}
 
 		if (chartsExist)

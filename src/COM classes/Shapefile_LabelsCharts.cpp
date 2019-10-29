@@ -32,10 +32,29 @@
 #pragma region Labels
 
 // ************************************************************
+//			GetLabelOffset
+// ************************************************************
+void CShapefile::GetLabelOffset(long offsetFieldIndex, long shapeIndex, double* offset)
+{
+    if (offsetFieldIndex != -1)
+    {
+        CComVariant val;
+        get_CellValue(offsetFieldIndex, shapeIndex, &val);
+        val.ChangeType(VT_R8);
+        *offset = val.dblVal;
+    }
+    else
+    {
+        *offset = 0.0;
+    }
+}
+
+// ************************************************************
 //			GetLabelValue
 // ************************************************************
 void CShapefile::GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat)
-{	if (fieldIndex != -1)
+{
+	if (fieldIndex != -1)
 	{
 		CComVariant val;
 		get_CellValue(fieldIndex, shapeIndex, &val);
@@ -52,8 +71,10 @@ void CShapefile::GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CS
 // ************************************************************
 // FieldIndex == -1: labels without text will be generated; 
 // Method == lpNone: labels with (0.0,0.0) coordinates will be generated
-STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Method, VARIANT_BOOL LargestPartOnly, long* Count)
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());	*Count = 0;
+STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Method, VARIANT_BOOL LargestPartOnly, long offsetXFieldIndex, long offsetYFieldIndex, long* Count)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*Count = 0;
 	
 	long numFields;
 	this->get_NumFields(&numFields);
@@ -63,6 +84,9 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS); 
 		return S_OK;
 	} 
+
+    bool useXOffset = (offsetXFieldIndex < -1 || offsetXFieldIndex >= numFields) ? false : true;
+    bool useYOffset = (offsetYFieldIndex < -1 || offsetYFieldIndex >= numFields) ? false : true;
 	
 	_labels->Clear();
 	
@@ -82,6 +106,12 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 		CComBSTR text;
 		GetLabelString(FieldIndex, i, &text, floatFormat);
 		
+        double offsetX, offsetY = 0;
+        if (useXOffset)
+            GetLabelOffset(offsetXFieldIndex, i, &offsetX);
+        if (useYOffset)
+            GetLabelOffset(offsetYFieldIndex, i, &offsetY);
+
 		CComPtr<IShape> shp = NULL;
 		this->get_Shape(i, &shp);
 		if (shp)
@@ -93,14 +123,14 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 
 			if( numParts == 1)
 			{
-				ShapeHelper::AddLabelToShape(shp, _labels, text, Method, orientation);
+				ShapeHelper::AddLabelToShape(shp, _labels, text, offsetX, offsetY, Method, orientation);
 				continue;
 			}
 			else if (numParts == 0)
 			{
 				if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 				{
-					ShapeHelper::AddLabelToShape(shp, _labels, text, Method, orientation);
+					ShapeHelper::AddLabelToShape(shp, _labels, text, offsetX, offsetY, Method, orientation);
 					continue;
 				}	
 			}
@@ -123,14 +153,14 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 					
 						if (partCount == 0) 
 						{
-							ShapeHelper::AddLabelToShape(shpPart, _labels, text, Method, orientation);
+							ShapeHelper::AddLabelToShape(shpPart, _labels, text, offsetX, offsetY, Method, orientation);
 							partCount++;
 						}
 						else		
 						{
 							double x = 0.0, y = 0.0;
 							ShapeHelper::Cast(shpPart)->get_LabelPosition(Method, x, y, rotation, orientation);
-							_labels->AddPart(i, text, x, y, rotation);
+							_labels->AddPart(i, text, x, y, offsetX, offsetY, rotation);
 						}
 					}
 
@@ -147,7 +177,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 						shp->get_PartAsShape(maxPart, &shpPart);
 						if (shpPart)
 						{
-							ShapeHelper::AddLabelToShape(shpPart, _labels, text, Method, orientation);
+							ShapeHelper::AddLabelToShape(shpPart, _labels, text, offsetX, offsetY, Method, orientation);
 							continue;
 						}
 					}
@@ -179,13 +209,17 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 // ******************************************************************
 //  Returns reference to Labels class
 STDMETHODIMP CShapefile::get_Labels(ILabels** pVal)
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());	*pVal = _labels;
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _labels;
 	if (_labels)
 		_labels->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_Labels(ILabels* newVal)
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());	if (!newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (!newVal)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE); 
 	}
@@ -201,7 +235,8 @@ STDMETHODIMP CShapefile::put_Labels(ILabels* newVal)
 /*		put_ReferenceToLabels
 /***********************************************************************/
 void CShapefile::put_ReferenceToLabels(bool bNullReference)
-{	if (_labels == NULL) return;
+{
+	if (_labels == NULL) return;
 	((CLabels*)_labels)->put_ParentShapefile(bNullReference ? NULL : this);
 }
 #pragma endregion
@@ -211,13 +246,17 @@ void CShapefile::put_ReferenceToLabels(bool bNullReference)
 //		get/put_Charts()
 // *******************************************************************
 STDMETHODIMP CShapefile::get_Charts (ICharts** pVal)
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());	*pVal = _charts;
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _charts;
 	if ( _charts != NULL)
 		_charts->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_Charts (ICharts* newVal)
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());	if (!newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (!newVal)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE); 
 	}
@@ -231,7 +270,8 @@ STDMETHODIMP CShapefile::put_Charts (ICharts* newVal)
 /*		put_ReferenceToCharts
 /***********************************************************************/
 void CShapefile::put_ReferenceToCharts(bool bNullReference)
-{	if (!_charts) return;
+{
+	if (!_charts) return;
 	((CCharts*)_charts)->put_ParentShapefile(bNullReference ? NULL: this);
 };
 
@@ -239,7 +279,8 @@ void CShapefile::put_ReferenceToCharts(bool bNullReference)
 //			SetChartsPositions
 // ********************************************************************
 void CShapefile::SetChartsPositions(tkLabelPositioning Method)
-{	USES_CONVERSION;
+{
+	USES_CONVERSION;
 	double x,y;
 	
 	ShpfileType shpType;
@@ -356,7 +397,8 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 //		ClearChartFrames()
 // *************************************************************
 void CShapefile::ClearChartFrames()
-{	for (unsigned int i = 0; i < _shapeData.size(); i++ ) 
+{
+	for (unsigned int i = 0; i < _shapeData.size(); i++ ) 
 	{
 		CChartInfo* chart = _shapeData[i]->chart;
 		if (chart)

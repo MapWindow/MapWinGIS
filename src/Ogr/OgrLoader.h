@@ -37,8 +37,6 @@ public:
 	{
 		_stop = false;
 		_maxCacheCount = m_globalSettings.ogrLayerMaxFeatureCount;
-		LabelOrientation = lorParallel;
-		LabelPosition = lpNone;
 		_lockCounter = 0;
 		IsMShapefile = false;
 	}
@@ -62,12 +60,8 @@ public:
 	::CCriticalSection ProviderLock;	
 
 	bool IsMShapefile;
-	CStringW LabelExpression;
 	Extent LastExtents;
 	Extent LastSuccessExtents;
-	tkLabelPositioning LabelPosition;
-	tkLineLabelOrientation LabelOrientation;
-	tkLabelPositioning GetLabelPosition(ShpfileType type);
 	
 	void EnqueueTask(OgrLoadingTask* task);
 	bool SignalWaitingTask();

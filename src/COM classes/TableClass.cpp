@@ -478,7 +478,7 @@ STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT 
 }
 
 // ***********************************************************
-//		get_CellValue
+//		get_EditingTable
 // ***********************************************************
 STDMETHODIMP CTableClass::get_EditingTable(VARIANT_BOOL *pVal)
 {

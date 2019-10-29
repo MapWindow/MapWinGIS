@@ -13,30 +13,14 @@
 IShapefile* Ogr2Shape::Layer2Shapefile(OGRLayer* layer, ShpfileType activeShapeType, int maxFeatureCount, bool& isTrimmed, 
 	OgrDynamicLoader* loader, ICallback* callback /*= NULL*/)
 {
-	if (!layer)	return NULL;
+	if (!layer)	
+        return NULL;
 
 	IShapefile* sf = CreateShapefile(layer, activeShapeType);
 
 	if (sf) 
-	{
 		FillShapefile(layer, sf, maxFeatureCount, m_globalSettings.saveOgrLabels, callback, isTrimmed);
-		
-		// let's generate labels to unify API with dynamic mode
-		if (loader->LabelExpression.GetLength() != 0)
-		{
-			CComPtr<ILabels> labels = NULL;
-			sf->get_Labels(&labels);
-			if (labels) 
-			{
-				labels->put_LineOrientation(loader->LabelOrientation);
-				long count;
-				ShpfileType type;
-				sf->get_ShapefileType(&type);
-				CComBSTR bstr(loader->LabelExpression);
-				labels->Generate(bstr, loader->GetLabelPosition(type), VARIANT_TRUE, &count);
-			}
-		}
-	}
+
 	return sf;
 }
 
@@ -405,8 +389,9 @@ bool isXBaseLogicalTrue(wchar_t c)
 void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, IShapefile* sf, bool hasFID, long numShapes, 
 	bool loadLabels, OgrLabelsHelper::LabelFields labelFields)
 {
-	double x = 0.0, y = 0.0, rotation = 0;
+    if (!sf) return;
 
+	double x = 0.0, y = 0.0, rotation = 0, offsetX = 0.0, offsetY = 0.0;
 	CStringW text;
 
 	for (int iFld = 0; iFld < poFields->GetFieldCount(); iFld++)
@@ -488,6 +473,8 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 		{
 			if (iFld == labelFields.X) x = var.dblVal;
 			if (iFld == labelFields.Y) y = var.dblVal;
+            if (iFld == labelFields.OffsetX) offsetX = var.dblVal;
+            if (iFld == labelFields.OffsetY) offsetY = var.dblVal;
 			if (iFld == labelFields.Text) text = OgrHelper::OgrString2Unicode(poFeature->GetFieldAsString(iFld));
 			if (iFld == labelFields.Rotation) rotation = var.dblVal;
 		}
@@ -500,7 +487,7 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 		CComPtr<ILabels> labels = NULL;
 		sf->get_Labels(&labels);
 
-		labels->AddLabel(bstr, x, y, rotation);
+		labels->AddLabel(bstr, x, y, offsetX, offsetY, rotation);
 	}
 }
 

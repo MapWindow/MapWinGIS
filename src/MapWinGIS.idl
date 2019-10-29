@@ -4093,7 +4093,7 @@ interface IShapefile : IDispatch{
 	[id(65), helpstring("method Dissolve")] HRESULT Dissolve([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly, [out, retval]IShapefile** sf);
 	[propget, id(66), helpstring("property Labels")] HRESULT Labels([out, retval] ILabels** pVal);
 	[propput, id(66), helpstring("property Labels")] HRESULT Labels([in] ILabels* newVal);
-	[id(67), helpstring("method GenerateLabels")] HRESULT GenerateLabels([in]long FieldIndex, [in]tkLabelPositioning Method, [in, defaultvalue(0)]VARIANT_BOOL LargestPartOnly, [out, retval] long* count);
+	[id(67), helpstring("method GenerateLabels")] HRESULT GenerateLabels([in]long FieldIndex, [in]tkLabelPositioning Method, [in, defaultvalue(0)]VARIANT_BOOL LargestPartOnly, [in, defaultvalue(-1)]long OffsetXFieldIndex, [in, defaultvalue(-1)]long OffsetYFieldIndex, [out, retval] long* count);
 	[id(68), helpstring("method Clone")] HRESULT Clone([out, retval]IShapefile** retVal);
 	[propget, id(69), helpstring("property DefaultDrawingOptions")] HRESULT DefaultDrawingOptions([out, retval]IShapeDrawingOptions** pVal);
 	[propput, id(69), helpstring("property DefaultDrawingOptions")] HRESULT DefaultDrawingOptions([in]IShapeDrawingOptions* newVal);
@@ -4996,13 +4996,17 @@ interface ILabel : IDispatch{
 	[propput, id(5), helpstring("property Y")] HRESULT Y([in] double newVal);
 
 	[propget, id(6), helpstring("property IsDrawn")] HRESULT IsDrawn([out, retval] VARIANT_BOOL* retval);
-	//[propget, id(6), helpstring("property LabelData")] HRESULT LabelData([out, retval] BYTE** retval);
-	//[propput, id(6), helpstring("property LabelData")] HRESULT LabelData([in] BYTE* retval);
 	
 	[propget, id(7), helpstring("property Category")] HRESULT Category([out, retval] long* retval);
 	[propput, id(7), helpstring("property Category")] HRESULT Category([in] long newVal);
 
 	[propget, id(8), helpstring("property ScreenExtents")] HRESULT ScreenExtents([out, retval] IExtents** retval);
+
+    [propget, id(9), helpstring("property OffsetX")] HRESULT OffsetX([out, retval] double* retval);
+    [propput, id(9), helpstring("property OffsetX")] HRESULT OffsetX([in] double newVal);
+
+    [propget, id(10), helpstring("property OffsetY")] HRESULT OffsetY([out, retval] double* retval);
+    [propput, id(10), helpstring("property OffsetY")] HRESULT OffsetY([in] double newVal);
 };
 
 // ***********************************  Labels Interface  ******************************* 
@@ -5028,12 +5032,12 @@ interface ILabels : IDispatch{
 	[propput, id(6), helpstring("property Category")] HRESULT Category([in]long Index, [in]ILabelCategory* newVal);
 	
 	// methods
-	[id(7), helpstring("method AddLabel")] HRESULT AddLabel([in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category);
-	[id(8), helpstring("method InsertLabel")] HRESULT InsertLabel([in]long Index, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
+	[id(7), helpstring("method AddLabel")] HRESULT AddLabel([in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category);
+	[id(8), helpstring("method InsertLabel")] HRESULT InsertLabel([in]long Index, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
 	[id(9), helpstring("method RemoveLabel")] HRESULT RemoveLabel([in]long Index, [out, retval ]VARIANT_BOOL* retval);
 	
-	[id(10), helpstring("method AddPart")] HRESULT AddPart([in] long Index,[in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category);
-	[id(11), helpstring("method InsertPart")] HRESULT InsertPart([in] long Index, [in] long Part, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
+	[id(10), helpstring("method AddPart")] HRESULT AddPart([in] long Index,[in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category);
+	[id(11), helpstring("method InsertPart")] HRESULT InsertPart([in] long Index, [in] long Part, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
 	[id(12), helpstring("method RemovePart")] HRESULT RemovePart([in]long Index, [in]long Part, [out, retval ]VARIANT_BOOL* vbretval);
 
 	[id(13), helpstring("method AddCategory")] HRESULT AddCategory([in]BSTR Name, [out, retval]ILabelCategory** retVal);
@@ -5235,6 +5239,7 @@ interface ILabels : IDispatch{
 																   [in, defaultvalue("_LabelCtg")]BSTR categoryField, 
 																   [in, defaultvalue(0)] VARIANT_BOOL saveText, 
 																   [in, defaultvalue(0)] VARIANT_BOOL saveCategory, 
+                                                                   [in, defaultvalue(0)] VARIANT_BOOL createFields,
 																   [out,retval] VARIANT_BOOL* retVal);
 
 	[id(92), helpstring("method LoadFromDbf")] HRESULT LoadFromDbf([in, defaultvalue(0)] VARIANT_BOOL loadText, 
@@ -5260,7 +5265,7 @@ interface ILabels : IDispatch{
 	[propput, id(97), helpstring("property TextRenderingHint")] HRESULT TextRenderingHint([in] tkTextRenderingHint newVal);
 	[propget, id(98)] HRESULT FloatNumberFormat([out, retval] BSTR* pVal);
 	[propput, id(98)] HRESULT FloatNumberFormat([in] BSTR newVal);
-	[id(99)] HRESULT ForceRecalculateExpression();
+	[id(99), helpstring("Deprecated method ForceRecalculateExpression, use ILabels::ApplyLabelExpression instead")] HRESULT ForceRecalculateExpression();
 	[propget, id(100)] HRESULT FontSize2([out, retval] LONG* pVal);
 	[propput, id(100)] HRESULT FontSize2([in] LONG newVal);
 	[propget, id(101)] HRESULT UseVariableSize([out, retval] VARIANT_BOOL* pVal);
@@ -5272,6 +5277,11 @@ interface ILabels : IDispatch{
 	[propput, id(104)] HRESULT MinVisibleZoom([in] LONG newVal);
 	[propget, id(105)] HRESULT MaxVisibleZoom([out, retval] LONG* pVal);
 	[propput, id(105)] HRESULT MaxVisibleZoom([in] LONG newVal);
+    [propget, id(106), helpstring("property OffsetXField")] HRESULT OffsetXField([out, retval] long* retval);
+    [propput, id(106), helpstring("property OffsetXField")] HRESULT OffsetXField([in] long newVal);
+    [propget, id(107), helpstring("property OffsetYField")] HRESULT OffsetYField([out, retval] long* retval);
+    [propput, id(107), helpstring("property OffsetYField")] HRESULT OffsetYField([in] long newVal);
+    [id(108)] HRESULT ApplyLabelExpression();
 };
 
 // *******************************  LabelCategory Interface  *****************************
@@ -5395,6 +5405,10 @@ interface ILabelCategory : IDispatch{
 	[id(45), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
 	[propget, id(46)] HRESULT FontSize2([out, retval] LONG* pVal);
 	[propput, id(46)] HRESULT FontSize2([in] LONG newVal);
+    [propget, id(47), helpstring("property OffsetXField")] HRESULT OffsetXField([out, retval] long* retval);
+    [propput, id(47), helpstring("property OffsetXField")] HRESULT OffsetXField([in] long retval);
+    [propget, id(48), helpstring("property OffsetYField")] HRESULT OffsetYField([out, retval] long* retval);
+    [propput, id(48), helpstring("property OffsetYField")] HRESULT OffsetYField([in] long retval);
 };
 
 // **************************  ShapefileCategories Interface  *****************************/
@@ -6352,12 +6366,6 @@ interface IOgrLayer : IDispatch{
 	[propget, id(36)] HRESULT StyleName([in] LONG styleIndex, [out, retval] BSTR* pVal);
 	[id(38)] HRESULT ClearStyles([out, retval]VARIANT_BOOL* retVal);
 	[id(39)] HRESULT RemoveStyle([in] BSTR styleName, [out, retval]VARIANT_BOOL* retVal);
-	[propget, id(40)] HRESULT LabelExpression([out, retval] BSTR* pVal);
-	[propput, id(40)] HRESULT LabelExpression([in] BSTR newVal);
-	[propget, id(42)] HRESULT LabelPosition([out, retval] tkLabelPositioning* pVal);
-	[propput, id(42)] HRESULT LabelPosition([in] tkLabelPositioning newVal);
-	[propget, id(43)] HRESULT LabelOrientation([out, retval] tkLineLabelOrientation* pVal);
-	[propput, id(43)] HRESULT LabelOrientation([in] tkLineLabelOrientation newVal);
 	[id(44)] HRESULT GenerateCategories([in] BSTR FieldName, [in] tkClassificationType classificationType, 
 			[in] long numClasses, [in]tkMapColor colorStart, [in] tkMapColor colorEnd, 
 			[in]tkColorSchemeType schemeType, [out, retval] VARIANT_BOOL* retVal);

@@ -116,12 +116,6 @@ public:
 	STDMETHOD(get_StyleName)(LONG styleIndex, BSTR* pVal);
 	STDMETHOD(ClearStyles)(VARIANT_BOOL* retVal);
 	STDMETHOD(RemoveStyle)(BSTR styleName, VARIANT_BOOL* retVal);
-	STDMETHOD(get_LabelExpression)(BSTR* pVal);
-	STDMETHOD(put_LabelExpression)(BSTR newVal);
-	STDMETHOD(get_LabelPosition)(tkLabelPositioning* pVal);
-	STDMETHOD(put_LabelPosition)(tkLabelPositioning newVal);
-	STDMETHOD(get_LabelOrientation)(tkLineLabelOrientation* pVal);
-	STDMETHOD(put_LabelOrientation)(tkLineLabelOrientation newVal);
 	STDMETHOD(GenerateCategories)(BSTR FieldName, tkClassificationType classificationType, long numClasses, tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType, VARIANT_BOOL* retVal);
 	STDMETHOD(get_ShapeType2D)(ShpfileType* pVal);
 	STDMETHOD(get_DriverName)(BSTR* pVal);

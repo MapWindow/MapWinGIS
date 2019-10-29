@@ -2194,6 +2194,7 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 		// first point, last point, point closest to center of mass;
 		this->get_XY(0, &x, &y, &vbretval);
 	}
+
 	return;
 }
 

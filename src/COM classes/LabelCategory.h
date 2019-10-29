@@ -114,13 +114,17 @@ public:
 	
 	// position
 	STDMETHOD(get_OffsetX)(double* retval)							{*retval = _options.offsetX;			return S_OK;};
-	STDMETHOD(put_OffsetX)(double newVal)							{_options.offsetX = newVal;			return S_OK;};
+	STDMETHOD(put_OffsetX)(double newVal)							{_options.offsetX = newVal;			    return S_OK;};
 	STDMETHOD(get_OffsetY)(double* retval)							{*retval = _options.offsetY;			return S_OK;};
-	STDMETHOD(put_OffsetY)(double newVal)							{_options.offsetY = newVal;			return S_OK;};
+	STDMETHOD(put_OffsetY)(double newVal)							{_options.offsetY = newVal;			    return S_OK;};
+    STDMETHOD(get_OffsetXField)(long* retval)                       { *retval = _options.offsetXField;      return S_OK; };
+    STDMETHOD(put_OffsetXField)(long newVal)                        { _options.offsetXField = newVal;	    return S_OK; };
+    STDMETHOD(get_OffsetYField)(long* retval)                       { *retval = _options.offsetYField;	    return S_OK; };
+    STDMETHOD(put_OffsetYField)(long newVal)                        { _options.offsetYField = newVal;	    return S_OK; };
 	STDMETHOD(get_Alignment)(tkLabelAlignment* retval)				{*retval = _options.alignment;			return S_OK;};
 	STDMETHOD(put_Alignment)(tkLabelAlignment newVal)				{_options.alignment = newVal;			return S_OK;};
 	STDMETHOD(get_LineOrientation)(tkLineLabelOrientation* retval)	{*retval = _options.lineOrientation;	return S_OK;};		
-	STDMETHOD(put_LineOrientation)(tkLineLabelOrientation newVal)	{_options.lineOrientation = newVal;	return S_OK;};
+	STDMETHOD(put_LineOrientation)(tkLineLabelOrientation newVal)	{_options.lineOrientation = newVal;	    return S_OK;};
 	
 	// font
 	STDMETHOD(get_FontName)(BSTR* retval);

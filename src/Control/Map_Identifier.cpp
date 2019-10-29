@@ -48,15 +48,21 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
     tkMwBoolean isFinal = blnFalse, isFound = blnFalse;
     FireSnapPointRequested(x, y, &xF, &yF, &isFound, &isFinal);
 
-    // Check if the snap point returned by the end-user is valid:
-    if (isFound && !isFinal) {
-        double distance = sqrt(pow(x - xF, 2.0) + pow(y - yF, 2.0));
-        if (distance <= maxDist)
-        {
-            minDistance = distance;
+    if (isFound) {
+        
+        if (isFinal) { // Trust the event consumer knows what (s)he's doing...
             *xFound = xF;
             *yFound = yF;
             result = VARIANT_TRUE;
+        } else { // Check if the snap point returned by the end-user is valid:
+            double distance = sqrt(pow(x - xF, 2.0) + pow(y - yF, 2.0));
+            if (distance <= maxDist)
+            {
+                minDistance = distance;
+                *xFound = xF;
+                *yFound = yF;
+                result = VARIANT_TRUE;
+            }
         }
     }
 

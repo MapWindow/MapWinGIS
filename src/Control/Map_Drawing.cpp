@@ -915,19 +915,19 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 				CComPtr<IShapefile> sf = NULL;
 				if (l->IsDynamicOgrLayer())
 				{
-					// Try to get the data loaded so far:
+					// Try to get the data loaded so far & update labels & categories
 					l->UpdateShapefile();
 					
 					// Get the shapefile
                     l->QueryShapefile(&sf);
 				}
-                else
-                {
-                    // grab extents from shapefile in case they changed
-                    l->UpdateExtentsFromDatasource();
+				else
+				{
+					// grab extents from shapefile in case they changed
+					l->UpdateExtentsFromDatasource();
 
-                    if (!l->extents.Intersects(_extents))
-                        continue;
+					if (!l->extents.Intersects(_extents))
+						continue;
 
 					// layerBuffer == true indicates we're drawing the non-Volatile layers
 					if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
@@ -936,7 +936,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
                     // Update labels & categories
                     l->UpdateShapefile();
 				}
- 
+
                 // Perform the draw:
                 sfDrawer.Draw(rcBounds, sf);
                 LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);

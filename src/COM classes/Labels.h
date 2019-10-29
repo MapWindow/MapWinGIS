@@ -135,12 +135,12 @@ public:
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
 	
-	STDMETHOD(AddLabel)(BSTR Text, double x, double y, double Rotation, long Category = -1);
-	STDMETHOD(InsertLabel)(long Index, BSTR Text, double x, double y, double Rotation, long Category, VARIANT_BOOL* retVal);
+	STDMETHOD(AddLabel)(BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category = -1);
+	STDMETHOD(InsertLabel)(long Index, BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category, VARIANT_BOOL* retVal);
 	STDMETHOD(RemoveLabel)(long Index, VARIANT_BOOL* vbretval);
 	
-	STDMETHOD(AddPart)(long Index, BSTR Text, double x, double y, double Rotation, long Category = -1);
-	STDMETHOD(InsertPart)(long Index, long Part, BSTR Text, double x, double y, double Rotation, long Category, VARIANT_BOOL* retVal);
+	STDMETHOD(AddPart)(long Index, BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category = -1);
+	STDMETHOD(InsertPart)(long Index, long Part, BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category, VARIANT_BOOL* retVal);
 	STDMETHOD(RemovePart)(long Index, long Part, VARIANT_BOOL* vbretval);
 
 	STDMETHOD(AddCategory)(BSTR Name, ILabelCategory** retVal);
@@ -227,6 +227,10 @@ public:
 	STDMETHOD(put_OffsetX)(DOUBLE newVal)							{_options->offsetX = newVal;			return S_OK;};
 	STDMETHOD(get_OffsetY)(DOUBLE* retval)							{*retval = _options->offsetY;			return S_OK;};
 	STDMETHOD(put_OffsetY)(DOUBLE newVal)							{_options->offsetY = newVal;			return S_OK;};
+    STDMETHOD(get_OffsetXField)(long* retval)                       {*retval = _options->offsetXField;		return S_OK;};
+    STDMETHOD(put_OffsetXField)(long newVal)                        {_options->offsetXField = newVal;		return S_OK;};
+    STDMETHOD(get_OffsetYField)(long* retval)                       {*retval = _options->offsetYField;		return S_OK;};
+    STDMETHOD(put_OffsetYField)(long newVal)                        {_options->offsetYField = newVal;		return S_OK;};
 	STDMETHOD(get_Alignment)(tkLabelAlignment* retval)				{*retval = _options->alignment;			return S_OK;};
 	STDMETHOD(put_Alignment)(tkLabelAlignment newVal)				{_options->alignment = newVal;			return S_OK;};
 	STDMETHOD(get_LineOrientation)(tkLineLabelOrientation* retval)	{*retval = _options->lineOrientation;	return S_OK;};		
@@ -352,7 +356,7 @@ public:
 
 	STDMETHOD(SaveToDbf)(VARIANT_BOOL saveText, VARIANT_BOOL saveCategory, VARIANT_BOOL* retVal);
 	STDMETHOD(SaveToDbf2)(BSTR xField, BSTR yField, BSTR angleField, BSTR textField, BSTR categoryField, 
-						 VARIANT_BOOL saveText, VARIANT_BOOL saveCategory, VARIANT_BOOL* retVal);
+						 VARIANT_BOOL saveText, VARIANT_BOOL saveCategory, VARIANT_BOOL createFields, VARIANT_BOOL* retVal);
 
 	STDMETHOD(LoadFromDbf)(VARIANT_BOOL loadText, VARIANT_BOOL loadCategory, VARIANT_BOOL* retVal);
 	STDMETHOD(LoadFromDbf2)(BSTR xField, BSTR yField, BSTR angleField, BSTR textField, BSTR categoryField, 
@@ -375,6 +379,7 @@ public:
 	STDMETHOD(put_FloatNumberFormat)(BSTR newVal);
 
 	STDMETHOD(ForceRecalculateExpression)();
+    STDMETHOD(ApplyLabelExpression)();
 
 	STDMETHOD(get_FontSize2)(LONG* pVal);
 	STDMETHOD(put_FontSize2)(LONG newVal);
@@ -437,12 +442,25 @@ private:
 	VARIANT_BOOL _useVariableSize;
 	VARIANT_BOOL _logScaleForSize;
 
+    // Field names & flags for Dbf serialization configuration
+    BSTR _xField;
+    BSTR _yField;
+    BSTR _angleField;
+    BSTR _textField;
+    BSTR _categoryField;
+    VARIANT_BOOL _saveText;
+    VARIANT_BOOL _saveCategory;
+    VARIANT_BOOL _createFields;
+
 	tkTextRenderingHint _textRenderingHint;
 	VARIANT_BOOL _synchronized;
 
 private:
 	inline void ErrorMessage(long ErrorCode);
 	bool GetMinMaxCategoryValue(double& globalMax, double& globalMin);
+    void SetCategoryForLabel(long labelIndex, long categoryIndex);
+    void UpdateLabelOffsetsFromShapefile(long labelIndex, long categoryIndex);
+    CLabelInfo* CreateNewLabel(const BSTR &Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category);
 
 public:
 	void ClearLabelFrames();
@@ -462,8 +480,8 @@ public:
 
 	void ApplyExpression_(long CategoryIndex);
 
-	CPLXMLNode* SerializeLabelData(CString ElementName, bool& saveRotation, bool& saveText);
-	bool DeserializeLabelData(CPLXMLNode* node, bool loadRotation, bool loadText);
+	CPLXMLNode* SerializeLabelData(CString ElementName, bool& saveRotation, bool& saveText, bool& saveOffsetX, bool& saveOffsetY);
+	bool DeserializeLabelData(CPLXMLNode* node, bool loadRotation, bool loadText, bool loadOffsetX, bool loadOffsetY);
 
 	bool GenerateEmptyLabels();
 	void AddEmptyLabel();
@@ -471,6 +489,7 @@ public:
 	void LoadLblOptions(CPLXMLNode* node);
 
 	bool RecalculateFontSize();
+    
 	
 };
 

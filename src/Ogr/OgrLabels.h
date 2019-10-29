@@ -10,7 +10,9 @@ public:
 		int Y;
 		int Rotation;
 		int Text;
-		LabelFields() : X(-1), Y(-1), Rotation(-1), Text(-1){}
+        int OffsetX;
+        int OffsetY;
+		LabelFields() : X(-1), Y(-1), Rotation(-1), Text(-1), OffsetX(-1), OffsetY(-1) {}
 		bool HasFields(){
 			return X != -1 && Y != -1 && Rotation != -1 && Text != -1;
 		}

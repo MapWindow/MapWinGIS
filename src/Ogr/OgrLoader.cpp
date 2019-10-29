@@ -123,14 +123,3 @@ void OgrDynamicLoader::AwaitTasks()
     }
 }
 
-// **********************************************
-//		GetLabelPosition()
-// **********************************************
-tkLabelPositioning OgrDynamicLoader::GetLabelPosition(ShpfileType type)
-{
-	if (LabelPosition == lpNone)
-		return LabelsHelper::LabelPositionForShapeType(type);
-	else
-		return LabelPosition;
-}
-

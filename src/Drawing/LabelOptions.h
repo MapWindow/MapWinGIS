@@ -36,6 +36,7 @@ public:
 
 		// position
 		offsetX = offsetY = 0.0;
+        offsetXField = offsetYField = -1;
 		alignment = laCenter;
 		lineOrientation = lorParallel;
 		inboxAlignment = laCenter;
@@ -93,6 +94,8 @@ public:
 		// position
 		offsetX = lbl.offsetX;
 		offsetY = lbl.offsetY;
+        offsetXField = lbl.offsetXField;
+        offsetYField = lbl.offsetYField;
 		alignment = lbl.alignment;
 		lineOrientation = lbl.lineOrientation;
 		inboxAlignment = lbl.inboxAlignment;
@@ -142,6 +145,8 @@ public:
 	// position
 	double offsetX;
 	double offsetY;
+    long offsetXField;
+    long offsetYField;
 	tkLabelAlignment alignment;
 	tkLineLabelOrientation lineOrientation;
 	tkLabelAlignment inboxAlignment;
@@ -199,6 +204,7 @@ public:
 		fontSize = 0;
 		visible	= true;
 		x = y = 0.0;
+        offsetX = offsetY = 0.0;
 		rotation = 0.0;
 		text = "";
 		category = -1;
@@ -219,6 +225,8 @@ public:
 	bool visible;
 	double x;
 	double y;
+    double offsetX;
+    double offsetY;
 	double rotation;
 	CStringW text;
 	long category;

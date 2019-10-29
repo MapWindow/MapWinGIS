@@ -154,11 +154,6 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
 
         // Stop 'fake' editing session
         _shapefile->StopEditingShapes(VARIANT_TRUE, VARIANT_TRUE, NULL, &vb);
-
-        // Without this, categories are not correctly applied in the drawing function:
-        IShapefileCategories* cat;
-        _shapefile->get_Categories(&cat);
-        cat->ApplyExpressions();
     }
 
     // clean the data
@@ -1139,12 +1134,6 @@ CPLXMLNode* COgrLayer::SerializeCore(CString ElementName)
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "SourceQuery", Utility::ConvertToUtf8(_sourceQuery));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "SourceType", CPLString().Printf("%d", (int)_sourceType));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "ForUpdate", CPLString().Printf("%d", (int)_forUpdate));
-	if (_loader.LabelExpression.GetLength() > 0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "LabelExpression", Utility::ConvertToUtf8(_loader.LabelExpression));
-	if (_loader.LabelPosition != lpNone)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "LabelPosition", CPLString().Printf("%d", (int)_loader.LabelPosition));
-	if (_loader.LabelOrientation != lorParallel)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "LabelOrientation", CPLString().Printf("%d", (int)_loader.LabelOrientation));
 	if (_loader.GetMaxCacheCount() != m_globalSettings.ogrLayerMaxFeatureCount)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxFeatureCount", CPLString().Printf("%d", (int)_loader.GetMaxCacheCount()));
 
@@ -1225,15 +1214,8 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 bool COgrLayer::DeserializeOptions(CPLXMLNode* node)
 {
 	bool success = true;
-	_loader.LabelExpression = Utility::ConvertFromUtf8(CPLGetXMLValue(node, "LabelExpression", ""));
 
-	CString s = CPLGetXMLValue(node, "LabelPosition", NULL);
-	_loader.LabelPosition = (s != "") ? (tkLabelPositioning)atoi(s.GetString()) : lpNone;
-
-	s = CPLGetXMLValue(node, "LabelOrientation", NULL);
-	_loader.LabelOrientation = (s != "") ? (tkLineLabelOrientation)atoi(s.GetString()) : lorParallel;
-
-	s = CPLGetXMLValue(node, "MaxFeatureCount", NULL);
+    CString s = CPLGetXMLValue(node, "MaxFeatureCount", NULL);
 	_loader.SetMaxCacheCount((s != "") ? atoi(s.GetString()) : m_globalSettings.ogrLayerMaxFeatureCount);
 
 	// let's populate data (in case it was populated before serialization)
@@ -1500,56 +1482,6 @@ STDMETHODIMP COgrLayer::RemoveStyle(BSTR styleName, VARIANT_BOOL* retVal)
 	CStringW name = OLE2W(styleName);
 	bool result = OgrStyleHelper::RemoveStyle(_dataset, GetStyleTableName(), GetLayerName(), name);
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
-	return S_OK;
-}
-
-// *************************************************************
-//		LabelExpression()
-// *************************************************************
-STDMETHODIMP COgrLayer::get_LabelExpression(BSTR* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	*pVal = W2BSTR(_loader.LabelExpression);
-	return S_OK;
-}
-STDMETHODIMP COgrLayer::put_LabelExpression(BSTR newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	_loader.LabelExpression = OLE2W(newVal);
-	return S_OK;
-}
-
-// *************************************************************
-//		LabelPosition()
-// *************************************************************
-STDMETHODIMP COgrLayer::get_LabelPosition(tkLabelPositioning* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _loader.LabelPosition;
-	return S_OK;
-}
-STDMETHODIMP COgrLayer::put_LabelPosition(tkLabelPositioning newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_loader.LabelPosition = newVal;
-	return S_OK;
-}
-
-// *************************************************************
-//		LabelOrientation()
-// *************************************************************
-STDMETHODIMP COgrLayer::get_LabelOrientation(tkLineLabelOrientation* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _loader.LabelOrientation;
-	return S_OK;
-}
-STDMETHODIMP COgrLayer::put_LabelOrientation(tkLineLabelOrientation newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_loader.LabelOrientation = newVal;
 	return S_OK;
 }
 

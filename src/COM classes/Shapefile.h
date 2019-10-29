@@ -157,7 +157,7 @@ public:
 	STDMETHOD(Dissolve)(long FieldIndex, VARIANT_BOOL SelectedOnly, IShapefile** sf);
 	STDMETHOD(get_Labels)(ILabels** pVal);
 	STDMETHOD(put_Labels)(ILabels* newVal);
-	STDMETHOD(GenerateLabels)(long FieldIndex, tkLabelPositioning Method, VARIANT_BOOL LargestPartOnly, long* Count);
+	STDMETHOD(GenerateLabels)(long FieldIndex, tkLabelPositioning Method, VARIANT_BOOL LargestPartOnly, long offsetXFieldIndex, long offsetYFieldIndex, long* Count);
 	STDMETHOD(Clone)(IShapefile** retVal);
 	STDMETHOD(get_DefaultDrawingOptions)(IShapeDrawingOptions** pVal);
 	STDMETHOD(put_DefaultDrawingOptions)(IShapeDrawingOptions* newVal);
@@ -493,6 +493,7 @@ public:
 	// drawing 
 	void MarkUndrawn();
 	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
+    void GetLabelOffset(long offsetFieldIndex, long shapeIndex, double* offset);
 	bool GetSorting(vector<long>** indices);
 
     // OGR data source can map OGR FID to ShapeIndex

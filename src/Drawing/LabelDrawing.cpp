@@ -284,15 +284,17 @@ void CLabelDrawer::CalcScreenRectangle(CLabelOptions* options, CLabelInfo* lbl, 
 	tkLabelAlignment align = (autoOffset && options->alignment == laCenter) ? laCenterRight : options->alignment;
 	LabelDrawingHelper::AlignRectangle(rect, options->alignment);
 
+    double lblX = lbl->x + lbl->offsetX, lblY = lbl->y + lbl->offsetY;
+
 	if (_spatiallyReferenced)
 	{
-		this->ProjectionToPixel(lbl->x, lbl->y, piX, piY);
+		this->ProjectionToPixel(lblX, lblY, piX, piY);
 	}
 	else
 	{
 		// no calculations for screen referenced labels
-		piX = lbl->x;
-		piY = lbl->y;
+		piX = lblX;
+		piY = lblY;
 	}
 
 	// we make very narrow rect wider to have circular form in case of rounded frames
@@ -320,10 +322,10 @@ void CLabelDrawer::CalcScreenRectangle(CLabelOptions* options, CLabelInfo* lbl, 
 		LabelDrawingHelper::UpdateAutoOffset(rect, align, offset);
 	}
 
-	rect.left += (LONG)options->offsetX;
-	rect.right += (LONG)options->offsetX;
-	rect.top += (LONG)options->offsetY;
-	rect.bottom += (LONG)options->offsetY;
+    rect.left += (LONG) options->offsetX;
+    rect.right += (LONG) options->offsetX;
+    rect.top += (LONG) options->offsetY;
+    rect.bottom += (LONG) options->offsetY;
 }
 
 // *********************************************************************
