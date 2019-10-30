@@ -113,6 +113,29 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
     vector<ShapeRecordData*> data = _loader.FetchData();
     if (data.size() == 0) return;
 
+    // Get the selected OGR FID's to preserve the selection if possible:
+    std::vector<int> selectedShapes = *(ShapefileHelper::GetSelectedIndices(_shapefile));
+    std::vector<CComVariant> selectedOgrFIDs = *(new vector<CComVariant>());
+    if (selectedShapes.size() > 0) 
+    {
+        CStringW fid = OgrHelper::OgrString2Unicode(_layer->GetFIDColumn());
+        bool hasFid = fid.GetLength() > 0;
+        if (!hasFid) // if we don't have fid, clear
+            selectedShapes.clear();
+
+        long fieldIndex = 0;
+        CComBSTR bstrName(fid);
+        _shapefile->get_FieldIndexByName(bstrName, &fieldIndex);
+
+        for (size_t i = 0; i < selectedShapes.size(); i++)
+        {
+            CComVariant var;
+            _shapefile->get_CellValue(fieldIndex, selectedShapes[i], &var);
+            selectedOgrFIDs.push_back(var);
+        }
+        
+    }    
+
     VARIANT_BOOL vb;
     _shapefile->EditClear(&vb);
 
@@ -146,9 +169,24 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
                 tbl->UpdateTableRow(data[i]->Row, count);
                 data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
 
+                // Preserve selection accross reloads:
+                CComVariant pVal;
+                tbl->get_CellValue(0, count, &pVal);
+                bool wasSelected = false;
+                for (size_t i = 0; i < selectedOgrFIDs.size(); i++)
+                {
+                    if (selectedOgrFIDs[i] == pVal) {
+                        wasSelected = true;
+                        break;
+                    }
+                }
+                if (wasSelected)
+                    _shapefile->put_ShapeSelected(count, VARIANT_TRUE);
+
                 count++;
             }
         }
+
         // inserted shapes were marked as modified, correct this
         ShapefileHelper::ClearShapefileModifiedFlag(_shapefile);
 
