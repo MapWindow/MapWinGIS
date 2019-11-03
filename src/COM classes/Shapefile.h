@@ -487,7 +487,6 @@ public:
 	bool GetSorting(vector<long>** indices);
 
 public:	
-    ::CCriticalSection ShapefileLock;
 	// geoprocessing methods
 	VARIANT_BOOL FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* result);
 	VARIANT_BOOL BufferByDistanceCore(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, VARIANT_BOOL MergeResults, IShapefile* result);

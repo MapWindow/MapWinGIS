@@ -12,7 +12,6 @@ public:
 	static bool FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCount, bool loadLabels, ICallback* callback, bool& isTrimmed);
 	static void ReadGeometryTypes(OGRLayer* layer, set<OGRwkbGeometryType>& types, bool readAll);
 	static void GeometryTypesToShapeTypes(set<OGRwkbGeometryType>& types, vector<ShpfileType>& result);
-    static bool ExtendShapefile(OGRLayer* layer, IShapefile* sf, bool loadLabels, ICallback* callback);
 private:
 	static void CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, IShapefile* sf, bool hasFID, long numShapes, bool loadLabels, OgrLabelsHelper::LabelFields labelFields);
 	static void CopyFields(OGRLayer* layer, IShapefile* sf);

@@ -37,7 +37,6 @@ STDMETHODIMP CShapefile::Validate(tkShapeValidationMode validationMode, VARIANT_
                                   IShapeValidationInfo** results)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    CSingleLock sfLock(&ShapefileLock, TRUE);
     *results = nullptr;
 
     if (validationMode == NoValidation)
@@ -63,7 +62,6 @@ STDMETHODIMP CShapefile::Validate(tkShapeValidationMode validationMode, VARIANT_
 bool CShapefile::ValidateInput(IShapefile* isf, CString methodName,
                                CString parameterName, VARIANT_BOOL selectedOnly, CString className /*= "Shapefile"*/)
 {
-    CSingleLock mySfLock(&ShapefileLock, TRUE);
     // MWGIS-132; this code, suggested by CLang for MWGIS-104 on 24 Aug 2018,
     // is being removed because it prevents any in-memory Shapefile from passing 
     // validation (since in-memory shapefiles have no FILE * (_shpfile == NULL). 
@@ -99,10 +97,6 @@ IShapeValidationInfo* CShapefile::ValidateInputCore(IShapefile* isf, CString met
                                                     tkShapeValidationMode validationMode, CString className,
                                                     bool reportOnly)
 {
-    if (!isf) return nullptr;
-
-    CSingleLock sfLock(&((CShapefile*)isf)->ShapefileLock, TRUE);
-    CSingleLock mySfLock(&ShapefileLock, TRUE);
     tkShapefileSourceType sourceType;
     if (isf->get_SourceType(&sourceType))
     {
@@ -150,9 +144,6 @@ IShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString metho
 {
     if (!*isf) return nullptr;
 
-    CSingleLock sfLock(&((CShapefile*)*isf)->ShapefileLock, TRUE);
-    CSingleLock mySfLock(&ShapefileLock, TRUE);
-
     long numShapes;
     (*isf)->get_NumShapes(&numShapes);
     if (numShapes == 0 && abortIfEmpty)
@@ -168,8 +159,6 @@ IShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString metho
             ErrorMessage(errorCode);
 
         VARIANT_BOOL vb;
-		// have to release lock prior to destruction
-		sfLock.Unlock();
         (*isf)->Close(&vb);
         (*isf)->Release();
         *isf = nullptr;
@@ -198,9 +187,6 @@ IShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString metho
 // **************************************************************
 bool CShapefile::ValidateOutput(IShapefile* sf, CString methodName, CString className, bool abortIfEmpty)
 {
-    if (!sf) return false;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
-    CSingleLock mySfLock(&ShapefileLock, TRUE);
     if (!_isEditingShapes)
     {
         return true;
@@ -215,7 +201,6 @@ bool CShapefile::ValidateOutput(IShapefile* sf, CString methodName, CString clas
 // *********************************************************
 HRESULT CShapefile::GetValidatedShape(int shapeIndex, IShape** retVal)
 {
-    CSingleLock sfLock(&ShapefileLock, TRUE);
     IShape* shp = nullptr;
     get_Shape(shapeIndex, &shp);
 
@@ -277,7 +262,6 @@ HRESULT CShapefile::GetValidatedShape(int shapeIndex, IShape** retVal)
 // *********************************************************
 bool CShapefile::ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly)
 {
-    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (shapeIndex < 0 || shapeIndex >= (int)_shapeData.size())
     {
         return false;
@@ -300,7 +284,6 @@ bool CShapefile::ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly)
 // *********************************************************
 GEOSGeometry* CShapefile::GetGeosGeometry(int shapeIndex)
 {
-    CSingleLock sfLock(&ShapefileLock, TRUE);
     return _shapeData[shapeIndex]->geosGeom;
 }
 
@@ -310,7 +293,6 @@ GEOSGeometry* CShapefile::GetGeosGeometry(int shapeIndex)
 STDMETHODIMP CShapefile::ClearCachedGeometries()
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_geosGeometriesRead)
     {
         for (auto& i : _shapeData)
@@ -331,7 +313,6 @@ STDMETHODIMP CShapefile::ClearCachedGeometries()
 // *********************************************************
 void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 {
-    CSingleLock sfLock(&ShapefileLock, TRUE);
     if (_geosGeometriesRead)
     {
         CallbackHelper::AssertionFailed("Attempt to reread GEOS geometries while they are in memory.");

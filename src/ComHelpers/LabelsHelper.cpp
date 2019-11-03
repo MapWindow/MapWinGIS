@@ -8,13 +8,9 @@
 // Should be called after change of shapefile type (CreateNew, Open, Resource, Close)
 void LabelsHelper::UpdateLabelsPositioning(IShapefile* sf)
 {
-    if (!sf) return;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 	ShpfileType type = ShapefileHelper::GetShapeType2D(sf);
 	CComPtr<ILabels> labels = NULL;
 	sf->get_Labels(&labels);
-    sfLock.Unlock();
-
 	if (labels)
 	{
 		if (type == SHP_POINT || type == SHP_MULTIPOINT)
