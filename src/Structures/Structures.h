@@ -76,15 +76,8 @@ struct ShapeRecordData
 {
 	VARIANT Shape;
 	TableRow* Row;
-	double LabelX;
-	double LabelY;
-	double LabelRotation;
-	CStringW LabelText;
-	int CategoryIndex;
 
-	bool HasLabel() { return LabelX != 0 && LabelY != 0 && LabelText.GetLength() > 0;}
-
-	ShapeRecordData() : LabelX(0.0), LabelY(0.0), LabelRotation(0.0), CategoryIndex(-1)
+	ShapeRecordData()
 	{
 		this->Row = new TableRow();
 		VariantInit(&Shape);

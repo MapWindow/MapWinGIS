@@ -1247,7 +1247,7 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 	*retval = VARIANT_FALSE;
 	if (!BoundingBox) return S_OK;
 
-	if (!_chartsExist)
+	if (!_chartsExist || !_shapefile)
 	{
 		return S_OK;
 	}
@@ -1825,42 +1825,40 @@ STDMETHODIMP CCharts::LoadFromXML(BSTR Filename, VARIANT_BOOL* retVal)
 // ********************************************************
 bool CCharts::DeserializeChartData(CPLXMLNode* node)
 {
-	if (node)
+    if (!node || !_shapefile)
+        return false;
+	
+	std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
+    if (!data)
+        return false;
+
+	this->Clear();
+	((CShapefile*)_shapefile)->SetChartsPositions(lpNone);
+
+	CString s;
+	double x, y;
+	int i = 0;
+
+	node = CPLGetXMLNode(node, "Chart");
+
+	int count = data->size();
+	while (node && i < count)
 	{
-		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
-		if (data)
-		{
+		s = CPLGetXMLValue(node, "X", "0.0");
+		x = Utility::atof_custom(s);
 
-			this->Clear();
-			((CShapefile*)_shapefile)->SetChartsPositions(lpNone);
+		s = CPLGetXMLValue(node, "Y", "0.0");
+		y = Utility::atof_custom(s);
 
-			CString s;
-			double x, y;
-			int i = 0;
+		CChartInfo* info = (*data)[i]->chart;
+		info->x = x;
+		info->y = y;
+		i++;
 
-			node = CPLGetXMLNode(node, "Chart");
-
-			int count = data->size();
-			while (node && i < count)
-			{
-				s = CPLGetXMLValue(node, "X", "0.0");
-				x = Utility::atof_custom(s);
-
-				s = CPLGetXMLValue(node, "Y", "0.0");
-				y = Utility::atof_custom(s);
-
-				CChartInfo* info = (*data)[i]->chart;
-				info->x = x;
-				info->y = y;
-				i++;
-
-				node = node->psNext;
-			}
-			_chartsExist = true;
-			return true;
-		}
+		node = node->psNext;
 	}
-	return false;
+	_chartsExist = true;
+	return true;
 }
 
 #pragma endregion

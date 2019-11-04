@@ -12,6 +12,8 @@
 #include "ShapefileCategories.h"
 #include "Templates.h"
 #include "ShapefileHelper.h"
+#include "TableClass.h"
+#include "TableHelper.h"
 
 // *************************************************************
 //		InjectShapefile()
@@ -89,6 +91,80 @@ IShapefile* COgrLayer::LoadShapefile()
 		ErrorMessage(tkOGR_LAYER_TRIMMED);
 	}
 	return sf;
+}
+
+//***********************************************************************
+//*		UpdateShapefileFromOGRLoader()
+//***********************************************************************
+void COgrLayer::UpdateShapefileFromOGRLoader()
+{
+    CSingleLock lock(&_loader.ProviderLock, TRUE);
+    if (!_shapefile) return;
+
+    // Wait for tasks to finish loading:
+    _loader.AwaitTasks();
+
+    // Lock it all down:
+    CSingleLock ldLock(&_loader.LoadingLock, TRUE);
+    CSingleLock prLock(&_loader.ProviderLock, TRUE);
+    CSingleLock sfLock(&_loader.ShapefileLock, TRUE);
+
+    // Grab the loaded data:
+    vector<ShapeRecordData*> data = _loader.FetchData();
+    if (data.size() == 0) return;
+
+    VARIANT_BOOL vb;
+    _shapefile->EditClear(&vb);
+
+    ShpfileType shpType;
+    _shapefile->get_ShapefileType(&shpType);
+
+    Debug::WriteWithThreadId(Debug::Format("Update shapefile: %d\n", data.size()), DebugOgrLoading);
+
+    CComPtr<ITable> table = NULL;
+    _shapefile->get_Table(&table);
+
+    CComPtr<ILabels> labels = NULL;
+    _shapefile->get_Labels(&labels);
+    labels->Clear();
+
+    if (table)
+    {
+        CTableClass* tbl = TableHelper::Cast(table);
+        _shapefile->StartEditingShapes(VARIANT_TRUE, NULL, &vb);
+        long count = 0;
+        for (size_t i = 0; i < data.size(); i++)
+        {
+            CComPtr<IShape> shp = NULL;
+            ComHelper::CreateShape(&shp);
+            if (shp)
+            {
+                shp->Create(shpType, &vb);
+                shp->ImportFromBinary(data[i]->Shape, &vb);
+                _shapefile->EditInsertShape(shp, &count, &vb);
+
+                tbl->UpdateTableRow(data[i]->Row, count);
+                data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
+
+                count++;
+            }
+        }
+        // inserted shapes were marked as modified, correct this
+        ShapefileHelper::ClearShapefileModifiedFlag(_shapefile);
+
+        // Stop 'fake' editing session
+        _shapefile->StopEditingShapes(VARIANT_TRUE, VARIANT_TRUE, NULL, &vb);
+
+        // Without this, categories are not correctly applied in the drawing function:
+        IShapefileCategories* cat;
+        _shapefile->get_Categories(&cat);
+        cat->ApplyExpressions();
+    }
+
+    // clean the data
+    for (size_t i = 0; i < data.size(); i++) {
+        delete data[i];
+    }
 }
 
 //***********************************************************************
@@ -312,6 +388,35 @@ bool COgrLayer::OpenDatabaseLayerCore(GDALDataset* ds, CStringW connectionString
 bool COgrLayer::InjectLayer(GDALDataset* ds, int layerIndex, CStringW connection, VARIANT_BOOL forUpdate)
 {
 	return OpenDatabaseLayerCore(ds, connection, layerIndex, forUpdate, VARIANT_TRUE);
+}
+
+// *************************************************************
+//		ExtendFromQuery()
+// *************************************************************
+STDMETHODIMP COgrLayer::ExtendFromQuery(BSTR sql, VARIANT_BOOL* retVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    *retVal = VARIANT_FALSE;
+
+    GDALDataset* ds = OpenDataset(W2BSTR(_connectionString), false);
+    if (!ds) {
+        ErrorMessage(tkOGR_QUERY_FAILED);
+        return S_OK;
+    }
+    
+    OGRLayer* layer = ds->ExecuteSQL(OgrHelper::Bstr2OgrString(sql), NULL, NULL);
+    if (!layer)
+    {
+        ErrorMessage(tkOGR_QUERY_FAILED);
+        GdalHelper::CloseSharedOgrDataset(ds);
+        return S_OK;
+    }
+
+    Ogr2Shape::ExtendShapefile(layer, _shapefile, true, _globalCallback);
+    GdalHelper::CloseSharedOgrDataset(ds);
+    *retVal = VARIANT_TRUE;
+    return S_OK;
 }
 
 // *************************************************************

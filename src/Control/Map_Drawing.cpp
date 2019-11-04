@@ -901,19 +901,6 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 		if (visible)
 		{
-			if (l->IsDynamicOgrLayer())
-			{
-				OgrDynamicLoader* loader = l->GetOgrLoader();
-				if (loader) {
-					// Clear the finished tasks & send events for them:
-					for (auto task : loader->AwaitTasks()) {
-						FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, task->LoadedCount);
-					}
-				}
-				// Try to get the data loaded so far:
-				l->UpdateShapefile(layerHandle);
-			}
-
 			if (l->IsImage())
 			{
 				if (!layerBuffer) continue;
@@ -922,23 +909,38 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
 			}
-			else if (l->IsShapefile())
-				{
-					// grab extents from shapefile in case they changed
-					l->UpdateExtentsFromDatasource();
-
-					if (!l->extents.Intersects(_extents))
-						continue;
+            else if (l->IsShapefile() || l->IsDynamicOgrLayer())
+			{
 
 				CComPtr<IShapefile> sf = NULL;
+				if (l->IsDynamicOgrLayer())
+				{
+					// Try to get the data loaded so far:
+					l->UpdateShapefile();
+					
+					// Get the shapefile
+                    l->QueryShapefile(&sf);
+				}
+                else
+                {
+                    // grab extents from shapefile in case they changed
+                    l->UpdateExtentsFromDatasource();
+
+                    if (!l->extents.Intersects(_extents))
+                        continue;
+
 					// layerBuffer == true indicates we're drawing the non-Volatile layers
 					if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
 						continue;
 
-				sfDrawer.Draw(rcBounds, sf);
-
-				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
-				LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
+                    // Update labels & categories
+                    l->UpdateShapefile();
+				}
+ 
+                // Perform the draw:
+                sfDrawer.Draw(rcBounds, sf);
+                LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
+                LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
 			}
 		}
 	}

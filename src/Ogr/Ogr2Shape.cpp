@@ -166,6 +166,123 @@ void Ogr2Shape::CopyFields(OGRLayer* layer, IShapefile* sf)
 		tableInternal->SetFieldSourceIndex(i, i - 1);
 	}
 }
+// *************************************************************
+//		ExtendShapefile()
+// *************************************************************
+bool Ogr2Shape::ExtendShapefile(OGRLayer* layer, IShapefile* sf, bool loadLabels, ICallback* callback)
+{
+    layer->ResetReading();
+
+    int numFeatures = static_cast<int>(layer->GetFeatureCount());
+
+    int count = 0;
+    long percent = 0;
+    USES_CONVERSION;
+    CComBSTR key = L"";
+
+    OGRFeature *poFeature;
+    VARIANT_BOOL vbretval;
+
+    CStringA name = layer->GetFIDColumn();
+    bool hasFID = name.GetLength() > 0;
+    ShpfileType shpType;
+    sf->get_ShapefileType(&shpType);
+
+    map<long, long> fids;
+
+    OGRFeatureDefn *poFields = layer->GetLayerDefn();
+
+    CComPtr<ILabels> labels = NULL;
+    sf->get_Labels(&labels);
+
+    OgrLabelsHelper::LabelFields labelFields;
+    if (loadLabels) {
+        if (!OgrLabelsHelper::GetLabelFields(layer, labelFields))
+            loadLabels = false;
+    }
+
+    ShpfileType targetType = ShapefileHelper::GetShapeType(sf);
+
+    while ((poFeature = layer->GetNextFeature()) != NULL)
+    {
+        CallbackHelper::Progress(callback, count, numFeatures, "Converting geometries...", key.m_str, percent);
+        count++;
+
+        OGRGeometry *oGeom = poFeature->GetGeometryRef();
+
+        IShape* shp = NULL;
+        if (oGeom)
+        {
+            shpType = OgrConverter::GeometryType2ShapeType(oGeom->getGeometryType());
+            if (shpType != targetType)
+            {
+                goto next_feature;
+            }
+
+            shp = OgrConverter::GeometryToShape(oGeom, ShapeUtility::IsM(shpType));
+        }
+
+        if (!shp)
+        {
+            // insert null shape so that client can still access it
+            ComHelper::CreateShape(&shp);
+        }
+
+        // Get number of shapes already loaded
+        long numShapes;
+        sf->get_NumShapes(&numShapes);
+
+        // Check if this OGR_FID is already in the featureset
+        long replaceIndex = -1;
+        long index = numShapes;
+        if (hasFID) {
+            CComVariant fid_var;
+            fid_var.vt = VT_I4;
+            fid_var.lVal = static_cast<long>(poFeature->GetFID());
+
+            for (int i = 0; i < numShapes; i++) {
+                VARIANT pVal;
+                sf->get_CellValue(0, i, &pVal);
+                long fid = 0;
+                lVal(pVal, fid);
+                if (pVal.lVal == fid_var.lVal) {
+                    replaceIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // Update index in case we are replacing:
+        index = replaceIndex > 0 ? replaceIndex : index;
+
+        // Insert or replace the shape:
+        if (replaceIndex > 0)
+            sf->EditUpdateShape(index, shp, &vbretval);
+        else
+            sf->EditInsertShape(shp, &index, &vbretval);
+
+        // No longer need this:
+        shp->Release();
+
+        // Set feature id
+        if (hasFID) {
+            CComVariant fid_var;
+            fid_var.vt = VT_I4;
+            fid_var.lVal = static_cast<long>(poFeature->GetFID());
+            sf->EditCellValue(0, index, fid_var, &vbretval);
+        }
+
+        CopyValues(poFields, poFeature, sf, hasFID, index, loadLabels, labelFields);
+
+    next_feature:
+        OGRFeature::DestroyFeature(poFeature);
+    }
+    CallbackHelper::ProgressCompleted(callback);
+
+    sf->RefreshExtents(&vbretval);
+    ShapefileHelper::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
+    return true;
+}
 
 // *************************************************************
 //		FillShapefile()

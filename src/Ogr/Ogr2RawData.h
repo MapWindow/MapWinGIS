@@ -7,15 +7,10 @@
 
 class Ogr2RawData
 {
-public:
-	static bool Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoader* loader, vector<CategoriesData*>& categories, OgrLoadingTask* callback);
-private:
-	static void FieldsToShapeRecord(OGRFeatureDefn* poFields, OGRFeature* poFeature, ShapeRecordData* data, bool hasFid, bool hasLabels, OgrLabelsHelper::LabelFields& labelFields);
-	static bool GenerateLabels(vector<ShapeRecordData*>& data, vector<CStringW>& fields, CStringW expression, CStringW& error, OgrDynamicLoader* loader);
-	static void UpdateLabelsAndCategories(vector<ShapeRecordData*>&data, OgrDynamicLoader* loader, bool hasLabels);
-	static int GetLabelFieldIndex(CStringW expression, vector<CStringW>& fields);
-	static void ApplyCategories(vector<ShapeRecordData*>& data, vector<CStringW>& fields, vector<CategoriesData*>& categories, OgrDynamicLoader* loader);
-	static bool PopulateExpressionFields(vector<ShapeRecordData*>& data, int rowIndex, CustomExpression& expr);
+ public:
+	static bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoader* loader, OgrLoadingTask* callback);
+ private:
+	static void Ogr2RawData::FieldsToShapeRecord(OGRFeatureDefn* poFields, OGRFeature* poFeature, ShapeRecordData* data, bool hasFid);
 	static void DeleteAndClearShapeData(vector<ShapeRecordData*>& data);
 };
 
