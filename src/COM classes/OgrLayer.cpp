@@ -1220,10 +1220,10 @@ bool COgrLayer::DeserializeOptions(CPLXMLNode* node)
             if (!_shapefile) {
                 IShapefile * sf = LoadShapefile();
                 _shapefile = sf;
+            }
 		    bool result = ((CShapefile*)_shapefile)->DeserializeCore(VARIANT_FALSE, psChild);
 			if (!result) success = false;
-		}
-	}
+	    }
 	}
 
 	CString key = CPLGetXMLValue(node, "Key", "");
