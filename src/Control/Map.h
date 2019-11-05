@@ -572,6 +572,7 @@ public:
 	afx_msg float GetLatitude();
 	afx_msg void SetLongitude(float nNewValue);
 	afx_msg float GetLongitude();
+	afx_msg void SetLatitudeLongitude(double latitude, double longitude);
 	afx_msg void SetCurrentZoom(int nNewValue);
 	afx_msg int GetCurrentZoom();
 	afx_msg void SetTileProvider(tkTileProvider nNewValue);

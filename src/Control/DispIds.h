@@ -260,6 +260,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
     dispidGetBaseProjectionPoint = 164L,     //ajp June 2010
 	dispidCanUseImageGrouping = 165L,		 // lsu
 	dispidDrawBackBuffer = 170L,
+	dispidSetLatitudeLongitude = 267L,
 
 	// events
 	eventidMouseDown = 1L,
