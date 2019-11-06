@@ -2320,6 +2320,18 @@ namespace AxMapWinGIS
         public float Longitude { get; set; }
 
         /// <summary>
+        /// Sets the Latitude and Longitude of the center of the screen in one operation
+        /// </summary>
+        /// <param name="latitude">Requested Latitude in decimal degrees</param>
+        /// <param name="longitude">Requested Longitude in decimal degrees</param>
+        /// <remarks>Map projection must be set in order for this method to work.</remarks>
+        /// \new510 Added in version 5.1.0
+        public void SetLatitudeLongitude(double latitude, double longitude)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets or sets the current zoom level for the map. It corresponds to the zoom level of current tile provider.
         /// </summary>
         /// <remarks>Map projection must be set in order for this property to work.</remarks>
