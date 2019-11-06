@@ -3,6 +3,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	// NOTE: ClassWizard will add and remove enumeration elements here
 	//    DO NOT EDIT what you see in these blocks of generated code !
 	// **ClassWizard is a thing of the past... feel free to edit this code.
+	dispidSetLatitudeLongitude = 267L,
 	dispidStartNewBoundShapeEx = 266L,
 	dispidStartNewBoundShape = 265L,
 	dispidRestartBackgroundLoading = 264L,
@@ -260,7 +261,6 @@ enum {		//{{AFX_DISP_ID(CMapView)
     dispidGetBaseProjectionPoint = 164L,     //ajp June 2010
 	dispidCanUseImageGrouping = 165L,		 // lsu
 	dispidDrawBackBuffer = 170L,
-	dispidSetLatitudeLongitude = 267L,
 
 	// events
 	eventidMouseDown = 1L,
