@@ -9,19 +9,16 @@
 // ****************************************************************
 void GeoProcessing::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShapefile* sfResult, map<long, long>& fieldMap, bool mergeFields)
 {
-    if (!sfSubject || !sfOverlay || !sfResult) return;
 	// fields of the subject shapefile
 	LONG numFields, position;
 	VARIANT_BOOL vbretval;
 	sfSubject->get_NumFields(&numFields);
-    CSingleLock sfSubjectLock(&((CShapefile*)sfSubject)->ShapefileLock, TRUE);
-    CSingleLock sfOverlayLock(&((CShapefile*)sfOverlay)->ShapefileLock, TRUE);
-    CSingleLock sfResultLock(&((CShapefile*)sfResult)->ShapefileLock, TRUE);
 	ShapefileHelper::CopyFields(sfSubject, sfResult);
 
 	// passing the fields of overlay shapefile
 	if (sfOverlay)
 	{
+
 		LONG numFields2;
 		sfOverlay->get_NumFields(&numFields2);
 		for (long i = 0; i < numFields2; i++)

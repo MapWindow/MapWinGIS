@@ -268,7 +268,6 @@ IShape* ClipperConverter::ClipPolygon(IShape* shapeClip, IShape* shapeSubject, P
 void ClipperConverter::AddPolygons(IShapefile* sf, ClipperLib::Clipper& clp, ClipperLib::PolyType clipType, bool selectedOnly)
 {
     if (!sf) return;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 
 	long numShapes;
 	sf->get_NumShapes(&numShapes);

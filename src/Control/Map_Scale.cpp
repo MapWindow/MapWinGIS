@@ -1772,7 +1772,7 @@ bool CMapView::SetGeoPosition(double x, double y)
 }
 
 // ****************************************************************
-//		Latitude()
+//		SetLatitude()
 // ****************************************************************
 void CMapView::SetLatitude(float latitude)
 {
@@ -1793,7 +1793,7 @@ float CMapView::GetLatitude()
 }
 
 // ****************************************************************
-//		Longitude()
+//		SetLongitude()
 // ****************************************************************
 void CMapView::SetLongitude(float longitude)
 {
@@ -1803,6 +1803,7 @@ void CMapView::SetLongitude(float longitude)
 	}
 	SetGeoPosition(longitude, GetLatitude());
 }
+
 float CMapView::GetLongitude()
 {
 	double x, y;
@@ -1810,6 +1811,21 @@ float CMapView::GetLongitude()
 		return (float)x;
 	return 0.0;
 }
+
+// ****************************************************************
+//		SetLatitudeLongitude()
+// ****************************************************************
+void CMapView::SetLatitudeLongitude(double latitude, double longitude)
+{
+	if (abs(latitude) > 90.0 || abs(longitude) > 180.0)
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return;
+	}
+
+	SetGeoPosition(longitude, latitude);
+}
+
 
 // ****************************************************************
 //		CurrentZoom()

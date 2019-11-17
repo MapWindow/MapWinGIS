@@ -57,6 +57,7 @@ private:
 	vector<ShapeRecordData*> Data;
 
 public:
+	::CCriticalSection ShapefileLock;
 	::CCriticalSection LoadingLock;
 	::CCriticalSection ProviderLock;	
 

@@ -62,7 +62,6 @@ enum tkDrawingShape
 bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 {
 	if (!sf) return false;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 
 	_shapefile = reinterpret_cast<CShapefile*>(sf);
 

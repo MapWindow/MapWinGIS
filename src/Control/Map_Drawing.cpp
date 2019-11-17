@@ -901,13 +901,6 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 		if (visible)
 		{
-			// This is used for regular & dynamic ogr 'shapefile' layers
-			auto _DrawShapeFileCore = [&](CComPtr<IShapefile> sf) {
-				sfDrawer.Draw(rcBounds, sf);
-				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
-				LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
-			};
-
 			if (l->IsImage())
 			{
 				if (!layerBuffer) continue;
@@ -916,8 +909,9 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
 			}
-			else if (l->IsShapefile() || l->IsDynamicOgrLayer())
+            else if (l->IsShapefile() || l->IsDynamicOgrLayer())
 			{
+
 				CComPtr<IShapefile> sf = NULL;
 				if (l->IsDynamicOgrLayer())
 				{
@@ -927,21 +921,26 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 					// Get the shapefile
                     l->QueryShapefile(&sf);
 				}
-				else
-				{
-					// grab extents from shapefile in case they changed
-					l->UpdateExtentsFromDatasource();
+                else
+                {
+                    // grab extents from shapefile in case they changed
+                    l->UpdateExtentsFromDatasource();
 
-					if (!l->extents.Intersects(_extents))
-						continue;
+                    if (!l->extents.Intersects(_extents))
+                        continue;
 
 					// layerBuffer == true indicates we're drawing the non-Volatile layers
 					if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
 						continue;
-				}
 
+                    // Update labels & categories
+                    l->UpdateShapefile();
+				}
+ 
                 // Perform the draw:
-                _DrawShapeFileCore(sf);
+                sfDrawer.Draw(rcBounds, sf);
+                LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
+                LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
 			}
 		}
 	}

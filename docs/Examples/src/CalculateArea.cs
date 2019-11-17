@@ -67,7 +67,7 @@ namespace Examples
                     }
                 
                     //adding the new field in the end of the table
-                    fldIndex = sf.EditAddField("CalcArea", FieldType.DOUBLE_FIELD, 12, 12);
+                    fldIndex = sf.EditAddField("CalcArea", FieldType.DOUBLE_FIELD, 9, 12);
                     if (fldIndex == -1)
                     {
                         MessageBox.Show("Failed to insert field: " + sf.ErrorMsg[sf.LastErrorCode]);

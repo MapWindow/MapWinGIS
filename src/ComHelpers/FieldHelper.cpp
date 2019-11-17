@@ -10,8 +10,6 @@
 long FieldHelper::FindNewShapeID(IShapefile* sf, long FieldIndex)
 {
 	if (!sf) return 0;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
-
 	CComPtr<ITable> table = NULL;
 	sf->get_Table(&table);
 	if (!table) return 0;

@@ -7,9 +7,9 @@
 
 class Ogr2RawData
 {
-public:
+ public:
 	static bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoader* loader, OgrLoadingTask* callback);
-private:
+ private:
 	static void Ogr2RawData::FieldsToShapeRecord(OGRFeatureDefn* poFields, OGRFeature* poFeature, ShapeRecordData* data, bool hasFid);
 	static void DeleteAndClearShapeData(vector<ShapeRecordData*>& data);
 };

@@ -8,7 +8,7 @@
 // *************************************************************
 //		Layer2RawData()
 // *************************************************************
-bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoader* loader,  OgrLoadingTask* callback)
+bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoader* loader, OgrLoadingTask* callback)
 {
 	if (!layer || !extents || !loader) return false;
 
@@ -58,7 +58,6 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 			// Get shape record:
 			ShapeRecordData* data = new ShapeRecordData();
 			shp->ExportToBinary(&(data->Shape), &vb);
-
 			shp->Release();
 
 			FieldsToShapeRecord(poFields, poFeature, data, hasFID);

@@ -116,11 +116,11 @@ void OgrDynamicLoader::AwaitTasks()
 			queueLock.Lock();
 			continue; // Try next
 		}
-        else
+        else 
         {
             delete task;
         }
-	}
+    }
 }
 
 // **********************************************

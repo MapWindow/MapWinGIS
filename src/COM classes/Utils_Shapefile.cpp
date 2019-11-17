@@ -8,8 +8,6 @@
 // ********************************************************
 VARIANT_BOOL CUtils::SaveOutputShapefile(BSTR outputFilename, IShapefile* sf, VARIANT_BOOL overwrite)
 {
-    if (!sf) return VARIANT_FALSE;
-
 	if (Utility::FileExistsW(outputFilename))
 	{
 		if (!overwrite) {
@@ -23,7 +21,6 @@ VARIANT_BOOL CUtils::SaveOutputShapefile(BSTR outputFilename, IShapefile* sf, VA
 		}
 	}
 
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 	VARIANT_BOOL vb;
 	sf->SaveAsEx(outputFilename, VARIANT_TRUE, VARIANT_FALSE, &vb);
 
@@ -43,8 +40,6 @@ VARIANT_BOOL CUtils::SaveOutputShapefile(BSTR outputFilename, IShapefile* sf, VA
 // ********************************************************
 void CUtils::CloseOutputShapefile(IShapefile* sf)
 {
-    if (!sf) return;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 	sf->StopAppendMode();
 
 	VARIANT_BOOL vb;
@@ -71,7 +66,6 @@ bool CUtils::CheckInputShapefile(IShapefile* input)
 IShapefile* CUtils::CloneInput(IShapefile* input, BSTR outputFilename, VARIANT_BOOL overwrite)
 {
 	if (!CheckInputShapefile(input)) return S_OK;
-    CSingleLock sfLock(&((CShapefile*)input)->ShapefileLock, TRUE);
 
 	IShapefile* result = NULL;
 	input->Clone(&result);
@@ -90,8 +84,6 @@ IShapefile* CUtils::CloneInput(IShapefile* input, BSTR outputFilename, VARIANT_B
 STDMETHODIMP CUtils::FixUpShapes(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL overwrite, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    if (!CheckInputShapefile(subject)) return S_OK;
-    CSingleLock sfLock(&((CShapefile*)subject)->ShapefileLock, TRUE);
 
 	*retVal = VARIANT_FALSE;
 	
@@ -118,7 +110,6 @@ STDMETHODIMP CUtils::BufferByDistance(IShapefile* subject, DOUBLE Distance, LONG
 	*retVal = VARIANT_FALSE;
 
 	if (!CheckInputShapefile(subject)) return S_OK;
-    CSingleLock sfLock(&((CShapefile*)subject)->ShapefileLock, TRUE);
 
 	IShapefile* result = NULL;
 
@@ -158,8 +149,6 @@ STDMETHODIMP CUtils::BufferByDistance(IShapefile* subject, DOUBLE Distance, LONG
 STDMETHODIMP CUtils::ExplodeShapes(IShapefile* subject, VARIANT_BOOL SelectedOnly, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    if (!CheckInputShapefile(subject)) return S_OK;
-    CSingleLock sfLock(&((CShapefile*)subject)->ShapefileLock, TRUE);
 
 	*retVal = VARIANT_FALSE;
 
@@ -181,9 +170,6 @@ STDMETHODIMP CUtils::ExplodeShapes(IShapefile* subject, VARIANT_BOOL SelectedOnl
 STDMETHODIMP CUtils::ExportSelection(IShapefile* subject, BSTR outputFilename, VARIANT_BOOL Overwrite, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-    if (!CheckInputShapefile(subject)) return S_OK;
-    CSingleLock sfLock(&((CShapefile*)subject)->ShapefileLock, TRUE);
 
 	*retVal = VARIANT_FALSE;
 

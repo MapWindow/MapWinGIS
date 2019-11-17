@@ -34,10 +34,11 @@ namespace MapWinGIS
         /// </summary>
         public uint OutlineColor { get; set; }
 
-        /// <summary>
-        /// Gets or sets the handle of active layer, which is used when Identifer.IdentifierMode set to imSingleLayer.
-        /// </summary>
-        public int ActiveLayer { get; set; }
+        ///// <summary>
+        ///// Gets or sets the handle of active layer, which is used when Identifer.IdentifierMode set to imSingleLayer.
+        ///// NOTE: this method has been hidden, and functionality replaced through use of the ChooseLayer event.
+        ///// </summary>
+        //public int ActiveLayer { get; set; }
     }
 #if nsp
 }

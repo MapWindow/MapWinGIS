@@ -385,8 +385,6 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
         return S_OK;
     }
 
-    CSingleLock sfLock(&((CShapefile*) Shapes)->ShapefileLock, TRUE);
-
     ICallback* callback = cBack ? cBack : _globalCallback;
 
     ShpfileType shptype;
@@ -1162,8 +1160,6 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
-
-	CSingleLock sfLock(&((CShapefile*)Shapefile)->ShapefileLock, TRUE);
 
 	long ncols = 0, nrows = 0;
 	IGridHeader * header = NULL;
@@ -2744,8 +2740,6 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		return S_OK;
 	}
 
-	CSingleLock sfLock(&((CShapefile*)Shpfile)->ShapefileLock, TRUE);
-
 	if (!((CShapefile*)Shpfile)->ValidateInput(Shpfile, "ShapefileToGrid", "Shpfile", VARIANT_FALSE, "Utils"))
 		return S_OK;
 
@@ -3589,8 +3583,6 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 		return S_OK;
 	}
 
-	CSingleLock sfLock(&((CShapefile*) sf)->ShapefileLock, TRUE);
-
 	OGRSpatialReference* ref1 = ((CGeoProjection*)source)->get_SpatialReference();
 	OGRSpatialReference* ref2 = ((CGeoProjection*)target)->get_SpatialReference();
 
@@ -4128,8 +4120,6 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
-
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 
 	ShpfileType type;
 	sf->get_ShapefileType(&type);

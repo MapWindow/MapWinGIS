@@ -1,7 +1,4 @@
 #pragma once
-
-#include "MapWinGIS_i.h"
-
 namespace CallbackHelper
 {
 	void Progress(ICallback* callback, int index, double count, const char* message, BSTR& key, long& lastPercent);

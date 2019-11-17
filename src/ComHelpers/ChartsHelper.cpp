@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "Shapefile.h"
 #include "ChartsHelper.h"
 
 // *******************************************************************
@@ -9,7 +8,6 @@
 bool ChartsHelper::ReadChartFields(IShapefile* sf, std::vector<double*>* values)
 {
 	if (!sf) return false;
-    CSingleLock sfLock(&((CShapefile*) sf)->ShapefileLock, TRUE);
 
 	struct FieldIndex
 	{
@@ -92,7 +90,6 @@ bool ChartsHelper::ReadChartFields(IShapefile* sf, std::vector<double*>* values)
 bool ChartsHelper::ReadChartField(IShapefile* sf, std::vector<double>* values, int fieldIndex)
 {
 	if (!sf) return false;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 
 	IField* fld = NULL;
 	sf->get_Field(fieldIndex, &fld);

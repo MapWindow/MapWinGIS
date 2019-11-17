@@ -34,7 +34,6 @@
 STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    CSingleLock sfLock(&ShapefileLock, TRUE);
 	VARIANT_BOOL vbretval = VARIANT_FALSE;
 
 	// out of bounds?
@@ -70,8 +69,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 //		ReadFastModeShape()
 // ************************************************************
 IShape* CShapefile::ReadFastModeShape(long ShapeIndex)
-{    CSingleLock sfLock(&ShapefileLock, TRUE);
-	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
+{	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
 
 	// read the shp from disk
 	int index = ShapeUtility::ReadIntBigEndian(_shpfile);
@@ -114,8 +112,7 @@ IShape* CShapefile::ReadFastModeShape(long ShapeIndex)
 //		ReadComShape()
 // ************************************************************
 IShape* CShapefile::ReadComShape(long ShapeIndex)
-{    CSingleLock sfLock(&ShapefileLock, TRUE);
-	// read the shp from disk
+{	// read the shp from disk
 	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
 
 	int intbuf;
@@ -957,8 +954,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 //		ReadShx()
 // **************************************************************
 BOOL CShapefile::ReadShx()
-{    CSingleLock sfLock(&ShapefileLock, TRUE);
-	// guaranteed that .shx file is open
+{	// guaranteed that .shx file is open
 	rewind(_shxfile);
 	_shpOffsets.clear();
 
@@ -1025,8 +1021,7 @@ BOOL CShapefile::ReadShx()
 //		AppendToShx()
 // **************************************************************
 bool CShapefile::AppendToShx(FILE* shx, IShape* shp, int offset)
-{    CSingleLock sfLock(&ShapefileLock, TRUE);
-	if (!shx || !shp) return false;
+{	if (!shx || !shp) return false;
 
 	_shpOffsets.push_back(offset);
 
@@ -1046,8 +1041,7 @@ bool CShapefile::AppendToShx(FILE* shx, IShape* shp, int offset)
 //		WriteShx()
 // **************************************************************
 BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
-{    CSingleLock sfLock(&ShapefileLock, TRUE);
-	ICallback* callback = cBack ? cBack : _globalCallback;
+{	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	// guaranteed that .shx file is open
 	rewind(shx);
@@ -1123,8 +1117,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 //		GetWriteFileLength()
 // **************************************************************
 int CShapefile::GetWriteFileLength()
-{    CSingleLock sfLock(&ShapefileLock, TRUE);
-	IShape * sh = NULL;
+{	IShape * sh = NULL;
 	long numPoints = 0;
 	long numParts = 0;
 	long part = 0;
@@ -1152,8 +1145,7 @@ int CShapefile::GetWriteFileLength()
 //		AppendToShpFile()
 // **************************************************************
 bool CShapefile::AppendToShpFile(FILE* shp, IShapeWrapper* wrapper)
-{    CSingleLock sfLock(&ShapefileLock, TRUE);
-	if (!shp || !wrapper) return false;
+{	if (!shp || !wrapper) return false;
 
 	int length = wrapper->get_ContentLength();
 
@@ -1182,8 +1174,7 @@ bool CShapefile::AppendToShpFile(FILE* shp, IShapeWrapper* wrapper)
 //		WriteShp()
 // **************************************************************
 void CShapefile::WriteBounds(FILE * shp)
-{    CSingleLock sfLock(&ShapefileLock, TRUE);
-	double ShapefileBounds[8];
+{	double ShapefileBounds[8];
 	ShapefileBounds[0] = _minX;
 	ShapefileBounds[1] = _minY;
 	ShapefileBounds[2] = _maxX;
@@ -1199,8 +1190,7 @@ void CShapefile::WriteBounds(FILE * shp)
 //		WriteShp()
 // **************************************************************
 BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
-{    CSingleLock sfLock(&ShapefileLock, TRUE);
-	// guaranteed that .shp file is open
+{	// guaranteed that .shp file is open
 	rewind(shp);
 
 	//FILE_CODE

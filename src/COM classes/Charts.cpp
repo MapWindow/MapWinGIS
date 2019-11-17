@@ -1,13 +1,13 @@
 /**************************************************************************************
  * File name: Charts.cpp
  *
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  * Description: Implementation of CCharts
  *
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -18,8 +18,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 19 june 2010 - created the file.
  // Paul Meems sept. 2019 - MWGIS-183: Merge .NET and VB drawing functions
@@ -39,14 +39,14 @@
 STDMETHODIMP CCharts::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(_key);
+		::SysFreeString(_key);
 	USES_CONVERSION;
 	_key = OLE2BSTR(newVal);
 	return S_OK;
@@ -58,14 +58,14 @@ STDMETHODIMP CCharts::put_Key(BSTR newVal)
 STDMETHODIMP CCharts::get_VisibilityExpression(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	*pVal = OLE2BSTR(_expression);
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_VisibilityExpression(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(_expression);
+		::SysFreeString(_expression);
 	USES_CONVERSION;
 	_expression = OLE2BSTR(newVal);
 	return S_OK;
@@ -77,14 +77,14 @@ STDMETHODIMP CCharts::put_VisibilityExpression(BSTR newVal)
 STDMETHODIMP CCharts::get_Caption(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	*pVal = OLE2BSTR(_caption);
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_Caption(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(_caption);
+		::SysFreeString(_caption);
 	USES_CONVERSION;
 	_caption = OLE2BSTR(newVal);
 	return S_OK;
@@ -93,48 +93,48 @@ STDMETHODIMP CCharts::put_Caption(BSTR newVal)
 // **********************************************************
 //		get/put_Visible()
 // **********************************************************
-STDMETHODIMP CCharts::get_Visible( VARIANT_BOOL *retVal )
+STDMETHODIMP CCharts::get_Visible(VARIANT_BOOL *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.visible;
+		*retVal = _options.visible;
 	return S_OK;
 }
-STDMETHODIMP CCharts::put_Visible( VARIANT_BOOL newVal )
+STDMETHODIMP CCharts::put_Visible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.visible = newVal;
+		_options.visible = newVal;
 	return S_OK;
 }
 
 // **********************************************************
 //		get/put_AvoidCollisions()
 // **********************************************************
-STDMETHODIMP CCharts::get_AvoidCollisions( VARIANT_BOOL *retVal )
+STDMETHODIMP CCharts::get_AvoidCollisions(VARIANT_BOOL *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.avoidCollisions;
+		*retVal = _options.avoidCollisions;
 	return S_OK;
 }
-STDMETHODIMP CCharts::put_AvoidCollisions( VARIANT_BOOL newVal )
+STDMETHODIMP CCharts::put_AvoidCollisions(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.avoidCollisions = newVal;
+		_options.avoidCollisions = newVal;
 	return S_OK;
 }
 
 // **********************************************************
 //		get/put_ChartType()
 // **********************************************************
-STDMETHODIMP CCharts::get_ChartType( tkChartType* retVal )
+STDMETHODIMP CCharts::get_ChartType(tkChartType* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.chartType;
+		*retVal = _options.chartType;
 	return S_OK;
 }
-STDMETHODIMP CCharts::put_ChartType( tkChartType newVal )
-{	
+STDMETHODIMP CCharts::put_ChartType(tkChartType newVal)
+{
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.chartType = newVal;
+		_options.chartType = newVal;
 	return S_OK;
 }
 
@@ -144,13 +144,13 @@ STDMETHODIMP CCharts::put_ChartType( tkChartType newVal )
 STDMETHODIMP CCharts::get_BarWidth(long* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.barWidth;
+		*retVal = _options.barWidth;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_BarWidth(long newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.barWidth = newVal;
+		_options.barWidth = newVal;
 	return S_OK;
 }
 
@@ -160,55 +160,55 @@ STDMETHODIMP CCharts::put_BarWidth(long newVal)
 STDMETHODIMP CCharts::get_BarHeight(long* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.barHeight;
+		*retVal = _options.barHeight;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_BarHeight(long newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.barHeight = newVal;
+		_options.barHeight = newVal;
 	return S_OK;
 }
 
 // **********************************************************
 //		get/put_PieChartRadius()
 // **********************************************************
-STDMETHODIMP CCharts::get_PieRadius (long* retVal)
+STDMETHODIMP CCharts::get_PieRadius(long* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.radius;
+		*retVal = _options.radius;
 	return S_OK;
 }
-STDMETHODIMP CCharts::put_PieRadius (long newVal)
+STDMETHODIMP CCharts::put_PieRadius(long newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.radius = newVal;
+		_options.radius = newVal;
 	return S_OK;
 }
 
 // **********************************************************
 //		get/put_PieChartRotation()
 // **********************************************************
-STDMETHODIMP CCharts::get_PieRotation (double* retVal)
+STDMETHODIMP CCharts::get_PieRotation(double* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.rotation;
+		*retVal = _options.rotation;
 	return S_OK;
 }
-STDMETHODIMP CCharts::put_PieRotation (double newVal)
+STDMETHODIMP CCharts::put_PieRotation(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.rotation = newVal;
+		_options.rotation = newVal;
 	return S_OK;
 }
 
 // **********************************************************
 //		get_NumBars
 // **********************************************************
-STDMETHODIMP CCharts::get_NumFields (long* retVal)
+STDMETHODIMP CCharts::get_NumFields(long* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _bars.size();
+		*retVal = _bars.size();
 	return S_OK;
 }
 
@@ -218,7 +218,7 @@ STDMETHODIMP CCharts::get_NumFields (long* retVal)
 STDMETHODIMP CCharts::AddField2(long FieldIndex, OLE_COLOR Color)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	VARIANT_BOOL vbretval;
+		VARIANT_BOOL vbretval;
 	this->InsertField2(_bars.size(), FieldIndex, Color, &vbretval);
 	return S_OK;
 }
@@ -226,16 +226,16 @@ STDMETHODIMP CCharts::AddField2(long FieldIndex, OLE_COLOR Color)
 STDMETHODIMP CCharts::AddField(IChartField* Field, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (!Field)	
-	{
-		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		*retVal = VARIANT_FALSE;
-	}
-	else
-	{
-		_bars.push_back(Field);
-		Field->AddRef();
-	}
+		if (!Field)
+		{
+			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+			*retVal = VARIANT_FALSE;
+		}
+		else
+		{
+			_bars.push_back(Field);
+			Field->AddRef();
+		}
 	*retVal = VARIANT_TRUE;
 	return S_OK;
 }
@@ -243,28 +243,28 @@ STDMETHODIMP CCharts::AddField(IChartField* Field, VARIANT_BOOL* retVal)
 // **********************************************************
 //		InsertField2()
 // **********************************************************
-STDMETHODIMP CCharts::InsertField2 (long Index, long FieldIndex, OLE_COLOR Color, VARIANT_BOOL* retVal)
+STDMETHODIMP CCharts::InsertField2(long Index, long FieldIndex, OLE_COLOR Color, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if(Index < 0 || Index > (long)_bars.size())
-	{	
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = VARIANT_FALSE;
-	}
-	else
-	{
-		IChartField* chartField = NULL;
-		CoCreateInstance(CLSID_ChartField,NULL,CLSCTX_INPROC_SERVER,IID_IChartField,(void**)&chartField);
-		if (chartField)
+		if (Index < 0 || Index >(long)_bars.size())
 		{
-			chartField->put_Index(FieldIndex);
-			chartField->put_Color(Color);
+			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+			*retVal = VARIANT_FALSE;
 		}
+		else
+		{
+			IChartField* chartField = NULL;
+			CoCreateInstance(CLSID_ChartField, NULL, CLSCTX_INPROC_SERVER, IID_IChartField, (void**)&chartField);
+			if (chartField)
+			{
+				chartField->put_Index(FieldIndex);
+				chartField->put_Color(Color);
+			}
 
-		if (Index == _bars.size())	_bars.push_back(chartField);
-		else						_bars.insert(_bars.begin() + Index, chartField);
-		*retVal = VARIANT_TRUE;
-	}
+			if (Index == _bars.size())	_bars.push_back(chartField);
+			else						_bars.insert(_bars.begin() + Index, chartField);
+			*retVal = VARIANT_TRUE;
+		}
 	return S_OK;
 }
 
@@ -274,25 +274,25 @@ STDMETHODIMP CCharts::InsertField2 (long Index, long FieldIndex, OLE_COLOR Color
 STDMETHODIMP CCharts::InsertField(long Index, IChartField* Field, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if(Index < 0 || Index > (long)_bars.size())
-	{	
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = VARIANT_FALSE;
-	}
-	else
-	{
-		if (!Field)	
+		if (Index < 0 || Index >(long)_bars.size())
 		{
-			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*retVal = VARIANT_FALSE;
 		}
 		else
 		{
-			_bars.insert(_bars.begin() + Index, Field);
-			Field->AddRef();
-			*retVal = VARIANT_TRUE;
+			if (!Field)
+			{
+				ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+				*retVal = VARIANT_FALSE;
+			}
+			else
+			{
+				_bars.insert(_bars.begin() + Index, Field);
+				Field->AddRef();
+				*retVal = VARIANT_TRUE;
+			}
 		}
-	}
 	return S_OK;
 }
 
@@ -302,17 +302,17 @@ STDMETHODIMP CCharts::InsertField(long Index, IChartField* Field, VARIANT_BOOL* 
 STDMETHODIMP CCharts::RemoveField(long Index, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if(Index < 0 || Index > (long)_bars.size())
-	{	
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = VARIANT_FALSE;
-	}
-	else
-	{
-		_bars[Index]->Release();
-		_bars.erase(_bars.begin() + Index);
-		*retVal = VARIANT_TRUE;
-	}
+		if (Index < 0 || Index >(long)_bars.size())
+		{
+			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+			*retVal = VARIANT_FALSE;
+		}
+		else
+		{
+			_bars[Index]->Release();
+			_bars.erase(_bars.begin() + Index);
+			*retVal = VARIANT_TRUE;
+		}
 	return S_OK;
 }
 
@@ -322,7 +322,7 @@ STDMETHODIMP CCharts::RemoveField(long Index, VARIANT_BOOL* retVal)
 STDMETHODIMP CCharts::MoveField(long OldIndex, long NewIndex, VARIANT_BOOL* vbretval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	ErrorMessage(tkPROPERTY_NOT_IMPLEMENTED);
+		ErrorMessage(tkPROPERTY_NOT_IMPLEMENTED);
 	return S_OK;
 }
 
@@ -332,17 +332,17 @@ STDMETHODIMP CCharts::MoveField(long OldIndex, long NewIndex, VARIANT_BOOL* vbre
 STDMETHODIMP CCharts::Generate(tkLabelPositioning Position, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (!_shapefile)
-	{
-		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
-		*retVal = VARIANT_FALSE;
-	}
-	else
-	{
-		((CShapefile*)_shapefile)->SetChartsPositions(Position);
-		_chartsExist = true;
-		*retVal = VARIANT_TRUE;
-	}
+		if (!_shapefile)
+		{
+			ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
+			*retVal = VARIANT_FALSE;
+		}
+		else
+		{
+			((CShapefile*)_shapefile)->SetChartsPositions(Position);
+			_chartsExist = true;
+			*retVal = VARIANT_TRUE;
+		}
 	return S_OK;
 }
 
@@ -374,13 +374,13 @@ IShapefile* CCharts::get_ParentShapefile()
 STDMETHODIMP CCharts::get_Thickness(double* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.thickness;
+		*retVal = _options.thickness;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_Thickness(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.thickness = newVal;
+		_options.thickness = newVal;
 	return S_OK;
 }
 
@@ -390,13 +390,13 @@ STDMETHODIMP CCharts::put_Thickness(double newVal)
 STDMETHODIMP CCharts::get_Tilt(double* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.tilt; 
+		*retVal = _options.tilt;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_Tilt(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.tilt = newVal;
+		_options.tilt = newVal;
 	return S_OK;
 }
 
@@ -406,13 +406,13 @@ STDMETHODIMP CCharts::put_Tilt(double newVal)
 STDMETHODIMP CCharts::get_PieRadius2(LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.radius2;
+		*retVal = _options.radius2;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_PieRadius2(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.radius2 = newVal;
+		_options.radius2 = newVal;
 	return S_OK;
 }
 
@@ -422,13 +422,13 @@ STDMETHODIMP CCharts::put_PieRadius2(LONG newVal)
 STDMETHODIMP CCharts::get_SizeField(LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.sizeField;
+		*retVal = _options.sizeField;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_SizeField(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.sizeField = newVal;
+		_options.sizeField = newVal;
 	return S_OK;
 }
 
@@ -438,13 +438,13 @@ STDMETHODIMP CCharts::put_SizeField(LONG newVal)
 STDMETHODIMP CCharts::get_NormalizationField(LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.normalizationField;
+		*retVal = _options.normalizationField;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_NormalizationField(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.normalizationField = newVal;
+		_options.normalizationField = newVal;
 	return S_OK;
 }
 
@@ -454,13 +454,13 @@ STDMETHODIMP CCharts::put_NormalizationField(LONG newVal)
 STDMETHODIMP CCharts::get_UseVariableRadius(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.useVariableRadius;
+		*retVal = _options.useVariableRadius;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_UseVariableRadius(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		_options.useVariableRadius = newVal?true:false;
+		_options.useVariableRadius = newVal ? true : false;
 	return S_OK;
 }
 
@@ -470,16 +470,16 @@ STDMETHODIMP CCharts::put_UseVariableRadius(VARIANT_BOOL newVal)
 STDMETHODIMP CCharts::get_Transparency(SHORT* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = (short)_options.transparency;
+		*retVal = (short)_options.transparency;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_Transparency(SHORT newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (newVal >= 0 && newVal <= 255)
-		_options.transparency = newVal;
-	else
-		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		if (newVal >= 0 && newVal <= 255)
+			_options.transparency = newVal;
+		else
+			ErrorMessage(tkINVALID_PARAMETER_VALUE);
 	return S_OK;
 }
 
@@ -489,13 +489,13 @@ STDMETHODIMP CCharts::put_Transparency(SHORT newVal)
 STDMETHODIMP CCharts::get_LineColor(OLE_COLOR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.lineColor;
+		*retVal = _options.lineColor;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_LineColor(OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.lineColor = newVal;
+		_options.lineColor = newVal;
 	return S_OK;
 }
 
@@ -505,29 +505,29 @@ STDMETHODIMP CCharts::put_LineColor(OLE_COLOR newVal)
 STDMETHODIMP CCharts::get_Use3DMode(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.use3Dmode;
+		*retVal = _options.use3Dmode;
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_Use3DMode(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		_options.use3Dmode = newVal?true:false;
+		_options.use3Dmode = newVal ? true : false;
 	return S_OK;
 }
 
 // **********************************************************
 //		VerticalPosition
 // **********************************************************
-STDMETHODIMP CCharts::get_VerticalPosition (tkVerticalPosition* retVal)
+STDMETHODIMP CCharts::get_VerticalPosition(tkVerticalPosition* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _options.verticalPosition;
+		*retVal = _options.verticalPosition;
 	return S_OK;
 }
-STDMETHODIMP CCharts::put_VerticalPosition (tkVerticalPosition newVal)
+STDMETHODIMP CCharts::put_VerticalPosition(tkVerticalPosition newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_options.verticalPosition = newVal;
+		_options.verticalPosition = newVal;
 	return S_OK;
 }
 
@@ -537,53 +537,53 @@ STDMETHODIMP CCharts::put_VerticalPosition (tkVerticalPosition newVal)
 STDMETHODIMP CCharts::get_Chart(long ShapeIndex, IChart** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	if (!_shapefile)
-	{
-		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
-		*retVal = NULL;
-		return S_OK;
-	}
-	else
-	{
-		std::vector<ShapeRecord*>* positions = ((CShapefile*)_shapefile)->get_ShapeVector();
-		if ( ShapeIndex < 0 || ShapeIndex > (long)positions->size())
+
+		if (!_shapefile)
 		{
-			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+			ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
 			*retVal = NULL;
 			return S_OK;
 		}
 		else
 		{
-			IChart* chart = NULL;
-			CoCreateInstance(CLSID_Chart,NULL,CLSCTX_INPROC_SERVER,IID_IChart,(void**)&chart);
-			if (chart)
+			std::vector<ShapeRecord*>* positions = ((CShapefile*)_shapefile)->get_ShapeVector();
+			if (ShapeIndex < 0 || ShapeIndex >(long)positions->size())
 			{
-				ShapeRecord* data = (*positions)[ShapeIndex];
-				((CChart*)chart)->put_ChartData(reinterpret_cast<char*>(data->chart));
+				ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+				*retVal = NULL;
+				return S_OK;
 			}
-			*retVal = chart;
+			else
+			{
+				IChart* chart = NULL;
+				CoCreateInstance(CLSID_Chart, NULL, CLSCTX_INPROC_SERVER, IID_IChart, (void**)&chart);
+				if (chart)
+				{
+					ShapeRecord* data = (*positions)[ShapeIndex];
+					((CChart*)chart)->put_ChartData(reinterpret_cast<char*>(data->chart));
+				}
+				*retVal = chart;
+			}
 		}
-	}
 	return S_OK;
 }
 
 // **********************************************************
 //		get_Field
 // **********************************************************
-STDMETHODIMP CCharts::get_Field (long FieldIndex, IChartField** retVal)
+STDMETHODIMP CCharts::get_Field(long FieldIndex, IChartField** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	if(FieldIndex < 0 || FieldIndex > (long)_bars.size() - 1)
-	{	
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-	}
-	else
-	{
-		*retVal = _bars[FieldIndex];
-		(*retVal)->AddRef();
-	}
+
+		if (FieldIndex < 0 || FieldIndex >(long)_bars.size() - 1)
+		{
+			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		}
+		else
+		{
+			*retVal = _bars[FieldIndex];
+			(*retVal)->AddRef();
+		}
 	return S_OK;
 }
 
@@ -593,8 +593,8 @@ STDMETHODIMP CCharts::get_Field (long FieldIndex, IChartField** retVal)
 STDMETHODIMP CCharts::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	*pVal = _lastErrorCode;
+
+		*pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
 
 	return S_OK;
@@ -606,8 +606,8 @@ STDMETHODIMP CCharts::get_LastErrorCode(long *pVal)
 STDMETHODIMP CCharts::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	USES_CONVERSION;
+
+		USES_CONVERSION;
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
 
 	return S_OK;
@@ -619,8 +619,8 @@ STDMETHODIMP CCharts::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CCharts::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _globalCallback;
-	if( _globalCallback )
+		*pVal = _globalCallback;
+	if (_globalCallback)
 	{
 		_globalCallback->AddRef();
 	}
@@ -629,7 +629,7 @@ STDMETHODIMP CCharts::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CCharts::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
+		ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -639,24 +639,24 @@ STDMETHODIMP CCharts::put_GlobalCallback(ICallback *newVal)
 STDMETHODIMP CCharts::get_Count(long *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if(!_shapefile)
-	{
-		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
-		*retVal = 0;
-	}
-	else
-	{
-		if (_chartsExist)
+		if (!_shapefile)
 		{
-			long numShapes;
-			_shapefile->get_NumShapes(&numShapes);
-			*retVal = numShapes;
+			ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
+			*retVal = 0;
 		}
 		else
 		{
-			*retVal = 0;
+			if (_chartsExist)
+			{
+				long numShapes;
+				_shapefile->get_NumShapes(&numShapes);
+				*retVal = numShapes;
+			}
+			else
+			{
+				*retVal = 0;
+			}
 		}
-	}
 	return S_OK;
 }
 
@@ -666,10 +666,10 @@ STDMETHODIMP CCharts::get_Count(long *retVal)
 STDMETHODIMP CCharts::ClearFields()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	for (unsigned int i = 0; i < _bars.size(); i++)
-	{
-		_bars[i]->Release();
-	}
+		for (unsigned int i = 0; i < _bars.size(); i++)
+		{
+			_bars[i]->Release();
+		}
 	_bars.clear();
 	return S_OK;
 }
@@ -680,10 +680,9 @@ STDMETHODIMP CCharts::ClearFields()
 STDMETHODIMP CCharts::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	IShapefile* sf = this->get_ParentShapefile();
+		IShapefile* sf = this->get_ParentShapefile();
 	if (sf)
 	{
-        CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 		std::vector<ShapeRecord*>* data = ((CShapefile*)sf)->get_ShapeVector();
 		for (unsigned int i = 0; i < data->size(); i++)
 		{
@@ -706,13 +705,13 @@ STDMETHODIMP CCharts::Clear()
 STDMETHODIMP CCharts::DrawChart(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	if (!hdc)
-	{
-		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_OK;
-	}
-		
+
+		if (!hdc)
+		{
+			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+			return S_OK;
+		}
+
 	CDC* dc = CDC::FromHandle((HDC)hdc);
 	*retVal = DrawChartCore(dc, x, y, hideLabels, backColor);
 	return S_OK;
@@ -740,7 +739,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 		ErrorMessage(tkFAILED_TO_OBTAIN_DC);
 		return VARIANT_FALSE;
 	}
-	
+
 	long numBars;
 	this->get_NumFields(&numBars);
 	bool noFields = false;
@@ -753,24 +752,24 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 	// initializing graphics
 	Gdiplus::Graphics g(dc->GetSafeHdc());
 
-	long alpha =_options.transparency << 24;
+	long alpha = _options.transparency << 24;
 	Gdiplus::Pen pen(Utility::OleColor2GdiPlus(_options.lineColor, (BYTE)_options.transparency));
 
 	Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor, 255);
 	Gdiplus::SolidBrush brushBackground(clr);
 	Gdiplus::Pen penBackground(clr);
-	
+
 	CFont* oldFont = NULL;
 	CFont fnt;
 	CBrush brushFrame(_options.valuesFrameColor);
-	
+
 	// values font initialization
 	bool vertical = (_options.valuesStyle == vsVertical);
 	CString sFormat = "%g";	// format for numbers
 
 	if (_options.valuesVisible && !hideLabels)
 	{
-		LOGFONT lf;	
+		LOGFONT lf;
 		CString s(_options.valuesFontName);
 
 		fnt.CreatePointFont(_options.valuesFontSize * 10, s);
@@ -780,16 +779,16 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 		{
 			lf.lfEscapement = 900;
 		}
-		
+
 		dc->SetTextColor(_options.valuesFontColor);
 
 		lf.lfItalic = (BYTE)_options.valuesFontItalic;
 
-		if (_options.valuesFontBold) 
+		if (_options.valuesFontBold)
 			lf.lfWeight = FW_BOLD;
-		else			
+		else
 			lf.lfWeight = 0;
-		
+
 		fnt.DeleteObject();
 		fnt.CreateFontIndirectA(&lf);
 		oldFont = dc->SelectObject(&fnt);
@@ -803,31 +802,31 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 	// drawing pie charts
 	if (_options.chartType == chtPieChart)
 	{
-		Gdiplus::REAL pieThickness = (Gdiplus::REAL)(_options.thickness *_options.tilt/90.0);
-		
+		Gdiplus::REAL pieThickness = (Gdiplus::REAL)(_options.thickness *_options.tilt / 90.0);
+
 		Gdiplus::REAL pieHeight;
 		if (_options.use3Dmode)
-			pieHeight = (Gdiplus::REAL)(_options.radius * (1.0 -_options.tilt/90.0) * 2.0);
+			pieHeight = (Gdiplus::REAL)(_options.radius * (1.0 - _options.tilt / 90.0) * 2.0);
 		else
-			pieHeight =(Gdiplus::REAL)(_options.radius * 2.0);
+			pieHeight = (Gdiplus::REAL)(_options.radius * 2.0);
 
-		Gdiplus::REAL pieWidth =(Gdiplus::REAL)(_options.radius * 2.0);
-	
+		Gdiplus::REAL pieWidth = (Gdiplus::REAL)(_options.radius * 2.0);
+
 		double sum = 0.0;
 		std::vector<double> values;
-		
+
 		for (int j = 0; j < numBars; j++)
 		{
-			values.push_back(100.0/(double)numBars);
+			values.push_back(100.0 / (double)numBars);
 			sum += values[j];
 		}
-		
+
 		Gdiplus::REAL xStart = (Gdiplus::REAL)x; //0
 		Gdiplus::REAL yStart = (Gdiplus::REAL)y; //0
-		
+
 		Gdiplus::REAL startAngle = 0.0, sweepAngle = 0.0;
 		Gdiplus::GraphicsPath path;
-		
+
 		for (int j = 0; j < numBars; j++)
 		{
 			// retrieving color
@@ -842,27 +841,27 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 				this->get_Field(j, &fld);
 				fld->get_Color(&color);
 			}
-			
+
 			// initializing brushes
 			Gdiplus::Color clr(alpha | BGR_TO_RGB(color));
 			Gdiplus::Color clrDimmed = Utility::ChangeBrightness(color, -100, alpha);
 			Gdiplus::SolidBrush brush(clr);
 			Gdiplus::SolidBrush brushDimmed(clrDimmed);
 
-			sweepAngle = (Gdiplus::REAL)(values[j]/sum * 360.0);
+			sweepAngle = (Gdiplus::REAL)(values[j] / sum * 360.0);
 			g.FillPie(&brushBackground, xStart, yStart, pieWidth, pieHeight, startAngle, sweepAngle);
 			g.FillPie(&brush, xStart, yStart, pieWidth, pieHeight, startAngle, sweepAngle);
 			path.AddPie(xStart, yStart, pieWidth, pieHeight, startAngle, sweepAngle);
-			
+
 			// 3D mode
-			if ( startAngle < 180.0 &&_options.use3Dmode)
+			if (startAngle < 180.0 &&_options.use3Dmode)
 			{
 				Gdiplus::GraphicsPath pathBottom;
 				if (startAngle + sweepAngle > 180.0)
 					pathBottom.AddArc(xStart, yStart + pieThickness, pieWidth, pieHeight, startAngle, 180 - startAngle);
 				else
 					pathBottom.AddArc(xStart, yStart + pieThickness, pieWidth, pieHeight, startAngle, sweepAngle);
-				
+
 				Gdiplus::PathData pathData;
 				pathBottom.GetPathData(&pathData);
 				Gdiplus::PointF* pntStart, *pntEnd;
@@ -879,9 +878,9 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 				}
 				else
 					pathBottom.AddArc(xStart, yStart, pieWidth, pieHeight, startAngle + sweepAngle, -sweepAngle);
-				
+
 				pathBottom.AddLine(pntStart->X, pntStart->Y - (Gdiplus::REAL)pieThickness, pntStart->X, pntStart->Y);
-				
+
 				g.FillPath(&brushBackground, &pathBottom);
 				g.FillPath(&brushDimmed, &pathBottom);
 				g.DrawPath(&penBackground, &pathBottom);
@@ -897,12 +896,12 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 		{
 			CCollisionList collisionList;
 			startAngle = 0.0;
-			xStart += pieWidth/2.0f;
-			yStart += pieHeight/2.0f;
-			
+			xStart += pieWidth / 2.0f;
+			yStart += pieHeight / 2.0f;
+
 			for (int j = 0; j < numBars; j++)
 			{
-				sweepAngle = (Gdiplus::REAL)(values[j]/sum * 360.0);
+				sweepAngle = (Gdiplus::REAL)(values[j] / sum * 360.0);
 
 				// label drawing
 				ValueRectangle value;
@@ -910,39 +909,39 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 
 				value.string = Utility::FormatNumber(values[j], CString("%g"));
 				dc->DrawText(value.string, rect, DT_CALCRECT);	// add alignment
-				
-				Gdiplus::REAL labelAngle = startAngle + sweepAngle/2.0f + 90.0f;
+
+				Gdiplus::REAL labelAngle = startAngle + sweepAngle / 2.0f + 90.0f;
 				if (labelAngle > 360.0f)
 				{
 					labelAngle = labelAngle - 360.0f;
 				}
-				
-				int x = (int)(xStart + sin(labelAngle/180.0 * pi_) * _options.radius);
-				int y = (int)(yStart - cos(labelAngle/180.0 * pi_) * _options.radius);
-								
+
+				int x = (int)(xStart + sin(labelAngle / 180.0 * pi_) * _options.radius);
+				int y = (int)(yStart - cos(labelAngle / 180.0 * pi_) * _options.radius);
+
 				if (labelAngle >= 0.0 && labelAngle <= 180.0)
 				{
-					x += rect->Width()/2;
+					x += rect->Width() / 2;
 				}
 				else
 				{
-					x -= rect->Width()/2;
+					x -= rect->Width() / 2;
 				}
 
-				if (labelAngle >= 90.0 && labelAngle <= 270.0 )
+				if (labelAngle >= 90.0 && labelAngle <= 270.0)
 				{
-					y += rect->Height()/2;
+					y += rect->Height() / 2;
 				}
 				else
 				{
-					y -= rect->Height()/2;
+					y -= rect->Height() / 2;
 				}
-				
+
 				startAngle += sweepAngle;
-				
-				rect->MoveToX(x - rect->Width()/2);
-				rect->MoveToY(y - rect->Height()/2);
-				
+
+				rect->MoveToX(x - rect->Width() / 2);
+				rect->MoveToY(y - rect->Height() / 2);
+
 				if (collisionList.HaveCollision(*rect))
 				{
 					continue;
@@ -957,8 +956,8 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 					if (_options.valuesFrameVisible)
 					{
 						CBrush* oldBrush = dc->SelectObject(&brushFrame);
-						
-						CRect r(rect->left -3, rect->top, rect->right +2, rect->bottom);
+
+						CRect r(rect->left - 3, rect->top, rect->right + 2, rect->bottom);
 						dc->Rectangle(r);
 						dc->SelectObject(oldBrush);
 					}
@@ -972,25 +971,25 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 	// -------------------------------------------------------------
 	//	Bar charts drawing
 	// -------------------------------------------------------------
-	else if(_options.chartType == chtBarChart)
+	else if (_options.chartType == chtBarChart)
 	{
 		Gdiplus::PointF points[5];
-		
+
 		std::vector<double> values;
-		
+
 		for (int j = 1; j <= numBars; j++)
 		{
 			values.push_back(j);
 		}
-		
+
 		double minValue = 1;
 		double maxValue = numBars;
-		
+
 		int barHeight = _options.barHeight; // > 30 ? 30 : _options.barHeight;
-		double maxHeight = (double)barHeight; 
+		double maxHeight = (double)barHeight;
 
 		int xStart = (int)x;
-		int yStart = (int)y + (_options.use3Dmode?(int)(_options.thickness  * _options.tilt/90.0 + 2):0);
+		int yStart = (int)y + (_options.use3Dmode ? (int)(_options.thickness  * _options.tilt / 90.0 + 2) : 0);
 
 		double angle = 45.0;
 
@@ -1010,35 +1009,35 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 				fld->Release();
 				fld = NULL;
 			}
-			
+
 			// initializing brushes
 			Gdiplus::Color clr(alpha | BGR_TO_RGB(color));
 			Gdiplus::Color clrDimmed = Utility::ChangeBrightness(color, -100, alpha);
 			Gdiplus::SolidBrush brush(clr);
 			Gdiplus::SolidBrush brushDimmed(clrDimmed);
-			
-			int height = int((double)barHeight/maxValue * values[j]);
+
+			int height = int((double)barHeight / maxValue * values[j]);
 			int offsetY = barHeight - height + yStart;
-			
-			if ( height != 0 )
+
+			if (height != 0)
 			{
 				g.FillRectangle(&brushBackground, xStart, offsetY, _options.barWidth, height);
 				g.FillRectangle(&brush, xStart, offsetY, _options.barWidth, height);
-				
+
 				g.DrawRectangle(&penBackground, xStart, offsetY, _options.barWidth, height);
 				g.DrawRectangle(&pen, xStart, offsetY, _options.barWidth, height);
-			
+
 				// 3D mode
-				if ( _options.use3Dmode )
+				if (_options.use3Dmode)
 				{
 					points[0].X = (Gdiplus::REAL)xStart;
-					points[1].X = (Gdiplus::REAL)(xStart + sin(angle/180*pi_) * _options.thickness);
+					points[1].X = (Gdiplus::REAL)(xStart + sin(angle / 180 * pi_) * _options.thickness);
 					points[2].X = (Gdiplus::REAL)points[1].X + _options.barWidth;
 					points[3].X = (Gdiplus::REAL)xStart + _options.barWidth;
 					points[4].X = (Gdiplus::REAL)xStart;
 
 					points[0].Y = (Gdiplus::REAL)offsetY;
-					points[1].Y = (Gdiplus::REAL)(offsetY - cos(angle/180*pi_) * _options.thickness);
+					points[1].Y = (Gdiplus::REAL)(offsetY - cos(angle / 180 * pi_) * _options.thickness);
 					points[2].Y = (Gdiplus::REAL)points[1].Y;
 					points[3].Y = (Gdiplus::REAL)offsetY;
 					points[4].Y = (Gdiplus::REAL)offsetY;
@@ -1049,13 +1048,13 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 					g.FillPolygon(&brushDimmed, points, 5);
 
 					points[0].X = (Gdiplus::REAL)xStart + _options.barWidth;
-					points[1].X = (Gdiplus::REAL)(points[0].X  + sin(angle/180*pi_) * _options.thickness);
+					points[1].X = (Gdiplus::REAL)(points[0].X + sin(angle / 180 * pi_) * _options.thickness);
 					points[2].X = (Gdiplus::REAL)points[1].X;
 					points[3].X = (Gdiplus::REAL)points[0].X;
 					points[4].X = (Gdiplus::REAL)points[0].X;
 
 					points[0].Y = (Gdiplus::REAL)offsetY;
-					points[1].Y = (Gdiplus::REAL)(points[0].Y - cos(angle/180*pi_) * _options.thickness);
+					points[1].Y = (Gdiplus::REAL)(points[0].Y - cos(angle / 180 * pi_) * _options.thickness);
 					points[2].Y = (Gdiplus::REAL)points[1].Y + height;
 					points[3].Y = (Gdiplus::REAL)points[0].Y + height;
 					points[4].Y = (Gdiplus::REAL)points[0].Y;
@@ -1068,25 +1067,25 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 			}
 			xStart += _options.barWidth;
 		}
-		
+
 		// drawing the labels
 		std::vector<ValueRectangle> labels;
 		if (_options.valuesVisible && !hideLabels)
 		{
-			int xAdd = (int)(sin(45.0/180*pi_) * _options.thickness);
-			
+			int xAdd = (int)(sin(45.0 / 180 * pi_) * _options.thickness);
+
 			xStart = int(x); //- numBars * _options.barWidth/2.0);
 			yStart = int(y + maxHeight);
 			int x, y;
-			
+
 			// calculating position of drawing
 			for (int j = 0; j < numBars; j++)
 			{
-				int height = int((double)barHeight/maxValue * values[j]);
-				if ( height != 0 )
+				int height = int((double)barHeight / maxValue * values[j]);
+				if (height != 0)
 				{
 					CString s = Utility::FormatNumber(values[j], sFormat);
-					
+
 					CRect* rect = new CRect();
 					dc->DrawText(s, rect, DT_CALCRECT);
 
@@ -1094,17 +1093,17 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 					{
 						rect->MoveToY(yStart - rect->Height() - height - 3);
 
-						if (j == 0 )
+						if (j == 0)
 						{
-							rect->MoveToX(xStart + _options.barWidth/2 - rect->Width());
+							rect->MoveToX(xStart + _options.barWidth / 2 - rect->Width());
 						}
 						else if (j == numBars - 1)
 						{
-							rect->MoveToX(xStart + _options.barWidth/2);
+							rect->MoveToX(xStart + _options.barWidth / 2);
 						}
 						else
 						{
-							rect->MoveToX(xStart + _options.barWidth/2 - rect->Width()/2);
+							rect->MoveToX(xStart + _options.barWidth / 2 - rect->Width() / 2);
 						}
 					}
 					else
@@ -1115,22 +1114,22 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 						rect->bottom = 0;
 						rect->left = 0;
 						rect->right = ht;
-						rect->top = - wd;
-						
-						x = xStart + _options.barWidth/2 - rect->Width()/2 + xAdd/2;
+						rect->top = -wd;
+
+						x = xStart + _options.barWidth / 2 - rect->Width() / 2 + xAdd / 2;
 						y = yStart - rect->Height() - height - 6;
-						
+
 						rect->MoveToXY(x, y);
 					}
-					
+
 					// we shall store the label, to keep the collision list clean
 					ValueRectangle value;
 					value.string = s;
-					
+
 					// drawing frame							
 					if (!vertical)
 					{
-						CRect r(rect->left-2, rect->top, rect->right + 2, rect->bottom);
+						CRect r(rect->left - 2, rect->top, rect->right + 2, rect->bottom);
 						value.rect = r;
 					}
 					else
@@ -1139,7 +1138,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 						value.rect = r;
 					}
 					labels.push_back(value);
-					
+
 				}
 				xStart += _options.barWidth;
 			}	// numBars
@@ -1159,7 +1158,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 
 				if (!vertical)
 				{
-					dc->DrawText(labels[j].string, rect, DT_CENTER|DT_VCENTER);
+					dc->DrawText(labels[j].string, rect, DT_CENTER | DT_VCENTER);
 				}
 				else
 				{
@@ -1168,7 +1167,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 			}
 		} // valuesVisible
 	}
-	
+
 	if (_options.valuesVisible)
 	{
 		dc->SelectObject(oldFont);
@@ -1184,17 +1183,17 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 STDMETHODIMP CCharts::get_IconWidth(long *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (_options.chartType == chtBarChart)
-	{
-		int barCount = _bars.size() == 0?1:_bars.size();
-		*retVal = _options.barWidth * barCount + 2;	
-		if (_options.use3Dmode)
-			*retVal += int(sqrt(2.0f)/2.0 * _options.thickness);		// 45 degrees
-	}
-	else
-	{
-		*retVal = _options.radius * 2 + 2;
-	}
+		if (_options.chartType == chtBarChart)
+		{
+			int barCount = _bars.size() == 0 ? 1 : _bars.size();
+			*retVal = _options.barWidth * barCount + 2;
+			if (_options.use3Dmode)
+				*retVal += int(sqrt(2.0f) / 2.0 * _options.thickness);		// 45 degrees
+		}
+		else
+		{
+			*retVal = _options.radius * 2 + 2;
+		}
 	return S_OK;
 }
 
@@ -1205,39 +1204,39 @@ STDMETHODIMP CCharts::get_IconHeight(long *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		if (_options.chartType == chtBarChart)
-	{
-		*retVal = _options.barHeight + 2;
-		if (_options.use3Dmode)
-			*retVal += (int)(sqrt(2.0f)/2.0 * _options.thickness);
-	}
-	else
-	{
-		if (_options.use3Dmode)
-			*retVal = (long)(_options.radius * (1.0 -_options.tilt/90.0) * 2.0 + _options.thickness  * _options.tilt/90.0 + 2);
+		{
+			*retVal = _options.barHeight + 2;
+			if (_options.use3Dmode)
+				*retVal += (int)(sqrt(2.0f) / 2.0 * _options.thickness);
+		}
 		else
-			*retVal = (long)(_options.radius * 2.0 + 2);
-	}
+		{
+			if (_options.use3Dmode)
+				*retVal = (long)(_options.radius * (1.0 - _options.tilt / 90.0) * 2.0 + _options.thickness  * _options.tilt / 90.0 + 2);
+			else
+				*retVal = (long)(_options.radius * 2.0 + 2);
+		}
 	return S_OK;
 }
 
 // *****************************************************************
 //		FontName()
 // *****************************************************************
-STDMETHODIMP CCharts::get_ValuesFontName(BSTR* retval)					
+STDMETHODIMP CCharts::get_ValuesFontName(BSTR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	*retval = OLE2BSTR(_options.valuesFontName);		
+		USES_CONVERSION;
+	*retval = OLE2BSTR(_options.valuesFontName);
 	return S_OK;
-};	
-STDMETHODIMP CCharts::put_ValuesFontName(BSTR newVal)					
+};
+STDMETHODIMP CCharts::put_ValuesFontName(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	::SysFreeString(_options.valuesFontName);
 	_options.valuesFontName = OLE2BSTR(newVal);
 	return S_OK;
-};	
+};
 
 // *****************************************************************
 //		Select()
@@ -1255,12 +1254,12 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 
 	double xMin, yMin, zMin, xMax, yMax, zMax;
 	BoundingBox->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-	CRect box(int(xMin - Tolerance/2), int(yMin - Tolerance/2), int(xMax + Tolerance/2), int(yMax + Tolerance/2));
-	
+	CRect box(int(xMin - Tolerance / 2), int(yMin - Tolerance / 2), int(xMax + Tolerance / 2), int(yMax + Tolerance / 2));
+
 	vector<long> results;
-	
+
 	IUtils* utils = NULL;
-	CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&utils);
+	CoCreateInstance(CLSID_Utils, NULL, CLSCTX_INPROC_SERVER, IID_IUtils, (void**)&utils);
 
 	long numShapes;
 	_shapefile->get_NumShapes(&numShapes);
@@ -1282,7 +1281,7 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 				results.push_back(i);
 			}
 		}
-		
+
 	}
 
 	utils->Release();
@@ -1299,7 +1298,7 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 STDMETHODIMP CCharts::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CPLXMLNode* psTree = SerializeCore("ChartsClass");
+		CPLXMLNode* psTree = SerializeCore("ChartsClass");
 	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
@@ -1310,8 +1309,8 @@ STDMETHODIMP CCharts::Serialize(BSTR* retVal)
 CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 {
 	USES_CONVERSION;
-	
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, "ChartsClass");
+
+	CPLXMLNode* psTree = CPLCreateXMLNode(NULL, CXT_Element, "ChartsClass");
 	CString str;
 
 	// fields
@@ -1323,18 +1322,18 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 			for (unsigned int i = 0; i < _bars.size(); i++)
 			{
 				CPLXMLNode* psNode = CPLCreateXMLNode(psFields, CXT_Element, "ChartFieldClass");
-				
+
 				// name				
 				CComBSTR name;
 				_bars[i]->get_Name(&name);
 				str = OLE2CA(name);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Name", str);
-			
+
 				// color
 				OLE_COLOR color;
 				_bars[i]->get_Color(&color);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Color", CPLString().Printf("%d", color));
-				
+
 				// index
 				long index;
 				_bars[i]->get_Index(&index);
@@ -1345,10 +1344,10 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 
 	// serializing data
 	if (_chartsExist)
-	{	
+	{
 		if (_savingMode == modeStandard)
 		{
-			CPLXMLNode* nodeCharts = this->SerializeChartData("Charts" );
+			CPLXMLNode* nodeCharts = this->SerializeChartData("Charts");
 			if (nodeCharts)
 			{
 				CPLAddXMLChild(psTree, nodeCharts);
@@ -1367,10 +1366,10 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 					_shapefile->get_Filename(&name);
 					CString path = Utility::GetPathWOExtension(OLE2CA(name));
 					path += ".chart";
-					
+
 					if (Utility::FileExists(path) && _savingMode == modeXMLOverwrite)
 					{
-						if( remove( path ) != 0 )
+						if (remove(path) != 0)
 						{
 							ErrorMessage(tkCANT_DELETE_FILE);
 						}
@@ -1399,13 +1398,13 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 	}
 
 	ChartOptions opt;	// to compare with default settings
-	
+
 	if (_options.avoidCollisions != opt.avoidCollisions)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "AvoidCollisions", CPLString().Printf("%d", (int)_options.avoidCollisions));
 
 	if (_options.barHeight != opt.barHeight)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "BarHeight", CPLString().Printf("%d", _options.barHeight));
-	
+
 	if (_options.barWidth != opt.barWidth)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "BarWidth", CPLString().Printf("%d", _options.barWidth));
 
@@ -1435,25 +1434,25 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 
 	if (_options.tilt != opt.tilt)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Tilt", CPLString().Printf("%f", _options.tilt));
-	
+
 	if (_options.transparency != opt.transparency)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Transparency", CPLString().Printf("%d", _options.transparency));
-	
+
 	if (_options.use3Dmode != opt.use3Dmode)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Use3Dmode", CPLString().Printf("%d", (int)_options.use3Dmode));
-	
+
 	if (_options.useVariableRadius != opt.useVariableRadius)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseVariableRadius", CPLString().Printf("%d", (int)_options.useVariableRadius));
-	
+
 	if (_options.valuesFontBold != opt.valuesFontBold)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ValuesFontBold", CPLString().Printf("%d", (int)_options.valuesFontBold));
-	
+
 	if (_options.valuesFontColor != opt.valuesFontColor)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ValuesFontColor", CPLString().Printf("%d", _options.valuesFontColor));
-	
+
 	if (_options.valuesFontItalic != opt.valuesFontItalic)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ValuesFontItalic", CPLString().Printf("%d", (int)_options.valuesFontItalic));
-	
+
 	str = OLE2A(_options.valuesFontName);
 	if (str != OLE2A(opt.valuesFontName))
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ValuesFontName", str);
@@ -1466,20 +1465,20 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 
 	if (_options.valuesFrameVisible != opt.valuesFrameVisible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ValuesFrameVisible", CPLString().Printf("%d", (int)_options.valuesFrameVisible));
-	
+
 	if (_options.valuesStyle != opt.valuesStyle)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ValuesStyle", CPLString().Printf("%d", (int)_options.valuesStyle));
-	
+
 	if (_options.valuesVisible != opt.valuesVisible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ValuesVisible", CPLString().Printf("%d", (int)_options.valuesVisible));
-	
+
 	if (_options.verticalPosition != opt.verticalPosition)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticalPosition", CPLString().Printf("%d", (int)_options.verticalPosition));
-	
+
 	if (_options.visible != opt.visible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_options.visible));
 
-	if (_savingMode !=  modeXML)
+	if (_savingMode != modeXML)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "SavingMode", CPLString().Printf("%d", (int)_savingMode));
 
 	return psTree;
@@ -1492,16 +1491,16 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 {
 	if (!node)
 		return false;
-	
+
 	// restoring fields
 	this->ClearFields();
-	
+
 	// we don't touch charts in this mode
 	if (_savingMode != modeNone)
 	{
 		this->Clear();
 	}
-	
+
 	CString s;
 
 	CPLXMLNode* nodeFields = CPLGetXMLNode(node, "ChartFields");
@@ -1513,20 +1512,20 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 			if (strcmp(node->pszValue, "ChartFieldClass") == 0)
 			{
 				IChartField* field = NULL;
-				CoCreateInstance(CLSID_ChartField,NULL,CLSCTX_INPROC_SERVER,IID_IChartField,(void**)&field);
-				
+				CoCreateInstance(CLSID_ChartField, NULL, CLSCTX_INPROC_SERVER, IID_IChartField, (void**)&field);
+
 				// name
-				s = CPLGetXMLValue( node, "Name", NULL );
-				CComBSTR vbstr( s );
+				s = CPLGetXMLValue(node, "Name", NULL);
+				CComBSTR vbstr(s);
 				field->put_Name(vbstr);
 
-				s = CPLGetXMLValue( node, "Color", NULL );
-				OLE_COLOR color = atoi( s );
-				field->put_Color( color );
+				s = CPLGetXMLValue(node, "Color", NULL);
+				OLE_COLOR color = atoi(s);
+				field->put_Color(color);
 
-				s = CPLGetXMLValue( node, "Index", NULL );
-				long index = atoi( s );
-				field->put_Index( index );
+				s = CPLGetXMLValue(node, "Index", NULL);
+				long index = atoi(s);
+				field->put_Index(index);
 
 				VARIANT_BOOL vbretval;
 				this->AddField(field, &vbretval);
@@ -1534,13 +1533,13 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 				field->Release();
 			}
 			node = node->psNext;
-		} 
+		}
 	}
-	
+
 	// restoring labels
 	if (_savingMode == modeStandard)
 	{
-		node = CPLGetXMLNode( node, "Charts" );
+		node = CPLGetXMLNode(node, "Charts");
 		if (node)
 		{
 			this->DeserializeChartData(node);
@@ -1552,7 +1551,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 		{
 			tkShapefileSourceType sourceType;
 			_shapefile->get_SourceType(&sourceType);
-			
+
 			if (sourceType == sstDiskBased)
 			{
 				// constructing the name of .lbl file
@@ -1561,7 +1560,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 				USES_CONVERSION;
 				CString path = Utility::GetPathWOExtension(OLE2CA(name));
 				path += ".chart";
-				
+
 				// restoring labels
 				if (Utility::FileExists(path))
 				{
@@ -1576,90 +1575,90 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 	ChartOptions opt;	// for default set of options
 
 	// start labels specific options
-	s = CPLGetXMLValue( node, "AvoidCollisions", NULL );
+	s = CPLGetXMLValue(node, "AvoidCollisions", NULL);
 	_options.avoidCollisions = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : opt.avoidCollisions;
 
-	s = CPLGetXMLValue( node, "BarHeight", NULL );
+	s = CPLGetXMLValue(node, "BarHeight", NULL);
 	_options.barHeight = (s != "") ? atoi(s.GetString()) : opt.barHeight;
 
-	s = CPLGetXMLValue( node, "BarWidth", NULL );
+	s = CPLGetXMLValue(node, "BarWidth", NULL);
 	_options.barWidth = (s != "") ? atoi(s.GetString()) : opt.barWidth;
-	
-	s = CPLGetXMLValue( node, "ChartType", NULL );
+
+	s = CPLGetXMLValue(node, "ChartType", NULL);
 	_options.chartType = (s != "") ? (tkChartType)atoi(s.GetString()) : opt.chartType;
-	
-	s = CPLGetXMLValue( node, "LineColor", NULL );
+
+	s = CPLGetXMLValue(node, "LineColor", NULL);
 	_options.lineColor = (s != "") ? (OLE_COLOR)atoi(s.GetString()) : opt.lineColor;
 
-	s = CPLGetXMLValue( node, "NormalizationField", NULL );
+	s = CPLGetXMLValue(node, "NormalizationField", NULL);
 	_options.normalizationField = (s != "") ? atoi(s.GetString()) : opt.normalizationField;
-	
-	s = CPLGetXMLValue( node, "Radius", NULL );
+
+	s = CPLGetXMLValue(node, "Radius", NULL);
 	_options.radius = (s != "") ? atoi(s.GetString()) : opt.radius;
-	
-	s = CPLGetXMLValue( node, "Radius2", NULL );
+
+	s = CPLGetXMLValue(node, "Radius2", NULL);
 	_options.radius2 = (s != "") ? atoi(s.GetString()) : opt.radius2;
-	
-	s = CPLGetXMLValue( node, "Rotation", NULL );
+
+	s = CPLGetXMLValue(node, "Rotation", NULL);
 	_options.rotation = (s != "") ? atoi(s.GetString()) : opt.rotation;
 
-	s = CPLGetXMLValue( node, "SizeField", NULL );
+	s = CPLGetXMLValue(node, "SizeField", NULL);
 	_options.sizeField = (s != "") ? atoi(s.GetString()) : opt.sizeField;
 
-	s = CPLGetXMLValue( node, "Thickness", NULL );
+	s = CPLGetXMLValue(node, "Thickness", NULL);
 	_options.thickness = (s != "") ? Utility::atof_custom(s) : opt.thickness;
 
-	s = CPLGetXMLValue( node, "Tilt", NULL );
+	s = CPLGetXMLValue(node, "Tilt", NULL);
 	_options.tilt = (s != "") ? Utility::atof_custom(s) : opt.tilt;
 
-	s = CPLGetXMLValue( node, "Transparency", NULL );
+	s = CPLGetXMLValue(node, "Transparency", NULL);
 	_options.transparency = (s != "") ? atoi(s) : opt.transparency;
 
-	s = CPLGetXMLValue( node, "Use3Dmode", NULL );
+	s = CPLGetXMLValue(node, "Use3Dmode", NULL);
 	_options.use3Dmode = (s != "") ? (atoi(s) == 0 ? false : true) : opt.use3Dmode;
 
-	s = CPLGetXMLValue( node, "UseVariableRadius", NULL );
+	s = CPLGetXMLValue(node, "UseVariableRadius", NULL);
 	_options.useVariableRadius = (s != "") ? (atoi(s.GetString()) == 0 ? false : true) : opt.useVariableRadius;
 
-	s = CPLGetXMLValue( node, "ValuesFontBold", NULL );
+	s = CPLGetXMLValue(node, "ValuesFontBold", NULL);
 	_options.valuesFontBold = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : opt.valuesFontBold;
 
-	s = CPLGetXMLValue( node, "ValuesFontColor", NULL );
+	s = CPLGetXMLValue(node, "ValuesFontColor", NULL);
 	_options.valuesFontColor = (s != "") ? (OLE_COLOR)atoi(s.GetString()) : opt.valuesFontColor;
 
-	s = CPLGetXMLValue( node, "ValuesFontItalic", NULL );
+	s = CPLGetXMLValue(node, "ValuesFontItalic", NULL);
 	_options.valuesFontItalic = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : opt.valuesFontItalic;
 
-	s = CPLGetXMLValue( node, "ValuesFontName", NULL );
+	s = CPLGetXMLValue(node, "ValuesFontName", NULL);
 	if (s != "")
 	{
 		SysFreeString(_options.valuesFontName);
 		_options.valuesFontName = A2BSTR(s);
 	}
-	
-	s = CPLGetXMLValue( node, "ValuesFontSize", NULL );
-	_options.valuesFontSize = (s != "") ?  atoi(s.GetString()) : opt.valuesFontSize;
-	
-	s = CPLGetXMLValue( node, "ValuesFrameColor", NULL );
-	_options.valuesFrameColor = (s != "") ?  (OLE_COLOR)atoi(s.GetString()) : opt.valuesFrameColor;
-	
-	s = CPLGetXMLValue( node, "ValuesFrameVisible", NULL );
-	_options.valuesFrameVisible = (s != "") ?  (VARIANT_BOOL)atoi(s.GetString()) : opt.valuesFrameVisible;
 
-	s = CPLGetXMLValue( node, "ValuesStyle", NULL );
-	_options.valuesStyle = (s != "") ?  (tkChartValuesStyle)atoi(s.GetString()) : opt.valuesStyle;
+	s = CPLGetXMLValue(node, "ValuesFontSize", NULL);
+	_options.valuesFontSize = (s != "") ? atoi(s.GetString()) : opt.valuesFontSize;
 
-	s = CPLGetXMLValue( node, "ValuesVisible", NULL );
-	_options.valuesVisible = (s != "") ?  (VARIANT_BOOL)atoi(s.GetString()) : opt.valuesVisible;
+	s = CPLGetXMLValue(node, "ValuesFrameColor", NULL);
+	_options.valuesFrameColor = (s != "") ? (OLE_COLOR)atoi(s.GetString()) : opt.valuesFrameColor;
 
-	s = CPLGetXMLValue( node, "VerticalPosition", NULL );
-	_options.verticalPosition = (s != "") ?  (tkVerticalPosition)atoi(s.GetString()) : opt.verticalPosition;
+	s = CPLGetXMLValue(node, "ValuesFrameVisible", NULL);
+	_options.valuesFrameVisible = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : opt.valuesFrameVisible;
 
-	s = CPLGetXMLValue( node, "Visible", NULL );
-	_options.visible = (s != "") ?  (VARIANT_BOOL)atoi(s.GetString()) : opt.visible;
+	s = CPLGetXMLValue(node, "ValuesStyle", NULL);
+	_options.valuesStyle = (s != "") ? (tkChartValuesStyle)atoi(s.GetString()) : opt.valuesStyle;
 
-	s = CPLGetXMLValue( node, "SavingMode", NULL );
-	_savingMode = (s != "") ?  (tkSavingMode)atoi(s.GetString()) : modeXML;
+	s = CPLGetXMLValue(node, "ValuesVisible", NULL);
+	_options.valuesVisible = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : opt.valuesVisible;
+
+	s = CPLGetXMLValue(node, "VerticalPosition", NULL);
+	_options.verticalPosition = (s != "") ? (tkVerticalPosition)atoi(s.GetString()) : opt.verticalPosition;
+
+	s = CPLGetXMLValue(node, "Visible", NULL);
+	_options.visible = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : opt.visible;
+
+	s = CPLGetXMLValue(node, "SavingMode", NULL);
+	_savingMode = (s != "") ? (tkSavingMode)atoi(s.GetString()) : modeXML;
 
 	return true;
 }
@@ -1670,7 +1669,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 STDMETHODIMP CCharts::Deserialize(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 
 	CString s = OLE2CA(newVal);
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
@@ -1692,7 +1691,7 @@ STDMETHODIMP CCharts::Deserialize(BSTR newVal)
 STDMETHODIMP CCharts::SaveToXML(BSTR Filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = VARIANT_FALSE;
+		*retVal = VARIANT_FALSE;
 
 	USES_CONVERSION;
 	CStringW s = OLE2W(Filename);
@@ -1707,8 +1706,8 @@ STDMETHODIMP CCharts::SaveToXML(BSTR Filename, VARIANT_BOOL* retVal)
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
 	}
-	
-	CPLXMLNode *psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWindow" );
+
+	CPLXMLNode *psTree = CPLCreateXMLNode(NULL, CXT_Element, "MapWindow");
 	if (psTree)
 	{
 		Utility::WriteXmlHeaderAttributes(psTree, "Charts");
@@ -1732,12 +1731,12 @@ STDMETHODIMP CCharts::SaveToXML(BSTR Filename, VARIANT_BOOL* retVal)
 // ********************************************************
 CPLXMLNode* CCharts::SerializeChartData(CString ElementName)
 {
-	CPLXMLNode* psCharts = CPLCreateXMLNode( NULL, CXT_Element, ElementName );
+	CPLXMLNode* psCharts = CPLCreateXMLNode(NULL, CXT_Element, ElementName);
 	if (psCharts)
 	{
 		if (!_shapefile)
 			return NULL;
-		
+
 		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 		if (data)
 		{
@@ -1756,7 +1755,7 @@ CPLXMLNode* CCharts::SerializeChartData(CString ElementName)
 					CPLAddXMLSibling(nodeOld, nodeNew);
 					nodeOld = nodeNew;
 				}
-				
+
 				CChartInfo* info = (*data)[i]->chart;
 				Utility::CPLCreateXMLAttributeAndValue(nodeOld, "X", CPLString().Printf("%f", info->x));
 				Utility::CPLCreateXMLAttributeAndValue(nodeOld, "Y", CPLString().Printf("%f", info->y));
@@ -1772,7 +1771,7 @@ CPLXMLNode* CCharts::SerializeChartData(CString ElementName)
 STDMETHODIMP CCharts::get_SavingMode(tkSavingMode* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _savingMode;
+		*retVal = _savingMode;
 	return S_OK;
 }
 
@@ -1782,7 +1781,7 @@ STDMETHODIMP CCharts::get_SavingMode(tkSavingMode* retVal)
 STDMETHODIMP CCharts::put_SavingMode(tkSavingMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	_savingMode = newVal;
+		_savingMode = newVal;
 	return S_OK;
 }
 
@@ -1792,8 +1791,8 @@ STDMETHODIMP CCharts::put_SavingMode(tkSavingMode newVal)
 STDMETHODIMP CCharts::LoadFromXML(BSTR Filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = VARIANT_FALSE;
-	
+		*retVal = VARIANT_FALSE;
+
 	USES_CONVERSION;
 	CStringW name = OLE2W(Filename);
 	if (!Utility::FileExistsW(name))
@@ -1802,13 +1801,13 @@ STDMETHODIMP CCharts::LoadFromXML(BSTR Filename, VARIANT_BOOL* retVal)
 		return S_OK;
 	}
 
-	CPLXMLNode* node =  GdalHelper::ParseXMLFile(name);
+	CPLXMLNode* node = GdalHelper::ParseXMLFile(name);
 	if (node)
 	{
 		node = CPLGetXMLNode(node, "=MapWindow");
 		if (node)
 		{
-			CString s = CPLGetXMLValue( node, "FileVersion", "0" );
+			CString s = CPLGetXMLValue(node, "FileVersion", "0");
 			int version = atoi(s);
 
 			node = CPLGetXMLNode(node, "Charts");
@@ -1828,40 +1827,38 @@ bool CCharts::DeserializeChartData(CPLXMLNode* node)
 {
     if (!node || !_shapefile)
         return false;
-
-    CSingleLock sfLock(&((CShapefile*)_shapefile)->ShapefileLock, TRUE);
-
+	
 	std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
     if (!data)
         return false;
 
-    this->Clear();
-    ((CShapefile*)_shapefile)->SetChartsPositions(lpNone);
+	this->Clear();
+	((CShapefile*)_shapefile)->SetChartsPositions(lpNone);
 
-    CString s;
-    double x, y;
-    int i = 0;
+	CString s;
+	double x, y;
+	int i = 0;
 
-    node = CPLGetXMLNode(node, "Chart");
+	node = CPLGetXMLNode(node, "Chart");
 
-    int count = data->size();
-    while (node && i < count)
-    {
-        s = CPLGetXMLValue(node, "X", "0.0");
-        x = Utility::atof_custom(s);
+	int count = data->size();
+	while (node && i < count)
+	{
+		s = CPLGetXMLValue(node, "X", "0.0");
+		x = Utility::atof_custom(s);
 
-        s = CPLGetXMLValue(node, "Y", "0.0");
-        y = Utility::atof_custom(s);
+		s = CPLGetXMLValue(node, "Y", "0.0");
+		y = Utility::atof_custom(s);
 
-        CChartInfo* info = (*data)[i]->chart;
-        info->x = x;
-        info->y = y;
-        i++;
+		CChartInfo* info = (*data)[i]->chart;
+		info->x = x;
+		info->y = y;
+		i++;
 
-        node = node->psNext;
-    }
-    _chartsExist = true;
-    return true;
+		node = node->psNext;
+	}
+	_chartsExist = true;
+	return true;
 }
 
 #pragma endregion
