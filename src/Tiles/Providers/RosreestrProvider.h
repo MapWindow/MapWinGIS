@@ -22,17 +22,15 @@
 #include "BaseProvider.h"
 #include "WmsProviderBase.h"
 
-// ************************************************************
-//		RosreestrProvider()
-// ************************************************************
-class RosreestrProvider : public BaseProvider
-{
+ // ************************************************************
+ //		RosreestrProvider()
+ // ************************************************************
+class RosreestrProvider : public BaseProvider {
 public:
-	RosreestrProvider(bool labels)
-	{
+	RosreestrProvider(bool labels) {
 		Id = tkTileProvider::Rosreestr;
 		Name = "Rosreestr";
-		_copyright = "©–ÓÒÂÂÒÚ";
+		_copyright = "‚î¨ÈìñÁñ±ÁæºËù†";
 		_serverLetters = "abc";
 		_licenseUrl = "http://maps.rosreestr.ru/PortalOnline/terms.html";
 		_refererUrl = "http://maps.rosreestr.ru/";
@@ -41,8 +39,7 @@ public:
 		_projection = new MercatorProjection();
 		_maxZoom = 19;
 	}
-	CString MakeTileImageUrl(CPoint &pos, int zoom)
-	{
+	CString MakeTileImageUrl(CPoint &pos, int zoom) {
 		char letter = _serverLetters[GetServerNum(pos, 3)];
 		CString s;
 		s.Format(_urlFormat, letter, zoom, pos.y, pos.x);
@@ -53,13 +50,11 @@ public:
 // ************************************************************
 //		RosreestrBordersProvider()
 // ************************************************************
-class RosreestrBordersProvider : public WmsMercatorProvider
-{
+class RosreestrBordersProvider : public WmsMercatorProvider {
 private:
 	CString _url2;
 public:
-	RosreestrBordersProvider()
-	{
+	RosreestrBordersProvider() {
 		Id = tkTileProvider::Rosreestr;
 		Name = "Rosreestr";
 		_copyright = "";
@@ -70,8 +65,7 @@ public:
 		_subProviders.push_back(this);
 	}
 
-	CString MakeTileImageUrl(CPoint &pos, int zoom)
-	{
+	CString MakeTileImageUrl(CPoint &pos, int zoom) {
 		CString s = _urlFormat + GetBoundingBox(pos, zoom) + _url2;
 		return s;
 	}

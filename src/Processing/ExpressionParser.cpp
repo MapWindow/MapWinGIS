@@ -212,7 +212,8 @@ CStringW ExpressionParser::GetInnerString(CStringW& s, int begin, int end) {
 //		GetBrackets()
 // *******************************************************************
 // Returns positions of the first inner brackets
-bool ExpressionParser::GetBrackets(CStringW expression, int& begin, int& end, CStringW openingSymbol, CStringW closingSymbol) {
+bool ExpressionParser::GetBrackets(CStringW expression, int& begin, int& end,
+	CStringW openingSymbol, CStringW closingSymbol) {
 	// closing bracket
 	end = -1;
 	for (int i = 0; i < expression.GetLength(); i++) {
@@ -368,8 +369,7 @@ bool ExpressionParser::ReadValue(CStringW s, int& position, CElement* element) {
 	wchar_t chr = s[position];
 
 	switch (chr) {
-	case L'{':
-	{
+	case L'{': {
 		sub = "";
 
 		position++;
@@ -389,12 +389,12 @@ bool ExpressionParser::ReadValue(CStringW s, int& position, CElement* element) {
 			unsigned int index = _wtoi((LPCWSTR)sub);
 			sub = (*_expression->GetStrings())[index];
 		} else {
-			SetErrorMessage("读入字段名出错");
+			SetErrorMessage(L"读入字段名出错");
 			return false;
 		}
 
 		if (position >= s.GetLength()) {
-			SetErrorMessage("没有对应的右中括号 ]");
+			SetErrorMessage(L"左中括号 [ 不能出现在字段名中");
 			return false;
 		}
 
@@ -403,7 +403,7 @@ bool ExpressionParser::ReadValue(CStringW s, int& position, CElement* element) {
 		chr = s[position];
 
 		if (chr != '}') {
-			SetErrorMessage("没有对应的有大括号 }");
+			SetErrorMessage(L"没有右大括号 }");
 			return false;
 		}
 
@@ -427,8 +427,8 @@ bool ExpressionParser::ReadValue(CStringW s, int& position, CElement* element) {
 				SetErrorMessage(L"没有字段：" + sub);
 				return false;
 			}
-		} else //if (_useVariables)
-		{
+		} else {
+			//if (_useVariables)
 			element->type = etValue;
 			CString s(sub);
 			element->fieldName = s;
@@ -436,8 +436,7 @@ bool ExpressionParser::ReadValue(CStringW s, int& position, CElement* element) {
 		}
 		break;
 	}
-	case L'"':
-	{
+	case L'"': {
 		sub = "";
 		position++;
 		chr = s[position];
@@ -771,7 +770,7 @@ bool ExpressionParser::ReplaceStringLiterals(CStringW& s, int& count) {
 		}
 
 		if (begin != -1) {
-			SetErrorMessage("文本的引号必须是成对的 \"\"");
+			SetErrorMessage(L"文本的引号必须是成对的 \"\"");
 			return false;
 		}
 	}
@@ -793,18 +792,18 @@ bool ExpressionParser::ReplaceFieldNames(CStringW& s, int& count) {
 				if (begin == -1) {
 					begin = i;
 				} else {
-					SetErrorMessage("字段名里面不能有左中括号 [");
+					SetErrorMessage(L"字段名里面不能有左中括号 [");
 					return false;
 				}
 			}
 
 			if (s.Mid(i, 1) == ']') {
 				if (begin == -1) {
-					SetErrorMessage("右中括号 ] 必须和左中括号 [ 成对出现");
+					SetErrorMessage(L"右中括号 ] 必须和左中括号 [ 成对出现");
 					return false;
 				} else {
-					if (i > begin + 1)   // at least one character
-					{
+					if (i > begin + 1) {
+						// at least one character
 						_expression->GetStrings()->push_back(s.Mid(begin + 1, i - begin - 1));
 						CStringW strReplace;
 						strReplace.Format(L"{%i}", count);
@@ -814,7 +813,7 @@ bool ExpressionParser::ReplaceFieldNames(CStringW& s, int& count) {
 						found = true;
 						break;
 					} else {
-						SetErrorMessage("中括号里面必须有字段名 []");
+						SetErrorMessage(L"中括号里面必须有字段名 []");
 						return false;
 					}
 				}
@@ -822,7 +821,7 @@ bool ExpressionParser::ReplaceFieldNames(CStringW& s, int& count) {
 		}
 
 		if (begin != -1) {
-			SetErrorMessage("文本的引号必须是成对的 \" \"");
+			SetErrorMessage(L"文本的引号必须是成对的 \"\"");
 			return false;
 		}
 	}
@@ -892,4 +891,3 @@ bool ExpressionParser::ReplaceParameterlessFunctions(CStringW& s) {
 
 	return true;
 }
-
