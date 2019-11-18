@@ -173,29 +173,29 @@ struct GlobalSettingsInfo {
 		gridFavorGreyScale = true;
 		gridUseHistogram = true;
 
-		shortUnitStrings[lsHectars] = L"ha";
-		shortUnitStrings[lsMeters] = L"m";
-		shortUnitStrings[lsKilometers] = L"km";
-		shortUnitStrings[lsSquareKilometers] = L"sq.km";
-		shortUnitStrings[lsSquareMeters] = L"sq.m";
-		shortUnitStrings[lsMapUnits] = L"mu";
-		shortUnitStrings[lsSquareMapUnits] = L"sq.mu";
-		shortUnitStrings[lsMiles] = L"mi";
-		shortUnitStrings[lsFeet] = L"ft";
-		shortUnitStrings[lsLatitude] = L"Lat";
-		shortUnitStrings[lsLongitude] = L"Lng";
-		shortUnitStrings[lsRadians] = L"rad";
-		shortUnitStrings[lsNorthEast] = L"NE";
-		shortUnitStrings[lsSouthEast] = L"SE";
-		shortUnitStrings[lsSouthWest] = L"SW";
-		shortUnitStrings[lsNorthWest] = L"NW";
-		shortUnitStrings[lsNorth] = L"N";
-		shortUnitStrings[lsEast] = L"E";
-		shortUnitStrings[lsSouth] = L"S";
-		shortUnitStrings[lsWest] = L"W";
-		shortUnitStrings[lsSquareFeet] = L"sq.ft";
-		shortUnitStrings[lsAcres] = L"ac";
-		shortUnitStrings[lsSquareMiles] = L"sq.mi";
+		shortUnitStrings[lsHectars] = L"公顷";
+		shortUnitStrings[lsMeters] = L"米";
+		shortUnitStrings[lsKilometers] = L"公里";
+		shortUnitStrings[lsSquareKilometers] = L"平方公里";
+		shortUnitStrings[lsSquareMeters] = L"平方米";
+		shortUnitStrings[lsMapUnits] = L"亩";
+		shortUnitStrings[lsSquareMapUnits] = L"平方亩";
+		shortUnitStrings[lsMiles] = L"英里";
+		shortUnitStrings[lsFeet] = L"英尺";
+		shortUnitStrings[lsLatitude] = L"纬度";
+		shortUnitStrings[lsLongitude] = L"经度";
+		shortUnitStrings[lsRadians] = L"弧度";
+		shortUnitStrings[lsNorthEast] = L"北东";
+		shortUnitStrings[lsSouthEast] = L"南东";
+		shortUnitStrings[lsSouthWest] = L"南西";
+		shortUnitStrings[lsNorthWest] = L"北西";
+		shortUnitStrings[lsNorth] = L"北";
+		shortUnitStrings[lsEast] = L"东";
+		shortUnitStrings[lsSouth] = L"南";
+		shortUnitStrings[lsWest] = L"西";
+		shortUnitStrings[lsSquareFeet] = L"平方英尺";
+		shortUnitStrings[lsAcres] = L"英亩";
+		shortUnitStrings[lsSquareMiles] = L"平方英里";
 	}
 
 	BSTR CreateEmptyBSTR() {
