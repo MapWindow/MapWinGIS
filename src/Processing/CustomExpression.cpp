@@ -121,7 +121,7 @@ bool CustomExpression::EvaluateFunction(CExpressionPart* part)
 		CExpressionPart* arg = part->arguments[i];
 		if (arg->activeCount != 1)
 		{
-			_errorMessage = "Argument was not evaluated: " + arg->expression;
+			_errorMessage = L"参数不能被求值： " + arg->expression;
 			return false;
 		}
 	}
@@ -276,7 +276,7 @@ bool CustomExpression::FindOperation(CExpressionPart* part, COperation& operatio
 
     if ( !found )
 	{
-		_errorMessage = "Failed to find operation";
+		_errorMessage = L"没有找到运算";
 		return false;
 	} 
 	
@@ -291,7 +291,7 @@ bool CustomExpression::FindOperation(CExpressionPart* part, COperation& operatio
 			{
 				if ( element->operation != operNOT && element->operation != operChangeSign)
 				{
-					_errorMessage = "There is operator in place of value";
+					_errorMessage = L"运算符被值取代";
 					return false;
 				}
 			}
@@ -305,7 +305,7 @@ bool CustomExpression::FindOperation(CExpressionPart* part, COperation& operatio
 
 	if ( operation.right == -1 )
 	{
-		_errorMessage = "No right operand was found";
+		_errorMessage = "没有右操作数";
 		return false;
 	}
 	
@@ -323,7 +323,7 @@ bool CustomExpression::FindOperation(CExpressionPart* part, COperation& operatio
 		}
 		if ( operation.left == -1 )
 		{
-			_errorMessage = "No left operand was found";
+			_errorMessage = "没有左操作数";
 			return false;
 		}
 		operation.binaryOperation = true;
@@ -441,7 +441,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 				}
 				else
 				{
-					_errorMessage = "The operands of CONSEQUENCE operation must have boolean type";
+					_errorMessage = L"CONSEQUENCE 运算符只能用在布尔类型值";
 					return false;
 				}
 				break;
@@ -454,7 +454,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 				}
 				else
 				{
-					_errorMessage = "NOT operator can be applied to boolean values only";
+					_errorMessage = L"NOT 运算符只能用在布尔类型值";
 					return false;
 				}
 				break;
@@ -567,7 +567,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 				}
 				else
 				{
-					_errorMessage = "Inconsistent types for comparison operation";
+					_errorMessage = L"类型不一致，不能作比较。";
 					return false;
 				}
 				break;
@@ -589,7 +589,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 				}
 				else
 				{
-					_errorMessage = "It's not allowed to change sign of non-numeric operands";
+					_errorMessage = L"非数字运算不允许改变符号";
 					return false;
 				}
 				break;
@@ -629,7 +629,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 					}
 					else
 					{
-						_errorMessage = "+ operation isn't allowed for boolean values.";
+						_errorMessage = L"+ 运算不能用在布尔类型值";
 						return false;
 					}
 					break;
@@ -642,7 +642,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 					{
 						if (valRight->dbl() == 0.0)
 						{
-							_errorMessage = "Division by zero";
+							_errorMessage = L"除以零";
 						}
 						else
 						{
@@ -654,7 +654,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 					else if ( oper == operDivInt )	
 						if (valRight->dbl() == 0.0)
 						{
-							_errorMessage = "Division by zero";
+							_errorMessage = L"除以零";
 						}
 						else
 						{
@@ -696,14 +696,14 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 				}
 				else
 				{
-					_errorMessage = "Arithmetic operations can be applied to numbers only";
+					_errorMessage = L"算术运算只能作用于数字";
 					return false;
 				}
 				break;
 			}
 		default:
 			{
-				_errorMessage = "Unsupported operation";
+				_errorMessage = L"不支持这种运算";
 				return false;
 			}
 	}
