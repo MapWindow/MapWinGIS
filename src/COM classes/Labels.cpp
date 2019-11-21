@@ -925,10 +925,8 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 	if (!_shapefile)
 		return;
 	
-	VARIANT_BOOL synchronized;
-	this->get_Synchronized(&synchronized);
     if (CategoryIndex == -1) { // reload all labels when refreshing everything
-        CLabelOptions* options = get_LabelOptions();
+        const CLabelOptions* options = get_LabelOptions();
 
         tkLabelPositioning Method;
         get_Positioning(&Method);
@@ -939,12 +937,13 @@ void CLabels::ApplyExpression_(long CategoryIndex)
         if (count > 0) // then apply the label text expression
             this->ApplyLabelExpression();
     }
+
     if (!_synchronized) { // this will now be set to true, unless something really bad happened
         ErrorMessage(tkLABELS_NOT_SYNCHRONIZE);
         return;
     }
 
-	CComPtr<ITable> tbl = NULL;
+	CComPtr<ITable> tbl = nullptr;
 	_shapefile->get_Table(&tbl);
     if (!tbl)
         return;
@@ -2623,7 +2622,7 @@ STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 		_shapefile->get_ShapefileType(&type);
 		type = ShapeUtility::Convert2D(type);
 
-		bool polyline =false, polygon = false;
+		bool polyline = false, polygon = false;
 		switch(newVal)
 		{
 			case lpFirstSegment:
@@ -2637,12 +2636,15 @@ STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 			case lpInteriorPoint:
 				polygon = true;
 				break;
+            case lpNone:
+                polygon = polyline = true;
+                break;
 		}
 
 		if ((type == SHP_POLYLINE && !polyline) ||
 			(type == SHP_POLYGON && !polygon))
 		{
-			ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+			ErrorMessage(tkLABEL_POSITIONING_INVALID);
 			return S_OK;
 		}
 	}
