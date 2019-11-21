@@ -104,10 +104,16 @@ public:
 	STDMETHOD(put_MarkerSize)(float newVal);
 	STDMETHOD(get_MarkerInterval)(float* retVal);
 	STDMETHOD(put_MarkerInterval)(float newVal);
+    STDMETHOD(get_MarkerIntervalIsRelative)(VARIANT_BOOL* retVal);
+    STDMETHOD(put_MarkerIntervalIsRelative)(VARIANT_BOOL newVal);
+    STDMETHOD(get_MarkerAllowOverflow)(VARIANT_BOOL* retVal);
+    STDMETHOD(put_MarkerAllowOverflow)(VARIANT_BOOL newVal);
 	STDMETHOD(get_MarkerOrientation)(tkLineLabelOrientation* retVal);
 	STDMETHOD(put_MarkerOrientation)(tkLineLabelOrientation newVal);
 	STDMETHOD(get_MarkerFlipFirst)(VARIANT_BOOL* retVal);
 	STDMETHOD(put_MarkerFlipFirst)(VARIANT_BOOL newVal);
+    STDMETHOD(get_MarkerOffsetIsRelative)(VARIANT_BOOL* retVal);
+    STDMETHOD(put_MarkerOffsetIsRelative)(VARIANT_BOOL newVal);
 	STDMETHOD(get_MarkerOffset)(float* retVal);
 	STDMETHOD(put_MarkerOffset)(float newVal);
 	STDMETHOD(get_MarkerOutlineColor)(OLE_COLOR* retVal);
@@ -124,13 +130,20 @@ private:
 	tkDefaultPointSymbol _marker;
 	float _markerSize;
 	float _markerInterval;
+    VARIANT_BOOL _markerIntervalIsRelative;
 	float _markerOffset;
+    VARIANT_BOOL _markerOffsetIsRelative;
+    VARIANT_BOOL _markerAllowOverflow;
 	OLE_COLOR _markerOutlineColor;
 	tkLineLabelOrientation _markerOrientation;
 	VARIANT_BOOL _markerFlipFirst;
 
+    void DrawSimpleSegment(Gdiplus::Graphics& g, int ImageWidth, int ImageHeight, const BYTE& transparency);
+    void DrawMarkerSegment(Gdiplus::Graphics& g, int ImageWidth, int ImageHeight, const BYTE& transparency);
+
 public:
-	VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha);
+    void DrawCoreCommon(Gdiplus::Graphics& g, int clipWidth, int clipHeight, BYTE transparency);
+    VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha);
 
 };
 OBJECT_ENTRY_AUTO(__uuidof(LineSegment), CLineSegment)

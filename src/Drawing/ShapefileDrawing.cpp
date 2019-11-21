@@ -1713,7 +1713,7 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 	ILinePattern* pattern = options->linePattern;
 
 	int numLines;
-	options->linePattern->get_Count(&numLines);
+    pattern->get_Count(&numLines);
 	if (numLines == 0)
 		return;
 	
@@ -1726,7 +1726,7 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 	Gdiplus::PathData* data = new PathData();
 	
 	BYTE transparency;
-	options->linePattern->get_Transparency(&transparency);
+    pattern->get_Transparency(&transparency);
 
 	Gdiplus::Pen* penSelection = NULL;
 	Gdiplus::SolidBrush* brushSelection = NULL;
@@ -1772,6 +1772,7 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 		}
 		else if (type == lltMarker)
 		{
+
 			if (!dataRead)
 			{
 				pointCount = path->GetPointCount();
@@ -1789,15 +1790,24 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 				// extracting properties
 				tkDefaultPointSymbol symbol;
 				tkLineLabelOrientation orientation;
-				float markerSize, interval, markerOffset;
+				float markerSize, intervalBase, markerOffsetBase;
+                float interval, markerOffset;
 				OLE_COLOR lineColor;
+                VARIANT_BOOL flipFirst;
+                VARIANT_BOOL intervalIsRelative;
+                VARIANT_BOOL offsetIsRelative;
+                VARIANT_BOOL overflow;
 				
 				line->get_Marker(&symbol);
 				line->get_MarkerSize(&markerSize);
-				line->get_MarkerInterval(&interval);
-				line->get_MarkerOffset(&markerOffset);
+				line->get_MarkerInterval(&intervalBase);
+                line->get_MarkerIntervalIsRelative(&intervalIsRelative);
+				line->get_MarkerOffset(&markerOffsetBase);
+                line->get_MarkerOffsetIsRelative(&offsetIsRelative);
 				line->get_MarkerOutlineColor(&lineColor);
 				line->get_MarkerOrientation(&orientation);
+                line->get_MarkerFlipFirst(&flipFirst);
+                line->get_MarkerAllowOverflow(&overflow);
 				
 				//	preparing marker
 				int numPoints = 0;
@@ -1809,77 +1819,121 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 					Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(lineColor, transparency));
 					pen->SetAlignment(Gdiplus::PenAlignmentInset);
 				
-					int n = 0;
-					double offset = 0;	// set by the marker offset for the start point, and by the unended part of interval for others
+                    std::vector<double> lengths(pointCount - 1);
+                    std::vector<double> totalLengths(pointCount - 1);
+                    double totalLength = 0.0;
+                    double positionScale = 1.0; // default is = pixel scale
 
-					while(n < pointCount)
+                    // Calculate lengths and total lengths
+                    int currentStartN = 0;
+                    for (int n = 0; n < pointCount; n++)
+                    {
+                        if (data->Types[n] == PathPointTypeStart) {
+                            totalLength = 0;
+                            currentStartN = n;
+                            continue;
+                        }
+
+                        double dx = data->Points[n].X - data->Points[n - 1].X;
+                        double dy = data->Points[n].Y - data->Points[n - 1].Y;
+
+                        double length = sqrt(pow(dx, 2.0) + pow(dy, 2.0));
+
+                        lengths[n - 1] = length;
+                        totalLength += length;
+
+                        // last iteration:
+                        if (n+1 == pointCount || data->Types[n+1] == PathPointTypeStart)
+                            for (int m = currentStartN; m < n; m++)
+                                totalLengths[m] = totalLength;
+                    }
+
+                    // Equals the marker offset for the start point,
+                    // and the undershot part of interval for all others
+                    double offset = 0;
+                    bool firstMarkerDrawn = false;
+                    for (int n = 0; n < pointCount; n++)
 					{
+                        double length = lengths[n - 1];
+                        double correctedLength = length;
+
+                        // Start of a new line:
 						if (data->Types[n] == PathPointTypeStart)
 						{
-							offset = markerOffset;
+                            totalLength = totalLengths[n] - (overflow ? 0 : markerSize);
+                            // Apply scale factor for offset & interval values if requested:
+                            markerOffset = markerOffsetBase * ((offsetIsRelative) ? totalLength : 1.0);
+                            interval = intervalBase * ((intervalIsRelative) ? totalLength : 1.0);
+                            firstMarkerDrawn = false;
+                            // Set starting offset:
+                            offset = markerOffset + (overflow ? 0 : markerSize * 0.5);
+                            correctedLength -= (overflow ? 0 : markerSize * 0.5);
+                            continue;
 						}
-						else
+                        // Last segment:
+                        if (n + 1 == pointCount || data->Types[n + 1] == PathPointTypeStart) 
+                        {
+                            correctedLength -= (overflow ? 0 : markerSize * 0.5);
+                        }
+
+						CPoint pnt;
+						pnt.x = (LONG)data->Points[n - 1].X;
+						pnt.y = (LONG)data->Points[n - 1].Y;
+
+						double dx = data->Points[n].X - data->Points[n - 1].X;
+						double dy = data->Points[n].Y - data->Points[n - 1].Y;
+
+                        // If this segment is shorter than the offset,
+                        // just subtract from offset & go the next segment
+                        const int count = (interval == 0) ? 1 : (int)((correctedLength - offset) / interval + 1.0 + FLT_EPSILON);
+						if (count <= 0 || offset > correctedLength + FLT_EPSILON)
 						{
-							CPoint pnt;
-							pnt.x = (LONG)data->Points[n - 1].X;
-							pnt.y = (LONG)data->Points[n - 1].Y;
-
-							double dx = data->Points[n].X - data->Points[n - 1].X;
-							double dy = data->Points[n].Y - data->Points[n - 1].Y;
-
-							double length = sqrt(pow(dx,2.0) + pow(dy,2.0));
-
-							if (length < offset)
-							{
-								offset -= length;
-							}
-							else
-							{
-								int count = (int)((length - offset)/interval) + 1;
-
-								ratio = offset/length;
-								Gdiplus::PointF pntStart(Gdiplus::REAL(pnt.x + dx * ratio), Gdiplus::REAL(pnt.y + dy * ratio));
-								
-								float angle = 0.0f;
-								if (orientation == lorParallel )
-								{
-									angle = (float)(GeometryHelper::GetPointAngle(dx, dy) / pi_ * 180.0 - 90.0);
-								}
-								else if (orientation == lorPerpindicular)
-								{
-									angle = (float)(GeometryHelper::GetPointAngle(dx, dy) / pi_ * 180.0); //+ 90.0);
-								}
-								
-								//int size = (int)markerSize/2;
-								SIZE size;
-								size.cx = (LONG)markerSize;
-								size.cy = (LONG)markerSize;
-
-								for (int j = 0; j < count; j++)
-								{
-									double ratio = interval/length * (double)j;
-									Gdiplus::REAL xPos =(Gdiplus::REAL)(pntStart.X + dx * ratio);
-									Gdiplus::REAL yPos =(Gdiplus::REAL)(pntStart.Y + dy * ratio);
-										
-									_graphics->TranslateTransform(xPos , yPos);
-									_graphics->RotateTransform(-angle);
-
-									_graphics->FillPolygon(brush, (Gdiplus::PointF*)points, numPoints);
-									_graphics->DrawPolygon(pen, (Gdiplus::PointF*)points, numPoints);
-
-									if (drawSelection)
-									{
-										_graphics->FillPolygon(brushSelection, (Gdiplus::PointF*)points, numPoints);
-									}
-								
-									_graphics->ResetTransform();
-								}
-
-								offset = interval - ((length - offset) - ((count - 1) * interval));		// the part of interval left to draw
-							}
+							offset -= correctedLength;
+                            continue;
 						}
 
-						n++;
+						ratio = offset/length;
+						Gdiplus::PointF pntStart(Gdiplus::REAL(pnt.x + dx * ratio), Gdiplus::REAL(pnt.y + dy * ratio));
+								
+                        double angle = 0.0f;
+						if (orientation == lorParallel )
+						{
+							angle = GeometryHelper::GetPointAngle(dx, dy) / pi_ * 180.0 - 90.0;
+						}
+						else if (orientation == lorPerpindicular)
+						{
+							angle = GeometryHelper::GetPointAngle(dx, dy) / pi_ * 180.0;
+						}
+								
+						SIZE size;
+						size.cx = (LONG)markerSize;
+						size.cy = (LONG)markerSize;
+
+						for (int j = 0; j < count; j++)
+						{
+							double ratio = interval/length * (double)j;
+							Gdiplus::REAL xPos =(Gdiplus::REAL)(pntStart.X + dx * ratio);
+							Gdiplus::REAL yPos =(Gdiplus::REAL)(pntStart.Y + dy * ratio);
+										
+							_graphics->TranslateTransform(xPos , yPos);
+							_graphics->RotateTransform(-angle + ((flipFirst && !firstMarkerDrawn) ? 180 : 0));
+
+							_graphics->FillPolygon(brush, (Gdiplus::PointF*)points, numPoints);
+							_graphics->DrawPolygon(pen, (Gdiplus::PointF*)points, numPoints);
+
+							if (drawSelection)
+								_graphics->FillPolygon(brushSelection, (Gdiplus::PointF*)points, numPoints);
+								
+							_graphics->ResetTransform();
+                            firstMarkerDrawn = true;
+						}
+
+                        // if interval is zero, no point in going to the next segment of this polyline
+                        while (interval == 0 && !(n+1==pointCount || data->Types[n + 1] == PathPointTypeStart))
+                            n++;
+
+                        // the part of interval left to draw:
+                        offset += count * interval - length;
 					}
 					delete[] points;
 					delete brush;

@@ -5762,6 +5762,13 @@ interface ILineSegment : IDispatch{
 													[out, retval]VARIANT_BOOL* retVal);
 	[propget, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [out, retval]OLE_COLOR* retVal);
 	[propput, id(12), helpstring("property MarkerOutlineColor")] HRESULT MarkerOutlineColor( [in]OLE_COLOR newVal);
+    [propget, id(13), helpstring("property MarkerIntervalIsRelative")] HRESULT MarkerIntervalIsRelative([out, retval]VARIANT_BOOL* retVal);
+    [propput, id(13), helpstring("property MarkerIntervalIsRelative")] HRESULT MarkerIntervalIsRelative([in]VARIANT_BOOL newVal);
+    [propget, id(14), helpstring("property MarkerOffsetIsRelative")] HRESULT MarkerOffsetIsRelative([out, retval]VARIANT_BOOL* retVal);
+    [propput, id(14), helpstring("property MarkerOffsetIsRelative")] HRESULT MarkerOffsetIsRelative([in]VARIANT_BOOL newVal);
+    [propget, id(15), helpstring("property MarkerMarkerAllowOverflow")] HRESULT MarkerAllowOverflow([out, retval]VARIANT_BOOL* retVal);
+    [propput, id(15), helpstring("property MarkerMarkerAllowOverflow")] HRESULT MarkerAllowOverflow([in]VARIANT_BOOL newVal);
+
 	//[id(13), helpstring("method Draw")] HRESULT DrawVB([in]int hdc, [in]float x, [in]float y, [in]int clipWidth, [in]int clipHeight,
 	//													[in, defaultvalue(16777215)]OLE_COLOR backColor, [in, defaultvalue(255)]BYTE backAlpha, 
 	//													[out, retval]VARIANT_BOOL* retVal);
