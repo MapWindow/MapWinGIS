@@ -63,7 +63,7 @@ CThreadPool<ThreadWorker>* ITileLoader::PreparePool()
 
     pool->SetSize(m_globalSettings.GetTilesThreadPoolSize());
 
-    pool->SetTimeout(100000); // 100 seconds (lower rate limit may be set)
+    pool->SetTimeout(1000); // 100 seconds (lower rate limit may be set)
 
     tilesLogger.WriteLine("Tiles requested; generation = %d", _lastGeneration);
 

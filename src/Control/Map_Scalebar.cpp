@@ -617,10 +617,10 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 			switch(_zoomBarVerbosity)
 			{
 				case zbvFull:
-					s.Format(L"Zoom: %d\nScale: 1:%.0f\nResolution: %.2f", zooming ? targetZoom : zoom, scale, resoultion);
+					s.Format(L"缩放：%d\n比例尺：1:%.0f\n解析度：%.2f", zooming ? targetZoom : zoom, scale, resoultion);
 					break;
 				case zbvZoomOnly:
-					s.Format(L"Zoom: %d", zooming ? targetZoom : zoom);
+					s.Format(L"缩放：%d", zooming ? targetZoom : zoom);
 					break;
 			}
 			
