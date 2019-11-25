@@ -1,5 +1,5 @@
 /**************************************************************************************
- * File name: Map_Snamshot.cpp
+ * File name: Map_Snapshot.cpp
  *
  * Project: MapWindow Open Source (MapWinGis ActiveX control) 
  * Description: implementation of the snapshot functions. 

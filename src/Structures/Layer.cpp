@@ -384,10 +384,12 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 
             // Fire event for this task:
             OgrLoadingTask* task = options->task;
-			task->Finished = true;
-			task->Cancelled = !success;
+            task->Finished = true;
+            task->Cancelled = !success;
             options->map->_FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, 0);
+
 			loader->ClearFinishedTasks();
+
 		}
 		layer->put_AsyncLoading(false);
 		Debug::WriteWithThreadId("Releasing loading lock. \n", DebugOgrLoading);
@@ -422,7 +424,9 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 	// This prevents race condition between the started & completed event.
 	AsyncLoadingParams* param = new AsyncLoadingParams(mapView, extents, this, task);
 	mapView->_FireBackgroundLoadingStarted(task->Id, layerHandle);
-	CWinThread* thread = AfxBeginThread(OgrAsyncLoadingThreadProc, (LPVOID)param);
+    OgrAsyncLoadingThreadProc(param);
+
+	//CWinThread* thread = AfxBeginThread(OgrAsyncLoadingThreadProc, (LPVOID)param);
 }
 
 //***********************************************************************
@@ -435,9 +439,10 @@ void Layer::UpdateShapefile()
 
     // Get the OGR layer:
     IOgrLayer* layer = NULL;
-    if (!QueryOgrLayer(&layer)) return;
-    
-    ((COgrLayer*) layer)->UpdateShapefileFromOGRLoader();
+    if (!QueryOgrLayer(&layer))
+        return;
+
+    ((COgrLayer*)layer)->UpdateShapefileFromOGRLoader();
 }
 
 //****************************************************

@@ -17,7 +17,6 @@ bool GroupOperation::Run(tkCursorMode cursorMode, long layerHandle, IShapefile* 
 		errorCode = tkUNEXPECTED_NULL_PARAMETER;
 		return false;
 	}
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 
 	vector<long> indices;
 	if (!SelectionHelper::SelectWithShapeBounds(sf, shp, indices))
@@ -54,8 +53,6 @@ bool GroupOperation::Run(tkCursorMode cursorMode, long layerHandle, IShapefile* 
 // ***************************************************************
 bool GroupOperation::ClipByPolygon(tkCursorMode cursorMode, long layerHandle, IShapefile* sf, vector<long>& indices, IShape*polygon, IUndoList* undoList, int& errorCode)
 {
-    if (!sf) return false;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 	GEOSGeometry* gPoly = GeosConverter::ShapeToGeom(polygon);
 	if (!gPoly) {
 		errorCode = tkCANT_CONVERT_SHAPE_GEOS;
@@ -151,8 +148,6 @@ bool GroupOperation::ClipByPolygon(tkCursorMode cursorMode, long layerHandle, IS
 bool GroupOperation::SplitByPolyline(long layerHandle, IShapefile* sf, vector<long>& indices, 
 		IShape* polyline, IUndoList* undoList, int& errorCode)
 {
-    if (!sf) return false;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 	vector<long> deleteList;
 
 	long mwShapeIdIndex = ShapefileHelper::GetMWShapeIdIndex(sf);

@@ -405,8 +405,6 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 		return S_OK;
 	}
 
-    CSingleLock sfLock(&((CShapefile*) shapefile)->ShapefileLock, TRUE);
-
 	CStringA name = OgrHelper::Bstr2OgrString(newLayerName);
 	if (name.GetLength() == 0)
 	{

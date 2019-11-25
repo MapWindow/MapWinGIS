@@ -2368,9 +2368,14 @@ namespace MapWinGIS
         /// </summary>
         imAllLayers = 0,
         /// <summary>
-        /// Only shapefile defined by Identifier.ActiveLayer will be identified.
+        /// Only shapefile specified in the context of AxMap.ChooseLayer event will be analyzed.
         /// </summary>
         imSingleLayer = 1,
+        /// <summary>
+        /// All shapefile layers with Shapefile.Identifiable property set to true will be analyzed,
+        /// but search will stop following the first (topmost) layer for which shapes are found.
+        /// </summary>
+        imAllLayersStopOnFirst = 2,
     }
 
     /// <summary>

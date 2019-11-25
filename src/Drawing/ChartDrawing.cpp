@@ -61,7 +61,6 @@ bool CChartDrawer::PrepareValues(IShapefile* sf, ICharts* charts, ChartOptions* 
 								 std::vector<long>& arr, std::vector<double*>& values)
 {
 	CShapefile* sfClass = (CShapefile*)sf;
-    CSingleLock sfLock(&(sfClass->ShapefileLock), TRUE);
 	
 	if (!ChartsHelper::ReadChartFields(sfClass, &values)) {
 		return false;
@@ -129,7 +128,6 @@ bool CChartDrawer::PrepareValues(IShapefile* sf, ICharts* charts, ChartOptions* 
 bool CChartDrawer::NormalizeValues(ICharts* charts, IShapefile* sf, ChartOptions* options, vector<double*> values)
 {
 	CShapefile* sfClass = (CShapefile*)sf;
-    CSingleLock sfLock(&(sfClass->ShapefileLock), TRUE);
 
 	long numBars;
 	charts->get_NumFields(&numBars);
@@ -170,7 +168,6 @@ bool CChartDrawer::NormalizeValues(ICharts* charts, IShapefile* sf, ChartOptions
 void CChartDrawer::DrawCharts(IShapefile* sf)
 {
 	if (!sf)	return;
-    CSingleLock sfLock(&((CShapefile*) sf)->ShapefileLock, TRUE);
 
 	REAL dx = _graphics->GetDpiX();
 
@@ -269,9 +266,6 @@ void CChartDrawer::DrawPieCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 	std::vector<long>& arr, std::vector<Brush*>& brushes, std::vector<Brush*>& brushesDimmed, long numBars,
 	Pen& pen, CString sFormat, CBrush& brushFrame, CPen& penFrame, Gdiplus::Font* gdiPlusFont)
 {
-    if (!sf) return;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
-
 	long collisionBuffer = ChartsHelper::GetCollisionBuffer(charts);
 	REAL offsetX = static_cast<REAL>(ChartsHelper::GetOffsetX(charts));
 	REAL offsetY = static_cast<REAL>(ChartsHelper::GetOffsetY(charts));
@@ -573,9 +567,6 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 			long numBars, Pen& pen, CString sFormat, bool vertical, CBrush& brushFrame, CPen& penFrame,
 			Gdiplus::Font* gdiPlusFont)
 {
-    if (!sf) return;
-    CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
-
 	long collisionBuffer = ChartsHelper::GetCollisionBuffer(charts);
 	long offsetX = ChartsHelper::GetOffsetX(charts);
 	long offsetY = ChartsHelper::GetOffsetY(charts);

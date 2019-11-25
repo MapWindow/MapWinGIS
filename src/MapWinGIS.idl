@@ -6834,6 +6834,7 @@ library MapWinGIS
 			[id(212), propget] float Latitude();
 			[id(213), propput] void Longitude(float nNewValue);
 			[id(213), propget] float Longitude();
+			[id(267)] void SetLatitudeLongitude(double latitude, double longitude);
 			[id(218), propput] void KnownExtents(tkKnownExtents nNewValue);
 			[id(218), propget] tkKnownExtents KnownExtents();
 #endif

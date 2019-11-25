@@ -48,14 +48,14 @@ void IShapeWrapper::CopyTo(IShapeWrapper* target)
 	for (int i = 0; i < get_PartCount(); i++)
 	{
 		int part = get_PartStartPoint(i);
-		target->put_PartStartPoint(i, part);
+		target->InsertPart(i, part);
 	}
 
 	double x, y, z, m;
 	for (int i = 0; i < get_PointCount(); i++)
 	{
 		get_PointXY(i, x, y);
-		target->put_PointXY(i, x, y);
+		target->InsertPointXY(i, x, y);
 
 		if (isM || isZ)
 		{

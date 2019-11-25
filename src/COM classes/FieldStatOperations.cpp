@@ -1,7 +1,6 @@
 // FieldStatOperations.cpp : Implementation of CFieldStatOperations
 
 #include "stdafx.h"
-#include "Shapefile.h"
 #include "FieldStatOperations.h"
 
 //***********************************************************************
@@ -191,7 +190,6 @@ STDMETHODIMP CFieldStatOperations::Validate(IShapefile* sf, VARIANT_BOOL* retVal
 	}
 	else
 	{
-        CSingleLock sfLock(&((CShapefile*)sf)->ShapefileLock, TRUE);
 		long numFields;
 		sf->get_NumFields(&numFields);
 
