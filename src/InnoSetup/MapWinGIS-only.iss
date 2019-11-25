@@ -2,12 +2,12 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "5.1.0"
+#define MyAppVersion "5.1.1"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapWindow\MapWinGIS\git\src\InnoSetup"
 #define BinLocation "D:\dev\MapWindow\MapWinGIS\git\src\bin"
-;; #define x64BitVersion
+;#define x64BitVersion
 ;; #define VsVersion = "2015" 
 #define VsVersion = "2017" 
 
@@ -80,8 +80,9 @@ Source: "{#MySourceDir}\MapWinGIS.ocx"; DestDir: "{app}"; Flags: ignoreversion {
 ;; IntelliSense:
 Source: "{#SetupLocation}\AxInterop.MapWinGIS.XML"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
 Source: "{#SetupLocation}\Interop.MapWinGIS.XML"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Core
-;; Delphi TAB file
+;; Delphi files
 Source: "{#SetupLocation}\MapWinGIS_TLB.pas"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Delphi
+Source: "{#SetupLocation}\MapWinGIS.Delphi.Component.v5.1.0.zip"; DestDir: "{app}"; Flags: ignoreversion; Components: MapWinGIS_Delphi
 ;; Licenses
 Source: "{#BinLocation}\Licenses\GDALLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
 Source: "{#BinLocation}\Licenses\GISInternalsLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
