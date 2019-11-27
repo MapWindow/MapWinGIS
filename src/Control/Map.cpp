@@ -743,6 +743,15 @@ So, I decided on "gdiplus registration per control" strategy:
 // GdiPlus::Bitmaps. It's desirable to keep it open even when the last CMapView contol
 // is destructed. Solution described at http://mikevdm.com/BlogEntry/Key/GdiplusShutdown-Hangs-Mysteriously
 // was implemented. Hopefully it will work.
+//
+// FOLLOW-UP: Having startup/shutdown being called in InitInstance/ExitInstance was not 
+// working properly from all development environments, and has been moved back to the CMapView
+// constructor/destructor.  The above-mentioned Tile cache issue is being handled by calling 
+// TileCacheManager::CloseAll() just prior to calling GdiplusShutdown.  This better follows
+// Microsoft's recommendations, and allows for transparent initialization whether or not the 
+// calling environment does it's own statrup and shutdown.  If any individual classes end up 
+// requiring GDI initialization outside of the map initialization, these can be handled on a 
+// case-by-case basis. (jf, 11/27/2019, https://mapwindow.atlassian.net/browse/MWGIS-205)
 
 ULONG_PTR CMapView::ms_gdiplusToken=NULL;
 ULONG_PTR CMapView::ms_gdiplusBGThreadToken=NULL;
