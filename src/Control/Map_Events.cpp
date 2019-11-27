@@ -899,8 +899,10 @@ void CMapView::ZoomToCursorPosition(bool zoomIn)
 			return;
 		ratio = zoomIn ? 0.499 : 2.001;		// add some margin for rounding error
 	}
-	else {
-		ratio = zoomIn ? 1 - m_zoomPercent : 1 + m_zoomPercent;
+	else
+    {
+        double factor = 1 + m_zoomPercent;
+		ratio = zoomIn ? (1 / factor) : factor;
 	}
 	
 	double height = (_extents.top - _extents.bottom) * ratio;
