@@ -177,6 +177,9 @@ CMapView::CMapView()
 	_moveBitmap(NULL),
 	_volatileBitmap(NULL)
 {
+    // GDI Plus Startup
+    GdiplusStartup();
+
 	Startup();
 	SetDefaults();
 }
@@ -195,6 +198,10 @@ CMapView::~CMapView()
 	ReleaseTempObjects();
 	
 	this->Shutdown();
+
+    // GDI Plus Shutdown
+    TileCacheManager::CloseAll();
+    GdiplusShutdown();
 }
 
 // **********************************************************************
