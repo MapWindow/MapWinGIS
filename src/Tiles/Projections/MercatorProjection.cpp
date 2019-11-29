@@ -117,3 +117,35 @@ void MercatorProjection::FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret)
 	ret.Lng = 360 * xx;
 }
 
+// ****************************************************
+//		CalculateGeogBounds
+// ****************************************************
+// check result from BaseProjection against min/max lat/lon, because BaseProjection don't 
+// have lat/lon limits, but Mercator do
+RectLatLng MercatorProjection::CalculateGeogBounds(CPoint pnt, int zoom)
+{
+	auto res = BaseProjection::CalculateGeogBounds(pnt, zoom);
+
+	//sanity check
+
+	if (res.yLat > _maxLat)
+		res.yLat = _maxLat;
+
+	if (res.yLat < _minLat)
+		res.yLat = _minLat;
+
+	if (res.xLng > _maxLng)
+		res.xLng = _maxLng;
+
+	if (res.xLng < _minLng)
+		res.xLng = _minLng;
+
+	if ((res.xLng + res.WidthLng) > _maxLng)
+		res.WidthLng = _maxLng - res.xLng;
+
+	if ((res.yLat - res.HeightLat) < _minLat)
+		res.HeightLat = res.yLat - _minLat;
+
+	return res;
+}
+
