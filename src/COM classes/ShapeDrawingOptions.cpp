@@ -730,6 +730,26 @@ STDMETHODIMP CShapeDrawingOptions::put_Tag(BSTR newVal)
 };	
 
 // *****************************************************************
+//		RotationField()
+// *****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_RotationField(BSTR* retval)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    USES_CONVERSION;
+
+    *retval = A2BSTR(_options.rotationField);
+    return S_OK;
+};
+STDMETHODIMP CShapeDrawingOptions::put_RotationField(BSTR newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    USES_CONVERSION;
+
+    _options.rotationField = OLE2CA(newVal);
+    return S_OK;
+};
+
+// *****************************************************************
 //		Clone()
 // *****************************************************************
 STDMETHODIMP CShapeDrawingOptions::Clone(IShapeDrawingOptions** retval)
@@ -1522,6 +1542,9 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 	if (opt->fontName != _options.fontName)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FontName", _options.fontName);
 	
+    if (opt->rotationField != _options.rotationField)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "RotationField", _options.rotationField);
+
 	if (opt->lineColor != _options.lineColor)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineColor", CPLString().Printf("%d", _options.lineColor));
 
@@ -1680,6 +1703,9 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue( node, "FontName", NULL );
 	_options.fontName = (s == "") ? opt->fontName : s.GetString();
+
+    s = CPLGetXMLValue(node, "RotationField", NULL);
+    _options.rotationField = (s == "") ? opt->rotationField : s.GetString();
 
 	s = CPLGetXMLValue( node, "LineColor", NULL );
 	_options.lineColor = (s == "") ? opt->lineColor : (OLE_COLOR)atoi(s.GetString());

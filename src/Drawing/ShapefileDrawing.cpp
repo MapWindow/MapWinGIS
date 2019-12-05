@@ -277,6 +277,31 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 			(*_shapeData)[i]->isVisible(false);
 		}
 	}
+    else if (_shptype == SHP_POINT)
+    {
+        // Since there may be (tens of) thousands of shapes,
+        // I don't want to check for rotation field specifications 
+        // and field indices on each iteration; so instead, I am
+        // checking once for field specification and index, and 
+        // then iterating shapes to set rotation-specific values.
+
+        // is a Rotation field specified ?
+        if (defaultOptions->rotationField.GetLength() > 0)
+        {
+            long idx;
+            CComBSTR bstrName(defaultOptions->rotationField);
+            _shapefile->get_FieldIndexByName(bstrName, &idx);
+            // iterate shapes, set rotation based on field value
+            // NOTE that this uses the existing 'rotation' field,
+            // and thus takes precedence over options-based rotation
+            for (int i = 0; i < _shapeData->size(); i++)
+            {
+                VARIANT rotation;
+                _shapefile->get_CellValue(idx, i, &rotation);
+                (*_shapeData)[i]->rotation = rotation.dblVal;
+            }
+        }
+    }
 
 	// --------------------------------------------------------------
 	//	 Building lists of shape indices for each category
@@ -948,13 +973,16 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					
 				_graphics->TranslateTransform((float)(xInt), (float)(yInt));
 					
+                // see if individual shape has a specified rotation
+                // (set either through shape rotation property, or from rotationField)
 				float angle = (float)((*_shapeData)[points[i].id])->rotation;
 					
 				// if not set explicitly, try to grab it from category
 				if (angle == 0)
 					angle = (float)options->rotation;
 
-				_graphics->RotateTransform(angle);
+                if (angle != 0)
+					_graphics->RotateTransform(angle);
 					
 				// if reflecting
 				if (options->pointReflectionType != prtNone)

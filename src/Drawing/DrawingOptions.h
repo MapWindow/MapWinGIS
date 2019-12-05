@@ -117,6 +117,9 @@ public:
 	CBrush* brush;
 	CBrush* brushOld;
 	
+    // field-based rendering
+    CString rotationField;
+	
 	#pragma region Constructor
 	// constructor
 	CDrawingOptionsEx(void)

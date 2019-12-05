@@ -198,6 +198,9 @@ public:
 	STDMETHOD(get_FontName)(BSTR* retval);		
 	STDMETHOD(put_FontName)(BSTR newVal);					
 
+    STDMETHOD(get_RotationField)(BSTR* retval);
+    STDMETHOD(put_RotationField)(BSTR newVal);
+
 	STDMETHOD(Clone)(IShapeDrawingOptions** retval);
 
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);

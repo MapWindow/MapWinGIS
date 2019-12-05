@@ -56,6 +56,7 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 	this->fillHatchStyle = opt.fillHatchStyle;
 	
 	this->fontName = opt.fontName;
+    this->rotationField = opt.rotationField;
 
 	this->lineColor = opt.lineColor;
 	this->lineStipple = opt.lineStipple;
