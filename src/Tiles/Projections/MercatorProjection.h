@@ -60,4 +60,6 @@ public:
 	// converts tile coordinates to decimal degrees
 	void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret);
 	
+	// override BaseProjection's member to check result
+	virtual RectLatLng CalculateGeogBounds(CPoint pnt, int zoom);
 };
