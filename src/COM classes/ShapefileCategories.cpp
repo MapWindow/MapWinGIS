@@ -550,8 +550,6 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 	// -------------------------------------------------------------
 	//		Analyzing expressions
 	// -------------------------------------------------------------
-	std::vector<CStringW> expressions;
-    expressions.resize(_categories.size(), L"");
 
     // Get default point rotation:
     CComPtr<IShapeDrawingOptions> options = nullptr;
@@ -559,13 +557,14 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
     rotations[0].resize(numShapes);
     CalculateRotations(options, tbl, rotations[0]);
 
+    std::vector<CStringW> expressions;
     for (unsigned int i = 0; i < _categories.size(); i++)
     {
         // Resize & set rotations to 0
         rotations[i + 1].resize(numShapes);
 
         // Is this a category we need?
-        if (!allCategories || i != CategoryIndex)
+        if (!allCategories && i != CategoryIndex)
             continue;
 
         // Do we even need to parse category expressions?
@@ -594,10 +593,13 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
     // -------------------------------------------------------------
     for (unsigned long i = 0; i < results.size(); i++) {
         const int categoryIndex = results[i];
-        if (allCategories || categoryIndex == CategoryIndex) {
-            _shapefile->put_ShapeCategory(i, categoryIndex);
-            _shapefile->put_ShapeRotation(i, rotations[categoryIndex + 1][i]);
-        }
+
+        // Is this a category we need?
+        if (!allCategories && i != CategoryIndex)
+            continue;
+
+        _shapefile->put_ShapeCategory(i, categoryIndex);
+        _shapefile->put_ShapeRotation(i, rotations[categoryIndex + 1][i]);
     }
 }
 
@@ -612,7 +614,7 @@ void CShapefileCategories::CalculateRotations(CComPtr<IShapeDrawingOptions>& opt
     // Get optional rotation expression
     CComBSTR rotExpr;
     options->get_PointRotationExpression(&rotExpr);
-    if (!rotExpr)  // no expr so we're done here
+    if (!rotExpr || rotExpr.Length() == 0)  // no expr so we're done here
         return;
 
     // Calculate angles:
