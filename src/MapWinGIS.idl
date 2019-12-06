@@ -4965,9 +4965,8 @@ interface IShapeDrawingOptions : IDispatch{
 	[propget, id(65), helpstring("property PointReflection")] HRESULT PointReflection([out, retval] tkPointReflectionType* pVal);
 	[propput, id(65), helpstring("property PointReflection")] HRESULT PointReflection([in] tkPointReflectionType newVal);
 
-    // field-based property settings
-    [propget, id(66), helpstring("property RotationField")] HRESULT RotationField([out, retval] BSTR* pVal);
-    [propput, id(66), helpstring("property RotationField")] HRESULT RotationField([in] BSTR newVal);
+    [propget, id(66), helpstring("property PointRotationExpression")] HRESULT PointRotationExpression([out, retval] BSTR* pVal);
+    [propput, id(66), helpstring("property PointRotationExpression")] HRESULT PointRotationExpression([in] BSTR newVal);
 };
 
 // ***********************************  Label Interface  **********************************

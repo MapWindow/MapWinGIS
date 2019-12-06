@@ -56,8 +56,8 @@ public:
 
 	double scaleX;
 	double scaleY;
-	double rotation;
-	//double pictureRotation;
+	double rotation; // if rotations is initialized/length > 0 this is ignored
+    BSTR rotationExpression;
 	double fillGradientRotation;
 
 	// colors

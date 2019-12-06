@@ -24,6 +24,7 @@
 
 #pragma once
 #include <set>
+#include <functional>
 #include "TableRow.h"
 #include "dbf.h"
 #include "CustomExpression.h"
@@ -239,6 +240,7 @@ public:
 	void AnalyzeExpressions(std::vector<CStringW>& expressions, std::vector<int>& results);
 	bool QueryCore(CStringW Expression, std::vector<long>& indices, CStringW& ErrorString);
 	bool CalculateCore(CStringW Expression, std::vector<CStringW>& results, CStringW& ErrorString, CString floatFormat, int rowIndex = -1);
+    bool CalculateCoreRaw(CStringW Expression, std::function<bool(CExpressionValue* value, int rowIndex, CStringW& ErrorString)> processValue, CStringW& ErrorString, CString floatFormat = m_globalSettings.floatNumberFormat, int rowIndex = -1, bool ignoreCalculationErrors = false);
 
 	bool get_FieldValuesDouble(int FieldIndex, std::vector<double>& values);
 	bool get_FieldValuesInteger(int FieldIndex, std::vector<int>& values);

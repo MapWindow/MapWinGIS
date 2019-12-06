@@ -150,6 +150,7 @@ private:
 private:
 	void ErrorMessage(long ErrorCode);
 	void ApplyExpressionCore(long CategoryIndex);
+    void CalculateRotations(CComPtr<IShapeDrawingOptions>& options, CComPtr<ITable>& tbl, std::vector<double>& rotations);
 	bool get_AreaValues(std::vector<double>* values);
 	bool get_LengthValues(std::vector<double>* values);
 	

@@ -493,6 +493,9 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 	std::vector<int> results;
 	results.resize(numShapes, -1);
 
+    std::vector<std::vector<double>> rotations;
+    rotations.resize(_categories.size() + 1);
+
 	bool uniqueValues = true;
 	for (auto& _categorie : _categories)
 	{
@@ -503,6 +506,8 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 			break;
 		}
 	}
+
+    bool allCategories = CategoryIndex == -1;
 
 	// ----------------------------------------------------------------
 	// we got unique values classification and want to process it fast
@@ -515,16 +520,16 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 		std::map<CComVariant, long> myMap;				// variant value as key and number of category as result
 		for (unsigned int i = 0; i < _categories.size(); i++)
 		{
-			if (i == CategoryIndex || CategoryIndex == -1 )
+            if (!allCategories && i != CategoryIndex)
+                continue;
+
+			CComVariant val;
+			_categories[i]->get_MinValue(&val);
+			if (val.vt != VT_EMPTY)
 			{
-				CComVariant val;
-				_categories[i]->get_MinValue(&val);
-				if (val.vt != VT_EMPTY)
-				{
-					CComVariant val2;
-					VariantCopy(&val2, &val);
-					myMap[val2] = i;
-				}
+				CComVariant val2;
+				VariantCopy(&val2, &val);
+				myMap[val2] = i;
 			}
 		}
 		
@@ -545,49 +550,87 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 	// -------------------------------------------------------------
 	//		Analyzing expressions
 	// -------------------------------------------------------------
-	if (parsingIsNeeded)
-	{
-		// building list of expressions
-		std::vector<CStringW> expressions;
-		for (unsigned int i = 0; i < _categories.size(); i++)
-		{
-			if (i == CategoryIndex || CategoryIndex == -1 )
-			{
-				CComBSTR expr;
-				_categories[i]->get_Expression(&expr);
-				USES_CONVERSION;
-				CStringW str = OLE2CW(expr);
-				expressions.push_back(str);
-			}
-			else
-			{
-				// we don't need this categories, so dummy strings for them
-				CStringW str = L"";
-				expressions.push_back(str);
-			}
-		}
+	std::vector<CStringW> expressions;
+    expressions.resize(_categories.size(), L"");
 
-		// adding category indices for shapes in the results vector
-		
-		TableHelper::Cast(tbl)->AnalyzeExpressions(expressions, results);
+    // Get default point rotation:
+    CComPtr<IShapeDrawingOptions> options = nullptr;
+    _shapefile->get_DefaultDrawingOptions(&options);
+    rotations[0].resize(numShapes);
+    CalculateRotations(options, tbl, rotations[0]);
+
+    for (unsigned int i = 0; i < _categories.size(); i++)
+    {
+        // Resize & set rotations to 0
+        rotations[i + 1].resize(numShapes);
+
+        // Is this a category we need?
+        if (!allCategories || i != CategoryIndex)
+            continue;
+
+        // Do we even need to parse category expressions?
+        if (parsingIsNeeded)
+        {
+            // Get the expression (will be parsed after this for-loop)
+            CComBSTR expr;
+            _categories[i]->get_Expression(&expr);
+            USES_CONVERSION;
+            CStringW str = OLE2CW(expr);
+            expressions.push_back(str);
+        }
+
+        // Can we proceed to analyse rotations expressions?
+        _categories[i]->get_DrawingOptions(&options);
+        if (options) 
+            CalculateRotations(options, tbl, rotations[i + 1]);
 	}
-		
-	// saving results
-	if (CategoryIndex == -1 )
-	{
-		for (unsigned long i = 0; i < results.size(); i++)
-		{
-			_shapefile->put_ShapeCategory(i, results[i]);
-		}
-	}
-	else
-	{
-		for (unsigned long i = 0; i < results.size(); i++)
-		{
-			if (results[i] == CategoryIndex)
-				_shapefile->put_ShapeCategory(i, CategoryIndex);
-		}
-	}
+
+    // adding category indices for shapes in the results vector
+    if (parsingIsNeeded)
+	    TableHelper::Cast(tbl)->AnalyzeExpressions(expressions, results);
+
+    // -------------------------------------------------------------
+    //		Saving results
+    // -------------------------------------------------------------
+    for (unsigned long i = 0; i < results.size(); i++) {
+        const int categoryIndex = results[i];
+        if (allCategories || categoryIndex == CategoryIndex) {
+            _shapefile->put_ShapeCategory(i, categoryIndex);
+            _shapefile->put_ShapeRotation(i, rotations[categoryIndex + 1][i]);
+        }
+    }
+}
+
+void CShapefileCategories::CalculateRotations(CComPtr<IShapeDrawingOptions>& options, CComPtr<ITable>& tbl, std::vector<double>& rotations)
+{
+    // Fill it with defaults:
+    double rotation;
+    options->get_PointRotation(&rotation);
+
+    std::fill(rotations.begin(), rotations.end(), rotation);
+
+    // Get optional rotation expression
+    CComBSTR rotExpr;
+    options->get_PointRotationExpression(&rotExpr);
+    if (!rotExpr)  // no expr so we're done here
+        return;
+
+    // Calculate angles:
+    CStringW ErrorString;
+    TableHelper::Cast(tbl)->CalculateCoreRaw(
+        OLE2CW(rotExpr),
+        [&](CExpressionValue* result, int rowIndex, CStringW& ErrorString) -> int {
+            USES_CONVERSION;
+            if (result->isString())
+                rotations[rowIndex] = Utility::wtof_custom(result->str());
+            else if (result->IsDouble())
+                rotations[rowIndex] = result->dbl();
+            else
+                rotations[rowIndex] = 0.0;
+            return true;
+        },
+        ErrorString, m_globalSettings.floatNumberFormat, -1, true
+    );
 }
 
 // ********************************************************

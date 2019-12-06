@@ -23,6 +23,7 @@
 #include "StdAfx.h"
 #include "TableClass.h"
 #include <algorithm>
+#include <functional>
 #include "Templates.h"
 #include "JenksBreaks.h"
 #include "Field.h"
@@ -177,6 +178,7 @@ STDMETHODIMP CTableClass::Query(BSTR Expression, VARIANT* Result, BSTR* ErrorStr
 STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Result, BSTR* ErrorString, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    USES_CONVERSION;
 
 	*retVal = VARIANT_FALSE;
 	Result->vt = VT_NULL;
@@ -187,49 +189,33 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 		return S_OK;
 	}
 
-	USES_CONVERSION;
-	CStringW str = OLE2CW(Expression);
+    CStringW err;
+    return CalculateCoreRaw(
+        Expression,
+        [&](CExpressionValue* result, int rowIndex, CStringW& ErrorString) -> int {
+            if (result->isBoolean())
+            {
+                Result->vt = VT_BOOL;
+                Result->boolVal = result->bln();
+            }
+            else if (result->IsDouble())
+            {
+                Result->vt = VT_R8;
+                Result->dblVal = result->dbl();
+            }
+            else if (result->isString())
+            {
+                Result->vt = VT_BSTR;
+                Result->bstrVal = W2BSTR(result->str());
+            }
+            return true;
+        },
+        err,
+        m_globalSettings.floatNumberFormat, RowIndex, true
+    );
 
-	CustomExpression expr;
-	if (expr.ReadFieldNames(this))
-	{
-		CStringW err;
-		if (expr.Parse(Expression, true, err))
-		{
-			TableHelper::SetFieldValues(this, RowIndex, expr);
-
-			// no need to delete the result
-			CExpressionValue* val = expr.Calculate(err);
-			if (val)
-			{
-				if (val->isBoolean())
-				{
-					Result->vt = VT_BOOL;
-					Result->boolVal = val->bln();
-				}
-				else if (val->IsDouble())
-				{
-					Result->vt = VT_R8;
-					Result->dblVal = val->dbl();
-				}
-				else if (val->isString())
-				{
-					Result->vt = VT_BSTR;
-					Result->bstrVal = W2BSTR(val->str());
-				}
-				*retVal = VARIANT_TRUE;
-			}
-		}
-		else
-		{
-			*ErrorString = W2BSTR(err);
-		}
-	}
-	else
-	{
-		*ErrorString = SysAllocString(L"Failed to read field names");
-	}
-	return S_OK;
+    *ErrorString = W2BSTR(err);
+    return S_OK;
 }
 
 // ********************************************************************
@@ -238,54 +224,80 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 bool CTableClass::QueryCore(CStringW Expression, std::vector<long>& indices, CStringW& ErrorString)
 {
 	indices.clear();
+    return CalculateCoreRaw(
+        Expression,
+        [&indices](CExpressionValue* result, int rowIndex, CStringW& ErrorString) -> int {
+            if (!result->isBoolean())
+            {
+                ErrorString = "Resulting value isn't boolean";
+                return false;
+            }
+            
+            if (result->bln())
+                indices.push_back(rowIndex);
 
-	CustomExpression expr;
-	if (expr.ReadFieldNames(this))
-	{
-		CStringW err;
-		if (expr.Parse(Expression, true, err))
-		{
-			bool error = false;
-			for (unsigned int i = 0; i < _rows.size(); i++)
-			{
-				TableHelper::SetFieldValues(this, i, expr);
+            return true;
+        },
+        ErrorString
+    );
+}
 
-				// if expression returns true for the given record we'll save the index 
-				CExpressionValue* result = expr.Calculate(err);	//new CExpressionValue();
-				if (result)
-				{
-					if (result->isBoolean())
-					{
-						if (result->bln())
-						{
-							indices.push_back(i);
-						}
-					}
-					else
-					{
-						ErrorString = "Resulting value isn't boolean";
-						error = true;
-					}
-				}
-				else
-				{
-					ErrorString = err;
-					error = true;
-					break;
-				}
-			}
-			return true;
-		}
-		else
-		{
-			ErrorString = err;
-		}
-	}
-	else
-	{
-		ErrorString = "Failed to read field names";
-	}
-	return false;
+// ********************************************************************
+//			CalculateCore()
+// ********************************************************************
+bool CTableClass::CalculateCoreRaw(CStringW Expression, 
+    std::function<bool(CExpressionValue* value, int rowIndex, CStringW& ErrorString)> processValue, 
+    CStringW& ErrorString, CString floatFormat, int rowIndex, bool ignoreCalculationErrors)
+{
+    USES_CONVERSION;
+
+    CustomExpression expr;
+    expr.SetFloatFormat(floatFormat);
+    if (!expr.ReadFieldNames(this))
+    {
+        ErrorString = "Failed to read field names";
+        return false;
+    }
+
+    CStringW err;
+    if (!expr.Parse(Expression, true, err))
+    {
+        ErrorString = err;
+        return false;
+    }
+
+    bool error = false;
+    CStringW str;
+
+    int start = (rowIndex == -1) ? 0 : rowIndex;
+    int end = (rowIndex == -1) ? int(_rows.size()) : rowIndex + 1;
+
+    for (int i = start; i < end; i++)
+    {
+        TableHelper::SetFieldValues(this, i, expr);
+
+        // calculate expression
+        CExpressionValue* result = expr.Calculate(err);
+        
+        // check if we can ignore calculation errors:
+        if (!result && ignoreCalculationErrors)
+        {
+            err = ""; // clear the error
+            continue;
+        }
+            
+        // if we had a result & processing went fine, continue
+        if (result && processValue(result, i, err))
+            continue;
+        else
+        {
+            ErrorString = err;
+            error = true;
+            return false;
+        }
+    }
+
+    return true;
 }
 
 // ********************************************************************
@@ -294,62 +306,31 @@ bool CTableClass::QueryCore(CStringW Expression, std::vector<long>& indices, CSt
 bool CTableClass::CalculateCore(CStringW Expression, std::vector<CStringW>& results, CStringW& ErrorString,
 	CString floatFormat, int rowIndex /*= -1*/)
 {
-	USES_CONVERSION;
 	results.clear();
-
-	CustomExpression expr;
-	expr.SetFloatFormat(floatFormat);
-	if (!expr.ReadFieldNames(this))
-	{
-		ErrorString = "Failed to read field names";
-		return false;
-	}
-
-	CStringW err;
-	if (!expr.Parse(Expression, true, err))
-	{
-		ErrorString = err;
-		return false;
-	}
-
-	bool error = false;
-	CStringW str;
-
-	int start = (rowIndex == -1) ? 0 : rowIndex;
-	int end = (rowIndex == -1) ? int(_rows.size()) : rowIndex + 1;
-
-	for (int i = start; i < end; i++)
-	{
-		TableHelper::SetFieldValues(this, i, expr);
-
-		// if expression returns true for the given record we'll save the index 
-		CExpressionValue* result = expr.Calculate(err);
-		if (result)
-		{
-			if (result->isString())
-			{
-				str = result->str();
-				results.push_back(str);
-			}
-			else if (result->isBoolean())
-			{
-				str = result->bln() ? "true" : "false";
-				results.push_back(str);
-			}
-			else
-			{
-				str.Format(A2W(floatFormat), result->dbl());
-				results.push_back(str);
-			}
-		}
-		else
-		{
-			ErrorString = err;
-			error = true;
-			break;
-		}
-	}
-	return true;
+    return CalculateCoreRaw(
+        Expression, 
+        [&](CExpressionValue* result, int rowIndex, CStringW& ErrorString) -> int {
+            USES_CONVERSION;
+            CStringW str;
+            if (result->isString())
+            {
+                str = result->str();
+                results.push_back(str);
+            }
+            else if (result->isBoolean())
+            {
+                str = result->bln() ? "true" : "false";
+                results.push_back(str);
+            }
+            else
+            {
+                str.Format(A2W(floatFormat), result->dbl());
+                results.push_back(str);
+            }
+            return true;
+        },
+        ErrorString, floatFormat, rowIndex
+    );
 }
 
 // ****************************************************************
@@ -372,27 +353,19 @@ void CTableClass::AnalyzeExpressions(std::vector<CStringW>& expressions, std::ve
 	{
 		if (expressions[categoryId] != "")
 		{
-			CStringW err;
-			if (expr.Parse(expressions[categoryId], true, err))
-			{
-				for (unsigned int i = 0; i < _rows.size(); i++)
-				{
-					if (results[i] == -1)
-					{
-						TableHelper::SetFieldValues(this, i, expr);
-
-						// if expression returns true for the given record we'll save the index 
-						CExpressionValue* result = expr.Calculate(err);
-						if (result)
-						{
-							if (result->isBoolean() && result->bln())
-							{
-								results[i] = categoryId;
-							}
-						}
-					}
-				}
-			}
+			CStringW ErrorString;
+            CalculateCoreRaw(
+                expressions[categoryId],
+                [&](CExpressionValue* result, int rowIndex, CStringW& ErrorString) -> int {
+                    USES_CONVERSION;
+                    if (result->isBoolean() && result->bln())
+                    {
+                        results[rowIndex] = categoryId;
+                    }
+                    return true;
+                },
+                ErrorString, m_globalSettings.floatNumberFormat, -1, true
+            );
 		}
 	}
 }

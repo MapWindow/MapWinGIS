@@ -45,10 +45,12 @@ public:
 		_pUnkMarshaler = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_isLineDecoration = false;
+        _pointRotationExpression = SysAllocString(L"");
 		gReferenceCounter.AddRef(tkInterface::idShapeDrawingOptions);
 	}
 	~CShapeDrawingOptions()
 	{			
+        ::SysFreeString(_pointRotationExpression);
 		gReferenceCounter.Release(tkInterface::idShapeDrawingOptions);
 	}
 
@@ -132,6 +134,8 @@ public:
 	STDMETHOD(put_FillColor2)(OLE_COLOR newVal);
 	STDMETHOD(get_PointRotation)(double *pVal);
 	STDMETHOD(put_PointRotation)(double newVal);
+    STDMETHOD(get_PointRotationExpression)(BSTR *expression);
+    STDMETHOD(put_PointRotationExpression)(BSTR expression);
 	STDMETHOD(get_PointReflection)(tkPointReflectionType* pVal);
 	STDMETHOD(put_PointReflection)(tkPointReflectionType newVal);
 
@@ -262,6 +266,7 @@ private:
 	long _lastErrorCode;
 	bool _isLineDecoration;  // prevents the creation of child instances of CDrawingOptions class in case it's line decoration symbol, 
 							 // which could become endless loop
+    BSTR _pointRotationExpression;
 private:
 	VARIANT_BOOL DrawPointCore(CDC* dc, float x, float y, 
 							   int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215, BYTE backAlpha = 255);

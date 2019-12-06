@@ -83,6 +83,26 @@ STDMETHODIMP CShapeDrawingOptions::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 	return S_OK;
 }
 
+// *****************************************************************
+//		get/put_Expression
+// *****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_PointRotationExpression(BSTR* retval)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        USES_CONVERSION;
+    *retval = OLE2BSTR(_options.rotationExpression);
+    return S_OK;
+}
+
+STDMETHODIMP CShapeDrawingOptions::put_PointRotationExpression(BSTR newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        USES_CONVERSION;
+    ::SysFreeString(_options.rotationExpression);
+    _options.rotationExpression = OLE2BSTR(newVal);
+    return S_OK;
+}
+
 // *******************************************************
 //	   get_Picture()
 // *******************************************************
@@ -1632,6 +1652,9 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 	if (opt->maxVisibleScale != _options.maxVisibleScale)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleScale", CPLString().Printf("%f", _options.maxVisibleScale));
 	
+    if (opt->rotationExpression != _options.rotationExpression)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "RotationExpression", OLE2CA(_options.rotationExpression));
+
 	delete opt;
 
 	if (_options.linePattern)
@@ -1668,128 +1691,129 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 
 	CString s;
 	
-	s = CPLGetXMLValue( node, "FillBgColor", NULL );
+	s = CPLGetXMLValue( node, "FillBgColor", nullptr);
 	_options.fillBgColor = (s == "") ? opt->fillBgColor : (OLE_COLOR)atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "FillBgTransparent", NULL );
+	s = CPLGetXMLValue( node, "FillBgTransparent", nullptr);
 	_options.fillBgTransparent = (s == "") ? opt->fillBgTransparent : atoi(s.GetString()) == 0 ? false : true;
 
-	s = CPLGetXMLValue( node, "FillColor", NULL );
+	s = CPLGetXMLValue( node, "FillColor", nullptr);
 	_options.fillColor = (s == "") ? opt->fillColor : (OLE_COLOR)atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "FillColor2", NULL );
+	s = CPLGetXMLValue( node, "FillColor2", nullptr);
 	_options.fillColor2 = (s == "") ? opt->fillColor2 : (OLE_COLOR)atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "FillGradientBounds", NULL );
+	s = CPLGetXMLValue( node, "FillGradientBounds", nullptr);
 	_options.fillGradientBounds = (s == "") ? opt->fillGradientBounds : (tkGradientBounds)atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "FillGradientRotation", NULL );
+	s = CPLGetXMLValue( node, "FillGradientRotation", nullptr);
 	_options.fillGradientRotation = (s == "") ? opt->fillGradientRotation : Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( node, "FillGradientType", NULL );
+	s = CPLGetXMLValue( node, "FillGradientType", nullptr);
 	_options.fillGradientType = (s == "") ? opt->fillGradientType : (tkGradientType)atoi(s.GetString());
 	
-	s = CPLGetXMLValue( node, "FillHatchStyle", NULL );
+	s = CPLGetXMLValue( node, "FillHatchStyle", nullptr);
 	_options.fillHatchStyle = (s == "") ? opt->fillHatchStyle : (tkGDIPlusHatchStyle)atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "FillTransparency", NULL );
+	s = CPLGetXMLValue( node, "FillTransparency", nullptr);
 	_options.fillTransparency = (s == "") ? opt->fillTransparency : (float)Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( node, "FillType", NULL );
+	s = CPLGetXMLValue( node, "FillType", nullptr);
 	_options.fillType = (s == "") ? opt->fillType : (tkFillType)atoi(s.GetString());
 	
-	s = CPLGetXMLValue( node, "FillVisible", NULL );
+	s = CPLGetXMLValue( node, "FillVisible", nullptr);
 	_options.fillVisible = (s == "") ? opt->fillVisible : atoi(s.GetString()) == 0 ? false : true;
 
-	s = CPLGetXMLValue( node, "FontName", NULL );
+	s = CPLGetXMLValue( node, "FontName", nullptr);
 	_options.fontName = (s == "") ? opt->fontName : s.GetString();
 
-    s = CPLGetXMLValue(node, "RotationField", NULL);
-    _options.rotationField = (s == "") ? opt->rotationField : s.GetString();
-
-	s = CPLGetXMLValue( node, "LineColor", NULL );
+	s = CPLGetXMLValue( node, "LineColor", nullptr);
 	_options.lineColor = (s == "") ? opt->lineColor : (OLE_COLOR)atoi(s.GetString());
 	
-	s = CPLGetXMLValue( node, "LineStipple", NULL );
+	s = CPLGetXMLValue( node, "LineStipple", nullptr);
 	_options.lineStipple = (s == "") ? opt->lineStipple : (tkDashStyle)atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "LineTransparency", NULL );
+	s = CPLGetXMLValue( node, "LineTransparency", nullptr);
 	_options.lineTransparency = (s == "") ? opt->lineTransparency : (float)Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( node, "LinesVisible", NULL );
+	s = CPLGetXMLValue( node, "LinesVisible", nullptr);
 	_options.linesVisible = (s == "") ? opt->linesVisible : atoi(s.GetString()) == 0 ? false : true;
 
-	s = CPLGetXMLValue( node, "LineWidth", NULL );
+	s = CPLGetXMLValue( node, "LineWidth", nullptr);
 	_options.lineWidth = (s == "") ? opt->lineWidth : (float)Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( node, "PointCharcter", NULL );
+	s = CPLGetXMLValue( node, "PointCharcter", nullptr);
 	_options.pointCharcter = (s == "") ? opt->pointCharcter : (unsigned char)atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "PointColor", NULL );
+	s = CPLGetXMLValue( node, "PointColor", nullptr);
 	_options.pointColor = (s == "") ? opt->pointColor : (OLE_COLOR)atoi(s.GetString());
 	
-	s = CPLGetXMLValue( node, "PointNumSides", NULL );
+	s = CPLGetXMLValue( node, "PointNumSides", nullptr);
 	_options.pointNumSides = (s == "") ? opt->pointNumSides : atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "PointShapeRatio", NULL );
+	s = CPLGetXMLValue( node, "PointShapeRatio", nullptr);
 	_options.pointShapeRatio = (s == "") ? opt->pointShapeRatio : (float)Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( node, "PointShapeType", NULL );
+	s = CPLGetXMLValue( node, "PointShapeType", nullptr);
 	_options.pointShapeType = (s == "") ? opt->pointShapeType : (tkPointShapeType)atoi(s.GetString());
 	
-	s = CPLGetXMLValue( node, "PointSize", NULL );
+	s = CPLGetXMLValue( node, "PointSize", nullptr);
 	_options.pointSize = (s == "") ? opt->pointSize : (float)Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( node, "PointSymbolType", NULL );
+	s = CPLGetXMLValue( node, "PointSymbolType", nullptr);
 	_options.pointSymbolType = (s == "") ? opt->pointSymbolType : (tkPointSymbolType)atoi(s.GetString());
 	
-	s = CPLGetXMLValue( node, "Rotation", NULL );
+	s = CPLGetXMLValue( node, "Rotation", nullptr);
 	_options.rotation = (s == "") ? opt->rotation : Utility::atof_custom(s);
 	
-	s = CPLGetXMLValue( node, "PointReflectionType", NULL );
+	s = CPLGetXMLValue( node, "PointReflectionType", nullptr);
 	_options.pointReflectionType = (s == "") ? opt->pointReflectionType : (tkPointReflectionType)atoi(s.GetString());
 	
-	s = CPLGetXMLValue( node, "ScaleX", NULL );
+	s = CPLGetXMLValue( node, "ScaleX", nullptr);
 	_options.scaleX = (s == "") ? opt->scaleX : Utility::atof_custom(s);
 	
-	s = CPLGetXMLValue( node, "ScaleY", NULL );
+	s = CPLGetXMLValue( node, "ScaleY", nullptr);
 	_options.scaleY = (s == "") ? opt->scaleY : Utility::atof_custom(s);
 	
-	s = CPLGetXMLValue( node, "VerticesColor", NULL );
+	s = CPLGetXMLValue( node, "VerticesColor", nullptr);
 	_options.verticesColor = (s == "") ? opt->verticesColor : atoi(s);
 
-	s = CPLGetXMLValue( node, "VerticesFillVisible", NULL );
+	s = CPLGetXMLValue( node, "VerticesFillVisible", nullptr);
 	_options.verticesFillVisible = (s == "") ? opt->verticesFillVisible : (VARIANT_BOOL)atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "VerticesSize", NULL );
+	s = CPLGetXMLValue( node, "VerticesSize", nullptr);
 	_options.verticesSize = (s == "") ? opt->verticesSize : atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "VerticesType", NULL );
+	s = CPLGetXMLValue( node, "VerticesType", nullptr);
 	_options.verticesSize = (s == "") ? opt->verticesSize : (tkVertexType)atoi(s.GetString());
 
-	s = CPLGetXMLValue( node, "VerticesVisible", NULL );
+	s = CPLGetXMLValue( node, "VerticesVisible", nullptr);
 	_options.verticesVisible = (s == "") ? opt->verticesVisible : (VARIANT_BOOL)atoi(s.GetString());
 	
-	s = CPLGetXMLValue( node, "Visible", NULL );
+	s = CPLGetXMLValue( node, "Visible", nullptr);
 	_options.visible = (s == "") ? opt->visible : atoi(s.GetString()) == 0 ? false : true;
 	
-	s = CPLGetXMLValue( node, "AlignPictureByBottom", NULL );
+	s = CPLGetXMLValue( node, "AlignPictureByBottom", nullptr);
 	_options.alignIconByBottom = (s == "") ? opt->alignIconByBottom : atoi(s.GetString()) == 0 ? false : true;
 
-	s = CPLGetXMLValue( node, "FrameVisible", NULL );
+	s = CPLGetXMLValue( node, "FrameVisible", nullptr);
 	_options.drawFrame = (s == "") ? opt->drawFrame : atoi(s.GetString()) == 0 ? false : true;
 
-	s = CPLGetXMLValue( node, "FrameType", NULL );
+	s = CPLGetXMLValue( node, "FrameType", nullptr);
 	_options.frameType = (s == "") ? opt->frameType : (tkLabelFrameType)atoi(s.GetString());
 
-	s = CPLGetXMLValue(node, "DynamicVisibility", NULL);
+	s = CPLGetXMLValue(node, "DynamicVisibility", nullptr);
 	_options.dynamicVisibility = (s == "") ? opt->dynamicVisibility : atoi(s.GetString()) == 0 ? false : true;
 	
-	s = CPLGetXMLValue(node, "MinVisibleScale", NULL);
+	s = CPLGetXMLValue(node, "MinVisibleScale", nullptr);
 	_options.minVisibleScale = (s == "") ? opt->minVisibleScale : Utility::atof_custom(s);
 	
-	s = CPLGetXMLValue(node, "MaxVisibleScale", NULL);
+	s = CPLGetXMLValue(node, "MaxVisibleScale", nullptr);
 	_options.maxVisibleScale = (s == "") ? opt->maxVisibleScale : Utility::atof_custom(s);
+
+    s = CPLGetXMLValue(node, "RotationExpression", nullptr);
+    SysFreeString(_options.rotationExpression);
+    _options.rotationExpression = A2BSTR(s);
 
 	// restoring picture
 	CPLXMLNode* psChild = CPLGetXMLNode(node, "Picture");
@@ -1828,7 +1852,7 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 		}
 	}
 
-	s = CPLGetXMLValue( node, "UseLinePattern", NULL );
+	s = CPLGetXMLValue( node, "UseLinePattern", nullptr);
 	_options.useLinePattern = (s == "") ? opt->useLinePattern : atoi(s.GetString()) == 0 ? false : true;
 
 	delete opt;
