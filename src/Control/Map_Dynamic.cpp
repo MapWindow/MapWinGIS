@@ -95,7 +95,7 @@ void CMapView::DrawMovingShapes(Gdiplus::Graphics* g, const CRect& rect, bool dy
 		gBuffer->TranslateTransform(offsetX, offsetY);
 		gBuffer->Clear(Gdiplus::Color::Transparent);
 		CCollisionList list;	
-		CShapefileDrawer drawer(gBuffer, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &list, GetCurrentScale(), false);
+		CShapefileDrawer drawer(gBuffer, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &list, GetCurrentScale(), GetCurrentZoom(), false);
 		drawer.Draw(rect, _dragging.Shapefile);
 		// clean up
 		delete gBuffer;

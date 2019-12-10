@@ -156,7 +156,7 @@ public:
 
 	STDMETHOD(get_PictureScaleX)(double *pVal);
 	STDMETHOD(put_PictureScaleX)(double newVal);
-	STDMETHOD(get_PictureScaleY)(double *pVal);
+	STDMETHOD(get_PictureScaleY)(double*pVal);
 	STDMETHOD(put_PictureScaleY)(double newVal);
 
 	STDMETHOD(get_AlignPictureByBottom)(VARIANT_BOOL *pVal);
@@ -260,6 +260,10 @@ public:
 	STDMETHOD(put_MinVisibleScale)(DOUBLE newVal);
 	STDMETHOD(get_MaxVisibleScale)(DOUBLE* pVal);
 	STDMETHOD(put_MaxVisibleScale)(DOUBLE newVal);
+    STDMETHOD(get_MinVisibleZoom)(LONG* pVal);
+    STDMETHOD(put_MinVisibleZoom)(LONG newVal);
+    STDMETHOD(get_MaxVisibleZoom)(LONG* pVal);
+    STDMETHOD(put_MaxVisibleZoom)(LONG newVal);
 	
 private:
 	CDrawingOptionsEx _options;

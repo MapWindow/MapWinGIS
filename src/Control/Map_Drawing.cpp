@@ -473,7 +473,7 @@ void CMapView::DrawIdentified(Gdiplus::Graphics* g, const CRect& rcBounds)
 	if (!hotTracking && !identified)
 		return;
 
-	CShapefileDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, this->GetCurrentScale(), true);
+	CShapefileDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, GetCurrentScale(), GetCurrentZoom(), true);
 
 	if (hotTracking)
 	{

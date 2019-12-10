@@ -365,6 +365,25 @@ STDMETHODIMP CShapefileCategories::put_Caption(BSTR newVal)
 	return S_OK;
 }
 
+// **********************************************************
+//		get/put_VisibilityExpression()
+// **********************************************************
+STDMETHODIMP CShapefileCategories::get_VisibilityExpression(BSTR* pVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        USES_CONVERSION;
+    *pVal = OLE2BSTR(_visExpression);
+    return S_OK;
+}
+STDMETHODIMP CShapefileCategories::put_VisibilityExpression(BSTR newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        ::SysFreeString(_visExpression);
+    USES_CONVERSION;
+    _visExpression = OLE2BSTR(newVal);
+    return S_OK;
+}
+
 //***********************************************************************/
 //*			ErrorMessage()
 //***********************************************************************/

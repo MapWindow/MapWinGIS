@@ -100,6 +100,8 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 	this->dynamicVisibility = opt.dynamicVisibility;	
 	this->minVisibleScale = opt.minVisibleScale;
 	this->maxVisibleScale = opt.maxVisibleScale;
+    this->minVisibleZoom = opt.minVisibleZoom;
+    this->maxVisibleZoom = opt.maxVisibleZoom;
 
 	brushPlus = NULL;
 	if(pen) delete pen;
@@ -110,6 +112,24 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 	brushOld = NULL;
 	
 	return *this;
+}
+#pragma endregion
+
+#pragma region Visibility check
+// *********************************************************
+//		IsVisible()
+// *********************************************************
+bool CDrawingOptionsEx::IsVisible(double scale, int zoom)
+{
+    if (dynamicVisibility)
+    {
+        return (
+            scale >= minVisibleScale && scale <= maxVisibleScale &&
+            zoom >= minVisibleZoom && zoom <= maxVisibleZoom
+            );
+    }
+    else
+        return true;
 }
 #pragma endregion
 
@@ -1119,3 +1139,4 @@ Gdiplus::GraphicsPath* CDrawingOptionsEx::GetFrameForPath(Gdiplus::GraphicsPath&
 	}
 	return path2;
 }
+#pragma endregion

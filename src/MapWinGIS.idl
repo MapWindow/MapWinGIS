@@ -4967,6 +4967,12 @@ interface IShapeDrawingOptions : IDispatch{
 
     [propget, id(66), helpstring("property PointRotationExpression")] HRESULT PointRotationExpression([out, retval] BSTR* pVal);
     [propput, id(66), helpstring("property PointRotationExpression")] HRESULT PointRotationExpression([in] BSTR newVal);
+
+    [propget, id(67), helpstring("property MaxVisibleZoom")] HRESULT MaxVisibleZoom([out, retval]LONG* retval);
+    [propput, id(67), helpstring("property MaxVisibleZoom")] HRESULT MaxVisibleZoom([in]LONG newVal);
+
+    [propget, id(68), helpstring("property MinVisibleZoom")] HRESULT MinVisibleZoom([out, retval]LONG* retval);
+    [propput, id(68), helpstring("property MinVisibleZoom")] HRESULT MinVisibleZoom([in]LONG newVal);
 };
 
 // ***********************************  Label Interface  **********************************

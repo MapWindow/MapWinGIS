@@ -1651,7 +1651,13 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 	
 	if (opt->maxVisibleScale != _options.maxVisibleScale)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleScale", CPLString().Printf("%f", _options.maxVisibleScale));
-	
+
+    if (opt->minVisibleZoom != _options.minVisibleZoom)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "MinVisibleZoom", CPLString().Printf("%d", _options.minVisibleZoom));
+
+    if (opt->maxVisibleZoom != _options.maxVisibleZoom)
+        Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleZoom", CPLString().Printf("%d", _options.maxVisibleZoom));
+
     if (opt->rotationExpression != _options.rotationExpression)
         Utility::CPLCreateXMLAttributeAndValue(psTree, "RotationExpression", OLE2CA(_options.rotationExpression));
 
@@ -1810,6 +1816,12 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	
 	s = CPLGetXMLValue(node, "MaxVisibleScale", nullptr);
 	_options.maxVisibleScale = (s == "") ? opt->maxVisibleScale : Utility::atof_custom(s);
+
+    s = CPLGetXMLValue(node, "MinVisibleZoom", NULL);
+    _options.minVisibleZoom = (s == "") ? opt->minVisibleZoom : atoi(s.GetString());
+
+    s = CPLGetXMLValue(node, "MaxVisibleZoom", NULL);
+    _options.maxVisibleZoom = (s == "") ? opt->maxVisibleZoom : atoi(s.GetString());
 
     s = CPLGetXMLValue(node, "RotationExpression", nullptr);
     SysFreeString(_options.rotationExpression);
@@ -1992,4 +2004,36 @@ STDMETHODIMP CShapeDrawingOptions::put_MaxVisibleScale(DOUBLE newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_options.maxVisibleScale = newVal;
 	return S_OK;
+};
+
+// ****************************************************************
+//		get_MinVisibleScale
+// ****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_MinVisibleZoom(LONG* pVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *pVal = _options.minVisibleZoom;
+    return S_OK;
+};
+STDMETHODIMP CShapeDrawingOptions::put_MinVisibleZoom(LONG newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    _options.minVisibleZoom = newVal;
+    return S_OK;
+};
+
+// ****************************************************************
+//		get_MaxVisibleScale
+// ****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_MaxVisibleZoom(LONG* pVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    *pVal = _options.maxVisibleZoom;
+    return S_OK;
+};
+STDMETHODIMP CShapeDrawingOptions::put_MaxVisibleZoom(LONG newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    _options.maxVisibleZoom = newVal;
+    return S_OK;
 };
