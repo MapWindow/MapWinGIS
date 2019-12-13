@@ -1435,6 +1435,8 @@ namespace AxMapWinGIS
         /// <returns>
         /// True if successful; False if not an OGR Layer, could not be reloaded, or could not be reprojected (if necessary)
         /// </returns>
+        /// \new520 Starting with version 5.2.0, this function will also attempt to maintain 
+        /// the current set of Hidden and Selected shapes within the associated Shapefile.
         public bool ReloadOgrLayerFromSource(int ogrLayerHandle)
         {
             throw new NotImplementedException();

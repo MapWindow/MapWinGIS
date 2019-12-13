@@ -421,6 +421,8 @@ namespace MapWinGIS
         /// Discards all the local changes and reloads layer from the source.
         /// </summary>
         /// <returns>True on success.</returns>
+        /// \new520 Starting with version 5.2.0, this function will also attempt to maintain 
+        /// the current set of Hidden and Selected shapes within the associated Shapefile.
         public bool ReloadFromSource()
         {
             throw new NotImplementedException();
