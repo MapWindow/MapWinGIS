@@ -211,6 +211,59 @@ void CShapefile::SetValidationInfo(IShapeValidationInfo* info, tkShapeValidation
                       (IDispatch**)&(validationType == svtInput ? _inputValidation : _outputValidation), true);
 }
 
+
+// give OGR layers the ability to retain visibility flags on reload
+bool CShapefile::GetVisibilityFlags(map<long, BYTE> &flags)
+{
+    // can only perform if we have an FID mapping to ShapeID
+    if (!_hasOgrFidMapping)
+        return false;
+
+    // copy visibility flags into provided map, keyed by OGR_FID
+    VARIANT_BOOL vb;
+    // iterate all OGR Mappings
+    auto iter = _ogrFid2ShapeIndex.begin();
+    while (iter != _ogrFid2ShapeIndex.end())
+    {
+        BYTE visibilityFlags = 0;
+        // get currently-assocaited ShapeID
+        long shapeID = _ogrFid2ShapeIndex[iter->first];
+        // only consider Hidden and Selected values, as others are not intended to be persisted
+        if (_shapeData[shapeID]->hidden()) visibilityFlags |= tkShapeRecordFlags::shpHidden;
+        if (_shapeData[shapeID]->selected()) visibilityFlags |= tkShapeRecordFlags::shpSelected;
+        // set into mapping, mapping OGR_FID to visibility flags
+        flags.insert(std::make_pair(iter->first, visibilityFlags));
+        iter++;
+    }
+    return true;
+}
+bool CShapefile::SetVisibilityFlags(map<long, BYTE> &flags)
+{
+    // can only perform if we have an FID mapping to ShapeID
+    if (!_hasOgrFidMapping)
+        return false;
+
+    // copy the specified visibility flags into the current shape data
+    VARIANT_BOOL vb;
+    // iterate all OGR Mappings
+    auto iter = _ogrFid2ShapeIndex.begin();
+    while (iter != _ogrFid2ShapeIndex.end())
+    {
+        // does FID still exist (from the previous mapping)?
+        if (flags.find(iter->first) != flags.end())
+        {
+            BYTE visibilityFlags = flags[iter->first];
+            // get currently-assocaited ShapeID
+            long shapeID = _ogrFid2ShapeIndex[iter->first];
+            // only consider Hidden and Selected values, as others are not intended to be persisted
+            _shapeData[shapeID]->hidden((visibilityFlags & tkShapeRecordFlags::shpHidden) ? true : false);
+            _shapeData[shapeID]->selected((visibilityFlags & tkShapeRecordFlags::shpSelected) ? true : false);
+        }
+        iter++;
+    }
+    return true;
+}
+
 #pragma region Properties
 
 // ************************************************************
@@ -2728,6 +2781,21 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
     long numFields, percent = 0;
     this->get_NumFields(&numFields);
 
+    std::map<long, long> reverseOgrFidMapping;
+    // we have to update the OgrFid mapping if not reprojecting in-place
+    if (_hasOgrFidMapping && !reprojectInPlace)
+    {
+        // set flag in new Shapefile
+        ((CShapefile*)(*retVal))->HasOgrFidMapping(true);
+        // one-time set up of reverse mapping for optimized reverse lookup
+        auto iter = _ogrFid2ShapeIndex.begin();
+        while (iter != _ogrFid2ShapeIndex.end())
+        {
+            reverseOgrFidMapping.insert(std::make_pair(iter->second, iter->first));
+            iter++;
+        }
+    }
+
     VARIANT_BOOL vb = VARIANT_FALSE;
     *reprojectedCount = 0;
 
@@ -2794,6 +2862,13 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
                             // set cell value into target at new index
                             (*retVal)->EditCellValue(j, newIndex, var, &vb);
                         }
+
+                        // update OgrFid mapping in new Shapefile
+                        if (_hasOgrFidMapping)
+                        {
+                            // find OgrFid for the current index i, map it to newIndex
+                            ((CShapefile*)(*retVal))->MapOgrFid2ShapeIndex(reverseOgrFidMapping[i], newIndex);
+                        }
                     }
                     // 
                     (*reprojectedCount)++;
@@ -2809,6 +2884,24 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
     {
         OGRCoordinateTransformation::DestroyCT(transf);
         transf = nullptr;
+    }
+
+    // copy attributes and clean-up
+    if (_hasOgrFidMapping && !reprojectInPlace)
+    {
+        map<long, BYTE> visibilityFlags;
+        // copy visibility flags
+        if (this->GetVisibilityFlags(visibilityFlags))
+        {
+            VARIANT_BOOL vb;
+            // copy 'selectable' attribute
+            this->get_Selectable(&vb);
+            ((CShapefile*)(*retVal))->put_Selectable(vb);
+            // restore visibility flags
+            ((CShapefile*)(*retVal))->SetVisibilityFlags(visibilityFlags);
+        }
+        // clean up reverse-mapping
+        reverseOgrFidMapping.clear();
     }
 
     // function result will be based on successful projection setting
@@ -3486,4 +3579,38 @@ bool CShapefile::GetSorting(vector<long>** indices)
     CallbackHelper::ErrorMsg("Failed to sort labels");
 
     return false;
+}
+
+// *************************************************************
+//		HasOgrFidMapping()
+// *************************************************************
+STDMETHODIMP CShapefile::get_HasOgrFidMapping(VARIANT_BOOL* pVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    *pVal = (_hasOgrFidMapping ? VARIANT_TRUE : VARIANT_FALSE);
+
+    return S_OK;
+}
+
+// *****************************************************************
+//		OgrFid2ShapeIndex()
+// *****************************************************************
+STDMETHODIMP CShapefile::OgrFid2ShapeIndex(long OgrFid, LONG* retVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    *retVal = -1;
+
+    // this shapefile has to have an OGR FID mapping, and a mapping for the specified OgrFid
+    if (!_hasOgrFidMapping || _ogrFid2ShapeIndex.find(OgrFid) == _ogrFid2ShapeIndex.end())
+    {
+        ErrorMessage(tkNO_OGR_DATA_WAS_LOADED);
+    }
+    else
+    {
+        // else return the mapping
+        *retVal = _ogrFid2ShapeIndex[OgrFid];
+    }
+    return S_OK;
 }

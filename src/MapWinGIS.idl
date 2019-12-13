@@ -4201,6 +4201,8 @@ interface IShapefile : IDispatch{
 	[propput, id(143)] HRESULT Selectable([in] VARIANT_BOOL newVal);
 	[id(144), helpstring("method GetClosestSnapPosition")] HRESULT GetClosestSnapPosition([in]double x, [in]double y, [in]double maxDistance,
 		[out]long* shapeIndex, [out] double* fx, [out] double* fy, [out] double* distance, [out, retval]VARIANT_BOOL* retVal);
+    [propget, id(145)] HRESULT HasOgrFidMapping([out, retval] VARIANT_BOOL* pVal);
+    [id(146)] HRESULT OgrFid2ShapeIndex([in] long OgrFid, [out, retval] LONG* ShapeIndex);
 };
 
 /****************************  Shape Interface ***********************/

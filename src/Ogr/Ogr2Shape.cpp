@@ -305,6 +305,12 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 
 	CStringA name = layer->GetFIDColumn();
 	bool hasFID = name.GetLength() > 0;
+    if (hasFID)
+    {
+        // if we have an FID, we can map it to the ShapeIndex
+        ((CShapefile*)sf)->HasOgrFidMapping(true);
+    }
+
 	ShpfileType shpType;
 	sf->get_ShapefileType(&shpType);
 
@@ -365,6 +371,8 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 			var.vt = VT_I4;
 			var.lVal = static_cast<long>(poFeature->GetFID());
 			sf->EditCellValue(0, numShapes, var, &vbretval);
+            // map the FID to the ShapeIndex for fast reliable lookups
+            ((CShapefile*)sf)->MapOgrFid2ShapeIndex(var.lVal, numShapes);
 		}
 
 		CopyValues(poFields, poFeature, sf, hasFID, numShapes, loadLabels, labelFields);

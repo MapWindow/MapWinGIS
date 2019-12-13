@@ -892,7 +892,7 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 	}
 	
 	// let's substitute original shapefile with the reprojected one
-	// don't close the original shapefile; use may still want to interact with it
+	// don't close the original shapefile; user may still want to interact with it
 
 	if (layer->get_LayerType() == OgrLayerSource)
 	{

@@ -696,6 +696,31 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 				delete _shapeData[ShapeIndex];
 				_shapeData.erase( _shapeData.begin() + ShapeIndex );
 
+                // if we're mapping Ogr FIDs to Shape indices, we have to do a downward-shift
+                if (_hasOgrFidMapping)
+                {
+                    // first remove the mapping containing the Shape index value
+                    auto iter = _ogrFid2ShapeIndex.begin();
+                    while (iter != _ogrFid2ShapeIndex.end())
+                    {
+                        // see if this value is the current Shape index
+                        if (iter->second == ShapeIndex)
+                        {
+                            // found it, erase it, and exit
+                            _ogrFid2ShapeIndex.erase(iter->first);
+                            break;
+                        }
+                        iter++;
+                    }
+                    // now re-iterate all mappings to decrement higher-valued Shape indices
+                    iter = _ogrFid2ShapeIndex.begin();
+                    while (iter != _ogrFid2ShapeIndex.end())
+                    {
+                        // any Shape IDs greater-than the deleted ID must be decremented
+                        if (iter->second > ShapeIndex) _ogrFid2ShapeIndex[iter->first] = iter->second - 1;
+                        iter++;
+                    }
+                }
 				_sortingChanged = true;
 
 				// TODO: why haven't we updated QTree?

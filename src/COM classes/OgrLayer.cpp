@@ -590,8 +590,34 @@ STDMETHODIMP COgrLayer::ReloadFromSource(VARIANT_BOOL* retVal)
 	
 	// Lock shape file
 	CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
+
+    // prior to close, see if we can save visibility flags
+    VARIANT_BOOL hasOgrFidMapping, isSelectable;
+    map<long, BYTE> visibilityFlags;
+    bool haveFlags = false;
+    // it is required to have an OGR_FID field mapping since Shape ID's 
+    // are not guaranteed to be the same following the reload
+    _shapefile->get_HasOgrFidMapping(&hasOgrFidMapping);
+    if (hasOgrFidMapping == VARIANT_TRUE)
+    {
+        // get 'selectable' attribute
+        _shapefile->get_Selectable(&isSelectable);
+        // get relevant visibility flags
+        haveFlags = (dynamic_cast<CShapefile*>(_shapefile))->GetVisibilityFlags(visibilityFlags);
+    }
+
+    // close and reload Shapefile
 	CloseShapefile();
 	_shapefile = LoadShapefile();
+
+    // try to restore visibility flags
+    if (hasOgrFidMapping == VARIANT_TRUE && haveFlags)
+    {
+        // restore 'selectable' attribute
+        _shapefile->put_Selectable(isSelectable);
+        // restore relevant visibility flags
+        (dynamic_cast<CShapefile*>(_shapefile))->SetVisibilityFlags(visibilityFlags);
+    }
 
 	*retVal = _shapefile ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;

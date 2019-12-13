@@ -260,6 +260,8 @@ public:
 	STDMETHOD(get_IsGeographicProjection)(VARIANT_BOOL* pVal);
     STDMETHOD(get_Selectable)(VARIANT_BOOL* retVal);
     STDMETHOD(put_Selectable)(VARIANT_BOOL newVal);
+    STDMETHOD(get_HasOgrFidMapping)(VARIANT_BOOL* pVal);
+    STDMETHOD(OgrFid2ShapeIndex)(long OgrFid, LONG* retVal);
 private:
 
 	// data for point in shapefile test
@@ -308,6 +310,11 @@ private:
 	
 	std::vector<ShapeRecord*> _shapeData;
 	std::vector<long> _shpOffsets;		//(32 bit words)
+
+    // OGR layers can lookup by fixed FID rather than ever-changing ShapeIndex
+    // (Shape indices change when removing rows, and may change on OGR reload)
+    std::map<long, long> _ogrFid2ShapeIndex;
+    bool _hasOgrFidMapping = false;
 
 	// table is initialized in CreateNew or Open methods
 	// it is is destroyed in Close() method
@@ -485,6 +492,17 @@ public:
 	void MarkUndrawn();
 	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
 	bool GetSorting(vector<long>** indices);
+
+    // OGR data source can map OGR FID to ShapeIndex
+    void HasOgrFidMapping(bool hasMapping) { _hasOgrFidMapping = hasMapping; }
+    void MapOgrFid2ShapeIndex(long ogrFid, long shapeIndex)
+    {
+        _ogrFid2ShapeIndex.insert(std::make_pair(ogrFid, shapeIndex));
+    }
+
+    // give OGR layers the ability to retain visibility flags on reload
+    bool GetVisibilityFlags(map<long, BYTE> &flags);
+    bool SetVisibilityFlags(map<long, BYTE> &flags);
 
 public:	
 	// geoprocessing methods
