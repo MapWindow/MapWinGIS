@@ -36,7 +36,9 @@
 // ******************************************************************
 CMutex selectShapesMutex(FALSE);
 STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, SelectMode SelectMode, VARIANT *Result, VARIANT_BOOL *retval)
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState())    *retval = VARIANT_FALSE;
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    *retval = VARIANT_FALSE;
 
 	selectShapesMutex.Lock();
 	
@@ -58,7 +60,8 @@ STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, Sele
 //		SelectShapesCore()
 // ****************************************************************
 bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult, bool renderedOnly)
-{	double b_minX = extents.left;
+{
+	double b_minX = extents.left;
 	double b_maxX = extents.right;
 	double b_minY = extents.bottom;
 	double b_maxY = extents.top;
@@ -324,7 +327,8 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	{
 		qtreeResult.clear();
 	}
-	return true;
+    // return true if any selected...
+	return (selectResult.size() > 0);
 }
 #pragma endregion
 
@@ -334,7 +338,9 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 /***********************************************************************/
 //  Returns and sets the selection state for a shape.
 STDMETHODIMP CShapefile::get_ShapeSelected(long ShapeIndex, VARIANT_BOOL* pVal)
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
 		*pVal = VARIANT_FALSE;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -346,7 +352,9 @@ STDMETHODIMP CShapefile::get_ShapeSelected(long ShapeIndex, VARIANT_BOOL* pVal)
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_ShapeSelected(long ShapeIndex, VARIANT_BOOL newVal)
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
@@ -361,7 +369,9 @@ STDMETHODIMP CShapefile::put_ShapeSelected(long ShapeIndex, VARIANT_BOOL newVal)
 //		get_NumSelected
 // *************************************************************
 STDMETHODIMP CShapefile::get_NumSelected(long *pVal)
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	long count = 0;
 	for(int i =0; i < (int)_shapeData.size(); i++)
 	{
@@ -376,7 +386,9 @@ STDMETHODIMP CShapefile::get_NumSelected(long *pVal)
 //     SelectAll()
 // *************************************************************
 STDMETHODIMP CShapefile::SelectAll()
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());	
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	for (int i = 0; i < (int)_shapeData.size(); i++) {
 		_shapeData[i]->selected(true);
 	}
@@ -388,7 +400,9 @@ STDMETHODIMP CShapefile::SelectAll()
 //     SelectNone()
 // *************************************************************
 STDMETHODIMP CShapefile::SelectNone()
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	for (int i = 0; i < (int)_shapeData.size(); i++) {
 		_shapeData[i]->selected(false);
 	}
@@ -400,7 +414,9 @@ STDMETHODIMP CShapefile::SelectNone()
 //     InvertSelection()
 // *************************************************************
 STDMETHODIMP CShapefile::InvertSelection()
-{    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	for (int i = 0; i < (int)_shapeData.size(); i++) {
 		_shapeData[i]->selected(!_shapeData[i]->selected());
 	}

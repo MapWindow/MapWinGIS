@@ -262,7 +262,7 @@ bool SelectionHelper::SelectByPoint(IShapefile* sf, Extent& box, bool clearPrevi
     {
         // default behavior for multi-layer selection (via 'Selectable' layers)
         // allow for multiple overlapping shapes in each layer to be selected
-        result = SelectByRectangle(sf, box);
+        result = SelectByRectangle(sf, box, clearPrevious);
     }
     return result;
 }
@@ -270,18 +270,28 @@ bool SelectionHelper::SelectByPoint(IShapefile* sf, Extent& box, bool clearPrevi
 /***********************************************************************/
 /*		SelectByRectangle()
 /***********************************************************************/
-bool SelectionHelper::SelectByRectangle(IShapefile* sf, Extent& box)
+bool SelectionHelper::SelectByRectangle(IShapefile* sf, Extent& box, bool clearPrevious)
 {
     if (!sf) return false;
 
-    sf->SelectNone();   // TODO: make a property to control it
+    if (clearPrevious)
+        sf->SelectNone();
 
     vector<long> results;
     if (SelectShapes(sf, box, SelectMode::INTERSECTION, results))
     {
         for (size_t i = 0; i < results.size(); i++)
         {
-            sf->put_ShapeSelected(results[i], VARIANT_TRUE);
+            // by default, toggle selection to TRUE
+            bool selected = false;
+            // if not clearing previous (ctrl-key is pressed), allow
+            // toggle of current selection rather than just 'select'
+            if (!clearPrevious)
+            {
+                // change the state of the top most shape
+                selected = ShapefileHelper::ShapeSelected(sf, results[i]);
+            }
+            sf->put_ShapeSelected(results[i], (!selected) ? VARIANT_TRUE : VARIANT_FALSE);
         }
         return true;
     }

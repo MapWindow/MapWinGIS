@@ -8,7 +8,7 @@ public:
 	static bool SelectWithShapeBounds(IShapefile* sf, IShape* shp, vector<long>& indices);
 	static int SelectByPolygon(IShapefile* sf, IShape* polygon, int& errorCode);
 	static bool SelectByPoint(IShapefile* sf, Extent& box, bool clearPrevious, bool singleShape = true);
-	static bool SelectByRectangle(IShapefile* sf, Extent& box);
+	static bool SelectByRectangle(IShapefile* sf, Extent& box, bool clearPrevious);
 	static bool SelectSingleShape(IShapefile* sf, Extent& box, long& shapeIndex);
 	static bool SelectSingleShape(IShapefile* sf, Extent& box, SelectMode mode, long& shapeIndex);
 	static bool SelectShapes(IShapefile* sf, Extent& extents, SelectMode SelectMode, std::vector<long>& selectResult);
