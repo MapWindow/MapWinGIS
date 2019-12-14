@@ -726,8 +726,8 @@ namespace MapWinGIS
         /// <remarks>
         /// If the associated OGR Layer has an FID field, an internal mapping is built automatically
         /// and is available for the purpose of resolving a volatile Shape Index from a fixed FID value.
-        /// This is because the Shape Index for a given shape is not guaranteed to be the same as the
-        /// OGR layer is reloaded, particularly in a multi-user database environment.
+        /// This is because the Shape Index for a given shape is not guaranteed to be the same each time
+        /// the OGR layer is reloaded.  This is particularly true in a multi-user database environment.
         /// </remarks>
         /// <returns>True if the internal mapping exists, otherwise false</returns>
         /// \see Shapefile.OgrFid2ShapeIndex
@@ -745,8 +745,8 @@ namespace MapWinGIS
         /// <remarks>
         /// If the associated OGR Layer has an FID field, an internal mapping is built automatically
         /// and is available for the purpose of resolving a volatile Shape Index from a fixed FID value.
-        /// This is because the Shape Index for a given shape is not guaranteed to be the same as the
-        /// OGR layer is reloaded, particularly in a multi-user database environment.
+        /// This is because the Shape Index for a given shape is not guaranteed to be the same each time
+        /// the OGR layer is reloaded.  This is particularly true in a multi-user database environment.
         /// </remarks>
         /// <returns>
         /// The Shape Index that is currently associated with the specified OGR FID value

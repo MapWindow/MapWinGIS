@@ -1435,8 +1435,11 @@ namespace AxMapWinGIS
         /// <returns>
         /// True if successful; False if not an OGR Layer, could not be reloaded, or could not be reprojected (if necessary)
         /// </returns>
-        /// \new520 Starting with version 5.2.0, this function will also attempt to maintain 
-        /// the current set of Hidden and Selected shapes within the associated Shapefile.
+        /// <remarks>
+        /// Starting with version 5.2.0, this function will also attempt to maintain the current 
+        /// set of Hidden and Selected shapes within the associated Shapefile.
+        /// </remarks>
+        /// \new520 Updated in version 5.2.0
         public bool ReloadOgrLayerFromSource(int ogrLayerHandle)
         {
             throw new NotImplementedException();
@@ -3191,7 +3194,14 @@ namespace AxMapWinGIS
         /// - AxMap.CursorMode set to tkCursorMode.cmSelection;
         /// - a layer handle is passed to AxMap.ChooseLayer event handler;
         /// - user changes selection by clicking on shapes or drawing selection box.
-        /// When Shapefile.set_ShapeSelected() property is changed from client code no event is fired.</remarks>
+        /// When Shapefile.set_ShapeSelected() property is changed from client code no event is fired.
+        /// 
+        /// Starting in version 5.2.0, this event is raised when shapes are selected or deselected,
+        /// and is also raised one final time, with layerHandle = -1, indicating that all selection 
+        /// events are complete.  This is particularly useful when multiple layers are 'Selectable', 
+        /// and you want to know when all layers have completed their selection.
+        /// </remarks>
+        /// \new520 Updated in version 5.2.0
         public event _DMapEvents_SelectionChangedEventHandler SelectionChanged;
         void _DMapEvents.SelectionChanged(int layerHandle)
         {
