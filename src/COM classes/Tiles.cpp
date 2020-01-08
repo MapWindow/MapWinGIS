@@ -357,7 +357,7 @@ STDMETHODIMP CTiles::get_ProviderName(BSTR* retVal)
 STDMETHODIMP CTiles::get_GridLinesVisible(VARIANT_BOOL* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    *pVal = _manager.get_GridLinesVisible() ? VARIANT_TRUE : VARIANT_TRUE;
+    *pVal = _manager.get_GridLinesVisible() ? VARIANT_TRUE : VARIANT_FALSE;
     return S_OK;
 }
 
