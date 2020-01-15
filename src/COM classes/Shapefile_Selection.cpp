@@ -187,11 +187,14 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
                 if (GeosHelper::Contains(geosShape, geosPoint))
                 {
                     selectResult.push_back(shapeVal);
+                    GeosHelper::DestroyGeometry(geosShape);
                     continue;
                 }
-                
+                GeosHelper::DestroyGeometry(geosShape);
 			}
-		}		
+		}
+
+        GeosHelper::DestroyGeometry(geosPoint);
 	}
 	//	Rectangle selection
 	else
@@ -270,6 +273,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
                 {
                     selectResult.push_back(shapeVal);
                 }
+                GeosHelper::DestroyGeometry(geos);
     //            if( DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
 				//{
 				//	if (SelectionHelper::PolylineIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
@@ -282,12 +286,13 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 				CComPtr<IShape> shape = nullptr;
 				get_Shape(shapeVal, &shape);
 				// convert shape to GEOS
-                GEOSGeom geos = GeosConverter::ShapeToGeom(shape);
+                GEOSGeom geos = GeosConverter::ShapeToGeom(shape); // need to call GEOSGeom_destroy
                 // see if shape intersects polygon extent
                 if (GeosHelper::Intersects(geosExtent, geos))
                 {
                     selectResult.push_back(shapeVal);
                 }
+                GeosHelper::DestroyGeometry(geos);
 			}
 			else if( shpType2D == SHP_MULTIPOINT && SelectMode == INTERSECTION)
 			{	
@@ -317,6 +322,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 				}
 			}
 		}
+        GeosHelper::DestroyGeometry(geosExtent);
 	}
 
 	if (useSpatialIndexResults)

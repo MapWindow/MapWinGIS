@@ -384,20 +384,7 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 	// -----------------------------------------------
 	//  check through GEOS (common for both modes)
 	// -----------------------------------------------
-	OGRGeometry* oGeom = OgrConverter::ShapeToGeometry(this);
-	if (oGeom == NULL) 
-	{
-		_isValidReason = "Failed to convert to OGR geometry";
-		return S_OK;
-	}
-
-	// added code
-	GEOSGeom hGeosGeom = NULL;	
-	
-	hGeosGeom = GeosHelper::ExportToGeos(oGeom);
-
-	OGRGeometryFactory::destroyGeometry(oGeom);
-
+    GEOSGeom hGeosGeom = GeosConverter::ShapeToGeom(this);
 	if (hGeosGeom == NULL)
 	{
 		_isValidReason = "Failed to convert to GEOS geometry";
