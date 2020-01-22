@@ -31,9 +31,8 @@ CString WmsCustomProvider::MakeTileImageUrl(CPoint &pos, int zoom)
 	s += "?request=GetMap&service=WMS";
 	s += "&layers=" + _layers;
 
-	s += "&";
 	CString temp;
-	temp.Format("&srs=EPSG:%d", get_CustomProjection()->get_Epsg());
+	temp.Format("&crs=EPSG:%d", get_CustomProjection()->get_Epsg());
 	s += temp;
 
 	s += "&bbox=" + GetBoundingBox(pos, zoom);
