@@ -1229,12 +1229,15 @@ BOOL CMapView::ReloadOgrLayerFromSource(long OgrLayerHandle)
 
     // reload OGR layer from source
 	VARIANT_BOOL vb = VARIANT_FALSE;
-	if (layer->IsDynamicOgrLayer()) {
+	if (layer->IsDynamicOgrLayer())
+    {
 		vb = VARIANT_TRUE;
 		RestartBackgroundLoading(OgrLayerHandle);
 	} 
 	else 
+    {
 		ogrLayer->ReloadFromSource(&vb);
+    }
 
     // we can now Release the IOgrLayer reference
     ogrLayer->Release();
@@ -1245,6 +1248,10 @@ BOOL CMapView::ReloadOgrLayerFromSource(long OgrLayerHandle)
         ErrorMessage(tkNO_OGR_DATA_WAS_LOADED);
 		return VARIANT_FALSE;
     }
+
+    // following reload, and prior to reprojection, we need to update extents;
+    // this is particularly to cover transitions to or from 0 shapes in the layer
+    layer->UpdateExtentsFromDatasource();
 
     // do we need to reproject?
     // at this point, success here indicates success of function

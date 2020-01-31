@@ -2904,8 +2904,9 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
         reverseOgrFidMapping.clear();
     }
 
-    // function result will be based on successful projection setting
-    vb = VARIANT_FALSE;
+    // function result will be based on successful projection setting;
+    // BUT if there were no shapes to reproject, consider it a success
+    vb = (numShapes == 0) ? VARIANT_TRUE : VARIANT_FALSE;
     // if at least some rows were reprojected...
     if (*reprojectedCount > 0)
     {
