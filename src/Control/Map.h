@@ -631,6 +631,8 @@ public:
 
 	afx_msg void SetRecenterMapOnZoom(VARIANT_BOOL nNewValue);
 	afx_msg VARIANT_BOOL GetRecenterMapOnZoom();
+    afx_msg void SetShowCoordinatesBackground(VARIANT_BOOL nNewValue);
+    afx_msg VARIANT_BOOL GetShowCoordinatesBackground();
 #pragma endregion
 
 	//}}AFX_DISPATCH
@@ -832,6 +834,7 @@ public:
 	BOOL _canUseImageGrouping;
 	BOOL _useAlternatePanCursor;		// use traditional Hand cursor for panning rather than NSEW cursor
 	BOOL _recenterMapOnZoom;			// recenter the map at the clicked zoom point
+    BOOL _showCoordinatesBackground;    // draw white background behind coordinate display
 	tkCustomState _panningInertia;			
 	BOOL _reuseTileBuffer;			
 	tkCustomState _zoomAnimation;			

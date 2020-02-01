@@ -248,6 +248,7 @@ ALIASES                = "new48=\xrefitem newpage48 \"New API 4.8\" \"New API 4.
                          "removed493=\xrefitem removed493 \"Removed in 4.9.3\" \"Removed in 4.9.3\"" \
                          "new500=\xrefitem newpage500 \"New API 5.0.0\" \"New API 5.0.0\"" \
                          "new510=\xrefitem newpage510 \"New API 5.1.0\" \"New API 5.1.0\""
+                         "new520=\xrefitem newpage520 \"New API 5.2.0\" \"New API 5.2.0\""
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"

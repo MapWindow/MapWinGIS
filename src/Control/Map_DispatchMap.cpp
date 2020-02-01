@@ -295,6 +295,7 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_FUNCTION_ID(CMapView, "RestartBackgroundLoading", dispidRestartBackgroundLoading, RestartBackgroundLoading, VT_EMPTY, VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "StartNewBoundShape", dispidStartNewBoundShape, StartNewBoundShape, VT_BOOL, VTS_R8 VTS_R8)
 	DISP_FUNCTION_ID(CMapView, "StartNewBoundShapeEx", dispidStartNewBoundShapeEx, StartNewBoundShapeEx, VT_BOOL, VTS_I4)
+    DISP_PROPERTY_EX_ID(CMapView, "ShowCoordinatesBackground", dispidShowCoordinatesBackground, GetShowCoordinatesBackground, SetShowCoordinatesBackground, VT_BOOL)
 
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP

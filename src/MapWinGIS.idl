@@ -6840,9 +6840,9 @@ library MapWinGIS
 			[id(212), propget] float Latitude();
 			[id(213), propput] void Longitude(float nNewValue);
 			[id(213), propget] float Longitude();
-			[id(267)] void SetLatitudeLongitude(double latitude, double longitude);
 			[id(218), propput] void KnownExtents(tkKnownExtents nNewValue);
 			[id(218), propget] tkKnownExtents KnownExtents();
+            [id(267)] void SetLatitudeLongitude(double latitude, double longitude);
 #endif
 			
 #define LAYER_API
@@ -7145,6 +7145,8 @@ library MapWinGIS
 			[id(261), propput] void UseAlternatePanCursor(VARIANT_BOOL nNewValue);
 			[id(262), propget] VARIANT_BOOL RecenterMapOnZoom();
 			[id(262), propput] void RecenterMapOnZoom(VARIANT_BOOL nNewValue);
+            [id(268), propget] VARIANT_BOOL ShowCoordinatesBackground();
+            [id(268), propput] void ShowCoordinatesBackground(VARIANT_BOOL nNewValue);
 #endif			
 
 			[id(43)] void Resize(long Width, long Height);

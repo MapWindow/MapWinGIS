@@ -2631,6 +2631,17 @@ namespace AxMapWinGIS
         public tkCoordinatesDisplay ShowCoordinates { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to display a white background behind the coordinates, for better contrast
+        /// </summary>
+        /// \new520 Added in version 5.2.0
+        public bool ShowCoordinatesBackground
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+
+        /// <summary>
         /// Gets or sets a value which indicate whether scalebar will be displayed on the map.
         /// </summary>
         /// \new490 Added in version 4.9.0

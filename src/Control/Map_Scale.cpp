@@ -2009,7 +2009,7 @@ VARIANT_BOOL CMapView::GetGrabProjectionFromData()
 }
 void CMapView::SetGrabProjectionFromData(VARIANT_BOOL value)
 {
-	_grabProjectionFromData = value;
+	_grabProjectionFromData = (value != VARIANT_FALSE);
 }
 
 // ****************************************************************

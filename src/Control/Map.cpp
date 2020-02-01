@@ -361,13 +361,13 @@ void CMapView::SetDefaults()
 	m_backColor = RGB( 255, 255, 255 );
 	m_extentPad = 0.02;
 	_rotateAngle = 0.0f;
-	_canUseImageGrouping = VARIANT_FALSE;
-	_grabProjectionFromData = VARIANT_TRUE;
+	_canUseImageGrouping = FALSE;
+	_grabProjectionFromData = TRUE;
 	_hasHotTracking = false;
 	_showCoordinates = cdmAuto;
 	_zoomBehavior = zbUseTileLevels;
-	_scalebarVisible = VARIANT_TRUE;
-	_zoombarVisible = VARIANT_TRUE;
+	_scalebarVisible = TRUE;
+	_zoombarVisible = TRUE;
 	_multilineLabeling = true;
 	_mapResizeBehavior = rbClassic;
 	_doTrapRMouseDown = TRUE;
@@ -378,8 +378,8 @@ void CMapView::SetDefaults()
 	_disableWaitCursor = false;
 	_lineSeparationFactor = 3;		
 	_useLabelCollision = false;
-	_showRedrawTime = VARIANT_FALSE;
-	_showVersionNumber = VARIANT_FALSE;	
+	_showRedrawTime = FALSE;
+	_showVersionNumber = FALSE;	
 	_scalebarUnits = tkScalebarUnits::GoogleStyle;
 	_zoomBarVerbosity = tkZoomBarVerbosity::zbvFull;
 	_panningInertia = csFalse;
@@ -392,8 +392,9 @@ void CMapView::SetDefaults()
 	_showCoordinatesFormat = afDegrees;
 	_panningExtentsChanged = false;
 	_prevExtentsIndex = 0;
-	_useAlternatePanCursor = VARIANT_FALSE;
-	_recenterMapOnZoom = VARIANT_FALSE;
+	_useAlternatePanCursor = FALSE;
+	_recenterMapOnZoom = FALSE;
+    _showCoordinatesBackground = FALSE;
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:
@@ -677,6 +678,8 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 		PX_Bool(pPX, "UseAlternatePanCursor", _useAlternatePanCursor, FALSE);
 
 		PX_Bool(pPX, "RecenterMapOnZoom", _recenterMapOnZoom, FALSE);
+
+        PX_Bool(pPX, "ShowCoordinatesBackground", _showCoordinatesBackground, FALSE);
 	}
 	catch(...)
 	{
