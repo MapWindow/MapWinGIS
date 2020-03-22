@@ -437,6 +437,8 @@ private:
 	bool AppendToShpFile(FILE* shp, IShapeWrapper* wrapper);
 	void WriteBounds(FILE* shp);
 	bool ReopenFiles(bool writeMode);
+    // read only those geometries requested by the specified array
+    void ReadGeosGeometries(std::set<int> list);
 
 public:
 	// accessing shapes

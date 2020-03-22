@@ -347,6 +347,39 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
     _geosGeometriesRead = true;
 }
 
+// read only those geometries requested by the specified array
+void CShapefile::ReadGeosGeometries(std::set<int> list)
+{
+    if (_geosGeometriesRead)
+    {
+        // pre-clear cache
+        ClearCachedGeometries();
+    }
+
+    const int size = (int)_shapeData.size();
+    for (int i = 0; i < size; i++)
+    {
+        if (list.find(i) == list.end())
+            continue;
+
+        if (_shapeData[i]->geosGeom)
+            CallbackHelper::AssertionFailed("GEOS Geometry during the reading was expected to be empty.");
+
+        IShape* shp = nullptr;
+        this->GetValidatedShape(i, &shp);
+        if (shp)
+        {
+            GEOSGeom geom = GeosConverter::ShapeToGeom(shp);
+            if (geom)
+            {
+                _shapeData[i]->geosGeom = geom;
+            }
+            shp->Release();
+        }
+    }
+    _geosGeometriesRead = true;
+}
+
 #pragma endregion
 
 // ReSharper restore CppUseAuto

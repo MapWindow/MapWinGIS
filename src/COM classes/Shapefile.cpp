@@ -3126,17 +3126,15 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
         std::vector<int> arr;
 
         // generate GEOS geometries only for shapes within qtree extent
+        std::set<int> list;
         for (size_t i = 0; i < shapes.size(); i++)
-            // minimize work by 'select'ing necessary shapes
-            this->put_ShapeSelected(shapes[i], VARIANT_TRUE);
-        // now generate only for 'select'ed shapes
-        this->ReadGeosGeometries(VARIANT_TRUE);
-        // don't leave shapes 'select'ed
-        for (size_t i = 0; i < shapes.size(); i++)
-            this->put_ShapeSelected(shapes[i], VARIANT_FALSE);
+            // add subset if indices to list
+            list.insert(shapes[i]);
+        // now generate only for list of shapes
+        this->ReadGeosGeometries(list);
 
         GEOSGeom geomBase;
-        if (referenceIndex > 0)
+        if (referenceIndex >= 0)
         {
             geomBase = _shapeData[referenceIndex]->geosGeom;
         }
@@ -3149,7 +3147,7 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
         {
             for (size_t i = 0; i < shapes.size(); i++)
             {
-                if (i == referenceIndex)
+                if (shapes[i] == referenceIndex)
                     continue; // it doesn't make sense to compare the shape with itself
 
                 // ReSharper disable once CppLocalVariableMayBeConst
