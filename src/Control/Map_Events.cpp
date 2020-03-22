@@ -990,9 +990,10 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                         // we want to know if at least one layer was selected/deselected
                         bool atLeastOneLayerAffected = false;
                         // iterate all layers
-                        for (layerHandle = 0; layerHandle < GetNumLayers(); layerHandle++)
-                        {
-                            sf.Attach(GetShapefile(layerHandle));
+						for (int layerPosition = 0; layerPosition < GetNumLayers(); layerPosition++)
+						{
+							layerHandle = GetLayerHandle(layerPosition);
+							sf.Attach(GetShapefile(layerHandle));
                             if (sf)
                             {
                                 // is layer selectable?
@@ -1091,9 +1092,10 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                     // we want to know if at least one layer was selected/deselected
                     bool atLeastOneLayerAffected = false;
                     // iterate all layers
-                    for (layerHandle = 0; layerHandle < GetNumLayers(); layerHandle++)
-                    {
-                        sf.Attach(GetShapefile(layerHandle));
+					for (int layerPosition = 0; layerPosition < GetNumLayers(); layerPosition++)
+					{
+						layerHandle = GetLayerHandle(layerPosition);
+						sf.Attach(GetShapefile(layerHandle));
                         if (sf)
                         {
                             // select all selectable

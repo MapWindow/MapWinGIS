@@ -456,8 +456,9 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
         else if (selectingSelectable)
         {
             // iterate all layers
-            for (layerHandle = 0; layerHandle < GetNumLayers(); layerHandle++)
+            for (int layerPosition = 0; layerPosition < GetNumLayers(); layerPosition++)
             {
+				layerHandle = GetLayerHandle(layerPosition);
                 sf.Attach(GetShapefile(layerHandle));
                 if (sf)
                 {
