@@ -21,9 +21,9 @@
 #include "stdafx.h"
 #include "WmsProviderBase.h"
 
-// ******************************************************
-//    GetBoundingBox()
-// ******************************************************
+ // ******************************************************
+ //    GetBoundingBox()
+ // ******************************************************
 CString WmsProviderBase::GetBoundingBox(CPoint &pos, int zoom)
 {
 	PointLatLng pnt1;
@@ -36,12 +36,10 @@ CString WmsProviderBase::GetBoundingBox(CPoint &pos, int zoom)
 
 	CString s;
 	s.Format("%f,%f,%f,%f",
-		MIN(pnt1.Lng, pnt2.Lng),
 		MIN(pnt2.Lat, pnt1.Lat),
-		MAX(pnt2.Lng, pnt1.Lng),
-		MAX(pnt1.Lat, pnt2.Lat));
+		MIN(pnt1.Lng, pnt2.Lng),
+		MAX(pnt1.Lat, pnt2.Lat),
+		MAX(pnt2.Lng, pnt1.Lng));
 
 	return s;
 }
-
-
