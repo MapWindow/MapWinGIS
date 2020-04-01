@@ -452,7 +452,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 			OGRPoint* oPnt = (OGRPoint *) oMPnt->getGeometryRef(i);
 			if (oPnt != NULL)
 			{
-				if (oPnt->getGeometryType() == wkbPoint || oPnt->getGeometryType() == wkbPoint25D)
+				if (oPnt->getGeometryType() == wkbPoint || oPnt->getGeometryType() == wkbPoint25D || oPnt->getGeometryType() == wkbPointZM)
 				{
 					ComHelper::CreatePoint(&pnt);
 					pnt->put_X(oPnt->getX());
@@ -605,7 +605,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 			{
 				oPoly = (OGRPolygon *) oMPoly->getGeometryRef(iGeom);
 				
-				if (oPoly->getGeometryType() == wkbPolygon || oPoly->getGeometryType() == wkbPolygon25D)
+				if (oPoly->getGeometryType() == wkbPolygon || oPoly->getGeometryType() == wkbPolygon25D || oPoly->getGeometryType() == wkbPolygonZM)
 				{					
 					if( oPoly->getExteriorRing() == NULL)		continue;
 					if (oPoly->getExteriorRing()->IsEmpty())	continue;
