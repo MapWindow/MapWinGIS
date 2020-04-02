@@ -162,7 +162,7 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	// --------------------------------------------------------
 	//	 Settings DC/graphics options
 	// --------------------------------------------------------
-	int* qtreeResult;					// results of quad tree selection
+    int* qtreeResult = nullptr;			// results of quad tree selection
 	vector<long>* selectResult = NULL;	// results of spatial index selection
 	int offset;							// position (number) of a shape in the shapefile		
 
@@ -294,7 +294,7 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
             // iterate shapes, set rotation based on field value
             // NOTE that this uses the existing 'rotation' field,
             // and thus takes precedence over options-based rotation
-            for (int i = 0; i < _shapeData->size(); i++)
+            for (long i = 0; i < (long)_shapeData->size(); i++)
             {
                 VARIANT rotation;
                 _shapefile->get_CellValue(idx, i, &rotation);
@@ -543,8 +543,12 @@ cleaning:
 	
 	if(_useQTree) 
 	{
-		delete[] qtreeResult;
-	}
+        // make sure it was allocated
+        if (qtreeResult)
+        {
+	    	delete[] qtreeResult;
+    	}
+    }
 	else
 	{
 		if (_useSpatialIndex && selectResult)
@@ -1008,7 +1012,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					
 				Gdiplus::Rect rect(0, 0, INT(options->bitmapPlus->GetWidth() * options->scaleX), INT(options->bitmapPlus->GetHeight() * options->scaleY));
 
-				if (!drawSelection || m_selectionTransparency <= 255)
+                if (!drawSelection || m_selectionTransparency < 255)
 				{
 					_graphics->DrawImage(options->bitmapPlus, rect, 0, 0, options->bitmapPlus->GetWidth(), options->bitmapPlus->GetHeight(), Gdiplus::UnitPixel, options->imgAttributes);
 				}
