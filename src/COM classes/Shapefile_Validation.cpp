@@ -356,15 +356,10 @@ void CShapefile::ReadGeosGeometries(std::set<int> list)
         ClearCachedGeometries();
     }
 
-    const int size = (int)_shapeData.size();
-    for (int i = 0; i < size; i++)
+    // list is small subset of shapes,
+    // so iterate list instead of shapeData
+    for each (int i in list)
     {
-        if (list.find(i) == list.end())
-            continue;
-
-        if (_shapeData[i]->geosGeom)
-            CallbackHelper::AssertionFailed("GEOS Geometry during the reading was expected to be empty.");
-
         IShape* shp = nullptr;
         this->GetValidatedShape(i, &shp);
         if (shp)
@@ -377,6 +372,7 @@ void CShapefile::ReadGeosGeometries(std::set<int> list)
             shp->Release();
         }
     }
+
     _geosGeometriesRead = true;
 }
 
