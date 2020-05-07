@@ -2459,7 +2459,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
     _expression = A2BSTR(s);
 
     s = CPLGetXMLValue(node, "UseQTree", nullptr);
-    _useQTree = s != "" ? (BOOL)atoi(s.GetString()) : FALSE;
+    put_UseQTree(s != "" ? (BOOL)atoi(s.GetString()) : FALSE);
 
     s = CPLGetXMLValue(node, "CollisionMode", nullptr);
     _collisionMode = s != "" ? (tkCollisionMode)atoi(s.GetString()) : LocalList;
