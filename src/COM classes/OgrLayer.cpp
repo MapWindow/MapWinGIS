@@ -113,13 +113,15 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
     vector<ShapeRecordData*> data = _loader.FetchData();
     if (data.size() == 0) return;
 
+	CStringW fid = OgrHelper::OgrString2Unicode(_layer->GetFIDColumn());
+	bool hasFid = fid.GetLength() > 0;
+	((CShapefile*)_shapefile)->HasOgrFidMapping(hasFid);
+
     // Get the selected OGR FID's to preserve the selection if possible:
     std::vector<int> selectedShapes = *(ShapefileHelper::GetSelectedIndices(_shapefile));
     std::vector<CComVariant> selectedOgrFIDs = *(new vector<CComVariant>());
     if (selectedShapes.size() > 0) 
     {
-        CStringW fid = OgrHelper::OgrString2Unicode(_layer->GetFIDColumn());
-        bool hasFid = fid.GetLength() > 0;
         if (!hasFid) // if we don't have fid, clear
             selectedShapes.clear();
 
@@ -182,6 +184,9 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
                 }
                 if (wasSelected)
                     _shapefile->put_ShapeSelected(count, VARIANT_TRUE);
+
+				if (hasFid)
+					((CShapefile*)_shapefile)->MapOgrFid2ShapeIndex(pVal.lVal, count);
 
                 count++;
             }

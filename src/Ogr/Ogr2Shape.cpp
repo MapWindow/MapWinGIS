@@ -242,8 +242,8 @@ bool Ogr2Shape::ExtendShapefile(OGRLayer* layer, IShapefile* sf, bool loadLabels
         // Insert or replace the shape:
         if (replaceIndex > 0)
             sf->EditUpdateShape(index, shp, &vbretval);
-        else
-            sf->EditInsertShape(shp, &index, &vbretval);
+		else
+			sf->EditInsertShape(shp, &index, &vbretval);
 
         // No longer need this:
         shp->Release();
@@ -254,6 +254,8 @@ bool Ogr2Shape::ExtendShapefile(OGRLayer* layer, IShapefile* sf, bool loadLabels
             fid_var.vt = VT_I4;
             fid_var.lVal = static_cast<long>(poFeature->GetFID());
             sf->EditCellValue(0, index, fid_var, &vbretval);
+			if (replaceIndex <= 0) // update fid map in case of insert
+				((CShapefile*)sf)->MapOgrFid2ShapeIndex(fid_var.lVal, index);
         }
 
         CopyValues(poFields, poFeature, sf, hasFID, index, loadLabels, labelFields);

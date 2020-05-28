@@ -803,6 +803,8 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 		*retval = VARIANT_TRUE;
 	}
 	
+	_ogrFid2ShapeIndex.clear();
+
 	return S_OK;
 }
 #pragma endregion
