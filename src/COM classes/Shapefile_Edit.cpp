@@ -455,13 +455,11 @@ STDMETHODIMP CShapefile::EditUpdateShape(long shapeIndex, IShape* shpNew, VARIAN
 		return S_OK;
 	}
 
-	ShpfileType shpType;
-	shpNew->get_ShapeType2D(&shpType);
-	if (shpType != ShapeUtility::Convert2D(_shpfiletype) && shpType != SHP_NULLSHAPE)
-	{
-		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
-		return S_OK;
-	}
+    if (!IsShapeCompatible(shpNew))
+    {
+        ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
+        return S_OK;
+    }
 
 	ComHelper::SetRef(shpNew, (IDispatch**)&_shapeData[shapeIndex]->shape, false);
 	ReregisterShape(shapeIndex);
@@ -470,6 +468,20 @@ STDMETHODIMP CShapefile::EditUpdateShape(long shapeIndex, IShape* shpNew, VARIAN
 	*retval = VARIANT_TRUE;
 	return S_OK;
 	
+}
+
+// ***********************************************************
+//		IsShapeCompatible()
+// ***********************************************************
+bool CShapefile::IsShapeCompatible(IShape* shape) {
+    ShpfileType shapetype;
+    shape->get_ShapeType(&shapetype);
+
+    // MWGIS-91
+    return _shpfiletype == SHP_NULLSHAPE 
+        || shapetype == SHP_NULLSHAPE 
+        || shapetype == _shpfiletype 
+        || ShapeUtility::Convert2D(shapetype) == ShapeUtility::Convert2D(_shpfiletype);
 }
 
 // ***********************************************************
@@ -567,21 +579,11 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 		return S_OK;
 	}
 			
-	ShpfileType shapetype;
-	Shape->get_ShapeType(&shapetype);
-	
-	// MWGIS-91
-	bool areEqualTypes = shapetype == _shpfiletype;
-	if (!areEqualTypes){
-		areEqualTypes = ShapeUtility::Convert2D(shapetype) == ShapeUtility::Convert2D(_shpfiletype);
-	}
-				
-	// if( shapetype != SHP_NULLSHAPE && shapetype != _shpfiletype)
-	if (shapetype != SHP_NULLSHAPE && !areEqualTypes)
-	{	
-		ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
-		return S_OK;
-	}
+    if (!IsShapeCompatible(Shape))
+    {
+        ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
+        return S_OK;
+    }
 
 	if (_appendMode) {
 		WriteAppendedShape();	

@@ -439,6 +439,7 @@ private:
 	bool ReopenFiles(bool writeMode);
     // read only those geometries requested by the specified array
     void ReadGeosGeometries(std::set<int> list);
+    bool IsShapeCompatible(IShape* shape);
 
 public:
 	// accessing shapes
