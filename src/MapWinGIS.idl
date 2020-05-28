@@ -1472,7 +1472,9 @@ enum tkScalebarUnits
 		[helpstring("Intersects")]	srIntersects = 4,	
 		[helpstring("Overlaps")]	srOverlaps = 5,	
 		[helpstring("Touches")]		srTouches = 6,	
-		[helpstring("Within")]		srWithin = 7,	
+		[helpstring("Within")]		srWithin = 7,
+        [helpstring("Covers")]		srCovers = 8,
+        [helpstring("CoveredBy")]	srCoveredBy = 9,
 	} tkSpatialRelation;
 	
 	typedef
@@ -4303,6 +4305,8 @@ interface IShape : IDispatch{
 	[id(69)] HRESULT FixUp2([in] tkUnitsOfMeasure units, [out, retval] IShape** retVal);
 	[id(70), helpstring("method InterpolatePoint")] HRESULT InterpolatePoint([in] IPoint* startPoint, [in] double distance, [in, defaultvalue(0)] VARIANT_BOOL normalized, [out, retval] IPoint **retVal);
 	[id(71), helpstring("method ProjectDistanceTo")] HRESULT ProjectDistanceTo([in] IShape* referenceShape, [out, retval] double* distance);
+    [id(72), helpstring("method Covers")] HRESULT Covers([in] IShape* Shape, [out, retval] VARIANT_BOOL* retval);
+    [id(73), helpstring("method CoveredBy")] HRESULT CoveredBy([in] IShape* Shape, [out, retval] VARIANT_BOOL* retval);
 };
 
 /****************************  Extents Interface ***********************/

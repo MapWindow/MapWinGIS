@@ -1254,6 +1254,18 @@ STDMETHODIMP CShape::Within(IShape* Shape, VARIANT_BOOL* retval)
 	this->Relates(Shape, srWithin, retval);
 	return S_OK;
 }
+STDMETHODIMP CShape::Covers(IShape* Shape, VARIANT_BOOL* retval)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    this->Relates(Shape, srCovers, retval);
+    return S_OK;
+}
+STDMETHODIMP CShape::CoveredBy(IShape* Shape, VARIANT_BOOL* retval)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    this->Relates(Shape, srCoveredBy, retval);
+    return S_OK;
+}
 
 // *************************************************************
 //		Clip
