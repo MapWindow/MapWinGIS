@@ -1,8 +1,8 @@
 When releasing a new version version numbers need to be updated on several locations:
 MapWinGIS.rc lines: 114, 115, 133, 139  						 [5.0.0.0]
 MapWinGIS.cpp lines: 32, 33             						 [5.0]
-MapWinGIS.idl line: 6682 (helpfile("MapWinGIS.chm"))                                     [5.0]
-                  , 6704 (helpstring("Dispatch interface for Map Control"))              [5.0]
+MapWinGIS.idl line: 6712 (helpfile("MapWinGIS.chm"))                                     [5.0]
+                  , 6734 (helpstring("Dispatch interface for Map Control"))              [5.0]
 MapWinGIS.h lines: 13, 14                                                                [5.0]
 
 If you want to update AxInterop.MapWinGIS.dll and Interop.MapWinGIS.dll

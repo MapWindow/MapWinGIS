@@ -29,7 +29,7 @@ REM FOR %%G IN (gdal_ECW_JP2ECW.dll ogr_PG.dll) DO (
 REM	IF EXIST %_from_dir%\gdal\plugins-optional\%%G (
 REM    xcopy /v /c /r /y %_from_dir%\gdal\plugins-optional\%%G  %_to_dir%gdalplugins\
 REM	)
-REM)
+REM )
 
 REM Copy PROJ4 data:
 xcopy /v /c /r /y %_from_dir%\gdal-data\*.* %_to_dir%gdal-data\
