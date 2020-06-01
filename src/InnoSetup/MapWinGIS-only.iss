@@ -2,12 +2,12 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "5.1.1"
+#define MyAppVersion "5.2.0"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapWindow\MapWinGIS\git\src\InnoSetup"
 #define BinLocation "D:\dev\MapWindow\MapWinGIS\git\src\bin"
-;#define x64BitVersion
+#define x64BitVersion
 ;; #define VsVersion = "2015" 
 #define VsVersion = "2017" 
 
@@ -40,7 +40,7 @@ DefaultGroupName={#MyAppName}
 LicenseFile={#BinLocation}\Licenses\MapWinGISLicense.rtf
 InfoBeforeFile={#SetupLocation}\ReleaseNotes.rtf
 OutputDir={#SetupLocation}
-OutputBaseFilename=MapWinGIS-only-v{#MyAppVersion}-{#CPU}
+OutputBaseFilename=MapWinGIS-only-v{#MyAppVersion}-{#CPU}-VS{#VsVersion}
 SetupIconFile={#SetupLocation}\MapWindow.ico
 Compression=lzma
 SolidCompression=yes

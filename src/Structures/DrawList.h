@@ -9,6 +9,7 @@ struct _DrawPoint
 	double y;
 	long size;
 	OLE_COLOR color;
+	byte alpha = 255;
 };
 
 struct _DrawLine
@@ -18,6 +19,7 @@ struct _DrawLine
 	double y2;
 	long width;
 	OLE_COLOR color;
+	byte alpha = 255;
 };
 
 struct _DrawCircle
@@ -26,6 +28,7 @@ struct _DrawCircle
 	double radius;
 	int width;
 	OLE_COLOR color;
+	byte alpha = 255;
 	bool fill;
 };
 
@@ -48,6 +51,7 @@ struct _DrawPolygon
 	double * ypnts;
 	long numPoints;
 	OLE_COLOR color;
+	byte alpha = 255;
 	bool fill;
 	int width;
 };

@@ -95,7 +95,7 @@ void CMapView::DrawMovingShapes(Gdiplus::Graphics* g, const CRect& rect, bool dy
 		gBuffer->TranslateTransform(offsetX, offsetY);
 		gBuffer->Clear(Gdiplus::Color::Transparent);
 		CCollisionList list;	
-		CShapefileDrawer drawer(gBuffer, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &list, GetCurrentScale(), false);
+		CShapefileDrawer drawer(gBuffer, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &list, GetCurrentScale(), GetCurrentZoom(), false);
 		drawer.Draw(rect, _dragging.Shapefile);
 		// clean up
 		delete gBuffer;
@@ -282,10 +282,23 @@ void CMapView::DrawCoordinates(Gdiplus::Graphics* g)
 				g->MeasureString(s, s.GetLength(), _fontCourier, point, Gdiplus::StringFormat::GenericDefault(), &rect);
 				if (rect.Width + 15 < _viewWidth)		// control must be big enough to host the string
 				{
-					point.X = _viewWidth - rect.Width - 7.0f;
-					point.Y = 7.0f;
-					DrawStringWithShade(g, s, _fontCourier, point, &GetMeasuringBase()->_textBrush, &GetMeasuringBase()->_whiteBrush);
-				}
+                    // position the text
+                    point.X = _viewWidth - rect.Width - 7.0f;
+                    point.Y = 7.0f;
+                    if (_showCoordinatesBackground)
+                    {
+					    // draw a white box behind the coordinates
+					    Gdiplus::Rect r(_viewWidth - rect.Width - 7.0f, 7.0f, rect.Width, rect.Height);
+					    g->FillRectangle(&GetMeasuringBase()->_whiteBrush, r);
+                        // with white background, we don't need shadowed text
+                        g->DrawString(s.GetString(), s.GetLength(), _fontCourier, point, &GetMeasuringBase()->_textBrush);
+				    }
+                    else
+                    {
+                        // default display, shadowed text
+                        DrawStringWithShade(g, s, _fontCourier, point, &GetMeasuringBase()->_textBrush, &GetMeasuringBase()->_whiteBrush);
+                    }
+                }
 			}
 		}
 	}

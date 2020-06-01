@@ -131,9 +131,24 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Gets or sets the interval between markers in pixels.
+        /// Gets or sets the interval between markers.
         /// </summary>
+        /// <remarks>
+        /// This is either in pixels or as a relative fraction
+        /// of the segment length as determined by the 
+        /// MarkerIntervalIsRelative flag
+        /// </remarks>
         public float MarkerInterval
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets if the interval between the markers is
+        /// expressed as a relative fraction of the segment length
+        /// </summary>
+        public bool MarkerIntervalIsRelative
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -143,8 +158,32 @@ namespace MapWinGIS
         /// Gets or sets the offset for the marker. 
         /// </summary>
         /// <remarks>The first marker will be positioned with offset from 
-        /// the beginning of polyline by this value.</remarks>
+        /// the beginning of polyline by this value.
+        /// This is either in pixels or as a relative fraction
+        /// of the segment length as determined by the 
+        /// MarkerIntervalIsRelative flag
+        /// </remarks>
         public float MarkerOffset
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets if the offset for the marker is expressed as a 
+        /// relative fraction of the segment length
+        /// </summary>
+        public bool MarkerOffsetIsRelative
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// If enabled, will not offset the markers to make them fit within 
+        /// the bounds of the line.
+        /// </summary>
+        public bool MarkerAllowOVerflow
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }

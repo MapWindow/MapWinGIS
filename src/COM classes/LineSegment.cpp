@@ -161,6 +161,38 @@ STDMETHODIMP CLineSegment::put_MarkerInterval(float newVal)
 }
 
 // *************************************************************
+//		get_MarkerIntervalIsRelative()
+// *************************************************************
+STDMETHODIMP CLineSegment::get_MarkerIntervalIsRelative(VARIANT_BOOL* retVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        * retVal = _markerIntervalIsRelative;
+    return S_OK;
+}
+STDMETHODIMP CLineSegment::put_MarkerIntervalIsRelative(VARIANT_BOOL newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        _markerIntervalIsRelative = newVal;
+    return S_OK;
+}
+
+// *************************************************************
+//		get_MarkerAllowOverflow()
+// *************************************************************
+STDMETHODIMP CLineSegment::get_MarkerAllowOverflow(VARIANT_BOOL* retVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        * retVal = _markerAllowOverflow;
+    return S_OK;
+}
+STDMETHODIMP CLineSegment::put_MarkerAllowOverflow(VARIANT_BOOL newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        _markerAllowOverflow = newVal;
+    return S_OK;
+}
+
+// *************************************************************
 //		get_MarkerOrientation()
 // *************************************************************
 STDMETHODIMP CLineSegment::get_MarkerOrientation(tkLineLabelOrientation* retVal)
@@ -209,6 +241,22 @@ STDMETHODIMP CLineSegment::put_MarkerOffset(float newVal)
 }
 
 // *************************************************************
+//		get_MarkerOffsetIsRelative()
+// *************************************************************
+STDMETHODIMP CLineSegment::get_MarkerOffsetIsRelative(VARIANT_BOOL* retVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        * retVal = _markerOffsetIsRelative;
+    return S_OK;
+}
+STDMETHODIMP CLineSegment::put_MarkerOffsetIsRelative(VARIANT_BOOL newVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+        _markerOffsetIsRelative = newVal;
+    return S_OK;
+}
+
+// *************************************************************
 //		Draw()
 // *************************************************************
 STDMETHODIMP CLineSegment::Draw (int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
@@ -252,67 +300,12 @@ VARIANT_BOOL CLineSegment::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 	Gdiplus::Graphics g(&bmp);
 	g.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 
-	float xStart = 0.0f, yStart = 0.0f;
-
-	Gdiplus::PointF points[2];
-	points[0].X = 0.0f;
-	points[0].Y = (float)clipHeight/2.0f;
-	points[1].X = (float)clipWidth;
-	points[1].Y = (float)clipHeight/2.0f;
-
-	Gdiplus::GraphicsPath path;
-	path.AddLines(&(points[0]), 2);
-
 	Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor, backAlpha);  
 	Gdiplus::SolidBrush brushBackground(clr);
 	g.Clear(clr);
 
-	if(_lineWidth != 0) 
-	{
-		if (_lineType == lltSimple)
-		{
-			Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_lineColor), _lineWidth);
-			switch (_lineStyle)
-			{
-				case dsSolid:		pen->SetDashStyle(Gdiplus::DashStyleSolid);		break;
-				case dsDash:		pen->SetDashStyle(Gdiplus::DashStyleDash);		break;
-				case dsDot:			pen->SetDashStyle(Gdiplus::DashStyleDot);		break;
-				case dsDashDotDot:	pen->SetDashStyle(Gdiplus::DashStyleDashDotDot);break;
-				case dsDashDot:		pen->SetDashStyle(Gdiplus::DashStyleDashDot);	break;
-				default:			pen->SetDashStyle(Gdiplus::DashStyleSolid);
-			}
-			
-			g.DrawLines(pen, points, 2);
-			delete pen;
-		}
-		else
-		{
-			int numPoints = 0;
-			float* points = get_SimplePointShape(_marker, _markerSize, &numPoints);
-			float offset = _markerOffset + x;
-
-			if (numPoints > 0)
-			{
-				Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(_lineColor));
-				Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_markerOutlineColor));
-				pen->SetAlignment(Gdiplus::PenAlignmentInset);
-
-				g.TranslateTransform(offset, clipHeight/2.0f);
-				while(offset < clipWidth)
-				{
-					g.FillPolygon(brush, (Gdiplus::PointF*)points, numPoints);
-					g.DrawPolygon(pen, (Gdiplus::PointF*)points, numPoints);
-					offset += _markerInterval;
-					g.TranslateTransform(_markerInterval, 0.0f);
-				}
-				g.ResetTransform();
-				delete[] points;
-				delete brush;
-				delete pen;
-			}
-		}
-	}
-
+    VARIANT_BOOL vb;
+    Draw(g, (BYTE) 255, clipWidth, clipHeight, (int) x, (int) y, &vb);
 
 	Gdiplus::Graphics gResult(dc->GetSafeHdc());
 	gResult.DrawImage(&bmp, x, y);
@@ -325,62 +318,84 @@ VARIANT_BOOL CLineSegment::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 // ***********************************************************
 STDMETHODIMP CLineSegment::Draw(Gdiplus::Graphics& g, BYTE transparency, int ImageWidth, int ImageHeight, int xOrigin, int yOrigin, VARIANT_BOOL* retVal)
 {
-	float xStart = 0.0f, yStart = 0.0f;
+    if (_lineType == lltSimple)
+        DrawSimpleSegment(g, ImageWidth, ImageHeight, transparency);
+    else
+        DrawMarkerSegment(g, ImageWidth, ImageHeight, transparency);
 
-	Gdiplus::PointF points[2];
-	points[0].X = 0.0f;// + xOrigin;
-	points[0].Y = (float)ImageHeight/2.0f;// + yOrigin;
-	points[1].X = (float)ImageWidth;// + xOrigin;
-	points[1].Y = (float)ImageHeight/2.0f;// + yOrigin;
-
-	Gdiplus::GraphicsPath path;
-	path.AddLines(&(points[0]), 2);
-
-	if(_lineWidth != 0) 
-	{
-		if (_lineType == lltSimple)
-		{
-			Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_lineColor, transparency), _lineWidth);
-			switch (_lineStyle)
-			{
-				case dsSolid:		pen->SetDashStyle(Gdiplus::DashStyleSolid);		break;
-				case dsDash:		pen->SetDashStyle(Gdiplus::DashStyleDash);		break;
-				case dsDot:			pen->SetDashStyle(Gdiplus::DashStyleDot);		break;
-				case dsDashDotDot:	pen->SetDashStyle(Gdiplus::DashStyleDashDotDot);break;
-				case dsDashDot:		pen->SetDashStyle(Gdiplus::DashStyleDashDot);	break;
-				default:			pen->SetDashStyle(Gdiplus::DashStyleSolid);
-			}
-			
-			g.DrawLines(pen, points, 2);
-			delete pen;
-		}
-		else
-		{
-			int numPoints = 0;
-			float* points = get_SimplePointShape(_marker, _markerSize, &numPoints);
-			float offset = _markerOffset;
-
-			if (numPoints > 0)
-			{
-				Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(_lineColor, transparency));
-				Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_markerOutlineColor));
-				pen->SetAlignment(Gdiplus::PenAlignmentInset);
-
-				g.TranslateTransform(offset, ImageHeight/2.0f);
-				while(offset < ImageWidth)
-				{
-					g.FillPolygon(brush, (Gdiplus::PointF*)points, numPoints);
-					g.DrawPolygon(pen, (Gdiplus::PointF*)points, numPoints);
-					offset += _markerInterval;
-					g.TranslateTransform(_markerInterval, 0.0f);
-				}
-				g.ResetTransform();
-				delete[] points;
-				delete brush;
-				delete pen;
-			}
-		}
-	}
 	*retVal = VARIANT_TRUE;
 	return S_OK;
+}
+
+void CLineSegment::DrawSimpleSegment(Gdiplus::Graphics& g, int ImageWidth, int ImageHeight, const BYTE& transparency)
+{
+    if (_lineWidth <= 0)
+        return;       
+
+    Gdiplus::PointF points[2];
+    points[0].X = 0.0f;
+    points[0].Y = (float)ImageHeight / 2.0f;
+    points[1].X = (float)ImageWidth;
+    points[1].Y = (float)ImageHeight / 2.0f;
+
+    Gdiplus::GraphicsPath path;
+    path.AddLines(&(points[0]), 2);
+
+    Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_lineColor, transparency), _lineWidth);
+    switch (_lineStyle)
+    {
+    case dsSolid:		pen->SetDashStyle(Gdiplus::DashStyleSolid);		break;
+    case dsDash:		pen->SetDashStyle(Gdiplus::DashStyleDash);		break;
+    case dsDot:			pen->SetDashStyle(Gdiplus::DashStyleDot);		break;
+    case dsDashDotDot:	pen->SetDashStyle(Gdiplus::DashStyleDashDotDot); break;
+    case dsDashDot:		pen->SetDashStyle(Gdiplus::DashStyleDashDot);	break;
+    default:			pen->SetDashStyle(Gdiplus::DashStyleSolid);
+    }
+
+    g.DrawLines(pen, points, 2);
+    delete pen;
+}
+
+void CLineSegment::DrawMarkerSegment(Gdiplus::Graphics& g, int ImageWidth, int ImageHeight, const BYTE& transparency)
+{
+    int numPoints = 0;
+    float* points = get_SimplePointShape(_marker, _markerSize, &numPoints);
+
+    if (numPoints <= 0)
+        return;
+
+    double availableWidth = ImageWidth - (_markerAllowOverflow ? 0 : _markerSize);
+    float offset = _markerOffset * (_markerOffsetIsRelative ? (float)availableWidth : 1.0);
+
+    float interval = _markerInterval * (_markerIntervalIsRelative ? (float)availableWidth : 1.0);;
+    const int count = (interval == 0) ? 1 : (int)((availableWidth - offset) / interval + 1.0 + FLT_EPSILON);
+
+    if (count == 0)
+        return;
+
+    if (!_markerAllowOverflow)
+        offset += _markerSize * 0.5;
+
+    Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(_lineColor, transparency));
+    Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_markerOutlineColor, transparency));
+    pen->SetAlignment(Gdiplus::PenAlignmentInset);
+
+    g.TranslateTransform(offset, ImageHeight * 0.5f);
+    for (int i = 0; i < count; i++)
+    {
+        if (_markerFlipFirst && i == 0)
+            g.RotateTransform(180);
+        g.FillPolygon(brush, (Gdiplus::PointF*)points, numPoints);
+        g.DrawPolygon(pen, (Gdiplus::PointF*)points, numPoints);
+        // If interval is 0, draw once and stop.
+        if (_markerInterval == 0)
+            break;
+        if (_markerFlipFirst && i == 0)
+            g.RotateTransform(180);
+        g.TranslateTransform(interval, 0);
+    }
+    g.ResetTransform();
+    delete[] points;
+    delete brush;
+    delete pen;
 }

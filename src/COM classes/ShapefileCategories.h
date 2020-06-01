@@ -44,6 +44,7 @@ public:
 		_shapefile = NULL;
 		_key = SysAllocString(L"");
 		_caption = SysAllocString(L"");
+        _visExpression = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_classificationField = -1;
@@ -119,6 +120,9 @@ public:
 	STDMETHOD(get_Caption)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Caption)(/*[in]*/ BSTR newVal);
 
+    STDMETHOD(get_VisibilityExpression)(BSTR* retval);
+    STDMETHOD(put_VisibilityExpression)(BSTR newVal);
+
 	STDMETHOD(MoveUp)(long Index, VARIANT_BOOL* retval);
 	STDMETHOD(MoveDown)(long Index, VARIANT_BOOL* retval);
 	STDMETHOD(Serialize)(BSTR* retVal);
@@ -138,6 +142,9 @@ private:
 	BSTR _key;
 	BSTR _caption;
 
+    // visibility expression
+    BSTR _visExpression;
+
 	long _lastErrorCode;
 	ICallback * _globalCallback;
 	IShapefile* _shapefile;		// parent shapefile
@@ -150,6 +157,7 @@ private:
 private:
 	void ErrorMessage(long ErrorCode);
 	void ApplyExpressionCore(long CategoryIndex);
+    void CalculateRotations(CComPtr<IShapeDrawingOptions>& options, CComPtr<ITable>& tbl, std::vector<double>& rotations);
 	bool get_AreaValues(std::vector<double>* values);
 	bool get_LengthValues(std::vector<double>* values);
 	

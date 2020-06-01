@@ -91,7 +91,7 @@ public:
 	void GetTileMatrixSizeXY(int zoom, CSize &ret);
 	void getTileRectXY(Extent extentsWgs84, int zoom, CRect &rect);
 
-	RectLatLng CalculateGeogBounds(CPoint pnt, int zoom);
+	virtual RectLatLng CalculateGeogBounds(CPoint pnt, int zoom);
 
 	void Clip(CPoint& tilePnt, int zoom);
 

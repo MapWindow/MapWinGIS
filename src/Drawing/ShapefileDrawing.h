@@ -35,7 +35,7 @@
 class CShapefileDrawer
 {
 public:
-	CShapefileDrawer(Gdiplus::Graphics* graphics, Extent* extents, double dx, double dy, CCollisionList* collisionList, double scale, bool forceGdiplus = false)
+	CShapefileDrawer(Gdiplus::Graphics* graphics, Extent* extents, double dx, double dy, CCollisionList* collisionList, double scale, int currentZoom, bool forceGdiplus = false)
 	{
 		m_hdc = NULL;
 		_dc = NULL;			// should be obtained from Graphics and released after the usage
@@ -69,6 +69,7 @@ public:
 		_bmpPixel = new Gdiplus::Bitmap(1, 1);
 
 		_scale = scale;
+        _currentZoom = currentZoom;
 		_shapeCount = 0;
 	};
 
@@ -82,6 +83,7 @@ public:
 
 protected:
 	double _scale;
+    int _currentZoom;
 	Gdiplus::Graphics* _graphics;
 	Gdiplus::Bitmap* _bmpPixel;
 	

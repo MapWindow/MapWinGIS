@@ -147,6 +147,8 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("AfterLayers", eventidAfterLayers, FireAfterLayers, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
     EVENT_CUSTOM_ID("LayerReprojectedIncomplete", eventidLayerReprojectedIncomplete, FireLayerReprojectedIncomplete, VTS_I4 VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("BeforeVertexDigitized", eventidBeforeVertexDigitized, FireBeforeVertexDigitized, VTS_PR8 VTS_PR8)
+    EVENT_CUSTOM_ID("SnapPointRequested", eventidSnapPointRequested, FireSnapPointRequested, VTS_R8, VTS_R8, VTS_PR8 VTS_PR8, VTS_PI4, VTS_PI4)
+    EVENT_CUSTOM_ID("SnapPointFound", eventidSnapPointFound, FireSnapPointFound, VTS_R8, VTS_R8, VTS_PR8 VTS_PR8)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
 	
@@ -177,6 +179,9 @@ CMapView::CMapView()
 	_moveBitmap(NULL),
 	_volatileBitmap(NULL)
 {
+    // GDI Plus Startup
+    GdiplusStartup();
+
 	Startup();
 	SetDefaults();
 }
@@ -195,6 +200,10 @@ CMapView::~CMapView()
 	ReleaseTempObjects();
 	
 	this->Shutdown();
+
+    // GDI Plus Shutdown
+    TileCacheManager::CloseAll();
+    GdiplusShutdown();
 }
 
 // **********************************************************************
@@ -354,13 +363,13 @@ void CMapView::SetDefaults()
 	m_backColor = RGB( 255, 255, 255 );
 	m_extentPad = 0.02;
 	_rotateAngle = 0.0f;
-	_canUseImageGrouping = VARIANT_FALSE;
-	_grabProjectionFromData = VARIANT_TRUE;
+	_canUseImageGrouping = FALSE;
+	_grabProjectionFromData = TRUE;
 	_hasHotTracking = false;
 	_showCoordinates = cdmAuto;
 	_zoomBehavior = zbUseTileLevels;
-	_scalebarVisible = VARIANT_TRUE;
-	_zoombarVisible = VARIANT_TRUE;
+	_scalebarVisible = TRUE;
+	_zoombarVisible = TRUE;
 	_multilineLabeling = true;
 	_mapResizeBehavior = rbClassic;
 	_doTrapRMouseDown = TRUE;
@@ -371,8 +380,8 @@ void CMapView::SetDefaults()
 	_disableWaitCursor = false;
 	_lineSeparationFactor = 3;		
 	_useLabelCollision = false;
-	_showRedrawTime = VARIANT_FALSE;
-	_showVersionNumber = VARIANT_FALSE;	
+	_showRedrawTime = FALSE;
+	_showVersionNumber = FALSE;	
 	_scalebarUnits = tkScalebarUnits::GoogleStyle;
 	_zoomBarVerbosity = tkZoomBarVerbosity::zbvFull;
 	_panningInertia = csFalse;
@@ -385,8 +394,9 @@ void CMapView::SetDefaults()
 	_showCoordinatesFormat = afDegrees;
 	_panningExtentsChanged = false;
 	_prevExtentsIndex = 0;
-	_useAlternatePanCursor = VARIANT_FALSE;
-	_recenterMapOnZoom = VARIANT_FALSE;
+	_useAlternatePanCursor = FALSE;
+	_recenterMapOnZoom = FALSE;
+    _showCoordinatesBackground = FALSE;
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:
@@ -670,6 +680,8 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 		PX_Bool(pPX, "UseAlternatePanCursor", _useAlternatePanCursor, FALSE);
 
 		PX_Bool(pPX, "RecenterMapOnZoom", _recenterMapOnZoom, FALSE);
+
+        PX_Bool(pPX, "ShowCoordinatesBackground", _showCoordinatesBackground, FALSE);
 	}
 	catch(...)
 	{
@@ -736,6 +748,15 @@ So, I decided on "gdiplus registration per control" strategy:
 // GdiPlus::Bitmaps. It's desirable to keep it open even when the last CMapView contol
 // is destructed. Solution described at http://mikevdm.com/BlogEntry/Key/GdiplusShutdown-Hangs-Mysteriously
 // was implemented. Hopefully it will work.
+//
+// FOLLOW-UP: Having startup/shutdown being called in InitInstance/ExitInstance was not 
+// working properly from all development environments, and has been moved back to the CMapView
+// constructor/destructor.  The above-mentioned Tile cache issue is being handled by calling 
+// TileCacheManager::CloseAll() just prior to calling GdiplusShutdown.  This better follows
+// Microsoft's recommendations, and allows for transparent initialization whether or not the 
+// calling environment does it's own statrup and shutdown.  If any individual classes end up 
+// requiring GDI initialization outside of the map initialization, these can be handled on a 
+// case-by-case basis. (jf, 11/27/2019, https://mapwindow.atlassian.net/browse/MWGIS-205)
 
 ULONG_PTR CMapView::ms_gdiplusToken=NULL;
 ULONG_PTR CMapView::ms_gdiplusBGThreadToken=NULL;

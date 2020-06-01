@@ -7,20 +7,14 @@
 // ************************************************************
 //		Start
 // ************************************************************
-void Digitizer::StartNewBoundShape(CShapeEditor* editor, IShapefile* sf, long layerHandle)
+void Digitizer::StartNewBoundShape(CShapeEditor* editor, ShpfileType shpType, IShapeDrawingOptions* options, long layerHandle)
 {
-	if (!editor || !sf || layerHandle == -1) return;
-
-	ShpfileType shpType;
-	sf->get_ShapefileType(&shpType);
+	if (!editor || layerHandle == -1) return;
 
 	editor->Clear();
 	editor->put_ShapeType(shpType);
 	editor->put_LayerHandle(layerHandle);
 	editor->put_EditorState(esDigitize);
-
-	CComPtr<IShapeDrawingOptions> options = NULL;
-	sf->get_DefaultDrawingOptions(&options);
 	editor->CopyOptionsFrom(options);
 	return;
 }

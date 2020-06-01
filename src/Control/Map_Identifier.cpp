@@ -29,82 +29,141 @@ VARIANT_BOOL CMapView::FindSnapPointCore(double xScreen, double yScreen, double*
 // ************************************************************
 VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound)
 {
-	double maxDist = GetProjectedTolerance(xScreen, yScreen, tolerance);
-	double x, y;
-	this->PixelToProjection(xScreen, yScreen, x, y);
+    // Get the projected coordinates of the screen coordinates:
+    double x, y;
+    this->PixelToProjection(xScreen, yScreen, x, y);
 
-	long shapeIndex;
-	long pointIndex;
-	VARIANT_BOOL vb;
-	double distance;
+    // Initialize max distance variables
+    double maxDist = GetProjectedTolerance(xScreen, yScreen, tolerance);
 
-	double minDist = DBL_MAX;
+    // Outcome of this method
+    VARIANT_BOOL result = VARIANT_FALSE;
 
-	bool digitizing = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode);
-	tkLayerSelection behavior;
-	_shapeEditor->get_SnapBehavior(&behavior);
-	tkSnapMode mode;
-	_shapeEditor->get_SnapMode(&mode);
-	long currentHandle = -1;
-	bool currentLayerOnly = behavior == lsActiveLayer && digitizing;
-	if (currentLayerOnly)
-		_shapeEditor->get_LayerHandle(&currentHandle);
+    // Initialize temp variables
+    double minDistance = DBL_MAX;
+    double xF, yF;
 
-	bool result = false;
-	for (long i = 0; i < this->GetNumLayers(); i++)
-	{
-		long layerHandle = this->GetLayerHandle(i);
-		if (currentLayerOnly && layerHandle != currentHandle)
-			continue;
+    // Fire the snap point requested event
+    // this allows users to override the snapping behaviour
+    tkMwBoolean isFinal = blnFalse, isFound = blnFalse;
+    FireSnapPointRequested(x, y, &xF, &yF, &isFound, &isFinal);
 
-		Layer* l = GetLayer(layerHandle);
-		if (!l || !l->wasRendered) continue;
+    if (isFound) {
+        
+        if (isFinal) { // Trust the event consumer knows what (s)he's doing...
+            *xFound = xF;
+            *yFound = yF;
+            result = VARIANT_TRUE;
+        } else { // Check if the snap point returned by the end-user is valid:
+            double distance = sqrt(pow(x - xF, 2.0) + pow(y - yF, 2.0));
+            if (distance <= maxDist)
+            {
+                minDistance = distance;
+                *xFound = xF;
+                *yFound = yF;
+                result = VARIANT_TRUE;
+            }
+        }
+    }
 
-		CComPtr<IShapefile> sf = NULL;
-		sf.Attach(this->GetShapefile(layerHandle));
-		if (sf)
-		{
-			VARIANT_BOOL snappable;
-			sf->get_Snappable(&snappable);
-			if (snappable)
-			{
-				double xF, yF;
-				bool snapped = false;
-				// Try snapping to a vertex first:
-				if (mode == smVertices || mode == smVerticesAndLines) {
-					sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
-					if (vb && distance < minDist)
-					{
-						IShape* shape = NULL;
-						sf->get_Shape(shapeIndex, &shape);
-						if (shape)
-						{
-							minDist = distance;
-							shape->get_XY(pointIndex, &xF, &yF, &vb);
-							shape->Release();
-							snapped = true;
-						}
-					}
-				}
-				// If not snapped to a vertex, maybe try to snap to a segment:
-				if (!snapped && (mode == smVerticesAndLines || mode == smLines)) {
-					sf->GetClosestSnapPosition(x, y, maxDist, &shapeIndex, &xF, &yF, &distance, &vb);
-					if (vb && distance < minDist)
-					{
-						minDist = distance;
-						snapped = true;
-					}
-				}
+    // Try to find a better snap point if not yet final:
+    if (!isFinal)
+        result = DefaultSnappingAlgorithm(maxDist, minDistance, x, y, xFound, yFound);
 
-				if (snapped) {
-					*xFound = xF;
-					*yFound = yF;
-					result = true;
-				}
-			}
-		}
-	}
+    // Fire the snap point found event
+    // this allows users to modify/process the found snapped point
+    FireSnapPointFound(x, y, xFound, yFound);
+
 	return result;
+}
+
+// ************************************************************
+//		DefaultSnappingAlgorithm
+// ************************************************************
+VARIANT_BOOL CMapView::DefaultSnappingAlgorithm(double maxDist, double minDist, double x, double y, double *xFound, double *yFound)
+{
+    VARIANT_BOOL result = VARIANT_FALSE;
+
+    // Determine which layer(s) to snap to:
+    bool digitizing = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode);
+    tkLayerSelection behavior;
+    _shapeEditor->get_SnapBehavior(&behavior);
+    tkSnapMode mode;
+    _shapeEditor->get_SnapMode(&mode);
+    long currentHandle = -1;
+    bool currentLayerOnly = behavior == lsActiveLayer && digitizing;
+    if (currentLayerOnly)
+        _shapeEditor->get_LayerHandle(&currentHandle);
+
+    // Loop over layers & search snap points
+    for (long i = 0; i < this->GetNumLayers(); i++)
+    {
+        // Get layer handle
+        long layerHandle = this->GetLayerHandle(i);
+        if (currentLayerOnly && layerHandle != currentHandle)
+            continue;
+
+        // Get layer & check if it was rendered
+        Layer* l = GetLayer(layerHandle);
+        if (!l || !l->wasRendered) 
+            continue;
+
+        // Get shapefile
+        CComPtr<IShapefile> sf = NULL;
+        sf.Attach(this->GetShapefile(layerHandle));
+        if (!sf)
+            continue;
+        
+        // Check if shapefile is snappable
+        VARIANT_BOOL snappable;
+        sf->get_Snappable(&snappable);
+        if (!snappable)
+            continue;
+        
+        // stuff we need
+        long shapeIndex;
+        long pointIndex;
+        double distance;
+        VARIANT_BOOL vb;
+
+        // Try snapping to a vertex first:
+        bool snapped = false;   
+        double xF, yF;
+        if (mode == smVertices || mode == smVerticesAndLines) {
+            sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
+            if (vb && distance < minDist)
+            {
+                IShape* shape = NULL;
+                sf->get_Shape(shapeIndex, &shape);
+                if (shape)
+                {
+                    minDist = distance;
+                    shape->get_XY(pointIndex, &xF, &yF, &vb);
+                    shape->Release();
+                    snapped = true;
+                }
+            }
+        }
+
+        // If not snapped to a vertex, maybe try to snap to a segment:
+        if (!snapped && (mode == smVerticesAndLines || mode == smLines)) {
+            sf->GetClosestSnapPosition(x, y, maxDist, &shapeIndex, &xF, &yF, &distance, &vb);
+            if (vb && distance < minDist)
+            {
+                minDist = distance;
+                snapped = true;
+            }
+        }
+
+        // If correctly snapped, set the result
+        if (snapped) {
+            *xFound = xF;
+            *yFound = yF;
+            result = VARIANT_TRUE;
+        }
+    }
+
+    return result;
 }
 
 // ************************************************************

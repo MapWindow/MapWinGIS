@@ -638,7 +638,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			fread(&bz, sizeof(double), 1, _shpfile);
 			fread(&bz, sizeof(double), 1, _shpfile);
 
-			for (int k = 0; k < numPoints - 1; k++)
+			for (int k = 0; k < numPoints; k++)
 			{
 				fread(&z, sizeof(double), 1, _shpfile);
 				pointIndex = k;

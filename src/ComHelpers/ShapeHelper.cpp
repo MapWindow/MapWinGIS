@@ -382,12 +382,12 @@ int ShapeHelper::GetLargestPart(IShape* shp)
 // *************************************************************
 //		AddLabel()
 // *************************************************************
-void ShapeHelper::AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, tkLabelPositioning method, tkLineLabelOrientation orientation)
+void ShapeHelper::AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, double offsetX, double offsetY, tkLabelPositioning method, tkLineLabelOrientation orientation)
 {
 	if (!shp || !labels) return;
 	double x, y, rotation = 0.0;
 	((CShape*)shp)->get_LabelPosition(method, x, y, rotation, orientation);
-	labels->AddLabel(text, x, y, rotation);
+	labels->AddLabel(text, x, y, offsetX, offsetY, rotation);
 }
 
 // *************************************************************

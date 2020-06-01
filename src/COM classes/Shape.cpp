@@ -384,20 +384,7 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 	// -----------------------------------------------
 	//  check through GEOS (common for both modes)
 	// -----------------------------------------------
-	OGRGeometry* oGeom = OgrConverter::ShapeToGeometry(this);
-	if (oGeom == NULL) 
-	{
-		_isValidReason = "Failed to convert to OGR geometry";
-		return S_OK;
-	}
-
-	// added code
-	GEOSGeom hGeosGeom = NULL;	
-	
-	hGeosGeom = GeosHelper::ExportToGeos(oGeom);
-
-	OGRGeometryFactory::destroyGeometry(oGeom);
-
+    GEOSGeom hGeosGeom = GeosConverter::ShapeToGeom(this);
 	if (hGeosGeom == NULL)
 	{
 		_isValidReason = "Failed to convert to GEOS geometry";
@@ -1253,6 +1240,18 @@ STDMETHODIMP CShape::Within(IShape* Shape, VARIANT_BOOL* retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	this->Relates(Shape, srWithin, retval);
 	return S_OK;
+}
+STDMETHODIMP CShape::Covers(IShape* Shape, VARIANT_BOOL* retval)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    this->Relates(Shape, srCovers, retval);
+    return S_OK;
+}
+STDMETHODIMP CShape::CoveredBy(IShape* Shape, VARIANT_BOOL* retval)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+    this->Relates(Shape, srCoveredBy, retval);
+    return S_OK;
 }
 
 // *************************************************************
@@ -2194,6 +2193,7 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 		// first point, last point, point closest to center of mass;
 		this->get_XY(0, &x, &y, &vbretval);
 	}
+
 	return;
 }
 
@@ -2572,7 +2572,7 @@ STDMETHODIMP CShape::ExportToWKT(BSTR * retVal)
 	if (geom != NULL) 
 	{
 		char* s;
-		geom->exportToWkt(&s);
+		geom->exportToWkt(&s, OGRwkbVariant::wkbVariantIso);
 		(*retVal) = A2BSTR(s);
 		OGRGeometryFactory::destroyGeometry(geom);
         // allocated in GDAL; free using CPLFree
@@ -2606,7 +2606,8 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 	{
 		// if there is a geometry collection only the first shape will be taken
 		std::vector<IShape*> shapes;
-		if (OgrConverter::GeometryToShapes(oGeom, &shapes, true))
+		// in case geometry is both measured and 3D, let 3D govern
+		if (OgrConverter::GeometryToShapes(oGeom, &shapes, oGeom->IsMeasured() && !oGeom->Is3D()))
 		{
 			if (shapes.size() > 0 && shapes[0])
 			{

@@ -2403,10 +2403,39 @@
             <param name="isUsingProxy">Whether the datasource is rendered by Image class directly or
             by using an RBG image that was created to serve as proxy (Grid.CreateImageProxy).</param>
         </member>
+        <member name="E:AxMap.FireSnapPointFound">
+          <summary>
+            This event is fired after MapWinGIS has found a snap point. It can be used to process or alter the found snap point.
+            Note: This event will also be fired if the user overrides the default algorithm using the isFinal flag in the SnapPointRequested event.
+          </summary>
+          <param name="pointX">X coordinate of the point to snap</param>
+          <param name="pointY">Y coordinate of the point to snap</param>
+          <param name="snappedX">X coordinate of the snap position - can be changed by consumer of the event</param>
+          <param name="snappedY">Y coordinate of the snap position - can be changed by consumer of the event</param>
+          \new520 Added in version 5.2.0
+        </member>
+        <member name="E:AxMap.SnapPointRequested">
+          <summary>
+            This event is fired whenever MapWinGIS requires a snap point. 
+            It is fired before the default algorithm is executed and can be used to:
+             - provide a soft suggestion by not setting the isFinal flag
+             - do a hard override of said default algorithm by setting the isFinal flag.
+          </summary>
+          <param name="pointX">X coordinate of the point to snap</param>
+          <param name="pointY">Y coordinate of the point to snap</param>
+          <param name="snappedX">X coordinate of the snap position - to be set by consumer of the event</param>
+          <param name="snappedY">Y coordinate of the snap position - to be set by consumer of the event</param>
+          <param name="isFound">flag indicating if a snap point was found - to be set by consumer of the event</param>
+          <param name="isFinal">flag indicating if the found snap point is considered final, meaning the default algorithm will not be executed  - to be set by consumer of the event</param>
+          \new520 Added in version 5.2.0
+        </member>
         <member name="E:AxMap.BeforeVertexDigitized">
             <summary>
-            This event is fired after the user digitized a new point and held the ALT button.
-            Can be used to modify the coordinates.
+              This event is fired after the user:
+              - digitized a new point of a new shape
+              - added a vertex to an existing shape
+              - moved a vertex of an existing shape 
+              while holding the ALT button. Can be used to modify the coordinates of the new point.
             </summary>
             <param name="pointX">X coordinate</param>
             <param name="pointY">Y coordinate</param>

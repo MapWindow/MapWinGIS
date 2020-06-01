@@ -171,5 +171,94 @@ namespace MapWinGISTests
                 Debug.WriteLine("Deleting " + f);
             }
         }
+
+        [TestMethod]
+        public void GenerateEmptyWKT()
+        {
+            // MW uses GDAL to generate WKT for shapes.  As of MWGIS-219,
+            // we should be able to generate proper WKT for empty shapes.
+            Shape shp = new Shape();
+            string wkt = string.Empty;
+            // create each of the shape types without adding any points.
+            // verify that the WKT does not come back as an empty string, 
+            // but instead as the proper "EMPTY" WKT text (e.g "POINT EMPTY")
+            shp.Create(ShpfileType.SHP_POINT);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_POINTM);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_POINTZ);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_MULTIPOINT);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_MULTIPOINTM);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_MULTIPOINTZ);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_POLYGON);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_POLYGONM);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_POLYGONZ);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_POLYLINE);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_POLYLINEM);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_POLYLINEZ);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(!string.IsNullOrEmpty(wkt) && wkt.Contains("EMPTY"));
+            shp = null;
+
+            shp = new Shape();
+            shp.Create(ShpfileType.SHP_NULLSHAPE);
+            wkt = shp.ExportToWKT();
+            Assert.IsTrue(string.IsNullOrEmpty(wkt));
+            shp = null;
+
+        }
     }
 }

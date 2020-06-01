@@ -376,10 +376,6 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 			OGRLayer * ds = ((COgrLayer*)ogr)->GetDatasource();
 			ULONG count = ogr->Release();
 
-			CComBSTR expr;
-			ogr->get_LabelExpression(&expr);
-			loader->LabelExpression = OLE2W(expr);
-
 			bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, options->task);
 
             // Fire event for this task:
@@ -433,17 +429,31 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 //*		UpdateShapefile()
 //***********************************************************************
 void Layer::UpdateShapefile()
-{
-    if (!IsDynamicOgrLayer())
+ {
+    if (!this->IsShapefile())
+        return;
+    
+    CComPtr<IShapefile> ishp = NULL;
+    if (!this->QueryShapefile(&ishp))
         return;
 
-    // Get the OGR layer:
-    IOgrLayer* layer = NULL;
-    if (!QueryOgrLayer(&layer))
-        return;
+    // Fetch data loaded so far
+    if (IsDynamicOgrLayer()) {
+        // Get the OGR layer:
+        IOgrLayer* layer = NULL;
+        if (QueryOgrLayer(&layer)) 
+            ((COgrLayer*)layer)->UpdateShapefileFromOGRLoader();
+    }
+         
+    // Refresh categories & labels:
+    CComPtr<IShapefileCategories> cat = NULL;
+    ishp->get_Categories(&cat);
+    cat->ApplyExpressions();
 
-    ((COgrLayer*)layer)->UpdateShapefileFromOGRLoader();
-}
+    CComPtr<ILabels> labels;
+    ishp->get_Labels(&labels);
+    labels->ApplyCategories();
+ }
 
 //****************************************************
 //*		IsEmpty()

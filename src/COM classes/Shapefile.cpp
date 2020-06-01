@@ -211,6 +211,59 @@ void CShapefile::SetValidationInfo(IShapeValidationInfo* info, tkShapeValidation
                       (IDispatch**)&(validationType == svtInput ? _inputValidation : _outputValidation), true);
 }
 
+
+// give OGR layers the ability to retain visibility flags on reload
+bool CShapefile::GetVisibilityFlags(map<long, BYTE> &flags)
+{
+    // can only perform if we have an FID mapping to ShapeID
+    if (!_hasOgrFidMapping)
+        return false;
+
+    // copy visibility flags into provided map, keyed by OGR_FID
+
+    // iterate all OGR Mappings
+    auto iter = _ogrFid2ShapeIndex.begin();
+    while (iter != _ogrFid2ShapeIndex.end())
+    {
+        BYTE visibilityFlags = 0;
+        // get currently-assocaited ShapeID
+        long shapeID = _ogrFid2ShapeIndex[iter->first];
+        // only consider Hidden and Selected values, as others are not intended to be persisted
+        if (_shapeData[shapeID]->hidden()) visibilityFlags |= tkShapeRecordFlags::shpHidden;
+        if (_shapeData[shapeID]->selected()) visibilityFlags |= tkShapeRecordFlags::shpSelected;
+        // set into mapping, mapping OGR_FID to visibility flags
+        flags.insert(std::make_pair(iter->first, visibilityFlags));
+        iter++;
+    }
+    return true;
+}
+bool CShapefile::SetVisibilityFlags(map<long, BYTE> &flags)
+{
+    // can only perform if we have an FID mapping to ShapeID
+    if (!_hasOgrFidMapping)
+        return false;
+
+    // copy the specified visibility flags into the current shape data
+
+    // iterate all OGR Mappings
+    auto iter = _ogrFid2ShapeIndex.begin();
+    while (iter != _ogrFid2ShapeIndex.end())
+    {
+        // does FID still exist (from the previous mapping)?
+        if (flags.find(iter->first) != flags.end())
+        {
+            BYTE visibilityFlags = flags[iter->first];
+            // get currently-assocaited ShapeID
+            long shapeID = _ogrFid2ShapeIndex[iter->first];
+            // only consider Hidden and Selected values, as others are not intended to be persisted
+            _shapeData[shapeID]->hidden((visibilityFlags & tkShapeRecordFlags::shpHidden) ? true : false);
+            _shapeData[shapeID]->selected((visibilityFlags & tkShapeRecordFlags::shpSelected) ? true : false);
+        }
+        iter++;
+    }
+    return true;
+}
+
 #pragma region Properties
 
 // ************************************************************
@@ -2406,7 +2459,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
     _expression = A2BSTR(s);
 
     s = CPLGetXMLValue(node, "UseQTree", nullptr);
-    _useQTree = s != "" ? (BOOL)atoi(s.GetString()) : FALSE;
+    put_UseQTree(s != "" ? (BOOL)atoi(s.GetString()) : FALSE);
 
     s = CPLGetXMLValue(node, "CollisionMode", nullptr);
     _collisionMode = s != "" ? (tkCollisionMode)atoi(s.GetString()) : LocalList;
@@ -2728,6 +2781,21 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
     long numFields, percent = 0;
     this->get_NumFields(&numFields);
 
+    std::map<long, long> reverseOgrFidMapping;
+    // we have to update the OgrFid mapping if not reprojecting in-place
+    if (_hasOgrFidMapping && !reprojectInPlace)
+    {
+        // set flag in new Shapefile
+        ((CShapefile*)(*retVal))->HasOgrFidMapping(true);
+        // one-time set up of reverse mapping for optimized reverse lookup
+        auto iter = _ogrFid2ShapeIndex.begin();
+        while (iter != _ogrFid2ShapeIndex.end())
+        {
+            reverseOgrFidMapping.insert(std::make_pair(iter->second, iter->first));
+            iter++;
+        }
+    }
+
     VARIANT_BOOL vb = VARIANT_FALSE;
     *reprojectedCount = 0;
 
@@ -2794,6 +2862,13 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
                             // set cell value into target at new index
                             (*retVal)->EditCellValue(j, newIndex, var, &vb);
                         }
+
+                        // update OgrFid mapping in new Shapefile
+                        if (_hasOgrFidMapping)
+                        {
+                            // find OgrFid for the current index i, map it to newIndex
+                            ((CShapefile*)(*retVal))->MapOgrFid2ShapeIndex(reverseOgrFidMapping[i], newIndex);
+                        }
                     }
                     // 
                     (*reprojectedCount)++;
@@ -2811,8 +2886,27 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
         transf = nullptr;
     }
 
-    // function result will be based on successful projection setting
-    vb = VARIANT_FALSE;
+    // copy attributes and clean-up
+    if (_hasOgrFidMapping && !reprojectInPlace)
+    {
+        map<long, BYTE> visibilityFlags;
+        // copy visibility flags
+        if (this->GetVisibilityFlags(visibilityFlags))
+        {
+            VARIANT_BOOL vb;
+            // copy 'selectable' attribute
+            this->get_Selectable(&vb);
+            ((CShapefile*)(*retVal))->put_Selectable(vb);
+            // restore visibility flags
+            ((CShapefile*)(*retVal))->SetVisibilityFlags(visibilityFlags);
+        }
+        // clean up reverse-mapping
+        reverseOgrFidMapping.clear();
+    }
+
+    // function result will be based on successful projection setting;
+    // BUT if there were no shapes to reproject, consider it a success
+    vb = (numShapes == 0) ? VARIANT_TRUE : VARIANT_FALSE;
     // if at least some rows were reprojected...
     if (*reprojectedCount > 0)
     {
@@ -3008,13 +3102,6 @@ STDMETHODIMP CShapefile::GetRelatedShapes2(IShape* referenceShape, tkSpatialRela
 void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation,
                                      VARIANT* resultArray, VARIANT_BOOL* retval)
 {
-    if (relation == srDisjoint)
-    {
-        // TODO: implement
-        ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
-        return;
-    }
-
     // rather than generate geometries for all shapes,
     // only generate for those within qtree extent (see below)
     //this->ReadGeosGeometries(VARIANT_FALSE);
@@ -3031,69 +3118,76 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
         std::vector<int> shapes = this->_qtree->GetNodes(query);
         std::vector<int> arr;
 
-        // generate GEOS geometries only for shapes within qtree extent
-        for (size_t i = 0; i < shapes.size(); i++)
-            // minimize work by 'select'ing necessary shapes
-            this->put_ShapeSelected(shapes[i], VARIANT_TRUE);
-        // now generate only for 'select'ed shapes
-        this->ReadGeosGeometries(VARIANT_TRUE);
-        // don't leave shapes 'select'ed
-        for (size_t i = 0; i < shapes.size(); i++)
-            this->put_ShapeSelected(shapes[i], VARIANT_FALSE);
-
-        GEOSGeom geomBase;
-        if (referenceIndex > 0)
+        // were any shapes returned ?
+        if (shapes.size() > 0)
         {
-            geomBase = _shapeData[referenceIndex]->geosGeom;
-        }
-        else
-        {
-            geomBase = GeosConverter::ShapeToGeom(referenceShape);
-        }
-
-        if (geomBase)
-        {
+            // generate GEOS geometries only for shapes within qtree extent
+            std::set<int> list;
             for (size_t i = 0; i < shapes.size(); i++)
-            {
-                if (i == referenceIndex)
-                    continue; // it doesn't make sense to compare the shape with itself
+                    // add subset of indices to local list
+                list.insert(shapes[i]);
+            // now generate only for list of shapes
+            this->ReadGeosGeometries(list);
 
-                // ReSharper disable once CppLocalVariableMayBeConst
-                GEOSGeom geom = _shapeData[shapes[i]]->geosGeom;
-                if (geom != nullptr)
-                {
-                    char res = 0;
-                    switch (relation)
-                    {
-                    case srContains: res = GeosHelper::Contains(geomBase, geom);
-                        break;
-                    case srCrosses: res = GeosHelper::Crosses(geomBase, geom);
-                        break;
-                    case srEquals: res = GeosHelper::Equals(geomBase, geom);
-                        break;
-                    case srIntersects: res = GeosHelper::Intersects(geomBase, geom);
-                        break;
-                    case srOverlaps: res = GeosHelper::Overlaps(geomBase, geom);
-                        break;
-                    case srTouches: res = GeosHelper::Touches(geomBase, geom);
-                        break;
-                    case srWithin: res = GeosHelper::Within(geomBase, geom);
-                        break;
-                    case srDisjoint: break;
-                    default: ;
-                    }
-                    if (res)
-                    {
-                        arr.push_back(shapes[i]);
-                    }
-                }
+            GEOSGeom geomBase;
+            if (referenceIndex >= 0)
+            {
+                geomBase = _shapeData[referenceIndex]->geosGeom;
+            }
+            else
+            {
+                geomBase = GeosConverter::ShapeToGeom(referenceShape);
             }
 
-            if (referenceIndex == -1)
-                GeosHelper::DestroyGeometry(geomBase);
-            // the geometry was created in this function so it must be destroyed
-        }
+            if (geomBase)
+            {
+                for (size_t i = 0; i < shapes.size(); i++)
+                {
+                    if (shapes[i] == referenceIndex)
+                        continue; // it doesn't make sense to compare the shape with itself
 
+                    // ReSharper disable once CppLocalVariableMayBeConst
+                    GEOSGeom geom = _shapeData[shapes[i]]->geosGeom;
+                    if (geom != nullptr)
+                    {
+                        char res = 0;
+                        switch (relation)
+                        {
+                        case srContains: res = GeosHelper::Contains(geomBase, geom);
+                            break;
+                        case srCrosses: res = GeosHelper::Crosses(geomBase, geom);
+                            break;
+                        case srEquals: res = GeosHelper::Equals(geomBase, geom);
+                            break;
+                        case srIntersects: res = GeosHelper::Intersects(geomBase, geom);
+                            break;
+                        case srOverlaps: res = GeosHelper::Overlaps(geomBase, geom);
+                            break;
+                        case srTouches: res = GeosHelper::Touches(geomBase, geom);
+                            break;
+                        case srWithin: res = GeosHelper::Within(geomBase, geom);
+                            break;
+                        case srCovers: res = GeosHelper::Covers(geomBase, geom);
+                            break;
+                        case srCoveredBy: res = GeosHelper::CoveredBy(geomBase, geom);
+                            break;
+                        default:
+                        case srDisjoint: res = GeosHelper::Disjoint(geomBase, geom);
+                            break;
+                        }
+                        if (res)
+                        {
+                            arr.push_back(shapes[i]);
+                        }
+                    }
+                }
+
+                if (referenceIndex == -1)
+                    GeosHelper::DestroyGeometry(geomBase);
+                // the geometry was created in this function so it must be destroyed
+            }
+        }
+        // return result as SafeArray
         *retval = Templates::Vector2SafeArray(&arr, VT_I4, resultArray);
     }
 
@@ -3486,4 +3580,38 @@ bool CShapefile::GetSorting(vector<long>** indices)
     CallbackHelper::ErrorMsg("Failed to sort labels");
 
     return false;
+}
+
+// *************************************************************
+//		HasOgrFidMapping()
+// *************************************************************
+STDMETHODIMP CShapefile::get_HasOgrFidMapping(VARIANT_BOOL* pVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    *pVal = (_hasOgrFidMapping ? VARIANT_TRUE : VARIANT_FALSE);
+
+    return S_OK;
+}
+
+// *****************************************************************
+//		OgrFid2ShapeIndex()
+// *****************************************************************
+STDMETHODIMP CShapefile::OgrFid2ShapeIndex(long OgrFid, LONG* retVal)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+    *retVal = -1;
+
+    // this shapefile has to have an OGR FID mapping, and a mapping for the specified OgrFid
+    if (!_hasOgrFidMapping || _ogrFid2ShapeIndex.find(OgrFid) == _ogrFid2ShapeIndex.end())
+    {
+        ErrorMessage(tkNO_OGR_DATA_WAS_LOADED);
+    }
+    else
+    {
+        // else return the mapping
+        *retVal = _ogrFid2ShapeIndex[OgrFid];
+    }
+    return S_OK;
 }

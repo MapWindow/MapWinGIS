@@ -81,7 +81,7 @@ public:
 	STDMETHOD(put_Visible)(VARIANT_BOOL newVal)				{_label->visible = newVal?true:false;	return S_OK;};		
 	
 	STDMETHOD(get_Rotation)(double* retval)					{*retval = _label->rotation;		return S_OK;};
-	STDMETHOD(put_Rotation)(double newVal)					{_label->rotation = newVal;		return S_OK;};
+	STDMETHOD(put_Rotation)(double newVal)					{_label->rotation = newVal;		    return S_OK;};
 	
 	STDMETHOD(get_Text)(BSTR* retval);						
 	STDMETHOD(put_Text)(BSTR newVal);
@@ -91,11 +91,17 @@ public:
 	
 	STDMETHOD(get_Y)(double* retval)						{*retval = _label->y;				return S_OK;};
 	STDMETHOD(put_Y)(double newVal)							{_label->y = newVal;				return S_OK;};
-	
-	STDMETHOD(get_Category)(long* retval)					{*retval = _label->category;		return S_OK;};
-	STDMETHOD(put_Category)(long newVal)					{_label->category = newVal;		return S_OK;};
 
-	STDMETHOD(get_IsDrawn)(VARIANT_BOOL* retval)			{*retval = _label->isDrawn;		return S_OK;};
+    STDMETHOD(get_OffsetX)(double* retval)                  {*retval = _label->offsetX;     	return S_OK;};
+    STDMETHOD(put_OffsetX)(double newVal)                   {_label->offsetX = newVal;			return S_OK;};
+
+    STDMETHOD(get_OffsetY)(double* retval)                  {*retval = _label->offsetY;			return S_OK;};
+    STDMETHOD(put_OffsetY)(double newVal)                   {_label->offsetY = newVal;			return S_OK;};
+
+	STDMETHOD(get_Category)(long* retval)					{*retval = _label->category;		return S_OK;};
+	STDMETHOD(put_Category)(long newVal)					{_label->category = newVal;		    return S_OK;};
+
+	STDMETHOD(get_IsDrawn)(VARIANT_BOOL* retval)			{*retval = _label->isDrawn;		    return S_OK;};
 
 	STDMETHOD(get_ScreenExtents)(IExtents** retval);
 

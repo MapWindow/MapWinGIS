@@ -337,249 +337,120 @@ void CMapView::DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tk
 //		DrawDrawing()
 // *****************************************************************
 void CMapView::DrawDrawing(Gdiplus::Graphics* graphics, DrawList * dlist)
+{	
+	bool project = (dlist->listType == dlSpatiallyReferencedList);
+
+	for (auto polygon : dlist->m_dpolygons)
+		DrawPolygonOnGraphics(graphics, polygon, project);
+
+	for (auto circle : dlist->m_dcircles)
+		DrawCircleOnGraphics(graphics, circle, project);
+
+	for (auto line : dlist->m_dlines)
+		DrawLineOnGraphics(graphics, line, project);
+
+	for (auto point : dlist->m_dpoints)
+		DrawPointOnGraphics(graphics, point, project);
+}
+
+void CMapView::DrawCircleOnGraphics(Gdiplus::Graphics* graphics, _DrawCircle* circle, bool project)
 {
-	HDC hdc = graphics->GetHDC();
-	CDC* dc = CDC::FromHandle(hdc);
+
+	auto color = Utility::OleColor2GdiPlus(circle->color, circle->alpha);
+	auto radius = circle->radius;
+	auto width = circle->width;
+
+	Gdiplus::REAL pixX = circle->x;
+	Gdiplus::REAL pixY = circle->y;
+	if (project)
+		PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
+	pixX -= radius * 0.5;
+	pixY -= radius * 0.5;
 	
-	CBrush * brush = new CBrush();
-	CPen * pen = new CPen();
 
-	CBrush * oldBrush = NULL;
-	CPen * oldPen = NULL;
-
-	CRect rect;
-
-	double pixX, pixY;
-
-	register int j;
-	
-	if( dlist->listType == dlScreenReferencedList )
+	if (circle->fill)
 	{
-		for(unsigned i = 0; i < dlist->m_dpolygons.size(); i++)
-		{	
-			if( dlist->m_dpolygons[i]->numPoints > 0 )
-			{	
-				CPoint * pnts = new CPoint[dlist->m_dpolygons[i]->numPoints];
-				long endcondition2 = dlist->m_dpolygons[i]->numPoints;
-				for(j=0;j<endcondition2;j++)
-				{
-					//Rob Cairns 10 Jan 06
-					int xpt = Utility::Rint(dlist->m_dpolygons[i]->xpnts[j]);
-					int ypt = Utility::Rint(dlist->m_dpolygons[i]->ypnts[j]);
-					pnts[j] = CPoint(xpt,ypt);
-				}
-				if( dlist->m_dpolygons[i]->fill )
-				{	
-					brush->CreateSolidBrush(dlist->m_dpolygons[i]->color);
-					pen->CreatePen(PS_SOLID,dlist->m_dpolygons[i]->width,dlist->m_dpolygons[i]->color);
-					oldBrush = dc->SelectObject(brush);
-					oldPen = dc->SelectObject(pen);
-					dc->Polygon(pnts,dlist->m_dpolygons[i]->numPoints);
-					dc->SelectObject(oldBrush);
-					dc->SelectObject(oldPen);
-					pen->DeleteObject();
-					brush->DeleteObject();
-				}
-				else
-				{	
-					pen->CreatePen(PS_SOLID,dlist->m_dpolygons[i]->width,dlist->m_dpolygons[i]->color);
-					oldPen = dc->SelectObject(pen);
-					dc->Polyline(pnts,dlist->m_dpolygons[i]->numPoints);
-					dc->SelectObject(oldPen);
-					pen->DeleteObject();
-				}
-				delete [] pnts;
-			}
-		}
-		
-		for(unsigned int i = 0; i < dlist->m_dcircles.size(); i++)
-		{	
-			if( dlist->m_dcircles[i]->fill )
-			{	
-				brush->CreateSolidBrush(dlist->m_dcircles[i]->color);
-				pen->CreatePen(PS_SOLID,dlist->m_dcircles[i]->width,dlist->m_dcircles[i]->color);
-				oldBrush = dc->SelectObject(brush);
-				oldPen = dc->SelectObject(pen);
-				dc->Ellipse((int)(dlist->m_dcircles[i]->x - dlist->m_dcircles[i]->radius),
-							(int)(dlist->m_dcircles[i]->y - dlist->m_dcircles[i]->radius), 
-							(int)(dlist->m_dcircles[i]->x + dlist->m_dcircles[i]->radius), 
-							(int)(dlist->m_dcircles[i]->y + dlist->m_dcircles[i]->radius) );
-				dc->SelectObject(oldBrush);
-				dc->SelectObject(oldPen);
-				pen->DeleteObject();
-				brush->DeleteObject();
-			}
-			else
-			{	
-				pen->CreatePen(PS_SOLID,dlist->m_dcircles[i]->width,dlist->m_dcircles[i]->color);
-				oldPen = dc->SelectObject(pen);
-				dc->MoveTo((int)(dlist->m_dcircles[i]->x+dlist->m_dcircles[i]->radius), (int)dlist->m_dcircles[i]->y);
-				dc->AngleArc((int)(dlist->m_dcircles[i]->x), (int)(dlist->m_dcircles[i]->y), (int)(dlist->m_dcircles[i]->radius),0,360);
-				dc->SelectObject(oldPen);
-				pen->DeleteObject();
-			}
-		}
-		
-		for(unsigned int i = 0 ; i < dlist->m_dlines.size(); i++)
-		{	
-			CPoint *pnts = new CPoint[2];
-			pen->CreatePen(PS_SOLID,dlist->m_dlines[i]->width,dlist->m_dlines[i]->color);
-			oldPen = dc->SelectObject(pen);
-			//Rob Cairns 10 Jan 06
-			int ptX1 = Utility::Rint(dlist->m_dlines[i]->x1);
-			int ptY1 = Utility::Rint(dlist->m_dlines[i]->y1);	
-			int ptX2 = Utility::Rint(dlist->m_dlines[i]->x2);
-			int ptY2 = Utility::Rint(dlist->m_dlines[i]->y2);
-			pnts[0]=CPoint(ptX1,ptY1);
-			pnts[1]=CPoint(ptX2,ptY2);
-			dc->Polyline(pnts,2);
-			dc->SelectObject(oldPen);
-			pen->DeleteObject();
-			delete []pnts;
-		}
-		
-		
-		for(unsigned int i = 0;i < dlist->m_dpoints.size(); i++) 
-		{	if( dlist->m_dpoints[i]->size == 1 )
-			{	//Rob Cairns 10 Jan 06
-				int pxX = Utility::Rint(dlist->m_dpoints[i]->x);
-				int pxY = Utility::Rint(dlist->m_dpoints[i]->y);
-				dc->SetPixelV(CPoint(pxX,pxY),dlist->m_dpoints[i]->color);
-			}	
-			else
-			{	
-				rect = CRect((int)dlist->m_dpoints[i]->x,(int)dlist->m_dpoints[i]->y, (int)dlist->m_dpoints[i]->x, (int)dlist->m_dpoints[i]->y);
-				rect.left -= (long)(dlist->m_dpoints[i]->size * 0.5);
-				rect.top -= (long)(dlist->m_dpoints[i]->size * 0.5);
-				dc->FillSolidRect(rect.left,rect.top,dlist->m_dpoints[i]->size,dlist->m_dpoints[i]->size,dlist->m_dpoints[i]->color);
-			}
-		}
+		Gdiplus::SolidBrush brush(color);
+		graphics->FillEllipse(&brush, pixX, pixY, radius, radius);
 	}
-	else	// if( dlist->listType == dlSpatiallyReferencedList )
+	else
 	{
-		for(unsigned int i = 0; i < dlist->m_dpolygons.size(); i++)
-		{	
-			if( dlist->m_dpolygons[i]->numPoints > 0 )
-			{	
-				CPoint * pnts = new CPoint[dlist->m_dpolygons[i]->numPoints];
-				long endcondition2 = dlist->m_dpolygons[i]->numPoints;
-				for(j=0;j<endcondition2;j++)
-				{	
-					PROJECTION_TO_PIXEL(dlist->m_dpolygons[i]->xpnts[j],dlist->m_dpolygons[i]->ypnts[j],pixX,pixY);
-					//Rob Cairns 10 Jan 06
-					int pxX = Utility::Rint(pixX);
-					int pxY = Utility::Rint(pixY);	
-					pnts[j] = CPoint(pxX,pxY);
-				}
-				
-				if( dlist->m_dpolygons[i]->fill )
-				{	
-					brush->CreateSolidBrush(dlist->m_dpolygons[i]->color);
-					pen->CreatePen(PS_SOLID,dlist->m_dpolygons[i]->width,dlist->m_dpolygons[i]->color);
-					oldBrush = dc->SelectObject(brush);
-					oldPen = dc->SelectObject(pen);
-					dc->Polygon(pnts,dlist->m_dpolygons[i]->numPoints);
-					dc->SelectObject(oldBrush);
-					dc->SelectObject(oldPen);
-					pen->DeleteObject();
-					brush->DeleteObject();
-				}
-				else
-				{	
-					pen->CreatePen(PS_SOLID,dlist->m_dpolygons[i]->width,dlist->m_dpolygons[i]->color);
-					oldPen = dc->SelectObject(pen);
-					dc->Polyline(pnts,dlist->m_dpolygons[i]->numPoints);
-					dc->SelectObject(oldPen);
-					pen->DeleteObject();
-				}
-				delete [] pnts;
-			}
-		}
-		
-		for(unsigned int i = 0; i < dlist->m_dcircles.size(); i++)
-		{	
-			if( dlist->m_dcircles[i]->fill )
-			{	
-				brush->CreateSolidBrush(dlist->m_dcircles[i]->color);
-				pen->CreatePen(PS_SOLID,dlist->m_dcircles[i]->width,dlist->m_dcircles[i]->color);
-				oldBrush = dc->SelectObject(brush);
-				oldPen = dc->SelectObject(pen);
-				PROJECTION_TO_PIXEL(dlist->m_dcircles[i]->x,dlist->m_dcircles[i]->y,pixX,pixY);
-				
-				// lsu 25-apr-2010: we need to draw it in screen coordinates
-				int pxX = Utility::Rint(pixX - dlist->m_dcircles[i]->radius * _pixelPerProjectionX);
-				int pxY = Utility::Rint(pixY - dlist->m_dcircles[i]->radius * _pixelPerProjectionY);
-				int pxX2 = Utility::Rint(pixX + dlist->m_dcircles[i]->radius * _pixelPerProjectionX);
-				int pxY2 = Utility::Rint(pixY + dlist->m_dcircles[i]->radius * _pixelPerProjectionY);
-				
-				dc->Ellipse( pxX, pxY, pxX2, pxY2);
-				dc->SelectObject(oldBrush);
-				dc->SelectObject(oldPen);
-				brush->DeleteObject();
-			}
-			else
-			{	pen->CreatePen(PS_SOLID, dlist->m_dcircles[i]->width,dlist->m_dcircles[i]->color);
-				oldPen = dc->SelectObject(pen);
-				PROJECTION_TO_PIXEL(dlist->m_dcircles[i]->x,dlist->m_dcircles[i]->y,pixX,pixY);
-				//Rob Cairns 10 Jan 06
-				int pxX = Utility::Rint(pixX);
-				int pxY = Utility::Rint(pixY);
-				dc->MoveTo((int)(pxX + dlist->m_dcircles[i]->radius * _pixelPerProjectionX),pxY);
-				dc->AngleArc(pxX, pxY, (int)(dlist->m_dcircles[i]->radius * _pixelPerProjectionX), 0, 360);
-				dc->SelectObject(oldPen);
-			}
-			pen->DeleteObject();
-		}
-		
-		for(unsigned int i=0; i < dlist->m_dlines.size(); i++)
-		{	
-			CPoint *pnts = new CPoint[2];
-			pen->CreatePen(PS_SOLID,dlist->m_dlines[i]->width,dlist->m_dlines[i]->color);
-			oldPen = dc->SelectObject(pen);
-			PROJECTION_TO_PIXEL(dlist->m_dlines[i]->x1,dlist->m_dlines[i]->y1,pixX,pixY);
-			//Rob Cairns 10 Jan 06
-			int pxX = Utility::Rint(pixX);
-			int pxY = Utility::Rint(pixY);
-			pnts[0]=CPoint(pxX,pxY);
-			PROJECTION_TO_PIXEL(dlist->m_dlines[i]->x2,dlist->m_dlines[i]->y2,pixX,pixY);
-			//Rob Cairns 10 Jan 06
-			pxX = Utility::Rint(pixX);
-			pxY = Utility::Rint(pixY);
-			pnts[1]=CPoint(pxX,pxY);
-			dc->Polyline(pnts,2);
-			dc->SelectObject(oldPen);
-			pen->DeleteObject();
-			delete []pnts;
-		}
-		
-		for(unsigned int i=0; i < dlist->m_dpoints.size(); i++)
-		{	
-			if( dlist->m_dpoints[i]->size == 1 )
-			{
-				PROJECTION_TO_PIXEL(dlist->m_dpoints[i]->x,dlist->m_dpoints[i]->y,pixX,pixY);
-				//Rob Cairns 10 Jan 06
-				int pxX = Utility::Rint(pixX);
-				int pxY = Utility::Rint(pixY);
-				dc->SetPixelV(CPoint(pxX,pxY),dlist->m_dpoints[i]->color);
-			}
-			else
-			{
-				PROJECTION_TO_PIXEL(dlist->m_dpoints[i]->x,dlist->m_dpoints[i]->y,pixX,pixY);
-				pixX -= dlist->m_dpoints[i]->size*.5;
-				pixY -= dlist->m_dpoints[i]->size*.5;
-				//Rob Cairns 10 Jan 06
-				int pxX = Utility::Rint(pixX);
-				int pxY = Utility::Rint(pixY);
-				dc->FillSolidRect(pxX,pxY,dlist->m_dpoints[i]->size,dlist->m_dpoints[i]->size,dlist->m_dpoints[i]->color);
-			}
-		}
+		Gdiplus::Pen pen(color, width);
+		graphics->DrawEllipse(&pen, pixX, pixY, radius, radius);
+	}
+}
+
+void CMapView::DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* polygon, bool project)
+{
+	if (polygon->numPoints <= 0)
+		return;
+
+	Gdiplus::Point* pnts = new Gdiplus::Point[polygon->numPoints];
+	long pointCount = polygon->numPoints;
+	auto width = polygon->width;
+	auto color = Utility::OleColor2GdiPlus(polygon->color, polygon->alpha);
+
+	for (int j = 0; j < pointCount; j++)
+	{
+		auto pixX = polygon->xpnts[j];
+		auto pixY = polygon->ypnts[j];
+		if (project)
+			PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
+
+		int xpt = Utility::Rint(pixX);
+		int ypt = Utility::Rint(pixY);
+		pnts[j] = Gdiplus::Point(xpt, ypt);
 	}
 
-	delete brush;
-	delete pen;
+	if (polygon->fill)
+	{	
+		Gdiplus::SolidBrush brush(color);
+		graphics->FillPolygon(&brush, pnts, (INT)pointCount);
+	}
+	else
+	{
+		Gdiplus::Pen pen(color, width);
+		graphics->DrawPolygon(&pen, pnts, (INT)pointCount);
+	}
 
-	graphics->ReleaseHDC(hdc);
-	dc = NULL;
+	delete[] pnts;
+}
+
+void CMapView::DrawLineOnGraphics(Gdiplus::Graphics* graphics, _DrawLine* line, bool project)
+{
+	auto width = line->width;
+	auto color = Utility::OleColor2GdiPlus(line->color, line->alpha);
+
+	Gdiplus::Point* pnts = new Gdiplus::Point[2];
+	auto pixX1 = line->x1;
+	auto pixY1 = line->y1;
+	if (project)
+		PROJECTION_TO_PIXEL_INT(pixX1, pixY1, pixX1, pixY1);
+	auto pixX2 = line->x2;
+	auto pixY2 = line->y2;
+	if (project)
+		PROJECTION_TO_PIXEL_INT(pixX2, pixY2, pixX2, pixY2);
+
+	Gdiplus::Pen pen(color, width);
+	graphics->DrawLine(&pen, Gdiplus::Point(pixX1, pixY1), Gdiplus::Point(pixX2, pixY2));
+
+	delete[]pnts;
+}
+
+void CMapView::DrawPointOnGraphics(Gdiplus::Graphics* graphics, _DrawPoint* point, bool project)
+{
+	auto color = Utility::OleColor2GdiPlus(point->color, point->alpha);
+	auto size = point->size;
+
+	double pixX = point->x;
+	double pixY = point->y;
+	if (project)
+		PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
+	auto x = pixX - size * 0.5;
+	auto y = pixY - size * 0.5;
+
+	Gdiplus::SolidBrush brush(color);
+	graphics->FillRectangle(&brush, x, y, size, size);
 }
 
 #pragma endregion
@@ -654,7 +525,7 @@ LONG CMapView::DrawLabelEx(LONG drawHandle, LPCTSTR text, DOUBLE x, DOUBLE y, DO
 		if (_allDrawLists[drawHandle]->m_labels) 
 		{
 			CComBSTR bstr(text);
-			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, rotation);
+			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, 0, 0, rotation);
 			OnDrawingLayersChanged();
 			return drawHandle;
 		}
@@ -673,7 +544,7 @@ void CMapView::AddDrawingLabel(long drawHandle, LPCTSTR Text, OLE_COLOR Color, d
 	{	
 		if (_allDrawLists[drawHandle]->m_labels) {
 			CComBSTR bstr(Text);
-			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y);
+			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, 0, 0);
 		}
 		OnDrawingLayersChanged();
 	}
@@ -690,7 +561,7 @@ void CMapView::AddDrawingLabelEx(long drawHandle, LPCTSTR Text, OLE_COLOR Color,
 	{	
 		if (_allDrawLists[drawHandle]->m_labels) {
 			CComBSTR bstr(Text);
-			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, Rotation);
+			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, 0, 0, Rotation);
 		}
 		OnDrawingLayersChanged();
 	}
@@ -783,7 +654,7 @@ long CMapView::NewDrawing(short Projection)
 // *****************************************************************
 //		DrawPoint()
 // *****************************************************************
-void CMapView::DrawPoint(double x, double y, long size, OLE_COLOR color)
+void CMapView::DrawPoint(double x, double y, long size, OLE_COLOR color, BYTE alpha)
 {
 	if( IsValidDrawList(_currentDrawing) )
 	{	
@@ -793,6 +664,7 @@ void CMapView::DrawPoint(double x, double y, long size, OLE_COLOR color)
 		dp->y = y;
 		dp->size = size;
 		dp->color = color;
+		dp->alpha = alpha;
 		dlist->m_dpoints.push_back(dp);
 		OnDrawingLayersChanged();
 	}
@@ -803,7 +675,7 @@ void CMapView::DrawPoint(double x, double y, long size, OLE_COLOR color)
 // *****************************************************************
 //		DrawLine()
 // *****************************************************************
-void CMapView::DrawLine(double x1, double y1, double x2, double y2, long width, OLE_COLOR color)
+void CMapView::DrawLine(double x1, double y1, double x2, double y2, long width, OLE_COLOR color, BYTE alpha)
 {
 	if( IsValidDrawList(_currentDrawing) )
 	{	
@@ -815,6 +687,7 @@ void CMapView::DrawLine(double x1, double y1, double x2, double y2, long width, 
 		dl->y2 = y2;
 		dl->width = width;
 		dl->color = color;
+		dl->alpha = alpha;
 		dlist->m_dlines.push_back(dl);
 		OnDrawingLayersChanged();
 	}
@@ -825,7 +698,7 @@ void CMapView::DrawLine(double x1, double y1, double x2, double y2, long width, 
 // *****************************************************************
 //		DrawCircle()
 // *****************************************************************
-void CMapView::DrawCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill)
+void CMapView::DrawCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, BYTE alpha)
 {
 	if( IsValidDrawList(_currentDrawing) )
 	{	
@@ -835,6 +708,7 @@ void CMapView::DrawCircle(double x, double y, double radius, OLE_COLOR color, BO
 		dc->y = y;
 		dc->radius = radius;
 		dc->color = color;
+		dc->alpha = alpha;
 		dc->fill = (fill == TRUE);
 		dc->width = 1;
 		dlist->m_dcircles.push_back(dc);
@@ -847,7 +721,7 @@ void CMapView::DrawCircle(double x, double y, double radius, OLE_COLOR color, BO
 // ***********************************************************
 //	  DrawWideCircle()
 // ***********************************************************
-void CMapView::DrawWideCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, int width)
+void CMapView::DrawWideCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, int width, BYTE alpha)
 {
 	USES_CONVERSION;
 
@@ -859,6 +733,7 @@ void CMapView::DrawWideCircle(double x, double y, double radius, OLE_COLOR color
 		dc->y = y;
 		dc->radius = radius;
 		dc->color = color;
+		dc->alpha = alpha;
 		dc->fill = (fill == TRUE);
 		dc->width = width;
 		dlist->m_dcircles.push_back(dc);
@@ -871,7 +746,7 @@ void CMapView::DrawWideCircle(double x, double y, double radius, OLE_COLOR color
 // *****************************************************************
 //		DrawPolygon()
 // *****************************************************************
-void CMapView::DrawPolygon(VARIANT *xPoints,VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill)
+void CMapView::DrawPolygon(VARIANT *xPoints,VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, BYTE alpha)
 {
 	USES_CONVERSION;
 	SAFEARRAY *sax = *xPoints->pparray;
@@ -894,6 +769,7 @@ void CMapView::DrawPolygon(VARIANT *xPoints,VARIANT *yPoints, long numPoints, OL
 		}
 		dp->numPoints = numPoints;
 		dp->color = color;
+		dp->alpha = alpha;
 		dp->fill = (fill == TRUE);
 		dp->width = 1;
 		dlist->m_dpolygons.push_back(dp);
@@ -907,7 +783,7 @@ void CMapView::DrawPolygon(VARIANT *xPoints,VARIANT *yPoints, long numPoints, OL
 // ***********************************************************
 //	  DrawWidePolygon()
 // ***********************************************************
-void CMapView::DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, short Width)
+void CMapView::DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, short Width, BYTE alpha)
 {
 	USES_CONVERSION;
 	SAFEARRAY *sax = *xPoints->pparray;
@@ -930,6 +806,7 @@ void CMapView::DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoint
 		}
 		dp->numPoints = numPoints;
 		dp->color = color;
+		dp->alpha = alpha;
 		dp->fill = (fill == TRUE);
 		dp->width = Width;
 		dlist->m_dpolygons.push_back(dp);
@@ -942,37 +819,37 @@ void CMapView::DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoint
 // *****************************************************************
 //		DrawWideCircleEx()
 // *****************************************************************
-void CMapView::DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth)
+void CMapView::DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	long oldCurrentLayer = this->_currentDrawing;	//Save the current layer for restore
 	this->_currentDrawing = LayerHandle;
-	this->DrawWideCircle(x, y, radius,color,fill, OutlineWidth);
+	this->DrawWideCircle(x, y, radius,color,fill, OutlineWidth, alpha);
 	this->_currentDrawing = oldCurrentLayer;		// restore current layer
 }
 
 // ***********************************************************
 //	  DrawWidePolygonEx()
 // ***********************************************************
-void CMapView::DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth)
+void CMapView::DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	long oldCurrentLayer = this->_currentDrawing;	//Save the current layer for restore
 	this->_currentDrawing = LayerHandle;
-	this->DrawWidePolygon(xPoints,yPoints,numPoints,color,fill, OutlineWidth);
+	this->DrawWidePolygon(xPoints,yPoints,numPoints,color,fill, OutlineWidth, alpha);
 	this->_currentDrawing = oldCurrentLayer;		// restore current layer
 }
 
 // *****************************************************************
 //		DrawLineEx()
 // *****************************************************************
-void CMapView::DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color)
+void CMapView::DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
 	this->_currentDrawing = LayerHandle;
-	this->DrawLine(x1,y1,x2,y2,pixelWidth,color);
+	this->DrawLine(x1, y1, x2, y2, pixelWidth, color, alpha);
 	this->_currentDrawing = oldCurrentLayer; // restore current layer
 
 }
@@ -980,13 +857,13 @@ void CMapView::DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOU
 // *****************************************************************
 //		DrawPointEx()
 // *****************************************************************
-void CMapView::DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color)
+void CMapView::DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
 	this->_currentDrawing = LayerHandle;
-	this->DrawPoint(x,y,pixelSize,color);
+	this->DrawPoint(x,y,pixelSize,color, alpha);
 	this->_currentDrawing = oldCurrentLayer; // restore current layer
 
 }
@@ -994,26 +871,26 @@ void CMapView::DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize,
 // *****************************************************************
 //		DrawCircleEx()
 // *****************************************************************
-void CMapView::DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill)
+void CMapView::DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
 	this->_currentDrawing = LayerHandle;
-	this->DrawCircle(x,y,pixelRadius,color,fill);
+	this->DrawCircle(x,y,pixelRadius,color,fill, alpha);
 	this->_currentDrawing = oldCurrentLayer; // restore current layer
 }
 
 // *****************************************************************
 //		DrawPolygonEx()
 // *****************************************************************
-void CMapView::DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill)
+void CMapView::DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
 	this->_currentDrawing = LayerHandle;
-	this->DrawPolygon(xPoints,yPoints,numPoints,color,fill);
+	this->DrawPolygon(xPoints,yPoints,numPoints,color,fill, alpha);
 	this->_currentDrawing = oldCurrentLayer; // restore current layer
 }
 

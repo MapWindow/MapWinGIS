@@ -239,6 +239,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkLABELS_NOT_SYNCHRONIZE 1602
 # define tkLABELS_NOT_SAVED 1603
 # define tkINVALID_FLOAT_NUMBER_FORMAT 1604
+# define tkLABEL_POSITIONING_INVALID 1605
 
 //1801-2000 = geoprojections
 #define tkOGR_NOT_ENOUGH_DATA			1801    /* not enough data to deserialize */

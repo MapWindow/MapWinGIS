@@ -674,6 +674,16 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Gets or sets an expression to calculate the rotation of the point symbol in degrees.
+        /// When this is set it takes precedence over the PointRotation property.
+        /// </summary>
+        public double PointRotationExpression
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
         /// Gets or sets the type of reflection to apply to the point symbol.
         /// </summary>
         /// <remarks>This value is used when ShapeDrawingOptions.PointType is equal to ptSymbolFontCharacter or ptSymbolPicture.</remarks>

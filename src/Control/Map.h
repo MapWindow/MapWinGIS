@@ -518,12 +518,12 @@ public:
 		
 	#pragma region New API members
 	afx_msg long NewDrawing(short Projection);
-	afx_msg void DrawPoint(double x, double y, long size, OLE_COLOR color);
-	afx_msg void DrawLine(double x1, double y1, double x2, double y2, long width, OLE_COLOR color);
-	afx_msg void DrawCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill);
-	afx_msg void DrawPolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill);
-	afx_msg void DrawWideCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, int width);
-	afx_msg void DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, short Width);
+	afx_msg void DrawPoint(double x, double y, long size, OLE_COLOR color, byte alpha = 255);
+	afx_msg void DrawLine(double x1, double y1, double x2, double y2, long width, OLE_COLOR color, byte alpha = 255);
+	afx_msg void DrawCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, byte alpha = 255);
+	afx_msg void DrawPolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, byte alpha = 255);
+	afx_msg void DrawWideCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, int width, byte alpha = 255);
+	afx_msg void DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, short Width, byte alpha = 255);
 	afx_msg BOOL IsTIFFGrid(LPCTSTR Filename);
 	afx_msg BOOL IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b);
 	afx_msg long HWnd();
@@ -542,12 +542,12 @@ public:
 	afx_msg float GetMapRotationAngle(void);
 	afx_msg IExtents* GetRotatedExtent(void);
 	afx_msg IPoint* GetBaseProjectionPoint(double rotPixX, double rotPixY);
-	afx_msg void DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color);
-	afx_msg void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color);
-	afx_msg void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill);
-	afx_msg void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill);
-	afx_msg void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
-	afx_msg void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
+	afx_msg void DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color, byte alpha = 255);
+	afx_msg void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color, byte alpha = 255);
+	afx_msg void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, byte alpha = 255);
+	afx_msg void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill, byte alpha = 255);
+	afx_msg void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, byte alpha = 255);
+	afx_msg void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, byte alpha = 255);
 	afx_msg BSTR SerializeLayer(LONG LayerHandle);
 	afx_msg VARIANT_BOOL DeserializeLayer(LONG LayerHandle, LPCTSTR newVal);
 	afx_msg IDispatch* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);
@@ -631,6 +631,8 @@ public:
 
 	afx_msg void SetRecenterMapOnZoom(VARIANT_BOOL nNewValue);
 	afx_msg VARIANT_BOOL GetRecenterMapOnZoom();
+    afx_msg void SetShowCoordinatesBackground(VARIANT_BOOL nNewValue);
+    afx_msg VARIANT_BOOL GetShowCoordinatesBackground();
 #pragma endregion
 
 	//}}AFX_DISPATCH
@@ -680,6 +682,10 @@ public:
 		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_DISPATCH VTS_PI4), LayerHandle, Shape, Cancel);	}
 	void FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY)
 		{FireEvent(eventidBeforeVertexDigitized, EVENT_PARAM(VTS_PR8 VTS_PR8), pointX, pointY); }
+	void FireSnapPointRequested(DOUBLE pointX, DOUBLE pointY, DOUBLE* snappedX, DOUBLE* snappedY, tkMwBoolean* isFound, tkMwBoolean* isFinal)
+		{FireEvent(eventidSnapPointRequested, EVENT_PARAM(VTS_R8 VTS_R8 VTS_PR8 VTS_PR8 VTS_PI4 VTS_PI4), pointX, pointY, snappedX, snappedY, isFound, isFinal); }
+	void FireSnapPointFound(DOUBLE pointX, DOUBLE pointY, DOUBLE* snappedX, DOUBLE* snappedY)
+		{FireEvent(eventidSnapPointFound, EVENT_PARAM(VTS_R8 VTS_R8 VTS_PR8 VTS_PR8), pointX, pointY, snappedX, snappedY); }
 	void FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
 	void FireChooseLayer(long x, long y, LONG* LayerHandle)
@@ -832,6 +838,7 @@ public:
 	BOOL _canUseImageGrouping;
 	BOOL _useAlternatePanCursor;		// use traditional Hand cursor for panning rather than NSEW cursor
 	BOOL _recenterMapOnZoom;			// recenter the map at the clicked zoom point
+    BOOL _showCoordinatesBackground;    // draw white background behind coordinate display
 	tkCustomState _panningInertia;			
 	BOOL _reuseTileBuffer;			
 	tkCustomState _zoomAnimation;			
@@ -1050,6 +1057,10 @@ private:
 	void DrawZoombar(Gdiplus::Graphics* g);
 	void DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tkDrawReferenceList listType);
 	void DrawDrawing(Gdiplus::Graphics* graphics, DrawList * dlist);
+	void DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* polygon, bool project = false);
+    void DrawPointOnGraphics(Gdiplus::Graphics* graphics, _DrawPoint* point, bool project = false);
+	void DrawLineOnGraphics(Gdiplus::Graphics* graphics, _DrawLine* line, bool project = false);
+	void DrawCircleOnGraphics(Gdiplus::Graphics* graphics, _DrawCircle* circle, bool project = false);
 	void DrawDynamic(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawBackBuffer = false, float offsetX = 0.0f, float offsetY = 0.0f);
 	IDispatch* SnapShotCore(double left, double right, double top, double bottom, long Width, long Height, 
 								  CDC* snapDC = NULL, float offsetX = 0.0f, float offsetY = 0.0f,
@@ -1254,6 +1265,9 @@ private:
 	void AdjustWmsLayerVerticalPosition(int layerHandle);
 	void UpdateWmsLayerBounds(IWmsLayer* layer);
 	void UpdateWmsLayerBounds(IWmsLayer* wms, Layer& layer);
+    // Snapping internal algorithm:
+    VARIANT_BOOL DefaultSnappingAlgorithm(double maxDist, double minDist, double x, double y, double *xFound, double *yFound);
+    VARIANT_BOOL CheckSnapPointForTolerance(double maxDist, double x, double y, double xF, double yF, double *xFound, double *yFound);
 #pragma endregion
 
 public:

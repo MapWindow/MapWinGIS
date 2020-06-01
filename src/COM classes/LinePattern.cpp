@@ -430,9 +430,18 @@ CPLXMLNode* CLinePattern::SerializeCore(CString ElementName)
 				_lines[i]->get_MarkerInterval(&val);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "MarkerInterval", CPLString().Printf("%f", val));
 
+                // marker interval is relative
+                VARIANT_BOOL isRelative;
+                _lines[i]->get_MarkerIntervalIsRelative(&isRelative);
+                Utility::CPLCreateXMLAttributeAndValue(psNode, "MarkerIntervalIsRelative", CPLString().Printf("%d", (int)isRelative));
+
 				// marker offset
 				_lines[i]->get_MarkerOffset(&val);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "MarkerOffset", CPLString().Printf("%f", val));
+
+                // marker offset is relative
+                _lines[i]->get_MarkerOffsetIsRelative(&isRelative);
+                Utility::CPLCreateXMLAttributeAndValue(psNode, "MarkerOffsetIsRelative", CPLString().Printf("%d", (int)isRelative));
 
 				// line style
 				tkDashStyle lineStyle;
@@ -530,11 +539,22 @@ bool CLinePattern::DeserializeCore(CPLXMLNode* node)
 					if (s != "") val = (float)Utility::atof_custom( s );
 					segment->put_MarkerInterval(val);
 
+                    // marker interval is relative
+                    VARIANT_BOOL isRelative = VARIANT_FALSE;
+                    s = CPLGetXMLValue(node, "MarkerIntervalIsRelative", NULL);
+                    if (s != "") isRelative = (VARIANT_BOOL)atoi(s);
+                    segment->put_MarkerIntervalIsRelative(isRelative);
+
 					// marker offset
 					val = 0.0f;
 					s = CPLGetXMLValue( node, "MarkerOffset", NULL );
 					if (s != "") val = (float)Utility::atof_custom( s );
 					segment->put_MarkerOffset(val);
+
+                    // marker interval is relative
+                    s = CPLGetXMLValue(node, "MarkerOffsetIsRelative", NULL);
+                    if (s != "") isRelative = (VARIANT_BOOL)atoi(s);
+                    segment->put_MarkerOffsetIsRelative(isRelative);
 
 					// line style
 					tkDashStyle lineStyle = dsSolid;

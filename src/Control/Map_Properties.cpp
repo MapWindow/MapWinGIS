@@ -23,7 +23,7 @@ short CMapView::GetIsLocked()
 VARIANT_BOOL CMapView::GetShowVersionNumber(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return _showVersionNumber;
+	return _showVersionNumber ? VARIANT_TRUE : VARIANT_FALSE;
 }
 
 // *******************************************************
@@ -45,7 +45,7 @@ void CMapView::SetShowVersionNumber(VARIANT_BOOL newVal)
 VARIANT_BOOL CMapView::GetShowRedrawTime(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return _showRedrawTime;
+	return _showRedrawTime ? VARIANT_TRUE : VARIANT_FALSE;
 }
 
 // *******************************************************
@@ -64,13 +64,13 @@ void CMapView::SetShowRedrawTime(VARIANT_BOOL newVal)
 VARIANT_BOOL CMapView::GetCanUseImageGrouping()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return _canUseImageGrouping;
+	return _canUseImageGrouping ? VARIANT_TRUE : VARIANT_FALSE;
 }
 
 void CMapView::SetCanUseImageGrouping(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_canUseImageGrouping = newVal;
+	_canUseImageGrouping = (newVal != VARIANT_FALSE);
 }
 
 short CMapView::GetMapResizeBehavior()
@@ -160,26 +160,38 @@ void CMapView::SetSerialNumber(LPCTSTR newVal)
 void CMapView::SetUseAlternatePanCursor(VARIANT_BOOL nNewValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_useAlternatePanCursor = nNewValue;
+	_useAlternatePanCursor = (nNewValue != VARIANT_FALSE);
 	//_cursorPan = (_useAlternatePanCursor == TRUE ? AfxGetApp()->LoadCursor(IDC_PAN_ALTERNATE) : AfxGetApp()->LoadCursor(IDC_PAN));
 }
 
 VARIANT_BOOL CMapView::GetUseAlternatePanCursor()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return _useAlternatePanCursor;
+	return _useAlternatePanCursor ? VARIANT_TRUE : VARIANT_FALSE;
 }
 
 void CMapView::SetRecenterMapOnZoom(VARIANT_BOOL nNewValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_recenterMapOnZoom = nNewValue;
+	_recenterMapOnZoom = (nNewValue != VARIANT_FALSE);
 }
 
 VARIANT_BOOL CMapView::GetRecenterMapOnZoom()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return _recenterMapOnZoom;
+	return _recenterMapOnZoom ? VARIANT_TRUE : VARIANT_FALSE;
+}
+
+void CMapView::SetShowCoordinatesBackground(VARIANT_BOOL nNewValue)
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    _showCoordinatesBackground = (nNewValue != VARIANT_FALSE);
+}
+
+VARIANT_BOOL CMapView::GetShowCoordinatesBackground()
+{
+    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    return _showCoordinatesBackground ? VARIANT_TRUE : VARIANT_FALSE;
 }
 
 // *************************************************************** //
@@ -293,14 +305,14 @@ void CMapView::SetScalebarUnits(tkScalebarUnits pVal)
 void CMapView::SetScalebarVisible(VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_scalebarVisible = pVal;
+	_scalebarVisible = (pVal != VARIANT_FALSE);
 	if( !_lockCount )
 		InvalidateControl();
 }
 VARIANT_BOOL CMapView::GetScalebarVisible(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return _scalebarVisible;
+	return _scalebarVisible ? VARIANT_TRUE : VARIANT_FALSE;
 }
 
 // *****************************************************
@@ -309,7 +321,7 @@ VARIANT_BOOL CMapView::GetScalebarVisible(void)
 void CMapView::SetShowZoomBar(VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_zoombarVisible = pVal;
+	_zoombarVisible = (pVal != VARIANT_FALSE);
 	if( !_lockCount )
 	{
 		_canUseMainBuffer = false;
@@ -319,7 +331,7 @@ void CMapView::SetShowZoomBar(VARIANT_BOOL pVal)
 VARIANT_BOOL CMapView::GetShowZoomBar(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return _zoombarVisible;
+	return _zoombarVisible ? VARIANT_TRUE : VARIANT_FALSE;
 }
 
 bool CMapView::SendMouseMove()

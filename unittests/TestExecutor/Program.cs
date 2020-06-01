@@ -90,8 +90,11 @@ namespace ConsoleApplication1
             //t.ClipPolygon();
             //t.PointInPolygon();
 
-            var t = new TilesTests();
-            t.PrefetchToFolderDutchOSM();
+            //var t = new TilesTests();
+            //t.PrefetchToFolderDutchOSM();
+
+            var t = new OgrDatasourceTests();
+            t.GenerateEmptyWKT();
 
             Console.WriteLine("Finished");
             Console.ReadLine();

@@ -1,0 +1,2179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="COM classes">
+      <UniqueIdentifier>{e410482e-e390-4a62-a9f2-4fd3ba5dac27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ComHelpers">
+      <UniqueIdentifier>{35e117d5-8cdd-4b3a-9785-e9026b587aa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control">
+      <UniqueIdentifier>{671fa684-f267-4c74-a685-d6f802c140b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Drawing">
+      <UniqueIdentifier>{07a8bea1-a415-4aae-835b-33929c206ff4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{74ee5b28-ba43-47bf-9d0c-a18fe4defd61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Image">
+      <UniqueIdentifier>{ae19d8c2-0413-46ff-8f83-322940527825}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ogr">
+      <UniqueIdentifier>{8d736f69-f40b-400a-ab70-419f53105479}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Processing">
+      <UniqueIdentifier>{7c2d93a6-d00c-416f-9a9f-f9f40c6ccdb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shapefile">
+      <UniqueIdentifier>{a64c0ec3-1fe6-4972-824a-be8b79e1481a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Structures">
+      <UniqueIdentifier>{1f55dd9d-b8f1-4b3b-9586-9ac5c52059c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tiles\Caching">
+      <UniqueIdentifier>{35e5578e-9297-4dae-b598-e62b42d00e89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tiles">
+      <UniqueIdentifier>{4790a1d8-e557-4110-aab6-974d9f745800}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tiles\Http">
+      <UniqueIdentifier>{88bfeaf4-ca98-487c-8297-6e241e4b1631}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tiles\Loaders">
+      <UniqueIdentifier>{c31f633d-9545-4ba0-b6fe-53bfd861f13e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tiles\Projections">
+      <UniqueIdentifier>{ae527559-53a2-4f6f-bbac-2ed24aa11d6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tiles\Providers">
+      <UniqueIdentifier>{f79a503f-e97a-4b4d-bae2-cd83435c31d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities">
+      <UniqueIdentifier>{aa1fbab5-1ea4-4a7e-bdec-8162cc14df8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities\Debugging">
+      <UniqueIdentifier>{352c6be3-dc69-4630-8301-affae0bae4c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities\SQLite">
+      <UniqueIdentifier>{70d1e5c0-f620-4c26-8d73-4f0ce11ec83a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Grid">
+      <UniqueIdentifier>{75f23d95-ae59-4692-99e5-77eff4873180}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Grid\fip">
+      <UniqueIdentifier>{5addd75c-3691-4dc9-b87e-bec5556c0dfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities\SpatialIndex">
+      <UniqueIdentifier>{99d79be2-993c-4b83-a975-5671107b753f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tin">
+      <UniqueIdentifier>{09c3d284-dab6-40d4-bcec-878934771025}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShapeNetwork">
+      <UniqueIdentifier>{04e5b369-4194-49ac-b7e3-35ce3bcc2a35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Processing\GeograpicLib">
+      <UniqueIdentifier>{7f11dfb3-e6dc-4f05-9f5a-904fac0e2776}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{1c56986d-19b4-40d1-abb6-f7deb6e09744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{cf29ab65-388d-49dd-8560-83618e35ff8e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="COM classes\DrawingRectangle.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Expression.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Function.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GdalDataset.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GdalDriver.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GdalDriverManager.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GdalRasterBand.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GdalUtils.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Histogram.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Identifier.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\OgrDatasource.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\OgrLayer.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\SelectionList.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ShapeEditor.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\UndoList.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Utils_Projections.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Utils_Shapefile.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\WmsLayer.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\CallbackHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ChartsHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ExtentsHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\FieldHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ImageHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\LabelsHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ProjectionHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\RasterBandHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\SelectionHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\SelectionListHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ShapefileHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ShapeHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ShapeStyleHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\TableHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\WmsHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Dynamic.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Edit.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Chart.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ChartField.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Charts.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ColorScheme.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ESRIGridManager.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Extents.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Field.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\FieldStatOperations.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\FileManager.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GeoProjection.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GlobalSettings.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Grid.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GridColorBreak.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GridColorScheme.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GridHeader.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Image.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\LabelCategory.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\LabelClass.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Labels.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\LinePattern.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\LineSegment.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Measuring.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\PointClass.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shape.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ShapeDrawingOptions.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shapefile.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shapefile_Edit.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shapefile_Geoprocessing.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shapefile_LabelsCharts.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shapefile_Optimizations.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shapefile_ReadWrite.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shapefile_Selection.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shapefile_SpatialIndex.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Shapefile_Validation.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ShapefileCategories.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ShapefileCategory.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ShapefileColorBreak.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ShapefileColorScheme.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ShapeNetwork.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ShapeValidationInfo.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\TableClass.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\TileProviders.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Tiles.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Tin.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Utils.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Utils_GDAL.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Utils_GridToImage.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Utils_OGR.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Vector.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Identifier.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Tiles.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\BaseDrawer.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\ChartDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\CollisionList.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\DrawingOptions.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\GdiLabelDrawer.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\GdiPlusLabelDrawer.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\ImageDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\LabelDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\LabelDrawingHelper.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\LabelOptions.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\LayerDrawer.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\PointSymbols.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\RotatedRectangle.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\ShapefileDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\TilesDrawer.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ActiveShape.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Digitizer.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorBase.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorHelper.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\GeoShape.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\GroupOperation.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\MeasuringBase.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\MeasuringHelper.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\UndoListHelper.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\VertexEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\colour.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\GdiPlusHelper.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\HistogramData.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\ImageGroup.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\ImageResamling.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\QColorMatrix.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\RasterMatrix.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\tkBitmap.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\GdalRaster.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\ErrorCodes.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\GlobalVars.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Core.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Cursors.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_DispatchMap.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Drawing.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_DrawingLayer.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Events.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_ImageGrouping.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Labels.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Layer.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Obsolete.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Projection.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Properties.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Scale.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Scalebar.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Serialization.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Shapefile.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Snapshot.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\MapPpg.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\GeosConverter.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\GeosHelper.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\Ogr2RawData.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\Ogr2Shape.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrConverter.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrHelper.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrLabels.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrLoader.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrStyle.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\Shape2Ogr.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\Base64.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\clipper.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\ClipperConverter.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\CustomExpression.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\ExpressionParser.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\ExpressionParts.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\Functions.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\GeometryHelper.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\JenksBreaks.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\MapRotate.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\Projections.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\QTree.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\GeoProcessing.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\HotTrackingInfo.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeInterfaces.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeUtility.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeWrapperPoint.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\ToolTipEx.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Structures\Layer.cpp">
+      <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Structures\Structures.cpp">
+      <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\DiskCache.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\PrefetchManager.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\RamCache.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\SQLiteCache.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\TileCacheManager.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Caching\TileCacher.cpp">
+      <Filter>Tiles\Caching</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Http\HttpProxyHelper.cpp">
+      <Filter>Tiles\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Http\SecureHttpClient.cpp">
+      <Filter>Tiles\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\BulkLoadingTask.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\ILoadingTask.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\ITileLoader.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\MapLoadingTask.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\TileBulkLoader.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Loaders\TileMapLoader.cpp">
+      <Filter>Tiles\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Projections\MercatorProjection.cpp">
+      <Filter>Tiles\Projections</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Providers\BingMapProvider.cpp">
+      <Filter>Tiles\Providers</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Providers\CustomTileProvider.cpp">
+      <Filter>Tiles\Providers</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Providers\WmsCustomProvider.cpp">
+      <Filter>Tiles\Providers</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Providers\WmsProviderBase.cpp">
+      <Filter>Tiles\Providers</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\TileCore.cpp">
+      <Filter>Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\TileHelper.cpp">
+      <Filter>Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\TileManager.cpp">
+      <Filter>Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\AngleHelper.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\ColoringGraph.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\ComHelper.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\cppVector.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\DebugHelper.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\FieldClassification.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\GdalDriverHelper.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\GdalHelper.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\GeographLibHelper.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\GraphicsStateHelper.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\LineBresenham.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\Logger.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\Matrix.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\RegistryKey.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\UtilityFunctions.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\varH.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\vertex.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\XRedBlackTree.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\YRedBlackTree.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\Debugging\MemLeakDetect.cpp">
+      <Filter>Utilities\Debugging</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\Debugging\ReferenceCounter.cpp">
+      <Filter>Utilities\Debugging</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\SQLite\shell.c">
+      <Filter>Utilities\SQLite</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\SQLite\sqlite3.c">
+      <Filter>Utilities\SQLite</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\dGrid.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\dHeader.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\EsriDll.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fGrid.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fHeader.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\GenericGrid.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\GenericHeader.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\GridInterpolate.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\GridManager.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\lGrid.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\lHeader.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\sgrid.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\sHeader.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\tkGridRaster.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\a_toe.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\bak_fld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\bak_rec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\bak_sfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\beg_ddre.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\beg_file.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\beg_rec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\bld_fmt.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\bld_lab.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\bldadscr.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\c_dddir.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\c_ddlead.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\c_drdir.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\c_drlead.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\ch_size.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\chk_fld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\chk_nfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\chk_nrec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\chk_nsfl.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\chk_rec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\chk_sfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\cki_nfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\conv_cat.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\del_dim.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\del_fmt.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\del_labs.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\deldrval.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\e_toa.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\end_ddre.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\end_file.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\end_rec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\er_ddfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\er_ddrec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\er_ddsfl.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\free_lab.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\g_order.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\gbstr.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\gdstr.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\get_dim.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\get_dval.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\get_fmt.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\get_lvl.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\gfstr.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\gint.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\gsstr.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\gstr.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\gt_adscr.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\i_toa.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\incr_lab.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\is_adscr.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\is_intgr.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\l_tos.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\ld_ddrec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\ld_rec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\ld_tagp.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\load_fld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\load_fmt.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\load_lab.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\out_fmt.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\pop_rs.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\push_rs.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\r_dddir.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\r_ddlead.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\r_drdir.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\r_drlead.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\rd_ddfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\rd_ddrec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\rd_ddsfl.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\rd_fld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\rd_rec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\rd_sfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\ret_dv.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\ret_fv.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\ret_matc.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\ret_pdm.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\rt_pvfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\rt_pvsfl.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\s_tol.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\set_stat.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\setup_lb.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\stc_empt.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\stor_dv.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\str_tok.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\uld_ddre.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\uld_rec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\v_ddtag.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\v_drtag.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\wint.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\wr_ddfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\wr_ddrec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\wr_ddsfl.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\wr_fld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\wr_rec.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid\fip\wr_sfld.cpp">
+      <Filter>Grid\fip</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\dbf.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeData.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapefileReader.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapePoint.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeValidator.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeWrapper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeWrapperCOM.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\TableRow.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\SpatialIndex\IndexSearching.cpp">
+      <Filter>Utilities\SpatialIndex</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\SpatialIndex\IndexShapeFiles.cpp">
+      <Filter>Utilities\SpatialIndex</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\SpatialIndex\ShapeFileStream.cpp">
+      <Filter>Utilities\SpatialIndex</Filter>
+    </ClCompile>
+    <ClCompile Include="Tin\point.cpp">
+      <Filter>Tin</Filter>
+    </ClCompile>
+    <ClCompile Include="Tin\point_table.cpp">
+      <Filter>Tin</Filter>
+    </ClCompile>
+    <ClCompile Include="Tin\table_row.cpp">
+      <Filter>Tin</Filter>
+    </ClCompile>
+    <ClCompile Include="Tin\TinHeap.cpp">
+      <Filter>Tin</Filter>
+    </ClCompile>
+    <ClCompile Include="Tin\triangle_table.cpp">
+      <Filter>Tin</Filter>
+    </ClCompile>
+    <ClCompile Include="Tin\vertex_table.cpp">
+      <Filter>Tin</Filter>
+    </ClCompile>
+    <ClCompile Include="ShapeNetwork\graph.cpp">
+      <Filter>ShapeNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="ShapeNetwork\heap.cpp">
+      <Filter>ShapeNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\GeograpicLib\Geodesic.cpp">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\GeograpicLib\GeodesicLine.cpp">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\GeograpicLib\PolygonArea.cpp">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Providers\BaseProvider.cpp">
+      <Filter>Tiles\Providers</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Projections\BaseProjection.cpp">
+      <Filter>Tiles\Projections</Filter>
+    </ClCompile>
+    <ClCompile Include="Tiles\Projections\CustomProjection.cpp">
+      <Filter>Tiles\Projections</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="COM classes\Callback.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\DrawingRectangle.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Expression.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Function.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GdalDataset.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GdalDriver.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GdalDriverManager.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GdalRasterBand.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GdalUtils.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Histogram.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Identifier.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\OgrDatasource.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\OgrLayer.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\SelectionList.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ShapeEditor.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\UndoList.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\WmsLayer.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\CallbackHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ChartsHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ExtentsHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\FieldHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ImageHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\LabelsHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ProjectionHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\RasterBandHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\SelectionHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\SelectionListHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ShapefileHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ShapeHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ShapeStyleHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\TableHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\WmsHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\MapViewCallback.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\BaseDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\ChartDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\CollisionList.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\DrawingOptions.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\GdiLabelDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\GdiPlusLabelDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\ImageDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\LabelDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\LabelDrawingHelper.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\LabelOptions.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\LayerDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\PointSymbols.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\RotatedRectangle.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\ShapefileDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\TilesDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ActiveShape.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Digitizer.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorBase.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorHelper.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\GeoShape.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\GroupOperation.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\MeasuringBase.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\MeasuringHelper.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\UndoListHelper.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\VertexEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\cq.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\GdiPlusHelper.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\HistogramData.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\QColorMatrix.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\GeosConverter.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\GeosHelper.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\Ogr2RawData.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\Ogr2Shape.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\OgrConverter.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\OgrHelper.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\OgrLabels.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\OgrLoader.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\OgrStyle.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\Shape2Ogr.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\Base64.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\clipper.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\ClipperConverter.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\CustomExpression.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\ExpressionParser.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\ExpressionParts.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\Functions.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeometryHelper.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\JenksBreaks.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\PointInPolygon.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\Projections.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\QTree.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ChartInfo.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\DraggingState.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\GeoProcessing.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\HotTrackingInfo.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeRecord.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeUtility.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeWrapperEmpty.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeWrapperPoint.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\BaseLayerInfo.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\DrawList.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\Extent.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\ImageLayerInfo.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\Label.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\Layer.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\SelectedItem.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\ShapeLayerInfo.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\Structures.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Chart.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ChartField.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Charts.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ColorScheme.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ESRIGridManager.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Extents.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Field.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\FieldStatOperations.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\FileManager.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GeoProjection.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GlobalSettings.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Grid.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GridColorBreak.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GridColorScheme.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GridHeader.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Image.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\LabelCategory.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\LabelClass.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Labels.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\LinePattern.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\LineSegment.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Measuring.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\PointClass.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Shape.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ShapeDrawingOptions.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Shapefile.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ShapefileCategories.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ShapefileCategory.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ShapefileColorBreak.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ShapefileColorScheme.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ShapeNetwork.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ShapeValidationInfo.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\TableClass.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\TileProviders.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Tiles.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Tin.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Utils.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Vector.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\colour.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\ImageGroup.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\ImageResampling.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\ImageStructs.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\InMemoryBitmap.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\RasterMatrix.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\tkBitmap.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\GdalRaster.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\DispIds.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\Enumerations.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\ErrorCodes.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\GlobalSettingsInfo.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\GlobalVars.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\macros.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\Map.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\MapPpg.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\MapRotate.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\ToolTipEx.h">
+      <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\DiskCache.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\ITileCache.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\PrefetchManager.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\RamCache.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\SQLiteCache.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\TileCacheManager.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Caching\TileCacher.h">
+      <Filter>Tiles\Caching</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\GeoPoint.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Http\BasicAuth.h">
+      <Filter>Tiles\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Http\HttpProxyHelper.h">
+      <Filter>Tiles\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Http\SecureHttpClient.h">
+      <Filter>Tiles\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\BulkLoadingTask.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\ILoadingTask.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\ITileLoader.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\MapLoadingTask.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\TileBulkLoader.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Loaders\TileMapLoader.h">
+      <Filter>Tiles\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\CustomTileProvider.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\WmsCustomProvider.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\WmsProviderBase.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Threading.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\TileCore.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\TileHelper.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\TileManager.h">
+      <Filter>Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\AngleHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\ColoringGraph.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\ComHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\cppVector.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\DebugHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\FieldClassification.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\GdalDriverHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\GdalHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\GeographLibHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\GlobalClassFactory.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\GraphicsStateHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\HashTable.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\LineBresenham.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Logger.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Matrix.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\RegistryKey.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Timer.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\TimerNew.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\UtilityFunctions.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\varH.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\vertex.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\XRedBlackNode.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\XRedBlackTree.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\YRedBlackNode.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\YRedBlackTree.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Debugging\dbgint.h">
+      <Filter>Utilities\Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Debugging\MemLeakDetect.h">
+      <Filter>Utilities\Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Debugging\ReferenceCounter.h">
+      <Filter>Utilities\Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\SQLite\sqlite3.h">
+      <Filter>Utilities\SQLite</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\SQLite\sqlite3ext.h">
+      <Filter>Utilities\SQLite</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\CountedRegKey.hpp">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\dGrid.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\dHeader.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\EsriDll.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\ExpandableBuffer.hpp">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\fGrid.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\fHeader.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\GenericGrid.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\GenericHeader.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\gioapi.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\grdapi.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\grdtypes.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\GridInterpolate.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\GridManager.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\lGrid.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\lHeader.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\sgrid.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\sHeader.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\tkGridRaster.h">
+      <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\fip\gvd123.h">
+      <Filter>Grid\fip</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid\fip\stc123.h">
+      <Filter>Grid\fip</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\dbf.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeData.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapefileReader.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeInterfaces.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapePoint.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeValidator.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeWrapper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeWrapperCOM.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\TableRow.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\SpatialIndex\IndexSearching.h">
+      <Filter>Utilities\SpatialIndex</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\SpatialIndex\IndexShapeFiles.h">
+      <Filter>Utilities\SpatialIndex</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\SpatialIndex\ShapeFileStream.h">
+      <Filter>Utilities\SpatialIndex</Filter>
+    </ClInclude>
+    <ClInclude Include="Tin\heap_node.h">
+      <Filter>Tin</Filter>
+    </ClInclude>
+    <ClInclude Include="Tin\point.h">
+      <Filter>Tin</Filter>
+    </ClInclude>
+    <ClInclude Include="Tin\point_table.h">
+      <Filter>Tin</Filter>
+    </ClInclude>
+    <ClInclude Include="Tin\table_row.h">
+      <Filter>Tin</Filter>
+    </ClInclude>
+    <ClInclude Include="Tin\table_row_node.h">
+      <Filter>Tin</Filter>
+    </ClInclude>
+    <ClInclude Include="Tin\TinHeap.h">
+      <Filter>Tin</Filter>
+    </ClInclude>
+    <ClInclude Include="Tin\tintypes.h">
+      <Filter>Tin</Filter>
+    </ClInclude>
+    <ClInclude Include="Tin\triangle_table.h">
+      <Filter>Tin</Filter>
+    </ClInclude>
+    <ClInclude Include="Tin\vertex_table.h">
+      <Filter>Tin</Filter>
+    </ClInclude>
+    <ClInclude Include="ShapeNetwork\edge.h">
+      <Filter>ShapeNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="ShapeNetwork\graph.h">
+      <Filter>ShapeNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="ShapeNetwork\graphnode.h">
+      <Filter>ShapeNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="ShapeNetwork\heap.h">
+      <Filter>ShapeNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="ShapeNetwork\heap_node.h">
+      <Filter>ShapeNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeograpicLib\Accumulator.hpp">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeograpicLib\Config.h">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeograpicLib\Constants.hpp">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeograpicLib\Geodesic.hpp">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeograpicLib\GeodesicLine.hpp">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeograpicLib\Math.hpp">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeograpicLib\PolygonArea.hpp">
+      <Filter>Processing\GeograpicLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\BaseProvider.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\BingMapProvider.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\GoogleMapProvider.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\OpenStreetMapProvider.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\OviProvider.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Providers\RosreestrProvider.h">
+      <Filter>Tiles\Providers</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Projections\AmersfoortProjection.h">
+      <Filter>Tiles\Projections</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Projections\BaseProjection.h">
+      <Filter>Tiles\Projections</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Projections\CustomProjection.h">
+      <Filter>Tiles\Projections</Filter>
+    </ClInclude>
+    <ClInclude Include="Tiles\Projections\MercatorProjection.h">
+      <Filter>Tiles\Projections</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="COM classes\Chart.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ChartField.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Charts.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ColorScheme.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\DrawingRectangle.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ESRIGridManager.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Expression.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Extents.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Field.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\FieldStatOperations.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\FileManager.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Function.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GdalDataset.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GdalDriver.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GdalDriverManager.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GdalRasterBand.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GdalUtils.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GeoProjection.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GlobalSettings.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Grid.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GridColorBreak.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GridColorScheme.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\GridHeader.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Histogram.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Identifier.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Image.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\LabelCategory.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\LabelClass.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Labels.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\LinePattern.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\LineSegment.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Measuring.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\OgrDatasource.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\OgrLayer.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\PointClass.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\SelectionList.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Shape.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ShapeDrawingOptions.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ShapeEditor.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Shapefile.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ShapefileCategories.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ShapefileCategory.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ShapefileColorBreak.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ShapefileColorScheme.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ShapeNetwork.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\ShapeValidationInfo.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\TableClass.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\TileProviders.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Tiles.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Tin.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\UndoList.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Utils.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\Vector.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="COM classes\WmsLayer.rgs">
+      <Filter>COM classes</Filter>
+    </None>
+    <None Include="Grid\fip\Makefile">
+      <Filter>Grid\fip</Filter>
+    </None>
+    <None Include="Grid\fip\readme.123">
+      <Filter>Grid\fip</Filter>
+    </None>
+    <None Include="resource\cur00001.cur">
+      <Filter>resource</Filter>
+    </None>
+    <None Include="Resource\cursor1.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\cursor2.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\cursor3.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\cursor4.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\cursor5.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\digitize_cursor.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\identify_cursor.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\Map.bmp">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\move_cursor.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\pan_alt.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\rotate_cursor.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\select_cursor.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\vertex_cursor.cur">
+      <Filter>Resource</Filter>
+    </None>
+    <None Include="Resource\zoom_in_16_2.ico">
+      <Filter>Resource</Filter>
+    </None>
+  </ItemGroup>
+</Project>

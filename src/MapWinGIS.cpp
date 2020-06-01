@@ -31,7 +31,7 @@ static char THIS_FILE[] = __FILE__;
 
 const GUID CDECL BASED_CODE _tlid = { 0xc368d713, 0xcc5f, 0x40ed, { 0x9f, 0x53, 0xf8, 0x4f, 0xe1, 0x97, 0xb9, 0x6a } };
 const WORD _wVerMajor = 5;
-const WORD _wVerMinor = 1;
+const WORD _wVerMinor = 2;
 
 CMapWinGISApp NEAR theApp;
 CMapWinGISModule _AtlModule;    // this one is from ATL7 (used by all ATL co-classes)
@@ -75,7 +75,7 @@ BOOL CMapWinGISApp::InitInstance()
 	gMemLeakDetect.stopped = false;
 #endif
 
-	CMapView::GdiplusStartup();
+	//CMapView::GdiplusStartup(); // moved back to CMapView constructor
 
 	return COleControlModule::InitInstance() && InitATL();
 }
@@ -92,7 +92,11 @@ int CMapWinGISApp::ExitInstance()
 	#ifndef RELEASE_MODE
 
 	CComBSTR bstr;
-	GetUtils()->get_ComUsageReport(VARIANT_TRUE, &bstr);
+    // make sure m_utils is still extant
+	if (m_utils)
+	{
+		m_utils->get_ComUsageReport(VARIANT_TRUE, &bstr);
+	}
 
 	USES_CONVERSION;
 	CString s = OLE2A(bstr);
@@ -100,7 +104,8 @@ int CMapWinGISApp::ExitInstance()
 
 	#endif
 
-	if (m_utils) {
+	if (m_utils)
+	{
 		m_utils->Release();
 	}
 
@@ -110,7 +115,7 @@ int CMapWinGISApp::ExitInstance()
 
 	parser::ReleaseFunctions();
 
-	CMapView::GdiplusShutdown();
+	//CMapView::GdiplusShutdown(); // moved back to CMapView destructor
 
 	_Module.Term();
 	return COleControlModule::ExitInstance();

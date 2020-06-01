@@ -13,30 +13,14 @@
 IShapefile* Ogr2Shape::Layer2Shapefile(OGRLayer* layer, ShpfileType activeShapeType, int maxFeatureCount, bool& isTrimmed, 
 	OgrDynamicLoader* loader, ICallback* callback /*= NULL*/)
 {
-	if (!layer)	return NULL;
+	if (!layer)	
+        return NULL;
 
 	IShapefile* sf = CreateShapefile(layer, activeShapeType);
 
 	if (sf) 
-	{
 		FillShapefile(layer, sf, maxFeatureCount, m_globalSettings.saveOgrLabels, callback, isTrimmed);
-		
-		// let's generate labels to unify API with dynamic mode
-		if (loader->LabelExpression.GetLength() != 0)
-		{
-			CComPtr<ILabels> labels = NULL;
-			sf->get_Labels(&labels);
-			if (labels) 
-			{
-				labels->put_LineOrientation(loader->LabelOrientation);
-				long count;
-				ShpfileType type;
-				sf->get_ShapefileType(&type);
-				CComBSTR bstr(loader->LabelExpression);
-				labels->Generate(bstr, loader->GetLabelPosition(type), VARIANT_TRUE, &count);
-			}
-		}
-	}
+
 	return sf;
 }
 
@@ -258,8 +242,8 @@ bool Ogr2Shape::ExtendShapefile(OGRLayer* layer, IShapefile* sf, bool loadLabels
         // Insert or replace the shape:
         if (replaceIndex > 0)
             sf->EditUpdateShape(index, shp, &vbretval);
-        else
-            sf->EditInsertShape(shp, &index, &vbretval);
+		else
+			sf->EditInsertShape(shp, &index, &vbretval);
 
         // No longer need this:
         shp->Release();
@@ -270,6 +254,8 @@ bool Ogr2Shape::ExtendShapefile(OGRLayer* layer, IShapefile* sf, bool loadLabels
             fid_var.vt = VT_I4;
             fid_var.lVal = static_cast<long>(poFeature->GetFID());
             sf->EditCellValue(0, index, fid_var, &vbretval);
+			if (replaceIndex <= 0) // update fid map in case of insert
+				((CShapefile*)sf)->MapOgrFid2ShapeIndex(fid_var.lVal, index);
         }
 
         CopyValues(poFields, poFeature, sf, hasFID, index, loadLabels, labelFields);
@@ -305,6 +291,12 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 
 	CStringA name = layer->GetFIDColumn();
 	bool hasFID = name.GetLength() > 0;
+    if (hasFID)
+    {
+        // if we have an FID, we can map it to the ShapeIndex
+        ((CShapefile*)sf)->HasOgrFidMapping(true);
+    }
+
 	ShpfileType shpType;
 	sf->get_ShapefileType(&shpType);
 
@@ -365,6 +357,8 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 			var.vt = VT_I4;
 			var.lVal = static_cast<long>(poFeature->GetFID());
 			sf->EditCellValue(0, numShapes, var, &vbretval);
+            // map the FID to the ShapeIndex for fast reliable lookups
+            ((CShapefile*)sf)->MapOgrFid2ShapeIndex(var.lVal, numShapes);
 		}
 
 		CopyValues(poFields, poFeature, sf, hasFID, numShapes, loadLabels, labelFields);
@@ -397,8 +391,9 @@ bool isXBaseLogicalTrue(wchar_t c)
 void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, IShapefile* sf, bool hasFID, long numShapes, 
 	bool loadLabels, OgrLabelsHelper::LabelFields labelFields)
 {
-	double x = 0.0, y = 0.0, rotation = 0;
+    if (!sf) return;
 
+	double x = 0.0, y = 0.0, rotation = 0, offsetX = 0.0, offsetY = 0.0;
 	CStringW text;
 
 	for (int iFld = 0; iFld < poFields->GetFieldCount(); iFld++)
@@ -480,6 +475,8 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 		{
 			if (iFld == labelFields.X) x = var.dblVal;
 			if (iFld == labelFields.Y) y = var.dblVal;
+            if (iFld == labelFields.OffsetX) offsetX = var.dblVal;
+            if (iFld == labelFields.OffsetY) offsetY = var.dblVal;
 			if (iFld == labelFields.Text) text = OgrHelper::OgrString2Unicode(poFeature->GetFieldAsString(iFld));
 			if (iFld == labelFields.Rotation) rotation = var.dblVal;
 		}
@@ -492,7 +489,7 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 		CComPtr<ILabels> labels = NULL;
 		sf->get_Labels(&labels);
 
-		labels->AddLabel(bstr, x, y, rotation);
+		labels->AddLabel(bstr, x, y, offsetX, offsetY, rotation);
 	}
 }
 

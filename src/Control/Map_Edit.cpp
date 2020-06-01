@@ -456,8 +456,9 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
         else if (selectingSelectable)
         {
             // iterate all layers
-            for (layerHandle = 0; layerHandle < GetNumLayers(); layerHandle++)
+            for (int layerPosition = 0; layerPosition < GetNumLayers(); layerPosition++)
             {
+				layerHandle = GetLayerHandle(layerPosition);
                 sf.Attach(GetShapefile(layerHandle));
                 if (sf)
                 {
@@ -525,13 +526,27 @@ VARIANT_BOOL CMapView::StartNewBoundShapeEx(long LayerHandle)
 			return VARIANT_FALSE;
 		}
 
-		if (!ShapefileHelper::InteractiveEditing(sf))
-		{
-			ErrorMessage(tkNO_INTERACTIVE_EDITING);
-			return VARIANT_FALSE;
-		}
+        if (!ShapefileHelper::InteractiveEditing(sf))
+        {
+            ErrorMessage(tkNO_INTERACTIVE_EDITING);
+            return VARIANT_FALSE;
+        }
 
-		Digitizer::StartNewBoundShape(_shapeEditor, sf, LayerHandle);
+        // Get shape type
+        ShpfileType shpType;
+        sf->get_ShapefileType(&shpType);
+
+        // Get drawing options
+        CComPtr<IShapeDrawingOptions> options = NULL;
+        sf->get_DefaultDrawingOptions(&options);
+
+        // Check if this is an OGR layer & try get active shape type
+        CComPtr<IOgrLayer> ogrLayer = NULL;
+        ogrLayer.Attach(GetOgrLayer(LayerHandle));
+        if (ogrLayer != nullptr)
+            ogrLayer->get_ActiveShapeType(&shpType);
+
+		Digitizer::StartNewBoundShape(_shapeEditor, shpType, options, LayerHandle);
 		return VARIANT_TRUE;
 	}
 	return VARIANT_TRUE;   // no need to choose

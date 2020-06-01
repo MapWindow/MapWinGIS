@@ -56,8 +56,8 @@ public:
 
 	double scaleX;
 	double scaleY;
-	double rotation;
-	//double pictureRotation;
+	double rotation; // if rotations is initialized/length > 0 this is ignored
+    BSTR rotationExpression;
 	double fillGradientRotation;
 
 	// colors
@@ -111,11 +111,16 @@ public:
 	bool dynamicVisibility;
 	double minVisibleScale;
 	double maxVisibleScale;
+    int minVisibleZoom;
+    int maxVisibleZoom;
 
 	CPen* pen;
 	CPen* penOld;
 	CBrush* brush;
 	CBrush* brushOld;
+	
+    // field-based rendering
+    CString rotationField;
 	
 	#pragma region Constructor
 	// constructor
@@ -128,6 +133,8 @@ public:
 		dynamicVisibility = false;
 		maxVisibleScale = 100000000.0;
 		minVisibleScale = 0.0;
+        minVisibleZoom = 0;
+        maxVisibleZoom = 25;
 
 		_shpType = tkSimpleShapeType::shpNone;
 
@@ -157,7 +164,7 @@ public:
 		fillTransparency = 255;
 		lineTransparency = 255;
 		rotation = 0.0;
-		fillGradientRotation = 0.0;
+        rotationExpression = SysAllocString(L"");
 
 		lineStipple = dsSolid;
 		fillHatchStyle = hsHorizontal;
@@ -240,7 +247,7 @@ public:
 		if ( imgAttributes) delete imgAttributes;
 
 		this->ReleaseGdiPlusBitmap();
-		
+        ::SysFreeString(rotationExpression);
 	}
 	#pragma endregion
 	
@@ -282,5 +289,7 @@ public:
 
 	void DrawGraphicPathWithFillColor(Gdiplus::Graphics* graphics, Gdiplus::GraphicsPath* path, Gdiplus::REAL width);
 	void LoadIcon();
+
+    bool IsVisible(double scale, int zoom);
 #pragma endregion
 };

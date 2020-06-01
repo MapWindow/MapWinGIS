@@ -719,6 +719,45 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// For OGR-derived Shapefiles, indicates whether or not an internal mapping exists 
+        /// from the constant OGR FID value to the currently assigned Shape Index.
+        /// </summary>
+        /// <remarks>
+        /// If the associated OGR Layer has an FID field, an internal mapping is built automatically
+        /// and is available for the purpose of resolving a volatile Shape Index from a fixed FID value.
+        /// This is because the Shape Index for a given shape is not guaranteed to be the same each time
+        /// the OGR layer is reloaded.  This is particularly true in a multi-user database environment.
+        /// </remarks>
+        /// <returns>True if the internal mapping exists, otherwise false</returns>
+        /// \see Shapefile.OgrFid2ShapeIndex
+        /// \new520 Added in version 5.2.0
+        public bool HasOgrFidMapping()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// For OGR-derived Shapefiles, you can use this function to get the Shape Index that is 
+        /// currently associated with the specified OGR FID value (which is constant for each row).
+        /// </summary>
+        /// <param name="OgrFid">FID field value from OGR data source</param>
+        /// <remarks>
+        /// If the associated OGR Layer has an FID field, an internal mapping is built automatically
+        /// and is available for the purpose of resolving a volatile Shape Index from a fixed FID value.
+        /// This is because the Shape Index for a given shape is not guaranteed to be the same each time
+        /// the OGR layer is reloaded.  This is particularly true in a multi-user database environment.
+        /// </remarks>
+        /// <returns>
+        /// The Shape Index that is currently associated with the specified OGR FID value
+        /// </returns>
+        /// \see Shapefile.HasOgrFidMapping
+        /// \new520 Added in version 5.2.0
+        public long OgrFid2ShapeIndex(long OgrFid)
+        {
+            throw new NotImplementedException();
+        }
+
         /// @}
         #endregion
 

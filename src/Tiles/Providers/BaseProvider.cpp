@@ -58,7 +58,8 @@ TileCore* BaseProvider::GetTileImage(CPoint& pos, const int zoom)
 CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool recursive)
 {
     // single-file access to the tile load
-    CSingleLock lock(&_clientLock, TRUE);
+    // MWGIS-207; allow multiple thread access
+    //CSingleLock lock(&_clientLock, TRUE);
 
     // stack-based instance
     SecureHttpClient client;

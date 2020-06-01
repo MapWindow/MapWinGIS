@@ -194,6 +194,33 @@ public:
 		#endif
 	}
 
+    static char Disjoint(const GEOSGeometry* gsBase, const GEOSGeometry* gsGeom)
+    {
+        #ifdef GEOS_NEW
+                return GEOSDisjoint_r(getGeosHandle(), gsBase, gsGeom);
+        #else
+                return GEOSDisjoint(gsBase, gsGeom);
+        #endif
+    }
+
+    static char Covers(const GEOSGeometry* gsBase, const GEOSGeometry* gsGeom)
+    {
+        #ifdef GEOS_NEW
+                return GEOSCovers_r(getGeosHandle(), gsBase, gsGeom);
+        #else
+                return GEOSCovers(gsBase, gsGeom);
+        #endif
+    }
+
+    static char CoveredBy(const GEOSGeometry* gsBase, const GEOSGeometry* gsGeom)
+    {
+        #ifdef GEOS_NEW
+                return GEOSCoveredBy_r(getGeosHandle(), gsBase, gsGeom);
+        #else
+                return GEOSCoveredBy(gsBase, gsGeom);
+        #endif
+    }
+
 	static void Free(void* buffer)
 	{
 		#ifdef GEOS_NEW

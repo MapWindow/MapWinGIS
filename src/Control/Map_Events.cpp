@@ -899,8 +899,11 @@ void CMapView::ZoomToCursorPosition(bool zoomIn)
 			return;
 		ratio = zoomIn ? 0.499 : 2.001;		// add some margin for rounding error
 	}
-	else {
-		ratio = zoomIn ? 1 - m_zoomPercent : 1 + m_zoomPercent;
+	else
+    {
+        // set zoom-in and zoom-out to be inverse of each other
+        double factor = 1 + m_zoomPercent;
+		ratio = zoomIn ? (1 / factor) : factor;
 	}
 	
 	double height = (_extents.top - _extents.bottom) * ratio;
@@ -959,6 +962,9 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 					PixelToProjection(x, y, xProj, yProj);
                     if (sf)
                     {
+                        // how many are currently selected?
+                        long numSelected;
+                        sf->get_NumSelected(&numSelected);
                         // single layer select
                         Extent box = GetPointSelectionBox(sf, xProj, yProj);
                         if (SelectionHelper::SelectByPoint(sf, box, !ctrl))
@@ -966,13 +972,28 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                             FireSelectionChanged(layerHandle);
                             Redraw();
                         }
+                        else
+                        {
+                            // watch for de-selection
+                            long nowSelected;
+                            sf->get_NumSelected(&nowSelected);
+                            if (nowSelected != numSelected)
+                            {
+                                // we need an event
+                                FireSelectionChanged(layerHandle);
+                                Redraw();
+                            }
+                        }
                     }
                     else if (selectingSelectable)
                     {
+                        // we want to know if at least one layer was selected/deselected
+                        bool atLeastOneLayerAffected = false;
                         // iterate all layers
-                        for (layerHandle = 0; layerHandle < GetNumLayers(); layerHandle++)
-                        {
-                            sf.Attach(GetShapefile(layerHandle));
+						for (int layerPosition = 0; layerPosition < GetNumLayers(); layerPosition++)
+						{
+							layerHandle = GetLayerHandle(layerPosition);
+							sf.Attach(GetShapefile(layerHandle));
                             if (sf)
                             {
                                 // is layer selectable?
@@ -980,15 +1001,34 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                                 sf->get_Selectable(&isSelectable);
                                 if (isSelectable == VARIANT_TRUE)
                                 {
+                                    // how many are currently selected?
+                                    long numSelected;
+                                    sf->get_NumSelected(&numSelected);
                                     Extent box = GetPointSelectionBox(sf, xProj, yProj);
                                     // allow also for multiple overlapping shapes
                                     if (SelectionHelper::SelectByPoint(sf, box, !ctrl, false))
                                     {
+                                        atLeastOneLayerAffected = true;
+                                        FireSelectionChanged(layerHandle);
+                                    }
+                                    else
+                                    {
+                                        // watch for de-selection
+                                        long nowSelected;
+                                        sf->get_NumSelected(&nowSelected);
+                                        if (nowSelected != numSelected)
+                                        {
+                                            atLeastOneLayerAffected = true;
                                         FireSelectionChanged(layerHandle);
                                     }
                                 }
                             }
                         }
+                        }
+                        // in multi-layer selectable mode, fire event when all are done
+                        if (atLeastOneLayerAffected)
+                            FireSelectionChanged(-1);
+                        // now redraw
                         Redraw();
                     }
 				}
@@ -1025,19 +1065,37 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 			case cmSelection:
 				if (sf) 
                 {
+                    // how many are currently selected?
+                    long numSelected;
+                    sf->get_NumSelected(&numSelected);
                     // single layer select
-					if (SelectionHelper::SelectByRectangle(sf, box)) 
+					if (SelectionHelper::SelectByRectangle(sf, box, !ctrl)) 
                     {
 						FireSelectionChanged(layerHandle);
 						Redraw();
 					}
+                    else
+                    {
+                        // watch for de-selection
+                        long nowSelected;
+                        sf->get_NumSelected(&nowSelected);
+                        if (nowSelected != numSelected)
+                        {
+                            // we need an event
+                            FireSelectionChanged(layerHandle);
+                            Redraw();
+                        }
+                    }
 				}
                 else if (selectingSelectable)
                 {
+                    // we want to know if at least one layer was selected/deselected
+                    bool atLeastOneLayerAffected = false;
                     // iterate all layers
-                    for (layerHandle = 0; layerHandle < GetNumLayers(); layerHandle++)
-                    {
-                        sf.Attach(GetShapefile(layerHandle));
+					for (int layerPosition = 0; layerPosition < GetNumLayers(); layerPosition++)
+					{
+						layerHandle = GetLayerHandle(layerPosition);
+						sf.Attach(GetShapefile(layerHandle));
                         if (sf)
                         {
                             // select all selectable
@@ -1045,13 +1103,32 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                             sf->get_Selectable(&isSelectable);
                             if (isSelectable == VARIANT_TRUE)
                             {
-                                if (SelectionHelper::SelectByRectangle(sf, box))
+                                // how many are currently selected?
+                                long numSelected;
+                                sf->get_NumSelected(&numSelected);
+                                if (SelectionHelper::SelectByRectangle(sf, box, !ctrl))
                                 {
+                                    atLeastOneLayerAffected = true;
+                                    FireSelectionChanged(layerHandle);
+                                }
+                                else
+                                {
+                                    // watch for de-selection
+                                    long nowSelected;
+                                    sf->get_NumSelected(&nowSelected);
+                                    if (nowSelected != numSelected)
+                                    {
+                                        atLeastOneLayerAffected = true;
                                     FireSelectionChanged(layerHandle);
                                 }
                             }
                         }
                     }
+                    }
+                    // in multi-layer selectable mode, fire event when all are done
+                    if (atLeastOneLayerAffected)
+                        FireSelectionChanged(-1);
+                    // now redraw
                     Redraw();
                 }
 				break;

@@ -2,6 +2,8 @@
 #include "OgrLabels.h"
 #include "OgrHelper.h"
 
+#define LABEL_OFFSETX_FIELD "labelOffsetX"
+#define LABEL_OFFSETY_FIELD "labelOffsetY"
 #define LABEL_X_FIELD "labelX"
 #define LABEL_Y_FIELD "labelY"
 #define LABEL_TEXT_FIELD "labelText"
@@ -17,6 +19,8 @@ bool OgrLabelsHelper::GetLabelFields(OGRLayer* ogrLayer, LabelFields& fields)
 	fields.Y = fd->GetFieldIndex(LABEL_Y_FIELD);
 	fields.Text = fd->GetFieldIndex(LABEL_TEXT_FIELD);
 	fields.Rotation = fd->GetFieldIndex(LABEL_ROTATION_FIELD);
+    fields.OffsetX = fd->GetFieldIndex(LABEL_OFFSETX_FIELD);
+    fields.OffsetY = fd->GetFieldIndex(LABEL_OFFSETY_FIELD);
 	return fields.HasFields();
 }
 
@@ -54,15 +58,29 @@ bool OgrLabelsHelper::AddLabel2Feature(ILabels* labels, int shapeIndex, OGRFeatu
 	labels->get_Label(shapeIndex, 0, &label);
 
 	CComBSTR text;
-	double x, y, rotation;
+	double x, y, rotation, offsetX, offsetY;
 	label->get_X(&x);
 	label->get_Y(&y);
 	label->get_Rotation(&rotation);
 	label->get_Text(&text);
+    label->get_OffsetX(&offsetX);
+    label->get_OffsetY(&offsetY);
 
-	feature->SetField(labelFields.X, x);
-	feature->SetField(labelFields.Y, y);
-	feature->SetField(labelFields.Rotation, rotation);
-	feature->SetField(labelFields.Text, OgrHelper::Bstr2OgrString(text.m_str));
+    if (labelFields.X != -1)
+	    feature->SetField(labelFields.X, x);
+    if (labelFields.Y != -1)
+    	feature->SetField(labelFields.Y, y);
+
+    if (labelFields.Rotation != -1)
+	    feature->SetField(labelFields.Rotation, rotation);
+
+    if (labelFields.Text != -1)
+	    feature->SetField(labelFields.Text, OgrHelper::Bstr2OgrString(text.m_str));
+
+    if (labelFields.OffsetX != -1)
+        feature->SetField(labelFields.OffsetX, offsetX);
+    if (labelFields.OffsetY != -1)
+        feature->SetField(labelFields.OffsetY, offsetY);
+
 	return false;
 }

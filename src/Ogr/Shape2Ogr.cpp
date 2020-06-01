@@ -614,6 +614,10 @@ bool Shape2Ogr::SaveShape(OGRLayer* poLayer, OGRFeature* ft, OGRFeatureDefn* fie
 				var.lVal = static_cast<long>(ft->GetFID());
 				var.vt = VT_I4;
 				shapefile->EditCellValue(shapeCmnIndex, shapeIndex, var, &vb);
+				VARIANT_BOOL hasOgrFidMapping;
+				shapefile->get_HasOgrFidMapping(&hasOgrFidMapping);
+				if (hasOgrFidMapping)
+					((CShapefile*)shapefile)->MapOgrFid2ShapeIndex(var.lVal, shapeIndex);
 			}
 
 			// we've created feature object, let's destroy it
