@@ -111,7 +111,8 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
 
     // Grab the loaded data:
     vector<ShapeRecordData*> data = _loader.FetchData();
-    if (data.size() == 0) return;
+    if (data.size() == 0)
+		return;
 
 	CStringW fid = OgrHelper::OgrString2Unicode(_layer->GetFIDColumn());
 	bool hasFid = fid.GetLength() > 0;
@@ -153,11 +154,14 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
     _shapefile->get_Labels(&labels);
     labels->Clear();
 
+	CComPtr<IShapefileCategories> categories = NULL;
+	_shapefile->get_Categories(&categories);
+
+	long count = 0;
     if (table)
     {
         CTableClass* tbl = TableHelper::Cast(table);
         _shapefile->StartEditingShapes(VARIANT_TRUE, NULL, &vb);
-        long count = 0;
         for (size_t i = 0; i < data.size(); i++)
         {
             CComPtr<IShape> shp = NULL;
@@ -203,6 +207,11 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
     for (size_t i = 0; i < data.size(); i++) {
         delete data[i];
     }
+
+	categories->ApplyExpressions();
+	labels->ApplyCategories();
+
+	return;
 }
 
 //***********************************************************************
