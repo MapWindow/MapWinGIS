@@ -430,30 +430,14 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 //***********************************************************************
 void Layer::UpdateShapefile()
  {
-    if (!this->IsShapefile())
-        return;
-    
-    CComPtr<IShapefile> ishp = NULL;
-    if (!this->QueryShapefile(&ishp))
-        return;
+	if (!IsDynamicOgrLayer())
+		return;
 
-    // Fetch data loaded so far
-    if (IsDynamicOgrLayer()) {
-        // Get the OGR layer:
-        IOgrLayer* layer = NULL;
-        if (QueryOgrLayer(&layer)) 
-            ((COgrLayer*)layer)->UpdateShapefileFromOGRLoader();
-    }
-         
-    // Refresh categories & labels:
-    CComPtr<IShapefileCategories> cat = NULL;
-    ishp->get_Categories(&cat);
-    cat->ApplyExpressions();
-
-    CComPtr<ILabels> labels;
-    ishp->get_Labels(&labels);
-    labels->ApplyCategories();
- }
+    IOgrLayer* layer = NULL;
+	if (!QueryOgrLayer(&layer))
+		return;
+    ((COgrLayer*)layer)->UpdateShapefileFromOGRLoader();
+}
 
 //****************************************************
 //*		IsEmpty()
