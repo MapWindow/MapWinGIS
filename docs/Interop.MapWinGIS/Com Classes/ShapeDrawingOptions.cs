@@ -924,6 +924,28 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
+
+        /// <summary>
+        /// Gets or sets maximum map zoom at which the category is visible 
+        /// when ShapeDrawingOptions.DynamicVisibility is set to true.
+        /// </summary>
+        /// \new52 Added in version 5.2
+        public double MaxVisibleZoom
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets minimum map zoom at which the category is visible
+        /// when ShapeDrawingOptions.DynamicVisibility is set to true.
+        /// </summary>
+        /// \new52 Added in version 5.2
+        public double MinVisibleZoom
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
     }
 #if nsp
 }

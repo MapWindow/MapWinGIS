@@ -471,6 +471,26 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Gets or sets the field index to use for the horizontal offset in pixels which is used to draw labels.
+        /// </summary>
+        /// /new52 New in version 5.2
+        public int OffsetXField
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the field index to use for the vertical offset in pixels which is used to draw labels.
+        /// </summary>
+        /// /new52 New in version 5.2
+        public int OffsetYField
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
         /// The property isn't implemented.
         /// </summary>
         public int Priority

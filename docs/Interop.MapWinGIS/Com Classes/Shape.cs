@@ -209,6 +209,28 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Tests a 'covers' relation between 2 shapes.
+        /// </summary>
+        /// <param name="shape">The second shape.</param>
+        /// <returns>True if this shape covers the second shape and false if it is not.</returns>
+        /// \new52 Added in version 5.2
+        public bool Covers(Shape shape)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Tests a 'covered by' relation between 2 shapes.
+        /// </summary>
+        /// <param name="shape">The second shape.</param>
+        /// <returns>True if this shape is covered by the second shape and false if it is not.</returns>
+        /// \new52 Added in version 5.2
+        public bool CoveredBy(Shape shape)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Calculates the distance between 2 shapes.
         /// </summary>
         /// <param name="Shape">The second shape.</param>
