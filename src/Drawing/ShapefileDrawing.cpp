@@ -285,22 +285,23 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
         // checking once for field specification and index, and 
         // then iterating shapes to set rotation-specific values.
 
-        // is a Rotation field specified ?
-        if (defaultOptions->rotationField.GetLength() > 0)
-        {
-            long idx;
-            CComBSTR bstrName(defaultOptions->rotationField);
-            _shapefile->get_FieldIndexByName(bstrName, &idx);
-            // iterate shapes, set rotation based on field value
-            // NOTE that this uses the existing 'rotation' field,
-            // and thus takes precedence over options-based rotation
-            for (long i = 0; i < (long)_shapeData->size(); i++)
-            {
-                VARIANT rotation;
-                _shapefile->get_CellValue(idx, i, &rotation);
-                (*_shapeData)[i]->rotation = rotation.dblVal;
-            }
-        }
+		// NOTE: the following is superceded by the rotationExpression
+		// is a Rotation field specified ?
+        //if (defaultOptions->rotationField.GetLength() > 0)
+        //{
+        //    long idx;
+        //    CComBSTR bstrName(defaultOptions->rotationField);
+        //    _shapefile->get_FieldIndexByName(bstrName, &idx);
+        //    // iterate shapes, set rotation based on field value
+        //    // NOTE that this uses the existing 'rotation' field,
+        //    // and thus takes precedence over options-based rotation
+        //    for (long i = 0; i < (long)_shapeData->size(); i++)
+        //    {
+        //        VARIANT rotation;
+        //        _shapefile->get_CellValue(idx, i, &rotation);
+        //        (*_shapeData)[i]->rotation = rotation.dblVal;
+        //    }
+        //}
     }
 
 	// --------------------------------------------------------------
@@ -784,10 +785,6 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		Gdiplus::Matrix mtx;
 		mtx.Reset();
 		
-		// font character rotation is set here
-		mtx.Rotate((Gdiplus::REAL)options->rotation);
-		path->Transform(&mtx);
-		if (path2) path2->Transform(&mtx);
 		pntShape = pshPolygon;
 	}
 
@@ -977,13 +974,13 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 				_graphics->TranslateTransform((float)(xInt), (float)(yInt));
 					
                 // see if individual shape has a specified rotation
-                // (set either through shape rotation property, or from rotationField)
+                // (set either through shape rotation property, or from rotationExpression)
 				float angle = (float)((*_shapeData)[points[i].id])->rotation;
 					
 				// if not set explicitly, try to grab it from category
 				if (angle == 0)
 					angle = (float)options->rotation;
-
+				// if any angle is specified, apply it
                 if (angle != 0)
 					_graphics->RotateTransform(angle);
 					
@@ -1036,6 +1033,15 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					_graphics->GetTransform(&mtxInit);
 						
 					_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
+
+					// does point have an individual rotation?
+					float angle = (float)((*_shapeData)[points[i].id])->rotation;
+					// if nothing specified, revert to options-level angle
+					if (angle == 0)
+						angle = (float)options->rotation;
+					// if angle is non-zero, apply it
+					if (angle != 0)
+						_graphics->RotateTransform(angle);
 
 					// if reflecting
 					if (options->pointReflectionType != prtNone)
@@ -1861,8 +1867,8 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 						{
                             totalLength = totalLengths[n] - (overflow ? 0 : markerSize);
                             // Apply scale factor for offset & interval values if requested:
-                            markerOffset = markerOffsetBase * ((offsetIsRelative) ? totalLength : 1.0);
-                            interval = intervalBase * ((intervalIsRelative) ? totalLength : 1.0);
+                            markerOffset = markerOffsetBase * ((offsetIsRelative) ? (float)totalLength : 1.0f);
+                            interval = intervalBase * ((intervalIsRelative) ? (float)totalLength : 1.0f);
                             firstMarkerDrawn = false;
                             // Set starting offset:
                             offset = markerOffset + (overflow ? 0 : markerSize * 0.5);
@@ -1915,7 +1921,7 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 							Gdiplus::REAL yPos =(Gdiplus::REAL)(pntStart.Y + dy * ratio);
 										
 							_graphics->TranslateTransform(xPos , yPos);
-							_graphics->RotateTransform(-angle + ((flipFirst && !firstMarkerDrawn) ? 180 : 0));
+							_graphics->RotateTransform((float)(-angle + ((flipFirst && !firstMarkerDrawn) ? 180 : 0)));
 
 							_graphics->FillPolygon(brush, (Gdiplus::PointF*)points, numPoints);
 							_graphics->DrawPolygon(pen, (Gdiplus::PointF*)points, numPoints);

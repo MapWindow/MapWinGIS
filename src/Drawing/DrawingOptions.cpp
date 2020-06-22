@@ -54,6 +54,9 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 	this->fillGradientType = opt.fillGradientType;
 	this->fillTransparency = opt.fillTransparency;
 	this->fillHatchStyle = opt.fillHatchStyle;
+
+	::SysFreeString(this->rotationExpression);
+	this->rotationExpression = OLE2BSTR(opt.rotationExpression);
 	
 	this->fontName = opt.fontName;
     this->rotationField = opt.rotationField;

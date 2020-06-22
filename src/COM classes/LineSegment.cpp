@@ -365,16 +365,16 @@ void CLineSegment::DrawMarkerSegment(Gdiplus::Graphics& g, int ImageWidth, int I
         return;
 
     double availableWidth = ImageWidth - (_markerAllowOverflow ? 0 : _markerSize);
-    float offset = _markerOffset * (_markerOffsetIsRelative ? (float)availableWidth : 1.0);
+    float offset = _markerOffset * (_markerOffsetIsRelative ? (float)availableWidth : 1.0f);
 
-    float interval = _markerInterval * (_markerIntervalIsRelative ? (float)availableWidth : 1.0);;
+    float interval = _markerInterval * (_markerIntervalIsRelative ? (float)availableWidth : 1.0f);;
     const int count = (interval == 0) ? 1 : (int)((availableWidth - offset) / interval + 1.0 + FLT_EPSILON);
 
     if (count == 0)
         return;
 
     if (!_markerAllowOverflow)
-        offset += _markerSize * 0.5;
+        offset += _markerSize * 0.5f;
 
     Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(_lineColor, transparency));
     Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_markerOutlineColor, transparency));
