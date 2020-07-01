@@ -666,7 +666,6 @@ namespace MapWinGIS
 
         /// <summary>
         /// Gets or sets the rotation of the point symbol in degrees.
-        /// When this is set it takes precedence over the Shapefile.ShapeRotation property.
         /// </summary>
         public double PointRotation
         {
