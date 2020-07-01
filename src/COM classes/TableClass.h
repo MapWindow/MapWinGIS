@@ -237,10 +237,13 @@ public:
 	std::vector<CategoriesData>* GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses);
 	std::vector<CategoriesData>* GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses,
 		CComVariant minValue, CComVariant maxValue);
-	void AnalyzeExpressions(std::vector<CStringW>& expressions, std::vector<int>& results);
+	void AnalyzeExpressions(std::vector<CStringW>& expressions, std::vector<int>& results,
+		int startRowIndex = -1, int endRowIndex = -1);
 	bool QueryCore(CStringW Expression, std::vector<long>& indices, CStringW& ErrorString);
-	bool CalculateCore(CStringW Expression, std::vector<CStringW>& results, CStringW& ErrorString, CString floatFormat, int rowIndex = -1);
-    bool CalculateCoreRaw(CStringW Expression, std::function<bool(CExpressionValue* value, int rowIndex, CStringW& ErrorString)> processValue, CStringW& ErrorString, CString floatFormat = m_globalSettings.floatNumberFormat, int rowIndex = -1, bool ignoreCalculationErrors = false);
+	bool CalculateCore(CStringW Expression, std::vector<CStringW>& results, CStringW& ErrorString, CString floatFormat,
+		int startRowIndex = -1, int endRowIndex = -1);
+    bool CalculateCoreRaw(CStringW Expression, std::function<bool(CExpressionValue* value, int rowIndex, CStringW& ErrorString)> processValue, CStringW& ErrorString, CString floatFormat = m_globalSettings.floatNumberFormat,
+		int startRowIndex = -1, int endRowIndex = -1, bool ignoreCalculationErrors = false);
 
 	bool get_FieldValuesDouble(int FieldIndex, std::vector<double>& values);
 	bool get_FieldValuesInteger(int FieldIndex, std::vector<int>& values);

@@ -159,10 +159,17 @@ private:
 	// either CShapeWrapper or CShapeWrapperCOM
 	IShapeWrapper* _shp;
 
+	tkLabelPositioning labelPositioning = tkLabelPositioning::lpNone;
+	tkLineLabelOrientation labelOrientation = tkLineLabelOrientation::lorParallel;
+	double labelX;
+	double labelY;
+	double labelRotation;
+
 	// forces to use fast shape wrapper class to hold points information
 	bool _useFastMode;							
 	
 private:
+	void ClearLabelPositionCache();
 	void ErrorMessage(long ErrorCode);
 	bool PointInThisPolyFast(IPoint * pt);
 	bool PointInThisPolyRegular(IPoint * pt);
