@@ -392,8 +392,8 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="shapeIndex">Index of shape.</param>
         /// <returns>Angle in degrees (0-360).</returns>
-        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
-        /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
+        /// <remarks>This value will be applied to point shapefiles only.
+        /// Value will be overridden by non-zero ShapeDrawingOptions.PointRotation or ShapeDrawingOptions.PointRotationExpression.</remarks>
         /// \new492 Added in version 4.9.2
         public double get_ShapeRotation(int shapeIndex)
         {
@@ -405,8 +405,8 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="shapeIndex">Index of shape.</param>
         /// <param name="pVal">Angle in degrees (0-360).</param>
-        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
-        /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
+        /// <remarks>This value will be applied to point shapefiles only.
+        /// Value will be overridden by non-zero ShapeDrawingOptions.PointRotation or ShapeDrawingOptions.PointRotationExpression.</remarks>
         /// \new492 Added in version 4.9.2
         public void set_ShapeRotation(int shapeIndex, double pVal)
         {
