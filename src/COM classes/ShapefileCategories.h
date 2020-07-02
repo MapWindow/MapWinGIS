@@ -111,7 +111,7 @@ public:
 	STDMETHOD(put_Item)(long Index, IShapefileCategory* newVal);
 	STDMETHOD(Generate)(long FieldIndex, tkClassificationType ClassificationType, long numClasses, VARIANT_BOOL* retVal);
 	STDMETHOD(ApplyExpressions)();
-	STDMETHOD(ApplyExpression)(long CategoryIndex);
+	STDMETHOD(ApplyExpression)(long CategoryIndex, long startRowIndex = -1, long endRowIndex = -1);
 
 	STDMETHOD(ApplyColorScheme)(tkColorSchemeType Type, IColorScheme* ColorScheme);
 	STDMETHOD(ApplyColorScheme2)(tkColorSchemeType Type, IColorScheme* ColorScheme, tkShapeElements ShapeElement);

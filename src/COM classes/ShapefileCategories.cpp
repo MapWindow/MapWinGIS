@@ -475,7 +475,7 @@ STDMETHODIMP CShapefileCategories::ApplyExpressions()
 // *******************************************************************
 //		ApplyExpression()
 // *******************************************************************
-STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex)
+STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex, long startRowIndex, long endRowIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
@@ -489,7 +489,7 @@ STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex)
 		}
 	}
 
-	ApplyExpressionCore(CategoryIndex);
+	ApplyExpressionCore(CategoryIndex, startRowIndex, endRowIndex);
 	return S_OK;
 }
 

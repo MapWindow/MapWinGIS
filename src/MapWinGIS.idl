@@ -5448,7 +5448,7 @@ interface IShapefileCategories : IDispatch{
 	[propget, id(11), helpstring("property Count")] HRESULT Count([out, retval] long *pVal);
 	[propget, id(12), helpstring("property Shapefile")] HRESULT Shapefile([out, retval] IShapefile** retVal);
 	[id(13), helpstring("method ApplyExpressions")] HRESULT ApplyExpressions();
-	[id(14), helpstring("method ApplyExpression")] HRESULT ApplyExpression([in]long CategoryIndex);
+	[id(14), helpstring("method ApplyExpression")] HRESULT ApplyExpression([in]long CategoryIndex, [in, defaultvalue(-1)] long startRowIndex, [in, defaultvalue(-1)] long endRowIndex);
 
 	[id(15), helpstring("method ApplyColorScheme")] HRESULT ApplyColorScheme([in]tkColorSchemeType Type, [in]IColorScheme* ColorScheme);
 	[id(16), helpstring("method ApplyColorScheme2")] HRESULT ApplyColorScheme2([in]tkColorSchemeType Type, [in]IColorScheme* ColorScheme, [in]tkShapeElements ShapeElement);
