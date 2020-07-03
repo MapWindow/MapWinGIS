@@ -733,7 +733,7 @@ namespace MapWinGIS
         /// </remarks>
         /// <returns>True if the internal mapping exists, otherwise false</returns>
         /// \see Shapefile.OgrFid2ShapeIndex
-        /// \new520 Added in version 5.2.0
+        /// \new52 Added in version 5.2
         public bool HasOgrFidMapping()
         {
             throw new NotImplementedException();
@@ -754,7 +754,7 @@ namespace MapWinGIS
         /// The Shape Index that is currently associated with the specified OGR FID value
         /// </returns>
         /// \see Shapefile.HasOgrFidMapping
-        /// \new520 Added in version 5.2.0
+        /// \new52 Added in version 5.2
         public long OgrFid2ShapeIndex(long OgrFid)
         {
             throw new NotImplementedException();

@@ -2,8 +2,9 @@
 /// \page version_history Version history
 /// 
 /// \section apichanges API changes.
-/// -  New API in version \link newpage510 5.1.0 \endlink
-/// -  New API in version \link newpage500 5.0.0 \endlink
+/// -  New API in version \link newpage52 5.2 \endlink
+/// -  New API in version \link newpage510 5.1 \endlink
+/// -  New API in version \link newpage500 5.0 \endlink
 /// -  New API in version \link newpage495 4.9.5 \endlink
 /// -  New API in version \link newpage494 4.9.4 \endlink
 /// -  New API in version \link newpage493 4.9.3 \endlink
@@ -15,7 +16,19 @@
 /// -  API members that were \link deprecated Deprecated \endlink
 /// .
 /// 
-/// \section changes500 Changes in version 5.0.0.
+/// \section changes52 Changes in version 5.2.
+/// Release notes (24 issues): https://mapwindow.atlassian.net/secure/ReleaseNote.jspa?projectId=10003&version=10605
+/// 
+/// 1. Compiled with VS2015 and VS2017, thus depending on VC++ 2015 or VC++ 2017 redistributables (included in the installer)
+/// 2. Using GDAL 2.4.4, released 2020/01/08
+///
+/// \section changes51 Changes in version 5.1.
+/// Release notes (35 issues): https://mapwindow.atlassian.net/secure/ReleaseNote.jspa?projectId=10003&version=10602
+/// 
+/// 1. Compiled with VS2015 and VS2017, thus depending on VC++ 2015 or VC++ 2017 redistributables (included in the installer)
+/// 2. Using GDAL v2.4.2, released 2019/06/28
+/// 
+/// \section changes50 Changes in version 5.0.
 /// Release notes (21 issues): https://mapwindow.atlassian.net/secure/ReleaseNote.jspa?projectId=10003&version=10400
 /// 
 /// 1. Compiled with VS2015, thus depending on VC++ 2015 redistributables (included in the installer)

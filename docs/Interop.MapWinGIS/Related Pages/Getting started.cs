@@ -1,5 +1,5 @@
 #pragma warning disable 1587
-/// \page getting_started Getting started with MapWinGIS 4.9.3+
+/// \page getting_started Getting started with MapWinGIS
 ///
 /// Let's start assuming that you:
 /// - Installed the latest 32-Bit version of MapWinGIS using the installer available on the 
