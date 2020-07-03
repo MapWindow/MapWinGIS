@@ -397,8 +397,8 @@ void CMapView::DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* 
 		if (project)
 			PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
 
-		int xpt = Utility::Rint(pixX);
-		int ypt = Utility::Rint(pixY);
+		int xpt = std::lround(pixX);
+		int ypt = std::lround(pixY);
 		pnts[j] = Gdiplus::Point(xpt, ypt);
 	}
 
@@ -425,12 +425,13 @@ void CMapView::DrawLineOnGraphics(Gdiplus::Graphics* graphics, _DrawLine* line, 
 	auto pixX1 = std::lround(line->x1);
 	auto pixY1 = std::lround(line->y1);
 	if (project)
-		PROJECTION_TO_PIXEL_INT(pixX1, pixY1, pixX1, pixY1);
+		PROJECTION_TO_PIXEL_INT(line->x1, line->y1, pixX1, pixY1);
+
 	auto pixX2 = std::lround(line->x2);
 	auto pixY2 = std::lround(line->y2);
 	if (project)
-		PROJECTION_TO_PIXEL_INT(pixX2, pixY2, pixX2, pixY2);
-
+		PROJECTION_TO_PIXEL_INT(line->x2, line->y2, pixX2, pixY2);
+	
 	Gdiplus::Pen pen(color, width);
 	graphics->DrawLine(&pen, Gdiplus::Point(pixX1, pixY1), Gdiplus::Point(pixX2, pixY2));
 
