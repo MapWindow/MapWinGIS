@@ -438,7 +438,7 @@ namespace MapWinGIS
         /// Starting with version 5.2.0, this function will also attempt to maintain the current 
         /// set of Hidden and Selected shapes within the associated Shapefile.
         /// </remarks>
-        /// \new520 Updated in version 5.2.0
+        /// \new52 Updated in version 5.2
         public bool ReloadFromSource()
         {
             throw new NotImplementedException();

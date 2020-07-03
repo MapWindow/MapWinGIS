@@ -1,4 +1,4 @@
-# Doxyfile 1.8.14
+Falia# Doxyfile 1.8.14
 
 # This file describes the settings to be used by the documentation system
 # doxygen (www.doxygen.org) for a project.
@@ -38,7 +38,7 @@ PROJECT_NAME           = MapWinGIS
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = v5.0
+PROJECT_NUMBER         = v5.2
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -246,9 +246,10 @@ ALIASES                = "new48=\xrefitem newpage48 \"New API 4.8\" \"New API 4.
                          "new494=\xrefitem newpage494 \"New API 4.9.4\" \"New API 4.9.4\"" \
                          "new495=\xrefitem newpage495 \"New API 4.9.5\" \"New API 4.9.5\"" \
                          "removed493=\xrefitem removed493 \"Removed in 4.9.3\" \"Removed in 4.9.3\"" \
-                         "new500=\xrefitem newpage500 \"New API 5.0.0\" \"New API 5.0.0\"" \
-                         "new510=\xrefitem newpage510 \"New API 5.1.0\" \"New API 5.1.0\""
-                         "new520=\xrefitem newpage520 \"New API 5.2.0\" \"New API 5.2.0\""
+                         "new500=\xrefitem newpage500 \"New API 5.0\" \"New API 5.0\"" \
+                         "new510=\xrefitem newpage510 \"New API 5.1\" \"New API 5.1\"" \
+                         "new52=\xrefitem newpage52 \"New API 5.2\" \"New API 5.2\""
+                         
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"
@@ -1101,7 +1102,7 @@ CLANG_OPTIONS          =
 # generated with the -Duse-libclang=ON option for CMake.
 # The default value is: 0.
 
-CLANG_COMPILATION_DATABASE_PATH= 
+CLANG_COMPILATION_DATABASE_PATH= 0
 
 #---------------------------------------------------------------------------
 # Configuration options related to the alphabetical class index
