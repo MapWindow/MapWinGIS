@@ -1374,6 +1374,7 @@ namespace MapWinGIS
     /// Defines possible spatial relations between 2 shapes.
     /// </summary>
     /// \new48 Added in version 4.8
+    /// \new52 Added Covers and CoveredBy
     public enum tkSpatialRelation
     {
         srContains = 0,
@@ -1384,6 +1385,8 @@ namespace MapWinGIS
         srOverlaps = 5,
         srTouches = 6,
         srWithin = 7,
+        srCovers = 8,
+        srCoveredBy = 9
     }
 
     /// <summary>

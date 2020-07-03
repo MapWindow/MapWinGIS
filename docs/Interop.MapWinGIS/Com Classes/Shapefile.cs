@@ -165,10 +165,12 @@ namespace MapWinGIS
         /// <param name="method">The method for calculation of label positions.</param>
         /// <param name="largestPartOnly">A value which indicates whether all the parts of a multi-part shape should be supplied with individual 
         /// labels or only the largest (longest) one.</param>
+        /// <param name="offsetXFieldIndex">The field index used to populate the labels' x offsets</param>
+        /// <param name="offsetYFieldIndex">The field index used to populate the labels' y offsets</param>
         /// <returns>The number of labels generated. Normally it is equal to the number of shapes.
         /// Labels of the multi-part shape are treated like a single label.</returns>
         /// \new48 Added in version 4.8
-        public int GenerateLabels(int fieldIndex, tkLabelPositioning method, bool largestPartOnly)
+        public int GenerateLabels(int fieldIndex, tkLabelPositioning method, bool largestPartOnly = false, int offsetXFieldIndex = -1, int offsetYFieldIndex = -1)
         {
             throw new NotImplementedException();
         }
@@ -390,7 +392,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="shapeIndex">Index of shape.</param>
         /// <returns>Angle in degrees (0-360).</returns>
-        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
+        /// <remarks>This value will be applied to point shapefiles only.
         /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
         /// \new492 Added in version 4.9.2
         public double get_ShapeRotation(int shapeIndex)
@@ -403,7 +405,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="shapeIndex">Index of shape.</param>
         /// <param name="pVal">Angle in degrees (0-360).</param>
-        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
+        /// <remarks>This value will be applied to point shapefiles only.
         /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
         /// \new492 Added in version 4.9.2
         public void set_ShapeRotation(int shapeIndex, double pVal)
@@ -731,7 +733,7 @@ namespace MapWinGIS
         /// </remarks>
         /// <returns>True if the internal mapping exists, otherwise false</returns>
         /// \see Shapefile.OgrFid2ShapeIndex
-        /// \new520 Added in version 5.2.0
+        /// \new52 Added in version 5.2
         public bool HasOgrFidMapping()
         {
             throw new NotImplementedException();
@@ -752,7 +754,7 @@ namespace MapWinGIS
         /// The Shape Index that is currently associated with the specified OGR FID value
         /// </returns>
         /// \see Shapefile.HasOgrFidMapping
-        /// \new520 Added in version 5.2.0
+        /// \new52 Added in version 5.2
         public long OgrFid2ShapeIndex(long OgrFid)
         {
             throw new NotImplementedException();
@@ -1303,9 +1305,25 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Calculates the closest snap point (taking the snap mode in account) on (the boundary of) a shape.
+        /// </summary>
+        /// <param name="x">input x coordinate</param>
+        /// <param name="y">input y coordinate</param>
+        /// <param name="maxDistance">maximum distance beyond which no more snapping is performed</param>
+        /// <param name="shapeIndex">the shape index to get a snap point for</param>
+        /// <param name="foundX">the X coordinate of the snap point</param>
+        /// <param name="foundY">the Y coordinate of the snap point</param>
+        /// <param name="foundDistance">the distance of the snap point to the input coordinates</param>
+        /// <returns>True if a snap point was found, false if not</returns>
+        public bool GetClosestSnapPosition(double x, double y, double maxDistance, int shapeIndex, ref double foundX, ref double foundY, ref double foundDistance)
+        {
+            throw new NotImplementedException();
+        }
+
         /// @}
         #endregion
-            
+
         #region Management
         /// \addtogroup shapefile_management Shapefile open and close
         /// Here is a list of methods which affect the state of the shapefile. 

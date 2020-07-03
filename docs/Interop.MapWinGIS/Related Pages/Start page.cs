@@ -2,7 +2,7 @@
 /// \mainpage MapWinGIS ActiveX Control
 /// 
 /// \section content Main topics
-/// - \link getting_started GETTING STARTED WITH v. 4.9.3+ \endlink
+/// - \link getting_started GETTING STARTED \endlink
 /// - \link version_history Version history \endlink
 /// - \link overview Library overview \endlink
 /// - \ref a_projection "Map projection"

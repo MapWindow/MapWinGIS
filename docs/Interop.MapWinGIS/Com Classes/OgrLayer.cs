@@ -418,6 +418,19 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Extends the ogr featureset by running the given query against the datasource.
+        /// </summary>
+        /// <remarks>The layer must be opened with OgrLayer.OpenFromQuery or OgrDatasource.RunQuery 
+        /// (OgrLayer.SourceType = ogrQuery) in order for this method to work.
+        /// The new feature set replaces features with identical OGR feature id's.</remarks>
+        /// <param name="extendSql"></param>
+        /// <returns></returns>
+        public bool ExtendFromQuery(string extendSql)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Discards all the local changes and reloads layer from the source.
         /// </summary>
         /// <returns>True on success.</returns>
@@ -425,7 +438,7 @@ namespace MapWinGIS
         /// Starting with version 5.2.0, this function will also attempt to maintain the current 
         /// set of Hidden and Selected shapes within the associated Shapefile.
         /// </remarks>
-        /// \new520 Updated in version 5.2.0
+        /// \new52 Updated in version 5.2
         public bool ReloadFromSource()
         {
             throw new NotImplementedException();
@@ -630,8 +643,8 @@ namespace MapWinGIS
         /// }
         /// else
         /// {
-        ///     layer.LabelExpression = "[Name]";
-        ///     layer.LabelPosition = tkLabelPositioning.lpCenter;
+        ///     layer.Labels.Expression = "[Name]";
+        ///     layer.Labels.Positioning = tkLabelPositioning.lpCenter;
         ///     layer.GlobalCallback = this;
         /// 
         ///     if (!layer.GenerateCategories("population", tkClassificationType.ctEqualIntervals,
@@ -701,6 +714,7 @@ namespace MapWinGIS
         /// for dynamic loading mode, where labels will be generated on the fly after each zooming 
         /// operation.
         /// </remarks>
+        /// \deprecated v5.2 Use Layer.Labels.Expression instead.
         public string LabelExpression
         {
             get { throw new NotImplementedException(); }
@@ -710,7 +724,7 @@ namespace MapWinGIS
         /// <summary>
         /// Gets or sets label orientation for polyline layers.
         /// </summary>
-        /// \see OgrLayer.LabelExpression
+        /// \deprecated v5.2 Use Layer.Labels.LineOrientation instead.
         public tkLineLabelOrientation LabelOrientation
         {
             get { throw new NotImplementedException(); }
@@ -720,7 +734,7 @@ namespace MapWinGIS
         /// <summary>
         /// Gets or sets position of labels relative to their parent features.
         /// </summary>
-        /// \see OgrLayer.LabelExpression
+        /// \deprecated v5.2 Use Layer.Labels.Positioning instead.
         public tkLabelPositioning LabelPosition
         {
             get { throw new NotImplementedException(); }

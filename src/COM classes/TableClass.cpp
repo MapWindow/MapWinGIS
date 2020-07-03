@@ -247,7 +247,7 @@ bool CTableClass::QueryCore(CStringW Expression, std::vector<long>& indices, CSt
 // ********************************************************************
 bool CTableClass::CalculateCoreRaw(CStringW Expression, 
     std::function<bool(CExpressionValue* value, int rowIndex, CStringW& ErrorString)> processValue, 
-    CStringW& ErrorString, CString floatFormat, int rowIndex, bool ignoreCalculationErrors)
+    CStringW& ErrorString, CString floatFormat, int startRowIndex, int endRowIndex, bool ignoreCalculationErrors)
 {
     USES_CONVERSION;
 
@@ -269,8 +269,8 @@ bool CTableClass::CalculateCoreRaw(CStringW Expression,
     bool error = false;
     CStringW str;
 
-    int start = (rowIndex == -1) ? 0 : rowIndex;
-    int end = (rowIndex == -1) ? int(_rows.size()) : rowIndex + 1;
+    int start = (startRowIndex == -1) ? 0 : startRowIndex;
+    int end = (endRowIndex == -1) ? int(_rows.size()) : endRowIndex + 1;
 
     for (int i = start; i < end; i++)
     {
@@ -304,7 +304,7 @@ bool CTableClass::CalculateCoreRaw(CStringW Expression,
 //			CalculateCore()
 // ********************************************************************
 bool CTableClass::CalculateCore(CStringW Expression, std::vector<CStringW>& results, CStringW& ErrorString,
-	CString floatFormat, int rowIndex /*= -1*/)
+	CString floatFormat, int startRowIndex, int endRowIndex)
 {
 	results.clear();
     return CalculateCoreRaw(
@@ -329,7 +329,7 @@ bool CTableClass::CalculateCore(CStringW Expression, std::vector<CStringW>& resu
             }
             return true;
         },
-        ErrorString, floatFormat, rowIndex
+        ErrorString, floatFormat, startRowIndex, endRowIndex
     );
 }
 
@@ -340,7 +340,8 @@ bool CTableClass::CalculateCore(CStringW Expression, std::vector<CStringW>& resu
 // for each shape index a category is specified. If the given shape didn't fall into
 // any category -1 is used. The first categories in the list have higher priority
 // Results vector with certain categories can be provided by caller; those categories won't be changed
-void CTableClass::AnalyzeExpressions(std::vector<CStringW>& expressions, std::vector<int>& results)
+void CTableClass::AnalyzeExpressions(std::vector<CStringW>& expressions, std::vector<int>& results,
+	int startRowIndex, int endRowIndex)
 {
 	// TODO: optimize, if all expressions have the same fields in the same positions
 	// don't read the values multiple times.
@@ -348,6 +349,8 @@ void CTableClass::AnalyzeExpressions(std::vector<CStringW>& expressions, std::ve
 	// but in older style files it may be not present.
 	CustomExpression expr;
 	if (!expr.ReadFieldNames(this)) return;
+
+	startRowIndex = startRowIndex < 0 ? 0 : startRowIndex;
 
 	for (unsigned int categoryId = 0; categoryId < expressions.size(); categoryId++)
 	{
@@ -360,11 +363,11 @@ void CTableClass::AnalyzeExpressions(std::vector<CStringW>& expressions, std::ve
                     USES_CONVERSION;
                     if (result->isBoolean() && result->bln())
                     {
-                        results[rowIndex] = categoryId;
+                        results[rowIndex-startRowIndex] = categoryId;
                     }
                     return true;
                 },
-                ErrorString, m_globalSettings.floatNumberFormat, -1, true
+                ErrorString, m_globalSettings.floatNumberFormat, startRowIndex, endRowIndex, true
             );
 		}
 	}

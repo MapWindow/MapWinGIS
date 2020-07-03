@@ -111,7 +111,7 @@ public:
 	STDMETHOD(put_Item)(long Index, IShapefileCategory* newVal);
 	STDMETHOD(Generate)(long FieldIndex, tkClassificationType ClassificationType, long numClasses, VARIANT_BOOL* retVal);
 	STDMETHOD(ApplyExpressions)();
-	STDMETHOD(ApplyExpression)(long CategoryIndex);
+	STDMETHOD(ApplyExpression)(long CategoryIndex, long startRowIndex = -1, long endRowIndex = -1);
 
 	STDMETHOD(ApplyColorScheme)(tkColorSchemeType Type, IColorScheme* ColorScheme);
 	STDMETHOD(ApplyColorScheme2)(tkColorSchemeType Type, IColorScheme* ColorScheme, tkShapeElements ShapeElement);
@@ -156,8 +156,8 @@ private:
 
 private:
 	void ErrorMessage(long ErrorCode);
-	void ApplyExpressionCore(long CategoryIndex);
-    void CalculateRotations(CComPtr<IShapeDrawingOptions>& options, CComPtr<ITable>& tbl, std::vector<double>& rotations);
+    void CalculateRotations(CComPtr<IShapeDrawingOptions>& options, CComPtr<ITable>& tbl,
+		std::vector<double>& rotations, int startIndex = -1, int endIndex = -1);
 	bool get_AreaValues(std::vector<double>* values);
 	bool get_LengthValues(std::vector<double>* values);
 	
@@ -170,6 +170,7 @@ public:
 	CDrawingOptionsEx* get_UnderlyingOptions(int Index);
 	void GenerateCore(std::vector<CategoriesData>* categories, long FieldIndex, tkClassificationType ClassificationType, VARIANT_BOOL* retVal);
 	void GetCategoryData(vector<CategoriesData*>& data);
+	void ApplyExpressionCore(long CategoryIndex, long startShapeIndex = 0, long endShapeIndex = -1);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(ShapefileCategories), CShapefileCategories)

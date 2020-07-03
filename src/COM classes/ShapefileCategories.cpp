@@ -475,7 +475,7 @@ STDMETHODIMP CShapefileCategories::ApplyExpressions()
 // *******************************************************************
 //		ApplyExpression()
 // *******************************************************************
-STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex)
+STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex, long startRowIndex, long endRowIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
@@ -489,14 +489,14 @@ STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex)
 		}
 	}
 
-	ApplyExpressionCore(CategoryIndex);
+	ApplyExpressionCore(CategoryIndex, startRowIndex, endRowIndex);
 	return S_OK;
 }
 
 // *******************************************************************
 //		ApplyExpressionCore
 // *******************************************************************
-void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
+void CShapefileCategories::ApplyExpressionCore(long CategoryIndex, long startRowIndex, long endRowIndex)
 {
 	if (!_shapefile)
 		return;
@@ -505,8 +505,12 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 	_shapefile->get_Table(&tbl);
 	if ( !tbl )	return;
 	
+	// Process shape index range:
 	long numShapes;
 	_shapefile->get_NumShapes(&numShapes);
+	endRowIndex = endRowIndex < 0 ? numShapes - 1 : endRowIndex;
+	startRowIndex = startRowIndex < 0 ? 0 : startRowIndex;
+	numShapes = endRowIndex - startRowIndex + 1;
 		
 	// vector of numShapes size with category index for each shape
 	std::vector<int> results;
@@ -555,7 +559,7 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 		// applying categories to shapes
 		VARIANT val;
 		VariantInit(&val);
-		for (long i = 0; i < numShapes; i++)
+		for (long i = startRowIndex; i <= endRowIndex; i++)
 		{
 			tbl->get_CellValue(_classificationField, i, &val);
 			if (myMap.find(val) != myMap.end())
@@ -574,7 +578,7 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
     CComPtr<IShapeDrawingOptions> options = nullptr;
     _shapefile->get_DefaultDrawingOptions(&options);
     rotations[0].resize(numShapes);
-    CalculateRotations(options, tbl, rotations[0]);
+    CalculateRotations(options, tbl, rotations[0], startRowIndex, endRowIndex);
 
     std::vector<CStringW> expressions;
     for (unsigned int i = 0; i < _categories.size(); i++)
@@ -600,29 +604,33 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
         // Can we proceed to analyse rotations expressions?
         _categories[i]->get_DrawingOptions(&options);
         if (options) 
-            CalculateRotations(options, tbl, rotations[i + 1]);
+            CalculateRotations(options, tbl, rotations[i + 1],
+				startRowIndex, endRowIndex);
 	}
 
     // adding category indices for shapes in the results vector
     if (parsingIsNeeded)
-	    TableHelper::Cast(tbl)->AnalyzeExpressions(expressions, results);
+	    TableHelper::Cast(tbl)->AnalyzeExpressions(
+			expressions, results, startRowIndex, endRowIndex);
 
     // -------------------------------------------------------------
     //		Saving results
     // -------------------------------------------------------------
     for (unsigned long i = 0; i < results.size(); i++) {
-        const int categoryIndex = results[i];
-
         // Is this a category we need?
         if (!allCategories && i != CategoryIndex)
             continue;
 
-        _shapefile->put_ShapeCategory(i, categoryIndex);
-        _shapefile->put_ShapeRotation(i, rotations[categoryIndex + 1][i]);
+		const int categoryIndex = results[i];
+		const int rowIndex = startRowIndex + i;
+        _shapefile->put_ShapeCategory(rowIndex, categoryIndex);
+        _shapefile->put_ShapeRotation(rowIndex, rotations[categoryIndex + 1][i]);
     }
 }
 
-void CShapefileCategories::CalculateRotations(CComPtr<IShapeDrawingOptions>& options, CComPtr<ITable>& tbl, std::vector<double>& rotations)
+void CShapefileCategories::CalculateRotations(
+	CComPtr<IShapeDrawingOptions>& options, CComPtr<ITable>& tbl, 
+	std::vector<double>& rotations, int startIndex, int endIndex)
 {
     // Fill it with defaults:
     double rotation;
@@ -643,14 +651,15 @@ void CShapefileCategories::CalculateRotations(CComPtr<IShapeDrawingOptions>& opt
         [&](CExpressionValue* result, int rowIndex, CStringW& ErrorString) -> int {
             USES_CONVERSION;
             if (result->isString())
-                rotations[rowIndex] = Utility::wtof_custom(result->str());
+                rotations[rowIndex-startIndex] = Utility::wtof_custom(result->str());
             else if (result->IsDouble())
-                rotations[rowIndex] = result->dbl();
+                rotations[rowIndex-startIndex] = result->dbl();
             else
-                rotations[rowIndex] = 0.0;
+                rotations[rowIndex-startIndex] = 0.0;
             return true;
         },
-        ErrorString, m_globalSettings.floatNumberFormat, -1, true
+        ErrorString, m_globalSettings.floatNumberFormat, 
+		startIndex, endIndex, true
     );
 }
 

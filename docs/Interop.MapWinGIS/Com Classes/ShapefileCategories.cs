@@ -123,9 +123,15 @@ namespace MapWinGIS
         /// <summary>
         /// Maps particular shapes to the category based on ShapefileCategory.Expression.
         /// </summary>
-        /// <remarks>The mapping between the category and shapes can be changed by Shapefile.set_ShapeCategory property.</remarks>
+        /// <remarks>
+        /// The mapping between the category and shapes can be changed by Shapefile.set_ShapeCategory property.
+        /// The row index parameters are zero-based and bounds-inclusive, meaning that if you want to
+        /// apply expressions on a single row, you have to specifiy its row index as startRowIndex and endRowIndex.
+        /// </remarks>
         /// <param name="CategoryIndex">The index of the category.</param>
-        public void ApplyExpression(int CategoryIndex)
+        /// <param name="startRowIndex">Starting row index to apply expressions on. Negative values translate to the first row.</param>
+        /// <param name="endRowIndex">Last row index to apply expressions on. Negative values translate to the last row.</param>
+        public void ApplyExpression(int CategoryIndex, int startRowIndex = -1, int endRowIndex = -1)
         {
             throw new NotImplementedException();
         }

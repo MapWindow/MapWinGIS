@@ -4,7 +4,7 @@
         <name>AxInterop.MapWinGIS</name>
     </assembly>
     <members>
-        <member name="T:AxMap">
+        <member name="T:AxMapWinGIS.AxMap">
             <summary>
             Map component for visualization of vector, raster or grid data.
             </summary>
@@ -46,31 +46,31 @@
             \dotfile mapgroups.dot
             <a href = "diagrams.html">Graph description</a>
         </member>
-        <member name="P:AxMap.UDCursorHandle">
+        <member name="P:AxMapWinGIS.AxMap.UDCursorHandle">
             <summary>
             Gets or sets the user defined cursor handle. The handle is a windows cursor handle. 
             </summary>
         </member>
-        <member name="P:AxMap.Tiles">
+        <member name="P:AxMapWinGIS.AxMap.Tiles">
             <summary>
             Gets or sets the object of Tiles class associated with map.
             </summary>
             \new490 Added in version 4.9.0
         </member>
-        <member name="P:AxMap.FileManager">
+        <member name="P:AxMapWinGIS.AxMap.FileManager">
             <summary>
             Gets FileManager object associated with map. The object is used by AxMap.AddLayerFromFilename methods.
             </summary>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.BackColor">
+        <member name="P:AxMapWinGIS.AxMap.BackColor">
             <summary>
             Gets or sets the background color of the map.
             </summary>
             <remarks>When using VB.NET the color is represented as a System.Drawing.Color. 
             When using VB 6 the color can be an OLE_COLOR or an integer representation of an RGB value.</remarks>
         </member>
-        <member name="M:AxMap.DrawBackBuffer(System.IntPtr,System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.DrawBackBuffer(System.Int32,System.Int32,System.Int32)">
             <summary>
             Draws the content of the back buffer to specified device context.
             </summary>
@@ -78,18 +78,19 @@
             <param name="hdc">The handle of the device context.</param>
             <param name="imageWidth">The width of the resulting image.</param>
             <param name="imageHeight">The height of the resulting image.</param>
+            \new510 Updated in version 5.1
         </member>
-        <member name="P:AxMap.ExtentHistoryRedoCount">
+        <member name="P:AxMapWinGIS.AxMap.ExtentHistoryRedoCount">
             <summary>
             Gets the number of previous extents to go to, forward in the undo list
             </summary>
         </member>
-        <member name="P:AxMap.ExtentHistoryUndoCount">
+        <member name="P:AxMapWinGIS.AxMap.ExtentHistoryUndoCount">
             <summary>
             Gets the number of previous extents to go to, back in the undo list
             </summary>
         </member>
-        <member name="P:AxMap.GlobalCallback">
+        <member name="P:AxMapWinGIS.AxMap.GlobalCallback">
             <summary>
             The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications. 
             </summary>
@@ -99,73 +100,73 @@
             or assembly where the class is defined. Otherwise InvalidCastException may occur at runtime.</remarks>
             \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
         </member>
-        <member name="M:AxMap.HWnd">
+        <member name="M:AxMapWinGIS.AxMap.HWnd">
             <summary>
             Returns the handle of the window of map control.
             </summary>
             <returns>The handle of window.</returns>
         </member>
-        <member name="P:AxMap.Key">
+        <member name="P:AxMapWinGIS.AxMap.Key">
             <summary>
             The key may be used by the programmer to store any string data associated with the object.
             </summary>
         </member>
-        <member name="P:AxMap.LastErrorCode">
+        <member name="P:AxMapWinGIS.AxMap.LastErrorCode">
             <summary>
             Retrieves the last error generated in the object.
             </summary>
         </member>
-        <member name="P:AxMap.MapCursor">
+        <member name="P:AxMapWinGIS.AxMap.MapCursor">
             <summary>
             Gets or sets the cursor used with the map. When using tkCursor.crsrUserDefined be sure to set a AxMap.UDCursorHandle. 
             </summary>
         </member>
-        <member name="P:AxMap.MapResizeBehavior">
+        <member name="P:AxMapWinGIS.AxMap.MapResizeBehavior">
             <summary>
             Gets or sets the value which indicates how the control adjust its content after the resizing operations.
             </summary>
         </member>
-        <member name="M:AxMap.Redraw">
+        <member name="M:AxMapWinGIS.AxMap.Redraw">
             <summary>
             Redraws all layers in the map if the map is not locked. 
             </summary>
             <remarks>The same as AxMap.Redraw2(tkRedrawType.RedrawAll).</remarks>
         </member>
-        <member name="M:AxMap.Resize(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.Resize(System.Int32,System.Int32)">
             <summary>
             Resizes the map to the given width and height.
             </summary>
             <param name="width">The new width of the control.</param>
             <param name="height">The new hight of the control.</param>
         </member>
-        <member name="P:AxMap.ShowRedrawTime">
+        <member name="P:AxMapWinGIS.AxMap.ShowRedrawTime">
             <summary>
             Gets or sets a value which indicates whether the time of map redraw will be displayed on the screen.
             </summary>
             <remarks>Only times of full redraws when data layers are drawn and are displayed.</remarks>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.ShowToolTip(System.String,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.ShowToolTip(System.String,System.Int32)">
             <summary>
             Shows tooltip near the mouse cursor.
             </summary>
             <param name="text">Text of the tooltip.</param>
             <param name="milliseconds">The duration of tooltip display.</param>
         </member>
-        <member name="P:AxMap.ShowVersionNumber">
+        <member name="P:AxMapWinGIS.AxMap.ShowVersionNumber">
             <summary>
             Gets or sets a boolean value which indicate whether control's version number will be displayed on the screen.
             </summary>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.MapWinGIS#_DMap#SnapShot(MapWinGIS.Extents)">
+        <member name="M:AxMapWinGIS.AxMap.MapWinGIS#_DMap#SnapShot(MapWinGIS.Extents)">
             <summary>
             Takes snapshot of the contents of the map within the bounds of the specified rectangle, returning an image of the results. 
             </summary>
             <param name="boundBox">The bounds (rectangle) in map units to get the snapshot from.</param>
             <returns>An image of the contents of the map displayed inside the bounds of the specified rectangle.</returns>
         </member>
-        <member name="M:AxMap.MapWinGIS#_DMap#SnapShot2(System.Int32,System.Double,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.MapWinGIS#_DMap#SnapShot2(System.Int32,System.Double,System.Int32)">
             <summary>
             Takes snapshot of the contents of the map and returns it as an image object. 
             </summary>
@@ -174,7 +175,7 @@
             <param name="pWidth">The width of the resulting image.</param>
             <returns>An image of the contents of the map.</returns>
         </member>
-        <member name="M:AxMap.MapWinGIS#_DMap#SnapShot3(System.Double,System.Double,System.Double,System.Double,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.MapWinGIS#_DMap#SnapShot3(System.Double,System.Double,System.Double,System.Double,System.Int32)">
             <summary>
             Takes snapshot of the contents of the map in the specified bounding box and returns it as an image object. 
             </summary>
@@ -185,7 +186,7 @@
             <param name="width">The width of the resulting image in pixels.</param>
             <returns>An image of the contents of the map.</returns>
         </member>
-        <member name="M:AxMap.MapWinGIS#_DMap#SnapShotToDC(System.IntPtr,MapWinGIS.Extents,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.MapWinGIS#_DMap#SnapShotToDC(System.IntPtr,MapWinGIS.Extents,System.Int32)">
             <summary>
             Performs drawing of the map contents to the specified device context.
             </summary>
@@ -194,7 +195,7 @@
             <param name="width">The width of the resulting image in pixels.</param>
             <returns>True on success and false otherwise.</returns>
         </member>
-        <member name="M:AxMap.MapWinGIS#_DMap#SnapShotToDC2(System.IntPtr,MapWinGIS.Extents,System.Int32,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single)">
+        <member name="M:AxMapWinGIS.AxMap.MapWinGIS#_DMap#SnapShotToDC2(System.IntPtr,MapWinGIS.Extents,System.Int32,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single)">
             <summary>
             Performs drawing of the map contents to the specified device context.
             </summary>
@@ -209,20 +210,20 @@
             <param name="clipHeight"></param>
             <returns>True on success and false otherwise.</returns>
         </member>
-        <member name="P:AxMap.VersionNumber">
+        <member name="P:AxMapWinGIS.AxMap.VersionNumber">
             <summary>
             Gets or sets version number of the control.
             </summary>
             <remarks>The set part of the property isn't supported.</remarks>
         </member>
-        <member name="M:AxMap.get_ErrorMsg(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ErrorMsg(System.Int32)">
             <summary>
             Retrieves the error message associated with the specified error code.
             </summary>
             <param name="errorCode">The error code for which the error message is required.  </param>
             <returns>The error message description for the specified error code.</returns>
         </member>
-        <member name="P:AxMap.TileProvider">
+        <member name="P:AxMapWinGIS.AxMap.TileProvider">
             <summary>
             Gets or sets tile provider for the map.
             </summary>
@@ -230,7 +231,7 @@
             Setting it to tkTileProvider.ProviderNone will change Tiles.Visible property to false.</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.FindSnapPoint(System.Double,System.Double,System.Double,System.Double@,System.Double@)">
+        <member name="M:AxMapWinGIS.AxMap.FindSnapPoint(System.Double,System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
             Returns coordinate of the shapefile point closest to specified point on screen.
             </summary>
@@ -242,7 +243,7 @@
             <returns>True on success.</returns>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.LoadTilesForSnapshot(MapWinGIS.Extents,System.Int32,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.LoadTilesForSnapshot(MapWinGIS.Extents,System.Int32,System.String)">
             <summary>
             Loads tiles for the specified map extents.
             </summary>
@@ -254,7 +255,7 @@
             for printing.</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.Redraw2(MapWinGIS.tkRedrawType)">
+        <member name="M:AxMapWinGIS.AxMap.Redraw2(MapWinGIS.tkRedrawType)">
             <summary>
             Performs specific type of map redraw. 
             </summary>
@@ -271,32 +272,32 @@
             altogether and call AxMap.Redraw instead ( equivalent to AxMap.Redraw2(tkRedrawType.RedrawAll)). </remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.Redraw3(MapWinGIS.tkRedrawType,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.Redraw3(MapWinGIS.tkRedrawType,System.Boolean)">
             <summary>
             Adveanced version of AxMap.Redraw2
             </summary>
             <param name="redrawType">Type of redraw.</param>
             <param name="reloadTiles">Reload the tiles, defaults to false when AxMap.Redraw2 is used.</param>
         </member>
-        <member name="P:AxMap.UndoList">
+        <member name="P:AxMapWinGIS.AxMap.UndoList">
             <summary>
             Gets list actions performed by user via interactive ShapeEditor. Provides undo/redo capability.
             </summary>
             \new493 Added in version 4.9.3
         </member>
-        <member name="P:AxMap.Identifier">
+        <member name="P:AxMapWinGIS.AxMap.Identifier">
             <summary>
             Gets an Identifier object which holds settings of tkCursorMode.cmIdentify tools.
             </summary>
             \new493 Added in version 4.9.3
         </member>
-        <member name="P:AxMap.ShapeEditor">
+        <member name="P:AxMapWinGIS.AxMap.ShapeEditor">
             <summary>
             Gets instance of ShapeEditor class associated with map which stores data entered by interactive editing tools.
             </summary>
             \new493 Added in version 4.9.3
         </member>
-        <member name="P:AxMap.UseSeamlessPan">
+        <member name="P:AxMapWinGIS.AxMap.UseSeamlessPan">
             \addtogroup map_interaction Map interaction
             Here is a list of properties and methods which affect the way a user interacts with the map. This module is a part of the documentation of AxMap class.
             \dot
@@ -319,24 +320,24 @@
             decrease the performance in case large layers are displayed.</remarks>
             \new48 Added in version 4.8
         </member>
-        <member name="P:AxMap.CursorMode">
+        <member name="P:AxMapWinGIS.AxMap.CursorMode">
             <summary>
             Gets or sets the cursor mode for the map. 
             </summary>
             <remarks>The cursor mode determines how the map handles mouse click events on the map. The only mode not handled by the map is cmNone.</remarks>
         </member>
-        <member name="P:AxMap.ZoomBehavior">
+        <member name="P:AxMapWinGIS.AxMap.ZoomBehavior">
             <summary>
             Gets or sets zoom behaviour for the map control.
             </summary>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.ClearExtentHistory">
+        <member name="M:AxMapWinGIS.AxMap.ClearExtentHistory">
             <summary>
             Clears the extent history.
             </summary>
         </member>
-        <member name="M:AxMap.ZoomToSelected(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.ZoomToSelected(System.Int32)">
             <summary>
             Zoomes map to display selected shapes of the specified shapefile.
             </summary>
@@ -345,7 +346,7 @@
             <remarks>If the layer isn't shapefile or there is no selected shapes in it, nothing will happen.</remarks>
             \new490 Added in version 4.9.0
         </member>
-        <member name="M:AxMap.ZoomToTileLevel(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.ZoomToTileLevel(System.Int32)">
             <summary>
             Zooms map to specified zoom level of the active tile provider (Tiles.Provider).
             </summary>
@@ -353,7 +354,7 @@
             <returns>True if the zooming took place.</returns>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.ZoomToWorld">
+        <member name="M:AxMapWinGIS.AxMap.ZoomToWorld">
             <summary>
             Zooms to World extents (-180.0; 180.0; -90.0; 90.0) 
             </summary>
@@ -361,12 +362,12 @@
             <returns>True on success.</returns>
             \new490 Added in version 4.9.0
         </member>
-        <member name="P:AxMap.IsLocked">
+        <member name="P:AxMapWinGIS.AxMap.IsLocked">
             <summary>
             Checks to see if the map is currently locked or not.
             </summary>
         </member>
-        <member name="M:AxMap.LockWindow(MapWinGIS.tkLockMode)">
+        <member name="M:AxMapWinGIS.AxMap.LockWindow(MapWinGIS.tkLockMode)">
             <summary>
             Locks the window so that any changes will not be displayed until it is unlocked. 
             </summary>
@@ -374,108 +375,108 @@
             The changes of drawing options in the related classes (Shapefile, Labels, etc.) won't cause the redraw of the map even if it's not locked.</remarks>
             <param name="lockMode">The state of the lock mode.</param>
         </member>
-        <member name="P:AxMap.DisableWaitCursor">
+        <member name="P:AxMapWinGIS.AxMap.DisableWaitCursor">
             <summary>
             Gets or sets a boolean value which indicates whether a wait cursor will be displayed on map redraw.
             </summary>
         </member>
-        <member name="P:AxMap.MouseWheelSpeed">
+        <member name="P:AxMapWinGIS.AxMap.MouseWheelSpeed">
             <summary>
             Gets or sets the speed of zooming with mouse wheel.
             </summary>
             <remarks>The default values is 0.5. The values in 0.1 - 10.0 range are accepted. The value 1.0 will turn off
             the zooming by mouse wheel.</remarks>
         </member>
-        <member name="P:AxMap.SendMouseDown">
+        <member name="P:AxMapWinGIS.AxMap.SendMouseDown">
             <summary>
             Gets or sets whether the map sends mouse down events. 
             </summary>
         </member>
-        <member name="P:AxMap.SendMouseMove">
+        <member name="P:AxMapWinGIS.AxMap.SendMouseMove">
             <summary>
             Gets or sets whether the map sends mouse move events. 
             </summary>
         </member>
-        <member name="P:AxMap.SendMouseUp">
+        <member name="P:AxMapWinGIS.AxMap.SendMouseUp">
             <summary>
             Gets or sets whether the map sends mouse up events.
             </summary>
         </member>
-        <member name="P:AxMap.SendOnDrawBackBuffer">
+        <member name="P:AxMapWinGIS.AxMap.SendOnDrawBackBuffer">
             <summary>
             Gets or sets a boolean value which indicates whether the map sends on draw back buffer events.
             </summary>
         </member>
-        <member name="P:AxMap.SendSelectBoxDrag">
+        <member name="P:AxMapWinGIS.AxMap.SendSelectBoxDrag">
             <summary>
             Gets or sets whether the map sends the SelectBoxDrag event.
             </summary>
         </member>
-        <member name="P:AxMap.SendSelectBoxFinal">
+        <member name="P:AxMapWinGIS.AxMap.SendSelectBoxFinal">
             <summary>
             Gets or sets whether the map sends the SelectBoxFinal event. 
             </summary>
         </member>
-        <member name="P:AxMap.TrapRMouseDown">
+        <member name="P:AxMapWinGIS.AxMap.TrapRMouseDown">
             <summary>
             Gets or sets a boolean value which can affect the displaying of the context menus in client code by the right click.
             </summary>
         </member>
-        <member name="M:AxMap.ZoomIn(System.Double)">
+        <member name="M:AxMapWinGIS.AxMap.ZoomIn(System.Double)">
             <summary>
             Zooms the display in by the given factor.
             </summary>
-            <param name="percent">The factor to zoom in by.</param>
+            <param name="percent">A number between 0.0 and 1.0, being the factor to zoom in by.</param>
         </member>
-        <member name="M:AxMap.ZoomOut(System.Double)">
+        <member name="M:AxMapWinGIS.AxMap.ZoomOut(System.Double)">
             <summary>
             Zooms the display out by the specified factor.
             </summary>
-            <param name="percent">The factor to zoom out by.</param>
+            <param name="percent">A number between 0.0 and 1.0, being the factor to zoom out by.</param>
         </member>
-        <member name="P:AxMap.ZoomPercent">
+        <member name="P:AxMapWinGIS.AxMap.ZoomPercent">
             <summary>
             Gets or sets the factor by which to zoom the view of the map in or out.
             </summary>
         </member>
-        <member name="M:AxMap.ZoomToLayer(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.ZoomToLayer(System.Int32)">
             <summary>
             Zooms the map display to the specified layer.
             </summary>
             <param name="layerHandle">The handle of the layer to zoom to.</param>
         </member>
-        <member name="M:AxMap.ZoomToMaxExtents">
+        <member name="M:AxMapWinGIS.AxMap.ZoomToMaxExtents">
             <summary>
             Zooms the map to the maximum extents of all loaded layers.  
             </summary>
             <remarks>Layers which are not visible are still used to compute maximum extents.</remarks>
         </member>
-        <member name="M:AxMap.ZoomToMaxVisibleExtents">
+        <member name="M:AxMapWinGIS.AxMap.ZoomToMaxVisibleExtents">
             <summary>
             Zooms the map to the maximum extents of all loaded visible layers.
             </summary>
             <remarks>Layers which are not visible are not used to compute maximum extents.</remarks>
         </member>
-        <member name="M:AxMap.ZoomToPrev">
+        <member name="M:AxMapWinGIS.AxMap.ZoomToPrev">
             <summary>
             Zooms the map view to the previous extents if there are previous extents in the extents history.
             </summary>
             <returns>Returns the number of extents left in the extents history after zooming to previous extents.</returns>
         </member>
-        <member name="M:AxMap.ZoomToNext">
+        <member name="M:AxMapWinGIS.AxMap.ZoomToNext">
             <summary>
             Zooms the map view to the next extents if there are next extents in the extents history.
             </summary>
             <returns>Returns the number of extents left in the extents history after zooming to previous extents.</returns>
         </member>
-        <member name="M:AxMap.ZoomToShape(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.ZoomToShape(System.Int32,System.Int32)">
             <summary>
             Zooms the map display to the specified shape in the shapefile contained by the specified layer.
             </summary>
             <param name="layerHandle">The handle of the layer containing the shape to zoom to.</param>
             <param name="shape">The index of the shape to zoom to.</param>
         </member>
-        <member name="P:AxMap.ShowZoomBar">
+        <member name="P:AxMapWinGIS.AxMap.ShowZoomBar">
             <summary>
             Gets or sets a value indicating whether zoom bar will be displayed on the map.
             </summary>
@@ -484,7 +485,7 @@
             /see AxMap.TileProvider, AxMap.Projection
             \new492 Added in version 4.9.2
         </member>
-        <member name="P:AxMap.AnimationOnZooming">
+        <member name="P:AxMapWinGIS.AxMap.AnimationOnZooming">
             <summary>
             Gets or sets a value indicating whether animation will be displayed zooming map in or out.
             </summary>
@@ -493,7 +494,7 @@
             zoom levels between current and target level.</remarks>
             \new492 Added in version 4.9.2
         </member>
-        <member name="P:AxMap.InertiaOnPanning">
+        <member name="P:AxMapWinGIS.AxMap.InertiaOnPanning">
             <summary>
             Gets or sets a value indicating whether animation will be displayed to simulate 
             inertia after panning operation.
@@ -505,33 +506,33 @@
             </remarks>
             \new492 Added in version 4.9.2
         </member>
-        <member name="P:AxMap.ReuseTileBuffer">
+        <member name="P:AxMapWinGIS.AxMap.ReuseTileBuffer">
             <summary>
             Gets or sets a value indicating whether currently rendered tile buffer should be scaled 
             and reused during the next redraw.
             </summary>
             \new492 Added in version 4.9.2
         </member>
-        <member name="P:AxMap.UseAlternatePanCursor">
+        <member name="P:AxMapWinGIS.AxMap.UseAlternatePanCursor">
             <summary>
             Gets or sets a value indicating whether the legacy 'hand' cursor should be used
             for map panning rather than the standard 'NSEW' four-point cursor.
             </summary>
             \new495 Added in version 4.9.5
         </member>
-        <member name="P:AxMap.ZoomBarVerbosity">
+        <member name="P:AxMapWinGIS.AxMap.ZoomBarVerbosity">
             <summary>
             Gets or sets the amount of information to be displayed in zoom bar tool tip.
             </summary>
             \new492 Added in version 4.9.2
         </member>
-        <member name="P:AxMap.ZoomBoxStyle">
+        <member name="P:AxMapWinGIS.AxMap.ZoomBoxStyle">
             <summary>
             Gets or sets a style of zoom box, which is used to select a region with Zoom In tool.
             </summary>
             \new492 Added in version 4.9.2
         </member>
-        <member name="P:AxMap.ZoomBarMinZoom">
+        <member name="P:AxMapWinGIS.AxMap.ZoomBarMinZoom">
             <summary>
             Gets or sets minimum zoom level to be used by zoom bar.
             </summary>
@@ -539,7 +540,7 @@
             if certain levels aren't supported by the provider they still won't be displayed.</remarks>
             \new492 Added in version 4.9.2
         </member>
-        <member name="P:AxMap.ZoomBarMaxZoom">
+        <member name="P:AxMapWinGIS.AxMap.ZoomBarMaxZoom">
             <summary>
             Gets or sets maximum zoom level to be used by zoom bar.
             </summary>
@@ -547,7 +548,7 @@
             if certain levels aren't supported by the provider they still won't be displayed.</remarks>
             \new492 Added in version 4.9.2
         </member>
-        <member name="P:AxMap.RecenterMapOnZoom">
+        <member name="P:AxMapWinGIS.AxMap.RecenterMapOnZoom">
             <summary>
             Gets or sets a value indicating whether to move the mouse click point to the center of the map 
             when using the Zoom In or Zoom Out tools.
@@ -556,7 +557,7 @@
             but instead keeps the click point at the mouse position and zooms around that point.</remarks>
             \new495 Added in version 4.9.5
         </member>
-        <member name="M:AxMap.Undo">
+        <member name="M:AxMapWinGIS.AxMap.Undo">
             <summary>
             Reverts the last operation performed by user in interactive ShapeEditor.
             </summary>
@@ -564,7 +565,7 @@
             also undo point added during creation of new shape, which are not registered in the undo list.</remarks>
             \new493 Added in version 4.9.3
         </member>
-        <member name="M:AxMap.SerializeLayer(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.SerializeLayer(System.Int32)">
             \addtogroup map_serialization Map serialization
             Here is a list of properties and methods to preserve the state of the map and particular layers. This module is a part of the documentation of AxMap class.
             \dot
@@ -589,7 +590,7 @@
             <returns>The string with serialized layer settings.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.DeserializeLayer(System.Int32,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.DeserializeLayer(System.Int32,System.String)">
             <summary>
             Restores the state of the layer from the string generated by AxMap.SerializeLayer().
             </summary>
@@ -598,7 +599,7 @@
             <returns>True on success and false otherwise.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.SerializeMapState(System.Boolean,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.SerializeMapState(System.Boolean,System.String)">
             <summary>
             Serializes map state to the string.
             </summary>
@@ -607,7 +608,7 @@
             <returns>The string with the serialized map state.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.DeserializeMapState(System.String,System.Boolean,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.DeserializeMapState(System.String,System.Boolean,System.String)">
             <summary>
             Restores map state from the string generated by AxMap.SerializeMapState.
             </summary>
@@ -618,7 +619,7 @@
             <returns>True on success and false otherwise.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.LoadLayerOptions(System.Int32,System.String,System.String@)">
+        <member name="M:AxMapWinGIS.AxMap.LoadLayerOptions(System.Int32,System.String,System.String@)">
             <summary>
             Applies to the layer a set of settings from file with the specified name.
             </summary>
@@ -629,7 +630,7 @@
             <returns>True on success and false otherwise.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.RemoveLayerOptions(System.Int32,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.RemoveLayerOptions(System.Int32,System.String)">
             <summary>
             Removes set of options for the layer with the specified name.
             </summary>
@@ -639,7 +640,7 @@
             <returns>True on success and false otherwise.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.SaveLayerOptions(System.Int32,System.String,System.Boolean,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.SaveLayerOptions(System.Int32,System.String,System.Boolean,System.String)">
             <summary>
             Saves settings of the layer to the file.
             </summary>
@@ -651,7 +652,7 @@
             <returns>True on success and false otherwise.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.LoadMapState(System.String,System.Object)">
+        <member name="M:AxMapWinGIS.AxMap.LoadMapState(System.String,System.Object)">
             <summary>
             Loads the state of the map from the file created by AxMap.SaveMapState method.
             </summary>
@@ -660,7 +661,7 @@
             <returns>True on success and false otherwise.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.SaveMapState(System.String,System.Boolean,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.SaveMapState(System.String,System.Boolean,System.Boolean)">
             <summary>
             Saves the state of the map to the specified file.
             </summary>
@@ -676,7 +677,7 @@
             <returns>True on success and false otherwise.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_LayerMaxVisibleZoom(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerMaxVisibleZoom(System.Int32)">
             \addtogroup map_layer_properties Layer properties
             Here is a list of properties common to all data layers. This module is a part of the documentation of AxMap class.
             \dot
@@ -701,7 +702,7 @@
             of the current tile provider (Map.Tiles.Provider).</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.set_LayerMaxVisibleZoom(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerMaxVisibleZoom(System.Int32,System.Int32)">
             <summary>
             Sets maximum zoom at which the layer will be displayed.
             </summary>
@@ -711,7 +712,7 @@
             of the current tile provider (Map.Tiles.Provider).</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.get_LayerFilename(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerFilename(System.Int32)">
             <summary>
             Gets filename of datasource for the specified layer.
             </summary>
@@ -719,7 +720,7 @@
             <returns>Filename of the layer including path.</returns>
             \new490 Added in version 4.9.0
         </member>
-        <member name="M:AxMap.get_LayerMinVisibleZoom(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerMinVisibleZoom(System.Int32)">
             <summary>
             Gets minimum zoom at which the layer will be displayed.
             </summary>
@@ -729,7 +730,7 @@
             of the current tile provider (Map.Tiles.Provider).</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.set_LayerMinVisibleZoom(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerMinVisibleZoom(System.Int32,System.Int32)">
             <summary>
             Sets minimum zoom at which the layer will be displayed.
             </summary>
@@ -739,7 +740,7 @@
             of the current tile provider (Map.Tiles.Provider).</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.set_LayerDescription(System.Int32,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerDescription(System.Int32,System.String)">
             <summary>
             Sets the description of the layer.
             </summary>
@@ -748,7 +749,7 @@
             <param name="newValue">The description of the layer.</param>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_LayerDescription(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerDescription(System.Int32)">
             <summary>
             Gets the description of the layer from the associated .mwsymb file.
             </summary>
@@ -756,7 +757,7 @@
             <returns>The string with description.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_LayerDynamicVisibility(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerDynamicVisibility(System.Int32)">
             <summary>
             Gets the boolean value which indicates whether the layer will be displayed at all scales or only within the chosen range of scales.
             </summary>
@@ -765,7 +766,7 @@
             \see AxMap.get_LayerMaxVisibleScale, AxMap.get_LayerMinVisibleScale
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.set_LayerDynamicVisibility(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerDynamicVisibility(System.Int32,System.Boolean)">
             <summary>
             Sets the boolean value which indicates whether the layer will be displayed at all scales or only within the chosen range of scales.
             </summary>
@@ -774,7 +775,7 @@
             \see set_LayerMaxVisibleScale, set_LayerMinVisibleScale
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_LayerKey(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerKey(System.Int32)">
             <summary>
             Gets a string associated with a layer in the map. 
             </summary>
@@ -782,7 +783,7 @@
             <param name="layerHandle">The handle for the layer for which the layer key is to be set.</param>
             <returns>The layer key for the specified layer in string format.</returns>
         </member>
-        <member name="M:AxMap.set_LayerKey(System.Int32,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerKey(System.Int32,System.String)">
             <summary>
             Sets a string associated with a layer in the map. 
             </summary>
@@ -790,7 +791,7 @@
             <param name="layerHandle">The handle of the layer.</param>
             <param name="newValue">The string to be associated with layer.</param>
         </member>
-        <member name="M:AxMap.get_LayerLabels(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerLabels(System.Int32)">
             <summary>
             Returns labels associated with layer.
             </summary>
@@ -799,7 +800,7 @@
             <returns>The labels associated with the layer.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.set_LayerLabels(System.Int32,MapWinGIS.Labels)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerLabels(System.Int32,MapWinGIS.Labels)">
             <summary>
             Sets the labels associated with the layer.
             </summary>
@@ -807,7 +808,7 @@
             <param name="newValue">The new instance of the Labels class to be associated with the layer.</param>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_LayerMaxVisibleScale(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerMaxVisibleScale(System.Int32)">
             <summary>
             Gets the maximum scale at which the layer is visible on the map.
             </summary>
@@ -815,7 +816,7 @@
             <returns>The maximum visible scale for the layer.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.set_LayerMaxVisibleScale(System.Int32,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerMaxVisibleScale(System.Int32,System.Double)">
             <summary>
             Sets the maximum scale at which the layer is visible on the map.
             </summary>
@@ -823,7 +824,7 @@
             <param name="newValue">The maximum visible scale for the layer.</param>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_LayerMinVisibleScale(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerMinVisibleScale(System.Int32)">
             <summary>
             Gets the minimum scale at which the layer is visible on the map.
             </summary>
@@ -831,7 +832,7 @@
             <returns>The minimum visible scale for the layer.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.set_LayerMinVisibleScale(System.Int32,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerMinVisibleScale(System.Int32,System.Double)">
             <summary>
             Sets the minimum scale at which the layer is visible on the map.
             </summary>
@@ -839,21 +840,21 @@
             <param name="newValue">The minimum visible scale for the layer.</param>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_LayerName(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerName(System.Int32)">
             <summary>
             Gets the name of the specified layer.
             </summary>
             <param name="layerHandle">The handle of the layer for which the name is to be set.</param>
             <returns>The layer name for the specified layer. </returns>
         </member>
-        <member name="M:AxMap.set_LayerName(System.Int32,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerName(System.Int32,System.String)">
             <summary>
             Sets the name of the specified layer.
             </summary>
             <param name="layerHandle">The handle of the layer for which the name is to be set.</param>
             <param name="newValue">The name to be set for the layer.</param>
         </member>
-        <member name="M:AxMap.get_LayerSkipOnSaving(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerSkipOnSaving(System.Int32)">
             <summary>
             Gets a boolean value which indicates whether the layer will be serialized by appropriate routines.
             </summary>
@@ -862,7 +863,7 @@
             <returns>True in case the layer will be excluded from serialization and false otherwise.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.set_LayerSkipOnSaving(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerSkipOnSaving(System.Int32,System.Boolean)">
             <summary>
             Sets a boolean value which indicates whether the layer will be serialized by appropriate routines.
             </summary>
@@ -871,28 +872,28 @@
             <param name="newValue">True in case the layer will be excluded from serialization and false otherwise.</param>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_LayerVisible(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerVisible(System.Int32)">
             <summary>
             Gets the visibility of the specified layer.
             </summary>
             <param name="layerHandle">The handle of the layer for which the visibility is being set. </param>
             <returns>A boolean value representing whether the layer is to be visible or not.</returns>
         </member>
-        <member name="M:AxMap.set_LayerVisible(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.set_LayerVisible(System.Int32,System.Boolean)">
             <summary>
             Sets the visibility of the specified layer.
             </summary>
             <param name="layerHandle">The handle of the layer for which the visibility is returned. </param>
             <param name="newValue">A boolean value representing whether the layer is to be visible or not.</param>
         </member>
-        <member name="M:AxMap.GetColorScheme(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.GetColorScheme(System.Int32)">
             <summary>
             Returns a color scheme for the specified layer.
             </summary>
             <param name="layerHandle">The layer handle of the layer for which the coloring scheme is required</param>
             <returns>The color scheme for the specified layer</returns>
         </member>
-        <member name="M:AxMap.SetImageLayerColorScheme(System.Int32,System.Object)">
+        <member name="M:AxMapWinGIS.AxMap.SetImageLayerColorScheme(System.Int32,System.Object)">
             <summary>
             Sets the color scheme of an image layer
             </summary>
@@ -900,7 +901,7 @@
             <param name="colorScheme">The color scheme</param>
             <returns>True on success</returns>
         </member>
-        <member name="M:AxMap.Clear">
+        <member name="M:AxMapWinGIS.AxMap.Clear">
             \addtogroup map_layer_management Layer management
             Here is a list of properties and methods which allow to work with layers of the map. This module is a part of the documentation of AxMap class.
             \dot
@@ -921,8 +922,8 @@
             </summary>
             \new491 Added in version 4.9.1
         </member>
-        <!-- Badly formed XML comment ignored for member "M:AxMap.AddLayerFromDatabase(System.String,System.String,System.Boolean)" -->
-        <member name="M:AxMap.AddLayerFromFilename(System.String,MapWinGIS.tkFileOpenStrategy,System.Boolean)">
+        <!-- Badly formed XML comment ignored for member "M:AxMapWinGIS.AxMap.AddLayerFromDatabase(System.String,System.String,System.Boolean)" -->
+        <member name="M:AxMapWinGIS.AxMap.AddLayerFromFilename(System.String,MapWinGIS.tkFileOpenStrategy,System.Boolean)">
             <summary>
             Adds layer from the specified datasource.
             </summary>
@@ -934,7 +935,7 @@
             <returns>Handle of the newly added layer or -1 on failure.</returns>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.AddLayer(System.Object,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.AddLayer(System.Object,System.Boolean)">
             <summary>
             Adds a layer to the map.
             </summary>
@@ -945,21 +946,21 @@
             <param name="visible">Sets whether the layer is visible after being added to the map.</param>
             <returns>Returns the integer handle for the layer added to the map.</returns>
         </member>
-        <member name="M:AxMap.get_LayerHandle(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerHandle(System.Int32)">
             <summary>
             Gets the handle of the layer at the given position in the map. Returns -1 if there is no layer at the specified position
             </summary>
             <param name="layerPosition">The position of the layer for which the layer handle is required.</param>
             <returns>The layer handle for the layer at the specified position.</returns>
         </member>
-        <member name="M:AxMap.get_LayerPosition(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerPosition(System.Int32)">
             <summary>
             Gets the position of the specified layer in the map.
             </summary>
             <param name="layerHandle">The layer handle of the layer for which the layer position is required.</param>
             <returns>The layer position of the specified layer in the map.</returns>
         </member>
-        <member name="M:AxMap.MoveLayer(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.MoveLayer(System.Int32,System.Int32)">
             <summary>
             Moves a layer in the map from the initial position to a target position.
             </summary>
@@ -967,45 +968,45 @@
             <param name="targetPosition">The final position of the layer being moved.</param>
             <returns></returns>
         </member>
-        <member name="M:AxMap.MoveLayerBottom(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.MoveLayerBottom(System.Int32)">
             <summary>
             Moves the specified layer below all other layers.
             </summary>
             <param name="initialPosition">The position of the layer to move to the bottom</param>
             <returns>Boolean value representing success when true, and failure when false.</returns>
         </member>
-        <member name="M:AxMap.MoveLayerDown(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.MoveLayerDown(System.Int32)">
             <summary>
             Moves the specified layer down one layer in the map.
             </summary>
             <param name="initialPosition">The position of the layer to be moved.</param>
             <returns>Boolean value representing success when true, and failure when false.</returns>
         </member>
-        <member name="M:AxMap.MoveLayerTop(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.MoveLayerTop(System.Int32)">
             <summary>
             Moves the specified layer to the top of all other layers.
             </summary>
             <param name="initialPosition">The position of the layer to be moved.</param>
             <returns>Boolean value representing success when true, failure when false.</returns>
         </member>
-        <member name="M:AxMap.MoveLayerUp(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.MoveLayerUp(System.Int32)">
             <summary>
             Moves the specified layer up one layer in the map.
             </summary>
             <param name="initialPosition">The initial position of the layer to be moved.</param>
             <returns>Boolean value representing success when true, failure when false.</returns>
         </member>
-        <member name="P:AxMap.NumLayers">
+        <member name="P:AxMapWinGIS.AxMap.NumLayers">
             <summary>
             Gets the number of layers loaded in the map.
             </summary>
         </member>
-        <member name="M:AxMap.RemoveAllLayers">
+        <member name="M:AxMapWinGIS.AxMap.RemoveAllLayers">
             <summary>
             Removes all layers from the map.
             </summary>
         </member>
-        <member name="M:AxMap.ReSourceLayer(System.Int32,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.ReSourceLayer(System.Int32,System.String)">
             <summary>
             Changes the data source for the specified layer without its closing.
             </summary>
@@ -1013,7 +1014,7 @@
             <param name="layerHandle">The handle of the layer.</param>
             <param name="newSrcPath">The the name of the new data source.</param>
         </member>
-        <member name="M:AxMap.ReloadOgrLayerFromSource(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.ReloadOgrLayerFromSource(System.Int32)">
             <summary>
             Performs the same operation as OgrLayer.ReloadFromSource, then compares 
             projections with the Map, and if the settings allow, will reproject on-the-fly.
@@ -1022,15 +1023,20 @@
             <returns>
             True if successful; False if not an OGR Layer, could not be reloaded, or could not be reprojected (if necessary)
             </returns>
+            <remarks>
+            Starting with version 5.2.0, this function will also attempt to maintain the current 
+            set of Hidden and Selected shapes within the associated Shapefile.
+            </remarks>
+            \new52 Updated in version 5.2
         </member>
-        <member name="M:AxMap.RestartBackgroundLoading(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.RestartBackgroundLoading(System.Int32)">
             <summary>
             Restarts the background loading thread of dynamically loaded layers
             </summary>
             <param name="ogrLayerHandle">The handle of the layer. Must be an OGR layer.</param>
             \new510 Adding in v5.1.0
         </member>
-        <member name="M:AxMap.StartNewBoundShape(System.Double,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap.StartNewBoundShape(System.Double,System.Double)">
             <summary>
             Allow to initiate digitizing a new shape with a starting point
             </summary>
@@ -1039,7 +1045,7 @@
             <returns>True on success</returns>
             \new510 Added in v5.1.0
         </member>
-        <member name="M:AxMap.StartNewBoundShapeEx(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.StartNewBoundShapeEx(System.Int32)">
             <summary>
             Allow to initiate digitizing a new shape with a starting point
             </summary>
@@ -1047,20 +1053,20 @@
             <returns>True on success</returns>
             \new510 Added in v5.1.0
         </member>
-        <member name="M:AxMap.RemoveLayer(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.RemoveLayer(System.Int32)">
             <summary>
             Removes the specified layer from the map
             </summary>
             <param name="layerHandle">The handle of the layer to be removed from the map.</param>
         </member>
-        <member name="M:AxMap.RemoveLayerWithoutClosing(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.RemoveLayerWithoutClosing(System.Int32)">
             <summary>
             Removes layer from the map without its closing.
             </summary>
             <remarks>Shapefile.Close or Image.Close won't be called while removing the layer.</remarks>
             <param name="layerHandle">The handle of the layer.</param>
         </member>
-        <member name="M:AxMap.get_Image(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_Image(System.Int32)">
             <summary>
             Gets image object associated with the layer.
             </summary>
@@ -1069,7 +1075,7 @@
             <returns>The reference to the image or NULL reference in case of invalid handle or wrong layer type.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.set_Image(System.Int32,MapWinGIS.Image)">
+        <member name="M:AxMapWinGIS.AxMap.set_Image(System.Int32,MapWinGIS.Image)">
             <summary>
             Replaces the image object associated with the layer.
             </summary>
@@ -1078,7 +1084,7 @@
             <param name="newValue">The new image object.</param>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_Shapefile(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_Shapefile(System.Int32)">
             <summary>
             Gets shapefile object associated with the layer.
             </summary>
@@ -1087,7 +1093,7 @@
             <returns>The reference to the shapefile or NULL reference in case of invalid handle or wrong layer type.</returns>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.set_Shapefile(System.Int32,MapWinGIS.Shapefile)">
+        <member name="M:AxMapWinGIS.AxMap.set_Shapefile(System.Int32,MapWinGIS.Shapefile)">
             <summary>
             Replaces the shapefile object associated with the layer.
             </summary>
@@ -1096,7 +1102,7 @@
             <param name="newValue">The new shapefile object.</param>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.get_GetObject(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_GetObject(System.Int32)">
             <summary>
             Returns the layer object with the given handle. The object could be a Shapefile, Grid, or Image object.
             </summary>
@@ -1105,7 +1111,7 @@
             <param name="layerHandle">The handle of the layer to be retrieved.</param>
             <returns>A Shapefile, Grid, or Image object.</returns>
         </member>
-        <member name="M:AxMap.get_OgrLayer(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_OgrLayer(System.Int32)">
             <summary>
             Gets instance of OGR layer object associated with the specified layer.
             </summary>
@@ -1113,14 +1119,14 @@
             <returns>OGR layer or null in case of invalid layer index or wrong layer type.</returns>
             \new493 Added in version 4.9.3
         </member>
-        <member name="M:AxMap.get_WmsLayer(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_WmsLayer(System.Int32)">
             <summary>
             Gets the WmsLayer
             </summary>
             <param name="layerHandle">The handle of the layer.</param>
             <returns>The WmsLayer object</returns>
         </member>
-        <member name="M:AxMap.get_layerExtents(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_layerExtents(System.Int32)">
             <summary>
             Gets the layer extents
             </summary>
@@ -1128,7 +1134,7 @@
             <returns>The extents</returns>
             \new510 Added in version 5.1.0
         </member>
-        <member name="M:AxMap.get_LayerVisibleAtCurrentScale(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_LayerVisibleAtCurrentScale(System.Int32)">
             <summary>
             Gets a value which indicates whether a layer is visible at current map scale.
             </summary>
@@ -1138,7 +1144,7 @@
             However it doesn't check that the layer has any objects within the current map extents.</remarks>
             \new493 Added in version 4.9.3
         </member>
-        <member name="M:AxMap.set_DrawingLabels(System.Int32,MapWinGIS.Labels)">
+        <member name="M:AxMapWinGIS.AxMap.set_DrawingLabels(System.Int32,MapWinGIS.Labels)">
             \addtogroup map_drawing_layers Drawing layers
             Here is a list of methods and properties to interact with the drawing layers of the map.
             The drawing layers are more transient that the standard layers, intended for fast drawing of temporary elements on top of the map.
@@ -1162,28 +1168,28 @@
             <param name="drawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
             <param name="newValue">The new instance of the Labels class to associate with the layer.</param>
         </member>
-        <member name="M:AxMap.get_DrawingLabels(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_DrawingLabels(System.Int32)">
             <summary>
             Gets labels associated with the drawing layer.
             </summary>
             <param name="drawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
             <returns>The reference to the Labels class or NULL reference on the invalid handle.</returns>
         </member>
-        <member name="M:AxMap.ClearDrawing(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.ClearDrawing(System.Int32)">
             <summary>
             Clears all drawings on the specified drawing layer, and removes the drawing layer. The drawing handle will no longer be valid.
             Call AxMap.NewDrawing again to create a new drawing layer to continue adding new elements.
             </summary>
             <param name="drawHandle">Drawing handle of the drawing layer to be cleared (and removed).</param>
         </member>
-        <member name="M:AxMap.ClearDrawings">
+        <member name="M:AxMapWinGIS.AxMap.ClearDrawings">
             <summary>
             Clears all drawings on all drawing layers, and removes all drawing layers.
             This method is slower than using ClearDrawing on a specific layer.
             Call AxMap.NewDrawing again to create a new drawing layer to continue adding new elements.
             </summary>
         </member>
-        <member name="M:AxMap.DrawCircle(System.Double,System.Double,System.Double,System.UInt32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.DrawCircle(System.Double,System.Double,System.Double,System.UInt32,System.Boolean,System.Byte)">
             <summary>
             Draws a circle on the last drawing layer created by AxMap.NewDrawing
             </summary>
@@ -1192,8 +1198,9 @@
             <param name="pixelRadius">Radius in pixels of the circle to be drawn.</param>
             <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
             <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawCircleEx(System.Int32,System.Double,System.Double,System.Double,System.UInt32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.DrawCircleEx(System.Int32,System.Double,System.Double,System.Double,System.UInt32,System.Boolean,System.Byte)">
             <summary>
             Draws a circle on the specified drawing layer.
             </summary>
@@ -1203,8 +1210,9 @@
             <param name="pixelRadius">Radius in pixels of the circle to be drawn.</param>
             <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
             <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawLine(System.Double,System.Double,System.Double,System.Double,System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap.DrawLine(System.Double,System.Double,System.Double,System.Double,System.Int32,System.UInt32,System.Byte)">
             <summary>
             Draws a line on the last drawing layer created using AxMap.NewDrawing.
             </summary>
@@ -1214,8 +1222,9 @@
             <param name="y2">Y coordinate of the second point used to draw the line.</param>
             <param name="pixelWidth">Width of the line in pixels.</param>
             <param name="color">Color to draw the line with. This is a UInt32 representation of an RGB value.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawLineEx(System.Int32,System.Double,System.Double,System.Double,System.Double,System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap.DrawLineEx(System.Int32,System.Double,System.Double,System.Double,System.Double,System.Int32,System.UInt32,System.Byte)">
             <summary>
             Draws a line on the specified drawing layer.
             </summary>
@@ -1226,8 +1235,9 @@
             <param name="y2">Y coordinate of the second point used to draw the line.</param>
             <param name="pixelWidth">Width of the line in pixels.</param>
             <param name="color">Color to draw the line with. This is a UInt32 representation of an RGB value.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawPoint(System.Double,System.Double,System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap.DrawPoint(System.Double,System.Double,System.Int32,System.UInt32,System.Byte)">
             <summary>
             Draws a point on the last drawing layer created by AxMap.NewDrawing.
             </summary>
@@ -1235,8 +1245,9 @@
             <param name="y">The y coordinate of the point to draw.</param>
             <param name="pixelSize">The size in pixels of the point to be drawn.</param>
             <param name="color">The color of the point to be drawn. This is a UInt32 representation of an RGB color.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawPointEx(System.Int32,System.Double,System.Double,System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap.DrawPointEx(System.Int32,System.Double,System.Double,System.Int32,System.UInt32,System.Byte)">
             <summary>
             Draws a point on the specified drawing layer.
             </summary>
@@ -1245,8 +1256,9 @@
             <param name="y">The y coordinate of the point to draw.</param>
             <param name="pixelSize">The size in pixels of the point to be drawn.</param>
             <param name="color">The color of the point to be drawn. This is a UInt32 representation of an RGB color.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawPolygon(System.Object@,System.Object@,System.Int32,System.UInt32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.DrawPolygon(System.Object@,System.Object@,System.Int32,System.UInt32,System.Boolean,System.Byte)">
             <summary>
             Draws a polygon on the last drawing layer created using AxMap.NewDrawing.
             </summary>
@@ -1255,8 +1267,9 @@
             <param name="numPoints">The number of points in the polygon.</param>
             <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
             <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawPolygonEx(System.Int32,System.Object@,System.Object@,System.Int32,System.UInt32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.DrawPolygonEx(System.Int32,System.Object@,System.Object@,System.Int32,System.UInt32,System.Boolean,System.Byte)">
             <summary>
             Draws a polygon on the specified drawing layer.
             </summary>
@@ -1266,8 +1279,9 @@
             <param name="numPoints">The number of points in the polygon.</param>
             <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
             <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawWideCircle(System.Double,System.Double,System.Double,System.UInt32,System.Boolean,System.Int16)">
+        <member name="M:AxMapWinGIS.AxMap.DrawWideCircle(System.Double,System.Double,System.Double,System.UInt32,System.Boolean,System.Int16,System.Byte)">
             <summary>
             Draws a circle with custom outline width on the last drawing layer created by AxMap.NewDrawing.
             </summary>
@@ -1277,8 +1291,9 @@
             <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
             <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
             <param name="width">The width of the outline.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>/// 
         </member>
-        <member name="M:AxMap.DrawWideCircleEx(System.Int32,System.Double,System.Double,System.Double,System.UInt32,System.Boolean,System.Int16)">
+        <member name="M:AxMapWinGIS.AxMap.DrawWideCircleEx(System.Int32,System.Double,System.Double,System.Double,System.UInt32,System.Boolean,System.Int16,System.Byte)">
             <summary>
             Draws a circle with custom outline width on the specified drawing layer.
             </summary>
@@ -1289,8 +1304,9 @@
             <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
             <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
             <param name="outlineWidth">The width of the outline.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawWidePolygon(System.Object@,System.Object@,System.Int32,System.UInt32,System.Boolean,System.Int16)">
+        <member name="M:AxMapWinGIS.AxMap.DrawWidePolygon(System.Object@,System.Object@,System.Int32,System.UInt32,System.Boolean,System.Int16,System.Byte)">
             <summary>
             Draws a polygon with custom width of outline on the last drawing layer created using AxMap.NewDrawing.
             </summary>
@@ -1300,8 +1316,9 @@
             <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
             <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
             <param name="width">The width of the outline.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.DrawWidePolygonEx(System.Int32,System.Object@,System.Object@,System.Int32,System.UInt32,System.Boolean,System.Int16)">
+        <member name="M:AxMapWinGIS.AxMap.DrawWidePolygonEx(System.Int32,System.Object@,System.Object@,System.Int32,System.UInt32,System.Boolean,System.Int16,System.Byte)">
             <summary>
             Draws a polygon with custom width of outline on the last drawing layer created using AxMap.NewDrawing.
             </summary>
@@ -1312,8 +1329,9 @@
             <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
             <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
             <param name="outlineWidth">The width of the outline.</param>
+            <param name="alpha">Byte value which determines the alpha channel of the color.</param>
         </member>
-        <member name="M:AxMap.NewDrawing(MapWinGIS.tkDrawReferenceList)">
+        <member name="M:AxMapWinGIS.AxMap.NewDrawing(MapWinGIS.tkDrawReferenceList)">
             <summary>
             Creates a new drawing layer on the map returning its handle.
             </summary>
@@ -1321,34 +1339,34 @@
             uses pixels in screen coordinates. tkDrawReferenceList.dlSpatiallyReferencedList uses projected map units.)</param>
             <returns>The handle for the new drawing layer in the map.</returns>
         </member>
-        <member name="M:AxMap.get_DrawingKey(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_DrawingKey(System.Int32)">
             <summary>
             Gets the drawing key which may be used by the programmer to store any string for a drawing layer with specified handle.
             </summary>
             <param name="drawHandle">The handle of the drawing layer.</param>
             <returns>The string associated with the layer.</returns>
         </member>
-        <member name="M:AxMap.set_DrawingKey(System.Int32,System.String)">
+        <member name="M:AxMapWinGIS.AxMap.set_DrawingKey(System.Int32,System.String)">
             <summary>
             Sets the drawing key may be used by the programmer to store any string for a drawing layer with specified handle.
             </summary>
             <param name="drawHandle">The handle of the drawing layer.</param>
             <param name="newValue">The string associated with the layer.</param>
         </member>
-        <member name="M:AxMap.SetDrawingLayerVisible(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.SetDrawingLayerVisible(System.Int32,System.Boolean)">
             <summary>
             Sets the boolean value which indicates whether the labels of the drawing layer are visible.
             </summary>
             <param name="layerHandle">The handle of the drawing layer.</param>
             <param name="visible">A boolean value which indicates whether the labels are visible.</param>
         </member>
-        <member name="M:AxMap.ClearDrawingLabels(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.ClearDrawingLabels(System.Int32)">
             <summary>
             Clears labels on the specified drawing layer.
             </summary>
             <param name="drawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         </member>
-        <member name="M:AxMap.get_DrawingLabelsVisible(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_DrawingLabelsVisible(System.Int32)">
             <summary>
             Gets a boolean value which indicates whether labels of the drawing layer are visible.
             </summary>
@@ -1356,7 +1374,7 @@
             <param name="drawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
             <returns>True in case labels are visible and false otherwise.</returns>
         </member>
-        <member name="M:AxMap.set_DrawingLabelsVisible(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.set_DrawingLabelsVisible(System.Int32,System.Boolean)">
             <summary>
             Sets a boolean value which indicates whether labels of the drawing layer are visible.
             </summary>
@@ -1364,7 +1382,7 @@
             <param name="drawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
             <param name="newValue">True in case labels are visible and false otherwise.</param>
         </member>
-        <member name="M:AxMap.DrawLabel(System.String,System.Double,System.Double,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap.DrawLabel(System.String,System.Double,System.Double,System.Double)">
             <summary>
             Draws a label on the current drawing layer.
             </summary>
@@ -1375,7 +1393,7 @@
             <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
             \new493 Added in version 4.9.3
         </member>
-        <member name="M:AxMap.DrawLabelEx(System.Int32,System.String,System.Double,System.Double,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap.DrawLabelEx(System.Int32,System.String,System.Double,System.Double,System.Double)">
             <summary>
             Draws a label on the specified drawing layer.
             </summary>
@@ -1387,7 +1405,7 @@
             <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
             \new493 Added in version 4.9.3
         </member>
-        <member name="M:AxMap.get_ShapeLayerDrawFill(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerDrawFill(System.Int32)">
             \addtogroup map_shapefile Shapefile visualization
             Here is a list of properties for changing appearance of shapefile layer added to the map. 
             Consider the usage of ShapeDrawingOptions class to access wider set of options. 
@@ -1411,112 +1429,112 @@
             <param name="layerHandle">Handle of the layer for which the fill is to be set.</param>
             <returns>Gets whether the layer is being drawn with a fill or not.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerDrawFill(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerDrawFill(System.Int32,System.Boolean)">
             <summary>
             Sets whether the specified layer is drawn with a fill. Only works on polygon shapefiles. 
             </summary>
             <param name="layerHandle">Handle of the layer for which the fill is to be set. </param>
             <param name="newValue">Sets whether the layer is drawn with a fill or not.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerDrawLine(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerDrawLine(System.Int32)">
             <summary>
             Gets whether the lines for the shapefile in specified layer are drawn. 
             </summary>
             <param name="layerHandle">Handle of the layer to test if it is being drawn with a lines or not.</param>
             <returns>Gets whether the layer is being drawn with lines or not.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerDrawLine(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerDrawLine(System.Int32,System.Boolean)">
             <summary>
             Sets whether the lines for the shapefile in specified layer are drawn. 
             </summary>
             <param name="layerHandle">Handle of the layer for which the lines are to be set.</param>
             <param name="newValue">Sets whether the layer is drawn with lines or not.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerDrawPoint(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerDrawPoint(System.Int32)">
             <summary>
             Gets whether the points/vertices for the shapefile in specified layer are drawn. 
             </summary>
             <param name="layerHandle">Handle of the layer to test if it is being drawn with a points or not.</param>
             <returns>Gets whether the layer is being drawn with points or not.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerDrawPoint(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerDrawPoint(System.Int32,System.Boolean)">
             <summary>
             Sets whether the points/vertices for the shapefile in specified layer are drawn.
             </summary>
             <param name="layerHandle">Handle of the layer for which the points are to be set.</param>
             <param name="newValue">Sets whether the layer is drawn with points or not.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerFillColor(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerFillColor(System.Int32)">
             <summary>
             Gets the fill color for the specified layer. Only works on polygon shapefiles. 
             </summary>
             <param name="layerHandle">Handle of the layer for which the fill color is required. </param>
             <returns>Fill color for the polygon shapefile.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerFillColor(System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerFillColor(System.Int32,System.UInt32)">
             <summary>
             Sets the fill color for the specified layer. Only works on polygon shapefiles
             </summary>
             <param name="layerHandle">Handle of the layer for which the fill color is to be set.</param>
             <param name="newValue">Fill color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerFillStipple(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerFillStipple(System.Int32)">
             <summary>
             Gets the fill stipple for the specified layer. Only works on polygon shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the fill stipple is required. </param>
             <returns>Gets the fill stipple for the specified layer.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerFillStipple(System.Int32,MapWinGIS.tkFillStipple)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerFillStipple(System.Int32,MapWinGIS.tkFillStipple)">
             <summary>
             Sets the fill stipple for the specified layer. Only works on polygon shapefiles. 
             </summary>
             <param name="layerHandle">Handle of the layer for which the fill stipple is to be set.</param>
             <param name="newValue">Sets fill stipple for the specified layer.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerFillTransparency(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerFillTransparency(System.Int32)">
             <summary>
             Gets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles. 
             </summary>
             <param name="layerHandle">Handle of the layer to get percentage of fill transparency. </param>
             <returns>Gets the percentage of fill transparency for the specified layer.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerFillTransparency(System.Int32,System.Single)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerFillTransparency(System.Int32,System.Single)">
             <summary>
             Sets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the fill transparency is to be set. </param>
             <param name="newValue">Sets the percentage of fill transparency for the specified layer.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerLineColor(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerLineColor(System.Int32)">
             <summary>
             Gets the line color for the specified layer. Only works on shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the line color is required. </param>
             <returns>Line color for the polygon shapefile. </returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerLineColor(System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerLineColor(System.Int32,System.UInt32)">
             <summary>
             Sets the line color for the specified layer. Only works on shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the line color is to be set.</param>
             <param name="newValue">Line color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerLineStipple(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerLineStipple(System.Int32)">
             <summary>
             Gets the line stipple for the specified layer. Only works on shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the line stipple is required.</param>
             <returns>Line stipple for the shapefile.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerLineStipple(System.Int32,MapWinGIS.tkLineStipple)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerLineStipple(System.Int32,MapWinGIS.tkLineStipple)">
             <summary>
             Sets the line stipple for the specified layer. Only works on shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the line stipple is required.</param>
             <param name="newValue">Line stipple for the shapefile.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerLineWidth(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerLineWidth(System.Int32)">
             <summary>
             Gets the line width for the specified layer. Only works on shapefiles.
             Suggested values for line width: 1 - 5
@@ -1524,7 +1542,7 @@
             <param name="layerHandle">Handle of the layer for which the line width is required.</param>
             <returns>Line width for the shapefile.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerLineWidth(System.Int32,System.Single)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerLineWidth(System.Int32,System.Single)">
             <summary>
             Sets the line width for the specified layer. Only works on shapefiles.
             Suggested values for line width: 1 - 5
@@ -1532,49 +1550,49 @@
             <param name="layerHandle">Handle of the layer for which the line width is to be set.</param>
             <param name="newValue">Line width for the shapefile.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerPointColor(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerPointColor(System.Int32)">
             <summary>
             Gets the point color for the specified layer. Only works on shapefiles
             </summary>
             <param name="layerHandle">Handle of the layer for which the point color is required. </param>
             <returns>Point color for the polygon shapefile. </returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerPointColor(System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerPointColor(System.Int32,System.UInt32)">
             <summary>
             Sets the point color for the specified layer. Only works on shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the point color is to be set.</param>
             <param name="newValue">Point color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerPointSize(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerPointSize(System.Int32)">
             <summary>
             Gets the line point/vertex size for the specified layer. Only works on shapefiles. 
             </summary>
             <param name="layerHandle">Gets or sets the line point/vertex size for the specified layer. Only works on shapefiles. </param>
             <returns>Point/vertex size for the shapefile. </returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerPointSize(System.Int32,System.Single)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerPointSize(System.Int32,System.Single)">
             <summary>
             Sets the line point/vertex size for the specified layer. Only works on shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the point/vertex size is to be set.</param>
             <param name="newValue">Point/vertex size for the shapefile.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerPointType(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerPointType(System.Int32)">
             <summary>
             Gets the line point type for the specified layer. Only works on shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the point type is required.</param>
             <returns>%Point type for the shapefile.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerPointType(System.Int32,MapWinGIS.tkPointType)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerPointType(System.Int32,MapWinGIS.tkPointType)">
             <summary>
             Sets the line point type for the specified layer. Only works on shapefiles.
             </summary>
             <param name="layerHandle">Handle of the layer for which the point type is to be set.</param>
             <param name="newValue">%Point type for the shapefile.</param>
         </member>
-        <member name="M:AxMap.get_ShapeLayerStippleColor(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerStippleColor(System.Int32)">
             <summary>
             Gets the color of the polygon stipple for shapefile layer.
             </summary>
@@ -1582,7 +1600,7 @@
             <param name="layerHandle">The handle of the shapefile layer.</param>
             <returns>The color of stipple.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerStippleColor(System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerStippleColor(System.Int32,System.UInt32)">
             <summary>
             Sets the color of the polygon stipple for shapefile layer.
             </summary>
@@ -1592,7 +1610,7 @@
             <param name="newValue">The color of stipple.</param>
             \see Shapefile.DefaultDrawingOptions
         </member>
-        <member name="M:AxMap.get_ShapeLayerStippleTransparent(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap.get_ShapeLayerStippleTransparent(System.Int32)">
             <summary>
             Gets a boolean value which indicates whether the background of fill stipple for polygon shapefile layer will be transparent.
             </summary>
@@ -1600,7 +1618,7 @@
             <param name="layerHandle">The handle of the shapefile layer.</param>
             <returns>True in case the background is transparent and false otherwise.</returns>
         </member>
-        <member name="M:AxMap.set_ShapeLayerStippleTransparent(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap.set_ShapeLayerStippleTransparent(System.Int32,System.Boolean)">
             <summary>
             Sets a boolean value which indicates whether the background of fill stipple for polygon shapefile layer will be transparent.
             </summary>
@@ -1608,7 +1626,7 @@
             <param name="layerHandle">The handle of the shapefile layer.</param>
             <param name="newValue">True in case the background is transparent and false otherwise.</param>
         </member>
-        <member name="M:AxMap.SetGeographicExtents2(System.Double,System.Double,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap.SetGeographicExtents2(System.Double,System.Double,System.Double)">
             \addtogroup map_extents Max extents and zoom
             Here is list of properties and methods that affect map extents and zoom level. This module is a part of the documentation of AxMap class.
             \dot
@@ -1634,7 +1652,7 @@
             <returns>True on success.</returns>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.GetKnownExtents(MapWinGIS.tkKnownExtents)">
+        <member name="M:AxMapWinGIS.AxMap.GetKnownExtents(MapWinGIS.tkKnownExtents)">
             <summary>
             Gets known extents.
             </summary>
@@ -1642,7 +1660,7 @@
             <returns>Extents object.</returns>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.GeographicExtents">
+        <member name="P:AxMapWinGIS.AxMap.GeographicExtents">
             <summary>
             Gets geographic extents of the map in decimal degrees.
             </summary>
@@ -1650,7 +1668,7 @@
             Otherwise null will be returned.</remarks>
             \new490 Added in version 4.9.0
         </member>
-        <member name="M:AxMap.SetGeographicExtents(MapWinGIS.Extents)">
+        <member name="M:AxMapWinGIS.AxMap.SetGeographicExtents(MapWinGIS.Extents)">
             <summary>
             Sets geographic extents in decimal degrees for the map.
             </summary>
@@ -1659,35 +1677,44 @@
             <remarks>For operation to succeed, projection must be set for the map (see AxMap.GeoProjection property)</remarks>
             \new490 Added in version 4.9.0
         </member>
-        <member name="P:AxMap.Latitude">
+        <member name="P:AxMapWinGIS.AxMap.Latitude">
             <summary>
             Gets or sets latitude of the center of screen (in decimal degrees). 
             </summary>
             <remarks>Map projection must be set in order for this property to work.</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.Longitude">
+        <member name="P:AxMapWinGIS.AxMap.Longitude">
             <summary>
             Gets or sets longitude of the center of screen (in decimal degrees). 
             </summary>
             <remarks>Map projection must be set in order for this property to work.</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.CurrentZoom">
+        <member name="M:AxMapWinGIS.AxMap.SetLatitudeLongitude(System.Double,System.Double)">
+            <summary>
+            Sets the Latitude and Longitude of the center of the screen in one operation
+            </summary>
+            <param name="latitude">Requested Latitude in decimal degrees</param>
+            <param name="longitude">Requested Longitude in decimal degrees</param>
+            <remarks>Map projection must be set in order for this method to work.</remarks>
+            \new510 Added in version 5.1.0
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.CurrentZoom">
             <summary>
             Gets or sets the current zoom level for the map. It corresponds to the zoom level of current tile provider.
             </summary>
             <remarks>Map projection must be set in order for this property to work.</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.KnownExtents">
+        <member name="P:AxMapWinGIS.AxMap.KnownExtents">
             <summary>
             Gets or sets known extents for the map.
             </summary>
             <remarks>Map projection must be set in order for this property to work.</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.CurrentScale">
+        <member name="P:AxMapWinGIS.AxMap.CurrentScale">
             <summary>
             Gets or sets the current map scale.
             </summary>
@@ -1697,31 +1724,31 @@
             of the center point on the screen.</remarks>
             \new48 Added in version 4.8
         </member>
-        <member name="P:AxMap.ExtentHistory">
+        <member name="P:AxMapWinGIS.AxMap.ExtentHistory">
             <summary>
             Gets or sets the number of extents to cache in the extents history
             </summary>
         </member>
-        <member name="P:AxMap.ExtentPad">
+        <member name="P:AxMapWinGIS.AxMap.ExtentPad">
             <summary>
             Gets or sets the percentage of the view used to pad the extents of a layer when zooming to a layer or maximum extents.
             </summary>
             <remarks>
             Padding makes it so that there is a small border around the layer when you zoom to it.</remarks>
         </member>
-        <member name="P:AxMap.Extents">
+        <member name="P:AxMapWinGIS.AxMap.Extents">
             <summary>
             Gets or sets the extents of the map using an Extents object. 
             </summary>
             <remarks>If the given extents do not fit the aspect ratio of the map, the map will fit the given extents as well as possible.</remarks>
             \new495 Return value changed to IExtents in version 4.9.5
         </member>
-        <member name="P:AxMap.MaxExtents">
+        <member name="P:AxMapWinGIS.AxMap.MaxExtents">
             <summary>
             Gets or sets the extents of the map displayed by the control.
             </summary>
         </member>
-        <member name="P:AxMap.Measuring">
+        <member name="P:AxMapWinGIS.AxMap.Measuring">
              \addtogroup map_coordinates Map projection and coordinates
              Here is list of properties and methods which are related to coordinate system, projection of map and units conversion.
              This module is a part of the documentation of AxMap class.
@@ -1866,27 +1893,27 @@
             </summary>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.IdentifiedShapes">
+        <member name="P:AxMapWinGIS.AxMap.IdentifiedShapes">
             <summary>
             Get the identified shapes
             </summary>
         </member>
-        <member name="P:AxMap.FocusRectangle">
+        <member name="P:AxMapWinGIS.AxMap.FocusRectangle">
             <summary>
             For selection boxes or dragging operations, updated with tkRedrawType.Minimal
             </summary>
         </member>
-        <member name="P:AxMap.CustomDrawingFlags">
+        <member name="P:AxMapWinGIS.AxMap.CustomDrawingFlags">
             <summary>
             Set custom drawing flags
             </summary>
         </member>
-        <member name="P:AxMap.ShowCoordinatesFormat">
+        <member name="P:AxMapWinGIS.AxMap.ShowCoordinatesFormat">
             <summary>
             Allows to format coordinates in top right corner in degrees/minutes/seconds format; by default the former minutes format is used
             </summary>
         </member>
-        <member name="P:AxMap.MapUnits">
+        <member name="P:AxMapWinGIS.AxMap.MapUnits">
             <summary>
             Gets or sets the units of measure for the map.
             </summary>
@@ -1894,7 +1921,7 @@
             This method affects the calculation of map scale (see AxMap.CurrentScale).</remarks>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.PixelToProj(System.Double,System.Double,System.Double@,System.Double@)">
+        <member name="M:AxMapWinGIS.AxMap.PixelToProj(System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
             Converts pixel coordinates to projected map coordinates
             </summary>
@@ -1903,14 +1930,14 @@
             <param name="projX">The projected x map coordinate is returned through this reference parameter.</param>
             <param name="projY">The projected y map coordinate is returned through this reference parameter.</param>
         </member>
-        <member name="P:AxMap.PixelsPerDegree">
+        <member name="P:AxMapWinGIS.AxMap.PixelsPerDegree">
             <summary>
             Gets the number of screen pixels per the decimal degree of the data.
             </summary>
             <remarks>The set part of this property isn't supported. The correctness of results depends on AxMap.MapUnits property.</remarks>
             \new48 Added in version 4.8
         </member>
-        <member name="M:AxMap.ProjToPixel(System.Double,System.Double,System.Double@,System.Double@)">
+        <member name="M:AxMapWinGIS.AxMap.ProjToPixel(System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
             Converts projected map coordinates into screen pixel units
             </summary>
@@ -1919,25 +1946,31 @@
             <param name="pixelX">The pixel x coordinate is returned through this reference parameter</param>
             <param name="pixelY">The pixel y coordinate is returned through this reference parameter.</param>
         </member>
-        <member name="P:AxMap.ShowCoordinates">
+        <member name="P:AxMapWinGIS.AxMap.ShowCoordinates">
             <summary>
             Gets or sets a value indicating whether coordinates of the current mouse position will be displayed on map.
             </summary>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.ScalebarVisible">
+        <member name="P:AxMapWinGIS.AxMap.ShowCoordinatesBackground">
+            <summary>
+            Gets or sets a value indicating whether to display a white background behind the coordinates, for better contrast
+            </summary>
+            \new52 Added in version 5.2
+        </member>
+        <member name="P:AxMapWinGIS.AxMap.ScalebarVisible">
             <summary>
             Gets or sets a value which indicate whether scalebar will be displayed on the map.
             </summary>
             \new490 Added in version 4.9.0
         </member>
-        <member name="P:AxMap.ScalebarUnits">
+        <member name="P:AxMapWinGIS.AxMap.ScalebarUnits">
             <summary>
             Gets or sets units to be displayed for map scalebar.
             </summary>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.GrabProjectionFromData">
+        <member name="P:AxMapWinGIS.AxMap.GrabProjectionFromData">
             <summary>
             Gets or sets a value indicating whether projection for will be taken from the first datasource added to it.
             </summary>
@@ -1945,7 +1978,7 @@
             On removing the last layer projection of the map will be cleared (set to an empty one).</remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.Projection">
+        <member name="P:AxMapWinGIS.AxMap.Projection">
             <summary>
             Sets projection of the map. It providers 2 most commonly used coordinate system/projections to be easily set from Form Designer. 
             To set other projections initialize GeoProjection object manually and use AxMap.GeoProjection property.
@@ -1953,7 +1986,7 @@
             <remarks></remarks>
             \new491 Added in version 4.9.1
         </member>
-        <member name="P:AxMap.GeoProjection">
+        <member name="P:AxMapWinGIS.AxMap.GeoProjection">
             <summary>
             Gets or sets projection for map. 
             </summary>
@@ -1962,7 +1995,7 @@
             This property must be set in order for certain functionality to work (tiles, for example).</remarks>
             \new490 Added in version 4.9.0
         </member>
-        <member name="M:AxMap.ProjToDegrees(System.Double,System.Double,System.Double@,System.Double@)">
+        <member name="M:AxMapWinGIS.AxMap.ProjToDegrees(System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
             Converts projected map coordinates to decimal degrees (map projection must be specified for this method to work). 
             </summary>
@@ -1973,7 +2006,7 @@
             <returns>True on success.</returns>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.PixelToDegrees(System.Double,System.Double,System.Double@,System.Double@)">
+        <member name="M:AxMapWinGIS.AxMap.PixelToDegrees(System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
             Converts coordinates in decimal degrees to pixel coordinates (map projection must be specified for this method to work). 
             </summary>
@@ -1984,7 +2017,7 @@
             <returns>True on success.</returns>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.DegreesToProj(System.Double,System.Double,System.Double@,System.Double@)">
+        <member name="M:AxMapWinGIS.AxMap.DegreesToProj(System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
             Converts coordinates in decimal degrees to projected map coordinates (map projection must be specified for this method to work). 
             </summary>
@@ -1995,7 +2028,7 @@
             <returns>True on success.</returns>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.DegreesToPixel(System.Double,System.Double,System.Double@,System.Double@)">
+        <member name="M:AxMapWinGIS.AxMap.DegreesToPixel(System.Double,System.Double,System.Double@,System.Double@)">
             <summary>
             Converts pixel coordinates to decimal degrees (map projection must be specified for this method to work). 
             </summary>
@@ -2006,7 +2039,7 @@
             <returns>True on success.</returns>
             \new491 Added in version 4.9.1
         </member>
-        <member name="M:AxMap.GeodesicArea(MapWinGIS.Shape)">
+        <member name="M:AxMapWinGIS.AxMap.GeodesicArea(MapWinGIS.Shape)">
             <summary>
             Calculates area of polygon taking into account the shape of Earth.
             </summary>
@@ -2016,7 +2049,7 @@
             <returns>Area of shape in square meters or 0.0 if current map projection doesn't support transformation to WGS84.</returns>
             \new493 Added in version 4.9.3
         </member>
-        <member name="M:AxMap.GeodesicDistance(System.Double,System.Double,System.Double,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap.GeodesicDistance(System.Double,System.Double,System.Double,System.Double)">
             <summary>
             Calculates geodesic distance between 2 points defined in map coordinate system.
             </summary>
@@ -2029,7 +2062,7 @@
             <returns>Distance between 2 points in meters 0.0 if current map projection doesn't support transformation to WGS84</returns>
             \new493 Added in version 4.9.3
         </member>
-        <member name="M:AxMap.GeodesicLength(MapWinGIS.Shape)">
+        <member name="M:AxMapWinGIS.AxMap.GeodesicLength(MapWinGIS.Shape)">
             <summary>
             Calculates length of polyline or perimeter of polygon taking into account the shape of Earth.
             </summary>
@@ -2039,7 +2072,7 @@
             <returns>Length of polyline or perimeter of polygon in meters or 0.0 if current map projection doesn't support transformation to WGS84.</returns>
             \new493 Added in version 4.9.3
         </member>
-        <member name="E:AxMap.AfterDrawing">
+        <member name="E:AxMapWinGIS.AxMap.AfterDrawing">
             \addtogroup map_events Map events
             \dot
             digraph map_events_graph {
@@ -2064,7 +2097,7 @@
             <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
             <param name="handled">Passed by reference. The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
         </member>
-        <member name="E:AxMap.AfterLayers">
+        <member name="E:AxMapWinGIS.AxMap.AfterLayers">
             <summary>
             This event is fired after the rendering of standard layers. Handle of device context is passed to allow the user to implement custom drawing. 
             </summary>
@@ -2076,7 +2109,31 @@
             <param name="handled">Passed by reference. The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
             \new495 Added in version 4.9.5
         </member>
-        <member name="E:AxMap.AfterShapeEdit">
+        <member name="E:AxMapWinGIS.AxMap.SnapPointRequested">
+            <summary>
+            This event is fired whenever a snap point is requested by the map before the MapWinGIS snap algorithm was run. 
+            If the isFinal flag is set to true, the default snapping algorithm of MapWinGIS will be skipped.
+            </summary>
+            <param name="pointX">the X coordinate of the point a snap point is requested for</param>
+            <param name="pointY">the Y coordinate of the point a snap point is requested for</param>
+            <param name="snappedX">the X coordinate of the snap point found so far (can be changed)</param>
+            <param name="snappedY">the Y coordinate of the snap point found so far (can be changed)</param>
+            <param name="isFound">a flag indicating if a snap point has been found (can be changed)</param>
+            <param name="isFinal">a flag indicating if the found snap point should be considered final</param>
+            \new52 Added in version 5.2
+        </member>
+        <member name="E:AxMapWinGIS.AxMap.SnapPointFound">
+            <summary>
+            This event is fired after a snap point was found either by the default snapping algorithm of MapWinGIS or by a SnapPointRequested handler.
+            Setting the snappedX and snappedY allows you to override this result (use with care!).
+            </summary>
+            <param name="pointX">the X coordinate of the point a snap point is requested for</param>
+            <param name="pointY">the Y coordinate of the point a snap point is requested for</param>
+            <param name="snappedX">the X coordinate of the snap point found so far (can be changed)</param>
+            <param name="snappedY">the Y coordinate of the snap point found so far (can be changed)</param>
+            \new52 Added in version 5.2
+        </member>
+        <member name="E:AxMapWinGIS.AxMap.AfterShapeEdit">
             <summary>
             This event is fired after interactive editing of shape is finished (AxMap.CursorMode is set to tkCursorMode.cmEditShape).
             </summary>
@@ -2086,7 +2143,7 @@
             <remarks>The common use of the event is set attributes of the shape, update its label or style. 
             The operation parameter can be one of the following values: tkUndoOperation.uoAddShape, tkUndoOperation.uoRemoveShape, tkUndoOperation.uoEditShape.</remarks>
         </member>
-        <member name="E:AxMap.BackgroundLoadingFinished">
+        <member name="E:AxMapWinGIS.AxMap.BackgroundLoadingFinished">
             <summary>
             This event is fired when background loading of data for OgrLayer finishes.
             </summary>
@@ -2102,7 +2159,7 @@
             of success - from the main thread before the rendering of the loaded data.
             </remarks>
         </member>
-        <member name="E:AxMap.BackgroundLoadingStarted">
+        <member name="E:AxMapWinGIS.AxMap.BackgroundLoadingStarted">
             <summary>
             This event is fired when background loading of data for OgrLayer starts.
             </summary>
@@ -2113,7 +2170,7 @@
             when the layer doesn't have the necessary data in its buffer (OgrLayer.GetBuffer). The event can be used
             to display some kind of loading indicator to notify the user that some data is still being loaded.</remarks>
         </member>
-        <member name="E:AxMap.BeforeDeleteShape">
+        <member name="E:AxMapWinGIS.AxMap.BeforeDeleteShape">
             <summary>
             This event is fired before shape is deleted in interactive ShapeEditor.
             </summary>
@@ -2123,7 +2180,7 @@
             and user presses Delete button. The common use of his event is to display a message box asking the user whether 
             the operation should be performed.</remarks>
         </member>
-        <member name="E:AxMap.BeforeDrawing">
+        <member name="E:AxMapWinGIS.AxMap.BeforeDrawing">
             <summary>
             This event is fired before the rendering of drawing layers. Handle of device context is passed to allow the user to implement custom drawing. 
             </summary>
@@ -2135,7 +2192,7 @@
             <param name="handled">Passed by reference. 
             The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
         </member>
-        <member name="E:AxMap.BeforeLayers">
+        <member name="E:AxMapWinGIS.AxMap.BeforeLayers">
             <summary>
             This event is fired before the rendering of standard layers. Handle of device context is passed to allow the user to implement custom drawing. 
             </summary>
@@ -2148,7 +2205,7 @@
             The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
             \new495 Added in version 4.9.5
         </member>
-        <member name="E:AxMap.BeforeShapeEdit">
+        <member name="E:AxMapWinGIS.AxMap.BeforeShapeEdit">
             <summary>
             This event is fired before editing starts for particular shape (after user click on the shape when map cursor is set to tkCursorMode.cmEditShape). 
             </summary>
@@ -2156,7 +2213,7 @@
             <param name="shapeIndex">Index of shape to be edited.</param>
             <param name="cancel">Passed by reference. Allows user to cancel the editing operations by setting the value to tkMwBoolean.blnTrue.</param>
         </member>
-        <member name="E:AxMap.ChooseLayer">
+        <member name="E:AxMapWinGIS.AxMap.ChooseLayer">
             <summary>
             The event is fired when current map tool asks for the layer to work with.
             </summary>
@@ -2167,29 +2224,29 @@
             If this value is left unchanged the pending operation won't be preformed. Further details are provided 
             in description of particular tools.</remarks>
         </member>
-        <member name="E:AxMap.DblClick">
+        <member name="E:AxMapWinGIS.AxMap.DblClick">
             <summary>
             The event is fired when user performs double click with left mouse button while cursor is within the map control.
             </summary>
         </member>
-        <member name="E:AxMap.ExtentsChanged">
+        <member name="E:AxMapWinGIS.AxMap.ExtentsChanged">
             <summary>
             This event is fired when the extents of the map change. 
             </summary>
         </member>
-        <member name="E:AxMap.FileDropped">
+        <member name="E:AxMapWinGIS.AxMap.FileDropped">
             <summary>
             This event is fired when a user drags a file and drops it on the map. 
             </summary>
             <param name="filename">The filename of the file dropped on the map.</param>
         </member>
-        <member name="E:AxMap.LayerAdded">
+        <member name="E:AxMapWinGIS.AxMap.LayerAdded">
             <summary>
             This event is fired when a new layer has been added to the map.
             </summary>
             <param name="layerHandle">Handle of the newly added layer.</param>
         </member>
-        <member name="E:AxMap.LayerProjectionIsEmpty">
+        <member name="E:AxMapWinGIS.AxMap.LayerProjectionIsEmpty">
             <summary>
             This event is fired when a new layer has been added to the map and it has no metadata about its coordinate system and projection.
             </summary>
@@ -2198,14 +2255,14 @@
             <remarks>If this event is not handled then decision about the layer will be taken based on 
             the value of GlobalSettings.AllowLayersWithoutProjections property.</remarks>
         </member>
-        <member name="E:AxMap.LayerRemoved">
+        <member name="E:AxMapWinGIS.AxMap.LayerRemoved">
             <summary>
             This event is fired when a layer has been removed from map.
             </summary>
             <param name="layerHandle">Handle of the layer.</param>
             <param name="fromRemoveAllLayers">The value will be set to true in case layer removal is caused by AxMap.RemoveAllLayers call.</param>
         </member>
-        <member name="E:AxMap.LayerReprojected">
+        <member name="E:AxMapWinGIS.AxMap.LayerReprojected">
             <summary>
             This event is fired after a layer was reprojected (its original projection was different from the map projection).
             </summary>
@@ -2217,7 +2274,7 @@
             The projection mismatch behavior is controlled by the GlobalSettings.AllowProjectionMismatch, 
             GlobalSettings.ReprojectLayersOnAdding properties.</remarks>
         </member>
-        <member name="E:AxMap.LayerReprojectedIncomplete">
+        <member name="E:AxMapWinGIS.AxMap.LayerReprojectedIncomplete">
             <summary>
             This event is fired when a layer was not fully reprojected.
             It is controlled by the GlobalSettings.AllowLayersWithIncompleteReprojection property.
@@ -2227,19 +2284,19 @@
             <param name="numShapes"></param>
             \new510 Added in version 5.1.0
         </member>
-        <member name="E:AxMap.MapState">
+        <member name="E:AxMapWinGIS.AxMap.MapState">
             <summary>
             This event is fired for each layer in the map when the map state is changed.
             </summary>
             <param name="layerHandle">Handle of the layer.</param>
         </member>
-        <member name="E:AxMap.MeasuringChanged">
+        <member name="E:AxMapWinGIS.AxMap.MeasuringChanged">
             <summary>
             This event is fired after the user adds or removes a point from the path of Measuring tool.
             </summary>
             <param name="action">Particular action (like tkMeasuringAction.PointAdded) performed by user.</param>
         </member>
-        <member name="E:AxMap.MouseDown">
+        <member name="E:AxMapWinGIS.AxMap.MouseDown">
             <summary>
             This event is fired when a user has pressed a mouse button while the cursor is inside the map control. 
             The map property AxMap.SendMouseDown must be set to True for this event to be fired.
@@ -2249,7 +2306,7 @@
             <param name="x">X coordinate of mouse cursor position in pixels relative to controls origin.</param>
             <param name="y">Y coordinate of mouse cursor position in pixels relative to controls origin.</param>
         </member>
-        <member name="E:AxMap.MouseMove">
+        <member name="E:AxMapWinGIS.AxMap.MouseMove">
             <summary>
             This event is fired when the mouse is moved while the cursor is inside the map control. 
             The map property AxMap.SendMouseMove must be set to True for this event to be fired. 
@@ -2259,7 +2316,7 @@
             <param name="x">X coordinate of mouse cursor position in pixels relative to controls origin.</param>
             <param name="y">Y coordinate of mouse cursor position in pixels relative to controls origin.</param>
         </member>
-        <member name="E:AxMap.MouseUp">
+        <member name="E:AxMapWinGIS.AxMap.MouseUp">
             <summary>
             This event is fired when the mouse button is released while the cursor is in the map control. 
             The map property AxMap.SendMouseUp must be set to True for this event to be fired. 
@@ -2269,14 +2326,14 @@
             <param name="x">X coordinate of mouse cursor position in pixels relative to controls origin.</param>
             <param name="y">Y coordinate of mouse cursor position in pixels relative to controls origin.</param>
         </member>
-        <member name="E:AxMap.OnDrawBackBuffer">
+        <member name="E:AxMapWinGIS.AxMap.OnDrawBackBuffer">
             <summary>
             This event is fired during the rendering of map after data layers and drawing layers were rendered.
             The map property AxMap.SendOnDrawBackBuffer must be set to True for this event to be fired. 
             </summary>
             <param name="backBuffer">Handle of the device context of back buffer bitmap.</param>
         </member>
-        <member name="E:AxMap.OnDrawBackBuffer2">
+        <member name="E:AxMapWinGIS.AxMap.OnDrawBackBuffer2">
             <summary>
             Special version of _DMapEvents.OnDrawBackBuffer
             </summary>
@@ -2286,12 +2343,12 @@
             <param name="pixelFormat"></param>
             <param name="scan0"></param>
         </member>
-        <member name="E:AxMap.ProjectionChanged">
+        <member name="E:AxMapWinGIS.AxMap.ProjectionChanged">
             <summary>
             The event is fired when projection of the map control was changed.
             </summary>
         </member>
-        <member name="E:AxMap.ProjectionMismatch">
+        <member name="E:AxMapWinGIS.AxMap.ProjectionMismatch">
             <summary>
             This event is fired when a layer was added to the map with projection / coordinate system different from 
             those of the map control.
@@ -2301,7 +2358,7 @@
             <param name="reproject">Passed by reference. The value should be set to tkMwBoolean.blnTrue to instruct the control 
             to run automatic reprojection of the layer.</param>
         </member>
-        <member name="E:AxMap.SelectBoxDrag">
+        <member name="E:AxMapWinGIS.AxMap.SelectBoxDrag">
             <summary>
             This event is fired while the user is dragging a selection box in the map control. 
             The map property AxMap.SendSelectBoxDrag must be set to True for this event to be fired. 
@@ -2311,7 +2368,7 @@
             <param name="bottom">The bottom boundary of the selection box in pixel coordinates.</param>
             <param name="top">The top boundary of the selection box in pixel coordinates.</param>
         </member>
-        <member name="E:AxMap.SelectBoxFinal">
+        <member name="E:AxMapWinGIS.AxMap.SelectBoxFinal">
             <summary>
             This event is fired when the user finishes dragging a selection box in the map control. 
             The map property AxMap.SendSelectBoxFinal must be set to True for this event to be fired.
@@ -2330,7 +2387,7 @@
             </remarks>
             \new500 Modified in version 5.0
         </member>
-        <member name="E:AxMap.SelectionChanged">
+        <member name="E:AxMapWinGIS.AxMap.SelectionChanged">
             <summary>
             This event is fired after shapes were selected with tkCursorMode.cmSelection tool.
             </summary>
@@ -2339,9 +2396,16 @@
             - AxMap.CursorMode set to tkCursorMode.cmSelection;
             - a layer handle is passed to AxMap.ChooseLayer event handler;
             - user changes selection by clicking on shapes or drawing selection box.
-            When Shapefile.set_ShapeSelected() property is changed from client code no event is fired.</remarks>
+            When Shapefile.set_ShapeSelected() property is changed from client code no event is fired.
+            
+            Starting in version 5.2.0, this event is raised when shapes are selected or deselected,
+            and is also raised one final time, with layerHandle = -1, indicating that all selection 
+            events are complete.  This is particularly useful when multiple layers are 'Selectable', 
+            and you want to know when all layers have completed their selection.
+            </remarks>
+            \new52 Updated in version 5.2
         </member>
-        <member name="E:AxMap.ShapeHighlighted">
+        <member name="E:AxMapWinGIS.AxMap.ShapeHighlighted">
             <summary>
             This event is fired when mouse cursor is being moved by user and the cursor enters or leaves neighborhood of particular shape.
             </summary>
@@ -2355,7 +2419,7 @@
             For editing cursors vertices of the shape under cursor will be displayed (see ShapeEditor.HighlightVertices property).
             </remarks>
         </member>
-        <member name="E:AxMap.ShapeIdentified">
+        <member name="E:AxMapWinGIS.AxMap.ShapeIdentified">
             <summary>
             This event is fired when user click on a shape with tkCursorMode.cmIdentify tool active.
             </summary>
@@ -2364,25 +2428,25 @@
             <param name="projX">X coordinate of mouse click position in map coordinates.</param>
             <param name="projY">Y coordinate of mouse click position in map coordinates</param>
         </member>
-        <member name="E:AxMap.ShapeValidationFailed">
+        <member name="E:AxMapWinGIS.AxMap.ShapeValidationFailed">
             <summary>
             This event is fired when shape being created or edited has topological errors and therefore can't be saved to the layer.
             </summary>
             <param name="errorMessage">Message about the reasons as to why the validation has failed.</param>
         </member>
-        <member name="E:AxMap.TilesLoaded">
+        <member name="E:AxMapWinGIS.AxMap.TilesLoaded">
             <summary>
             This event is fired when complete set of tiles has been loaded for the new map extents.
             </summary>
             <param name="snapshot">True in case the loading of tiles was done as a part of making snapshot of the map.</param>
             <param name="key">A key of operation set in AxMap.LoadTilesForSnapshot method.</param>
         </member>
-        <member name="E:AxMap.UndoListChanged">
+        <member name="E:AxMapWinGIS.AxMap.UndoListChanged">
             <summary>
             This event is fired when an operations is added or removed from undo/redo list of interactive ShapeEditor.
             </summary>
         </member>
-        <member name="E:AxMap.ValidateShape">
+        <member name="E:AxMapWinGIS.AxMap.ValidateShape">
             <summary>
             This event is fired before a shape which is being created or edited is about to be saved back to the layer.
             </summary>
@@ -2393,7 +2457,7 @@
             no need to run the same checks once again here (like Shape.IsValid). However if some form of custom
             rules should be enforced, this is the right place to do it.</remarks>
         </member>
-        <member name="E:AxMap.GridOpened">
+        <member name="E:AxMapWinGIS.AxMap.GridOpened">
             <summary>
             This event is fired after grid datasource was added to the map (AxMap.AddLayer).
             </summary>
@@ -2403,7 +2467,7 @@
             <param name="isUsingProxy">Whether the datasource is rendered by Image class directly or
             by using an RBG image that was created to serve as proxy (Grid.CreateImageProxy).</param>
         </member>
-        <member name="E:AxMap.BeforeVertexDigitized">
+        <member name="E:AxMapWinGIS.AxMap.BeforeVertexDigitized">
             <summary>
             This event is fired after the user digitized a new point and held the ALT button.
             Can be used to modify the coordinates.
@@ -2412,20 +2476,20 @@
             <param name="pointY">Y coordinate</param>
             \new510 Added in version 5.1.0
         </member>
-        <member name="T:AxMap_Deprecated">
+        <member name="T:AxMapWinGIS.AxMap_Deprecated">
             <summary>
             Holds members that once were a part of %AxMap class. 
             New API members to substitute deprecated ones are listed in description.
             </summary>
         </member>
-        <member name="P:AxMap_Deprecated.LineSeparationFactor">
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.LineSeparationFactor">
             <summary>
             Gets or sets line separation factor.
             </summary>
             \deprecated v4.8. Use LinePattern class, and ShapeDrawingOptions.LinePattern property instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_UDFillStipple(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_UDFillStipple(System.Int32,System.Int32)">
             <summary>
             Gets one user defined stipple row.
             </summary> 
@@ -2438,7 +2502,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.FillHatchStyle instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_UDFillStipple(System.Int32,System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_UDFillStipple(System.Int32,System.Int32,System.Int32)">
             <summary>
             Sets one user defined stipple row. 
             </summary>
@@ -2451,7 +2515,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.FillHatchStyle instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_UDLineStipple(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_UDLineStipple(System.Int32)">
             <summary>
             Gets the user defined line stipple for the specified layer.
             </summary>
@@ -2467,7 +2531,7 @@
             \deprecated v.4.8. Use LinePattern class instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_UDLineStipple(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_UDLineStipple(System.Int32,System.Int32)">
             <summary>
             Sets the user defined line stipple for the specified layer.
             </summary>
@@ -2484,7 +2548,7 @@
             \deprecated v.4.8. Use LinePattern class instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_UDPointFontCharFont(System.Int32,System.String,System.Single,System.Boolean,System.Boolean,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_UDPointFontCharFont(System.Int32,System.String,System.Single,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Sets the font for point markers defined by font characters. 
             </summary>
@@ -2497,7 +2561,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.PointCharacter and ShapefileCategories instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_UDPointFontCharFontSize(System.Int32,System.Single)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_UDPointFontCharFontSize(System.Int32,System.Single)">
             <summary>
             Sets the font size for point markers defined by font characters. 
             </summary>
@@ -2506,7 +2570,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.PointCharacter and ShapefileCategories instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_UDPointFontCharListAdd(System.Int32,System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_UDPointFontCharListAdd(System.Int32,System.Int32,System.UInt32)">
             <summary>
             Adds a new item in the list of point markers defined by font characters
             </summary>
@@ -2517,7 +2581,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.PointCharacter and ShapefileCategories instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_UDPointImageListAdd(System.Int32,System.Object)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_UDPointImageListAdd(System.Int32,System.Object)">
             <summary>
             Allows you to build an image list so that one point shapefile can have multiple icons. 
             </summary>
@@ -2527,7 +2591,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.Picture and ShapefileCategories instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_UDPointImageListCount(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_UDPointImageListCount(System.Int32)">
             <summary>
             Gets the number of images currently stored in the image list for custom points images. 
             </summary>
@@ -2538,7 +2602,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.Picture and ShapefileCategories instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_UDPointImageListItem(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_UDPointImageListItem(System.Int32,System.Int32)">
             <summary>
             Allows you to build an image list so that one point shapefile can have multiple icons.
             </summary>
@@ -2548,7 +2612,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.Picture and ShapefileCategories instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_UDPointType(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_UDPointType(System.Int32)">
             <summary>
             Gets the image used when drawing points on the specified layer.
             </summary>
@@ -2557,7 +2621,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.PointType instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_UDPointType(System.Int32,System.Object)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_UDPointType(System.Int32,System.Object)">
             <summary>
             Sets the image used when drawing points on the specified layer.
             </summary>
@@ -2566,7 +2630,7 @@
             \deprecated v.4.8. Use ShapeDrawingOptions.PointType instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeDrawFill(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeDrawFill(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets whether the specified shape is drawn with a fill. Only works on polygon shapefiles.
             </summary>
@@ -2577,7 +2641,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeDrawFill(System.Int32,System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeDrawFill(System.Int32,System.Int32,System.Boolean)">
             <summary>
             Deprecated. Sets whether the specified shape is drawn with a fill. Only works on polygon shapefiles.
             </summary>
@@ -2588,7 +2652,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeDrawLine(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeDrawLine(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets whether the lines for the specified shape are drawn.
             </summary>
@@ -2599,7 +2663,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeDrawLine(System.Int32,System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeDrawLine(System.Int32,System.Int32,System.Boolean)">
             <summary>
             Deprecated. Sets whether the lines for the specified shape are drawn.
             </summary>
@@ -2610,7 +2674,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeDrawPoint(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeDrawPoint(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets whether the points/vertices in specified shape are drawn.
             </summary>
@@ -2621,7 +2685,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeDrawPoint(System.Int32,System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeDrawPoint(System.Int32,System.Int32,System.Boolean)">
             <summary>
             Deprecated. Sets whether the points/vertices in specified shape are drawn. 
             </summary>
@@ -2632,7 +2696,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeFillColor(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeFillColor(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the fill color for the specified shape. Only works on polygon shapefiles.
             </summary>
@@ -2643,7 +2707,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeFillColor(System.Int32,System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeFillColor(System.Int32,System.Int32,System.UInt32)">
             <summary>
             Deprecated. Sets the fill color for the specified shape. Only works on polygon shapefiles
             </summary>
@@ -2654,7 +2718,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeFillStipple(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeFillStipple(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the fill stipple for the specified shape. Only works on polygon shapefiles
             </summary>
@@ -2665,7 +2729,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeFillStipple(System.Int32,System.Int32,MapWinGIS.tkFillStipple)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeFillStipple(System.Int32,System.Int32,MapWinGIS.tkFillStipple)">
             <summary>
             Deprecated. Sets the fill stipple for the specified shape. Only works on polygon shapefiles. 
             </summary>
@@ -2676,7 +2740,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeFillTransparency(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeFillTransparency(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles.
             </summary>
@@ -2687,7 +2751,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeFillTransparency(System.Int32,System.Int32,System.Single)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeFillTransparency(System.Int32,System.Int32,System.Single)">
             <summary>
             Deprecated. Sets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles. 
             </summary>
@@ -2698,7 +2762,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeLineColor(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeLineColor(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the line color for the specified shape. Only works on shapefiles.
             </summary>
@@ -2709,7 +2773,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeLineColor(System.Int32,System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeLineColor(System.Int32,System.Int32,System.UInt32)">
             <summary>
             Deprecated. Sets the line color for the specified shape. Only works on shapefiles. 
             </summary>
@@ -2720,7 +2784,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeLineStipple(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeLineStipple(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the line stipple for the specified shape. Only works on shapefiles.
             </summary>
@@ -2731,7 +2795,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeLineStipple(System.Int32,System.Int32,MapWinGIS.tkLineStipple)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeLineStipple(System.Int32,System.Int32,MapWinGIS.tkLineStipple)">
             <summary>
             Deprecated. Sets the line stipple for the specified shape. Only works on shapefiles.
             </summary>
@@ -2742,7 +2806,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeLineWidth(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeLineWidth(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the line width for the specified shape. Only works on shapefiles.
             Suggested values for line width: 1 - 5
@@ -2754,7 +2818,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeLineWidth(System.Int32,System.Int32,System.Single)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeLineWidth(System.Int32,System.Int32,System.Single)">
             <summary>
             Deprecated. Sets the line width for the specified shape. Only works on shapefiles.
             Suggested values for line width: 1 - 5
@@ -2766,7 +2830,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapePointColor(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapePointColor(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the point color for the specified shape. Only works on shapefiles. 
             </summary>
@@ -2778,7 +2842,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapePointColor(System.Int32,System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapePointColor(System.Int32,System.Int32,System.UInt32)">
             <summary>
             Deprecated. Sets the point color for the specified shape. Only works on shapefiles.
             </summary>
@@ -2790,7 +2854,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapePointFontCharListID(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapePointFontCharListID(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the index of the point marker represented by font character.
             </summary>
@@ -2801,7 +2865,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapePointFontCharListID(System.Int32,System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapePointFontCharListID(System.Int32,System.Int32,System.Int32)">
             <summary>
             Deprecated. Sets the index of the point marker represented by font character.
             </summary>
@@ -2812,7 +2876,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapePointImageListID(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapePointImageListID(System.Int32,System.Int32)">
             <summary>
             Allows you specify an image from the image list so that one point shapefile can have multiple icons.
             </summary>
@@ -2823,7 +2887,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapePointImageListID(System.Int32,System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapePointImageListID(System.Int32,System.Int32,System.Int32)">
             <summary>
             Allows you specify an image from the image list so that one point shapefile can have multiple icons
             </summary>
@@ -2834,7 +2898,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapePointSize(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapePointSize(System.Int32,System.Int32)">
             <summary>
             Gets the line point/vertex size for the specified shape. Only works on shapefiles. 
             </summary>
@@ -2845,7 +2909,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapePointSize(System.Int32,System.Int32,System.Single)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapePointSize(System.Int32,System.Int32,System.Single)">
             <summary>
             Sets the line point/vertex size for the specified shape. Only works on shapefiles.
             </summary>
@@ -2856,7 +2920,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapePointType(System.Int32,System.Int32,MapWinGIS.tkPointType)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapePointType(System.Int32,System.Int32,MapWinGIS.tkPointType)">
             <summary>
             Deprecated. Sets the line point type for the specified shape. Only works on shapefiles.
             </summary>
@@ -2867,7 +2931,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapePointType(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapePointType(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the line point type for the specified shape. Only works on shapefiles. 
             </summary>
@@ -2878,7 +2942,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeStippleColor(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeStippleColor(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the color of the polygon fill stipple for the given shape of the layer.
             </summary>
@@ -2889,7 +2953,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeStippleColor(System.Int32,System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeStippleColor(System.Int32,System.Int32,System.UInt32)">
             <summary>
             Deprecated. Sets the color of the polygon fill stipple for the given shape of the layer.
             </summary>
@@ -2900,7 +2964,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeStippleTransparent(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeStippleTransparent(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets a boolean value which indicates whether the background of fill stipple for given shape of will be transparent.
             </summary>
@@ -2911,7 +2975,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeStippleTransparent(System.Int32,System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeStippleTransparent(System.Int32,System.Int32,System.Boolean)">
             <summary>
             Deprecated. Sets a boolean value which indicates whether the background of fill stipple for given shape of will be transparent.
             </summary>
@@ -2922,7 +2986,7 @@
             visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ShapeVisible(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ShapeVisible(System.Int32,System.Int32)">
             <summary>
             Deprecated. Gets the visibility of the specified shape.
             </summary>
@@ -2933,7 +2997,7 @@
             See ShapefileCategories, Shapefile.set_ShapeCategory to setup visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ShapeVisible(System.Int32,System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ShapeVisible(System.Int32,System.Int32,System.Boolean)">
             <summary>
             Deprecated. Sets the visibility of the specified shape. 
             </summary>
@@ -2944,7 +3008,7 @@
             See ShapefileCategories, Shapefile.set_ShapeCategory to setup visualization of individual shapes.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.ApplyLegendColors(System.Object)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.ApplyLegendColors(System.Object)">
             <summary>
             Applies the coloring scheme to a layer (the layer handle is specified in the coloring scheme object).
             </summary>
@@ -2954,7 +3018,7 @@
             \deprecated v4.9.3 No longer used.
             \removed493 Removed in v4.9.3.
         </member>
-        <member name="M:AxMap_Deprecated.IsTIFFGrid(System.String)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.IsTIFFGrid(System.String)">
             <summary>
             Returns a boolean value which indicates whether the specified file holds tiff grid.
             </summary>
@@ -2963,7 +3027,7 @@
             \deprecated v4.9.3 Use Utils.IsTiffGrid instead.
             \removed493 Removed in v4.9.3.
         </member>
-        <member name="P:AxMap_Deprecated.ShapeDrawingMethod">
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.ShapeDrawingMethod">
             <summary>
             Gets or sets the drawing method for vector layers.
             </summary>
@@ -2972,7 +3036,7 @@
             \deprecated v4.8 No longer used.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.SetImageLayerColorScheme(System.Int32,System.Object)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.SetImageLayerColorScheme(System.Int32,System.Object)">
             <summary>
             Sets a coloring scheme to be associated with an image layer. 
             </summary>
@@ -2983,7 +3047,7 @@
             \deprecated v4.8 Use Image.CustomColorScheme instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.UpdateImage(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.UpdateImage(System.Int32)">
             <summary>
             Updates the display of the specified image object.
             </summary>
@@ -2991,7 +3055,7 @@
             \deprecated v4.9.3 No longer used.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_GridFileName(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_GridFileName(System.Int32)">
             <summary>
             Gets or sets the filename of the Grid object associated with an Image object loaded into the map.
             </summary>
@@ -3000,7 +3064,7 @@
             \deprecated v 4.9.1 Use AxMap.get_Image, Image.SourceGridName instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_ImageLayerPercentTransparent(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_ImageLayerPercentTransparent(System.Int32)">
             <summary>
             Gets or sets the percentage of transparency of an Image layer.
             </summary>
@@ -3009,7 +3073,7 @@
             \deprecated v4.9.3 Use AxMap.get_Image, Image.TransparencyPercent instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_GridFileName(System.Int32,System.String)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_GridFileName(System.Int32,System.String)">
             <summary>
             Sets the filename of the grid associated with the specified layer.
             </summary>
@@ -3019,7 +3083,7 @@
             \deprecated v 4.9.1 Use Image.SourceGridName instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.AddLabel(System.Int32,System.String,System.UInt32,System.Double,System.Double,tkHJustification)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.AddLabel(System.Int32,System.String,System.UInt32,System.Double,System.Double,tkHJustification)">
             <summary>
             Adds a label to the map.
             </summary>
@@ -3032,7 +3096,7 @@
             \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interface ( AxMap.get_LayerLabels ) to change these settings.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.AddLabelEx(System.Int32,System.String,System.UInt32,System.Double,System.Double,tkHJustification,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.AddLabelEx(System.Int32,System.String,System.UInt32,System.Double,System.Double,tkHJustification,System.Double)">
             <summary>
             Adds an extended label to the map, allowing for rotated labels.
             </summary>
@@ -3047,7 +3111,7 @@
             \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interface ( AxMap.get_LayerLabels ) to change these settings.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.ClearLabels(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.ClearLabels(System.Int32)">
             <summary>
             Clears all labels that have been added to the specified layer.
             </summary>
@@ -3055,7 +3119,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.Clear instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_LayerLabelsOffset(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_LayerLabelsOffset(System.Int32)">
             <summary>
             Gets the offset for the labels on the layer. 
             </summary>
@@ -3065,7 +3129,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.OffsetX, Labels.OffsetY instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_LayerLabelsOffset(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_LayerLabelsOffset(System.Int32,System.Int32)">
             <summary>
             Sets the offset for the labels on the layer. 
             </summary>
@@ -3075,7 +3139,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.OffsetX, Labels.OffsetY instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_LayerLabelsScale(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_LayerLabelsScale(System.Int32)">
             <summary>
             Gets whether to scale the labels on the layer.
             </summary>
@@ -3084,7 +3148,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.ScaleLabels instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_LayerLabelsScale(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_LayerLabelsScale(System.Int32,System.Boolean)">
             <summary>
             Sets whether to scale the labels on the layer
             </summary>
@@ -3093,7 +3157,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.ScaleLabels instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_LayerLabelsShadow(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_LayerLabelsShadow(System.Int32)">
             <summary>
             Gets whether to use shadows for the labels on the layer.
             </summary>
@@ -3102,7 +3166,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.HaloVisible instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_LayerLabelsShadow(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_LayerLabelsShadow(System.Int32,System.Boolean)">
             <summary>
             Sets whether to use shadows for the labels on the layer.
             </summary>
@@ -3111,7 +3175,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.HaloVisible instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_LayerLabelsShadowColor(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_LayerLabelsShadowColor(System.Int32)">
             <summary>
             Gets the shadow color for the labels on the layer
             </summary>
@@ -3121,7 +3185,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.HaloColor instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_LayerLabelsShadowColor(System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_LayerLabelsShadowColor(System.Int32,System.UInt32)">
             <summary>
             Sets the shadow color for the labels on the layer. 
             </summary>
@@ -3131,7 +3195,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.HaloColor instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_LayerLabelsVisible(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_LayerLabelsVisible(System.Int32)">
             <summary>
             Gets label visibility for the specified layer.
             </summary>
@@ -3140,7 +3204,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.Visible instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_LayerLabelsVisible(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_LayerLabelsVisible(System.Int32,System.Boolean)">
             <summary>
             Sets label visibility for the specified layer.
             </summary>
@@ -3149,7 +3213,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.Visible instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.GetLayerStandardViewWidth(System.Int32,System.Double@)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.GetLayerStandardViewWidth(System.Int32,System.Double@)">
             <summary>
             Gets the standard view width used to scale the labels on the layer
             </summary>
@@ -3158,7 +3222,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.BasicScale instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.SetLayerStandardViewWidth(System.Int32,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.SetLayerStandardViewWidth(System.Int32,System.Double)">
             <summary>
             Sets the standard view width used to scale the labels on the layer.
             </summary>
@@ -3167,7 +3231,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.BasicScale instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_UseLabelCollision(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_UseLabelCollision(System.Int32)">
             <summary>
             Gets a boolean value which indicates whether overlapping labels will be allowed for the layer.
             </summary>
@@ -3176,7 +3240,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.AvoidCollisions instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_UseLabelCollision(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_UseLabelCollision(System.Int32,System.Boolean)">
             <summary>
             Sets a boolean value which indicates whether overlapping labels will be allowed for the layer.
             </summary>
@@ -3185,7 +3249,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.AvoidCollisions instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.LabelColor(System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.LabelColor(System.Int32,System.UInt32)">
             <summary>
             Sets the color of the font for labels of the layer.
             </summary>
@@ -3194,7 +3258,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.FontColor instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.LayerFont(System.Int32,System.String,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.LayerFont(System.Int32,System.String,System.Int32)">
             <summary>
             Sets the font to use when drawing labels for a layer.
             </summary>
@@ -3204,7 +3268,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.FontName, Labels.FontSize instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.LayerFontEx(System.Int32,System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.LayerFontEx(System.Int32,System.String,System.Int32,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Sets the font for labels of the layer.
             </summary>
@@ -3217,7 +3281,7 @@
             \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.FontName, Labels.FontSize, Labels.FontBold, Labels.FontItalic, Labels.FontUnderline instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="P:AxMap_Deprecated.MultilineLabels">
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.MultilineLabels">
             <summary>
             Gets or sets a boolean value which indicates whether multiline labels will be drawn correctly on the map.
             </summary>
@@ -3225,7 +3289,7 @@
             \see Labels.Expression.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.AddDrawingLabel(System.Int32,System.String,System.UInt32,System.Double,System.Double,tkHJustification)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.AddDrawingLabel(System.Int32,System.String,System.UInt32,System.Double,System.Double,tkHJustification)">
             <summary>
             Adds label to the specified drawing layer.
             </summary>
@@ -3239,7 +3303,7 @@
             \deprecated v4.9.3 Use AxMap.DrawLabel, AxMap.DrawLabelEx instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.AddDrawingLabelEx(System.Int32,System.String,System.UInt32,System.Double,System.Double,tkHJustification,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.AddDrawingLabelEx(System.Int32,System.String,System.UInt32,System.Double,System.Double,tkHJustification,System.Double)">
             <summary>
             Adds label to the specified drawing layer. Angle of rotation is accepted.
             </summary>
@@ -3254,7 +3318,7 @@
             \deprecated v4.9.3 Use AxMap.DrawLabel, AxMap.DrawLabelEx instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.GetDrawingStandardViewWidth(System.Int32,System.Double@)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.GetDrawingStandardViewWidth(System.Int32,System.Double@)">
             <summary>
             Gets the value which affects the scaling of labels.
             </summary>
@@ -3263,7 +3327,7 @@
             \deprecated v 4.8. Use AxMap.get_DrawingLabels, Labels.BasicScale instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_DrawingLabelsOffset(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_DrawingLabelsOffset(System.Int32)">
             <summary>
             Gets the vertical offset of the labels for the specified drawing layer in pixels.
             </summary>
@@ -3272,7 +3336,7 @@
             \deprecated v. 4.8. Use AxMap.get_DrawingLabels and Labels.OffsetX, Labels.OffsetY instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_DrawingLabelsOffset(System.Int32,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_DrawingLabelsOffset(System.Int32,System.Int32)">
             <summary>
             Sets the vertical offset of the labels for the specified drawing layer in pixels.
             </summary>
@@ -3281,7 +3345,7 @@
             \deprecated v. 4.8. Use AxMap.get_DrawingLabels and Labels.OffsetX, Labels.OffsetY instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_DrawingLabelsScale(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_DrawingLabelsScale(System.Int32)">
             <summary>
             Gets a boolean value which indicates whether the labels of the drawing layer will be scaled.
             </summary>
@@ -3291,7 +3355,7 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.ScaleLabels instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_DrawingLabelsScale(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_DrawingLabelsScale(System.Int32,System.Boolean)">
             <summary>
             Sets a boolean value which indicates whether the labels of the drawing layer will be scaled.
             </summary>
@@ -3301,7 +3365,7 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.ScaleLabels instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_DrawingLabelsShadow(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_DrawingLabelsShadow(System.Int32)">
             <summary>
             Gets a boolean value which indicates whether a shadow will be displayed for the labels of the drawing layer.
             </summary>
@@ -3311,7 +3375,7 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.HaloVisible instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_DrawingLabelsShadow(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_DrawingLabelsShadow(System.Int32,System.Boolean)">
             <summary>
             Sets a boolean value which indicates whether a shadow will be displayed for the labels of the drawing layer.
             </summary>
@@ -3321,7 +3385,7 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.HaloVisible instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_DrawingLabelsShadowColor(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_DrawingLabelsShadowColor(System.Int32)">
             <summary>
             Gets the color of the shadow for the labels of the specified drawing layer.
             </summary>
@@ -3331,7 +3395,7 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.HaloColor instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_DrawingLabelsShadowColor(System.Int32,System.UInt32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_DrawingLabelsShadowColor(System.Int32,System.UInt32)">
             <summary>
             Sets the color of the shadow for the labels of the specified drawing layer.
             </summary>
@@ -3341,7 +3405,7 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.HaloColor instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.get_UseDrawingLabelCollision(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.get_UseDrawingLabelCollision(System.Int32)">
             <summary>
             Gets a boolean value which indicates whether overlapping labels will be allowed for drawing layer.
             </summary>
@@ -3351,7 +3415,7 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.AvoidCollisions instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_UseDrawingLabelCollision(System.Int32,System.Boolean)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_UseDrawingLabelCollision(System.Int32,System.Boolean)">
             <summary>
             Sets a boolean value which indicates whether overlapping labels will be allowed for drawing layer.
             </summary>
@@ -3361,7 +3425,7 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.AvoidCollisions instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.DrawingFont(System.Int32,System.String,System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.DrawingFont(System.Int32,System.String,System.Int32)">
             <summary>
             Sets the font for the labels of the drawing layer.
             </summary>
@@ -3371,14 +3435,14 @@
             \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.FontName, Labels.FontSize instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="P:AxMap_Deprecated.MapRotationAngle">
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.MapRotationAngle">
             <summary>
             Gets or sets the angle of map rotation in degrees.
             </summary>
             \deprecated v.4.9.3 The functionality is no longer supported.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.set_ImageLayerPercentTransparent(System.Int32,System.Single)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.set_ImageLayerPercentTransparent(System.Int32,System.Single)">
             <summary>
             Sets the numeric value which determines the transparency of the given image layer.
             </summary>
@@ -3388,7 +3452,7 @@
             \deprecated v4.9.3 Use AxMap.get_Image(), Image.TransparencyPercent instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.SetDrawingStandardViewWidth(System.Int32,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.SetDrawingStandardViewWidth(System.Int32,System.Double)">
             <summary>
             Deprecated. Affects the scaling of the labels of the specified drawing layer.
             </summary>
@@ -3397,7 +3461,7 @@
             \deprecated v.4.8. Use AxMap.get_DrawingLabels, Labels.BasicScale and Labels.ScaleLabels instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.ClearUDPointImageList(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.ClearUDPointImageList(System.Int32)">
             <summary>
             Clears the images from the user defined list of point symbols.
             </summary>
@@ -3405,7 +3469,7 @@
             \deprecated v4.9.3 Use ShapeDrawingOptions.Picture instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.GetBaseProjectionPoint(System.Double,System.Double)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.GetBaseProjectionPoint(System.Double,System.Double)">
             <summary>
             Gets or set the point which is used as a center of the map rotation/
             </summary>
@@ -3416,7 +3480,7 @@
             \deprecated v.4.9.3 The functionality is no longer supported.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.GetRotatedExtent">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.GetRotatedExtent">
             <summary>
             Gets the bounding box which holds the extents of the map when rotation is applied.
             </summary>
@@ -3427,7 +3491,7 @@
             \deprecated v.4.9.3 The functionality is no longer supported.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.IsSameProjection(System.String,System.String)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.IsSameProjection(System.String,System.String)">
             <summary>
             Tests the identity of 2 projections.
             </summary>
@@ -3437,7 +3501,7 @@
             \deprecated v4.9.3 Use GeoProjection.get_IsSame, GeoProjection.get_IsSameExt instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="P:AxMap_Deprecated.CanUseImageGrouping">
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.CanUseImageGrouping">
             <summary>
             Gets or sets a boolean value which indicates how images with identical size and position on the map will be drawn.
             </summary>
@@ -3447,7 +3511,7 @@
             \deprecated v.4.9.3 The functionality is no longer supported.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="P:AxMap_Deprecated.DoubleBuffer">
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.DoubleBuffer">
             <summary>
             Gets or sets whether or not the map uses double buffering. 
             </summary>
@@ -3456,7 +3520,7 @@
             \deprecated v.4.9.3 Double buffer is used in all cases.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="P:AxMap_Deprecated.MapState">
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.MapState">
             <summary>
             Gets or sets the MapState string which stores all information needed to restore a view. 
             </summary>
@@ -3464,14 +3528,14 @@
             \deprecated v.4.8 Use AxMap.SerializeMapState instead.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="P:AxMap_Deprecated.SerialNumber">
+        <member name="P:AxMapWinGIS.AxMap_Deprecated.SerialNumber">
             <summary>
             Serial number functionality is deprecated as MapWindow is now Open Source. This property may be left unset. 
             </summary>
             \deprecated v4.8 This property is no longer used.
             \removed493 Removed in v4.9.3
         </member>
-        <member name="M:AxMap_Deprecated.AdjustLayerExtents(System.Int32)">
+        <member name="M:AxMapWinGIS.AxMap_Deprecated.AdjustLayerExtents(System.Int32)">
             <summary>
             Deprecated. Updates the extents of the layer before the drawing.
             </summary>

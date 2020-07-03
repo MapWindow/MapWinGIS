@@ -164,12 +164,21 @@ namespace MapWinGIS
         /// For labels attached to shapefile layer updates the text of each label based on Expression property.
         /// </summary>
         /// <remarks>The method is necessary when the values in underlying DBF table have changed, 
-        /// since Labels class doesn't track these changes automatically.</remarks>
+        /// since Labels class doesn't track these changes automatically.
+        /// This method is depraceted since version 5.2 - use the new ApplyLabelExpression instead.</remarks>
         public void ForceRecalculateExpression()
         {
             throw new NotImplementedException();
         }
-       
+
+        /// <summary>
+        /// Generates the labels for the layer based on the label expression.
+        /// </summary>
+        public void ApplyLabelExpression()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         /// The modules listed here are parts of the documentation of Labels class.
@@ -420,10 +429,13 @@ namespace MapWinGIS
         /// <param name="Text">The text of the new label.</param>
         /// <param name="x">The x coordinate of the new label.</param>
         /// <param name="y">The y coordinate of the new label.</param>
+        /// <param name="offsetX">The x offset in pixels of the new label.</param>
+        /// <param name="offsetY">The y offset in pixels of the new label.</param>
         /// <param name="Rotation">The rotation of the label in degrees. Positive values set clockwise rotation, negative - counter-clockwise.</param>
         /// <param name="Category">The index of visualization category to be used for the label drawing. 
         /// Default value is -1, which means the default drawing options will be used.</param>
-        public void AddLabel(string Text, double x, double y, double Rotation, int Category)
+        /// \new52 offsetX & offsetY were introduced in version 5.2
+        public void AddLabel(string Text, double x, double y, double offsetX, double offsetY, double Rotation, int Category)
         {
             throw new NotImplementedException();
         }
@@ -437,10 +449,13 @@ namespace MapWinGIS
         /// <param name="Text">The text to be displayed.</param>
         /// <param name="x">The x coordinate of the part.</param>
         /// <param name="y">The y coordinate of the part.</param>
+        /// <param name="offsetX">The x offset in pixels of the new label.</param>
+        /// <param name="offsetY">The y offset in pixels of the new label.</param>
         /// <param name="Rotation">The rotation of the label's part.</param>
         /// <param name="Category">The index of visualization category to be used for the label drawing. 
         /// Default value is -1, which means the default drawing options will be used.</param>
-        public void AddPart(int Index, string Text, double x, double y, double Rotation, int Category)
+        /// /// \new52 offsetX & offsetY were introduced in version 5.2
+        public void AddPart(int Index, string Text, double x, double y, double offsetX, double offsetY, double Rotation, int Category)
         {
             throw new NotImplementedException();
         }
@@ -484,10 +499,13 @@ namespace MapWinGIS
         /// <param name="Text">The text of the label.</param>
         /// <param name="x">The x coordinate of the label.</param>
         /// <param name="y">The y coordinate of the label.</param>
+        /// <param name="offsetX">The x offset in pixels of the label.</param>
+        /// <param name="offsetY">The y offset in pixels of the label.</param>
         /// <param name="Rotation">The angle of label rotation.</param>
         /// <param name="Category">The index of the visualization category for the label. Use -1 if the label doesn't belong to any category.</param>
         /// <returns>True on success and false otherwise.</returns>
-        public bool InsertLabel(int Index, string Text, double x, double y, double Rotation, int Category)
+        /// \new52 offsetX & offsetY were introduced in version 5.2
+        public bool InsertLabel(int Index, string Text, double x, double y, double offsetX, double offsetY, double Rotation, int Category)
         {
             throw new NotImplementedException();
         }
@@ -501,10 +519,13 @@ namespace MapWinGIS
         /// <param name="Text">The text of the label.</param>
         /// <param name="x">The x coordinate of the label.</param>
         /// <param name="y">The y coordinate of the label.</param>
+        /// <param name="offsetX">The x offset in pixels of the label.</param>
+        /// <param name="offsetY">The y offset in pixels of the label.</param>
         /// <param name="Rotation">The rotation of the label in degrees.</param>
         /// <param name="Category">The index of visualization category. Use -1 if the label doesn't belong to any category.</param>
         /// <returns>True on success or false otherwise.</returns>
-        public bool InsertPart(int Index, int Part, string Text, double x, double y, double Rotation, int Category)
+        /// /// \new52 offsetX & offsetY were introduced in version 5.2
+        public bool InsertPart(int Index, int Part, string Text, double x, double y, double offsetX, double offsetY, double Rotation, int Category)
         {
             throw new NotImplementedException();
         }
@@ -667,6 +688,26 @@ namespace MapWinGIS
         /// <remarks>When labels are subject to rotation "vertical" means "along the text height".</remarks>
         /// \see Labels.AutoOffset property
         public double OffsetY
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the field index to use for the horizontal offset in pixels which is used to draw labels.
+        /// </summary>
+        /// /new52 New in version 5.2
+        public int OffsetXField
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the field index to use for the vertical offset in pixels which is used to draw labels.
+        /// </summary>
+        /// /new52 New in version 5.2
+        public int OffsetYField
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }

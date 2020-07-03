@@ -357,15 +357,15 @@ void CMapView::DrawCircleOnGraphics(Gdiplus::Graphics* graphics, _DrawCircle* ci
 {
 
 	auto color = Utility::OleColor2GdiPlus(circle->color, circle->alpha);
-	auto radius = circle->radius;
-	auto width = circle->width;
+	auto radius = (float)circle->radius;
+	auto width = (float)circle->width;
 
-	Gdiplus::REAL pixX = circle->x;
-	Gdiplus::REAL pixY = circle->y;
+	Gdiplus::REAL pixX = (float)circle->x;
+	Gdiplus::REAL pixY = (float)circle->y;
 	if (project)
 		PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
-	pixX -= radius * 0.5;
-	pixY -= radius * 0.5;
+	pixX -= radius * 0.5f;
+	pixY -= radius * 0.5f;
 	
 
 	if (circle->fill)
@@ -387,7 +387,7 @@ void CMapView::DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* 
 
 	Gdiplus::Point* pnts = new Gdiplus::Point[polygon->numPoints];
 	long pointCount = polygon->numPoints;
-	auto width = polygon->width;
+	auto width = (float)polygon->width;
 	auto color = Utility::OleColor2GdiPlus(polygon->color, polygon->alpha);
 
 	for (int j = 0; j < pointCount; j++)
@@ -397,8 +397,8 @@ void CMapView::DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* 
 		if (project)
 			PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
 
-		int xpt = Utility::Rint(pixX);
-		int ypt = Utility::Rint(pixY);
+		int xpt = std::lround(pixX);
+		int ypt = std::lround(pixY);
 		pnts[j] = Gdiplus::Point(xpt, ypt);
 	}
 
@@ -418,19 +418,20 @@ void CMapView::DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* 
 
 void CMapView::DrawLineOnGraphics(Gdiplus::Graphics* graphics, _DrawLine* line, bool project)
 {
-	auto width = line->width;
+	auto width = (float)line->width;
 	auto color = Utility::OleColor2GdiPlus(line->color, line->alpha);
 
 	Gdiplus::Point* pnts = new Gdiplus::Point[2];
-	auto pixX1 = line->x1;
-	auto pixY1 = line->y1;
+	auto pixX1 = std::lround(line->x1);
+	auto pixY1 = std::lround(line->y1);
 	if (project)
-		PROJECTION_TO_PIXEL_INT(pixX1, pixY1, pixX1, pixY1);
-	auto pixX2 = line->x2;
-	auto pixY2 = line->y2;
-	if (project)
-		PROJECTION_TO_PIXEL_INT(pixX2, pixY2, pixX2, pixY2);
+		PROJECTION_TO_PIXEL_INT(line->x1, line->y1, pixX1, pixY1);
 
+	auto pixX2 = std::lround(line->x2);
+	auto pixY2 = std::lround(line->y2);
+	if (project)
+		PROJECTION_TO_PIXEL_INT(line->x2, line->y2, pixX2, pixY2);
+	
 	Gdiplus::Pen pen(color, width);
 	graphics->DrawLine(&pen, Gdiplus::Point(pixX1, pixY1), Gdiplus::Point(pixX2, pixY2));
 
@@ -446,8 +447,8 @@ void CMapView::DrawPointOnGraphics(Gdiplus::Graphics* graphics, _DrawPoint* poin
 	double pixY = point->y;
 	if (project)
 		PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
-	auto x = pixX - size * 0.5;
-	auto y = pixY - size * 0.5;
+	auto x = std::lround(pixX - size * 0.5);
+	auto y = std::lround(pixY - size * 0.5);
 
 	Gdiplus::SolidBrush brush(color);
 	graphics->FillRectangle(&brush, x, y, size, size);

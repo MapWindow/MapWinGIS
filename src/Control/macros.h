@@ -49,8 +49,8 @@
 	//	piY = m_viewHeight-piY-1;\ //
 	# define PROJECTION_TO_PIXEL(prX,prY,piX,piY)\
 	{\
-		piX = (prX - _extents.left)*_pixelPerProjectionX;\
-		piY = (_extents.top - prY) * _pixelPerProjectionY;\
+		piX = (float)((prX - _extents.left) * _pixelPerProjectionX);\
+		piY = (float)((_extents.top - prY) * _pixelPerProjectionY);\
 	}
 
 	# define SET_SIGN(val,SH)(val<0?SH=-1:SH=1)

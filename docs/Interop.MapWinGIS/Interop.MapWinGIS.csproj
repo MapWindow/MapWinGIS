@@ -85,8 +85,11 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AxInterop.MapWinGIS">
+      <HintPath>..\..\src\bin\Win32\15.0\AxInterop.MapWinGIS.dll</HintPath>
+    </Reference>
     <Reference Include="Interop.MapWinGIS">
-      <HintPath>..\..\src\bin\Win32\Interop.MapWinGIS.dll</HintPath>
+      <HintPath>..\..\src\bin\Win32\15.0\Interop.MapWinGIS.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="stdole, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

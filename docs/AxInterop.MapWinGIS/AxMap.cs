@@ -90,7 +90,9 @@ namespace AxMapWinGIS
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
+#pragma warning disable 1591
         public uint backColor { get; set; }  // TODO: Why does it start with lower-key 'b'?
+#pragma warning restore 1591
 
         /// <summary>
         /// Draws the content of the back buffer to specified device context.
@@ -99,7 +101,8 @@ namespace AxMapWinGIS
         /// <param name="hdc">The handle of the device context.</param>
         /// <param name="imageWidth">The width of the resulting image.</param>
         /// <param name="imageHeight">The height of the resulting image.</param>
-        public void DrawBackBuffer(IntPtr hdc, int imageWidth, int imageHeight)
+        /// \new510 Updated in version 5.1
+        public void DrawBackBuffer(int hdc, int imageWidth, int imageHeight)
         {
             throw new NotImplementedException();
         }
@@ -289,6 +292,8 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+  
+
         /// <summary>
         /// Gets or sets version number of the control.
         /// </summary>
@@ -406,11 +411,13 @@ namespace AxMapWinGIS
 
         #endregion
 
+#pragma warning disable 1587
         /// The modules listed here are parts of the documentation of AxMap class.
         /// \dotfile mapgroups.dot
         /// <a href = "diagrams.html">Graph description</a>
         /// \addtogroup map_modules Map modules
         /// @{
+#pragma warning restore 1587
 
         #region Map interaction
         /// \addtogroup map_interaction Map interaction
@@ -776,7 +783,9 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1587
         /// @}
+#pragma warning restore 1587
         #endregion
 
         #region Map serialization
@@ -920,7 +929,9 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1587
         /// @}
+#pragma warning restore 1587
         #endregion
 
         #region Layer properties
@@ -1224,7 +1235,9 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1587
         /// @}
+#pragma warning restore 1587
 
         #endregion
 
@@ -1254,6 +1267,7 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1570
         /// <summary>
         /// Adds a layer from spatial database accessed via GDAL/OGR drivers.
         /// </summary>
@@ -1299,6 +1313,7 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
+#pragma warning restore 1570
 
         /// <summary>
         /// Adds layer from the specified datasource.
@@ -1439,7 +1454,7 @@ namespace AxMapWinGIS
         /// Starting with version 5.2.0, this function will also attempt to maintain the current 
         /// set of Hidden and Selected shapes within the associated Shapefile.
         /// </remarks>
-        /// \new520 Updated in version 5.2.0
+        /// \new52 Updated in version 5.2
         public bool ReloadOgrLayerFromSource(int ogrLayerHandle)
         {
             throw new NotImplementedException();
@@ -1602,7 +1617,9 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1587
         /// @}
+#pragma warning restore 1587
         #endregion
 
         #region Drawing layer
@@ -1672,7 +1689,8 @@ namespace AxMapWinGIS
         /// <param name="pixelRadius">Radius in pixels of the circle to be drawn.</param>
         /// <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
-        public void DrawCircle(double x, double y, double pixelRadius, uint color, bool fill)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawCircle(double x, double y, double pixelRadius, uint color, bool fill, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1686,7 +1704,8 @@ namespace AxMapWinGIS
         /// <param name="pixelRadius">Radius in pixels of the circle to be drawn.</param>
         /// <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
-        public void DrawCircleEx(int layerHandle, double x, double y, double pixelRadius, uint color, bool fill)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawCircleEx(int layerHandle, double x, double y, double pixelRadius, uint color, bool fill, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1700,7 +1719,8 @@ namespace AxMapWinGIS
         /// <param name="y2">Y coordinate of the second point used to draw the line.</param>
         /// <param name="pixelWidth">Width of the line in pixels.</param>
         /// <param name="color">Color to draw the line with. This is a UInt32 representation of an RGB value.</param>
-        public void DrawLine(double x1, double y1, double x2, double y2, int pixelWidth, uint color)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawLine(double x1, double y1, double x2, double y2, int pixelWidth, uint color, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1715,7 +1735,8 @@ namespace AxMapWinGIS
         /// <param name="y2">Y coordinate of the second point used to draw the line.</param>
         /// <param name="pixelWidth">Width of the line in pixels.</param>
         /// <param name="color">Color to draw the line with. This is a UInt32 representation of an RGB value.</param>
-        public void DrawLineEx(int layerHandle, double x1, double y1, double x2, double y2, int pixelWidth, uint color)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawLineEx(int layerHandle, double x1, double y1, double x2, double y2, int pixelWidth, uint color, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1727,7 +1748,8 @@ namespace AxMapWinGIS
         /// <param name="y">The y coordinate of the point to draw.</param>
         /// <param name="pixelSize">The size in pixels of the point to be drawn.</param>
         /// <param name="color">The color of the point to be drawn. This is a UInt32 representation of an RGB color.</param>
-        public void DrawPoint(double x, double y, int pixelSize, uint color)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawPoint(double x, double y, int pixelSize, uint color, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1740,7 +1762,8 @@ namespace AxMapWinGIS
         /// <param name="y">The y coordinate of the point to draw.</param>
         /// <param name="pixelSize">The size in pixels of the point to be drawn.</param>
         /// <param name="color">The color of the point to be drawn. This is a UInt32 representation of an RGB color.</param>
-        public void DrawPointEx(int layerHandle, double x, double y, int pixelSize, uint color)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawPointEx(int layerHandle, double x, double y, int pixelSize, uint color, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1753,7 +1776,8 @@ namespace AxMapWinGIS
         /// <param name="numPoints">The number of points in the polygon.</param>
         /// <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
-        public void DrawPolygon(ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawPolygon(ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1767,7 +1791,8 @@ namespace AxMapWinGIS
         /// <param name="numPoints">The number of points in the polygon.</param>
         /// <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
-        public void DrawPolygonEx(int layerHandle, ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawPolygonEx(int layerHandle, ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1781,7 +1806,8 @@ namespace AxMapWinGIS
         /// <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
         /// <param name="width">The width of the outline.</param>
-        public void DrawWideCircle(double x, double y, double pixelRadius, uint color, bool fill, short width)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>/// 
+        public void DrawWideCircle(double x, double y, double pixelRadius, uint color, bool fill, short width, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1796,7 +1822,8 @@ namespace AxMapWinGIS
         /// <param name="color">Color of the circle to be drawn. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">Boolean value which determines whether the circle will be drawn with a fill or not.</param>
         /// <param name="outlineWidth">The width of the outline.</param>
-        public void DrawWideCircleEx(int layerHandle, double x, double y, double radius, uint color, bool fill, short outlineWidth)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawWideCircleEx(int layerHandle, double x, double y, double radius, uint color, bool fill, short outlineWidth, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1810,7 +1837,8 @@ namespace AxMapWinGIS
         /// <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
         /// <param name="width">The width of the outline.</param>
-        public void DrawWidePolygon(ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill, short width)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawWidePolygon(ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill, short width, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1825,7 +1853,8 @@ namespace AxMapWinGIS
         /// <param name="color">The color to use when drawing the polygon. This is a UInt32 representation of an RGB color.</param>
         /// <param name="fill">A boolean value representing whether the polygon is drawn with a fill or not.</param>
         /// <param name="outlineWidth">The width of the outline.</param>
-        public void DrawWidePolygonEx(int layerHandle, ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill, short outlineWidth)
+        /// <param name="alpha">Byte value which determines the alpha channel of the color.</param>
+        public void DrawWidePolygonEx(int layerHandle, ref object xPoints, ref object yPoints, int numPoints, uint color, bool fill, short outlineWidth, byte alpha = 255)
         {
             throw new NotImplementedException();
         }
@@ -1931,7 +1960,9 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1587
         /// @}
+#pragma warning restore 1587
         #endregion
 
         #region Shapefile layer
@@ -2241,7 +2272,9 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1587
         /// @}
+#pragma warning restore 1587
 
         #endregion
 
@@ -2404,7 +2437,9 @@ namespace AxMapWinGIS
             set { throw new NotImplementedException(); }
         }
 
+#pragma warning disable 1587
         /// @}
+#pragma warning restore 1587
         #endregion
 
         #region Projection and coordinates
@@ -2633,7 +2668,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets or sets a value indicating whether to display a white background behind the coordinates, for better contrast
         /// </summary>
-        /// \new520 Added in version 5.2.0
+        /// \new52 Added in version 5.2
         public bool ShowCoordinatesBackground
         {
             get { throw new NotImplementedException(); }
@@ -2784,7 +2819,9 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1587
         /// @}
+#pragma warning restore 1587
         #endregion
 
         #region Events
@@ -2814,7 +2851,7 @@ namespace AxMapWinGIS
         /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
         /// <param name="handled">Passed by reference. The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
         public event _DMapEvents_AfterDrawingEventHandler AfterDrawing;
-        void _DMapEvents.AfterDrawing(int hDc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
+        void _DMapEvents.AfterDrawing(int hdc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
         {
             throw new NotImplementedException();
         }
@@ -2830,9 +2867,40 @@ namespace AxMapWinGIS
         /// <param name="handled">Passed by reference. The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
         /// \new495 Added in version 4.9.5
         public event _DMapEvents_AfterLayersEventHandler AfterLayers;
-        void _DMapEvents.AfterLayers(int hDc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
+        void _DMapEvents.AfterLayers(int hdc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// This event is fired whenever a snap point is requested by the map before the MapWinGIS snap algorithm was run. 
+        /// If the isFinal flag is set to true, the default snapping algorithm of MapWinGIS will be skipped.
+        /// </summary>
+        /// <param name="pointX">the X coordinate of the point a snap point is requested for</param>
+        /// <param name="pointY">the Y coordinate of the point a snap point is requested for</param>
+        /// <param name="snappedX">the X coordinate of the snap point found so far (can be changed)</param>
+        /// <param name="snappedY">the Y coordinate of the snap point found so far (can be changed)</param>
+        /// <param name="isFound">a flag indicating if a snap point has been found (can be changed)</param>
+        /// <param name="isFinal">a flag indicating if the found snap point should be considered final</param>
+        /// \new52 Added in version 5.2
+        public event _DMapEvents_SnapPointRequestedEventHandler SnapPointRequested;
+        void _DMapEvents.SnapPointRequested(double pointX, double pointY, ref double snappedX, ref double snappedY, ref tkMwBoolean isFound,
+            ref tkMwBoolean isFinal)
+        {
+        }
+
+        /// <summary>
+        /// This event is fired after a snap point was found either by the default snapping algorithm of MapWinGIS or by a SnapPointRequested handler.
+        /// Setting the snappedX and snappedY allows you to override this result (use with care!).
+        /// </summary>
+        /// <param name="pointX">the X coordinate of the point a snap point is requested for</param>
+        /// <param name="pointY">the Y coordinate of the point a snap point is requested for</param>
+        /// <param name="snappedX">the X coordinate of the snap point found so far (can be changed)</param>
+        /// <param name="snappedY">the Y coordinate of the snap point found so far (can be changed)</param>
+        /// \new52 Added in version 5.2
+        public event _DMapEvents_SnapPointFoundEventHandler SnapPointFound;
+        void _DMapEvents.SnapPointFound(double pointX, double pointY, ref double snappedX, ref double snappedY)
+        {
         }
 
         /// <summary>
@@ -2848,6 +2916,7 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
+        
 
         /// <summary>
         /// This event is fired when background loading of data for OgrLayer finishes.
@@ -2926,7 +2995,7 @@ namespace AxMapWinGIS
         /// The value should be set to tkMwBoolean.blnTrue in case some additional drawing is performed in client code.</param>
         /// \new495 Added in version 4.9.5
         public event _DMapEvents_BeforeLayersEventHandler BeforeLayers;
-        void _DMapEvents.BeforeLayers(int hDc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
+        void _DMapEvents.BeforeLayers(int hdc, int xMin, int xMax, int yMin, int yMax, ref tkMwBoolean handled)
         {
             throw new NotImplementedException();
         }
@@ -3212,7 +3281,7 @@ namespace AxMapWinGIS
         /// events are complete.  This is particularly useful when multiple layers are 'Selectable', 
         /// and you want to know when all layers have completed their selection.
         /// </remarks>
-        /// \new520 Updated in version 5.2.0
+        /// \new52 Updated in version 5.2
         public event _DMapEvents_SelectionChangedEventHandler SelectionChanged;
         void _DMapEvents.SelectionChanged(int layerHandle)
         {
