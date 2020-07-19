@@ -85,6 +85,19 @@ enum tkWmsVersion {
 	wv13 = 5,
 } tkWmsVersion;
 
+/************************** tkWmsBoundingBoxOrder Enumeration **********************/
+typedef
+[
+	uuid(A61764EF-141E-4BBF-A719-DE93E780B2A5),
+	helpstring("tkWmsBoundingBoxOrder"),
+]
+enum tkWmsBoundingBoxOrder
+{
+	bboAuto = 0,
+	bboLongLat = 1,
+	bboLatLong = 2,
+} 	tkWmsBoundingBoxOrder;
+
 /************************** tkCallbackVerbosity Enumeration **********************/
 typedef
 [
