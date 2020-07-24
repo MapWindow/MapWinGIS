@@ -36,10 +36,10 @@ xcopy /v /c /r /y %_from_dir%\gdal-data\*.* %_to_dir%gdal-data\
 xcopy /v /c /r /y %_from_dir%\proj\SHARE\*.* %_to_dir%..\PROJ_NAD\
 
 REM Copy needed Tamas binaries:
-FOR %%G IN (cfitsio.dll geos.dll geos_c.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcurl.dll 
-            iconv.dll libeay32.dll libmysql.dll libpq.dll libxml2.dll lti_lidar_dsdk_1.1.dll netcdf.dll  
-            openjp2.dll proj.dll spatialite.dll sqlite3.dll freexl.dll  
-            ssleay32.dll szip.dll tbb.dll xdrdll.dll zlib1.dll libtiff.dll expat.dll NCSEcw.dll) DO (
+FOR %%G IN (cfitsio.dll expat.dll freexl.dll geos.dll geos_c.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcrypto-1_1.dll libcrypto-1_1-x64.dll libcurl.dll  
+            iconv.dll libmysql.dll libpq.dll libssl-1_1.dll libssl-1_1-x64.dll libtiff.dll libxml2.dll lti_lidar_dsdk_1.1.dll netcdf.dll   
+            openjp2.dll proj.dll spatialite.dll sqlite3.dll szip.dll tbb.dll xdrdll.dll zlib1.dll  
+            NCSEcw.dll) DO (
 	IF EXIST %_from_dir%\%%G (
     xcopy /v /c /r /y %_from_dir%\%%G  %_to_dir%
 	)

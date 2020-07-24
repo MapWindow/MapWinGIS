@@ -2,12 +2,12 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "5.2.2"
+#define MyAppVersion "5.2.3"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapWindow\MapWinGIS\git\src\InnoSetup"
 #define BinLocation "D:\dev\MapWindow\MapWinGIS\git\src\bin"
-;; #define x64BitVersion
+#define x64BitVersion
 ;; #define VsVersion = "2015" 
 #define VsVersion = "2017" 
 
@@ -94,8 +94,8 @@ Source: "{#BinLocation}\Licenses\MapWinGISLicense.rtf"; DestDir: "{app}\Licenses
 ;Source: "Licenses\OCILicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
 ;Source: "Licenses\SZIPLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MapWinGIS_Core
 ;; GDAL Plugins:
-Source: "{#MySourceDir}\gdalplugins\gdal_ECW_JP2ECW.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion recursesubdirs createallsubdirs {#SystemFlag}; Components: ECW
-Source: "{#BinLocation}\Licenses\ECW5License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: ECW
+;;Source: "{#MySourceDir}\gdalplugins\gdal_ECW_JP2ECW.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion recursesubdirs createallsubdirs {#SystemFlag}; Components: ECW
+;;Source: "{#BinLocation}\Licenses\ECW5License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: ECW
 Source: "{#MySourceDir}\gdalplugins\gdal_MrSID.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: MrSID
 Source: "{#BinLocation}\Licenses\MRSIDLicense.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: MrSID
 Source: "{#MySourceDir}\gdalplugins\gdal_netCDF.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: NetCDF
@@ -107,8 +107,8 @@ Source: "{#BinLocation}\Licenses\HDF5License.rtf"; DestDir: "{app}\Licenses\"; F
 ;;Source: "{#MySourceDir}\gdalplugins\gdal_HDF4Image.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: HDF4
 ;;Source: "{#BinLocation}\Licenses\HDF4License.rtf"; DestDir: "{app}\Licenses\"; Flags: ignoreversion; Components: HDF4
 
-Source: "{#MySourceDir}\gdalplugins\ogr_MSSQLSpatial.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
-Source: "{#MySourceDir}\gdalplugins\ogr_PG.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
+;;Source: "{#MySourceDir}\gdalplugins\ogr_MSSQLSpatial.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
+;;Source: "{#MySourceDir}\gdalplugins\ogr_PG.dll"; DestDir: "{app}\gdalplugins\"; Flags: ignoreversion {#SystemFlag}; Components: MapWinGIS_Core
 
 ;; GDAL data
 Source: "{#MySourceDir}\gdal-data\*"; DestDir: "{app}\gdal-data"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: MapWinGIS_Core
@@ -128,7 +128,7 @@ BeveledLabel=MapWinGIS Open Source ActiveX Map Control
 [Components]
 Name: "MapWinGIS_Core"; Description: "Core files for MapWinGIS"; Types: full custom compact; Flags: fixed
 Name: "NetCDF"; Description: "Add NetCDF support"; Types: full custom
-Name: "ECW"; Description: "Add ECW & JPEG2000 support"; Types: full custom
+;;Name: "ECW"; Description: "Add ECW & JPEG2000 support"; Types: full custom
 Name: "MrSID"; Description: "Add MrSID support"; Types: full custom
 ;; Name: "HDF4"; Description: "Add Hierarchical Data Format Release 4 support"; Types: full custom
 Name: "HDF5"; Description: "Add Hierarchical Data Format Release 5 support"; Types: full custom
