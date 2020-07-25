@@ -135,12 +135,12 @@ public:
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
 	
-	STDMETHOD(AddLabel)(BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category = -1);
-	STDMETHOD(InsertLabel)(long Index, BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category, VARIANT_BOOL* retVal);
+	STDMETHOD(AddLabel)(BSTR Text, double x, double y, double Rotation, long Category = -1, double offsetX = 0, double offsetY = 0);
+	STDMETHOD(InsertLabel)(long Index, BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY, VARIANT_BOOL* retVal);
 	STDMETHOD(RemoveLabel)(long Index, VARIANT_BOOL* vbretval);
 	
-	STDMETHOD(AddPart)(long Index, BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category = -1);
-	STDMETHOD(InsertPart)(long Index, long Part, BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category, VARIANT_BOOL* retVal);
+	STDMETHOD(AddPart)(long Index, BSTR Text, double x, double y, double Rotation, long Category = -1, double offsetX = 0, double offsetY = 0);
+	STDMETHOD(InsertPart)(long Index, long Part, BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY, VARIANT_BOOL* retVal);
 	STDMETHOD(RemovePart)(long Index, long Part, VARIANT_BOOL* vbretval);
 
 	STDMETHOD(AddCategory)(BSTR Name, ILabelCategory** retVal);
@@ -460,7 +460,7 @@ private:
 	bool GetMinMaxCategoryValue(double& globalMax, double& globalMin);
     void SetCategoryForLabel(long labelIndex, long categoryIndex);
     void UpdateLabelOffsetsFromShapefile(long labelIndex, long categoryIndex);
-    CLabelInfo* CreateNewLabel(const BSTR &Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category);
+    CLabelInfo* CreateNewLabel(const BSTR &Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY);
 
 public:
 	void ClearLabelFrames();

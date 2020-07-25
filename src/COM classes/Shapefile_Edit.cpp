@@ -377,7 +377,7 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 
 			// it doesn't make sense to recalculate expression as DBF cells are empty all the same
 			CComBSTR bstrText("");
-			_labels->InsertLabel(ShapeIndex, bstrText, x, y, offsetX, offsetY, rotation, -1, &vbretval);
+			_labels->InsertLabel(ShapeIndex, bstrText, x, y, rotation, -1, offsetX, offsetY, &vbretval);
 		}
 
 		if (chartsExist)

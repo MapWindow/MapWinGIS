@@ -526,7 +526,7 @@ LONG CMapView::DrawLabelEx(LONG drawHandle, LPCTSTR text, DOUBLE x, DOUBLE y, DO
 		if (_allDrawLists[drawHandle]->m_labels) 
 		{
 			CComBSTR bstr(text);
-			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, 0, 0, rotation);
+			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, rotation);
 			OnDrawingLayersChanged();
 			return drawHandle;
 		}
@@ -545,7 +545,7 @@ void CMapView::AddDrawingLabel(long drawHandle, LPCTSTR Text, OLE_COLOR Color, d
 	{	
 		if (_allDrawLists[drawHandle]->m_labels) {
 			CComBSTR bstr(Text);
-			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, 0, 0);
+			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y);
 		}
 		OnDrawingLayersChanged();
 	}
@@ -562,7 +562,7 @@ void CMapView::AddDrawingLabelEx(long drawHandle, LPCTSTR Text, OLE_COLOR Color,
 	{	
 		if (_allDrawLists[drawHandle]->m_labels) {
 			CComBSTR bstr(Text);
-			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, 0, 0, Rotation);
+			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, Rotation);
 		}
 		OnDrawingLayersChanged();
 	}

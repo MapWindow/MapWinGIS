@@ -123,14 +123,14 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 
 			if( numParts == 1)
 			{
-				ShapeHelper::AddLabelToShape(shp, _labels, text, offsetX, offsetY, Method, orientation);
+				ShapeHelper::AddLabelToShape(shp, _labels, text, Method, orientation, offsetX, offsetY);
 				continue;
 			}
 			else if (numParts == 0)
 			{
 				if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 				{
-					ShapeHelper::AddLabelToShape(shp, _labels, text, offsetX, offsetY, Method, orientation);
+					ShapeHelper::AddLabelToShape(shp, _labels, text, Method, orientation, offsetX, offsetY);
 					continue;
 				}	
 			}
@@ -153,14 +153,14 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 					
 						if (partCount == 0) 
 						{
-							ShapeHelper::AddLabelToShape(shpPart, _labels, text, offsetX, offsetY, Method, orientation);
+							ShapeHelper::AddLabelToShape(shpPart, _labels, text, Method, orientation, offsetX, offsetY);
 							partCount++;
 						}
 						else		
 						{
 							double x = 0.0, y = 0.0;
 							ShapeHelper::Cast(shpPart)->get_LabelPosition(Method, x, y, rotation, orientation);
-							_labels->AddPart(i, text, x, y, offsetX, offsetY, rotation);
+							_labels->AddPart(i, text, x, y, rotation, -1, offsetX, offsetY);
 						}
 					}
 
@@ -177,7 +177,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 						shp->get_PartAsShape(maxPart, &shpPart);
 						if (shpPart)
 						{
-							ShapeHelper::AddLabelToShape(shpPart, _labels, text, offsetX, offsetY, Method, orientation);
+							ShapeHelper::AddLabelToShape(shpPart, _labels, text, Method, orientation, offsetX, offsetY);
 							continue;
 						}
 					}

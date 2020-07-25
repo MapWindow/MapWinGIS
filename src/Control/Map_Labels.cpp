@@ -413,7 +413,7 @@ void CMapView::AddLabel(long LayerHandle, LPCTSTR Text, OLE_COLOR Color, double 
 	if (labels)
 	{
 		CComBSTR s(Text);
-		labels->AddLabel(s, x, y, 0, 0);
+		labels->AddLabel(s, x, y);
 	}
 }
 
@@ -426,7 +426,7 @@ void CMapView::AddLabelEx(long LayerHandle, LPCTSTR Text, OLE_COLOR Color, doubl
 	if (labels)
 	{
 		CComBSTR s(Text);
-		labels->AddLabel(s, x, y, Rotation, 0, 0);
+		labels->AddLabel(s, x, y, Rotation);
 	}
 }
 

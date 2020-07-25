@@ -16,7 +16,7 @@ public:
 	static CShape* Cast(CComPtr<IShape>& shp);
 	static long GetNumParts(IShape* shp);
 	static int GetLargestPart(IShape* shp);
-	static void AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, double offsetX, double offsetY, tkLabelPositioning method, tkLineLabelOrientation orientation);
+	static void AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, tkLabelPositioning method, tkLineLabelOrientation orientation, double offsetX, double offsetY);
 	static IShape* CenterAsShape(IShape* shp);
 	static int GetContentLength(IShape* shp);
 };
