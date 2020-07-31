@@ -323,18 +323,18 @@ STDMETHODIMP CLabels::put_Category(long Index, ILabelCategory* newVal)
 //***********************************************************************/
 //*		AddLabel()
 //***********************************************************************/
-STDMETHODIMP CLabels::AddLabel(BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category)
+STDMETHODIMP CLabels::AddLabel(BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	VARIANT_BOOL vbretval;
-	this->InsertLabel(_labels.size(), Text, x, y, offsetX, offsetY, Rotation, Category, &vbretval);
+	this->InsertLabel(_labels.size(), Text, x, y, Rotation, Category, offsetX, offsetY, &vbretval);
 	return S_OK;
 }
 
 //***********************************************************************/
 //*		InsertLabel()
 //***********************************************************************/
-STDMETHODIMP CLabels::InsertLabel(long Index, BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category, VARIANT_BOOL* retVal)
+STDMETHODIMP CLabels::InsertLabel(long Index, BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if(Index < 0 || Index > (long)_labels.size())
@@ -343,7 +343,7 @@ STDMETHODIMP CLabels::InsertLabel(long Index, BSTR Text, double x, double y, dou
 		*retVal = VARIANT_FALSE;
 	}
 		
-    CLabelInfo* lbl = CreateNewLabel(Text, x, y, offsetX, offsetY, Rotation, Category);
+    CLabelInfo* lbl = CreateNewLabel(Text, x, y, Rotation, Category, offsetX, offsetY);
 
 	std::vector<CLabelInfo*>* parts = new std::vector<CLabelInfo*>;
 	parts->push_back(lbl);
@@ -363,7 +363,7 @@ STDMETHODIMP CLabels::InsertLabel(long Index, BSTR Text, double x, double y, dou
 //***********************************************************************/
 /*		CreateNewLabel()
 //***********************************************************************/
-CLabelInfo* CLabels::CreateNewLabel(const BSTR &Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category)
+CLabelInfo* CLabels::CreateNewLabel(const BSTR &Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY)
 {
     // TODO this really is just a constructor for label info => need to move this here ...
     CLabelInfo *lbl = new CLabelInfo();
@@ -406,7 +406,7 @@ STDMETHODIMP CLabels::RemoveLabel(long Index, VARIANT_BOOL* vbretval)
 ///***********************************************************************/
 ///*		AddPart()
 ///***********************************************************************/
-STDMETHODIMP CLabels::AddPart(long Index, BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category)
+STDMETHODIMP CLabels::AddPart(long Index, BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if(Index < 0 || Index > (int)_labels.size())
@@ -417,14 +417,14 @@ STDMETHODIMP CLabels::AddPart(long Index, BSTR Text, double x, double y, double 
 	std::vector<CLabelInfo*>* parts = _labels[Index];
 	
 	VARIANT_BOOL vbretval;
-	InsertPart(Index, parts->size(), Text, x, y, offsetX, offsetY, Rotation, Category, &vbretval);
+	InsertPart(Index, parts->size(), Text, x, y, Rotation, Category, offsetX, offsetY, &vbretval);
 	return S_OK;
 };
 
 ///***********************************************************************/
 ///*		AddPart()
 ///***********************************************************************/
-STDMETHODIMP CLabels::InsertPart(long Index, long Part, BSTR Text, double x, double y, double offsetX, double offsetY, double Rotation, long Category, VARIANT_BOOL* retVal)
+STDMETHODIMP CLabels::InsertPart(long Index, long Part, BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if(Index < 0 || Index >=(int)_labels.size())
@@ -434,7 +434,7 @@ STDMETHODIMP CLabels::InsertPart(long Index, long Part, BSTR Text, double x, dou
 	} 
 	std::vector<CLabelInfo*>* parts = _labels[Index];
 
-    CLabelInfo* lbl = CreateNewLabel(Text, x, y, offsetX, offsetY, Rotation, Category);
+    CLabelInfo* lbl = CreateNewLabel(Text, x, y, Rotation, Category, offsetX, offsetY);
 	
 	if (Part == parts->size())
 	{
@@ -2153,7 +2153,7 @@ bool CLabels::DeserializeLabelData(CPLXMLNode* node, bool loadRotation, bool loa
 			angle = 0.0;
 		}
 
-		this->AddLabel(bstr, x, y, offsetX, offsetY, angle);
+		this->AddLabel(bstr, x, y, angle, -1, offsetX, offsetY);
 		node = node->psNext;
 	}
 		
@@ -2693,7 +2693,7 @@ bool CLabels::HasRotation()
 // *************************************************************
 void CLabels::AddEmptyLabel()
 {
-	AddLabel(m_globalSettings.emptyBstr, 0.0, 0.0, 0.0, 0.0, 0.0);
+	AddLabel(m_globalSettings.emptyBstr, 0.0, 0.0, 0.0, 0, 0.0, 0.0);
 	if (_labels.size() == 0) return;
 	CLabelInfo* lbl = (*_labels[_labels.size() - 1])[0];
 	if (lbl) {

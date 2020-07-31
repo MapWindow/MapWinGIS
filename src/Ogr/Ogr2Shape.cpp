@@ -489,7 +489,7 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 		CComPtr<ILabels> labels = NULL;
 		sf->get_Labels(&labels);
 
-		labels->AddLabel(bstr, x, y, offsetX, offsetY, rotation);
+		labels->AddLabel(bstr, x, y, rotation, -1, offsetX, offsetY);
 	}
 }
 

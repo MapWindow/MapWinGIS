@@ -5041,12 +5041,12 @@ interface ILabels : IDispatch{
 	[propput, id(6), helpstring("property Category")] HRESULT Category([in]long Index, [in]ILabelCategory* newVal);
 	
 	// methods
-	[id(7), helpstring("method AddLabel")] HRESULT AddLabel([in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category);
-	[id(8), helpstring("method InsertLabel")] HRESULT InsertLabel([in]long Index, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
+	[id(7), helpstring("method AddLabel")] HRESULT AddLabel([in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY);
+	[id(8), helpstring("method InsertLabel")] HRESULT InsertLabel([in]long Index, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [out, retval ]VARIANT_BOOL* retval);
 	[id(9), helpstring("method RemoveLabel")] HRESULT RemoveLabel([in]long Index, [out, retval ]VARIANT_BOOL* retval);
 	
-	[id(10), helpstring("method AddPart")] HRESULT AddPart([in] long Index,[in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category);
-	[id(11), helpstring("method InsertPart")] HRESULT InsertPart([in] long Index, [in] long Part, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [out, retval ]VARIANT_BOOL* retval);
+	[id(10), helpstring("method AddPart")] HRESULT AddPart([in] long Index,[in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY);
+	[id(11), helpstring("method InsertPart")] HRESULT InsertPart([in] long Index, [in] long Part, [in]BSTR Text, [in]double x, [in]double y, [in, defaultvalue(0)]double Rotation, [in, defaultvalue(-1)]long Category, [in, defaultvalue(0)]double offsetX, [in, defaultvalue(0)]double offsetY, [out, retval ]VARIANT_BOOL* retval);
 	[id(12), helpstring("method RemovePart")] HRESULT RemovePart([in]long Index, [in]long Part, [out, retval ]VARIANT_BOOL* vbretval);
 
 	[id(13), helpstring("method AddCategory")] HRESULT AddCategory([in]BSTR Name, [out, retval]ILabelCategory** retVal);
