@@ -987,6 +987,8 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                     }
                     else if (selectingSelectable)
                     {
+						// we need to know if at least one layer was marked 'selectable'
+						bool atLeastOneLayerWasSelectable = false;
                         // we want to know if at least one layer was selected/deselected
                         bool atLeastOneLayerAffected = false;
                         // iterate all layers
@@ -1001,6 +1003,7 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                                 sf->get_Selectable(&isSelectable);
                                 if (isSelectable == VARIANT_TRUE)
                                 {
+									atLeastOneLayerWasSelectable = true;
                                     // how many are currently selected?
                                     long numSelected;
                                     sf->get_NumSelected(&numSelected);
@@ -1019,21 +1022,33 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
                                         if (nowSelected != numSelected)
                                         {
                                             atLeastOneLayerAffected = true;
-                                        FireSelectionChanged(layerHandle);
-                                    }
-                                }
-                            }
+	                                        FireSelectionChanged(layerHandle);
+										}
+									}
+								}
+							}
                         }
-                        }
-                        // in multi-layer selectable mode, fire event when all are done
-                        if (atLeastOneLayerAffected)
-                            FireSelectionChanged(-1);
+						// to maintain historical behavior, we should raise the MouseDown event
+						// in multi-layer selectable mode if no layers were marked 'selectable'
+						if (!atLeastOneLayerWasSelectable)
+						{
+							if (m_sendMouseDown)
+							{
+								this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
+							}
+						}
+                        // if at least one layer had a selection, fire event when all layers are done
+						else if (atLeastOneLayerAffected)
+						{
+							FireSelectionChanged(-1);
+						}
                         // now redraw
                         Redraw();
                     }
 				}
 				else if (m_sendMouseDown) 
                 {
+					// we get here if layer handle was specified in ChooseLayer, but handle was invalid
 					this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 				}
 				break;
