@@ -31,7 +31,7 @@ public:
 	virtual ~WmsProviderBase() { }
 
 	// gets bounding box in Google mercator projection (meters; EPSG:3857)
-	virtual CString GetBoundingBox(CPoint &pos, int zoom);
+	virtual CString GetBoundingBox(CPoint &pos, int zoom, tkWmsVersion version, tkWmsBoundingBoxOrder bbo);
 
 	virtual bool IsWms() { return true; }
 };

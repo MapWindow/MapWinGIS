@@ -32,7 +32,7 @@ public:
 	{
 		Id = tkTileProvider::Rosreestr;
 		Name = "Rosreestr";
-		_copyright = "©Росреестр";
+		_copyright = "©?in?aano?";
 		_serverLetters = "abc";
 		_licenseUrl = "http://maps.rosreestr.ru/PortalOnline/terms.html";
 		_refererUrl = "http://maps.rosreestr.ru/";
@@ -72,7 +72,7 @@ public:
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
-		CString s = _urlFormat + GetBoundingBox(pos, zoom) + _url2;
+		CString s = _urlFormat + GetBoundingBox(pos, zoom, tkWmsVersion::wvAuto, tkWmsBoundingBoxOrder::bboAuto) + _url2;
 		return s;
 	}
 };
