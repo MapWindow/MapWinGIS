@@ -32,7 +32,7 @@ public:
 	{
 		Id = tkTileProvider::Rosreestr;
 		Name = "Rosreestr";
-		_copyright = "©?in?aano?";
+		_copyright = "©Росреестр";
 		_serverLetters = "abc";
 		_licenseUrl = "http://maps.rosreestr.ru/PortalOnline/terms.html";
 		_refererUrl = "http://maps.rosreestr.ru/";
