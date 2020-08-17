@@ -761,13 +761,14 @@ public:
 	Gdiplus::Bitmap* _moveBitmap;      // shapes being moved are rendered to this bitmap
 	Gdiplus::Bitmap* _tempBitmap;	   // to scale contents of the rest bitmaps 
 
-	Gdiplus::SolidBrush _brushBlue;
-	Gdiplus::SolidBrush _brushBlack;
-	Gdiplus::SolidBrush _brushWhite;
-	Gdiplus::SolidBrush _brushLightGray;
-	Gdiplus::SolidBrush _brushGray;
-	Gdiplus::Pen _penGray;
-	Gdiplus::Pen _penDarkGray;
+	Gdiplus::SolidBrush* _brushBlue;
+	Gdiplus::SolidBrush* _brushBlack;
+	Gdiplus::SolidBrush* _brushWhite;
+	Gdiplus::SolidBrush* _brushLightGray;
+	Gdiplus::SolidBrush* _brushGray;
+	Gdiplus::Pen* _penGray;
+	Gdiplus::Pen* _penDarkGray;
+
 	Gdiplus::Font* _fontCourier;
 	Gdiplus::Font* _fontCourierSmall;
 	Gdiplus::Font* _fontCourierLink;

@@ -161,15 +161,15 @@ END_EVENT_MAP()
 //		CMapView() constructor
 // ********************************************************************
 CMapView::CMapView() 
-	: _vals("AZ0CY1EX2GV3IT4KR5MP6ON7QL8SJ9UH0WF1DB2"), 
+: _vals("AZ0CY1EX2GV3IT4KR5MP6ON7QL8SJ9UH0WF1DB2"),
 	_valsLen(39), _isSnapshot(false),
-	_brushBlue(Gdiplus::Color::Blue),
-	_brushBlack(Gdiplus::Color::Black), 
-	_brushWhite(Gdiplus::Color::White), 
-	_brushLightGray(Gdiplus::Color::LightGray),
-	_penGray(Gdiplus::Color::Gray),
-	_brushGray(Gdiplus::Color::Gray), 
-	_penDarkGray(Gdiplus::Color::DarkSlateGray),
+	_brushBlue(NULL),
+	_brushBlack(NULL),
+	_brushWhite(NULL),
+	_brushLightGray(NULL),
+	_brushGray(NULL),
+	_penGray(NULL),
+	_penDarkGray(NULL),
 	_propertyExchange(NULL),
 	_bufferBitmap(NULL),
 	_tilesBitmap(NULL),
@@ -231,6 +231,14 @@ void CMapView::Startup()
 {
 	InitializeIIDs(&IID_DMap, &IID_DMapEvents);
 	
+	_brushBlue = new Gdiplus::SolidBrush(Gdiplus::Color::Blue);
+	_brushBlack = new Gdiplus::SolidBrush(Gdiplus::Color::Black);
+	_brushWhite = new Gdiplus::SolidBrush(Gdiplus::Color::White);
+	_brushLightGray = new Gdiplus::SolidBrush(Gdiplus::Color::LightGray);
+	_brushGray = new Gdiplus::SolidBrush(Gdiplus::Color::Gray);
+	_penGray = new Gdiplus::Pen(Gdiplus::Color::Gray);
+	_penDarkGray = new Gdiplus::Pen(Gdiplus::Color::DarkSlateGray);
+
 	Utility::InitGdiPlusFont(&_fontCourier, L"Courier New", 9.0f);
 	Utility::InitGdiPlusFont(&_fontArial, L"Arial", 9.0f);
 	_fontCourierSmall = new Gdiplus::Font(L"Courier New", 8.0f);
