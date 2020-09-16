@@ -183,6 +183,8 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 				get_Shape(shapeVal, &shape);
 				// convert querying shape to GEOS
                 GEOSGeom geosShape = GeosConverter::ShapeToGeom(shape);
+				if (geosShape == nullptr)
+					continue;
                 // check for containment
                 if (GeosHelper::Contains(geosShape, geosPoint))
                 {

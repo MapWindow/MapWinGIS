@@ -110,9 +110,9 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
     CSingleLock sfLock(&_loader.ShapefileLock, TRUE);
 
     // Grab the loaded data:
-    vector<ShapeRecordData*> data = _loader.FetchData();
-    if (data.size() == 0)
+	if (!_loader.HasData())
 		return;
+    vector<ShapeRecordData*> data = _loader.FetchData();
 
 	CStringW fid = OgrHelper::OgrString2Unicode(_layer->GetFIDColumn());
 	bool hasFid = fid.GetLength() > 0;

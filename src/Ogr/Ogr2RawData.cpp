@@ -80,23 +80,17 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 		DeleteAndClearShapeData(shapeData);
 		return false;
 	}
-		
-	// Process loaded data:
-	if (shapeData.size() > 0)
-	{
-		// copy to the location accessible by map rendering
-		loader->PutData(shapeData);
-		callback->LoadedCount = shapeData.size();
-		loader->LastSuccessExtents = *extents;
-		Debug::WriteWithThreadId("Task succeeded.", DebugOgrLoading);
-		return true;
-	}
-	else 
-	{
+
+	loader->PutData(shapeData);
+	callback->LoadedCount = shapeData.size();
+	loader->LastSuccessExtents = *extents;
+
+	if (callback->LoadedCount == 0)
 		Debug::WriteWithThreadId("Task succeeded but no data loaded.", DebugOgrLoading);
-		DeleteAndClearShapeData(shapeData);
-		return false;
-	}
+	else
+		Debug::WriteWithThreadId("Task succeeded.", DebugOgrLoading);
+
+	return true;
 }
 
 // *************************************************************
