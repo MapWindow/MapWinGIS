@@ -111,7 +111,8 @@ void GdiLabelDrawer::DrawFrame(CRect* rect, CLabelOptions* m_options)
 			_dc->Rectangle(rect->left, rect->top, rect->right, rect->bottom);
 			break;
 		case lfRoundedRectangle:
-			_dc->RoundRect(rect->left, rect->top, rect->right, rect->bottom, rect->Height(), rect->Height());
+			// MWGIS-229; start circle outside of left and right boundaries
+			_dc->RoundRect(rect->left - (rect->Height() / 2), rect->top, rect->right + (rect->Height() / 2), rect->bottom, rect->Height(), rect->Height());
 			break;
 		case lfPointedRectangle:
 			_dc->BeginPath();

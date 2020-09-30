@@ -202,7 +202,8 @@ CMapView::~CMapView()
 	this->Shutdown();
 
     // GDI Plus Shutdown
-    TileCacheManager::CloseAll();
+    // TileCacheManager::CloseAll is now by GdiplusShutdown,
+	// managed within the reference count
     GdiplusShutdown();
 }
 
@@ -802,6 +803,7 @@ void CMapView::GdiplusShutdown()
 	ms_gdiplusCount--;
 	if (ms_gdiplusCount == 0)
 	{
+		TileCacheManager::CloseAll();
 		ms_gdiplusStartupOutput.NotificationUnhook(ms_gdiplusBGThreadToken);
 		Gdiplus::GdiplusShutdown(ms_gdiplusToken);
 		ms_gdiplusToken = NULL;
