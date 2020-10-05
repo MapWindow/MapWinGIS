@@ -41,7 +41,8 @@ CString WmsProviderBase::GetBoundingBox(CPoint &pos, int zoom, tkWmsVersion vers
 		switch (version)
 		{
 		case wv13:
-			bbo = tkWmsBoundingBoxOrder::bboLongLat;
+			bbo = tkWmsBoundingBoxOrder::bboLatLong;
+			break;
 		case wvEmpty:
 		case wv100:
 		case wv110:
