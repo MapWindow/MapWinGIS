@@ -929,13 +929,13 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 					if (!l->extents.Intersects(_extents))
 						continue;
 
-					// layerBuffer == true indicates we're drawing the non-Volatile layers
-					if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
-						continue;
-
                     // Update labels & categories
                     l->UpdateShapefile();
 				}
+
+				// layerBuffer == true indicates we're drawing the non-Volatile layers
+				if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
+					continue;
 
                 // Perform the draw:
                 sfDrawer.Draw(rcBounds, sf);
