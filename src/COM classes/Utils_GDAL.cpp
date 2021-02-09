@@ -4342,7 +4342,11 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
                      && (pszMethod == NULL || EQUALN(pszMethod,"GCP_",4)) )
                 pszThisSourceSRS = GDALGetGCPProjection( hSrcDS );
             else if( pszMethod != NULL && EQUAL(pszMethod,"RPC") )
-                pszThisSourceSRS = SRS_WKT_WGS84;
+#if GDAL_VERSION_MAJOR >= 3
+                pszThisSourceSRS = SRS_WKT_WGS84_LAT_LONG; //  SRS_WKT_WGS84 macro is no longer declared by default since WKT without AXIS is too ambiguous. Preferred remediation: use SRS_WKT_WGS84_LAT_LONG
+#else
+				pszThisSourceSRS = SRS_WKT_WGS84;
+#endif
             else
                 pszThisSourceSRS = "";
         }
