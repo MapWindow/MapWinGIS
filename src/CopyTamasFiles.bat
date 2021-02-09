@@ -57,6 +57,12 @@ REM lti_dsdk contains a version number, so use a wildcard:
 del /f /q %_to_dir%\lti_dsdk*.dll
 xcopy /v /c /r /y %_from_dir%\lti_dsdk*.dll  %_to_dir%
 
+REM Updates for GDAL v3:
+del /f /q %_to_dir%\gdal*.dll
+xcopy /v /c /r /y %_from_dir%\gdal3*.dll  %_to_dir%
+del /f /q %_to_dir%\proj_6*.dll
+xcopy /v /c /r /y %_from_dir%\proj_6_*.dll  %_to_dir%
+
 REM Copy licenses:
 xcopy /v /c /r /y %_from_dir%\..\..\..\licenses\*.rtf %_to_dir%..\Licenses\
 
