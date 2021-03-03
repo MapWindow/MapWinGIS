@@ -358,25 +358,27 @@ void CMapView::DrawCircleOnGraphics(Gdiplus::Graphics* graphics, _DrawCircle* ci
 
 	auto color = Utility::OleColor2GdiPlus(circle->color, circle->alpha);
 	auto radius = (float)circle->radius;
+	if (project)
+		radius *= _pixelPerProjectionX;
 	auto width = (float)circle->width;
 
-	Gdiplus::REAL pixX = (float)circle->x;
+	Gdiplus::REAL pixX = (float)circle->x; 
 	Gdiplus::REAL pixY = (float)circle->y;
 	if (project)
 		PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
-	pixX -= radius * 0.5f;
-	pixY -= radius * 0.5f;
+	pixX -= radius;
+	pixY -= radius;
 	
 
 	if (circle->fill)
 	{
 		Gdiplus::SolidBrush brush(color);
-		graphics->FillEllipse(&brush, pixX, pixY, radius, radius);
+		graphics->FillEllipse(&brush, pixX, pixY, radius*2, radius*2);
 	}
 	else
 	{
 		Gdiplus::Pen pen(color, width);
-		graphics->DrawEllipse(&pen, pixX, pixY, radius, radius);
+		graphics->DrawEllipse(&pen, pixX, pixY, radius*2, radius*2);
 	}
 }
 
