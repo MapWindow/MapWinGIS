@@ -100,6 +100,7 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
 {
     CSingleLock lock(&_loader.ProviderLock, TRUE);
     if (!_shapefile) return;
+	lock.Unlock();
 
     // Wait for tasks to finish loading:
     _loader.AwaitTasks();
@@ -861,9 +862,21 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 	}
 
 	{ // Locking provider & shapefile here
+		CSingleLock loadingLock(&_loader.LoadingLock, _dynamicLoading ? TRUE : FALSE);
 		CSingleLock lock(&_loader.ProviderLock, _dynamicLoading ? TRUE : FALSE);
 		CSingleLock sfLock(&_loader.ShapefileLock, _dynamicLoading ? TRUE : FALSE);
-		*savedCount = Shape2Ogr::SaveShapefileChanges(_layer, _shapefile, shapeCmnId, saveType, validateShapes ? true : false, _updateErrors);
+		auto safeToDelete = true;
+		if (_dynamicLoading)
+		{
+			VARIANT_BOOL hasFIDMap;
+			_shapefile->get_HasOgrFidMapping(&hasFIDMap);
+			if (!hasFIDMap)
+				safeToDelete = false; //don't delete when there's no FID map to track them
+		}
+		*savedCount = Shape2Ogr::SaveShapefileChanges(
+			_layer, _shapefile, shapeCmnId, 
+			saveType, validateShapes ? true : false,
+			safeToDelete, _updateErrors);
 	}
 
 	HasLocalChanges(&hasChanges);

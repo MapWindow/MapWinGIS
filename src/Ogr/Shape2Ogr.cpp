@@ -392,7 +392,8 @@ OGRFeature* Shape2Ogr::GetFeature(OGRLayer* poLayer, IShapefile* shapefile, long
 // *************************************************************
 //		SaveShapefileChanges()
 // *************************************************************
-int Shape2Ogr::SaveShapefileChanges(OGRLayer* layer, IShapefile* sf, long shapeCmnIndex, tkOgrSaveType saveType,
+int Shape2Ogr::SaveShapefileChanges(OGRLayer* layer, IShapefile* sf, long shapeCmnIndex, 
+	tkOgrSaveType saveType, bool safeToDelete,
 	bool validateShapes, vector<OgrUpdateError>& errors)
 {
 	errors.clear();
@@ -415,7 +416,8 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* layer, IShapefile* sf, long shapeC
 	// remove fields that were either removed or changed locally
 	RemovedStaleFields(layer, sf, fieldCount);
 
-	shapeCount += RemoveDeletedFeatures(layer, sf, shapeCmnIndex);
+	if (safeToDelete)
+		shapeCount += RemoveDeletedFeatures(layer, sf, shapeCmnIndex);
 
 	// the source indices of the fields will still be incorrect
 	// if certain fields were removed, but at least this will help
@@ -647,30 +649,45 @@ int Shape2Ogr::RemoveDeletedFeatures(OGRLayer* layer, IShapefile* sf, long shape
 {
 	int count = 0;
 	if (shapeCmnIndex == -1) return count;
-	long numShapes;
-	CComVariant var;
+
 	std::multiset<long> fids;
 
-	// building list of ids
-	sf->get_NumShapes(&numShapes);
-	for (int i = 0; i < numShapes; i++)
+	VARIANT_BOOL hasFidMap;
+	sf->get_HasOgrFidMapping(&hasFidMap);
+	if (hasFidMap)
 	{
-		sf->get_CellValue(shapeCmnIndex, i, &var);
-		fids.insert(var.lVal);
+		auto fids = ((CShapefile*)sf)->GetDeletedShapeFIDs();
+		for (auto fid : fids)
+			layer->DeleteFeature(fid);
+		((CShapefile*)sf)->ClearDeleteShapeFIDs();
+	}
+	else
+	{
+		// building list of ids by difference of what's inside the source and what's in memory
+		// this only works if we load the entire dataset
+		long numShapes;
+		CComVariant var;
+		sf->get_NumShapes(&numShapes);
+		for (int i = 0; i < numShapes; i++)
+		{
+			sf->get_CellValue(shapeCmnIndex, i, &var);
+			fids.insert(var.lVal);
+		}
+
+		OGRFeature* ft = NULL;
+		layer->ResetReading();
+		while ((ft = layer->GetNextFeature()) != NULL)
+		{
+			long fid = static_cast<long>(ft->GetFID());
+			std::multiset<long>::iterator it = fids.find(fid);
+			if (it == fids.end())
+			{
+				layer->DeleteFeature(fid);
+				count++;
+			}
+			OGRFeature::DestroyFeature(ft);
+		}
 	}
 
-	OGRFeature* ft = NULL;
-	layer->ResetReading();
-	while ((ft = layer->GetNextFeature()) != NULL)
-	{
-		long fid = static_cast<long>(ft->GetFID());
-		std::multiset<long>::iterator it = fids.find(fid);
-		if (it == fids.end())
-		{
-			layer->DeleteFeature(fid);
-			count++;
-		}
-		OGRFeature::DestroyFeature(ft);
-	}
 	return count;
 }

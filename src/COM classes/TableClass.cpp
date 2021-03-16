@@ -29,6 +29,7 @@
 #include "Field.h"
 #include "TableHelper.h"
 #include "FieldHelper.h"
+#include "Shapefile.h"
 
 #pragma warning(disable:4996)
 
@@ -1990,6 +1991,8 @@ STDMETHODIMP CTableClass::EditDeleteRow(long RowIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		*retval = VARIANT_FALSE;
+
+	((CShapefile*) m_shapefile)->MarkShapeDeleted(RowIndex);
 
 	if (_isEditingTable == FALSE)
 	{
