@@ -1992,7 +1992,7 @@ STDMETHODIMP CTableClass::EditDeleteRow(long RowIndex, VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		*retval = VARIANT_FALSE;
 
-	((CShapefile*) m_shapefile)->MarkShapeDeleted(RowIndex);
+	((CShapefile*) _shapefile)->MarkShapeDeleted(RowIndex);
 
 	if (_isEditingTable == FALSE)
 	{
