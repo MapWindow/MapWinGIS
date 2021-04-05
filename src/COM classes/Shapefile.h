@@ -314,6 +314,7 @@ private:
     // OGR layers can lookup by fixed FID rather than ever-changing ShapeIndex
     // (Shape indices change when removing rows, and may change on OGR reload)
     std::map<long, long> _ogrFid2ShapeIndex;
+	std::set<long> _deletedFids;
     bool _hasOgrFidMapping = false;
 
 	// table is initialized in CreateNew or Open methods
@@ -503,6 +504,23 @@ public:
     {
         _ogrFid2ShapeIndex.insert(std::make_pair(ogrFid, shapeIndex));
     }
+	bool MarkShapeDeleted(long shapeIndex)
+	{
+		if (!_hasOgrFidMapping)
+			return false;
+		
+		for (auto const& it : _ogrFid2ShapeIndex)
+			if (it.second == shapeIndex)
+				_deletedFids.insert(it.first);
+	}
+	std::set<long> GetDeletedShapeFIDs()
+	{
+		return std::set<long>(_deletedFids);
+	}
+	void ClearDeleteShapeFIDs()
+	{
+		_deletedFids.clear();
+	}
 
     // give OGR layers the ability to retain visibility flags on reload
     bool GetVisibilityFlags(map<long, BYTE> &flags);
