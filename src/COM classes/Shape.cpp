@@ -2083,7 +2083,7 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 	if (method == labelPositioning && orientation == labelOrientation)
 	{
 		x = labelX;
-		y = labelX;
+		y = labelY;
 		rotation = labelRotation;
 		return;
 	}
