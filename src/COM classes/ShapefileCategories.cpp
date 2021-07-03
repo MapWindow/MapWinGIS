@@ -617,11 +617,11 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex, long startRow
     //		Saving results
     // -------------------------------------------------------------
     for (unsigned long i = 0; i < results.size(); i++) {
-        // Is this a category we need?
-        if (!allCategories && i != CategoryIndex)
+		// Is this a category we need?
+		const int categoryIndex = results[i];
+		if (!allCategories && categoryIndex != CategoryIndex)
             continue;
 
-		const int categoryIndex = results[i];
 		const int rowIndex = startRowIndex + i;
         _shapefile->put_ShapeCategory(rowIndex, categoryIndex);
         _shapefile->put_ShapeRotation(rowIndex, rotations[categoryIndex + 1][i]);
