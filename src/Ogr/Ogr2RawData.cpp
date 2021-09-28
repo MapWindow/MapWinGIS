@@ -137,8 +137,10 @@ void Ogr2RawData::FieldsToShapeRecord(OGRFeatureDefn* poFields, OGRFeature* poFe
 		}
 		else //if (type == OFTString )
 		{
+			// string should be interpreted as UTF-8 unless overridden in Global Settings
+			CStringW ws = OgrHelper::OgrString2Unicode(poFeature->GetFieldAsString(iFld));
 			var->vt = VT_BSTR;
-			var->bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+			var->bstrVal = W2BSTR(ws);		// BSTR will be cleared by CComVariant destructor
 		}
 		data->Row->values.push_back(var);
 	}
