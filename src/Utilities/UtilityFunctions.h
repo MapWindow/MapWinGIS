@@ -13,7 +13,7 @@ namespace Utility
 	BSTR Variant2BSTR(VARIANT* val, CString floatFormat);
 	char * SYS2A(BSTR str);
 	WCHAR* StringToWideChar(CString s);
-	char* ConvertBSTRToLPSTR (BSTR bstrIn);
+	char* ConvertBSTRToLPSTR (BSTR bstrIn, UINT codePage = CP_ACP);
 	CString ReplaceNoCase( LPCTSTR instr, LPCTSTR oldstr, LPCTSTR newstr );
 	
 	CString UrlEncode(CString s);
