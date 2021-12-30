@@ -36,7 +36,8 @@ xcopy /v /c /r /y %_from_dir%\gdal-data\*.* %_to_dir%gdal-data\
 xcopy /v /c /r /y %_from_dir%\proj\SHARE\*.* %_to_dir%..\PROJ_NAD\
 
 REM Copy needed Tamas binaries:
-FOR %%G IN (cfitsio.dll expat.dll freexl.dll geos.dll geos_c.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcrypto-1_1.dll libcrypto-1_1-x64.dll libcurl.dll  
+FOR %%G IN (cfitsio.dll expat.dll freexl.dll geos.dll geos_c.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcrypto-1_1.dll libcrypto-1_1-x64.dll 
+			libcurl.dll ssleay32.dll libeay32.dll  
             iconv.dll libmysql.dll libpq.dll libssl-1_1.dll libssl-1_1-x64.dll libtiff.dll libxml2.dll lti_lidar_dsdk_1.1.dll netcdf.dll   
             openjp2.dll proj.dll spatialite.dll sqlite3.dll szip.dll tbb.dll xdrdll.dll zlib1.dll  
             NCSEcw.dll) DO (
@@ -58,7 +59,7 @@ del /f /q %_to_dir%\lti_dsdk*.dll
 xcopy /v /c /r /y %_from_dir%\lti_dsdk*.dll  %_to_dir%
 
 REM Updates for GDAL v3:
-del /f /q %_to_dir%\gdal*.dll
+del /f /q %_to_dir%\gdal3*.dll
 xcopy /v /c /r /y %_from_dir%\gdal3*.dll  %_to_dir%
 del /f /q %_to_dir%\proj_6*.dll
 xcopy /v /c /r /y %_from_dir%\proj_6_*.dll  %_to_dir%

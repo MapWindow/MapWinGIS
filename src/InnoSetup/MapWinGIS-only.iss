@@ -2,12 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "5.2.4"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapWindow\MapWinGIS\git\src\InnoSetup"
 #define BinLocation "D:\dev\MapWindow\MapWinGIS\git\src\bin"
-;; #define x64BitVersion
+#define x64BitVersion
 ;; #define VsVersion = "2015" 
 #define VsVersion = "2017" 
 
@@ -22,6 +21,8 @@
   #define MySourceDir BinLocation + "\Win32\"
   #define SystemFlag "32bit"
 #endif
+
+#define MyAppVersion GetFileVersion(MySourceDir + '\MapWinGIS.ocx')
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.

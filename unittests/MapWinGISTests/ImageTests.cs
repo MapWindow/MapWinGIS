@@ -197,6 +197,7 @@ namespace MapWinGISTests
             Image modified = new Image();
             modified.Deserialize(s);
 
+
             // verify pixels
             Assert.AreEqual(original.Value[0, 0], modified.Value[0, 0]);
             Assert.AreEqual(original.Value[0, 1], modified.Value[0, 1]);
