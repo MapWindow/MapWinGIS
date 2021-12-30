@@ -72,7 +72,7 @@ public:
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
-		CString s = _urlFormat + GetBoundingBox(pos, zoom) + _url2;
+		CString s = _urlFormat + GetBoundingBox(pos, zoom, tkWmsVersion::wvAuto, tkWmsBoundingBoxOrder::bboAuto) + _url2;
 		return s;
 	}
 };

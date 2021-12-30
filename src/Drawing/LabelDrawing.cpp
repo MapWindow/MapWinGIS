@@ -297,14 +297,9 @@ void CLabelDrawer::CalcScreenRectangle(CLabelOptions* options, CLabelInfo* lbl, 
 		piY = lblY;
 	}
 
-	// we make very narrow rect wider to have circular form in case of rounded frames
-	if (rect.Height() > rect.Width())
-	{
-		long add = (long)ceil(double((rect.Height() - rect.Width()) / 2));
-		rect.left -= add;
-		rect.right += add;
-		offset += 2 * add;
-	}
+	// MWGIS-229; erroneous code removed from here, handling rounded rectangles.
+	// Rounded and Pointed rectangles are now properly handled in GDI DrawFrame
+	// and GDI+ DrawLabelFrame methods (see https://mapwindow.atlassian.net/browse/MWGIS-229)
 
 	// adding padding				
 	if (options->frameVisible)

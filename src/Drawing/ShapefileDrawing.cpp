@@ -1859,12 +1859,12 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
                     bool firstMarkerDrawn = false;
                     for (int n = 0; n < pointCount; n++)
 					{
-                        double length = lengths[n - 1];
-                        double correctedLength = length;
-
                         // Start of a new line:
 						if (data->Types[n] == PathPointTypeStart)
 						{
+							double length = 0;
+							double correctedLength = length;
+
                             totalLength = totalLengths[n] - (overflow ? 0 : markerSize);
                             // Apply scale factor for offset & interval values if requested:
                             markerOffset = markerOffsetBase * ((offsetIsRelative) ? (float)totalLength : 1.0f);
@@ -1875,6 +1875,10 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
                             correctedLength -= (overflow ? 0 : markerSize * 0.5);
                             continue;
 						}
+
+						double length = lengths[n - 1];
+						double correctedLength = length;
+
                         // Last segment:
                         if (n + 1 == pointCount || data->Types[n + 1] == PathPointTypeStart) 
                         {

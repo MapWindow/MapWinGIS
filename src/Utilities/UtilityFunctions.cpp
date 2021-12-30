@@ -87,7 +87,7 @@ namespace Utility
 	//		ConvertBSTRToLPSTR
 	// ********************************************************
 	//Rob Cairns 29-Aug-2009
-	char* ConvertBSTRToLPSTR(BSTR bstrIn)
+	char* ConvertBSTRToLPSTR(BSTR bstrIn, UINT codePage /* = CP_ACP */)
 	{
 		LPSTR pszOut = nullptr;
 		if (bstrIn != nullptr)
@@ -95,13 +95,13 @@ namespace Utility
 			int nInputStrLen = SysStringLen(bstrIn);
 
 			// Double NULL Termination
-			int nOutputStrLen = WideCharToMultiByte(CP_ACP, 0, bstrIn, nInputStrLen, nullptr, 0, nullptr, nullptr) + 2;
+			int nOutputStrLen = WideCharToMultiByte(codePage, 0, bstrIn, nInputStrLen, nullptr, 0, nullptr, nullptr) + 2;
 			pszOut = new char[nOutputStrLen];
 
 			if (pszOut)
 			{
 				memset(pszOut, 0x00, sizeof(char)*nOutputStrLen);
-				WideCharToMultiByte(CP_ACP, 0, bstrIn, nInputStrLen, pszOut, nOutputStrLen, nullptr, nullptr);
+				WideCharToMultiByte(codePage, 0, bstrIn, nInputStrLen, pszOut, nOutputStrLen, nullptr, nullptr);
 			}
 		}
 		return pszOut;

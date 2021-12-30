@@ -6,7 +6,8 @@ class Shape2Ogr
 {
 public:
 	static bool Shapefile2OgrLayer(IShapefile* sf, OGRLayer* poLayer, bool saveLabels, ICallback* callback = NULL);
-	static int SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, long shapeCmnIndex, tkOgrSaveType saveType, bool validateShapes, vector<OgrUpdateError>& errors);
+	static int SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, 
+		long shapeCmnIndex, tkOgrSaveType saveType, bool validateShapes, bool safeToDelete, vector<OgrUpdateError>& errors);
 private:
 	static int RemoveDeletedFeatures(OGRLayer* layer, IShapefile* sf, long shapeCmnIndex);
 	static bool ShapeRecord2Feature(IShapefile* sf, long shapeIndex, OGRFeature* feature, OGRFeatureDefn* fields, tkOgrSaveType saveType, bool editing, CString& validationError, bool validateShape, vector<int>* fieldMap);

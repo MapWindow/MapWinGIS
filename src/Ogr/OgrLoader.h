@@ -53,6 +53,7 @@ private:
 	unsigned long _lockCounter;
 	std::queue<OgrLoadingTask*> Queue;
 	vector<ShapeRecordData*> Data;
+	bool hasData;
 
 public:
 	::CCriticalSection ShapefileLock;
@@ -79,5 +80,6 @@ public:
 	
 	vector<ShapeRecordData*> FetchData();
 	void PutData(vector<ShapeRecordData*> shapeData);
+	bool HasData();
 };
 

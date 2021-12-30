@@ -439,7 +439,8 @@ void Ogr2Shape::CopyValues(OGRFeatureDefn* poFields, OGRFeature* poFeature, ISha
 			{
 				// preview string
 				// NOTE that it is presumed that ALL strings coming from OGR can be interpreted as UTF-8
-				CStringW str = Utility::ConvertFromUtf8(poFeature->GetFieldAsString(iFld));
+				//      and the following function will account for the Global Setting override to ANSI
+				CStringW str = OgrHelper::OgrString2Unicode(poFeature->GetFieldAsString(iFld));
 				// OGR does not currently support the Logical (boolean) field type.  It is possible that they will exist 
 				// in the file, but OGR will interpret them as Strings.  Since we support boolean field types, we want 
 				// to have a way of copying these particular string fields and interpreting them as booleans.  We will 

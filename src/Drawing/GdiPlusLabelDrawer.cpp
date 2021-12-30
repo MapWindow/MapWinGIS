@@ -233,10 +233,14 @@ void GdiPlusLabelDrawer::DrawLabelFrame(Gdiplus::Brush* brush, Gdiplus::Pen& pen
 			Gdiplus::GraphicsPath* path = new Gdiplus::GraphicsPath();
 			path->StartFigure();
 
-			path->AddLine(left + rect.Height, top, right - rect.Height, top);
-			path->AddArc(right - rect.Height, top, rect.Height, rect.Height, -90.0, 180.0);
-			path->AddLine(right - rect.Height, bottom, left + rect.Height, bottom);
+			// MWGIS-229
+			// start arcs outside of left and right boundaries, rather than
+			// fitting them within, else we may not fully contain the text.
+			path->AddLine(left, top, right, top);
+			path->AddArc(right, top, rect.Height, rect.Height, -90.0, 180.0);
+			path->AddLine(right, bottom, left, bottom);
 			path->AddArc(left, top, rect.Height, rect.Height, 90.0, 180.0);
+
 			path->CloseFigure();
 			_graphics->FillPath(brush, path);
 			_graphics->DrawPath(&pen, path);
@@ -252,15 +256,16 @@ void GdiPlusLabelDrawer::DrawLabelFrame(Gdiplus::Brush* brush, Gdiplus::Pen& pen
 
 			Gdiplus::GraphicsPath* path = new Gdiplus::GraphicsPath();
 			path->StartFigure();
-			path->AddLine(left + rect.Height / 4, top, right - rect.Height / 4, top);
 
-			path->AddLine(right - rect.Height / 4, top, right, (top + bottom) / 2);
-			path->AddLine(right, (top + bottom) / 2, right - rect.Height / 4, bottom);
-
-			path->AddLine(right - rect.Height / 4, bottom, left + rect.Height / 4, bottom);
-
-			path->AddLine(left + rect.Height / 4, bottom, left, (top + bottom) / 2);
-			path->AddLine(left, (top + bottom) / 2, left + rect.Height / 4, top);
+			// MWGIS-229
+			// place endcaps outside of left and right boundaries, rather than
+			// fitting them within, else we may not fully contain the text.
+			path->AddLine(left, top, right, top);
+			path->AddLine(right, top, right, (top + bottom) / 2);
+			path->AddLine(right, (top + bottom) / 2, right, bottom);
+			path->AddLine(right, bottom, left, bottom);
+			path->AddLine(left, bottom, left, (top + bottom) / 2);
+			path->AddLine(left, (top + bottom) / 2, left, top);
 
 			path->CloseFigure();
 			_graphics->FillPath(brush, path);

@@ -750,28 +750,35 @@ class GCPCoordTransformation : public OGRCoordinateTransformation
 {
 public:
 
-	void               *hTransformArg;
-	int                 bUseTPS;
+	void*                hTransformArg;
+	const bool           bUseTPS;
 	OGRSpatialReference* poSRS;
+	const int            nGCPCount;
+	const GDAL_GCP*      pasGCPList;
+	const int            nReqOrder;
 
 	GCPCoordTransformation(int nGCPCount,
+		// pasGCPList is not copied in, and can only be freed after GCPCoordTransformation is destroyed.
 		const GDAL_GCP *pasGCPList,
 		int  nReqOrder,
 		OGRSpatialReference* poSRS)
+		: hTransformArg()
+		, bUseTPS(nReqOrder < 0)
+		, poSRS(poSRS)
+		, nGCPCount(nGCPCount)
+		, pasGCPList(pasGCPList)
+		, nReqOrder(nReqOrder)
 	{
-		if (nReqOrder < 0)
+		if (bUseTPS)
 		{
-			bUseTPS = TRUE;
 			hTransformArg =
 				GDALCreateTPSTransformer(nGCPCount, pasGCPList, FALSE);
 		}
 		else
 		{
-			bUseTPS = FALSE;
 			hTransformArg =
 				GDALCreateGCPTransformer(nGCPCount, pasGCPList, nReqOrder, FALSE);
 		}
-		this->poSRS = poSRS;
 		if (poSRS)
 			poSRS->Reference();
 	}
@@ -791,11 +798,52 @@ public:
 			poSRS->Dereference();
 	}
 
+#if GDAL_VERSION_MAJOR >= 3
+	virtual OGRCoordinateTransformation* Clone() const override
+	{
+		return new GCPCoordTransformation(nGCPCount, pasGCPList, nReqOrder, poSRS);
+	}
+#endif
+
 	virtual OGRSpatialReference *GetSourceCS() { return poSRS; }
 	virtual OGRSpatialReference *GetTargetCS() { return poSRS; }
 
+#if GDAL_VERSION_MAJOR >= 3
 	virtual int Transform(int nCount,
-		double *x, double *y, double *z = NULL)
+		double *x, double *y, double *z, double *t, int *pabSuccess) override
+	{
+		int bOverallSuccess, i;
+
+		if (t != NULL)
+		{
+			CPLError(CE_Fatal, 0, "Time values cannot be transformed. Unsupported by GDALTPSTransform and GDALGCPTransform.\n");
+		}
+
+		if (bUseTPS)
+		{
+			bOverallSuccess = GDALTPSTransform(hTransformArg, FALSE,
+				nCount, x, y, z, pabSuccess);
+		}
+		else
+		{
+			bOverallSuccess = GDALGCPTransform(hTransformArg, FALSE,
+				nCount, x, y, z, pabSuccess);
+		}
+
+		for (i = 0; i < nCount; i++)
+		{
+			if (!pabSuccess[i])
+			{
+				bOverallSuccess = FALSE;
+				break;
+			}
+		}
+
+		return bOverallSuccess;
+	}
+#else
+	virtual int Transform(int nCount,
+		double *x, double *y, double *z) override
 	{
 		int *pabSuccess = (int *)CPLMalloc(sizeof(int)* nCount);
 		int bOverallSuccess, i;
@@ -818,15 +866,16 @@ public:
 
 	virtual int TransformEx(int nCount,
 		double *x, double *y, double *z = NULL,
-		int *pabSuccess = NULL)
+		int *pabSuccess = NULL) override
 	{
 		if (bUseTPS)
 			return GDALTPSTransform(hTransformArg, FALSE,
-			nCount, x, y, z, pabSuccess);
+				nCount, x, y, z, pabSuccess);
 		else
 			return GDALGCPTransform(hTransformArg, FALSE,
-			nCount, x, y, z, pabSuccess);
+				nCount, x, y, z, pabSuccess);
 	}
+#endif
 };
 
 /************************************************************************/
@@ -3040,6 +3089,13 @@ public:
 		OGRCoordinateTransformation::DestroyCT(poCT2);
 	}
 
+#if GDAL_VERSION_MAJOR >= 3
+	virtual OGRCoordinateTransformation* Clone() const override
+	{
+		return new CompositeCT(poCT1, poCT2->Clone());
+	}
+#endif
+
 	virtual OGRSpatialReference *GetSourceCS()
 	{
 		return poCT1 ? poCT1->GetSourceCS() :
@@ -3063,9 +3119,22 @@ public:
 		return nResult;
 	}
 
+#if GDAL_VERSION_MAJOR >= 3
+	virtual int Transform(int nCount,
+		double *x, double *y, double *z = NULL, double *t = NULL,
+		int *pabSuccess = NULL) override
+	{
+		int nResult = TRUE;
+		if (poCT1)
+			nResult = poCT1->Transform(nCount, x, y, z, t, pabSuccess);
+		if (nResult && poCT2)
+			nResult = poCT2->Transform(nCount, x, y, z, t, pabSuccess);
+		return nResult;
+	}
+#else
 	virtual int TransformEx(int nCount,
 		double *x, double *y, double *z = NULL,
-		int *pabSuccess = NULL)
+		int *pabSuccess = NULL) override
 	{
 		int nResult = TRUE;
 		if (poCT1)
@@ -3074,6 +3143,7 @@ public:
 			nResult = poCT2->TransformEx(nCount, x, y, z, pabSuccess);
 		return nResult;
 	}
+#endif
 };
 
 /************************************************************************/

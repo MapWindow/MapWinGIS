@@ -80,23 +80,17 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 		DeleteAndClearShapeData(shapeData);
 		return false;
 	}
-		
-	// Process loaded data:
-	if (shapeData.size() > 0)
-	{
-		// copy to the location accessible by map rendering
-		loader->PutData(shapeData);
-		callback->LoadedCount = shapeData.size();
-		loader->LastSuccessExtents = *extents;
-		Debug::WriteWithThreadId("Task succeeded.", DebugOgrLoading);
-		return true;
-	}
-	else 
-	{
+
+	loader->PutData(shapeData);
+	callback->LoadedCount = shapeData.size();
+	loader->LastSuccessExtents = *extents;
+
+	if (callback->LoadedCount == 0)
 		Debug::WriteWithThreadId("Task succeeded but no data loaded.", DebugOgrLoading);
-		DeleteAndClearShapeData(shapeData);
-		return false;
-	}
+	else
+		Debug::WriteWithThreadId("Task succeeded.", DebugOgrLoading);
+
+	return true;
 }
 
 // *************************************************************
@@ -143,8 +137,10 @@ void Ogr2RawData::FieldsToShapeRecord(OGRFeatureDefn* poFields, OGRFeature* poFe
 		}
 		else //if (type == OFTString )
 		{
+			// string should be interpreted as UTF-8 unless overridden in Global Settings
+			CStringW ws = OgrHelper::OgrString2Unicode(poFeature->GetFieldAsString(iFld));
 			var->vt = VT_BSTR;
-			var->bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+			var->bstrVal = W2BSTR(ws);		// BSTR will be cleared by CComVariant destructor
 		}
 		data->Row->values.push_back(var);
 	}

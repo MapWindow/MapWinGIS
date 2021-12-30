@@ -868,7 +868,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	// initializing classes for drawing
 	bool forceGdiplus = this->_rotateAngle != 0.0f || _isSnapshot;
 	
-	CShapefileDrawer sfDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, this->GetCurrentScale(), forceGdiplus);
+	CShapefileDrawer sfDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, this->GetCurrentScale(), this->GetCurrentZoom(), forceGdiplus);
 	CImageDrawer imgDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, _viewWidth, _viewHeight);
 	CLabelDrawer lblDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, currentScale, _currentZoom, chosenListLabels, _rotateAngle, _isSnapshot);
 	CChartDrawer chartDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, currentScale, chosenListCharts, _isSnapshot);
@@ -929,13 +929,13 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 					if (!l->extents.Intersects(_extents))
 						continue;
 
-					// layerBuffer == true indicates we're drawing the non-Volatile layers
-					if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
-						continue;
-
                     // Update labels & categories
                     l->UpdateShapefile();
 				}
+
+				// layerBuffer == true indicates we're drawing the non-Volatile layers
+				if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
+					continue;
 
                 // Perform the draw:
                 sfDrawer.Draw(rcBounds, sf);

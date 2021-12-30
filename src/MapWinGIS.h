@@ -2,7 +2,7 @@
 #pragma once
 
 #if !defined( __AFXCTL_H__ )
-	#error include 'afxctl.h' before including this file
+#error include 'afxctl.h' before including this file
 #endif
 
 #include "resource.h"
@@ -11,7 +11,7 @@
 #include "GlobalClassFactory.h"
 
 #define VERSION_MAJOR 5
-#define VERSION_MINOR 2
+#define VERSION_MINOR 3
 
 extern const GUID CDECL _tlid;
 extern const WORD _wVerMajor;
@@ -24,10 +24,10 @@ HINSTANCE GetModuleInstance();
 class CMapWinGISApp : public COleControlModule
 {
 public:
-	BOOL InitInstance();
-	int ExitInstance();
+    BOOL InitInstance();
+    int ExitInstance();
 private:
-	BOOL InitATL();
+    BOOL InitATL();
 };
 
 extern GlobalClassFactory m_factory;

@@ -809,6 +809,8 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
             }
             else
             {
+
+                ((CTableClass*)_table)->InjectShapefile(this);
                 _shpfiletype = ShapefileType;
                 _isEditingShapes = true;
                 _sourceType = sstInMemory;
@@ -880,6 +882,7 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
         }
         else
         {
+            ((CTableClass*)_table)->InjectShapefile(this);
             _shpfileName = tmp_shpfileName;
             _shxfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "shx";
             _dbffileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";

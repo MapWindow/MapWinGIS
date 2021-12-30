@@ -31,6 +31,7 @@ public:
 	WmsCustomProvider()
 	{
 		_version = wvAuto;
+		_bbo = bboAuto;
 		_projection = new CustomProjection();
 		_subProviders.push_back(this);
 	}
@@ -42,6 +43,7 @@ private:
 	CString _format;
 	CString _styles;
 	tkWmsVersion _version;
+	tkWmsBoundingBoxOrder _bbo;
 
 public:
 	// properties
@@ -53,6 +55,8 @@ public:
 	void set_Format(CString value) { _format = value; }
 	tkWmsVersion get_Version() { return _version; }
 	void set_Version(tkWmsVersion value) { _version = value; }
+	tkWmsBoundingBoxOrder get_BoundingBoxOrder() { return _bbo; }
+	void set_BoundingBoxOrder(tkWmsBoundingBoxOrder bbo) { _bbo = bbo; }
 	CString get_Styles() { return _styles; }
 	void set_Styles(CString value) { _styles = value; }
 

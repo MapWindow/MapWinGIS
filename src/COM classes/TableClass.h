@@ -206,7 +206,7 @@ private:
 	long RowCount() { return _rows.size(); }
 	long FieldCount() { return _fields.size(); }
 	bool ReadRecord(long RowIndex);
-	bool WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowIndex);
+	bool WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowIndex, bool isUTF8 = false);
 	void ClearRow(long rowIndex);
 	FieldType GetFieldType(long fieldIndex);
 	long GetFieldPrecision(long fieldIndex);

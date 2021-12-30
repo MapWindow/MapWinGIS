@@ -29,6 +29,7 @@
 #include "Field.h"
 #include "TableHelper.h"
 #include "FieldHelper.h"
+#include "Shapefile.h"
 
 #pragma warning(disable:4996)
 
@@ -717,6 +718,9 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 		return false;
 	}
 
+	// is the Shapefile UTF-8 (if unspecified or specified as UTF-8)
+	bool isUTF8 = (DBFGetCodePage(_dbfHandle) == nullptr || strcmp(DBFGetCodePage(_dbfHandle), "UTF-8") == 0);
+
 	// joined fields must be removed; they will be restored in the process of reopening table
 	// after saving operation
 	this->RemoveJoinedFields();
@@ -798,7 +802,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 			continue;
 		}
 
-		if (!WriteRecord(newdbfHandle, rowIndex, ++currentRowIndex))
+		if (!WriteRecord(newdbfHandle, rowIndex, ++currentRowIndex, isUTF8))
 		{
 			ErrorMessage(tkDBF_CANT_WRITE_ROW);
 			return false;
@@ -934,6 +938,8 @@ void CTableClass::LoadDefaultFields()
 		field->put_Width(fwidth);
 		field->put_Precision(fdecimals);
 		field->put_Type((FieldType)type);
+		//// field has not really been modified
+		//((CField*)field)->SetIsUpdated(false);
 
 		FieldWrapper* fw = new FieldWrapper();
 		fw->oldIndex = i;
@@ -1439,7 +1445,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 //		WriteRecord()
 // *******************************************************************
 //Write a cached RecordWrapper into dbf file 
-bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowIndex)
+bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowIndex, bool isUTF8)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -1453,7 +1459,7 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 	if (fromRowIndex < 0 || fromRowIndex >= RowCount())
 		return false;
 
-	char * nonstackString = NULL;
+	const char * nonstackString = NULL;
 
 	for (long i = 0; i < FieldCount(); i++)
 	{
@@ -1467,7 +1473,7 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 		{
 			if (val.vt == VT_BSTR)
 			{
-				nonstackString = Utility::SYS2A(val.bstrVal);
+				nonstackString = Utility::ConvertBSTRToLPSTR(val.bstrVal, (isUTF8 ? CP_UTF8 : CP_ACP)); // ((LPCSTR)Utility::ConvertToUtf8(val.bstrVal)); // Utility::SYS2A(val.bstrVal);
 				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, nonstackString);
 				delete[] nonstackString;
 				nonstackString = NULL;
@@ -1990,6 +1996,8 @@ STDMETHODIMP CTableClass::EditDeleteRow(long RowIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		*retval = VARIANT_FALSE;
+
+	((CShapefile*) _shapefile)->MarkShapeDeleted(RowIndex);
 
 	if (_isEditingTable == FALSE)
 	{
