@@ -76,7 +76,6 @@ namespace MWLite.Core.GeoLocation
                 dynamic obj = serializer.Deserialize(result, typeof(object));
 
                 var numbers = new List<double>();
-                var list = new List<string>();
                 
                 for (int i = 0; i < 4; i++)
 			    {
@@ -105,7 +104,6 @@ namespace MWLite.Core.GeoLocation
             {
                 throw new ApplicationException("Failed to find coordinates of location.");
             }
-            return null;
         }
     }
 }

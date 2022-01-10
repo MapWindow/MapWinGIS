@@ -588,7 +588,6 @@ namespace MWLite.GUI.Forms
             dockPaneStripToolWindowGradient2.InactiveTabGradient = tabGradient14;
             dockPaneStripSkin2.ToolWindowGradient = dockPaneStripToolWindowGradient2;
             dockPanelSkin2.DockPaneStripSkin = dockPaneStripSkin2;
-            this.dockPanel1.Skin = dockPanelSkin2;
             this.dockPanel1.TabIndex = 0;
             // 
             // _toolStripLayer
