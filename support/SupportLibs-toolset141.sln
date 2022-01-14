@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32002.261
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spatialindex-mw", "spatialindex\spatialindex-vc\spatialindex.vcxproj", "{38FBBD59-8344-4D8E-B728-3D51763B6A70}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spatialindex-mw", "spatialindex\spatialindex-vc\spatialindex-toolset141.vcxproj", "{38FBBD59-8344-4D8E-B728-3D51763B6A70}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cqlib", "cqlib\cqlib.vcxproj", "{E81699D6-81BA-41BF-A3A9-DD4CEF0B4E95}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cqlib", "cqlib\cqlib-toolset141.vcxproj", "{E81699D6-81BA-41BF-A3A9-DD4CEF0B4E95}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShapeLib", "ShapeLib\ShapeLib.vcxproj", "{A0B00502-605B-4382-B313-5983F6BC8E71}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShapeLib", "ShapeLib\ShapeLib-toolset141.vcxproj", "{A0B00502-605B-4382-B313-5983F6BC8E71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
