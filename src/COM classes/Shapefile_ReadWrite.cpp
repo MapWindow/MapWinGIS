@@ -31,13 +31,13 @@
 // ************************************************************
 //		get_Shape()
 // ************************************************************
-STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
+STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape** pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	VARIANT_BOOL vbretval = VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		VARIANT_BOOL vbretval = VARIANT_FALSE;
 
 	// out of bounds?
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*pVal = NULL;
@@ -127,7 +127,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 		ErrorMessage(tkINVALID_SHP_FILE);
 		return NULL;
 	}
-	
+
 	fread(&intbuf, sizeof(int), 1, _shpfile);
 	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
 	int contentLength = intbuf * 2;//(32 bit words)
@@ -136,21 +136,21 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 
 	ShpfileType shpType = (ShpfileType)intbuf;
 
-	IShape * shape = NULL;
-	IPoint * pnt = NULL;
+	IShape* shape = NULL;
+	IPoint* pnt = NULL;
 	VARIANT_BOOL vbretval;
 
 #pragma region Nullshape Or Mismatch
 	// ------------------------------------------------------
 	//	  Shape specific record contents
 	// ------------------------------------------------------
-	
+
 	// MWGIS-91
 	bool areEqualTypes = shpType == _shpfiletype;
-	if (!areEqualTypes){
+	if (!areEqualTypes) {
 		areEqualTypes = ShapeUtility::Convert2D(shpType) == ShapeUtility::Convert2D(_shpfiletype);
 	}
-	
+
 	if (_shpfiletype == SHP_NULLSHAPE)
 	{
 		if (shpType != SHP_NULLSHAPE)
@@ -403,7 +403,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			{
 				fread(&z, sizeof(double), 1, _shpfile);
 				pointIndex = k;
-				IPoint * pnt = NULL;
+				IPoint* pnt = NULL;
 				shape->get_Point(pointIndex, &pnt);
 				if (pnt == NULL)
 				{
@@ -421,7 +421,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint* pnt = NULL;
 				shape->get_Point(pointIndex, &pnt);
 				if (pnt == NULL)
 				{
@@ -502,7 +502,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint* pnt = NULL;
 				shape->get_Point(pointIndex, &pnt);
 				if (pnt == NULL)
 				{
@@ -644,7 +644,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			{
 				fread(&z, sizeof(double), 1, _shpfile);
 				pointIndex = k;
-				IPoint * pnt = NULL;
+				IPoint* pnt = NULL;
 				shape->get_Point(pointIndex, &pnt);
 				if (pnt == NULL)
 				{
@@ -662,7 +662,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint* pnt = NULL;
 				shape->get_Point(pointIndex, &pnt);
 				if (pnt == NULL)
 				{
@@ -742,7 +742,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint* pnt = NULL;
 				shape->get_Point(pointIndex, &pnt);
 				if (pnt == NULL)
 				{
@@ -851,7 +851,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			{
 				fread(&z, sizeof(double), 1, _shpfile);
 				pointIndex = k;
-				IPoint * pnt = NULL;
+				IPoint* pnt = NULL;
 				shape->get_Point(pointIndex, &pnt);
 				if (pnt == NULL)
 				{
@@ -869,7 +869,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint* pnt = NULL;
 				shape->get_Point(pointIndex, &pnt);
 				if (pnt == NULL)
 				{
@@ -932,7 +932,7 @@ IShape* CShapefile::ReadComShape(long ShapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint* pnt = NULL;
 				shape->get_Point(pointIndex, &pnt);
 				if (pnt == NULL)
 				{
@@ -963,59 +963,59 @@ BOOL CShapefile::ReadShx()
 
 	// file code
 	int intbuf;
-	fread(&intbuf,sizeof(int),1,_shxfile);
-	ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
-	if( intbuf != FILE_CODE )
+	fread(&intbuf, sizeof(int), 1, _shxfile);
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
+	if (intbuf != FILE_CODE)
 		return FALSE;
 
 	// unused
 	int unused = UNUSEDVAL;
-	for(int i=0; i < UNUSEDSIZE; i++)
+	for (int i = 0; i < UNUSEDSIZE; i++)
 	{
-		fread(&intbuf,sizeof(int),1,_shxfile);
-		ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
-		if( intbuf != unused )
+		fread(&intbuf, sizeof(int), 1, _shxfile);
+		ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
+		if (intbuf != unused)
 			return FALSE;
 	}
 
 	// file length (16 bit words)
-	fread(&intbuf,sizeof(int),1,_shxfile);
-	ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
+	fread(&intbuf, sizeof(int), 1, _shxfile);
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
 	int filelength = intbuf;
 
 	// version
-	fread(&intbuf,sizeof(int),1,_shxfile);
-	if( intbuf != VERSION )
+	fread(&intbuf, sizeof(int), 1, _shxfile);
+	if (intbuf != VERSION)
 		return FALSE;
 
 	// shapefile type
-	fread(&intbuf,sizeof(int),1,_shxfile);
+	fread(&intbuf, sizeof(int), 1, _shxfile);
 	_shpfiletype = (ShpfileType)intbuf;
 
 	// bounds
-	fread(&_minX,sizeof(double),1,_shxfile);
-	fread(&_minY,sizeof(double),1,_shxfile);
-	fread(&_maxX,sizeof(double),1,_shxfile);
-	fread(&_maxY,sizeof(double),1,_shxfile);
-	fread(&_minZ,sizeof(double),1,_shxfile);
-	fread(&_maxZ,sizeof(double),1,_shxfile);
-	fread(&_minM,sizeof(double),1,_shxfile);
-	fread(&_maxM,sizeof(double),1,_shxfile);
+	fread(&_minX, sizeof(double), 1, _shxfile);
+	fread(&_minY, sizeof(double), 1, _shxfile);
+	fread(&_maxX, sizeof(double), 1, _shxfile);
+	fread(&_maxY, sizeof(double), 1, _shxfile);
+	fread(&_minZ, sizeof(double), 1, _shxfile);
+	fread(&_maxZ, sizeof(double), 1, _shxfile);
+	fread(&_minM, sizeof(double), 1, _shxfile);
+	fread(&_maxM, sizeof(double), 1, _shxfile);
 
 	int readLength = HEADER_BYTES_16;
-	while( readLength < filelength )
+	while (readLength < filelength)
 	{
 		// offset
-		fread(&intbuf,sizeof(int),1,_shxfile);
-		ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
-		_shpOffsets.push_back(intbuf*2);			// convert to (32 bit words)
+		fread(&intbuf, sizeof(int), 1, _shxfile);
+		ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
+		_shpOffsets.push_back(intbuf * 2);			// convert to (32 bit words)
 
 		// content length
-		fread(&intbuf,sizeof(int),1,_shxfile);
-		ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
+		fread(&intbuf, sizeof(int), 1, _shxfile);
+		ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
 		readLength += 4;
 	}
-	
+
 	rewind(_shxfile);
 	return TRUE;
 }
@@ -1044,7 +1044,7 @@ bool CShapefile::AppendToShx(FILE* shx, IShape* shp, int offset)
 // **************************************************************
 //		WriteShx()
 // **************************************************************
-BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
+BOOL CShapefile::WriteShx(FILE* shx, ICallback* cBack)
 {
 	ICallback* callback = cBack ? cBack : _globalCallback;
 
@@ -1055,7 +1055,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 	ShapeUtility::WriteBigEndian(shx, FILE_CODE);
 
 	// unused
-	for(int j = 0; j < UNUSEDSIZE; j++)
+	for (int j = 0; j < UNUSEDSIZE; j++)
 	{
 		ShapeUtility::WriteBigEndian(shx, UNUSEDVAL);
 	}
@@ -1066,11 +1066,11 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 
 	//VERSION
 	int version = VERSION;
-	fwrite(&version, sizeof(int),1,shx);
+	fwrite(&version, sizeof(int), 1, shx);
 
 	//SHAPEFILE TYPE
 	int tmpshapefiletype = (short)_shpfiletype;
-	fwrite(&tmpshapefiletype, sizeof(int),1,shx);
+	fwrite(&tmpshapefiletype, sizeof(int), 1, shx);
 
 	//BOUNDS
 	WriteBounds(shx);
@@ -1079,20 +1079,20 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 	long numPoints = 0;
 	long numParts = 0;
 	ShpfileType shptype;
-	IShape * shape = NULL;
+	IShape* shape = NULL;
 
 	long percent = 0, newpercent = 0;
 
 	_shpOffsets.clear();
-	int size  = (int)_shapeData.size();
-	for( int i = 0; i < size; i++)
+	int size = (int)_shapeData.size();
+	for (int i = 0; i < size; i++)
 	{
 		// convert to (32 bit words)
 		_shpOffsets.push_back(offset);
 
 		ShapeUtility::WriteBigEndian(shx, offset / 2);
 
-		get_Shape(i,&shape);
+		get_Shape(i, &shape);
 		shape->get_NumPoints(&numPoints);
 		shape->get_NumParts(&numParts);
 		shape->get_ShapeType(&shptype);
@@ -1123,7 +1123,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 // **************************************************************
 int CShapefile::GetWriteFileLength()
 {
-	IShape * sh = NULL;
+	IShape* sh = NULL;
 	long numPoints = 0;
 	long numParts = 0;
 	long part = 0;
@@ -1163,12 +1163,12 @@ bool CShapefile::AppendToShpFile(FILE* shp, IShapeWrapper* wrapper)
 	// write content		
 	wrapper->RefreshBounds();
 	int* data = wrapper->get_RawData();
-	if (data) 
+	if (data)
 	{
 		fseek(shp, 0, SEEK_END);
 		size_t size = fwrite(data, sizeof(char), length, shp);
 		fflush(shp);
-		
+
 		delete[] data;
 
 		return true;
@@ -1180,7 +1180,7 @@ bool CShapefile::AppendToShpFile(FILE* shp, IShapeWrapper* wrapper)
 // **************************************************************
 //		WriteShp()
 // **************************************************************
-void CShapefile::WriteBounds(FILE * shp)
+void CShapefile::WriteBounds(FILE* shp)
 {
 	double ShapefileBounds[8];
 	ShapefileBounds[0] = _minX;
@@ -1197,7 +1197,7 @@ void CShapefile::WriteBounds(FILE * shp)
 // **************************************************************
 //		WriteShp()
 // **************************************************************
-BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
+BOOL CShapefile::WriteShp(FILE* shp, ICallback* cBack)
 {
 	// guaranteed that .shp file is open
 	rewind(shp);
@@ -1206,7 +1206,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	ShapeUtility::WriteBigEndian(shp, FILE_CODE);
 
 	//UNUSED
-	for(int j = 0; j < UNUSEDSIZE; j++)
+	for (int j = 0; j < UNUSEDSIZE; j++)
 	{
 		ShapeUtility::WriteBigEndian(shp, UNUSEDVAL);
 	}
@@ -1217,11 +1217,11 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 
 	//VERSION
 	int version = VERSION;
-	fwrite(&version, sizeof(int),1,shp);
+	fwrite(&version, sizeof(int), 1, shp);
 
 	//SHAPEFILE TYPE
 	int tmpshapefiletype = (short)_shpfiletype;
-	fwrite(&tmpshapefiletype, sizeof(int),1,shp);
+	fwrite(&tmpshapefiletype, sizeof(int), 1, shp);
 
 	//BOUNDS
 	WriteBounds(shp);
@@ -1233,23 +1233,23 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	long numPoints = 0;
 	long numParts = 0;
 	long part = 0;
-	IShape * sh = NULL;
+	IShape* sh = NULL;
 
 	int size = _shapeData.size();
 
-	for( int k = 0; k < size; k++)
+	for (int k = 0; k < size; k++)
 	{
-		get_Shape(k,&sh);
+		get_Shape(k, &sh);
 		CShape* shape = (CShape*)sh;
-		
+
 		IShapeWrapper* wrapper = shape->get_ShapeWrapper();
 		int length = wrapper->get_ContentLength();
-		
+
 		//Write the Record Header
 		ShapeUtility::WriteBigEndian(shp, k + 1);
 		ShapeUtility::WriteBigEndian(shp, length / 2);
 
-		if ( _fastMode && _isEditingShapes)
+		if (_fastMode && _isEditingShapes)
 		{
 			wrapper->RefreshBounds();
 			int* data = wrapper->get_RawData();
@@ -1263,50 +1263,60 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 			// in-memory mode (COM points)
 			ShpfileType shptype = wrapper->get_ShapeType();
 			ShpfileType shptype2D = wrapper->get_ShapeType2D();
-			numPoints = wrapper->get_PointCount();
-			numParts = wrapper->get_PartCount();
+
+			// ********** Start change for MWGIS-250
+			// numPoints = wrapper->get_PointCount();
+			//numParts = wrapper->get_PartCount();
+
+			if (shptype != SHP_NULLSHAPE)
+			{
+				numPoints = wrapper->get_PointCount();
+				numParts = wrapper->get_PartCount();
+			}
 
 			//Write the Record
-			if( shptype2D == SHP_NULLSHAPE )
+			//if (shptype2D == SHP_NULLSHAPE)
+			if (shptype == SHP_NULLSHAPE || shptype2D == SHP_NULLSHAPE)
+			// ********** End change for MWGIS-250
 			{
 				int ishptype = shptype;
-				fwrite(&shptype, sizeof(int), 1, shp);
+				fwrite(&ishptype, sizeof(int), 1, shp);
 			}
-			else if( shptype2D == SHP_POINT )
+			else if (shptype2D == SHP_POINT)
 			{
 				int ishptype = shptype;
-				fwrite(&ishptype,sizeof(int),1,shp);
+				fwrite(&ishptype, sizeof(int), 1, shp);
 				switch (shptype)
 				{
-					case SHP_POINT:
-						ShapeUtility::WritePointXY(wrapper, 0, shp);
-						break;
-					case SHP_POINTZ:
-						ShapeUtility::WritePointXYZ(wrapper, 0, shp);
-						break;
-					case SHP_POINTM:
-						ShapeUtility::WritePointXYM(wrapper, 0, shp);
-						break;
+				case SHP_POINT:
+					ShapeUtility::WritePointXY(wrapper, 0, shp);
+					break;
+				case SHP_POINTZ:
+					ShapeUtility::WritePointXYZ(wrapper, 0, shp);
+					break;
+				case SHP_POINTM:
+					ShapeUtility::WritePointXYM(wrapper, 0, shp);
+					break;
 				}
 			}
-			else if( shptype2D == SHP_POLYLINE || shptype2D == SHP_POLYGON || shptype2D == SHP_MULTIPOINT )
+			else if (shptype2D == SHP_POLYLINE || shptype2D == SHP_POLYGON || shptype2D == SHP_MULTIPOINT)
 			{
 				int ishptype = shptype;
-				fwrite(&ishptype,sizeof(int),1,shp);
+				fwrite(&ishptype, sizeof(int), 1, shp);
 
 				ShapeUtility::WriteExtentsXY(wrapper, shp);
 
 				if (shptype2D != SHP_MULTIPOINT)		// parts should be written for both polylines and polygons
-					fwrite(&numParts,sizeof(int),1,shp);
+					fwrite(&numParts, sizeof(int), 1, shp);
 
-				fwrite(&numPoints,sizeof(int),1,shp);
+				fwrite(&numPoints, sizeof(int), 1, shp);
 
 				if (shptype2D != SHP_MULTIPOINT)		// parts should be written for both polylines and polygons
 				{
-					for( int p = 0; p < numParts; p++ )
+					for (int p = 0; p < numParts; p++)
 					{
-						shape->get_Part(p,&part);
-						fwrite(&part,sizeof(int),1,shp);
+						shape->get_Part(p, &part);
+						fwrite(&part, sizeof(int), 1, shp);
 					}
 				}
 
