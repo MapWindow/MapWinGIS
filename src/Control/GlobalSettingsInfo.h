@@ -96,7 +96,7 @@ struct GlobalSettingsInfo
             callback->Release();
     }
 
-    GlobalSettingsInfo::GlobalSettingsInfo()
+    GlobalSettingsInfo()
     {
         allowLayersWithIncompleteReprojection = false;
         ogrInterpretYNStringAsBoolean = true;

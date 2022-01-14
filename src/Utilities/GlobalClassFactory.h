@@ -7,7 +7,7 @@ public:
 	IClassFactory* shapeFactory;
 	IClassFactory* extentsFactory;
 
-	GlobalClassFactory::GlobalClassFactory()
+	GlobalClassFactory()
 	{
 		pointFactory = shapeFactory = extentsFactory =  NULL;
 		CoGetClassObject(CLSID_Point, CLSCTX_INPROC_SERVER, NULL, IID_IClassFactory, (void**)&pointFactory); 

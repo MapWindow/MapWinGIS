@@ -11,7 +11,10 @@
 #include "geo_normalize.h"
 #include "geovalues.h"
 #include "tiffio.h"
+
+#if GDAL_VERSION_MAJOR < 3
 #include "tiffiop.h"
+#endif
 
 // ReSharper disable CppUseAuto
 

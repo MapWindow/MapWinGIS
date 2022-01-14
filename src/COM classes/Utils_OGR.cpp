@@ -2,21 +2,18 @@
 //File name: Utils_OGR.cpp
 //Description: Implementation of CUtils.
 //********************************************************************************************************
-#include "stdafx.h"
-#include "Utils.h"
-#include "atlsafe.h"
-#include <stack>
 #include <comdef.h>
-#include "gdal.h"
-#include "gdal_alg.h"
+#include <stdafx.h>
 #include "cpl_conv.h"
 #include "cpl_string.h"
-#include "cpl_multiproc.h"
+#include "cpl_vsi.h"
+#include "gdal.h"
+#include "gdal_alg.h"
+#include "gdal_alg_priv.h"
 #include "ogr_api.h"
 #include "ogr_srs_api.h"
-#include "cpl_vsi.h"
+#include "Utils.h"
 #include "vrtdataset.h"
-#include "direct.h"
 
 #pragma warning(disable:4996)
 
@@ -745,7 +742,99 @@ do {if (iArg + nExtraArg >= nArgc) \
 /*                                                                      */
 /*      Apply GCP Transform to points                                   */
 /************************************************************************/
+#if GDAL_VERSION_MAJOR >= 3
+class GCPCoordTransformation final : public OGRCoordinateTransformation
+{
+	GCPCoordTransformation(const GCPCoordTransformation& other) :
+		hTransformArg(GDALCloneTransformer(other.hTransformArg)),
+		bUseTPS(other.bUseTPS),
+		poSRS(other.poSRS)
+	{
+		if (poSRS)
+			poSRS->Reference();
+	}
 
+	GCPCoordTransformation& operator= (const GCPCoordTransformation&) = delete;
+
+public:
+
+	void* hTransformArg;
+	bool                 bUseTPS;
+	OGRSpatialReference* poSRS;
+
+	GCPCoordTransformation(int nGCPCount,
+		const GDAL_GCP* pasGCPList,
+		int  nReqOrder,
+		OGRSpatialReference* poSRSIn) :
+		hTransformArg(nullptr),
+		bUseTPS(nReqOrder < 0),
+		poSRS(poSRSIn)
+	{
+		if (nReqOrder < 0)
+		{
+			hTransformArg =
+				GDALCreateTPSTransformer(nGCPCount, pasGCPList, FALSE);
+		}
+		else
+		{
+			hTransformArg =
+				GDALCreateGCPTransformer(nGCPCount, pasGCPList, nReqOrder, FALSE);
+		}
+		if (poSRS)
+			poSRS->Reference();
+	}
+
+	[[nodiscard]]
+	OGRCoordinateTransformation* Clone() const override {
+		return new GCPCoordTransformation(*this);
+	}
+
+	[[nodiscard]]
+	bool IsValid() const { return hTransformArg != nullptr; }
+
+	~GCPCoordTransformation() override
+	{
+		if (hTransformArg != nullptr)
+		{
+			GDALDestroyTransformer(hTransformArg);
+		}
+		if (poSRS)
+			poSRS->Dereference();
+	}
+
+	OGRSpatialReference* GetSourceCS() override { return poSRS; }
+	OGRSpatialReference* GetTargetCS() override { return poSRS; }
+
+	int Transform(int nCount,
+	              double* x, double* y, double* z,
+	              double* /* t */,
+	              int* pabSuccess) override
+	{
+		int bOverallSuccess;
+
+		if (bUseTPS)
+			bOverallSuccess = GDALTPSTransform(hTransformArg, FALSE,
+				nCount, x, y, z, pabSuccess);
+		else
+			bOverallSuccess = GDALGCPTransform(hTransformArg, FALSE,
+				nCount, x, y, z, pabSuccess);
+
+		for (int i = 0; i < nCount; i++)
+		{
+			if (!pabSuccess[i])
+			{
+				bOverallSuccess = FALSE;
+				break;
+			}
+		}
+
+		return bOverallSuccess;
+	}
+
+	[[nodiscard]]
+	OGRCoordinateTransformation* GetInverse() const override { return nullptr; }
+};
+#else
 class GCPCoordTransformation : public OGRCoordinateTransformation
 {
 public:
@@ -798,50 +887,9 @@ public:
 			poSRS->Dereference();
 	}
 
-#if GDAL_VERSION_MAJOR >= 3
-	virtual OGRCoordinateTransformation* Clone() const override
-	{
-		return new GCPCoordTransformation(nGCPCount, pasGCPList, nReqOrder, poSRS);
-	}
-#endif
-
 	virtual OGRSpatialReference *GetSourceCS() { return poSRS; }
 	virtual OGRSpatialReference *GetTargetCS() { return poSRS; }
 
-#if GDAL_VERSION_MAJOR >= 3
-	virtual int Transform(int nCount,
-		double *x, double *y, double *z, double *t, int *pabSuccess) override
-	{
-		int bOverallSuccess, i;
-
-		if (t != NULL)
-		{
-			CPLError(CE_Fatal, 0, "Time values cannot be transformed. Unsupported by GDALTPSTransform and GDALGCPTransform.\n");
-		}
-
-		if (bUseTPS)
-		{
-			bOverallSuccess = GDALTPSTransform(hTransformArg, FALSE,
-				nCount, x, y, z, pabSuccess);
-		}
-		else
-		{
-			bOverallSuccess = GDALGCPTransform(hTransformArg, FALSE,
-				nCount, x, y, z, pabSuccess);
-		}
-
-		for (i = 0; i < nCount; i++)
-		{
-			if (!pabSuccess[i])
-			{
-				bOverallSuccess = FALSE;
-				break;
-			}
-		}
-
-		return bOverallSuccess;
-	}
-#else
 	virtual int Transform(int nCount,
 		double *x, double *y, double *z) override
 	{
@@ -875,8 +923,8 @@ public:
 			return GDALGCPTransform(hTransformArg, FALSE,
 				nCount, x, y, z, pabSuccess);
 	}
-#endif
 };
+#endif
 
 /************************************************************************/
 /*                        ApplySpatialFilter()                          */
@@ -3070,6 +3118,83 @@ static void SetZ (OGRGeometry* poGeom, double dfZ )
 /*                            CompositeCT                               */
 /************************************************************************/
 
+#if GDAL_VERSION_MAJOR >= 3
+class CompositeCT final : public OGRCoordinateTransformation
+{
+	CompositeCT(const CompositeCT& other) :
+		poCT1(other.poCT1 ? other.poCT1->Clone() : nullptr),
+		bOwnCT1(true),
+		poCT2(other.poCT2 ? other.poCT2->Clone() : nullptr),
+		bOwnCT2(true) {}
+
+	CompositeCT& operator= (const CompositeCT&) = delete;
+
+public:
+
+	OGRCoordinateTransformation* poCT1;
+	bool bOwnCT1;
+	OGRCoordinateTransformation* poCT2;
+	bool bOwnCT2;
+
+	CompositeCT(OGRCoordinateTransformation* poCT1In, bool bOwnCT1In,
+		OGRCoordinateTransformation* poCT2In, bool bOwnCT2In) :
+		poCT1(poCT1In),
+		bOwnCT1(bOwnCT1In),
+		poCT2(poCT2In),
+		bOwnCT2(bOwnCT2In)
+	{}
+
+	CompositeCT(OGRCoordinateTransformation* poCT1In,
+		OGRCoordinateTransformation* poCT2In) :
+		poCT1(poCT1In),
+		bOwnCT1(false),
+		poCT2(poCT2In),
+		bOwnCT2(true)
+	{}
+
+	~CompositeCT() override
+	{
+		if (bOwnCT1)
+			delete poCT1;
+		if (bOwnCT2)
+			delete poCT2;
+	}
+
+	[[nodiscard]]
+	OGRCoordinateTransformation* Clone() const override {
+		return new CompositeCT(*this);
+	}
+
+	OGRSpatialReference* GetSourceCS() override
+	{
+		return poCT1 ? poCT1->GetSourceCS() :
+			poCT2 ? poCT2->GetSourceCS() : nullptr;
+	}
+
+	OGRSpatialReference* GetTargetCS() override
+	{
+		return poCT2 ? poCT2->GetTargetCS() :
+			poCT1 ? poCT1->GetTargetCS() : nullptr;
+	}
+
+	int Transform(int nCount,
+	              double* x, double* y, double* z,
+	              double* t,
+	              int* pabSuccess) override
+	{
+		int nResult = TRUE;
+		if (poCT1)
+			nResult = poCT1->Transform(nCount, x, y, z, t, pabSuccess);
+		if (nResult && poCT2)
+			nResult = poCT2->Transform(nCount, x, y, z, t, pabSuccess);
+		return nResult;
+	}
+
+	[[nodiscard]]
+	OGRCoordinateTransformation* GetInverse() const override { return nullptr; }
+};
+
+#else
 class CompositeCT : public OGRCoordinateTransformation
 {
 public:
@@ -3089,12 +3214,6 @@ public:
 		OGRCoordinateTransformation::DestroyCT(poCT2);
 	}
 
-#if GDAL_VERSION_MAJOR >= 3
-	virtual OGRCoordinateTransformation* Clone() const override
-	{
-		return new CompositeCT(poCT1, poCT2->Clone());
-	}
-#endif
 
 	virtual OGRSpatialReference *GetSourceCS()
 	{
@@ -3119,19 +3238,6 @@ public:
 		return nResult;
 	}
 
-#if GDAL_VERSION_MAJOR >= 3
-	virtual int Transform(int nCount,
-		double *x, double *y, double *z = NULL, double *t = NULL,
-		int *pabSuccess = NULL) override
-	{
-		int nResult = TRUE;
-		if (poCT1)
-			nResult = poCT1->Transform(nCount, x, y, z, t, pabSuccess);
-		if (nResult && poCT2)
-			nResult = poCT2->Transform(nCount, x, y, z, t, pabSuccess);
-		return nResult;
-	}
-#else
 	virtual int TransformEx(int nCount,
 		double *x, double *y, double *z = NULL,
 		int *pabSuccess = NULL) override
@@ -3143,8 +3249,8 @@ public:
 			nResult = poCT2->TransformEx(nCount, x, y, z, pabSuccess);
 		return nResult;
 	}
-#endif
 };
+#endif
 
 /************************************************************************/
 /*                               SetupCT()                              */

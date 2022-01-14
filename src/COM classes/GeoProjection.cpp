@@ -23,7 +23,7 @@
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 14 may 2011 - created the file.
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "GeoProjection.h"
 #include "ProjectionHelper.h"
 #include <malloc.h>
@@ -1046,8 +1046,13 @@ STDMETHODIMP CGeoProjection::get_GeogCSParam(tkGeogCSParameter name, DOUBLE* pVa
 // ***********************************************************
 STDMETHODIMP CGeoProjection::SetGeographicCS(tkCoordinateSystem coordinateSystem)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+#if GDAL_VERSION_MAJOR >= 3
+	VARIANT_BOOL* bret = nullptr;
+	ImportFromEPSG(coordinateSystem, bret);
+#else
 	_projection->importFromEPSG((int)coordinateSystem);
+#endif
 	return S_OK;
 }
 
@@ -1056,8 +1061,13 @@ STDMETHODIMP CGeoProjection::SetGeographicCS(tkCoordinateSystem coordinateSystem
 // ***********************************************************
 STDMETHODIMP CGeoProjection::SetWgs84Projection(tkWgs84Projection projection)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+#if GDAL_VERSION_MAJOR >= 3
+	VARIANT_BOOL* bret = nullptr;
+	ImportFromEPSG(projection, bret);
+#else
 	_projection->importFromEPSG((int)projection);
+#endif	
 	return S_OK;
 }
 
@@ -1066,8 +1076,13 @@ STDMETHODIMP CGeoProjection::SetWgs84Projection(tkWgs84Projection projection)
 // ***********************************************************
 STDMETHODIMP CGeoProjection::SetNad83Projection(tkNad83Projection projection)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+#if GDAL_VERSION_MAJOR >= 3
+	VARIANT_BOOL* bret = nullptr;
+	ImportFromEPSG(projection, bret);
+#else
 	_projection->importFromEPSG((int)projection);
+#endif	
 	return S_OK;
 }
 
@@ -1197,6 +1212,23 @@ STDMETHODIMP CGeoProjection::SetWgs84(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+#if GDAL_VERSION_MAJOR >= 3
+
+	// --- new value: SRS_WKT_WGS84_LAT_LONG
+	CComBSTR bstr = L"GEOGCS[\"WGS 84\","
+		L"DATUM[\"WGS_1984\","
+		L"SPHEROID[\"WGS 84\",6378137,298.257223563,"
+		L"AUTHORITY[\"EPSG\",\"7030\"]],"
+		L"AUTHORITY[\"EPSG\",\"6326\"]],"
+		L"PRIMEM[\"Greenwich\",0,"
+		L"AUTHORITY[\"EPSG\",\"8901\"]],"
+		L"UNIT[\"degree\",0.0174532925199433,"
+		L"AUTHORITY[\"EPSG\",\"9122\"]],"
+		L"AXIS[\"Latitude\",NORTH],"
+		L"AXIS[\"Longitude\",EAST],"
+		L"AUTHORITY[\"EPSG\",\"4326\"]]";
+#else
+	// original value = depricated SRS_WKT_WGS84
 	CComBSTR bstr = L"GEOGCS[\"WGS 84\","
 		L"DATUM[\"WGS_1984\","
 		L"SPHEROID[\"WGS 84\", 6378137, 298.257223563,"
@@ -1207,6 +1239,7 @@ STDMETHODIMP CGeoProjection::SetWgs84(VARIANT_BOOL* retVal)
 		L"UNIT[\"degree\", 0.01745329251994328,"
 		L"AUTHORITY[\"EPSG\", \"9122\"]],"
 		L"AUTHORITY[\"EPSG\", \"4326\"]]";
+#endif
 
 	this->ImportFromWKT(bstr, retVal);
 	return S_OK;

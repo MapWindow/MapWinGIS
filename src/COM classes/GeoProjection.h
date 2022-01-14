@@ -44,6 +44,9 @@ public:
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_projection = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
+#if GDAL_VERSION_MAJOR >= 3
+		_projection->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+#endif
 		_transformation = NULL;	
 		gReferenceCounter.AddRef(tkInterface::idGeoProjection);
 		_isFrozen = false;

@@ -16,16 +16,16 @@ class Extent
 {
 public:
 
-	Extent::Extent()
+	Extent()
 	{	left = 0;
 		right = 0;
 		bottom = 0;
 		top = 0;
 	}
 
-	Extent::~Extent() {}
+	~Extent() {}
 
-	Extent::Extent(double x, double y, double tol)
+	Extent(double x, double y, double tol)
 	{
 		left = x - tol / 2;
 		right = x + tol / 2;
@@ -33,7 +33,7 @@ public:
 		top = y + tol / 2;
 	}
 
-	Extent::Extent( double Left, double Right, double Bottom, double Top )
+	Extent( double Left, double Right, double Bottom, double Top )
 	{	
 		left = Left;
 		right = Right;
@@ -41,7 +41,7 @@ public:
 		top = Top;
 	}
 
-	Extent::Extent(Point2D center, double width, double height)
+	Extent(Point2D center, double width, double height)
 	{
 		left = center.x - width / 2.0;
 		right = center.x + width / 2.0;
@@ -65,7 +65,7 @@ public:
 	double bottom;
 	double top;
 
-	Extent& Extent::operator=(const Extent& ext)
+	Extent& operator=(const Extent& ext)
 	{
 		if (&ext == this)
 			return *this;
@@ -78,7 +78,7 @@ public:
 		return *this;
 	}
 
-	bool Extent::operator==(const Extent& ext)
+	bool operator==(const Extent& ext)
 	{
 		if (this->bottom != ext.bottom) return false;
 		if (this->left != ext.left) return false;
@@ -87,7 +87,7 @@ public:
 		return true;
 	}
 
-	bool Extent::getIntersection(const Extent& ext, Extent& retVal)
+	bool getIntersection(const Extent& ext, Extent& retVal)
 	{
 		retVal.left = MAX(ext.left, this->left);
 		retVal.right = MIN(ext.right, this->right);
@@ -96,17 +96,17 @@ public:
 		return (retVal.left <= retVal.right) && (retVal.top >= retVal.bottom);
 	}
 
-	bool Extent::Intersects(const Extent& ext)
+	bool Intersects(const Extent& ext)
 	{
 		return !(this->right < ext.left || this->left  > ext.right || this->bottom > ext.top || this->top < ext.bottom);
 	}
 
-	bool Extent::Within(const Extent& ext)
+	bool Within(const Extent& ext)
 	{
 		return this->left >= ext.left && this->right <= ext.right && this->top <= ext.top && this->bottom >= ext.bottom;
 	}
 
-	double Extent::getArea()
+	double getArea()
 	{
 		return ((this->right - this->left) * (this->top - this->bottom));
 	}
