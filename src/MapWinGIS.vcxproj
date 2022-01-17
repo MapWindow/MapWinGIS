@@ -61,14 +61,14 @@
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
     <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
   </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>
     <PreBuildEvent>
-      <Message>Copying executables...</Message>
+      <Message>Copying GDAL binaries ...</Message>
       <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\bin\$(Platform) $(TargetDir)</Command>
     </PreBuildEvent>
     <CustomBuildStep>
@@ -159,9 +159,12 @@
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>if $(PlatformName) == Win32 setx  MapWinGISBin32 $(OutputPath)
-if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)
-$(TargetDir)regMapWinGIS.cmd</Command>
+      <Command>if $(PlatformName) == Win32 setx MapWinGISBin32 $(OutputPath)
+if $(PlatformName) == x64 setx MapWinGISBin64 $(OutputPath)
+setx PROJ_LIB $(OutputPath)proj7\share
+$(TargetDir)regMapWinGIS.cmd
+
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Win32 platform definitions -->
@@ -171,16 +174,16 @@ $(TargetDir)regMapWinGIS.cmd</Command>
     </Midl>
     <ClCompile>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</MultiProcessorCompilation>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</MultiProcessorCompilation>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</LanguageStandard>
-      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</LanguageStandard_C>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdc11</LanguageStandard_C>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">...registering output</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">... Set environment variables</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- x64 platform definitions -->
@@ -192,11 +195,15 @@ $(TargetDir)regMapWinGIS.cmd</Command>
       <PreprocessorDefinitions>WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp20</LanguageStandard>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">... Set environment variables</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Visual Leak Detector config -->
   <ItemDefinitionGroup Condition="'$(Configuration)'=='VLD'">
@@ -206,10 +213,18 @@ $(TargetDir)regMapWinGIS.cmd</Command>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">stdc17</LanguageStandard_C>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">stdcpp20</LanguageStandard>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">true</MultiProcessorCompilation>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <RegisterOutput>false</RegisterOutput>
     </Link>
+    <PostBuildEvent>
+      <Message Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">... Set environment variables</Message>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">... Set environment variables</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Release config -->
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -217,15 +232,22 @@ $(TargetDir)regMapWinGIS.cmd</Command>
       <Optimization>Full</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <PreprocessorDefinitions>RELEASE_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</MultiProcessorCompilation>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</MultiProcessorCompilation>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdcpp20</LanguageStandard>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdc17</LanguageStandard_C>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp20</LanguageStandard>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">... Set environment variables</Message>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">... Set environment variables</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- headers -->
   <ItemGroup>
