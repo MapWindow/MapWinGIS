@@ -1,9 +1,9 @@
 /**************************************************************************************
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -14,18 +14,19 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
-  // lsu 21 aug 2011 - created the file
+ // lsu 21 aug 2011 - created the file
 
-#pragma once;
+#pragma once
+
 #include "base64.h"
 
 // A wrapper for GDI+ bitmap located in the global heap
 class CMemoryBitmap
 {
-private:	
+private:
 	// icon stream (must be open for the lifetime of the Bitmap according to MSDN Bitmap constructor)
 	IStream* m_stream;
 
@@ -41,10 +42,10 @@ public:
 	{
 		return m_data;
 	}
-	
+
 	// The actual bitmap	
 	Gdiplus::Bitmap* m_bitmap;
-	
+
 	int get_Width()
 	{
 		if (m_bitmap)
@@ -77,7 +78,7 @@ public:
 		m_data = NULL;
 		m_size = 0;
 	};
-	
+
 	// **************************************************
 	//    LoadFromBase64String()
 	// **************************************************
@@ -88,7 +89,7 @@ public:
 		{
 			std::string strNew = base64_decode(str);
 			const char* data = strNew.c_str();
-			
+
 			return this->LoadFromRawData(data, (int)strNew.size());
 		}
 		return false;
@@ -107,7 +108,7 @@ public:
 				char* data = new char[m_size];
 				memcpy(data, hMem, m_size);
 				::GlobalUnlock(hMem);
-				
+
 				std::string str = base64_encode(reinterpret_cast<unsigned char*>(data), m_size);
 				delete[] data;
 				return str;
@@ -122,7 +123,7 @@ public:
 	bool LoadFromRawData(const char* data, int size)
 	{
 		this->Release();
-		
+
 		if (size <= 0)
 			return false;
 

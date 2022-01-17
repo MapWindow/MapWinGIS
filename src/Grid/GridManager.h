@@ -8,16 +8,16 @@
 # include "grdtypes.h"
 # include "EsriDll.h"
 
-class __declspec( dllexport ) GridManager
+class __declspec(dllexport) GridManager
 {
 public:
 	GridManager();
 	~GridManager();
-	
-	DATA_TYPE getGridDataType( const char * filename, GRID_TYPE GridType = USE_EXTENSION );
-	GRID_TYPE getGridType( const char * filename );
+
+	DATA_TYPE getGridDataType(const char* filename, GRID_TYPE gridType = USE_EXTENSION);
+	GRID_TYPE getGridType(const char* filename);
 	bool canUseEsriGrids();
-	bool deleteGrid( const char * filename, GRID_TYPE GridType = USE_EXTENSION );
+	bool deleteGrid(const char* filename, GRID_TYPE GridType = USE_EXTENSION);
 	static bool NeedProxyForGrid(CStringW filename, tkGridProxyMode proxyMode, IGrid* grid = NULL);
 	static CStringW GetProxyLegendName(CStringW filename);
 	static CStringW GetProxyWorldFileName(CStringW filename);
