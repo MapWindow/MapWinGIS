@@ -19,7 +19,7 @@ set _to_dir=%2
 if '%_from_dir%'=='' if '%_to_dir%'=='' GOTO usage
 
 REM Copy gdal plugins:
-FOR %%G IN (gdal_MrSID.dll gdal_netCDF.dll gdal_HDF5.dll gdal_HDF5Image.dll gdal_ECW_JP2ECW.dll gdal_MG4Lidar.dll) DO (
+FOR %%G IN (gdal_MrSID.dll gdal_netCDF.dll gdal_HDF4.dll gdal_HDF4Image.dll gdal_HDF5.dll gdal_HDF5Image.dll gdal_ECW_JP2ECW.dll gdal_MG4Lidar.dll) DO (
 	IF EXIST %_from_dir%\gdal\plugins\%%G (
     xcopy /v /c /r /y %_from_dir%\gdal\plugins\%%G  %_to_dir%gdalplugins\
 	)
@@ -34,14 +34,14 @@ REM )
 
 REM Copy PROJ4 data:
 xcopy /v /c /r /y %_from_dir%\gdal-data\*.* %_to_dir%gdal-data\
-xcopy /v /c /r /y %_from_dir%\proj\SHARE\*.* %_to_dir%..\PROJ_NAD\
+REM xcopy /v /c /r /y %_from_dir%\proj\SHARE\*.* %_to_dir%..\PROJ_NAD\
 
 REM Copy Proj7 data. TODO: Check if copied to correct location:
 xcopy /v /c /r /y %_from_dir%\proj7\share\*.* %_to_dir%proj7\share\
 
 REM Copy needed Tamas binaries:
 FOR %%G IN (cfitsio.dll freexl.dll geos.dll geos_c.dll hdf.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcrypto-1_1.dll libcrypto-1_1-x64.dll 
-			libcurl.dll libexpat.dll tiff.dll tiffxx.dll ogdi.dll 
+			libcurl.dll libexpat.dll tiff.dll tiffxx.dll ogdi.dll mfhdf.dll  
             iconv-2.dll libmysql.dll libpng16.dll libpq.dll libssl-1_1.dll libssl-1_1-x64.dll libxml2.dll lti_lidar_dsdk_1.1.dll netcdf.dll   
             openjp2.dll spatialite.dll sqlite3.dll szip.dll tbb.dll xdr.dll zlib.dll  
             NCSEcw.dll) DO (
