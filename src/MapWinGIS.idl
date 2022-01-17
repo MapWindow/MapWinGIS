@@ -6739,7 +6739,7 @@ interface IGdalUtils : IDispatch {
 }
 
 [
-    uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(5.3),
+    uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(5.4),
     helpfile("MapWinGIS.chm"),
     helpstring("MapWinGIS Components"),
     control
@@ -6761,7 +6761,7 @@ library MapWinGIS
     //  Primary dispatch interface for CMap
 
     [uuid(1D077739-E866-46A0-B256-8AECC04F2312),
-        helpstring("Dispatch interface for Map Control"), version(5.3), hidden
+        helpstring("Dispatch interface for Map Control"), version(5.4), hidden
     ]
     dispinterface _DMap
     {
