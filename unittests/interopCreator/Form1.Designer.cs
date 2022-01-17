@@ -47,6 +47,7 @@
             this.btnPrefetchTiles = new System.Windows.Forms.Button();
             this.axMap1 = new AxMapWinGIS.AxMap();
             this.button12 = new System.Windows.Forms.Button();
+            this.btnLoadGdb = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -97,10 +98,10 @@
             // txtResults
             // 
             this.txtResults.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtResults.Location = new System.Drawing.Point(686, 431);
+            this.txtResults.Location = new System.Drawing.Point(686, 460);
             this.txtResults.Multiline = true;
             this.txtResults.Name = "txtResults";
-            this.txtResults.Size = new System.Drawing.Size(136, 264);
+            this.txtResults.Size = new System.Drawing.Size(136, 235);
             this.txtResults.TabIndex = 5;
             this.txtResults.TextChanged += new System.EventHandler(this.txtResults_TextChanged);
             // 
@@ -249,11 +250,23 @@
             this.button12.UseVisualStyleBackColor = true;
             this.button12.Click += new System.EventHandler(this.button12_Click);
             // 
+            // btnLoadGdb
+            // 
+            this.btnLoadGdb.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnLoadGdb.Location = new System.Drawing.Point(683, 431);
+            this.btnLoadGdb.Name = "btnLoadGdb";
+            this.btnLoadGdb.Size = new System.Drawing.Size(136, 23);
+            this.btnLoadGdb.TabIndex = 18;
+            this.btnLoadGdb.Text = "Load gdb";
+            this.btnLoadGdb.UseVisualStyleBackColor = true;
+            this.btnLoadGdb.Click += new System.EventHandler(this.btnLoadGdb_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(831, 699);
+            this.Controls.Add(this.btnLoadGdb);
             this.Controls.Add(this.button12);
             this.Controls.Add(this.btnPrefetchTiles);
             this.Controls.Add(this.button10);
@@ -300,6 +313,7 @@
         private System.Windows.Forms.Button button10;
         private System.Windows.Forms.Button btnPrefetchTiles;
         private System.Windows.Forms.Button button12;
+        private System.Windows.Forms.Button btnLoadGdb;
     }
 }
 

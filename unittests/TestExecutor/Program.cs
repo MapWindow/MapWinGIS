@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using MapWinGISTests;
 
-namespace ConsoleApplication1
+namespace TestExecutor
 {
     /// <summary>
     /// This program is used as Debug target for MapWinGIS project. 

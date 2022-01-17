@@ -19,6 +19,69 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
+        public void OpenGdb2Test()
+        {
+            try
+            {
+                var ogr = new OgrDatasource();
+                var source = @"D:\dev\MapWindow\MapWinGIS\_issues\Forum\1193 add-layer-from-geodatabase-not-working\data.gdb";
+                if (!ogr.Open(source)) // no error here
+                {
+                    Debug.WriteLine("Failed to open data source. Err: " + ogr.GdalLastErrorMsg);
+                }
+                else
+                {
+                    int count = ogr.LayerCount; // This displays count properly
+                    Debug.WriteLine(count);
+
+                    var layer = new OgrLayer();
+                    layer = ogr.GetLayerByName("Road");
+                    
+                    //int a = axMap1.AddLayer(layer, true) ; // here a gets number 1
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }
+        }
+
+        [TestMethod]
+        public void OpenGdbTest()
+        {
+            var ogrDatasource = new OgrDatasource();
+            try
+            {
+                var result = ogrDatasource.Open(@"D:\dev\MapWindow\MapWinGIS\_issues\Forum\1193 add-layer-from-geodatabase-not-working\data.gdb");
+                Assert.IsTrue(result, "Cannot open gdb file: " + ogrDatasource.GdalLastErrorMsg);
+                var settings = new GlobalSettings { OgrLayerForceUpdateMode = true };
+
+                var capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateLayer);
+                Debug.WriteLine("odcCreateLayer: " + capability);
+                //Assert.IsTrue(capability, "Cannot create layer");
+                capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcDeleteLayer);
+                Debug.WriteLine("odcDeleteLayer: " + capability);
+                //Assert.IsTrue(capability, "Cannot delete layer");
+                capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateDataSource);
+                Debug.WriteLine("odcCreateDataSource: " + capability);
+                //Assert.IsTrue(capability), "Cannot create datasource");
+                capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcDeleteDataSource);
+                Debug.WriteLine("odcDeleteDataSource: " + capability);
+                //Assert.IsTrue(capability, "Cannot delete datasource");
+                capability = ogrDatasource.TestCapability(tkOgrDSCapability.odcCreateGeomFieldAfterCreateLayer);
+                Debug.WriteLine("odcCreateGeomFieldAfterCreateLayer: " + capability);
+                //Assert.IsTrue(capability, "Cannot create GeomField After CreateLayer");
+
+                TestOgrLayers(ogrDatasource, "OpenFileGDB", true);
+            }
+            finally
+            {
+                ogrDatasource.Close();
+            }
+        }
+
+
+        [TestMethod]
         public void OpenSQLiteTest()
         {
             var ogrDatasource = new OgrDatasource();
@@ -44,7 +107,7 @@ namespace MapWinGISTests
                 Debug.WriteLine("odcCreateGeomFieldAfterCreateLayer: " + capability);
                 Assert.IsTrue(capability, "Cannot create GeomField After CreateLayer");
 
-                TestSQLiteLayers(ogrDatasource);
+                TestOgrLayers(ogrDatasource, "SQLite");
             }
             finally
             {
@@ -89,7 +152,7 @@ namespace MapWinGISTests
                 var numFeatures = newLayer.FeatureCount[true];
                 Debug.WriteLine("numFeatures: " + numFeatures);
 
-                TestSQLiteLayers(ogrDatasource);
+                TestOgrLayers(ogrDatasource, "SQLite");
             }
             finally
             {
@@ -160,7 +223,7 @@ namespace MapWinGISTests
             Assert.IsTrue(result.Contains("GTiff (rw+): GeoTIFF"), "result is invalid");
         }
 
-        private static void TestSQLiteLayers(IOgrDatasource ogrDatasource)
+        private static void TestOgrLayers(IOgrDatasource ogrDatasource, string driverName, bool inReadOnlyMode = false)
         {
             // Get layers:
             var lastLayername = string.Empty;
@@ -172,16 +235,17 @@ namespace MapWinGISTests
                 lastLayername = layer.Name;
                 Debug.WriteLine("Layer name: " + layer.Name);
                 Debug.WriteLine("Driver Name: " + layer.DriverName);
-                Assert.AreEqual("SQLite", layer.DriverName, "Wrong driver name");
+                Assert.AreEqual(driverName, layer.DriverName, "Wrong driver name");
+                Debug.WriteLine("ActiveShapeType: " + layer.ActiveShapeType);
                 var capability = layer.TestCapability(tkOgrLayerCapability.olcRandomRead);
                 Debug.WriteLine("olcRandomRead: " + capability);
-                Assert.IsTrue(capability, "Cannot random read");
+                if (!inReadOnlyMode) Assert.IsTrue(capability, "Cannot random read");
                 capability = layer.TestCapability(tkOgrLayerCapability.olcRandomWrite);
                 Debug.WriteLine("olcRandomWrite: " + capability);
-                Assert.IsTrue(capability, "Cannot random write");
+                if (!inReadOnlyMode) Assert.IsTrue(capability, "Cannot random write");
                 capability = layer.TestCapability(tkOgrLayerCapability.olcSequentialWrite);
                 Debug.WriteLine("olcSequentialWrite: " + capability);
-                Assert.IsTrue(capability, "Cannot sequential write");
+                if (!inReadOnlyMode) Assert.IsTrue(capability, "Cannot sequential write");
             }
 
             Debug.WriteLine("Last layer name: " + lastLayername);
@@ -190,13 +254,13 @@ namespace MapWinGISTests
                 var layer = ogrDatasource.GetLayerByName(lastLayername, true);
                 var layerCapability = layer.TestCapability(tkOgrLayerCapability.olcRandomRead);
                 Debug.WriteLine("olcRandomRead: " + layerCapability);
-                Assert.IsTrue(layerCapability, "Cannot random read");
+                if (!inReadOnlyMode) Assert.IsTrue(layerCapability, "Cannot random read");
                 layerCapability = layer.TestCapability(tkOgrLayerCapability.olcRandomWrite);
                 Debug.WriteLine("olcRandomWrite: " + layerCapability);
-                Assert.IsTrue(layerCapability, "Cannot random write");
+                if (!inReadOnlyMode) Assert.IsTrue(layerCapability, "Cannot random write");
                 layerCapability = layer.TestCapability(tkOgrLayerCapability.olcSequentialWrite);
                 Debug.WriteLine("olcSequentialWrite: " + layerCapability);
-                Assert.IsTrue(layerCapability, "Cannot sequential write");
+                if (!inReadOnlyMode) Assert.IsTrue(layerCapability, "Cannot sequential write");
             }
         }
 

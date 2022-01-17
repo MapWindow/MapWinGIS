@@ -9,34 +9,36 @@ namespace interopCreator
 {
     public partial class Form1 : Form, ICallback
     {
-        private static readonly GlobalSettings _settings = new GlobalSettings();
+        private static readonly GlobalSettings Settings = new GlobalSettings();
 
         public Form1()
         {
             InitializeComponent();
-            _settings.ApplicationCallback = this;
-            _settings.SetHttpUserAgent("MapWinGIS Testapplication");
+            Settings.ApplicationCallback = this;
+            Settings.SetHttpUserAgent("MapWinGIS Testapplication");
             const string tilesLogging = @"D:\tmp\axmap.tiles\TileRequests.log";
-            _settings.StartLogTileRequests(tilesLogging);
+            Settings.StartLogTileRequests(tilesLogging);
             txtResults.Text += @"Tiles logging at " + tilesLogging;
+            axMap1.ShowVersionNumber = true;
+            txtResults.Text = axMap1.VersionNumber + Environment.NewLine;
         }
 
-        public void Progress(string KeyOfSender, int Percent, string Message)
+        public void Progress(string keyOfSender, int percent, string message)
         {
-            txtResults.Text += $@"{Percent} {Message}";
+            txtResults.Text += $@"{percent} {message}";
         }
 
-        public void Error(string KeyOfSender, string ErrorMsg)
+        public void Error(string keyOfSender, string errorMsg)
         {
-            txtResults.Text += $@"Error: {ErrorMsg}";
+            txtResults.Text += $@"Error: {errorMsg}";
         }
 
+        // ReSharper disable once UnusedMember.Local
         private void CheckNewMethods()
         {
             axMap1.DeserializeLayer(1, "Test");
             var projection = new GeoProjection();
             projection.ImportFromProj4("g");
-            var t = tkSavingMode.modeXMLOverwrite;
             axMap1.SaveMapState("r", true, true);
 
             axMap1.set_LayerSkipOnSaving(1, true);
@@ -45,12 +47,15 @@ namespace interopCreator
             var reprojectedCount = 0;
             sf.Reproject(projection, ref reprojectedCount);
             var geoProjection = sf.GeoProjection;
+            Console.WriteLine(geoProjection.ProjectionName);
             var sfSimple = sf.SimplifyLines(10, false);
 
             var gridHeader = new GridHeader();
             var gridHeaderGeoProjection = gridHeader.GeoProjection;
+            Console.WriteLine(gridHeaderGeoProjection.ProjectionName);
 
             var ext = axMap1.MaxExtents;
+            Console.WriteLine(ext.Center);
 
             var utils = new Utils();
             utils.ClipGridWithPolygon("test", sfSimple.Shape[0], "new", false);
@@ -69,6 +74,7 @@ namespace interopCreator
 
             var ds = new GdalDataset();
             var subDatasetCount = ds.SubDatasetCount;
+            Console.WriteLine($@"# sub datasets: {subDatasetCount}");
         }
 
         private void ClipGridWithPolygon()
@@ -139,7 +145,7 @@ namespace interopCreator
 
                 var netCdfFiles = Directory.GetFiles(workingFolder, "*.nc");
                 var utils = new UtilsClass();
-                _settings.ResetGdalError();
+                Settings.ResetGdalError();
                 var amersfoort = new GeoProjectionClass();
                 amersfoort.ImportFromEPSG(28992);
 
@@ -153,7 +159,7 @@ namespace interopCreator
                     if (!grd.Open(netCdfFile))
                     {
                         writer.WriteLine(DateTime.Now + " Could not open {0}. Reason: {1}, GDAL Error: {2}", netCdfFile,
-                            grd.ErrorMsg[grd.LastErrorCode], _settings.GdalLastErrorMsg);
+                            grd.ErrorMsg[grd.LastErrorCode], Settings.GdalLastErrorMsg);
                         continue;
                     }
 
@@ -162,7 +168,7 @@ namespace interopCreator
                                      FormatBytes(currentProcess.WorkingSet64));
 
                     var header = grd.Header;
-                    var noDataValue = (double) grd.Header.NodataValue;
+                    var noDataValue = (double)grd.Header.NodataValue;
                     var extents = grd.Extents;
 
                     // Set projection:
@@ -175,7 +181,7 @@ namespace interopCreator
                         if (!grd.OpenBand(i))
                         {
                             writer.WriteLine(DateTime.Now + " Could not open band {0}. Reason: {1}, GDAL Error: {2}", i,
-                                grd.ErrorMsg[grd.LastErrorCode], _settings.GdalLastErrorMsg);
+                                grd.ErrorMsg[grd.LastErrorCode], Settings.GdalLastErrorMsg);
                             continue;
                         }
 
@@ -218,12 +224,12 @@ namespace interopCreator
 
         private static string FormatBytes(long bytes)
         {
-            string[] Suffix = {"B", "KB", "MB", "GB", "TB"};
+            string[] suffix = { "B", "KB", "MB", "GB", "TB" };
             int i;
             double dblSByte = bytes;
-            for (i = 0; i < Suffix.Length && bytes >= 1024; i++, bytes /= 1024) dblSByte = bytes / 1024.0;
+            for (i = 0; i < suffix.Length && bytes >= 1024; i++, bytes /= 1024) dblSByte = bytes / 1024.0;
 
-            return $"{dblSByte:0.##} {Suffix[i]}";
+            return $"{dblSByte:0.##} {suffix[i]}";
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -265,7 +271,7 @@ namespace interopCreator
 
         private void btnOgr2Ogr_Click(object sender, EventArgs e)
         {
-            _settings.ResetGdalError();
+            Settings.ResetGdalError();
             var utils = new UtilsClass();
             var options =
                 "--config CONFIG_FILE \"D:\\dev\\GIS-Data\\Djordje\\osmconf.ini\" --config OSM_USE_CUSTOM_INDEXING NO -skipfailures -f \"ESRI Shapefile\"";
@@ -276,7 +282,7 @@ namespace interopCreator
                 // Both line should be the same:
                 Debug.WriteLine(utils.ErrorMsgFromObject(utils));
                 Debug.WriteLine(utils.ErrorMsg[utils.LastErrorCode]);
-                Debug.WriteLine(_settings.GdalLastErrorMsg);
+                Debug.WriteLine(Settings.GdalLastErrorMsg);
             }
 
             txtResults.Text = @"OGR2OGR result: " + result;
@@ -290,7 +296,7 @@ namespace interopCreator
 
         private void btnGdalInfo_Click(object sender, EventArgs e)
         {
-            _settings.ResetGdalError();
+            Settings.ResetGdalError();
             var utils = new UtilsClass();
 
             var filename = @"D:\dev\GIS-Data\HDF5\RAD_NL25_RAC_03H_201612040000.h5";
@@ -301,7 +307,7 @@ namespace interopCreator
                 var hndle = axMap1.AddLayerFromFilename(filename, tkFileOpenStrategy.fosAutoDetect, true);
                 if (hndle >= 1) return;
 
-                txtResults.Text += @" GDAL Error: " + _settings.GdalLastErrorMsg
+                txtResults.Text += @" GDAL Error: " + Settings.GdalLastErrorMsg
                                                     + axMap1.get_ErrorMsg(axMap1.LastErrorCode);
                 var grd = new GridClass();
                 var opened = grd.Open(filename);
@@ -325,13 +331,13 @@ namespace interopCreator
                 return;
             }
 
-            txtResults.Text = @" GDAL Error: " + _settings.GdalLastErrorMsg
-                                               + @" GdalPluginPath: " + _settings.GdalPluginPath;
+            txtResults.Text = @" GDAL Error: " + Settings.GdalLastErrorMsg
+                                               + @" GdalPluginPath: " + Settings.GdalPluginPath;
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            _settings.OgrStringEncoding = tkOgrEncoding.oseUtf8;
+            Settings.OgrStringEncoding = tkOgrEncoding.oseUtf8;
 
             var sf = new ShapefileClass();
             if (!sf.Open(@"D:\dev\GIS-Data\Issues\Persian\roads.shp"))
@@ -465,7 +471,7 @@ namespace interopCreator
                 @"D:\dev\MapwinGIS\GitHub\unittests\MapWinGISTests\Testdata\Issues\MWGIS-98\3dPoint.shp",
                 tkFileOpenStrategy.fosAutoDetect, true);
         }
-        
+
         private void btnPrefetchTiles_Click(object sender, EventArgs e)
         {
             if (axMap1.Projection == tkMapProjection.PROJECTION_NONE)
@@ -479,7 +485,7 @@ namespace interopCreator
             axMap1.ZoomBehavior = tkZoomBehavior.zbUseTileLevels;
             var outputFolder = $@"D:\tmp\axmap.tiles\{axMap1.Tiles.Provider.ToString()}";
             if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
-            
+
             var numTilesToCache = axMap1.Tiles.PrefetchToFolder(axMap1.Extents, axMap1.Tiles.CurrentZoom,
                 Convert.ToInt32(axMap1.Tiles.Provider), outputFolder, ".png", null);
             txtResults.Text += $@"{Environment.NewLine}numTilesToCache: " + numTilesToCache;
@@ -494,6 +500,79 @@ namespace interopCreator
         private void button12_Click(object sender, EventArgs e)
         {
             axMap1.ZoomIn(0.3);
+        }
+
+        private void btnLoadGdb_Click(object sender, EventArgs e)
+        {
+            var ogr = new OgrDatasource();
+            var utils = new Utils();
+
+            try
+            {
+                axMap1.Clear();
+
+                const string source = @"D:\dev\MapWindow\MapWinGIS\_issues\Forum\1193 add-layer-from-geodatabase-not-working\data.gdb";
+                if (!ogr.Open(source)) 
+                {
+                    txtResults.Text += $@"{Environment.NewLine}Failed to open data source. Err: {ogr.GdalLastErrorMsg}";
+                }
+                else
+                {
+                    var count = ogr.LayerCount; 
+                    txtResults.Text += $@"{Environment.NewLine}Number of layers: {count}";
+
+                    for (var i = 0; i < count; i++)
+                    {
+                        var layer = ogr.GetLayer(i);
+                        txtResults.Text += $@"{Environment.NewLine}Adding layer name: {layer.Name}{Environment.NewLine}";
+                        axMap1.AddLayer(layer, true);
+
+                        // Set some coloring:
+                        var buffer = layer.GetBuffer();
+
+                        switch (layer.ShapeType2D)
+                        {
+                            case ShpfileType.SHP_POINT:
+                                buffer.DefaultDrawingOptions.FillColor = utils.ColorByName(tkMapColor.Red);
+                                buffer.DefaultDrawingOptions.LineColor = utils.ColorByName(tkMapColor.DarkRed);
+                                break;
+                            case ShpfileType.SHP_POLYLINE:
+                                buffer.DefaultDrawingOptions.FillColor = utils.ColorByName(tkMapColor.Green);
+                                buffer.DefaultDrawingOptions.LineColor = utils.ColorByName(tkMapColor.DarkGreen);
+                                break;
+                            case ShpfileType.SHP_POLYGON:
+                                buffer.DefaultDrawingOptions.FillColor = utils.ColorByName(tkMapColor.Blue);
+                                buffer.DefaultDrawingOptions.LineColor = utils.ColorByName(tkMapColor.BlueViolet);
+                                buffer.DefaultDrawingOptions.FillTransparency = 200;
+                                break;
+                        }
+                    }
+                }
+
+                var numLayers = axMap1.NumLayers;
+                txtResults.Text += $@"{Environment.NewLine}Number of loaded layers: {numLayers}";
+
+                // Change order of layers: points on top, polygons at the bottom:
+                for (var i = 0; i < numLayers; i++)
+                {
+                    var layerHandle = axMap1.get_LayerHandle(i);
+                    var sf = axMap1.get_Shapefile(layerHandle);
+                    switch (sf.ShapefileType2D)
+                    {
+                        case ShpfileType.SHP_POINT:
+                            axMap1.MoveLayerTop(layerHandle);
+                            break;
+                        case ShpfileType.SHP_POLYGON:
+                            axMap1.MoveLayerBottom(layerHandle);
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                txtResults.Text += $@"{Environment.NewLine}Exception: {ex}";
+                txtResults.Text += $@"{Environment.NewLine}OgrDatasource error: {ogr.GdalLastErrorMsg}";
+            }
         }
     }
 }

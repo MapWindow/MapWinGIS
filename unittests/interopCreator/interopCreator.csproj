@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>interopCreator</RootNamespace>
     <AssemblyName>interopCreator</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -91,6 +91,9 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>interopCreator.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -145,7 +148,7 @@
     <COMReference Include="AxMapWinGIS">
       <Guid>{C368D713-CC5F-40ED-9F53-F84FE197B96A}</Guid>
       <VersionMajor>5</VersionMajor>
-      <VersionMinor>0</VersionMinor>
+      <VersionMinor>4</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>aximp</WrapperTool>
       <Isolated>False</Isolated>
@@ -153,7 +156,7 @@
     <COMReference Include="MapWinGIS">
       <Guid>{C368D713-CC5F-40ED-9F53-F84FE197B96A}</Guid>
       <VersionMajor>5</VersionMajor>
-      <VersionMinor>0</VersionMinor>
+      <VersionMinor>4</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>tlbimp</WrapperTool>
       <Isolated>False</Isolated>
@@ -189,8 +192,9 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>del /F /S /Q $(OutDir)
-del /F /S /Q $(ProjectDir)\obj\*.*</PreBuildEvent>
+    <PreBuildEvent>del /F /S /Q $(TargetDir)
+del /F /S /Q $(ProjectDir)\obj\*.*
+</PreBuildEvent>
     <PostBuildEvent>if $(PlatformName) == x64 (
    mkdir $(ProjectDir)\..\..\src\bin\$(PlatformName)\$(VisualStudioVersion)
     xcopy /C /Q /R /Y $(ProjectDir)\bin\$(PlatformName)\$(ConfigurationName)\*.dll $(ProjectDir)\..\..\src\bin\$(PlatformName)\$(VisualStudioVersion)
