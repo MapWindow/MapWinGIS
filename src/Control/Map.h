@@ -518,12 +518,12 @@ public:
 		
 	#pragma region New API members
 	afx_msg long NewDrawing(short Projection);
-	afx_msg void DrawPoint(double x, double y, long size, OLE_COLOR color, byte alpha = 255);
-	afx_msg void DrawLine(double x1, double y1, double x2, double y2, long width, OLE_COLOR color, byte alpha = 255);
-	afx_msg void DrawCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, byte alpha = 255);
-	afx_msg void DrawPolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, byte alpha = 255);
-	afx_msg void DrawWideCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, int width, byte alpha = 255);
-	afx_msg void DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, short Width, byte alpha = 255);
+	afx_msg void DrawPoint(double x, double y, long size, OLE_COLOR color, ::byte alpha = 255);
+	afx_msg void DrawLine(double x1, double y1, double x2, double y2, long width, OLE_COLOR color, ::byte alpha = 255);
+	afx_msg void DrawCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, ::byte alpha = 255);
+	afx_msg void DrawPolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, ::byte alpha = 255);
+	afx_msg void DrawWideCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, int width, ::byte alpha = 255);
+	afx_msg void DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, short Width, ::byte alpha = 255);
 	afx_msg BOOL IsTIFFGrid(LPCTSTR Filename);
 	afx_msg BOOL IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b);
 	afx_msg long HWnd();
@@ -542,12 +542,12 @@ public:
 	afx_msg float GetMapRotationAngle(void);
 	afx_msg IExtents* GetRotatedExtent(void);
 	afx_msg IPoint* GetBaseProjectionPoint(double rotPixX, double rotPixY);
-	afx_msg void DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color, byte alpha = 255);
-	afx_msg void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color, byte alpha = 255);
-	afx_msg void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, byte alpha = 255);
-	afx_msg void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill, byte alpha = 255);
-	afx_msg void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, byte alpha = 255);
-	afx_msg void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, byte alpha = 255);
+	afx_msg void DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color, ::byte alpha = 255);
+	afx_msg void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color, ::byte alpha = 255);
+	afx_msg void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, ::byte alpha = 255);
+	afx_msg void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill, ::byte alpha = 255);
+	afx_msg void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, ::byte alpha = 255);
+	afx_msg void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, ::byte alpha = 255);
 	afx_msg BSTR SerializeLayer(LONG LayerHandle);
 	afx_msg VARIANT_BOOL DeserializeLayer(LONG LayerHandle, LPCTSTR newVal);
 	afx_msg IDispatch* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);

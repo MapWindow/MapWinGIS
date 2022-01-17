@@ -35,7 +35,7 @@ namespace Utility
 	// ********************************************************
 	CStringA ConvertToUtf8(CStringW unicode) {
 		USES_CONVERSION;
-		CStringA utf8 = CW2A(unicode, CP_UTF8);
+		CStringA utf8 = CStringA((LPCWSTR)unicode, CP_UTF8);
 		return utf8;
 	}
 
@@ -44,7 +44,7 @@ namespace Utility
 	// ********************************************************
 	CStringW ConvertFromUtf8(CStringA utf8) {
 		USES_CONVERSION;
-		CStringW unicode = CA2W(utf8, CP_UTF8);
+		CStringW unicode = CStringW(utf8, CP_UTF8);
 		return unicode;
 	}
 
@@ -1029,7 +1029,7 @@ namespace Utility
 		return RGB(r, g, b);
 	}
 
-	byte Utility::GetBrightness(OLE_COLOR color)
+	::byte Utility::GetBrightness(OLE_COLOR color)
 	{
 		return ((short)GetRValue(color) + (short)GetGValue(color) + (short)GetBValue(color)) / 3;
 	}

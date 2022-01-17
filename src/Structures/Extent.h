@@ -143,7 +143,8 @@ public:
 
 	CString ToString()
 	{
-		return Debug::Format("x: %f; y: %f; w: %f; h: %f", left, top, Width(), Height());
+		char fmt[] = "x: %f; y: %f; w: %f; h: %f";
+		return Debug::Format(fmt, left, top, Width(), Height());
 	}
 	
 };

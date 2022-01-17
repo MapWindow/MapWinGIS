@@ -41,7 +41,7 @@ xcopy /v /c /r /y %_from_dir%\proj7\share\*.* %_to_dir%proj7\share\
 
 REM Copy needed Tamas binaries:
 FOR %%G IN (cfitsio.dll freexl.dll geos.dll geos_c.dll hdf.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcrypto-1_1.dll libcrypto-1_1-x64.dll 
-			libcurl.dll libexpat.dll tiff.dll tiffxx.dll  
+			libcurl.dll libexpat.dll tiff.dll tiffxx.dll ogdi.dll 
             iconv-2.dll libmysql.dll libpng16.dll libpq.dll libssl-1_1.dll libssl-1_1-x64.dll libxml2.dll lti_lidar_dsdk_1.1.dll netcdf.dll   
             openjp2.dll spatialite.dll sqlite3.dll szip.dll tbb.dll xdr.dll zlib.dll  
             NCSEcw.dll) DO (

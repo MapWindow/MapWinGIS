@@ -229,7 +229,7 @@ struct GlobalSettingsInfo
 
     CStringW GetLocalizedString(tkLocalizedStrings s)
     {
-        return shortUnitStrings.find(s) != shortUnitStrings.end() ? shortUnitStrings[s] : L"";
+        return shortUnitStrings.find(s) != shortUnitStrings.end() ? shortUnitStrings[s] : CStringW(L"");
     }
 
     double GetMinPolygonArea(IGeoProjection* proj)

@@ -5,5 +5,5 @@ rem The lines above are from http://www.codeproject.com/Tips/119828/Running-a-ba
 REM Unregister any previous versions:
 %systemroot%\SysWoW64\regsvr32 /u /s MapWinGIS.ocx
 REM Register current version:
-%systemroot%\SysWoW64\regsvr32 /s MapWinGIS.ocx
-
+%systemroot%\SysWoW64\regsvr32 MapWinGIS.ocx
+pause

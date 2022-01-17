@@ -79,7 +79,7 @@ namespace Utility
 	OLE_COLOR ChangeBrightness(OLE_COLOR color, int shiftValue);
 	Gdiplus::Color OleColor2GdiPlus(OLE_COLOR color, BYTE alpha);
 	Gdiplus::Color OleColor2GdiPlus(OLE_COLOR color);
-	byte GetBrightness(OLE_COLOR color);
+	::byte GetBrightness(OLE_COLOR color);
 	void InitGdiPlusFont(Gdiplus::Font** font, CStringW name, float size);
 	
 	// units conversions
