@@ -1,6 +1,7 @@
 This is a static lib version of the SpatialIndex library found at:
 
 http://libspatialindex.org
+https://github.com/libspatialindex/libspatialindex
 
 ------
 
@@ -23,3 +24,17 @@ The following changes were made for the MW version of SpatialIndex:
 1. Changed the project name to "spatialindex-mw"
 
 2. Changed the index file extensions from "dat" and "idx" to "mwd" and "mwx"
+      
+   
+------
+Updating the source code 
+
+1. Download master zip from https://github.com/libspatialindex/libspatialindex
+
+2a. Copy include folder from zip to \support\include\spatialindex overwriting existing files
+2b. Copy src folder from zip to \support\spatialindex\src overwriting existing files
+
+3. Changed the index file extensions from "dat" and "idx" to "mwd" and "mwx"
+   In \support\spatialindex\src\storagemanager\DiskStorageManager.cc	L53, L161
+   
+4. Removed the SIDX_DLL keyword from include files

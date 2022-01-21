@@ -5,7 +5,7 @@
  * Copyright (c) 2004, Marios Hadjieleftheriou
  *
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -53,25 +53,25 @@ namespace SpatialIndex
 		class Data : public IData, public Tools::ISerializable
 		{
 		public:
-			Data(uint32_t len, byte* pData, TimeRegion& r, id_type id);
-			virtual ~Data();
+			Data(uint32_t len, uint8_t* pData, TimeRegion& r, id_type id);
+			~Data() override;
 
-			virtual Data* clone();
-			virtual id_type getIdentifier() const;
-			virtual void getShape(IShape** out) const;
-			virtual void getData(uint32_t& len, byte** data) const;
-			virtual uint32_t getByteArraySize();
-			virtual void loadFromByteArray(const byte* data);
-			virtual void storeToByteArray(byte** data, uint32_t& len);
+			Data* clone() override;
+			id_type getIdentifier() const override;
+			void getShape(IShape** out) const override;
+			void getData(uint32_t& len, uint8_t** data) const override;
+			uint32_t getByteArraySize() override;
+			void loadFromByteArray(const uint8_t* data) override;
+			void storeToByteArray(uint8_t** data, uint32_t& len) override;
 
 			id_type m_id;
 			TimeRegion m_region;
-			byte* m_pData;
+			uint8_t* m_pData;
 			uint32_t m_dataLength;
 		}; // Data
 
-		ISpatialIndex* returnMVRTree(IStorageManager& ind, Tools::PropertySet& in);
-		ISpatialIndex* createNewMVRTree(
+		 ISpatialIndex* returnMVRTree(IStorageManager& ind, Tools::PropertySet& in);
+		 ISpatialIndex* createNewMVRTree(
 			IStorageManager& in,
 			double fillFactor,
 			uint32_t indexCapacity,
@@ -80,10 +80,9 @@ namespace SpatialIndex
 			MVRTreeVariant rv,
 			id_type& out_indexIdentifier
 		);
-		ISpatialIndex* loadMVRTree(
+		 ISpatialIndex* loadMVRTree(
 			IStorageManager& in,
 			id_type indexIdentifier
 		);
 	}
 }
-

@@ -5,7 +5,7 @@
  * Copyright (c) 2002, Marios Hadjieleftheriou
  *
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -47,6 +47,7 @@ bool CheckFilesExists(Tools::PropertySet& ps)
 	bool bExists = false;
 
 	std::string filename("");
+	// Changes for MapWinGIS:
 	//std::string idx("idx");
 	//std::string dat("dat");
 	std::string idx("mwx");
@@ -68,14 +69,14 @@ bool CheckFilesExists(Tools::PropertySet& ps)
 
 	std::ostringstream os;
 	int ret;
-	os << filename <<"."<<dat;
+	os << filename << "." << dat;
 	std::string data_name = os.str();
 	ret = stat(data_name.c_str(), &stats);
 
 	if (ret == 0) bExists = true;
 
 	os.str("");
-	os << filename <<"."<<idx;
+	os << filename << "." << idx;
 	std::string index_name = os.str();
 	ret = stat(index_name.c_str(), &stats);
 
@@ -97,19 +98,19 @@ SpatialIndex::IStorageManager* SpatialIndex::StorageManager::createNewDiskStorag
 	var.m_varType = Tools::VT_BOOL;
 	var.m_val.blVal = true;
 	ps.setProperty("Overwrite", var);
-		// overwrite the file if it exists.
+	// overwrite the file if it exists.
 
 	var.m_varType = Tools::VT_PCHAR;
 	var.m_val.pcVal = const_cast<char*>(baseName.c_str());
 	ps.setProperty("FileName", var);
-		// .idx and .dat extensions will be added.
+	// .idx and .dat extensions will be added.
 
 	var.m_varType = Tools::VT_ULONG;
 	var.m_val.ulVal = pageSize;
 	ps.setProperty("PageSize", var);
-		// specify the page size. Since the index may also contain user defined data
-		// there is no way to know how big a single node may become. The storage manager
-		// will use multiple pages per node if needed. Off course this will slow down performance.
+	// specify the page size. Since the index may also contain user defined data
+	// there is no way to know how big a single node may become. The storage manager
+	// will use multiple pages per node if needed. Off course this will slow down performance.
 
 	return returnDiskStorageManager(ps);
 }
@@ -122,12 +123,12 @@ SpatialIndex::IStorageManager* SpatialIndex::StorageManager::loadDiskStorageMana
 	var.m_varType = Tools::VT_PCHAR;
 	var.m_val.pcVal = const_cast<char*>(baseName.c_str());
 	ps.setProperty("FileName", var);
-		// .idx and .dat extensions will be added.
+	// .idx and .dat extensions will be added.
 
 	return returnDiskStorageManager(ps);
 }
 
-DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), m_nextPage(-1), m_buffer(0)
+DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), m_nextPage(-1), m_buffer(nullptr)
 {
 	Tools::Variant var;
 
@@ -135,7 +136,7 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 	bool bOverwrite = false;
 	bool bFileExists = false;
 	std::streamoff length = 0;
-	
+
 	var = ps.getProperty("Overwrite");
 
 	if (var.m_varType != Tools::VT_EMPTY)
@@ -151,9 +152,10 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 	if (var.m_varType != Tools::VT_EMPTY)
 	{
 		if (!(var.m_varType == Tools::VT_PCHAR ||
-            var.m_varType == Tools::VT_PWCHAR))
+			var.m_varType == Tools::VT_PWCHAR))
 			throw Tools::IllegalArgumentException("SpatialIndex::DiskStorageManager: Property FileName must be Tools::VT_PCHAR or Tools::VT_PWCHAR");
 
+		// Changes for MapWinGIS:
 		//std::string idx("idx");
 		//std::string dat("dat");
 		std::string idx("mwx");
@@ -174,7 +176,7 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 		// check if file can be read/written.
 		if (bFileExists == true && bOverwrite == false)
 		{
-            std::ios_base::openmode mode = std::ios::in | std::ios::out | std::ios::binary;
+			std::ios_base::openmode mode = std::ios::in | std::ios::out | std::ios::binary;
 			m_indexFile.open(sIndexFile.c_str(), mode);
 			m_dataFile.open(sDataFile.c_str(), mode);
 
@@ -183,7 +185,7 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 		}
 		else
 		{
-            std::ios_base::openmode mode = std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc;
+			std::ios_base::openmode mode = std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc;
 			m_indexFile.open(sIndexFile.c_str(), mode);
 			m_dataFile.open(sDataFile.c_str(), mode);
 
@@ -198,9 +200,9 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 	}
 
 	// get current length of file
-	m_indexFile.seekg (0, m_indexFile.end);
+	m_indexFile.seekg(0, m_indexFile.end);
 	length = m_indexFile.tellg();
-	m_indexFile.seekg (0, m_indexFile.beg);
+	m_indexFile.seekg(0, m_indexFile.beg);
 
 	// find page size.
 	if ((bOverwrite == true) || (length == 0) || (bFileExists == false))
@@ -231,7 +233,7 @@ DiskStorageManager::DiskStorageManager(Tools::PropertySet& ps) : m_pageSize(0), 
 	}
 
 	// create buffer.
-	m_buffer = new byte[m_pageSize];
+	m_buffer = new uint8_t[m_pageSize];
 	memset(m_buffer, 0, m_pageSize);
 
 	if ((bOverwrite == false) && (length > 0))
@@ -291,10 +293,10 @@ DiskStorageManager::~DiskStorageManager()
 	flush();
 	m_indexFile.close();
 	m_dataFile.close();
-	if (m_buffer != 0) delete[] m_buffer;
+	if (m_buffer != nullptr) delete[] m_buffer;
 
-	std::map<id_type, Entry*>::iterator it;
-	for (it = m_pageIndex.begin(); it != m_pageIndex.end(); ++it) delete (*it).second;
+	for (auto& v : m_pageIndex)
+		delete v.second;
 }
 
 void DiskStorageManager::flush()
@@ -314,7 +316,7 @@ void DiskStorageManager::flush()
 	uint32_t count = static_cast<uint32_t>(m_emptyPages.size());
 	m_indexFile.write(reinterpret_cast<const char*>(&count), sizeof(uint32_t));
 	if (m_indexFile.fail())
-			throw Tools::IllegalStateException("SpatialIndex::DiskStorageManager: Corrupted storage manager index file.");
+		throw Tools::IllegalStateException("SpatialIndex::DiskStorageManager: Corrupted storage manager index file.");
 
 	for (std::set<id_type>::const_iterator it = m_emptyPages.begin(); it != m_emptyPages.end(); ++it)
 	{
@@ -355,7 +357,7 @@ void DiskStorageManager::flush()
 	m_dataFile.flush();
 }
 
-void DiskStorageManager::loadByteArray(const id_type page, uint32_t& len, byte** data)
+void DiskStorageManager::loadByteArray(const id_type page, uint32_t& len, uint8_t** data)
 {
 	std::map<id_type, Entry*>::iterator it = m_pageIndex.find(page);
 
@@ -367,9 +369,9 @@ void DiskStorageManager::loadByteArray(const id_type page, uint32_t& len, byte**
 	uint32_t cTotal = static_cast<uint32_t>(pages.size());
 
 	len = (*it).second->m_length;
-	*data = new byte[len];
+	*data = new uint8_t[len];
 
-	byte* ptr = *data;
+	uint8_t* ptr = *data;
 	uint32_t cLen;
 	uint32_t cRem = len;
 
@@ -389,25 +391,24 @@ void DiskStorageManager::loadByteArray(const id_type page, uint32_t& len, byte**
 		ptr += cLen;
 		cRem -= cLen;
 		++cNext;
-	}
-	while (cNext < cTotal);
+	} while (cNext < cTotal);
 }
 
-void DiskStorageManager::storeByteArray(id_type& page, const uint32_t len, const byte* const data)
+void DiskStorageManager::storeByteArray(id_type& page, const uint32_t len, const uint8_t* const data)
 {
 	if (page == NewPage)
 	{
 		Entry* e = new Entry();
 		e->m_length = len;
 
-		const byte* ptr = data;
+		const uint8_t* ptr = data;
 		id_type cPage;
 		uint32_t cRem = len;
 		uint32_t cLen;
 
 		while (cRem > 0)
 		{
-			if (! m_emptyPages.empty())
+			if (!m_emptyPages.empty())
 			{
 				cPage = *m_emptyPages.begin();
 				m_emptyPages.erase(m_emptyPages.begin());
@@ -453,7 +454,7 @@ void DiskStorageManager::storeByteArray(id_type& page, const uint32_t len, const
 		Entry* e = new Entry();
 		e->m_length = len;
 
-		const byte* ptr = data;
+		const uint8_t* ptr = data;
 		id_type cPage;
 		uint32_t cRem = len;
 		uint32_t cLen, cNext = 0;
@@ -465,7 +466,7 @@ void DiskStorageManager::storeByteArray(id_type& page, const uint32_t len, const
 				cPage = oldEntry->m_pages[cNext];
 				++cNext;
 			}
-			else if (! m_emptyPages.empty())
+			else if (!m_emptyPages.empty())
 			{
 				cPage = *m_emptyPages.begin();
 				m_emptyPages.erase(m_emptyPages.begin());

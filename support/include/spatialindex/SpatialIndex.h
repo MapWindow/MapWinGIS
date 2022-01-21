@@ -53,8 +53,8 @@ namespace SpatialIndex
 	{
 	public:
 		InvalidPageException(id_type id);
-		virtual ~InvalidPageException() {}
-		virtual std::string what();
+		~InvalidPageException() override = default;
+		std::string what() override;
 
 	private:
 		std::string m_error;
@@ -75,7 +75,7 @@ namespace SpatialIndex
 		virtual void getMBR(Region& out) const = 0;
 		virtual double getArea() const = 0;
 		virtual double getMinimumDistance(const IShape& in) const = 0;
-		virtual ~IShape() {}
+		~IShape() override = default;
 	}; // IShape
 
 	class ITimeShape : public Tools::IInterval
@@ -91,7 +91,7 @@ namespace SpatialIndex
 		virtual double getAreaInTime(const Tools::IInterval& ivI) const = 0;
 		virtual double getIntersectingAreaInTime(const ITimeShape& r) const = 0;
 		virtual double getIntersectingAreaInTime(const Tools::IInterval& ivI, const ITimeShape& r) const = 0;
-		virtual ~ITimeShape() {}
+		~ITimeShape() override = default;
 	}; // ITimeShape
 
 	class IEvolvingShape
@@ -99,7 +99,7 @@ namespace SpatialIndex
 	public:
 		virtual void getVMBR(Region& out) const = 0;
 		virtual void getMBRAtTime(double t, Region& out) const = 0;
-		virtual ~IEvolvingShape() {}
+		virtual ~IEvolvingShape() = default;
 	}; // IEvolvingShape
 
 	class IEntry : public Tools::IObject
@@ -107,7 +107,7 @@ namespace SpatialIndex
 	public:
 		virtual id_type getIdentifier() const = 0;
 		virtual void getShape(IShape** out) const = 0;
-		virtual ~IEntry() {}
+		~IEntry() override = default;
 	}; // IEntry
 
 	class INode : public IEntry, public Tools::ISerializable
@@ -115,33 +115,33 @@ namespace SpatialIndex
 	public:
 		virtual uint32_t getChildrenCount() const = 0;
 		virtual id_type getChildIdentifier(uint32_t index) const = 0;
-		virtual void getChildData(uint32_t index, uint32_t& len, byte** data) const = 0;
+		virtual void getChildData(uint32_t index, uint32_t& len, uint8_t** data) const = 0;
 		virtual void getChildShape(uint32_t index, IShape** out) const = 0;
 		virtual uint32_t getLevel() const = 0;
 		virtual bool isIndex() const = 0;
 		virtual bool isLeaf() const = 0;
-		virtual ~INode() {}
+		~INode() override = default;
 	}; // INode
 
 	class IData : public IEntry
 	{
 	public:
-		virtual void getData(uint32_t& len, byte** data) const = 0;
-		virtual ~IData() {}
+		virtual void getData(uint32_t& len, uint8_t** data) const = 0;
+		~IData() override = default;
 	}; // IData
 
 	class IDataStream : public Tools::IObjectStream
 	{
 	public:
-		virtual IData* getNext() = 0;
-		virtual ~IDataStream() {}
+		IData* getNext() override = 0;
+		~IDataStream() override = default;
 	}; // IDataStream
 
 	class ICommand
 	{
 	public:
 		virtual void execute(const INode& in) = 0;
-		virtual ~ICommand() {}
+		virtual ~ICommand() = default;
 	}; // ICommand
 
 	class INearestNeighborComparator
@@ -149,17 +149,17 @@ namespace SpatialIndex
 	public:
 		virtual double getMinimumDistance(const IShape& query, const IShape& entry) = 0;
 		virtual double getMinimumDistance(const IShape& query, const IData& data) = 0;
-		virtual ~INearestNeighborComparator() {}
+		virtual ~INearestNeighborComparator() = default;
 	}; // INearestNeighborComparator
 
 	class IStorageManager
 	{
 	public:
-		virtual void loadByteArray(const id_type id, uint32_t& len, byte** data) = 0;
-		virtual void storeByteArray(id_type& id, const uint32_t len, const byte* const data) = 0;
+		virtual void loadByteArray(const id_type id, uint32_t& len, uint8_t** data) = 0;
+		virtual void storeByteArray(id_type& id, const uint32_t len, const uint8_t* const data) = 0;
 		virtual void deleteByteArray(const id_type id) = 0;
 		virtual void flush() = 0;
-		virtual ~IStorageManager() {}
+		virtual ~IStorageManager() = default;
 	}; // IStorageManager
 
 	class IVisitor
@@ -168,14 +168,14 @@ namespace SpatialIndex
 		virtual void visitNode(const INode& in) = 0;
 		virtual void visitData(const IData& in) = 0;
 		virtual void visitData(std::vector<const IData*>& v) = 0;
-		virtual ~IVisitor() {}
+		virtual ~IVisitor() = default;
 	}; // IVisitor
 
 	class IQueryStrategy
 	{
 	public:
 		virtual void getNextEntry(const IEntry& previouslyFetched, id_type& nextEntryToFetch, bool& bFetchNextEntry) = 0;
-		virtual ~IQueryStrategy() {}
+		virtual ~IQueryStrategy() = default;
 	}; // IQueryStrategy
 
 	class IStatistics
@@ -185,14 +185,15 @@ namespace SpatialIndex
 		virtual uint64_t getWrites() const = 0;
 		virtual uint32_t getNumberOfNodes() const = 0;
 		virtual uint64_t getNumberOfData() const = 0;
-		virtual ~IStatistics() {}
+		virtual ~IStatistics() = default;
 	}; // IStatistics
 
 	class ISpatialIndex
 	{
 	public:
-		virtual void insertData(uint32_t len, const byte* pData, const IShape& shape, id_type shapeIdentifier) = 0;
+		virtual void insertData(uint32_t len, const uint8_t* pData, const IShape& shape, id_type shapeIdentifier) = 0;
 		virtual bool deleteData(const IShape& shape, id_type shapeIdentifier) = 0;
+		virtual void internalNodesQuery(const IShape& query, IVisitor& v) = 0;
 		virtual void containsWhatQuery(const IShape& query, IVisitor& v)  = 0;
 		virtual void intersectsWithQuery(const IShape& query, IVisitor& v) = 0;
 		virtual void pointLocationQuery(const Point& query, IVisitor& v) = 0;
@@ -205,7 +206,7 @@ namespace SpatialIndex
 		virtual bool isIndexValid() = 0;
 		virtual void getStatistics(IStatistics** out) const = 0;
 		virtual void flush() = 0;
-		virtual ~ISpatialIndex() {}
+		virtual ~ISpatialIndex() = default;
 
 	}; // ISpatialIndex
 
@@ -222,25 +223,25 @@ namespace SpatialIndex
 		public:
 			virtual uint64_t getHits() = 0;
 			virtual void clear() = 0;
-			virtual ~IBuffer() {}
+			~IBuffer() override = default;
 		}; // IBuffer
 
-		 IStorageManager* returnMemoryStorageManager(Tools::PropertySet& in);
-		 IStorageManager* createNewMemoryStorageManager();
+		  IStorageManager* returnMemoryStorageManager(Tools::PropertySet& in);
+		  IStorageManager* createNewMemoryStorageManager();
 
-		 IStorageManager* returnDiskStorageManager(Tools::PropertySet& in);
-		 IStorageManager* createNewDiskStorageManager(std::string& baseName, uint32_t pageSize);
-		 IStorageManager* loadDiskStorageManager(std::string& baseName);
+		  IStorageManager* returnDiskStorageManager(Tools::PropertySet& in);
+		  IStorageManager* createNewDiskStorageManager(std::string& baseName, uint32_t pageSize);
+		  IStorageManager* loadDiskStorageManager(std::string& baseName);
 
-		 IBuffer* returnRandomEvictionsBuffer(IStorageManager& ind, Tools::PropertySet& in);
-		 IBuffer* createNewRandomEvictionsBuffer(IStorageManager& in, uint32_t capacity, bool bWriteThrough);
+		  IBuffer* returnRandomEvictionsBuffer(IStorageManager& ind, Tools::PropertySet& in);
+		  IBuffer* createNewRandomEvictionsBuffer(IStorageManager& in, uint32_t capacity, bool bWriteThrough);
 	}
 
 	//
 	// Global functions
 	//
-	 std::ostream& operator<<(std::ostream&, const ISpatialIndex&);
-	 std::ostream& operator<<(std::ostream&, const IStatistics&);
+	  std::ostream& operator<<(std::ostream&, const ISpatialIndex&);
+	  std::ostream& operator<<(std::ostream&, const IStatistics&);
 }
 
 #include "Point.h"

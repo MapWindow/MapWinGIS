@@ -29,6 +29,7 @@
 #pragma once
 
 
+#include "sidx_export.h"
 
 class Index
 {
@@ -49,7 +50,7 @@ public:
     void SetIndexStorage(RTStorageType v);
 
     RTIndexVariant GetIndexVariant();
-    void SetIndexVariant(RTStorageType v);
+    void SetIndexVariant(RTIndexVariant v);
 
     int64_t GetResultSetOffset();
     void SetResultSetOffset(int64_t v);
