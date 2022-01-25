@@ -42,24 +42,24 @@
   typedef unsigned __int16 uint16_t;
   typedef unsigned __int32 uint32_t;
   typedef unsigned __int64 uint64_t;
+#else
+  #include <stdint.h>
 #endif
 
    #include <windows.h>
    #define STRDUP _strdup
-   #include <spatialindex/SpatialIndex.h>
    #include <windows.h>
 
 #else
 
    #include <stdint.h>
    #define SIDX_THREAD  __thread
-   #include <spatialindex/SpatialIndex.h>
    #define STRDUP strdup
 #endif
 
 #include <sys/stat.h>
 
-
+#include "sidx_export.h"
 
 typedef enum
 {

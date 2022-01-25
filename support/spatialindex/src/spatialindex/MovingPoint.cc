@@ -5,7 +5,7 @@
  * Copyright (c) 2002, Marios Hadjieleftheriou
  *
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -34,53 +34,52 @@
 using namespace SpatialIndex;
 
 MovingPoint::MovingPoint()
-{
-}
+= default;
 
-MovingPoint::MovingPoint(	const double* pCoords, 
-							const double* pVCoords, 
-							const IInterval& ti, 
+MovingPoint::MovingPoint(	const double* pCoords,
+							const double* pVCoords,
+							const IInterval& ti,
 							uint32_t dimension)
 {
-	initialize(	pCoords, 
-				pVCoords, 
-				ti.getLowerBound(), 
-				ti.getUpperBound(), 
+	initialize(	pCoords,
+				pVCoords,
+				ti.getLowerBound(),
+				ti.getUpperBound(),
 				dimension);
 }
 
-MovingPoint::MovingPoint(	const double* pCoords, 
-							const double* pVCoords, 
-							double tStart, 
-							double tEnd, 
+MovingPoint::MovingPoint(	const double* pCoords,
+							const double* pVCoords,
+							double tStart,
+							double tEnd,
 							uint32_t dimension)
 {
 	initialize(pCoords, pVCoords, tStart, tEnd, dimension);
 }
 
-MovingPoint::MovingPoint(	const Point& p, 
-							const Point& vp, 
+MovingPoint::MovingPoint(	const Point& p,
+							const Point& vp,
 							const IInterval& ti)
 {
-	if (p.m_dimension != vp.m_dimension) 
+	if (p.m_dimension != vp.m_dimension)
 		throw Tools::IllegalArgumentException("MovingPoint: Points have different number of dimensions.");
 
-	initialize(	p.m_pCoords, 
-				vp.m_pCoords, 
-				ti.getLowerBound(), 
-				ti.getUpperBound(), 
+	initialize(	p.m_pCoords,
+				vp.m_pCoords,
+				ti.getLowerBound(),
+				ti.getUpperBound(),
 				p.m_dimension);
 }
 
 MovingPoint::MovingPoint(const Point& p, const Point& vp, double tStart, double tEnd)
 {
-	if (p.m_dimension != vp.m_dimension) 
+	if (p.m_dimension != vp.m_dimension)
 		throw Tools::IllegalArgumentException("MovingPoint: Points have different number of dimensions.");
 
-	initialize(	p.m_pCoords, 
-				vp.m_pCoords, 
-				tStart, 
-				tEnd, 
+	initialize(	p.m_pCoords,
+				vp.m_pCoords,
+				tStart,
+				tEnd,
 				p.m_dimension);
 }
 
@@ -88,7 +87,7 @@ MovingPoint::MovingPoint(const MovingPoint& p)
 {
 	m_startTime = p.m_startTime;
 	m_endTime = p.m_endTime;
-	m_pCoords = 0;
+	m_pCoords = nullptr;
 
 	m_dimension = p.m_dimension;
 
@@ -119,9 +118,9 @@ void MovingPoint::initialize(
 	m_dimension = dimension;
 	m_startTime = tStart;
 	m_endTime = tEnd;
-	m_pCoords = 0;
+	m_pCoords = nullptr;
 
-	if (m_endTime <= m_startTime) 
+	if (m_endTime <= m_startTime)
 		throw Tools::IllegalArgumentException("MovingPoint: Cannot support degenerate time intervals.");
 
 	try
@@ -170,19 +169,20 @@ bool MovingPoint::operator==(const MovingPoint& p) const
 			m_pCoords[cDim] < p.m_pCoords[cDim] - std::numeric_limits<double>::epsilon() ||
 			m_pCoords[cDim] > p.m_pCoords[cDim] + std::numeric_limits<double>::epsilon() ||
 			m_pVCoords[cDim] < p.m_pVCoords[cDim] - std::numeric_limits<double>::epsilon() ||
-			m_pVCoords[cDim] > p.m_pVCoords[cDim] + std::numeric_limits<double>::epsilon()) 
+			m_pVCoords[cDim] > p.m_pVCoords[cDim] + std::numeric_limits<double>::epsilon())
 			return false;
 	}
 
 	return true;
 }
 
+
 double MovingPoint::getCoord(uint32_t d, double t) const
 {
 	if (d >= m_dimension) throw Tools::IndexOutOfBoundsException(d);
 
 	if (t >= m_endTime) return m_pCoords[d] + m_pVCoords[d] * (m_endTime - m_startTime);
-	else if (t <= m_startTime) return m_pCoords[d] + m_pVCoords[d] * m_startTime;
+	else if (t <= m_startTime) return m_pCoords[d];
 	else return m_pCoords[d] + m_pVCoords[d] * (t - m_startTime);
 }
 
@@ -225,7 +225,7 @@ uint32_t MovingPoint::getByteArraySize()
 	return (sizeof(uint32_t) + 2 * sizeof(double) + 2 * m_dimension * sizeof(double));
 }
 
-void MovingPoint::loadFromByteArray(const byte* ptr)
+void MovingPoint::loadFromByteArray(const uint8_t* ptr)
 {
 	uint32_t dimension;
 	memcpy(&dimension, ptr, sizeof(uint32_t));
@@ -242,11 +242,11 @@ void MovingPoint::loadFromByteArray(const byte* ptr)
 	//ptr += m_dimension * sizeof(double);
 }
 
-void MovingPoint::storeToByteArray(byte** data, uint32_t& len)
+void MovingPoint::storeToByteArray(uint8_t** data, uint32_t& len)
 {
 	len = getByteArraySize();
-	*data = new byte[len];
-	byte* ptr = *data;
+	*data = new uint8_t[len];
+	uint8_t* ptr = *data;
 
 	memcpy(ptr, &m_dimension, sizeof(uint32_t));
 	ptr += sizeof(uint32_t);
@@ -299,7 +299,7 @@ void MovingPoint::makeDimension(uint32_t dimension)
 	{
 		delete[] m_pCoords;
 		delete[] m_pVCoords;
-		m_pCoords = 0; m_pVCoords = 0;
+		m_pCoords = nullptr; m_pVCoords = nullptr;
 
 		m_dimension = dimension;
 		m_pCoords = new double[m_dimension];
