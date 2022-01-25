@@ -132,7 +132,7 @@
     <Link>
       <Version>
       </Version>
-      <RegisterOutput>false</RegisterOutput>
+      <RegisterOutput>true</RegisterOutput>
       <AdditionalOptions>/ignore:4099 /Ignore:4254  %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>cqlib.lib;GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex-mw.lib;geos_c.lib;tiff.lib;ShapeLib.lib;libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
@@ -161,7 +161,7 @@
     <PostBuildEvent>
       <Command>if $(PlatformName) == Win32 setx  MapWinGISBin32 $(OutputPath)
 if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)
-$(TargetDir)regMapWinGIS.cmd</Command>
+REM $(TargetDir)regMapWinGIS.cmd</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Win32 platform definitions -->
