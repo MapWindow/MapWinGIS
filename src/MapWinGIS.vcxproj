@@ -61,13 +61,13 @@
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
     <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
   </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>
     <PreBuildEvent>
-      <Message>Copying executables...</Message>
+      <Message>Copying GDAL files ...</Message>
       <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\bin\$(Platform) $(TargetDir)</Command>
     </PreBuildEvent>
     <CustomBuildStep>
@@ -159,7 +159,8 @@
     </Bscmake>
     <PostBuildEvent>
       <Command>if $(PlatformName) == Win32 setx  MapWinGISBin32 $(OutputPath)
-if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
+if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)
+setx PROJ_LIB $(OutputPath)proj7\share</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Win32 platform definitions -->
