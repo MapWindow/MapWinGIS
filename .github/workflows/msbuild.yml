@@ -1,7 +1,17 @@
 name: MSBuild MapWinGIS+Gdal3
-
-on: [push]
-
+on:
+  push:
+    branches:
+      - feature/GDAL3-VS2019
+    paths-ignore:
+      - '**.md'
+      - '**.yml'
+      - 'docs/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '**.yml'
+      - 'docs/**'
 env:
   # Path to the solution file relative to the root of the project.
   SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs.sln
@@ -41,14 +51,12 @@ jobs:
         # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
         failOnStandardError: true
     
-    # TODO: unzip zips by calling powershell script
+    # Unzip zips by calling powershell script
     - name: Unzip
       working-directory: ./Support/
       shell: pwsh
       run: .\unpackVS2019GISInternals.ps1
-      
-    # TODO: Cache GisInternal zips
-        
+             
     - name: Build SupportLibs
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
@@ -63,3 +71,6 @@ jobs:
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
             
+   # TODO: Create installer using innosetup
+   
+   # TODO: Publish installer to GitHub Releases
