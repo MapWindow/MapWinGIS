@@ -11,7 +11,7 @@
 #include "GlobalClassFactory.h"
 
 #define VERSION_MAJOR 5
-#define VERSION_MINOR 3
+#define VERSION_MINOR 4
 
 extern const GUID CDECL _tlid;
 extern const WORD _wVerMajor;
