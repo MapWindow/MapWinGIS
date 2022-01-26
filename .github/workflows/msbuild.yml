@@ -1,4 +1,4 @@
-name: MSBuild $(date:yyyy.MM.dd)$(rev:.r)-$(Build.SourceBranchName)
+name: MSBuild MapWinGIS+Gdal3
 
 on: [push]
 
@@ -23,8 +23,8 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    # # Download GisInternals zips
-    - name: Azure PowerShell Action
+    # Download GisInternals zips
+    - name: Download GisInternals zips
       uses: Azure/powershell@v1
       with:
         # Specify the Az PowerShell script here.
@@ -33,7 +33,7 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3-libs.zip" -OutFile ".\Support\release-1928-gdal-3-libs.zip"
           Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3.zip" -OutFile ".\Support\release-1928-x64-gdal-3.zip"
           Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3-libs.zip" -OutFile ".\Support\release-1928-x64-gdal-3-libs.zip"
-          ls
+          ls .\Support\
         # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
         azPSVersion: "latest"
         # Select the value of the ErrorActionPreference variable for executing the script. Options: stop, continue, silentlyContinue. Default is Stop.
@@ -42,14 +42,24 @@ jobs:
         failOnStandardError: true
     
     # TODO: unzip zips by calling powershell script
+    - name: Unzip
+      working-directory: ./Support/
+      shell: pwsh
+      run: .\unpackVS2019GISInternals.ps1
+      
     # TODO: Cache GisInternal zips
         
-    - name: Build
+    - name: Build SupportLibs
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: |
-        msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
-        msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
-      
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
+        
+    - name: Build MapWinGIS
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
+            
