@@ -1,13 +1,13 @@
 /**************************************************************************************
  * File name: GeoProjection.h
  *
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  * Description: Declaration of the CGeoProjection
  *
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -18,8 +18,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 14 may 2011 - created the file.
 
@@ -44,7 +44,10 @@ public:
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_projection = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
-		_transformation = NULL;	
+#if GDAL_VERSION_MAJOR >= 3
+		_projection->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+#endif
+		_transformation = NULL;
 		gReferenceCounter.AddRef(tkInterface::idGeoProjection);
 		_isFrozen = false;
 	}
@@ -87,11 +90,11 @@ public:
 	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
-	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
-	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
-	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
-	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
-	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
+	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long* pVal);
+	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR* pVal);
+	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback** pVal);
+	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback* newVal);
+	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR* pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
 	STDMETHOD(ImportFromProj4)(BSTR proj, VARIANT_BOOL* retVal);
 	STDMETHOD(ImportFromESRI)(BSTR proj, VARIANT_BOOL* retVal);
@@ -140,7 +143,7 @@ public:
 private:
 	OGRSpatialReference* _projection;
 	long _lastErrorCode;
-	ICallback * _globalCallback;
+	ICallback* _globalCallback;
 	BSTR _key;
 	bool _isFrozen;
 	OGRCoordinateTransformation* _transformation;
@@ -156,7 +159,7 @@ private:
 public:
 	OGRSpatialReference* get_SpatialReference() { return _projection; }
 	bool get_IsSame(IGeoProjection* proj);
-	void SetIsFrozen(bool frozen) {	_isFrozen = frozen; }
+	void SetIsFrozen(bool frozen) { _isFrozen = frozen; }
 	void InjectSpatialReference(OGRSpatialReference* sr);
 };
 

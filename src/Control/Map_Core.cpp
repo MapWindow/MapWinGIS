@@ -11,7 +11,10 @@
 #include "geo_normalize.h"
 #include "geovalues.h"
 #include "tiffio.h"
+
+#if GDAL_VERSION_MAJOR < 3
 #include "tiffiop.h"
+#endif
 
 // ReSharper disable CppUseAuto
 
@@ -22,7 +25,7 @@
 //ajp (June 2010)
 IPoint* CMapView::GetBaseProjectionPoint(double rotPixX, double rotPixY)
 {
-	IPoint *curPoint = nullptr;
+	IPoint* curPoint = nullptr;
 	long basePixX = 0, basePixY = 0;
 	double baseProjX = 0, baseProjY = 0;
 
@@ -51,7 +54,7 @@ IPoint* CMapView::GetBaseProjectionPoint(double rotPixX, double rotPixY)
 IExtents* CMapView::GetRotatedExtent()
 {
 	Extent rotExtent;
-	IExtents * box = nullptr;
+	IExtents* box = nullptr;
 
 	rotExtent = _extents;
 	ComHelper::CreateExtents(&box);
@@ -86,7 +89,7 @@ float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 		Layer* l = _allLayers[LayerHandle];
 		if (l->IsImage())
 		{
-			IImage * iimg = nullptr;
+			IImage* iimg = nullptr;
 
 			if (!l->QueryImage(&iimg))
 				return 1.0;
@@ -96,11 +99,11 @@ float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 			iimg->Release(); iimg = nullptr;
 			return static_cast<float>(val);
 		}
-		
+
 		ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 		return 0.0f;
 	}
-	
+
 	ErrorMessage(tkINVALID_LAYER_HANDLE);
 	return 0.0f;
 }
@@ -116,10 +119,10 @@ void CMapView::SetImageLayerPercentTransparent(long LayerHandle, float newValue)
 
 	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
-		Layer * l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[LayerHandle];
 		if (l->IsImage())
 		{
-			IImage * iimg = nullptr;
+			IImage* iimg = nullptr;
 
 			//if( iimg == NULL )	return;
 			if (!l->QueryImage(&iimg))
@@ -157,16 +160,16 @@ VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* Col
 				scheme->Release();
 				return VARIANT_TRUE;
 			}
-			
+
 			scheme->Release();
 			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 			return VARIANT_FALSE;
 		}
-		
+
 		ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 		return VARIANT_FALSE;
 	}
-	
+
 	ErrorMessage(tkINVALID_LAYER_HANDLE);
 	return VARIANT_FALSE;
 }
@@ -184,7 +187,7 @@ bool CMapView::LayerIsEmpty(long LayerHandle)
 {
 	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
-		Layer * l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[LayerHandle];
 		if (!l) return true;
 		return l->IsEmpty();
 	}
@@ -198,11 +201,11 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 {
 	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
-		Layer * l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[LayerHandle];
 		if (!l->get_Object()) return FALSE;
 		return l->UpdateExtentsFromDatasource() ? TRUE : FALSE;
 	}
-	
+
 	ErrorMessage(tkINVALID_LAYER_HANDLE);
 	return FALSE;
 }
@@ -254,7 +257,7 @@ void CMapView::Resize(long Width, long Height)
 	CSize size;
 	size.cx = pl.x;
 	size.cy = pl.y;
-	CDC *dc = GetDC();
+	CDC* dc = GetDC();
 	dc->HIMETRICtoDP(&size);
 	ReleaseDC(dc);
 
@@ -402,7 +405,7 @@ inline void CMapView::ErrorMessage(long ErrorCode, tkCallbackVerbosity verbosity
 // *************************************************
 BOOL CMapView::IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b)
 {
-	ProjectionTools * pt = new ProjectionTools();
+	ProjectionTools* pt = new ProjectionTools();
 	bool rt = pt->IsSameProjection(proj4_a, proj4_b);
 	delete pt;
 
@@ -429,7 +432,7 @@ BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
 // Refreshes drawing options for shapes (old implementation), creates
 // or deletes if necessary. If the shape count was changed, the options
 // will be initialize with default values
-void CMapView::AlignShapeLayerAndShapes(Layer * layer)
+void CMapView::AlignShapeLayerAndShapes(Layer* layer)
 {
 	return;
 }
@@ -450,7 +453,7 @@ LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 {
 	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
-		Layer * l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[LayerHandle];
 		if (l->IsShapefile())
 		{
 			return nullptr;	// probably return ShapeDrawingOptions ?
