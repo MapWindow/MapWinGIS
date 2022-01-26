@@ -50,6 +50,7 @@ Function UnpackGisInternalsZips{
     }
 
     Write-Host "Clearing temp folder..."
+    CreateDirIfNeeded("temp")
     Get-ChildItem temp\* -Force | Remove-Item -force -recurse
 
     Write-Host "Unzipping..."
