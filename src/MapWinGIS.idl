@@ -6761,7 +6761,7 @@ library MapWinGIS
     //  Primary dispatch interface for CMap
 
     [uuid(1D077739-E866-46A0-B256-8AECC04F2312),
-        helpstring("Dispatch interface for Map Control"), version(5.4), hidden
+        helpstring("Dispatch interface for MapWinGIS Map Control"), version(5.4), hidden
     ]
     dispinterface _DMap
     {
@@ -7236,7 +7236,7 @@ library MapWinGIS
 
     //  Event dispatch interface for CMap
     [uuid(ABEA1545-08AB-4D5C-A594-D3017211EA95),
-        helpstring("Event interface for Map Control")]
+        helpstring("Event interface for MapWinGIS Map Control")]
     dispinterface _DMapEvents
     {
         properties:
@@ -7345,7 +7345,7 @@ library MapWinGIS
     //  Class information for CMap
 
     [uuid(54F4C2F7-ED40-43B7-9D6F-E45965DF7F95),
-        helpstring("Map Control"), control]
+        helpstring("MapWinGIS Map Control"), control]
     coclass Map
     {
         [default]dispinterface _DMap;

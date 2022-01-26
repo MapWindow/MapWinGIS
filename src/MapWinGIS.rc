@@ -220,7 +220,7 @@ IDI_ICON1               ICON                    "Resource/zoom_in_16_2.ico"
 
 STRINGTABLE
 BEGIN
-    IDS_MAP                 "Map Control"
+    IDS_MAP                 "MapWinGIS Map Control"
     IDS_MAP_PPG             "Map Property Page"
 END
 
