@@ -23,6 +23,10 @@ env:
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_CONFIGURATION: Release
   BUILD_PLATFORM: Win32
+  
+  #TODO: make runtime variable
+  # TODO: Create installer using innosetup   
+  # TODO: Publish installer to GitHub Releases
 
 jobs:
   build:
@@ -77,8 +81,4 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2.1.0
-      - run: dotnet test ${{UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86  #TODO: make runtime variable
-	              
-   # TODO: Create installer using innosetup
-   
-   # TODO: Publish installer to GitHub Releases
+      - run: dotnet test ${{UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86
