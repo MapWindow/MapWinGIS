@@ -30,6 +30,7 @@ env:
 
 jobs:
   build:
+    name: Build MapWinGIS
     runs-on: windows-latest
 
     steps:
@@ -76,5 +77,20 @@ jobs:
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
             
+  tests:
+    name: Unit Testing
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v2.1.0
+      
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.x'
+
     - name: Unit Testing
       run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86
+
+      
+        
