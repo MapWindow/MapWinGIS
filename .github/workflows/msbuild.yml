@@ -77,4 +77,4 @@ jobs:
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
             
     - name: Unit Testing
-      run: dotnet test ${{UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86
