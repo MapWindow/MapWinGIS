@@ -5,7 +5,7 @@ on:
       - feature/GDAL3-VS2019
     paths-ignore:
       - '**.md'
-      - '**.yml'
+      #- '**.yml'
       - 'docs/**'
   pull_request:
     paths-ignore:
