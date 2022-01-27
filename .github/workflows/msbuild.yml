@@ -79,6 +79,7 @@ jobs:
             
   tests:
     name: Unit Testing
+    needs: build
     runs-on: windows-latest
     
     steps:
