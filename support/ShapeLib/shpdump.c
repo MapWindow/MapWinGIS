@@ -1,8 +1,7 @@
 /******************************************************************************
- * $Id: shpdump.c,v 1.19 2016-12-05 12:44:05 erouault Exp $
  *
  * Project:  Shapelib
- * Purpose:  Sample application for dumping contents of a shapefile to 
+ * Purpose:  Sample application for dumping contents of a shapefile to
  *           the terminal in human readable form.
  * Author:   Frank Warmerdam, warmerdam@pobox.com
  *
@@ -14,7 +13,7 @@
  * option is discussed in more detail in shapelib.html.
  *
  * --
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -34,95 +33,34 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: shpdump.c,v $
- * Revision 1.19  2016-12-05 12:44:05  erouault
- * * Major overhaul of Makefile build system to use autoconf/automake.
- *
- * * Warning fixes in contrib/
- *
- * Revision 1.18  2011-07-24 03:05:14  fwarmerdam
- * use %.15g for formatting coordiantes in shpdump
- *
- * Revision 1.17  2010-07-01 07:33:04  fwarmerdam
- * do not crash in shpdump if null object returned
- *
- * Revision 1.16  2010-07-01 07:27:13  fwarmerdam
- * white space formatting adjustments
- *
- * Revision 1.15  2006-01-26 15:07:32  fwarmerdam
- * add bMeasureIsUsed flag from Craig Bruce: Bug 1249
- *
- * Revision 1.14  2005/02/11 17:17:46  fwarmerdam
- * added panPartStart[0] validation
- *
- * Revision 1.13  2004/09/26 20:09:35  fwarmerdam
- * avoid rcsid warnings
- *
- * Revision 1.12  2004/01/27 18:05:35  fwarmerdam
- * Added the -ho (header only) switch.
- *
- * Revision 1.11  2004/01/09 16:39:49  fwarmerdam
- * include standard include files
- *
- * Revision 1.10  2002/04/10 16:59:29  warmerda
- * added -validate switch
- *
- * Revision 1.9  2002/01/15 14:36:07  warmerda
- * updated email address
- *
- * Revision 1.8  2000/07/07 13:39:45  warmerda
- * removed unused variables, and added system include files
- *
- * Revision 1.7  1999/11/05 14:12:04  warmerda
- * updated license terms
- *
- * Revision 1.6  1998/12/03 15:48:48  warmerda
- * Added report of shapefile type, and total number of shapes.
- *
- * Revision 1.5  1998/11/09 20:57:36  warmerda
- * use SHPObject.
- *
- * Revision 1.4  1995/10/21 03:14:49  warmerda
- * Changed to use binary file access.
- *
- * Revision 1.3  1995/08/23  02:25:25  warmerda
- * Added support for bounds.
- *
- * Revision 1.2  1995/08/04  03:18:11  warmerda
- * Added header.
- *
  */
 
-#include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "shapefil.h"
 
-SHP_CVSID("$Id: shpdump.c,v 1.19 2016-12-05 12:44:05 erouault Exp $")
+SHP_CVSID("$Id$")
 
-int main( int argc, char ** argv )
-
-{
-    SHPHandle	hSHP;
-    int		nShapeType, nEntities, i, iPart, bValidate = 0,nInvalidCount=0;
-    int         bHeaderOnly = 0;
-    const char 	*pszPlus;
-    double 	adfMinBound[4], adfMaxBound[4];
-    int nPrecision = 15;
-
+int main( int argc, char ** argv ) {
+    bool bValidate = false;
     if( argc > 1 && strcmp(argv[1],"-validate") == 0 )
     {
-        bValidate = 1;
+        bValidate = true;
         argv++;
         argc--;
     }
 
+    bool bHeaderOnly = false;
     if( argc > 1 && strcmp(argv[1],"-ho") == 0 )
     {
-        bHeaderOnly = 1;
+        bHeaderOnly = true;
         argv++;
         argc--;
     }
 
+    int nPrecision = 15;
     if( argc > 2 && strcmp(argv[1],"-precision") == 0 )
     {
         nPrecision = atoi(argv[2]);
@@ -142,8 +80,7 @@ int main( int argc, char ** argv )
 /* -------------------------------------------------------------------- */
 /*      Open the passed shapefile.                                      */
 /* -------------------------------------------------------------------- */
-    hSHP = SHPOpen( argv[1], "rb" );
-
+    SHPHandle hSHP = SHPOpen( argv[1], "rb" );
     if( hSHP == NULL )
     {
         printf( "Unable to open:%s\n", argv[1] );
@@ -153,31 +90,34 @@ int main( int argc, char ** argv )
 /* -------------------------------------------------------------------- */
 /*      Print out the file bounds.                                      */
 /* -------------------------------------------------------------------- */
+    int nEntities;
+    int nShapeType;
+    double adfMinBound[4];
+    double adfMaxBound[4];
     SHPGetInfo( hSHP, &nEntities, &nShapeType, adfMinBound, adfMaxBound );
 
     printf( "Shapefile Type: %s   # of Shapes: %d\n\n",
             SHPTypeName( nShapeType ), nEntities );
-    
+
     printf( "File Bounds: (%.*g,%.*g,%.*g,%.*g)\n"
             "         to  (%.*g,%.*g,%.*g,%.*g)\n",
-            nPrecision, adfMinBound[0], 
-            nPrecision, adfMinBound[1], 
-            nPrecision, adfMinBound[2], 
-            nPrecision, adfMinBound[3], 
-            nPrecision, adfMaxBound[0], 
-            nPrecision, adfMaxBound[1], 
-            nPrecision, adfMaxBound[2], 
+            nPrecision, adfMinBound[0],
+            nPrecision, adfMinBound[1],
+            nPrecision, adfMinBound[2],
+            nPrecision, adfMinBound[3],
+            nPrecision, adfMaxBound[0],
+            nPrecision, adfMaxBound[1],
+            nPrecision, adfMaxBound[2],
             nPrecision, adfMaxBound[3] );
 
 /* -------------------------------------------------------------------- */
 /*	Skim over the list of shapes, printing all the vertices.	*/
 /* -------------------------------------------------------------------- */
-    for( i = 0; i < nEntities && !bHeaderOnly; i++ )
-    {
-        int		j;
-        SHPObject	*psShape;
+    int	nInvalidCount = 0;
 
-        psShape = SHPReadObject( hSHP, i );
+    for( int i = 0; i < nEntities && !bHeaderOnly; i++ )
+    {
+        SHPObject *psShape = SHPReadObject( hSHP, i );
 
         if( psShape == NULL )
         {
@@ -220,13 +160,14 @@ int main( int argc, char ** argv )
                      psShape->panPartStart[0] );
         }
 
-        for( j = 0, iPart = 1; j < psShape->nVertices; j++ )
+        for( int j = 0, iPart = 1; j < psShape->nVertices; j++ )
         {
             const char	*pszPartType = "";
 
             if( j == 0 && psShape->nParts > 0 )
                 pszPartType = SHPPartTypeName( psShape->panPartType[0] );
-            
+
+            const char *pszPlus;
             if( iPart < psShape->nParts
                 && psShape->panPartStart[iPart] == j )
             {
@@ -265,7 +206,7 @@ int main( int argc, char ** argv )
                 nInvalidCount++;
             }
         }
-        
+
         SHPDestroyObject( psShape );
     }
 

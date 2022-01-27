@@ -8,7 +8,5 @@ includedir=@includedir@
 Name: shapelib
 Description: C API for processing ESRI Shapefiles
 Version: @VERSION@
-Libs.private: @PROJ_LIBS@
-Cflags.private: @PROJ_CFLAGS@
 Libs: -L${libdir} -lshp
 Cflags: -I${includedir}

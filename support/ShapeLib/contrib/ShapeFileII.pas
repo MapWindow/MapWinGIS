@@ -1,6 +1,5 @@
 {
 /******************************************************************************
- * $Id: ShapeFileII.pas,v 1.4 2016-12-05 12:44:07 erouault Exp $
  *
  * Project:  Shapelib
  * Purpose:  Delphi Pascal interface to Shapelib.
@@ -14,7 +13,7 @@
  * option is discussed in more detail in shapelib.html.
  *
  * --
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -33,21 +32,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
- *
- * $Log: ShapeFileII.pas,v $
- * Revision 1.4  2016-12-05 12:44:07  erouault
- * * Major overhaul of Makefile build system to use autoconf/automake.
- *
- * * Warning fixes in contrib/
- *
- * Revision 1.3  2003-05-14 20:04:51  warmerda
- * Changed fpSHP and fpSHX to integer at suggestion of Ivan Lucena.
- *
- * Revision 1.2  2002/01/21 14:09:26  warmerda
- * Fixed name.
- *
- * Revision 1.1  2002/01/17 14:30:37  warmerda
- * New
  *
  */
 }

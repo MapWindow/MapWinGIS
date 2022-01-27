@@ -18,15 +18,9 @@ $top_builddir/dbfadd "$testdir/test" "3"
 $top_builddir/dbfadd "$testdir/test" "4"
 $top_builddir/dbfadd "$testdir/test" "5"
 
-$top_builddir/contrib/shpproj "$testdir/test" "$testdir/test_1" -i=geographic -o="init=nad83:1002 units=us-ft"
-$top_builddir/contrib/shpproj "$testdir/test_1" "$testdir/test_2" -o="proj=utm zone=16 units=m"
-$top_builddir/contrib/shpproj "$testdir/test_2" "$testdir/test_3" -o=geographic
-
 $top_builddir/shpdump -precision 8 "$testdir/test"    > "$testdir/test.out"
-$top_builddir/shpdump -precision 8 "$testdir/test_3"  > "$testdir/test_3.out"
 
-
-result="$(diff "$testdir/test.out" "$testdir/test_3.out")"
+result="$(diff "$testdir/test.out")"
 if [ "$result" == "" ]; then
 	echo "******* Test Succeeded *********"
 	rm -f "$testdir/test*"

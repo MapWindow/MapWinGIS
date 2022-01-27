@@ -1,8 +1,7 @@
 /******************************************************************************
- * $Id: Shape_PointInPoly.cpp,v 1.2 2016-12-05 12:44:07 erouault Exp $
  *
  * Project:  Shapelib
- * Purpose:  Commandline program to generate points-in-polygons from a 
+ * Purpose:  Commandline program to generate points-in-polygons from a
  *           shapefile as a shapefile.
  * Author:   Marko Podgorsek, d-mon@siol.net
  *
@@ -14,7 +13,7 @@
  * option is discussed in more detail in shapelib.html.
  *
  * --
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -34,19 +33,7 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: Shape_PointInPoly.cpp,v $
- * Revision 1.2  2016-12-05 12:44:07  erouault
- * * Major overhaul of Makefile build system to use autoconf/automake.
- *
- * * Warning fixes in contrib/
- *
- * Revision 1.1  2004-01-09 16:47:57  fwarmerdam
- * New
- *
  */
-
-static char rcsid[] = 
-  "$Id: Shape_PointInPoly.cpp,v 1.2 2016-12-05 12:44:07 erouault Exp $";
 
 #include <string.h>
 #include <stdlib.h>
@@ -56,14 +43,14 @@ static char rcsid[] =
 #define MAXINTERSECTIONPOINTS 255
 
 enum loopDir {
-    kExterior,   
+    kExterior,
     kInterior,
     kError
 };
 
 struct DPoint2d
 {
-    DPoint2d() 
+    DPoint2d()
 	{
             x = y = 0.0;
 	};
@@ -77,7 +64,7 @@ struct DPoint2d
 
 struct IntersectPoint
 {
-    IntersectPoint(void) 
+    IntersectPoint(void)
 	{
             x = y = 0.0;
             boundry_nmb = 0;
@@ -240,4 +227,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
