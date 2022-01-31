@@ -96,7 +96,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.x'
-	
+
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1.1
       
@@ -121,4 +121,3 @@ jobs:
 
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      
-        
