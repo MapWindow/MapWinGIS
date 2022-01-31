@@ -69,6 +69,8 @@ jobs:
     name: Build SupportLibs Win32
     runs-on: windows-latest
     steps:
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2    
     - name: Build SupportLibs Win32
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
