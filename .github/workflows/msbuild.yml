@@ -90,16 +90,16 @@ jobs:
     runs-on: windows-2022
     
     steps:
-    - uses: actions/checkout@v2.1.0
+    - uses: actions/checkout@v2
       
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
-	        
     - name: Setup dotnet
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.x'
-        
+	
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.1
+      
     - name: Download MapWinGIS (Win32) binaries
       uses: actions/download-artifact@v2
       with:
