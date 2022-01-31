@@ -63,22 +63,36 @@ jobs:
       shell: pwsh
       run: .\unpackVS2019GISInternals.ps1
              
-    - name: Build SupportLibs
+    # Build support libs
+    - name: Build SupportLibs Win32
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=Release /p:Platform=Win32 ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
-           msbuild /m /p:Configuration=Release /p:Platform=x64 ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
-        
-    - name: Build MapWinGIS
+
+    - name: Build SupportLibs x64
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
+      run: msbuild /m /p:Configuration=Release /p:Platform=x64 ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}   
+    
+    # Build MapWinGIS
+    - name: Build MapWinGIS Win32
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=Win32 ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
-           msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
-            
+           
+    - name: Build MapWinGIS x64
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
+           
   tests:
     name: Unit Testing
     needs: build
