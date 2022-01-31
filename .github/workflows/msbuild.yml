@@ -34,7 +34,8 @@ jobs:
 
     strategy:
       matrix:
-        platform: ['Win32', 'x64']
+        # platform: ['Win32', 'x64']
+        platform: ['Win32']
 
     steps:
     - uses: actions/checkout@v2
@@ -67,36 +68,28 @@ jobs:
       run: .\unpackVS2019GISInternals.ps1
              
     # Build support libs
-    - name: Build SupportLibs Win32
+    - name: Build SupportLibs ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-    #  run: msbuild /m /p:Configuration=Release /p:Platform=Win32 ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
       run: msbuild /m /p:Configuration=Release /p:Platform=${{matrix.platform}} ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
-
-    #- name: Build SupportLibs x64
-    #  working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-    #  run: msbuild /m /p:Configuration=Release /p:Platform=x64 ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}   
-    
+  
     # Build MapWinGIS
-    - name: Build MapWinGIS Win32
+    - name: Build MapWinGIS ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
-           
-    #- name: Build MapWinGIS x64
-    #  working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-    #  run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
-           
+
+    # Save artifacts:
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: binaries
+        path: .\src\bin\Release\${{matrix.platform}}\**\*
+        
    # Unit testing      
    # - name: Setup dotnet
    #   uses: actions/setup-dotnet@v1
