@@ -31,15 +31,13 @@ env:
 jobs:
   build:
     name: Build MapWinGIS
-    runs-on: windows-2022
+    runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
-      with:
-        vs-version: '16.11'
 
     # Download GisInternals zips
     - name: Download GisInternals zips
@@ -96,13 +94,13 @@ jobs:
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
            
    # Unit testing      
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.x'
+   # - name: Setup dotnet
+   #   uses: actions/setup-dotnet@v1
+   #   with:
+   #     dotnet-version: '6.x'
 
-    - name: Unit Testing
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86 --no-self-contained
+   # - name: Unit Testing
+   #   run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86 --no-self-contained
 
       
         
