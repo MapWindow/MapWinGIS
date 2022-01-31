@@ -87,9 +87,35 @@ jobs:
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: binaries
+        name: binaries-${{matrix.platform}}
         path: .\src\bin\Release\${{matrix.platform}}\**\*
         
+  unit-tests:
+    name: Unit Testing
+    needs: build
+    runs-on: windows-2022
+    
+    steps:
+    - uses: actions/checkout@v2.1.0
+      
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+	        
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.x'
+        
+    - name: Download MapWinGIS (Win32) binaries
+      uses: actions/download-artifact@v2
+      with:
+        name: binaries-Win32
+        
+    # TODO: Copy and run regMapWinGIS.cmd
+
+    - name: Unit Testing (Win32)
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86 --no-self-contained
+      
    # Unit testing      
    # - name: Setup dotnet
    #   uses: actions/setup-dotnet@v1
