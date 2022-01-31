@@ -41,6 +41,7 @@ jobs:
   download-gisinternals:
     name: Download and unpack GisInternals files
     runs-on: windows-latest
+    steps:
     - name: Download GisInternals zips
       uses: Azure/powershell@v1
       with:
@@ -67,6 +68,7 @@ jobs:
   build-supportlibs-win32:
     name: Build SupportLibs Win32
     runs-on: windows-latest
+    steps:
     - name: Build SupportLibs Win32
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
@@ -77,7 +79,8 @@ jobs:
   build-win32:
     name: Build MapWinGIS Win32
     needs: [build-supportlibs-win32, download-gisinternals]
-    runs-on: windows-latest        
+    runs-on: windows-latest
+    steps:
     - name: Build MapWinGIS
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
