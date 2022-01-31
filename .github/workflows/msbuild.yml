@@ -104,11 +104,12 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: binaries-Win32
+        path: .\src\bin\Release\Win32\
         
     # TODO: Copy and run regMapWinGIS.cmd
 
     - name: Unit Testing (Win32)
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86 --no-self-contained
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86
       
    # Unit testing      
    # - name: Setup dotnet
