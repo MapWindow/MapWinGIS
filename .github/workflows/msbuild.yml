@@ -91,7 +91,7 @@ jobs:
         dotnet-version: '6.x'
 
     - name: Unit Testing
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86 --no-self-contained
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86 
 
       
         
