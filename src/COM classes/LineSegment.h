@@ -54,7 +54,10 @@ public:
 		_markerInterval = 16;
 		_markerOffset = 0.0f;
 		_markerOrientation = lorParallel;
-		_markerFlipFirst = VARIANT_TRUE;
+		_markerFlipFirst = VARIANT_FALSE;
+		_markerIntervalIsRelative = VARIANT_FALSE; 
+		_markerOffsetIsRelative = VARIANT_FALSE; 
+		_markerAllowOverflow = VARIANT_FALSE; 
 		gReferenceCounter.AddRef(idLineSegment);
 	}
 
