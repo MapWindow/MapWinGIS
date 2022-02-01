@@ -109,7 +109,7 @@ jobs:
         name: binaries-${{matrix.platform}}
         path: .\src\bin\Release\${{matrix.platform}}\
         
-    - name: Register MapWinGIS.ocx
+    - name: Register MapWinGIS.ocx (${{matrix.platform}})
       uses: Azure/powershell@v1
       with:
         # Specify the Az PowerShell script here.
@@ -139,10 +139,10 @@ jobs:
     # Run unit tests
     - name: Unit Testing (${{matrix.platform}})
       if: ${{matrix.platform == 'Win32' }}
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x86
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x86 --environment PlatformTarget=x86
     - name: Unit Testing (${{matrix.platform}})
       if: ${{matrix.platform == 'x64' }}
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x64     
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x64 --environment PlatformTarget=x64
       
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      
