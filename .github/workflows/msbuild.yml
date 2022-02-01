@@ -112,10 +112,10 @@ jobs:
         # Specify the Az PowerShell script here.
         inlineScript: | 
           echo "systemroot"
-          ls [System.Environment]::ExpandEnvironmentVariables("%systemroot%")
+          ls C:\Windows\SysWOW64\
           echo ${{env.GITHUB_WORKSPACE}}
           ls ${{env.GITHUB_WORKSPACE}}
-          $regsvrp = Start-Process [System.Environment]::ExpandEnvironmentVariables("%systemroot%")\SysWoW64\regsvr32.exe -ArgumentList "/s ${{env.GITHUB_WORKSPACE}}\bin\Release\Win32\MapWinGIS.ocx" -PassThru
+          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s ${{env.GITHUB_WORKSPACE}}\bin\Release\Win32\MapWinGIS.ocx" -PassThru
           $regsvrp.WaitForExit(5000) # Wait (up to) 5 seconds
           if($regsvrp.ExitCode -ne 0)
           {
