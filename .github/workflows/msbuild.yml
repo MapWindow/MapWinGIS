@@ -89,6 +89,11 @@ jobs:
     needs: build
     runs-on: windows-2022
     
+    strategy:
+      matrix:
+        # platform: ['Win32', 'x64']
+        platform: ['Win32']
+        
     steps:
     - uses: actions/checkout@v2
       
@@ -100,11 +105,11 @@ jobs:
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1.1
       
-    - name: Download MapWinGIS (Win32) binaries
+    - name: Download MapWinGIS (${{matrix.platform}}) binaries
       uses: actions/download-artifact@v2
       with:
-        name: binaries-Win32
-        path: .\src\bin\Release\Win32\
+        name: binaries-${{matrix.platform}}
+        path: .\src\bin\Release\${{matrix.platform}}\
         
     - name: Register MapWinGIS.ocx
       uses: Azure/powershell@v1
@@ -119,10 +124,11 @@ jobs:
             4 = "FAIL_ENTRY - GetProcAddress failed";
             5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
           }        
-          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s D:\a\MapWinGIS\MapWinGIS\src\bin\Release\Win32\MapWinGIS.ocx" -PassThru
+          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s D:\a\MapWinGIS\MapWinGIS\src\bin\Release\${{matrix.platform}}\MapWinGIS.ocx" -PassThru
           $regsvrp.WaitForExit(5000) # Wait (up to) 5 seconds
           if($regsvrp.ExitCode -ne 0)
           {
+              Write-Host "RegSrv32 for ${{matrix.platform}} failed"
               Write-Error $ExitCodes[$regsvrp.ExitCode]
           }
         # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
@@ -133,17 +139,12 @@ jobs:
         failOnStandardError: true
         
     # Run unit tests
-    - name: Unit Testing (Win32)
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86
+    - name: Unit Testing (${{matrix.platform}})
+      if: ${{matrix.platform == 'Win32' }}
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86 --sc
+    - name: Unit Testing (${{matrix.platform}})
+      if: ${{matrix.platform == 'x64' }}
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x64 --sc      
       
-   # Unit testing      
-   # - name: Setup dotnet
-   #   uses: actions/setup-dotnet@v1
-   #   with:
-   #     dotnet-version: '6.x'
-
-   # - name: Unit Testing
-   #   run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86 --no-self-contained
-
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      
