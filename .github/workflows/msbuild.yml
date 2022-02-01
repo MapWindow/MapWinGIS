@@ -106,6 +106,26 @@ jobs:
         name: binaries-Win32
         path: .\src\bin\Release\Win32\
         
+    - name: Register MapWinGIS.ocx
+      uses: Azure/powershell@v1
+      with:
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        # Specify the Az PowerShell script here.
+        inlineScript: | 
+          ls -s
+          $regsvrp = Start-Process %systemroot%\SysWoW64\regsvr32.exe -ArgumentList "/s ${{env.GITHUB_WORKSPACE}}\bin\Release\Win32\MapWinGIS.ocx" -PassThru
+          $regsvrp.WaitForExit(5000) # Wait (up to) 5 seconds
+          if($regsvrp.ExitCode -ne 0)
+          {
+              Write-Warning "regsvr32 exited with error $($regsvrp.ExitCode)"
+          }
+        # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
+        azPSVersion: "latest"
+        # Select the value of the ErrorActionPreference variable for executing the script. Options: stop, continue, silentlyContinue. Default is Stop.
+        errorActionPreference: Stop
+        # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
+        failOnStandardError: true
+        
     # TODO: Copy and run regMapWinGIS.cmd
 
     - name: Unit Testing (Win32)
