@@ -141,10 +141,10 @@ jobs:
     # Run unit tests
     - name: Unit Testing (${{matrix.platform}})
       if: ${{matrix.platform == 'Win32' }}
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86 --sc
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x86
     - name: Unit Testing (${{matrix.platform}})
       if: ${{matrix.platform == 'x64' }}
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x64 --sc      
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime x64     
       
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      
