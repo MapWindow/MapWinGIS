@@ -103,6 +103,9 @@ jobs:
 
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1.1
+
+    - name: Setup VSTest.console.exe
+      uses: darenm/Setup-VSTest@v1      
       
     - name: Download MapWinGIS (${{matrix.platform}}) binaries
       uses: actions/download-artifact@v2
@@ -156,12 +159,10 @@ jobs:
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}
         
-    - name: Setup VSTest.console.exe
-      uses: darenm/Setup-VSTest@v1
 
     - name: VSTest
       run: vstest.console.exe /Platform:x64 .\unittest-net6\bin\x64\${{env.BUILD_CONFIGURATION}}\unittest-net6.dll
-	          
+
     # Run unit tests
     #- name: Unit Testing (${{matrix.platform}})
     #  if: ${{matrix.platform == 'Win32' }}
