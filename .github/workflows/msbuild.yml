@@ -140,18 +140,6 @@ jobs:
         # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
         failOnStandardError: true
         
-    - name: Call aximp (${{matrix.platform}})
-      uses: Azure/powershell@v1
-      with:
-        # Specify the Az PowerShell script here.
-        inlineScript: aximp D:\a\MapWinGIS\MapWinGIS\src\bin\Release\${{matrix.platform}}\MapWinGIS.ocx
-        # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
-        azPSVersion: "latest"
-        # Select the value of the ErrorActionPreference variable for executing the script. Options: stop, continue, silentlyContinue. Default is Stop.
-        errorActionPreference: Stop
-        # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
-        failOnStandardError: true    
-        
     - name: Build test solution ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
