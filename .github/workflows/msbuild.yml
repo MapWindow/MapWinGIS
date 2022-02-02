@@ -137,7 +137,7 @@ jobs:
         # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
         failOnStandardError: true
         
-	- name: Call aximp (${{matrix.platform}})
+    - name: Call aximp (${{matrix.platform}})
       uses: Azure/powershell@v1
       with:
         # Specify the Az PowerShell script here.
@@ -156,11 +156,9 @@ jobs:
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}
         
-	- name: Setup VSTest.console.exe
-	  # You may pin to the exact commit or the version.
-	  # uses: darenm/Setup-VSTest@fbb574e849d6225ce9702f86e64eb6cdc4b4e561
-	  uses: darenm/Setup-VSTest@v1
-	          
+    - name: Setup VSTest.console.exe
+      uses: darenm/Setup-VSTest@v1
+
     - name: VSTest
       run: vstest.console.exe /Platform:x64 .\unittest-net6\bin\x64\${{env.BUILD_CONFIGURATION}}\unittest-net6.dll
 	          
