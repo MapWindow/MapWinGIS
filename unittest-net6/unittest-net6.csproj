@@ -14,8 +14,6 @@
 
 		<ImplicitUsings>enable</ImplicitUsings>
 
-		<SelfContained>true</SelfContained>
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -32,13 +30,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="AxInterop.MapWinGIS">
-			<HintPath>..\src\bin\Win32\16.0\AxInterop.MapWinGIS.dll</HintPath>
-			<CopyLocal>False</CopyLocal>
-		</Reference>
-		<Reference Include="Interop.MapWinGIS">
-			<HintPath>..\src\bin\Win32\16.0\Interop.MapWinGIS.dll</HintPath>
-		</Reference>
+	  <Reference Include="AxMapWinGIS">
+	    <HintPath>AxMapWinGIS.dll</HintPath>
+	  </Reference>
+	  <Reference Include="MapWinGIS">
+	    <HintPath>MapWinGIS.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>
