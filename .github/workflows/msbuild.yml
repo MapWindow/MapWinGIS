@@ -149,7 +149,7 @@ jobs:
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}        
 
     - name: VSTest
-      run: vstest.console.exe /Platform:x64 .\unittest-net6\bin\x64\${{env.BUILD_CONFIGURATION}}\unittest-net6.dll
+      run: vstest.console.exe /Platform:x64 .\unittest-net6\bin\${{matrix.platform}}\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
 
     # Run unit tests
     #- name: Unit Testing (${{matrix.platform}})
