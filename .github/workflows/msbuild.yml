@@ -131,7 +131,7 @@ jobs:
           if($regsvrp.ExitCode -ne 0)
           {
               Write-Host "RegSrv32 for ${{matrix.platform}} failed"
-              Write-Error $regsvrp.ExitCode              
+              Write-Host $regsvrp.ExitCode              
               Write-Error $ExitCodes[$regsvrp.ExitCode]
           }
         # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
