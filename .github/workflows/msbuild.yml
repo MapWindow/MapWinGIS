@@ -140,7 +140,10 @@ jobs:
         
     # Build test solution
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1      
+      uses: microsoft/setup-msbuild@v1.1    
+      with:
+        msbuild-architecture: x64
+        
     - name: Build test solution ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
