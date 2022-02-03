@@ -28,7 +28,8 @@ jobs:
 
     strategy:
       matrix:
-        platform: ['Win32', 'x64']
+        # platform: ['Win32', 'x64']
+        platform: ['Win32']
 
     steps:
     - uses: actions/checkout@v2
@@ -137,13 +138,24 @@ jobs:
         # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
         failOnStandardError: true
         
+    # Build test solution
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.1
+      
+    - name: Build test solution ${{matrix.platform}}
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}      
+      
     # Run unit tests
-    - name: Unit Testing (${{matrix.platform}})
-      if: ${{matrix.platform == 'Win32' }}
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x86 --environment PlatformTarget=x86
-    - name: Unit Testing (${{matrix.platform}})
-      if: ${{matrix.platform == 'x64' }}
-      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x64 --environment PlatformTarget=x64
+    #- name: Unit Testing (${{matrix.platform}})
+    #  if: ${{matrix.platform == 'Win32' }}
+    #  run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x86 --environment PlatformTarget=x86
+    #- name: Unit Testing (${{matrix.platform}})
+    #  if: ${{matrix.platform == 'x64' }}
+    #  run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x64 --environment PlatformTarget=x64
       
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      
