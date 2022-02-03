@@ -61,7 +61,7 @@ STDMETHODIMP CGeoProjection::get_GlobalCallback(ICallback** pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 		* pVal = _globalCallback;
-	if (_globalCallback != NULL)
+	if (_globalCallback != nullptr)
 		_globalCallback->AddRef();
 	return S_OK;
 }
@@ -130,6 +130,12 @@ void CGeoProjection::ReportOgrError(long ErrorCode, tkCallbackVerbosity verbosit
 	case OGRERR_INVALID_HANDLE:
 		code = tkOGR_INVALID_HANDLE;
 		break;
+	case OGRERR_NOT_ENOUGH_DATA:
+		code = tkOGR_NOT_ENOUGH_DATA;
+		break;
+	case OGRERR_NON_EXISTING_FEATURE:
+		code = tkOGR_NON_EXISTING_FEATURE;
+		break;
 	}
 
 	if (code != tkNO_ERROR)
@@ -182,8 +188,8 @@ STDMETHODIMP CGeoProjection::ExportToProj4(BSTR* retVal)
 		return S_OK;
 	}
 
-	char* proj = NULL;
-	OGRErr err = _projection->exportToProj4(&proj);
+	char* proj = nullptr;
+	const OGRErr err = _projection->exportToProj4(&proj);
 
 	if (err == OGRERR_NONE)
 	{
@@ -214,14 +220,14 @@ STDMETHODIMP CGeoProjection::ImportFromProj4(BSTR proj, VARIANT_BOOL* retVal)
 	}
 
 	USES_CONVERSION;
-	CString str = OLE2CA(proj);
+	const CString str = OLE2CA(proj);
 	if (str.GetLength() == 0)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
 
-	OGRErr err = _projection->importFromProj4(str);
+	const OGRErr err = _projection->importFromProj4(str);
 
 	*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 	if (err != OGRERR_NONE)
@@ -255,18 +261,33 @@ STDMETHODIMP CGeoProjection::Clear(VARIANT_BOOL* retVal)
 // *******************************************************
 //		Clone()
 // *******************************************************
+//STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
+//{
+//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+//	*retVal = nullptr;
+//	ComHelper::CreateInstance(idGeoProjection, reinterpret_cast<IDispatch**>(retVal));
+//	VARIANT_BOOL vb;
+//	(*retVal)->CopyFrom(this, &vb);
+//	if (!vb)
+//	{
+//		(*retVal)->Release();
+//		(*retVal) = nullptr;
+//	}
+//	return S_OK;
+//}
+
+// *******************************************************
+//		Clone()
+//   GDAL3+ implementation
+// *******************************************************
 STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = NULL;
-	ComHelper::CreateInstance(tkInterface::idGeoProjection, (IDispatch**)retVal);
-	VARIANT_BOOL vb;
-	(*retVal)->CopyFrom(this, &vb);
-	if (!vb)
-	{
-		(*retVal)->Release();
-		(*retVal) = NULL;
-	}
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	IGeoProjection* gp = nullptr;
+	ComHelper::CreateInstance(idGeoProjection, reinterpret_cast<IDispatch**>(&gp));
+	*retVal = gp;
+
+	static_cast<CGeoProjection*>(gp)->InjectSpatialReference(_projection);
 	return S_OK;
 }
 
@@ -285,7 +306,7 @@ STDMETHODIMP CGeoProjection::ImportFromESRI(BSTR proj, VARIANT_BOOL* retVal)
 	{
 		USES_CONVERSION;
 
-		OGRErr err = ProjectionHelper::ImportFromEsri(_projection, OLE2A(proj));
+		const OGRErr err = ProjectionHelper::ImportFromEsri(_projection, OLE2A(proj));
 
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
@@ -307,19 +328,21 @@ STDMETHODIMP CGeoProjection::ImportFromEPSG(LONG projCode, VARIANT_BOOL* retVal)
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
 		*retVal = VARIANT_FALSE;
 	}
-	else if (projCode == 3857)
-	{
-		SetGoogleMercator(retVal);
-		return S_OK;
-	}
-	else if (projCode == 4326)
-	{
-		SetWgs84(retVal);
-		return S_OK;
-	}
+	// Start pm feb-2022, Is this still needed?
+	//else if (projCode == 3857)
+	//{
+	//	SetGoogleMercator(retVal);
+	//	return S_OK;
+	//}
+	//else if (projCode == 4326)
+	//{
+	//	SetWgs84(retVal);
+	//	return S_OK;
+	//}
+	// End pm feb-2022, Is this still needed?
 	else
 	{
-		OGRErr err = _projection->importFromEPSG(projCode);
+		const OGRErr err = _projection->importFromEPSG(projCode);
 
 		*retVal = (err == OGRERR_NONE) ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
@@ -344,7 +367,7 @@ STDMETHODIMP CGeoProjection::ExportToWKT(BSTR* retVal)
 	}
 
 	CString proj;
-	OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
+	const OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
 
 	if (err == OGRERR_NONE)
 	{
@@ -404,8 +427,8 @@ STDMETHODIMP CGeoProjection::ImportFromWKT(BSTR proj, VARIANT_BOOL* retVal)
 	{
 		USES_CONVERSION;
 
-		CString s = OLE2A(proj);
-		OGRErr err = ProjectionHelper::ImportFromWkt(_projection, s);
+		const CString s = OLE2A(proj);
+		const OGRErr err = ProjectionHelper::ImportFromWkt(_projection, s);
 
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
@@ -431,10 +454,10 @@ STDMETHODIMP CGeoProjection::ImportFromAutoDetect(BSTR proj, VARIANT_BOOL* retVa
 	else
 	{
 		USES_CONVERSION;
-		CString s = OLE2A(proj);
+		const CString s = OLE2A(proj);
 		*retVal = VARIANT_FALSE;
 
-		OGRErr err = _projection->SetFromUserInput(s);
+		const OGRErr err = _projection->SetFromUserInput(s);
 
 		if (err == OGRERR_NONE)
 		{
@@ -453,7 +476,7 @@ STDMETHODIMP CGeoProjection::ImportFromAutoDetect(BSTR proj, VARIANT_BOOL* retVa
 STDMETHODIMP CGeoProjection::SetWellKnownGeogCS(tkCoordinateSystem newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_projection->importFromEPSG((int)newVal);
+	_projection->importFromEPSG(newVal);
 	return S_OK;
 }
 #pragma endregion
@@ -464,8 +487,8 @@ STDMETHODIMP CGeoProjection::SetWellKnownGeogCS(tkCoordinateSystem newVal)
 // *******************************************************
 STDMETHODIMP CGeoProjection::get_IsGeographic(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _projection->IsGeographic() == 0 ? VARIANT_FALSE : VARIANT_TRUE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		* pVal = _projection->IsGeographic() == 0 ? VARIANT_FALSE : VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -474,8 +497,8 @@ STDMETHODIMP CGeoProjection::get_IsGeographic(VARIANT_BOOL* pVal)
 // *******************************************************
 STDMETHODIMP CGeoProjection::get_IsProjected(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _projection->IsProjected() == 0 ? VARIANT_FALSE : VARIANT_TRUE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		* pVal = _projection->IsProjected() == 0 ? VARIANT_FALSE : VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -484,8 +507,8 @@ STDMETHODIMP CGeoProjection::get_IsProjected(VARIANT_BOOL* pVal)
 // *******************************************************
 STDMETHODIMP CGeoProjection::get_IsLocal(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _projection->IsLocal() == 0 ? VARIANT_FALSE : VARIANT_TRUE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		* pVal = _projection->IsLocal() == 0 ? VARIANT_FALSE : VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -494,8 +517,8 @@ STDMETHODIMP CGeoProjection::get_IsLocal(VARIANT_BOOL* pVal)
 // *******************************************************
 STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		* pVal = VARIANT_FALSE;
 
 	if (!proj)
 	{
@@ -510,17 +533,18 @@ STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal
 			return S_OK;
 		}
 
-		OGRSpatialReference* ref = ((CGeoProjection*)proj)->get_SpatialReference();
-		OGRSpatialReference ref1, ref2;
+		const OGRSpatialReference* ref = static_cast<CGeoProjection*>(proj)->get_SpatialReference();
+		OGRSpatialReference ref2;
 
-		char* s1 = NULL;
+		char* s1 = nullptr;
 		OGRErr err = ref->exportToProj4(&s1);
 
 		if (err == OGRERR_NONE) {
+			OGRSpatialReference ref1;
 			err = ref1.importFromProj4(s1);
 
 			if (err == OGRERR_NONE) {
-				char* s2 = NULL;
+				char* s2 = nullptr;
 				err = _projection->exportToProj4(&s2);
 
 				if (err == OGRERR_NONE) {
@@ -555,14 +579,14 @@ bool CGeoProjection::IsSameProjection(OGRCoordinateTransformation* transf, doubl
 
 	BOOL res = transf->Transform(1, &xNew, &yNew);
 	{
-		int tolerance = projected == true ? 3 : 7;
+		const int tolerance = projected == true ? 3 : 7;
 
 		// probably it will be needed to think more over the comparison, 
 		// let's try an existing function so far
-		double x1 = Utility::FloatRound(xNew, tolerance);
-		double x2 = Utility::FloatRound(x, tolerance);
-		double y1 = Utility::FloatRound(yNew, tolerance);
-		double y2 = Utility::FloatRound(y, tolerance);
+		const double x1 = Utility::FloatRound(xNew, tolerance);
+		const double x2 = Utility::FloatRound(x, tolerance);
+		const double y1 = Utility::FloatRound(yNew, tolerance);
+		const double y2 = Utility::FloatRound(y, tolerance);
 
 		if (x1 == x2 || y1 == y2)
 		{
@@ -604,8 +628,8 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	bounds->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 
-	OGRSpatialReference* projSource = _projection;
-	OGRSpatialReference* projTarget = ((CGeoProjection*)proj)->get_SpatialReference();
+	const OGRSpatialReference* projSource = _projection;
+	const OGRSpatialReference* projTarget = static_cast<CGeoProjection*>(proj)->get_SpatialReference();
 
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation(projSource, projTarget);
 	if (!transf)
@@ -614,7 +638,7 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 		return S_OK;
 	}
 
-	bool projected = projSource->IsProjected() != 0;
+	const bool projected = projSource->IsProjected() != 0;
 
 	*pVal = VARIANT_TRUE;
 	double* xs = new double[4];
@@ -652,8 +676,8 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 
 	if (*pVal != VARIANT_FALSE && numSamplingPoints > 0)
 	{
-		double dx = xMax - xMin;
-		double dy = yMax - yMin;
+		//double dx = xMax - xMin;
+		//double dy = yMax - yMin;
 
 		for (int i = 0; i < numSamplingPoints; i++)
 		{
@@ -684,7 +708,7 @@ STDMETHODIMP CGeoProjection::get_IsSameGeogCS(IGeoProjection* proj, VARIANT_BOOL
 	}
 	else
 	{
-		OGRSpatialReference* ref = ((CGeoProjection*)proj)->get_SpatialReference();
+		const OGRSpatialReference* ref = static_cast<CGeoProjection*>(proj)->get_SpatialReference();
 		*pVal = (_projection->IsSameGeogCS(ref) == 0) ? VARIANT_FALSE : VARIANT_TRUE;
 	}
 	return S_OK;
@@ -766,13 +790,13 @@ STDMETHODIMP CGeoProjection::get_ProjectionParam(tkProjectionParameter name, dou
 		break;
 	}
 
-	if (s = "")
+	if (s == "")
 	{
 		return S_OK;
 	}
 
 	OGRErr err = OGRERR_NONE;
-	double res = _projection->GetProjParm(s, *value, &err);
+	const double res = _projection->GetProjParm(s, *value, &err);
 	if (err == OGRERR_NONE)
 	{
 		*value = res;
@@ -839,7 +863,7 @@ STDMETHODIMP CGeoProjection::CopyFrom(IGeoProjection* sourceProj, VARIANT_BOOL* 
 	USES_CONVERSION;
 	char* prj = OLE2A(bstr);
 
-	OGRErr err = _projection->importFromWkt(&prj);
+	const OGRErr err = _projection->importFromWkt(&prj);
 	if (err != OGRERR_NONE)
 	{
 		CallbackHelper::ErrorMsg("Failed to copy projection");
@@ -858,7 +882,7 @@ STDMETHODIMP CGeoProjection::ReadFromFile(BSTR filename, VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	USES_CONVERSION;
-	CStringW filenameW = OLE2W(filename);
+	const CStringW filenameW = OLE2W(filename);
 
 	*retVal = ReadFromFileCore(filenameW, false) ? VARIANT_TRUE : VARIANT_FALSE;
 
@@ -873,7 +897,7 @@ STDMETHODIMP CGeoProjection::ReadFromFileEx(BSTR filename, VARIANT_BOOL esri, VA
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	USES_CONVERSION;
-	CStringW filenameW = OLE2W(filename);
+	const CStringW filenameW = OLE2W(filename);
 
 	*retVal = ReadFromFileCore(filenameW, esri ? true : false) ? VARIANT_TRUE : VARIANT_FALSE;
 
@@ -902,7 +926,7 @@ bool CGeoProjection::ReadFromFileCore(CStringW filename, bool esri)
 	// to keep safe the initial pointer to array
 	char* pszWKT = CPLStrdup(papszPrj[0]);
 
-	OGRErr err = esri ? _projection->importFromESRI(papszPrj) : _projection->SetFromUserInput(pszWKT);
+	const OGRErr err = esri ? _projection->importFromESRI(papszPrj) : _projection->SetFromUserInput(pszWKT);
 
 	CSLDestroy(papszPrj);
 	CPLFree(pszWKT);
@@ -924,7 +948,7 @@ STDMETHODIMP CGeoProjection::WriteToFile(BSTR filename, VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	USES_CONVERSION;
-	CStringW filenameW = OLE2W(filename);
+	const CStringW filenameW = OLE2W(filename);
 
 	*retVal = WriteToFileCore(filenameW, false) ? VARIANT_TRUE : VARIANT_FALSE;
 
@@ -939,7 +963,7 @@ STDMETHODIMP CGeoProjection::WriteToFileEx(BSTR filename, VARIANT_BOOL esri, VAR
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	USES_CONVERSION;
-	CStringW filenameW = OLE2W(filename);
+	const CStringW filenameW = OLE2W(filename);
 
 	*retVal = WriteToFileCore(filenameW, esri ? true : false) ? VARIANT_TRUE : VARIANT_FALSE;
 
@@ -967,7 +991,12 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 		proj = OLE2A(bstr);
 	}
 	else {
-		OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
+		const OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
+		if (err != OGRERR_NONE)
+		{
+			ReportOgrError(err);
+			return false;
+		}
 	}
 
 	if (proj.GetLength() != 0)
@@ -976,7 +1005,7 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 	}
 
 	fclose(prjFile);
-	prjFile = NULL;
+	prjFile = nullptr;
 
 	return true;
 }
@@ -1120,7 +1149,7 @@ STDMETHODIMP CGeoProjection::SetNad83Projection(tkNad83Projection projection)
 STDMETHODIMP CGeoProjection::get_HasTransformation(VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retval = (_transformation != NULL) ? VARIANT_TRUE : VARIANT_FALSE;
+	*retval = (_transformation != nullptr) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -1196,7 +1225,7 @@ STDMETHODIMP CGeoProjection::StopTransform()
 	if (_transformation)
 	{
 		OGRCoordinateTransformation::DestroyCT(_transformation);
-		_transformation = NULL;
+		_transformation = nullptr;
 	}
 	return S_OK;
 }
@@ -1303,7 +1332,7 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 	else
 	{
 		const char* pszAuthName = _projection->GetAuthorityName("PROJCS");
-		if (pszAuthName != NULL && !_strnicmp(pszAuthName, "epsg", 4))
+		if (pszAuthName != nullptr && !_strnicmp(pszAuthName, "epsg", 4))
 			*epsgCode = atoi(_projection->GetAuthorityCode("PROJCS"));
 	}
 	*retVal = *epsgCode != -1 ? VARIANT_TRUE : VARIANT_FALSE;
@@ -1361,7 +1390,7 @@ STDMETHODIMP CGeoProjection::get_LinearUnits(tkUnitsOfMeasure* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	char* s = NULL;
+	char* s = nullptr;
 	double ratio = _projection->GetLinearUnits(&s);	  // don't free the memory, the string was already allocated
 
 	CString units = s;
