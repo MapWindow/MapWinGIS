@@ -103,9 +103,6 @@ jobs:
 
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1.1
-
-    - name: Setup VSTest.console.exe
-      uses: darenm/Setup-VSTest@v1      
       
     - name: Download MapWinGIS (${{matrix.platform}}) binaries
       uses: actions/download-artifact@v2
@@ -131,7 +128,6 @@ jobs:
           if($regsvrp.ExitCode -ne 0)
           {
               Write-Host "RegSrv32 for ${{matrix.platform}} failed"
-              Write-Host $regsvrp.ExitCode              
               Write-Error $ExitCodes[$regsvrp.ExitCode]
           }
         # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
@@ -141,23 +137,13 @@ jobs:
         # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
         failOnStandardError: true
         
-    - name: Build test solution ${{matrix.platform}}
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}        
-
-    - name: VSTest
-      run: vstest.console.exe /Platform:x64 .\unittest-net6\bin\${{matrix.platform}}\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
-
     # Run unit tests
-    #- name: Unit Testing (${{matrix.platform}})
-    #  if: ${{matrix.platform == 'Win32' }}
-    #  run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x86 --environment PlatformTarget=x86
-    #- name: Unit Testing (${{matrix.platform}})
-    #  if: ${{matrix.platform == 'x64' }}
-    #  run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x64 --environment PlatformTarget=x64
+    - name: Unit Testing (${{matrix.platform}})
+      if: ${{matrix.platform == 'Win32' }}
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x86 --environment PlatformTarget=x86
+    - name: Unit Testing (${{matrix.platform}})
+      if: ${{matrix.platform == 'x64' }}
+      run: dotnet test ${{env.UNITTESTS_SOLUTION_FILE_PATH}} --runtime win-x64 --environment PlatformTarget=x64
       
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      
