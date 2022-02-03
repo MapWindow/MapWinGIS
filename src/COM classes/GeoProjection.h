@@ -103,6 +103,7 @@ public:
 	STDMETHOD(ImportFromAutoDetect)(BSTR proj, VARIANT_BOOL* retVal);
 	STDMETHOD(ExportToProj4)(BSTR* retVal);
 	STDMETHOD(ExportToWKT)(BSTR* retVal);
+	STDMETHOD(ExportToWktEx)(BSTR* retVal);
 	STDMETHOD(SetWellKnownGeogCS)(tkCoordinateSystem newVal);
 	STDMETHOD(get_IsGeographic)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_IsProjected)(VARIANT_BOOL* pVal);

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include <StdAfx.h>
 #include "ProjectionHelper.h"
 
 // ***************************************************************
@@ -42,7 +42,7 @@ CString ProjectionHelper::ToString(IGeoProjection* gp)
 	if (!gp) return "";
 
 	CComBSTR str;
-	if (!ProjectionHelper::IsEmpty(gp)) {
+	if (!IsEmpty(gp)) {
 		gp->ExportToProj4(&str);
 	}
 	else {
@@ -93,6 +93,7 @@ OGRErr ProjectionHelper::ImportFromWkt(OGRSpatialReference* sr, CString proj)
 
 	char* s = proj.GetBuffer();
 
+	// TODO: Update:
 	return sr->importFromWkt(&s);
 }
 
@@ -106,7 +107,30 @@ OGRErr ProjectionHelper::ExportToWkt(OGRSpatialReference* sr, CString& proj)
 	}
 
 	char* s = NULL;
-	OGRErr err = sr->exportToWkt(&s);
+	const OGRErr err = sr->exportToWkt(&s);
+
+	proj = s;
+	
+	if (s) {
+		CPLFree(s);
+	}
+
+	return err;
+}
+
+// ***************************************************************
+//		ExportFromWktEx()
+//  Starting with GDAL 3.0, the OGRSpatialReference::exportToWkt() method accepts options
+// ***************************************************************
+OGRErr ProjectionHelper::ExportToWktEx(OGRSpatialReference* sr, CString& proj)
+{
+	if (!sr) {
+		return false;
+	}
+
+	char* s = nullptr;
+	const char* apszOptions[] = { "FORMAT=WKT2_2019", "MULTILINE=YES", nullptr };
+	const OGRErr err = sr->exportToWkt(&s, apszOptions);
 
 	proj = s;
 	

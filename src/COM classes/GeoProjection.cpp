@@ -23,6 +23,7 @@
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 14 may 2011 - created the file.
 
+// ReSharper disable CppTooWideScopeInitStatement
 #include "StdAfx.h"
 #include "GeoProjection.h"
 #include "ProjectionHelper.h"
@@ -344,6 +345,36 @@ STDMETHODIMP CGeoProjection::ExportToWKT(BSTR* retVal)
 
 	CString proj;
 	OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
+
+	if (err == OGRERR_NONE)
+	{
+		*retVal = A2BSTR(proj);
+	}
+	else
+	{
+		ReportOgrError(err);
+		*retVal = m_globalSettings.CreateEmptyBSTR();
+	}
+
+	return S_OK;
+}
+
+// *******************************************************
+//		ExportToWktEx()
+// Starting with GDAL 3.0, the OGRSpatialReference::exportToWkt() method accepts options
+// *******************************************************
+STDMETHODIMP CGeoProjection::ExportToWktEx(BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
+	if (!node) {
+		*retVal = A2BSTR("");
+		return S_OK;
+	}
+
+	CString proj;
+	const OGRErr err = ProjectionHelper::ExportToWktEx(_projection, proj);
 
 	if (err == OGRERR_NONE)
 	{
