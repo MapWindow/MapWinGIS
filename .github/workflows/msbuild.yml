@@ -156,10 +156,10 @@ jobs:
       uses: darenm/Setup-VSTest@v1  
     - name: Unit Testing x86
       if: ${{matrix.platform == 'Win32' }}
-      run: vstest.console.exe /Platform:x86 .\unittest-net6\bin\x86\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
+      run: vstest.console.exe /Platform:x86 -e:PROJ_LIB="D:\a\MapWinGIS\MapWinGIS\src\bin\Release\${{matrix.platform}}\proj7\share\" .\unittest-net6\bin\x86\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
     - name: Unit Testing x64
       if: ${{matrix.platform == 'x64' }}
-      run: vstest.console.exe /Platform:x64 .\unittest-net6\bin\x64\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
+      run: vstest.console.exe /Platform:x64 -e:PROJ_LIB="D:\a\MapWinGIS\MapWinGIS\src\bin\Release\${{matrix.platform}}\proj7\share\" .\unittest-net6\bin\x64\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
 
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      
