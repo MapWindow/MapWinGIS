@@ -449,7 +449,7 @@ STDMETHODIMP CGeoProjection::ImportFromWKT(BSTR proj, VARIANT_BOOL* retVal)
 // *******************************************************
 STDMETHODIMP CGeoProjection::ImportFromAutoDetect(BSTR proj, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_isFrozen)
 	{
@@ -478,10 +478,10 @@ STDMETHODIMP CGeoProjection::ImportFromAutoDetect(BSTR proj, VARIANT_BOOL* retVa
 // *******************************************************
 //		SetWellKnownGeogCS()
 // *******************************************************
-STDMETHODIMP CGeoProjection::SetWellKnownGeogCS(tkCoordinateSystem newVal)
+STDMETHODIMP CGeoProjection::SetWellKnownGeogCS(tkCoordinateSystem newVal, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_projection->importFromEPSG(newVal);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	ImportFromEPSG(newVal, retVal);
 	return S_OK;
 }
 #pragma endregion

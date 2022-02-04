@@ -105,7 +105,7 @@ public:
 	STDMETHOD(ExportToProj4)(BSTR* retVal);
 	STDMETHOD(ExportToWKT)(BSTR* retVal);
 	STDMETHOD(ExportToWktEx)(BSTR* retVal);
-	STDMETHOD(SetWellKnownGeogCS)(tkCoordinateSystem newVal);
+	STDMETHOD(SetWellKnownGeogCS)(tkCoordinateSystem newVal, VARIANT_BOOL* retVal);
 	STDMETHOD(get_IsGeographic)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_IsProjected)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_IsLocal)(VARIANT_BOOL* pVal);

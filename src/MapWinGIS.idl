@@ -5836,7 +5836,7 @@ interface IGeoProjection : IDispatch {
 	[propget, id(10), helpstring("property Key")] HRESULT Key([out, retval]BSTR* retVal);
 	[propput, id(10), helpstring("property Key")] HRESULT Key([in]BSTR newVal);
 
-	[id(11), helpstring("method SetWellKnownGeogCS")] HRESULT SetWellKnownGeogCS([in] tkCoordinateSystem newVal);
+	[id(11), helpstring("method SetWellKnownGeogCS")] HRESULT SetWellKnownGeogCS([in] tkCoordinateSystem newVal, [out, retval] VARIANT_BOOL* pVal);
 	[propget, id(12), helpstring("property IsGeographic")] HRESULT IsGeographic([out, retval] VARIANT_BOOL* pVal);
 	[propget, id(13), helpstring("property IsProjected")] HRESULT IsProjected([out, retval] VARIANT_BOOL* pVal);
 	[propget, id(14), helpstring("property IsLocal")] HRESULT IsLocal([out, retval] VARIANT_BOOL* pVal);
