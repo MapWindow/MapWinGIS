@@ -60,6 +60,7 @@ void ProjectionHelper::GetSpatialReference(IGeoProjection* gp, OGRSpatialReferen
 {
 	if (!gp) return;
 
+	// TODO: importFromProj4 is deprecated:
 	CComBSTR bstr;
 	gp->ExportToProj4(&bstr);
 
@@ -77,9 +78,13 @@ OGRErr ProjectionHelper::ImportFromEsri(OGRSpatialReference* sr, CString proj)
 		return false;
 	}
 
+	char* apszPrj[2];
 	char* s = proj.GetBuffer();
+	apszPrj[0] = s;
+	apszPrj[1] = nullptr;
 
-	return sr->importFromESRI(&s);
+	// Parameters: papszPrj	NULL terminated list of strings containing the definition.
+	return sr->importFromESRI(apszPrj);
 }
 
 // ***************************************************************

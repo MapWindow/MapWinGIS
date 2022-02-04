@@ -135,7 +135,7 @@ public class GeoProjectionsTests
 
     }
 
-    // [Fact]
+    [Fact]
     public void ImportFromEsriTest()
     {
         // As mentioned in https://mapwindow.discourse.group/t/importfromesri-crash-in-64-bits/984
