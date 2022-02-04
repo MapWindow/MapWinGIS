@@ -299,7 +299,7 @@ STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
 // *******************************************************
 //		ImportFromESRI()
 // *******************************************************
-STDMETHODIMP CGeoProjection::ImportFromESRI(BSTR proj, VARIANT_BOOL* retVal)
+STDMETHODIMP CGeoProjection::ImportFromESRI(const BSTR proj, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (_isFrozen)
@@ -325,7 +325,7 @@ STDMETHODIMP CGeoProjection::ImportFromESRI(BSTR proj, VARIANT_BOOL* retVal)
 // *******************************************************
 //		ImportFromEPSG()
 // *******************************************************
-STDMETHODIMP CGeoProjection::ImportFromEPSG(LONG projCode, VARIANT_BOOL* retVal)
+STDMETHODIMP CGeoProjection::ImportFromEPSG(const LONG projCode, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (_isFrozen)
@@ -363,7 +363,7 @@ STDMETHODIMP CGeoProjection::ImportFromEPSG(LONG projCode, VARIANT_BOOL* retVal)
 // *******************************************************
 STDMETHODIMP CGeoProjection::ExportToWKT(BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
 	if (!node) {
@@ -1333,12 +1333,41 @@ STDMETHODIMP CGeoProjection::get_IsFrozen(VARIANT_BOOL* retVal)
 // ************************************************************
 STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*epsgCode = -1;
 	if (!_isFrozen) {
+
+		// Copied from https://github.com/OSGeo/gdal/blob/master/frmts/sigdem/sigdemdataset.cpp
+		if (_projection->morphFromESRI() != OGRERR_NONE)
+		{
+			*retVal = VARIANT_FALSE;
+			return S_OK;
+		}
+
 		//  Set EPSG authority info if possible.
 		// https://gdal.org/api/ogrspatialref.html#_CPPv4N19OGRSpatialReference16AutoIdentifyEPSGEv
-		_projection->AutoIdentifyEPSG();	// it changes the underlying object
+		//_projection->AutoIdentifyEPSG();	// it changes the underlying object
+		if (_projection->AutoIdentifyEPSG() != OGRERR_NONE)
+		{
+			int nEntries = 0;
+			int* panConfidence = nullptr;
+
+			// Try to identify a match between the passed SRS and a related SRS in a catalog.
+			// Starting with GDAL 3.0, it relies on PROJ’ proj_identify() function.
+			// https://gdal.org/api/ogrspatialref.html?highlight=autoidentifyepsg#_CPPv4NK19OGRSpatialReference11FindMatchesEPPcPiPPi
+			OGRSpatialReferenceH* pahSrs = _projection->FindMatches(nullptr, &nEntries, &panConfidence);
+			if (nEntries == 1 && panConfidence[0] == 100)
+			{
+				_projection->Release();
+				_projection = static_cast<OGRSpatialReference*>(pahSrs[0]);
+				CPLFree(pahSrs);
+			}
+			else
+			{
+				OSRFreeSRSArray(pahSrs);
+			}
+			CPLFree(panConfidence);
+		}
 	}
 
 	if (_projection->IsGeographic())
@@ -1354,6 +1383,7 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 	*retVal = *epsgCode != -1 ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
+
 
 // ************************************************************
 //		ExportToEsri
