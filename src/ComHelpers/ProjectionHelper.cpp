@@ -31,7 +31,7 @@ bool ProjectionHelper::IsSame(IGeoProjection* gp1, IGeoProjection* gp2, IExtents
 	if (!gp1 || !gp2 || !bounds) return false;
 	VARIANT_BOOL vb;
 	gp1->get_IsSameExt(gp2, bounds, sampleSize, &vb);
-	return vb ? true: false;
+	return vb ? true : false;
 }
 
 // ***************************************************************
@@ -93,8 +93,11 @@ OGRErr ProjectionHelper::ImportFromWkt(OGRSpatialReference* sr, CString proj)
 
 	char* s = proj.GetBuffer();
 
-	// TODO: Update:
+	// TODO: Deprecated: GDAL 2.3. Use importFromWkt(const char**) instead.
 	return sr->importFromWkt(&s);
+
+	// TODO: Use Validate (https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference8ValidateEv)
+	// Validate CRS imported with importFromWkt()
 }
 
 // ***************************************************************
@@ -106,11 +109,11 @@ OGRErr ProjectionHelper::ExportToWkt(OGRSpatialReference* sr, CString& proj)
 		return false;
 	}
 
-	char* s = NULL;
+	char* s = nullptr;
 	const OGRErr err = sr->exportToWkt(&s);
 
 	proj = s;
-	
+
 	if (s) {
 		CPLFree(s);
 	}
@@ -129,11 +132,11 @@ OGRErr ProjectionHelper::ExportToWktEx(OGRSpatialReference* sr, CString& proj)
 	}
 
 	char* s = nullptr;
-	const char* apszOptions[] = { "FORMAT=WKT2_2019", "MULTILINE=YES", nullptr };
+	const char* apszOptions[3] = { "FORMAT=WKT2_2019", "MULTILINE=YES", nullptr };
 	const OGRErr err = sr->exportToWkt(&s, apszOptions);
 
 	proj = s;
-	
+
 	if (s) {
 		CPLFree(s);
 	}
@@ -184,6 +187,7 @@ bool ProjectionHelper::SupportsWorldWideTransform(IGeoProjection* mapProjection,
 			return true;
 		}
 	}
-	
+
 	return false;
 }
+

@@ -23,6 +23,7 @@
 
 using namespace std;
 
+// pm, feb 2022 TODO: Shouldn't we use GeoProjection and/or ProjectionHelper instead?
 void ProjectionTools::GetProj4FromPRJFile(char * prjfileName, char ** prj4)
 {
 	FILE * pFile;
