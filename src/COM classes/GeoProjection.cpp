@@ -147,10 +147,10 @@ void CGeoProjection::ReportOgrError(long ErrorCode, tkCallbackVerbosity verbosit
 // **************************************************************
 //		ErrorMessage()
 // **************************************************************
-void CGeoProjection::ErrorMessage(long ErrorCode)
+void CGeoProjection::ErrorMessage(const long errorCode)
 {
-	_lastErrorCode = ErrorCode;
-	CString msg = ErrorMsg(_lastErrorCode);
+	_lastErrorCode = errorCode;
+	const CString msg = ErrorMsg(_lastErrorCode);
 	CallbackHelper::ErrorMsg("GeoProjection", _globalCallback, _key, msg);
 }
 
@@ -177,6 +177,11 @@ STDMETHODIMP CGeoProjection::put_Key(BSTR newVal)
 #pragma region "Conversion"
 // *******************************************************
 //		ExportToProj4()
+// Use of this function is discouraged. Its behavior in GDAL >= 3 / PROJ >= 6 is
+// significantly different from earlier versions. In particular +datum will only
+// encode WGS84, NAD27 and NAD83, and +towgs84/+nadgrids terms will be missing most of the time.
+// PROJ strings to encode CRS should be considered as a a legacy solution.
+// Using a AUTHORITY:CODE or WKT representation is the recommended way.
 // *******************************************************
 STDMETHODIMP CGeoProjection::ExportToProj4(BSTR* retVal)
 {
@@ -283,7 +288,7 @@ STDMETHODIMP CGeoProjection::Clear(VARIANT_BOOL* retVal)
 STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	IGeoProjection* gp = nullptr;
+		IGeoProjection* gp = nullptr;
 	ComHelper::CreateInstance(idGeoProjection, reinterpret_cast<IDispatch**>(&gp));
 	*retVal = gp;
 
@@ -814,19 +819,26 @@ STDMETHODIMP CGeoProjection::get_ProjectionParam(tkProjectionParameter name, dou
 // *******************************************************
 //		get_IsEmpty()
 // *******************************************************
+//STDMETHODIMP CGeoProjection::get_IsEmpty(VARIANT_BOOL* retVal)
+//{
+//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+//		OGR_SRSNode* node = _projection->GetRoot();
+//	if (node)
+//	{
+//		const char* name = _projection->GetAttrValue("GEOGCS");
+//		*retVal = name ? VARIANT_FALSE : VARIANT_TRUE;
+//	}
+//	else
+//	{
+//		*retVal = VARIANT_TRUE;
+//	}
+//	return S_OK;
+//}
 STDMETHODIMP CGeoProjection::get_IsEmpty(VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	OGR_SRSNode* node = _projection->GetRoot();
-	if (node)
-	{
-		const char* name = _projection->GetAttrValue("GEOGCS");
-		*retVal = name ? VARIANT_FALSE : VARIANT_TRUE;
-	}
-	else
-	{
-		*retVal = VARIANT_TRUE;
-	}
+	// https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference7IsEmptyEv
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		* retVal = _projection->IsEmpty() ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -991,6 +1003,7 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 		proj = OLE2A(bstr);
 	}
 	else {
+		// TODO: Use new ExportWktEx instead??
 		const OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
 		if (err != OGRERR_NONE)
 		{
@@ -1323,8 +1336,11 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*epsgCode = -1;
 	if (!_isFrozen) {
+		//  Set EPSG authority info if possible.
+		// https://gdal.org/api/ogrspatialref.html#_CPPv4N19OGRSpatialReference16AutoIdentifyEPSGEv
 		_projection->AutoIdentifyEPSG();	// it changes the underlying object
 	}
+
 	if (_projection->IsGeographic())
 	{
 		*epsgCode = _projection->GetEPSGGeogCS();
@@ -1344,13 +1360,17 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 // ************************************************************
 STDMETHODIMP CGeoProjection::ExportToEsri(BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	OGR_SRSNode* node = _projection->GetRoot();
+		OGR_SRSNode* node = _projection->GetRoot();
 	if (!node) {
 		*retVal = m_globalSettings.CreateEmptyBSTR();
 		return S_OK;
 	}
+
+	// TODO: Deprecated
+	// Since GDAL 3.0, this function has only user-visible effects at exportToWkt() time.
+	// It is recommended to use instead exportToWkt(char**, const char* const char*) const with options having FORMAT=WKT1_ESRI.
 
 	OGRSpatialReference projTemp;
 

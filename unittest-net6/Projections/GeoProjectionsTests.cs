@@ -40,4 +40,29 @@ public class GeoProjectionsTests
 
         original2.ShouldNotBe(cloned2);
     }
+
+    [Fact]
+    public void IsEmptyTest()
+    {
+        var geoProjection = new GeoProjection();
+        geoProjection.ShouldNotBeNull();
+        geoProjection.IsEmpty.ShouldBeTrue();
+
+        // Import projected:
+        var retVal = geoProjection.ImportFromEPSG(3857);
+        retVal.ShouldBe(true);
+        geoProjection.IsProjected.ShouldBeTrue();
+        geoProjection.IsEmpty.ShouldBeFalse();
+
+        // Reset:
+        retVal = geoProjection.Clear();
+        retVal.ShouldBe(true);
+        geoProjection.IsEmpty.ShouldBeTrue();
+
+        // Import geographic:
+        retVal = geoProjection.ImportFromEPSG(4326);
+        retVal.ShouldBe(true);
+        geoProjection.IsGeographic.ShouldBeTrue();
+        geoProjection.IsEmpty.ShouldBeFalse();
+    }
 }

@@ -38,16 +38,17 @@ class ATL_NO_VTABLE CGeoProjection :
 public:
 	CGeoProjection()
 	{
-		_pUnkMarshaler = NULL;
+		_pUnkMarshaler = nullptr;
 		USES_CONVERSION;
 		_key = A2BSTR("");
-		_globalCallback = NULL;
+		_globalCallback = nullptr;
 		_lastErrorCode = tkNO_ERROR;
-		_projection = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
+		_projection = (OGRSpatialReference*)OSRNewSpatialReference(nullptr);
 #if GDAL_VERSION_MAJOR >= 3
+		// TODO: This should be a temporarily fix??
 		_projection->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
 #endif
-		_transformation = NULL;
+		_transformation = nullptr;
 		gReferenceCounter.AddRef(tkInterface::idGeoProjection);
 		_isFrozen = false;
 	}
@@ -150,7 +151,7 @@ private:
 	OGRCoordinateTransformation* _transformation;
 
 private:
-	void ErrorMessage(long ErrorCode);
+	void ErrorMessage(long errorCode);
 	bool IsSameProjection(OGRCoordinateTransformation* transf, double x, double y, bool projected);
 	bool ReadFromFileCore(CStringW filename, bool esri);
 	bool WriteToFileCore(CStringW filename, bool esri);
