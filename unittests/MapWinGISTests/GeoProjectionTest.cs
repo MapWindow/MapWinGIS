@@ -35,6 +35,18 @@ namespace MapWinGISTests
             Debug.WriteLine("gridReference: " + gridReference);
         }
 
+        [TestMethod]
+        public void ImportFromEsriTest()
+        {
+            // As mentioned in https://mapwindow.discourse.group/t/importfromesri-crash-in-64-bits/984
+            var geoProjection = new GeoProjection();
+            Assert.IsNotNull(geoProjection);
+
+            const string proj = "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]";
+            var retVal = geoProjection.ImportFromESRI(proj);
+            Assert.IsTrue(retVal);
+        }
+
         private string ConvertToFourFigureGridReference(double x, double y)
         {
             // Input coordinates should be in OSGB 1936 / British National Grid (EPSG:27700)

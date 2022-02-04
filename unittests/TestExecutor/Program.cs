@@ -93,8 +93,11 @@ namespace ConsoleApplication1
             //var t = new TilesTests();
             //t.PrefetchToFolderDutchOSM();
 
-            var t = new OgrDatasourceTests();
-            t.GenerateEmptyWKT();
+            //var t = new OgrDatasourceTests();
+            //t.GenerateEmptyWKT();
+
+            var t = new GeoProjectionTest();
+            t.ImportFromEsriTest();
 
             Console.WriteLine("Finished");
             Console.ReadLine();

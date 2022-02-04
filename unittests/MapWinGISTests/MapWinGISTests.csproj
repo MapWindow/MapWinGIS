@@ -72,10 +72,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AxInterop.MapWinGIS">
-      <HintPath>..\..\src\bin\Win32\16.0\AxInterop.MapWinGIS.dll</HintPath>
+      <HintPath>..\interopCreator\bin\x64\Debug\AxInterop.MapWinGIS.dll</HintPath>
     </Reference>
     <Reference Include="Interop.MapWinGIS">
-      <HintPath>..\..\src\bin\Win32\16.0\Interop.MapWinGIS.dll</HintPath>
+      <HintPath>..\interopCreator\bin\x64\Debug\Interop.MapWinGIS.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />

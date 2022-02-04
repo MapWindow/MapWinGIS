@@ -127,9 +127,15 @@ public class GeoProjectionsTests
         retVal = geoProjection.ImportFromAutoDetect("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");
         retVal.ShouldBeTrue();
         CheckEpsgCode(geoProjection, 4326);
+
+        // Amersfoort:
+        retVal = geoProjection.ImportFromEPSG(28992);
+        retVal.ShouldBeTrue();
+        CheckEpsgCode(geoProjection, 28992, false);
+
     }
 
-    [Fact]
+    // [Fact]
     public void ImportFromEsriTest()
     {
         // As mentioned in https://mapwindow.discourse.group/t/importfromesri-crash-in-64-bits/984

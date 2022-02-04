@@ -301,7 +301,7 @@ STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
 // *******************************************************
 STDMETHODIMP CGeoProjection::ImportFromESRI(const BSTR proj, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_isFrozen)
 	{
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
@@ -311,7 +311,8 @@ STDMETHODIMP CGeoProjection::ImportFromESRI(const BSTR proj, VARIANT_BOOL* retVa
 	{
 		USES_CONVERSION;
 
-		const OGRErr err = ProjectionHelper::ImportFromEsri(_projection, OLE2A(proj));
+		const CString s = OLE2A(proj);
+		const OGRErr err = ProjectionHelper::ImportFromEsri(_projection, s);
 
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
@@ -420,9 +421,9 @@ STDMETHODIMP CGeoProjection::ExportToWktEx(BSTR* retVal)
 // *******************************************************
 //		ImportFromWKT()
 // *******************************************************
-STDMETHODIMP CGeoProjection::ImportFromWKT(BSTR proj, VARIANT_BOOL* retVal)
+STDMETHODIMP CGeoProjection::ImportFromWKT(const BSTR proj, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_isFrozen)
 	{
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
