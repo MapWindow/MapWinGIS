@@ -59,7 +59,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BOOL *retval)
+STDMETHODIMP CUtils::PointInPolygon(IShape* Shape, IPoint* TestPoint, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -253,7 +253,7 @@ inline bool CUtils::does_cross(int SH, int NSH, double corner_oneX, double corne
 		return false;
 }
 
-inline void CUtils::set_sign(double val, int & SH)
+inline void CUtils::set_sign(double val, int& SH)
 {
 	if (val < 0)
 		SH = -1;
@@ -261,7 +261,7 @@ inline void CUtils::set_sign(double val, int & SH)
 		SH = 1;
 }
 
-STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue, ICallback *cBack, VARIANT_BOOL *retval)
+STDMETHODIMP CUtils::GridReplace(IGrid* Grid, VARIANT OldValue, VARIANT NewValue, ICallback* cBack, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -276,7 +276,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	}
 
 	long ncols = 0, nrows = 0;
-	IGridHeader * header = nullptr;
+	IGridHeader* header = nullptr;
 	Grid->get_Header(&header);
 	header->get_NumberCols(&ncols);
 	header->get_NumberRows(&nrows);
@@ -314,7 +314,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIANT_BOOL *retval)
+STDMETHODIMP CUtils::GridInterpolateNoData(IGrid* Grid, ICallback* cBack, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -329,7 +329,7 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 
 	long ncols = 0, nrows = 0;
 	double nodatavalue;
-	IGridHeader * header = nullptr;
+	IGridHeader* header = nullptr;
 	VARIANT nodataval_variant;
 	VariantInit(&nodataval_variant);
 	Grid->get_Header(&header);
@@ -374,182 +374,182 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 // ************************************************************
 //		RemoveColinearPoints
 // ************************************************************
-STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTolerance, ICallback *cBack, VARIANT_BOOL *retval)
+STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile* Shapes, double LinearTolerance, ICallback* cBack, VARIANT_BOOL* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-    if (Shapes == nullptr)
-    {
-        *retval = NULL;
-        ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-        return S_OK;
-    }
+		if (Shapes == nullptr)
+		{
+			*retval = NULL;
+			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+			return S_OK;
+		}
 
-    ICallback* callback = cBack ? cBack : _globalCallback;
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
-    ShpfileType shptype;
-    Shapes->get_ShapefileType(&shptype);
+	ShpfileType shptype;
+	Shapes->get_ShapefileType(&shptype);
 
-    if (shptype != SHP_POLYLINE && shptype != SHP_POLYGON)
-    {
-        *retval = VARIANT_FALSE;
-        if (shptype == SHP_POLYLINEZ || shptype == SHP_POLYGONZ ||
-            shptype == SHP_POLYLINEM || shptype == SHP_POLYGONM)
-            _lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
-        else
-            _lastErrorCode = tkINCOMPATIBLE_SHAPEFILE_TYPE;
+	if (shptype != SHP_POLYLINE && shptype != SHP_POLYGON)
+	{
+		*retval = VARIANT_FALSE;
+		if (shptype == SHP_POLYLINEZ || shptype == SHP_POLYGONZ ||
+			shptype == SHP_POLYLINEM || shptype == SHP_POLYGONM)
+			_lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
+		else
+			_lastErrorCode = tkINCOMPATIBLE_SHAPEFILE_TYPE;
 
-        ErrorMessage(callback, _lastErrorCode);
+		ErrorMessage(callback, _lastErrorCode);
 
-        return S_OK;
-    }
+		return S_OK;
+	}
 
-    if (!((CShapefile*)Shapes)->ValidateInput(Shapes, "RemoveColinearPoints", "Shapes", VARIANT_FALSE, "Utils"))
-        return S_OK;
+	if (!((CShapefile*)Shapes)->ValidateInput(Shapes, "RemoveColinearPoints", "Shapes", VARIANT_FALSE, "Utils"))
+		return S_OK;
 
-    VARIANT_BOOL vbretval;
-    Shapes->StartEditingShapes(FALSE, cBack, &vbretval);
-    long numShapes;
-    Shapes->get_NumShapes(&numShapes);
+	VARIANT_BOOL vbretval;
+	Shapes->StartEditingShapes(FALSE, cBack, &vbretval);
+	long numShapes;
+	Shapes->get_NumShapes(&numShapes);
 
-    long percent = 0, cnt = 0;
-    double total = 2 * numShapes;
+	long percent = 0, cnt = 0;
+	double total = 2 * numShapes;
 
-    XRedBlack rb;
+	XRedBlack rb;
 
-    if (shptype == SHP_POLYLINE)
-    {
-    }
-    else if (shptype == SHP_POLYGON)
-    {
-        for (int currentShape = 0; currentShape < numShapes; currentShape++)
-        {
-            IShape * shape = nullptr;
-            ((CShapefile*)Shapes)->GetValidatedShape(currentShape, &shape);
-            if (!shape) continue;
+	if (shptype == SHP_POLYLINE)
+	{
+	}
+	else if (shptype == SHP_POLYGON)
+	{
+		for (int currentShape = 0; currentShape < numShapes; currentShape++)
+		{
+			IShape* shape = nullptr;
+			((CShapefile*)Shapes)->GetValidatedShape(currentShape, &shape);
+			if (!shape) continue;
 
-            long numPoints = 0, forward_index = 0, backward_index = 0;
-            shape->get_NumPoints(&numPoints);
+			long numPoints = 0, forward_index = 0, backward_index = 0;
+			shape->get_NumPoints(&numPoints);
 
-            double x, y;
-            VARIANT_BOOL vbretval;
+			double x, y;
+			VARIANT_BOOL vbretval;
 
-            for (int point_index = 0; point_index < numPoints; point_index++)
-            {
-                shape->get_XY(point_index, &x, &y, &vbretval);
+			for (int point_index = 0; point_index < numPoints; point_index++)
+			{
+				shape->get_XY(point_index, &x, &y, &vbretval);
 
-                POINT p;
-                p.x = (LONG)x;
-                p.y = (LONG)y;
-                rb.Insert(p);
+				POINT p;
+				p.x = (LONG)x;
+				p.y = (LONG)y;
+				rb.Insert(p);
 
-                forward_index = point_index + 1;
-                backward_index = point_index - 1;
-                if (forward_index >= numPoints)
-                    forward_index = 0;
-                if (backward_index < 0)
-                    backward_index = numPoints - 1;
+				forward_index = point_index + 1;
+				backward_index = point_index - 1;
+				if (forward_index >= numPoints)
+					forward_index = 0;
+				if (backward_index < 0)
+					backward_index = numPoints - 1;
 
-                VARIANT_BOOL vbretval;
-                double onex, oney, twox, twoy, threex, threey;
-                shape->get_XY(backward_index, &onex, &oney, &vbretval);
-                shape->get_XY(forward_index, &twox, &twoy, &vbretval);
-                shape->get_XY(point_index, &threex, &threey, &vbretval);
+				VARIANT_BOOL vbretval;
+				double onex, oney, twox, twoy, threex, threey;
+				shape->get_XY(backward_index, &onex, &oney, &vbretval);
+				shape->get_XY(forward_index, &twox, &twoy, &vbretval);
+				shape->get_XY(point_index, &threex, &threey, &vbretval);
 
-                POINT one;
-                one.x = (LONG)onex;
-                one.y = (LONG)oney;
+				POINT one;
+				one.x = (LONG)onex;
+				one.y = (LONG)oney;
 
-                POINT two;
-                two.x = (LONG)twox;
-                two.y = (LONG)twoy;
+				POINT two;
+				two.x = (LONG)twox;
+				two.y = (LONG)twoy;
 
-                POINT three;
-                three.x = (LONG)threex;
-                three.y = (LONG)threey;
+				POINT three;
+				three.x = (LONG)threex;
+				three.y = (LONG)threey;
 
-                YRedBlackNode * prbn = rb.GetNode(three);
-                if (prbn != nullptr)
-                {
-                    if (prbn->canSetColinear)
-                    {
-                        if (isColinear(one, two, three, LinearTolerance))
-                            prbn->isColinear = true;
-                        else
-                        {
-                            prbn->isColinear = false;
-                            prbn->canSetColinear = false;
-                        }
-                    }
-                }
-            }
+				YRedBlackNode* prbn = rb.GetNode(three);
+				if (prbn != nullptr)
+				{
+					if (prbn->canSetColinear)
+					{
+						if (isColinear(one, two, three, LinearTolerance))
+							prbn->isColinear = true;
+						else
+						{
+							prbn->isColinear = false;
+							prbn->canSetColinear = false;
+						}
+					}
+				}
+			}
 
-            cnt++;
+			cnt++;
 
-            CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
+			CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
 
-            std::deque< POINT > PointsToKeep;
-            for (currentShape = 0; currentShape < numShapes; currentShape++)
-            {
-                double x, y;
-                VARIANT_BOOL vbretval;
+			std::deque< POINT > PointsToKeep;
+			for (currentShape = 0; currentShape < numShapes; currentShape++)
+			{
+				double x, y;
+				VARIANT_BOOL vbretval;
 
-                for (int point_index = 0; point_index < numPoints; point_index++)
-                {
-                    shape->get_XY(point_index, &x, &y, &vbretval);
-                    POINT p;
-                    p.x = (LONG)x; p.y = (LONG)y;
-                    rb.Insert(p);
+				for (int point_index = 0; point_index < numPoints; point_index++)
+				{
+					shape->get_XY(point_index, &x, &y, &vbretval);
+					POINT p;
+					p.x = (LONG)x; p.y = (LONG)y;
+					rb.Insert(p);
 
-                    YRedBlackNode * prbn = rb.GetNode(p);
-                    if (prbn != nullptr)
-                    {
-                        if (prbn->isColinear == true && prbn->useCount < 2)
-                        {	//Don't Keep the Point
-                        }
-                        else
-                            PointsToKeep.push_back(prbn->Element);
-                    }
-                }
+					YRedBlackNode* prbn = rb.GetNode(p);
+					if (prbn != nullptr)
+					{
+						if (prbn->isColinear == true && prbn->useCount < 2)
+						{	//Don't Keep the Point
+						}
+						else
+							PointsToKeep.push_back(prbn->Element);
+					}
+				}
 
-                for (int ns = 0; ns < numPoints; ns++)
-                    shape->DeletePoint(0, &vbretval);
+				for (int ns = 0; ns < numPoints; ns++)
+					shape->DeletePoint(0, &vbretval);
 
-                PointsToKeep.push_back(PointsToKeep[0]);
-                for (int i = 0; i < (int)PointsToKeep.size(); i++)
-                {
-                    IPoint * pnt = nullptr;
-                    ComHelper::CreatePoint(&pnt);
+				PointsToKeep.push_back(PointsToKeep[0]);
+				for (int i = 0; i < (int)PointsToKeep.size(); i++)
+				{
+					IPoint* pnt = nullptr;
+					ComHelper::CreatePoint(&pnt);
 
-                    pnt->put_X(PointsToKeep[i].x);
-                    pnt->put_Y(PointsToKeep[i].y);
-                    long pntpos = i;
-                    shape->InsertPoint(pnt, &pntpos, &vbretval);
-                }
+					pnt->put_X(PointsToKeep[i].x);
+					pnt->put_Y(PointsToKeep[i].y);
+					long pntpos = i;
+					shape->InsertPoint(pnt, &pntpos, &vbretval);
+				}
 
-                PointsToKeep.clear();
+				PointsToKeep.clear();
 
-                cnt++;
-                CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
-            }
+				cnt++;
+				CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
+			}
 
-            shape->Release();
-            shape = nullptr;
-        }
-    }
+			shape->Release();
+			shape = nullptr;
+		}
+	}
 
-    // ---------------------------------------------------
-    //	 Validating output
-    // ---------------------------------------------------
-    CallbackHelper::ProgressCompleted(_globalCallback, _key);
+	// ---------------------------------------------------
+	//	 Validating output
+	// ---------------------------------------------------
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
-    ((CShapefile*)Shapes)->ValidateOutput(&Shapes, "RemoveColinearPoints", "Utils");
+	((CShapefile*)Shapes)->ValidateOutput(&Shapes, "RemoveColinearPoints", "Utils");
 
-    if (Shapes) {
-        Shapes->StopEditingShapes(TRUE, FALSE, cBack, &vbretval);
-    }
+	if (Shapes) {
+		Shapes->StopEditingShapes(TRUE, FALSE, cBack, &vbretval);
+	}
 
-    return S_OK;
+	return S_OK;
 }
 
 bool CUtils::isColinear(POINT one, POINT two, POINT test, double tolerance)
@@ -590,7 +590,7 @@ bool CUtils::isColinear(POINT one, POINT two, POINT test, double tolerance)
 	}
 }
 
-STDMETHODIMP CUtils::get_Length(IShape *Shape, double *pVal)
+STDMETHODIMP CUtils::get_Length(IShape* Shape, double* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -604,7 +604,7 @@ STDMETHODIMP CUtils::get_Length(IShape *Shape, double *pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::get_Perimeter(IShape *Shape, double *pVal)
+STDMETHODIMP CUtils::get_Perimeter(IShape* Shape, double* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -619,7 +619,7 @@ STDMETHODIMP CUtils::get_Perimeter(IShape *Shape, double *pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::get_Area(IShape *Shape, double *pVal)
+STDMETHODIMP CUtils::get_Area(IShape* Shape, double* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		if (Shape == nullptr)
@@ -640,7 +640,7 @@ STDMETHODIMP CUtils::get_Area(IShape *Shape, double *pVal)
 //v2: Checks to see if a polygon is oriented clockwise about the normal.
 //In multi-part polygons, clockwise parts are filled while counter-clockwise parts are holes.
 //Returns true if clockwise, false if counter-clockwise.
-bool CUtils::is_clockwise(Poly *polygon)
+bool CUtils::is_clockwise(Poly* polygon)
 {
 	int numPoints = polygon->polyX.size();
 	double area = 0;
@@ -670,7 +670,7 @@ bool CUtils::is_clockwise(Poly *polygon)
 //v3: Checks to see if a polygon is oriented clockwise about the normal.
 //In multi-part polygons, clockwise parts are filled while counter-clockwise parts are holes.
 //Returns true if clockwise, false if counter-clockwise.
-bool CUtils::is_clockwise(IShape *Shape)
+bool CUtils::is_clockwise(IShape* Shape)
 {
 	long numPoints = 0;
 	Shape->get_NumPoints(&numPoints);
@@ -703,7 +703,7 @@ bool CUtils::is_clockwise(double x0, double y0, double x1, double y1, double x2,
 {
 	//See http://astronomy.swin.edu.au/~pbourke/geometry/clockwise/, by Paul Bourke
 	//for better explanation of using cross product to find clockwiseness.
-	double crossProduct = (x1 - x0)*(y2 - y1) - (y1 - y0)*(x2 - x1);
+	double crossProduct = (x1 - x0) * (y2 - y1) - (y1 - y0) * (x2 - x1);
 
 	//a negative cross product means that we have a clockwise polygon
 	if (crossProduct < 0)
@@ -712,17 +712,17 @@ bool CUtils::is_clockwise(double x0, double y0, double x1, double y1, double x2,
 		return false;
 }
 
-STDMETHODIMP CUtils::get_LastErrorCode(long *pVal)
+STDMETHODIMP CUtils::get_LastErrorCode(long* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		*pVal = _lastErrorCode;
+		* pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
 
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::get_ErrorMsg(long ErrorCode, BSTR *pVal)
+STDMETHODIMP CUtils::get_ErrorMsg(long ErrorCode, BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -732,11 +732,11 @@ STDMETHODIMP CUtils::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::get_GlobalCallback(ICallback **pVal)
+STDMETHODIMP CUtils::get_GlobalCallback(ICallback** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		*pVal = _globalCallback;
+		* pVal = _globalCallback;
 	if (_globalCallback != nullptr)
 	{
 		_globalCallback->AddRef();
@@ -744,14 +744,14 @@ STDMETHODIMP CUtils::get_GlobalCallback(ICallback **pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::put_GlobalCallback(ICallback *newVal)
+STDMETHODIMP CUtils::put_GlobalCallback(ICallback* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::get_Key(BSTR *pVal)
+STDMETHODIMP CUtils::get_Key(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -772,7 +772,7 @@ STDMETHODIMP CUtils::put_Key(BSTR newVal)
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL InRam, GridFileType GrdFileType, ICallback *cBack, IGrid **retval)
+STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL InRam, GridFileType GrdFileType, ICallback* cBack, IGrid** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -790,7 +790,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	}
 
 	//Check the Array Size
-	SAFEARRAY * arr = Grids.parray;
+	SAFEARRAY* arr = Grids.parray;
 	SAFEARRAYBOUND arraybound = arr->rgsabound[0];
 	if (arraybound.cElements <= 0)
 	{
@@ -805,7 +805,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 
 	for (int index = 0; index < elements; index++)
 	{
-		IUnknown * unknown = nullptr;
+		IUnknown* unknown = nullptr;
 		long ind = index;
 		SafeArrayGetElement(arr, &ind, &unknown);
 
@@ -813,7 +813,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 			continue;
 
 		//Determine if the IUnknown supports the IGrid Interface
-		IGrid * grid = nullptr;
+		IGrid* grid = nullptr;
 		if (unknown->QueryInterface(IID_IGrid, reinterpret_cast<void**>(&grid)) != S_OK)
 		{
 			*retval = nullptr;
@@ -838,13 +838,13 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	}
 
 	gridSize = (int)allGrids.size();
-	ProjectionTools * pt = new ProjectionTools();
+	ProjectionTools* pt = new ProjectionTools();
 	for (int i = 0; i < gridSize; i++)
 	{
-		char * currentComparingProj = nullptr;
+		char* currentComparingProj = nullptr;
 		if (i == 0)
 		{
-			IGridHeader * header = nullptr;
+			IGridHeader* header = nullptr;
 			allGrids[i]->get_Header(&header);
 			header->get_Projection(&final_projection);
 			currentComparingProj = OLE2A(final_projection);
@@ -853,10 +853,10 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		else
 		{
 			CComBSTR bstrProj;
-			IGridHeader * header = nullptr;
+			IGridHeader* header = nullptr;
 			allGrids[i]->get_Header(&header);
 			header->get_Projection(&bstrProj);
-			char * nextProj = OLE2A(bstrProj);
+			char* nextProj = OLE2A(bstrProj);
 			if (!pt->IsSameProjection(currentComparingProj, nextProj))
 			{
 				ErrorMessage(callback, tkGRID_MERGE_PROJECTION_MISMATCH);
@@ -897,7 +897,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	{
 		if (i == 0)
 		{
-			IGridHeader * header = nullptr;
+			IGridHeader* header = nullptr;
 			allGrids[i]->get_Header(&header);
 			header->get_dX(&final_dx);
 			header->get_dY(&final_dy);
@@ -909,15 +909,15 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 			header->get_NumberCols(&final_ncols);
 			header->get_NumberRows(&final_nrows);
 
-			final_xurcenter = final_xllcenter + (final_ncols - 1)*final_dx;
-			final_yurcenter = final_yllcenter + (final_nrows - 1)*final_dy;
+			final_xurcenter = final_xllcenter + (final_ncols - 1) * final_dx;
+			final_yurcenter = final_yllcenter + (final_nrows - 1) * final_dy;
 			total = final_ncols * final_nrows;
 			header->Release();
 			allGrids[i]->get_DataType(&final_dType);
 		}
 		else
 		{
-			IGridHeader * header = nullptr;
+			IGridHeader* header = nullptr;
 			allGrids[i]->get_Header(&header);
 			header->get_dX(&ind_dx);
 			header->get_dY(&ind_dy);
@@ -927,8 +927,8 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 			header->get_NumberCols(&ind_ncols);
 			header->get_NumberRows(&ind_nrows);
 
-			ind_xurcenter = ind_xllcenter + (ind_ncols - 1)*ind_dx;
-			ind_yurcenter = ind_yllcenter + (ind_nrows - 1)*ind_dy;
+			ind_xurcenter = ind_xllcenter + (ind_ncols - 1) * ind_dx;
+			ind_yurcenter = ind_yllcenter + (ind_nrows - 1) * ind_dy;
 			header->Release();
 			allGrids[i]->get_DataType(&ind_dType);
 
@@ -1007,7 +1007,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		return S_OK;
 	}
 
-	IGridHeader * final_header = nullptr;
+	IGridHeader* final_header = nullptr;
 	CoCreateInstance(CLSID_GridHeader, nullptr, CLSCTX_INPROC_SERVER, IID_IGridHeader, reinterpret_cast<void**>(&final_header));
 	final_header->put_NumberCols((long)((final_xurcenter - final_xllcenter) / final_dx) + 1);
 	final_header->put_NumberRows((long)((final_yurcenter - final_yllcenter) / final_dy) + 1);
@@ -1045,7 +1045,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	gridSize = (int)allGrids.size();
 	for (int n = gridSize - 1; n >= 0; n--)
 	{
-		IGridHeader * header = nullptr;
+		IGridHeader* header = nullptr;
 		allGrids[n]->get_Header(&header);
 		header->get_XllCenter(&ind_xllcenter);
 		header->get_YllCenter(&ind_yllcenter);
@@ -1055,7 +1055,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		dVal(vndv, nodata_value);
 		header->Release();
 
-		(*retval)->ProjToCell(ind_xllcenter, ind_yllcenter + (ind_nrows - 1)*final_dy, &xoffset, &yoffset);
+		(*retval)->ProjToCell(ind_xllcenter, ind_yllcenter + (ind_nrows - 1) * final_dy, &xoffset, &yoffset);
 
 		for (int j = 0; j < ind_nrows; j++)
 		{
@@ -1085,14 +1085,14 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::ShapeMerge(IShapefile *Shapes, long IndexOne, long IndexTwo, ICallback *cBack, IShape **retval)
+STDMETHODIMP CUtils::ShapeMerge(IShapefile* Shapes, long IndexOne, long IndexTwo, ICallback* cBack, IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback *cBack, IGrid **retval)
+STDMETHODIMP CUtils::GridToGrid(IGrid* Grid, GridDataType OutDataType, ICallback* cBack, IGrid** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -1108,7 +1108,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 
 	long ncols = 0, nrows = 0;
 
-	IGridHeader * header = nullptr;
+	IGridHeader* header = nullptr;
 	Grid->get_Header(&header);
 	header->get_NumberCols(&ncols);
 	header->get_NumberRows(&nrows);
@@ -1150,19 +1150,19 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallback *cBack, IShapefile **retval)
+STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile* Shapefile, IGrid* Grid, ICallback* cBack, IShapefile** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (Shapefile == nullptr || Grid == nullptr)
-	{
-		*retval = nullptr;
-		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_OK;
-	}
+		if (Shapefile == nullptr || Grid == nullptr)
+		{
+			*retval = nullptr;
+			this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+			return S_OK;
+		}
 
 	long ncols = 0, nrows = 0;
-	IGridHeader * header = nullptr;
+	IGridHeader* header = nullptr;
 	Grid->get_Header(&header);
 	header->get_NumberCols(&ncols);
 	header->get_NumberRows(&nrows);
@@ -1172,7 +1172,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 	Grid->CellToProj(0, 0, &left, &bottom);
 	Grid->CellToProj(ncols - 1, nrows - 1, &right, &top);
 
-	IExtents * box = nullptr;
+	IExtents* box = nullptr;
 	Shapefile->get_Extents(&box);
 	double s_left = 0, s_bottom = 0, s_right = 0, s_top = 0, nval;
 	box->GetBounds(&s_left, &s_bottom, &nval, &s_right, &s_top, &nval);
@@ -1196,7 +1196,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 	Shapefile->get_NumFields(&numFields);
 	for (int i = 0; i < numFields; i++)
 	{
-		IField * field = nullptr;
+		IField* field = nullptr;
 		Shapefile->get_Field(i, &field);
 		long fpos = i;
 		(*retval)->EditInsertField(field, &fpos, cBack, &vbretval);
@@ -1207,7 +1207,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 	Shapefile->get_NumShapes(&numShapes);
 	for (int j = 0; j < numShapes; j++)
 	{
-		IShape * shape = nullptr;
+		IShape* shape = nullptr;
 		Shapefile->get_Shape(j, &shape);
 
 		long numPoints = 0;
@@ -1218,7 +1218,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 			double x = 0, y = 0;
 			double z = 0;
 
-			IPoint * point = nullptr;
+			IPoint* point = nullptr;
 			shape->get_Point(p, &point);
 			point->get_X(&x);
 			point->get_Y(&y);
@@ -1250,7 +1250,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBack, IShapefile **retval)
+STDMETHODIMP CUtils::TinToShapefile(ITin* Tin, ShpfileType Type, ICallback* cBack, IShapefile** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -1280,7 +1280,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		(*retval)->CreateNew(m_globalSettings.emptyBstr, Type, &vbretval);
 
 		long pos = 0;
-		IField * field = nullptr;
+		IField* field = nullptr;
 		CoCreateInstance(CLSID_Field, nullptr, CLSCTX_INPROC_SERVER, IID_IField, reinterpret_cast<void**>(&field));
 		CComBSTR bstrName("Tin");
 		field->put_Name(bstrName);
@@ -1302,14 +1302,14 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			Tin->Vertex(vtx2, &x3, &y3, &z3);
 			Tin->Vertex(vtx3, &x2, &y2, &z2);
 
-			IShape * shape = nullptr;
+			IShape* shape = nullptr;
 			ComHelper::CreateShape(&shape);
 			shape->Create(Type, &vbretval);
 
 			pos = 0;
 			shape->InsertPart(0, &pos, &vbretval);
 
-			IPoint * point = nullptr;
+			IPoint* point = nullptr;
 			ComHelper::CreatePoint(&point);
 			point->put_X(x1);
 			point->put_Y(y1);
@@ -1370,7 +1370,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		(*retval)->CreateNew(m_globalSettings.emptyBstr, Type, &vbretval);
 
 		long pos = 0;
-		IField * field = nullptr;
+		IField* field = nullptr;
 		CoCreateInstance(CLSID_Field, nullptr, CLSCTX_INPROC_SERVER, IID_IField, reinterpret_cast<void**>(&field));
 
 		CComBSTR bstrName("Vertex");
@@ -1387,11 +1387,11 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		{
 			Tin->Vertex(i, &x1, &y1, &z1);
 
-			IShape * shape = nullptr;
+			IShape* shape = nullptr;
 			ComHelper::CreateShape(&shape);
 			shape->Create(Type, &vbretval);
 
-			IPoint * point = nullptr;
+			IPoint* point = nullptr;
 			ComHelper::CreatePoint(&point);
 			point->put_X(x1);
 			point->put_Y(y1);
@@ -1459,7 +1459,7 @@ enum UTILS_DIRECTION
 // ***************************************************
 //    GridToShapefile()
 // ***************************************************
-STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallback *cBack, IShapefile **retval)
+STDMETHODIMP CUtils::GridToShapefile(IGrid* Grid, IGrid* ConnectionGrid, ICallback* cBack, IShapefile** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -1473,7 +1473,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	}
 
 	//Create a grid that is twice the size of the original
-	IGridHeader * header = nullptr;
+	IGridHeader* header = nullptr;
 	Grid->get_Header(&header);
 	long cols = 0, rows = 0;
 	header->get_NumberCols(&cols);
@@ -1516,10 +1516,10 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	VARIANT_BOOL vbretval = FALSE;
 
 	CoCreateInstance(CLSID_Grid, nullptr, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(&_expand_grid));
-	IGridHeader * expand_header = nullptr;
+	IGridHeader* expand_header = nullptr;
 	CoCreateInstance(CLSID_GridHeader, nullptr, CLSCTX_INPROC_SERVER, IID_IGridHeader, reinterpret_cast<void**>(&expand_header));
-	expand_header->put_dX(dx*.5);
-	expand_header->put_dY(dy*.5);
+	expand_header->put_dX(dx * .5);
+	expand_header->put_dY(dy * .5);
 	expand_header->put_XllCenter(xllCenter - dx * .5);
 	expand_header->put_YllCenter(yllCenter - dy * .5);
 	expand_header->put_NodataValue(vndv);
@@ -1727,7 +1727,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 							long contract_x = (i - 1) / 2;
 							long contract_y = (j - 1) / 2;
 
-							IGridHeader * cHeader = nullptr;
+							IGridHeader* cHeader = nullptr;
 							_connection_grid->get_Header(&cHeader);
 							VARIANT cndv;
 							VariantInit(&cndv);
@@ -1805,7 +1805,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	(*retval)->CreateNew(m_globalSettings.emptyBstr, SHP_POLYGON, &vbretval);
 
 	long fieldpos = 0;
-	IField * field = nullptr;
+	IField* field = nullptr;
 	CoCreateInstance(CLSID_Field, nullptr, CLSCTX_INPROC_SERVER, IID_IField, reinterpret_cast<void**>(&field));
 	CComBSTR bstrName("PolygonID");
 	field->put_Name(bstrName);
@@ -1884,7 +1884,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 
 					//Write the final polygon
-					IShape * shape = nullptr;
+					IShape* shape = nullptr;
 					ComHelper::CreateShape(&shape);
 					shape->Create(SHP_POLYGON, &vbretval);
 					long ppos = 0;
@@ -1976,7 +1976,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 							if (last_point_index < 0)
 								last_point_index = point;
 							_expand_grid->CellToProj(polygon[point].column, polygon[point].row, &poly_x, &poly_y);
-							IPoint * ipoint = nullptr;
+							IPoint* ipoint = nullptr;
 							ComHelper::CreatePoint(&ipoint);
 							ipoint->put_X(poly_x);
 							ipoint->put_Y(poly_y);
@@ -1988,7 +1988,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 					}
 					//Write the last point again
 					_expand_grid->CellToProj(polygon[last_point_index].column, polygon[last_point_index].row, &poly_x, &poly_y);
-					IPoint * ipoint = nullptr;
+					IPoint* ipoint = nullptr;
 					ComHelper::CreatePoint(&ipoint);
 					ipoint->put_X(poly_x);
 					ipoint->put_Y(poly_y);
@@ -2033,7 +2033,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 //Determine if a given index of [] map is a DECISION SPOT . . .
 //DECISION SPOT is a point where multiple path options are available
-inline bool CUtils::is_decision(IGrid * g, int x, int y)
+inline bool CUtils::is_decision(IGrid* g, int x, int y)
 {
 	// ( x, y ) corresponds to 0
 
@@ -2050,7 +2050,7 @@ inline bool CUtils::is_decision(IGrid * g, int x, int y)
 	double two = getValue(g, x + 1, y - 1);
 	double six = getValue(g, x - 1, y + 1);
 
-	IGridHeader * header = nullptr;
+	IGridHeader* header = nullptr;
 	g->get_Header(&header);
 	VARIANT vval;
 	VariantInit(&vval);
@@ -2083,7 +2083,7 @@ inline bool CUtils::is_decision(IGrid * g, int x, int y)
 }
 
 //Mark the edges so the polygon can be traced
-void CUtils::mark_edge(double & polygon_id, long x, long y)
+void CUtils::mark_edge(double& polygon_id, long x, long y)
 {
 	std::stack< RasterPoint > stack;
 	std::vector< RasterPoint > decisions;
@@ -2225,7 +2225,7 @@ void CUtils::mark_edge(double & polygon_id, long x, long y)
 }
 
 //Erase the CurrenClipperLib::Polygon
-void CUtils::scan_fill_to_edge(double & nodata, long x, long y)
+void CUtils::scan_fill_to_edge(double& nodata, long x, long y)
 {
 	std::stack< RasterPoint > stack;
 	std::vector< RasterPoint > decisions;
@@ -2295,7 +2295,7 @@ void CUtils::scan_fill_to_edge(double & nodata, long x, long y)
 		setValue(_expand_grid, decisions[d1].column, decisions[d1].row, DECISION);
 }
 
-inline double CUtils::getValue(IGrid * Grid, long column, long row)
+inline double CUtils::getValue(IGrid* Grid, long column, long row)
 {
 	VARIANT vval;
 	VariantInit(&vval);
@@ -2306,7 +2306,7 @@ inline double CUtils::getValue(IGrid * Grid, long column, long row)
 	return val;
 }
 
-inline void CUtils::setValue(IGrid * Grid, long column, long row, double val)
+inline void CUtils::setValue(IGrid* Grid, long column, long row, double val)
 {
 	VARIANT vval;
 	VariantInit(&vval);
@@ -2316,7 +2316,7 @@ inline void CUtils::setValue(IGrid * Grid, long column, long row, double val)
 	VariantClear(&vval);
 }
 
-void CUtils::trace_polygon(long x, long y, std::deque<RasterPoint> & polygon)
+void CUtils::trace_polygon(long x, long y, std::deque<RasterPoint>& polygon)
 {
 	polygon.push_back(RasterPoint(x, y));
 
@@ -2727,7 +2727,7 @@ inline bool CUtils::is_joint(double cell2, double cell8, double cell4, double ce
 #define ROUND(X)  (long)(X + .5)
 #endif
 
-STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShapefileBounds, IGridHeader * GridHeader, double Cellsize, VARIANT_BOOL UseShapeNumber, short SingleValue, IGrid ** retval)
+STDMETHODIMP CUtils::ShapefileToGrid(IShapefile* Shpfile, VARIANT_BOOL UseShapefileBounds, IGridHeader* GridHeader, double Cellsize, VARIANT_BOOL UseShapeNumber, short SingleValue, IGrid** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -2792,7 +2792,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 
 		Shpfile->get_NumShapes(&NumShapes);
 
-		IShape * shape = nullptr;
+		IShape* shape = nullptr;
 
 		short cellValue;
 
@@ -2815,7 +2815,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 	{
 		return NULL; //not complete
 
-		IGridHeader * LocalGridHeader;
+		IGridHeader* LocalGridHeader;
 		(*retval)->get_Header(&LocalGridHeader);
 
 		//attempt to create a new grid of the correct size
@@ -2833,7 +2833,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		}
 
 		//Create a header that uses the minimum size allowed
-		IExtents * bndbox;
+		IExtents* bndbox;
 		Shpfile->get_Extents(&bndbox);
 
 		double xllcenter = 0, yllcenter = 0;
@@ -2883,7 +2883,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 
 		Shpfile->get_NumShapes(&NumShapes);
 
-		IShape * shape = nullptr;
+		IShape* shape = nullptr;
 
 		short cellValue;
 
@@ -2912,12 +2912,12 @@ cleaning:
 // *******************************************************************
 //		PolygonToGrid()
 // *******************************************************************
-bool CUtils::PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue)
+bool CUtils::PolygonToGrid(IShape* shape, IGrid** grid, short cellValue)
 {
 	LineBresenham Line;
 	std::vector<lbPoint> ListOfPoints;
 	lbPoint StartPoint, EndPoint;
-	IPoint * shpPoint = nullptr;
+	IPoint* shpPoint = nullptr;
 	long NumPoints = 0;
 	double CurX;
 	double CurY;
@@ -3001,7 +3001,7 @@ bool CUtils::PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue)
 	return true;
 }
 
-STDMETHODIMP CUtils::hBitmapToPicture(long hBitmap, IPictureDisp **retval)
+STDMETHODIMP CUtils::hBitmapToPicture(long hBitmap, IPictureDisp** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -3018,7 +3018,7 @@ STDMETHODIMP CUtils::hBitmapToPicture(long hBitmap, IPictureDisp **retval)
 }
 
 STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFilename,
-	float z, float scale, float az, float alt, VARIANT_BOOL *retval)
+	float z, float scale, float az, float alt, VARIANT_BOOL* retval)
 	/*  Purpose:
 			Hillshade generates a shaded relief map from any GDAL-supported elevation raster
 		Credits:
@@ -3036,15 +3036,15 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 
 {
 	USES_CONVERSION;
-	const char  *pszGridFilename = OLE2A(bstrGridFilename);
-	const char  *pszShadeFilename = OLE2A(bstrShadeFilename);
+	const char* pszGridFilename = OLE2A(bstrGridFilename);
+	const char* pszShadeFilename = OLE2A(bstrShadeFilename);
 
-	GDALDataset *poDataset;
+	GDALDataset* poDataset;
 	const float radiansToDegrees = (float)(180.0 / 3.14159);
 	const float degreesToRadians = (float)(3.14159 / 180.0);
 	double      adfGeoTransf[6];
-	float       *win;
-	float       *shadeBuf;
+	float* win;
+	float* shadeBuf;
 	float  	    x;
 	float		y;
 	float       aspect;
@@ -3054,7 +3054,7 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 	int         j;
 	int         n;
 	int         containsNull;
-	const char *pszFormat = "GTiff";
+	const char* pszFormat = "GTiff";
 
 	*retval = VARIANT_FALSE;
 
@@ -3081,7 +3081,7 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 			CallbackHelper::ErrorMsg(Debug::Format("Generate hill shade: couldn't open dataset %s\n", pszGridFilename));
 			return S_OK;
 		}
-		GDALRasterBand  *poBnd;
+		GDALRasterBand* poBnd;
 		poBnd = poDataset->GetRasterBand(1);
 		poDataset->GetGeoTransform(adfGeoTransf);
 
@@ -3093,17 +3093,17 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 		const float    nullValue = (float)poBnd->GetNoDataValue();
 		const int      nXSize = poBnd->GetXSize();
 		const int      nYSize = poBnd->GetYSize();
-		shadeBuf = (float *)CPLMalloc(sizeof(float)*nXSize);
-		win = (float *)CPLMalloc(sizeof(float) * 9);
+		shadeBuf = (float*)CPLMalloc(sizeof(float) * nXSize);
+		win = (float*)CPLMalloc(sizeof(float) * 9);
 
 		/* -----------------------------------------
 		* Create the output dataset and copy over relevant metadata
 		*/
-		GDALDriver *poDriver;
+		GDALDriver* poDriver;
 		poDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
-		GDALDataset      *poShadeDS;
-		GDALRasterBand   *poShadeBand;
-		char **papszOptions = nullptr;
+		GDALDataset* poShadeDS;
+		GDALRasterBand* poShadeBand;
+		char** papszOptions = nullptr;
 
 		poShadeDS = poDriver->Create(pszShadeFilename, nXSize, nYSize, 1, GDT_Byte,
 			papszOptions);
@@ -3163,23 +3163,23 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 					*/
 
 					// First Slope ...
-					x = (float)(((z*win[0] + z * win[3] + z * win[3] + z * win[6]) -
-						(z*win[2] + z * win[5] + z * win[5] + z * win[8])) /
+					x = (float)(((z * win[0] + z * win[3] + z * win[3] + z * win[6]) -
+						(z * win[2] + z * win[5] + z * win[5] + z * win[8])) /
 						(8.0 * ewres * scale));
 
-					y = (float)(((z*win[6] + z * win[7] + z * win[7] + z * win[8]) -
-						(z*win[0] + z * win[1] + z * win[1] + z * win[2])) /
+					y = (float)(((z * win[6] + z * win[7] + z * win[7] + z * win[8]) -
+						(z * win[0] + z * win[1] + z * win[1] + z * win[2])) /
 						(8.0 * nsres * scale));
 
-					slope = (float)90.0 - atan(sqrt(x*x + y * y))*radiansToDegrees;
+					slope = (float)90.0 - atan(sqrt(x * x + y * y)) * radiansToDegrees;
 
 					// ... then aspect...
 					aspect = atan2(x, y);
 
 					// ... then the shade value
-					cang = (float)(sin(alt*degreesToRadians) * sin(slope*degreesToRadians) +
-						cos(alt*degreesToRadians) * cos(slope*degreesToRadians) *
-						cos((az - 90.0)*degreesToRadians - aspect));
+					cang = (float)(sin(alt * degreesToRadians) * sin(slope * degreesToRadians) +
+						cos(alt * degreesToRadians) * cos(slope * degreesToRadians) *
+						cos((az - 90.0) * degreesToRadians - aspect));
 
 					if (cang <= 0.0)
 						cang = nullValue;
@@ -3213,7 +3213,7 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 /************************************************************************/
 /*                           Parse()                                    */
 /************************************************************************/
-void CUtils::Parse(CString sOrig, int * opts)
+void CUtils::Parse(CString sOrig, int* opts)
 {
 	if (sOrig.IsEmpty())
 	{
@@ -3276,7 +3276,7 @@ void CUtils::Parse(CString sOrig, int * opts)
 // ***********************************************************
 //	  OGRLayerToShapefile()
 // ***********************************************************
-STDMETHODIMP CUtils::OGRLayerToShapefile(BSTR Filename, ShpfileType shpType, ICallback *cBack, IShapefile** sf)
+STDMETHODIMP CUtils::OGRLayerToShapefile(BSTR Filename, ShpfileType shpType, ICallback* cBack, IShapefile** sf)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	ICallback* callback = cBack ? cBack : _globalCallback;
@@ -3295,7 +3295,7 @@ STDMETHODIMP CUtils::OGRLayerToShapefile(BSTR Filename, ShpfileType shpType, ICa
 STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IShape* ClipPolygon, IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*retval = nullptr;
+		* retval = nullptr;
 
 	if (SubjectPolygon == nullptr || ClipPolygon == nullptr)
 	{
@@ -3391,7 +3391,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* inputNames, /*[in]*/
 	const BSTR outputName, /*out,retval*/VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*retVal = VARIANT_FALSE;
+		* retVal = VARIANT_FALSE;
 	USES_CONVERSION;
 
 	// Check dimensions of the array.
@@ -3419,8 +3419,8 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* inputNames, /*[in]*/
 	}
 
 	// TODO: add check that we have an array of BSTR and not the other data type
-	BSTR HUGEP *pbstr;
-	hr = SafeArrayAccessData(inputNames, reinterpret_cast<void HUGEP* FAR*>(&pbstr));
+	BSTR HUGEP* pbstr;
+	hr = SafeArrayAccessData(inputNames, reinterpret_cast<void HUGEP * FAR*>(&pbstr));
 	if (FAILED(hr))
 	{
 		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
@@ -3583,19 +3583,31 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 		return S_OK;
 	}
 
-	OGRSpatialReference* ref1 = static_cast<CGeoProjection*>(source)->get_SpatialReference();
-	OGRSpatialReference* ref2 = static_cast<CGeoProjection*>(target)->get_SpatialReference();
-
+	// https://docs.microsoft.com/en-us/cpp/code-quality/c26466?view=msvc-170
+    // OGRSpatialReference* ref1 = static_cast<CGeoProjection*>(source)->get_SpatialReference();
+	// OGRSpatialReference* ref2 = static_cast<CGeoProjection*>(target)->get_SpatialReference();
+	// https://docs.microsoft.com/en-us/cpp/code-quality/c26462?view=msvc-170
+	const OGRSpatialReference* const ref1 = dynamic_cast<CGeoProjection*>(source)->get_SpatialReference();
+	const OGRSpatialReference* const ref2 = dynamic_cast<CGeoProjection*>(target)->get_SpatialReference();
+    
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation(ref1, ref2);
 	if (!transf)
 	{
 		ErrorMessage(tkFAILED_TO_REPROJECT);
 		*result = nullptr;
+		// TODO: No need to free transf?
 		return S_OK;
 	}
 
-	if (!static_cast<CShapefile*>(sf)->ValidateInput(sf, "ReprojectShapefile", "sf", VARIANT_FALSE, "Utils"))
-		return S_OK;
+	// https://docs.microsoft.com/en-us/cpp/code-quality/c26466?view=msvc-170
+	//if (!static_cast<CShapefile*>(sf)->ValidateInput(sf, "ReprojectShapefile", "sf", VARIANT_FALSE, "Utils"))
+	//	return S_OK;
+	if (auto sfd = dynamic_cast<CShapefile*>(sf))
+	{
+		if (!sfd->ValidateInput(sf, "ReprojectShapefile", "sf", VARIANT_FALSE, "Utils"))
+			return S_OK;
+	}
+
 
 	// ------------------------------------------------
 	//	Creating output
@@ -3634,8 +3646,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 				shpNew->get_XY(j, &x, &y, &vbretval);
 
 				// will work faster after embedding to the CShape class
-				BOOL res = transf->Transform(1, &x, &y);
-				if (res)
+				if (transf->Transform(1, &x, &y))
 				{
 					shpNew->put_XY(j, x, y, &vbretval);
 				}
@@ -3646,9 +3657,12 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 					(*result)->Release();
 					(*result) = nullptr;
 					ErrorMessage(tkFAILED_TO_REPROJECT);
+					// TODO: No need to free transf?
 					return S_OK;
 				}
 			}
+
+			// TODO: No need to free transf?
 
 			(*result)->get_NumShapes(&count);
 			(*result)->EditInsertShape(shpNew, &count, &vbretval);
@@ -3666,7 +3680,13 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	//    Validating output
 	// --------------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	static_cast<CShapefile*>(sf)->ValidateOutput(&sf, "ReprojectShapefile", "Utils");
+
+	// https://docs.microsoft.com/en-us/cpp/code-quality/c26466?view=msvc-170
+	// static_cast<CShapefile*>(sf)->ValidateOutput(&sf, "ReprojectShapefile", "Utils");
+	if (auto sfd = dynamic_cast<CShapefile*>(sf))
+	{
+		sfd->ValidateOutput(&sf, "ReprojectShapefile", "Utils");
+	}
 
 	return S_OK;
 }
@@ -3674,21 +3694,21 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 // **************************************************************
 //		ErrorMessage()
 // **************************************************************
-void CUtils::ErrorMessage(long ErrorCode)
+void CUtils::ErrorMessage(long errorCode)
 {
-	_lastErrorCode = ErrorCode;
+	_lastErrorCode = errorCode;
 	CallbackHelper::ErrorMsg("Utils", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
-void CUtils::ErrorMessage(ICallback* callback, long ErrorCode)
+void CUtils::ErrorMessage(ICallback* callback, long errorCode)
 {
-	_lastErrorCode = ErrorCode;
+	_lastErrorCode = errorCode;
 	CallbackHelper::ErrorMsg("Utils", callback, _key, ErrorMsg(_lastErrorCode));
 }
 
-void CUtils::ErrorMessage(long ErrorCode, CString customMessage)
+void CUtils::ErrorMessage(long errorCode, CString customMessage)
 {
-	_lastErrorCode = ErrorCode;
+	_lastErrorCode = errorCode;
 	CallbackHelper::ErrorMsg("Utils", _globalCallback, _key, (LPCSTR)customMessage);
 }
 
@@ -4538,7 +4558,7 @@ double CalcPolyGeodesicArea(std::vector<Point2D>& points)
 STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*retVal = VARIANT_FALSE;
+		* retVal = VARIANT_FALSE;
 
 	GDALAllRegister();
 
@@ -4571,7 +4591,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 
 		int nXBlocks = (poBand->GetXSize() + nXBlockSize - 1) / nXBlockSize;
 		int nYBlocks = (poBand->GetYSize() + nYBlockSize - 1) / nYBlockSize;
-		pabyData = (GByte *)CPLMalloc(nXBlockSize * nYBlockSize);
+		pabyData = (GByte*)CPLMalloc(nXBlockSize * nYBlockSize);
 
 		CPLErr err = CPLErr::CE_None;
 		long percent = 0;
@@ -4582,7 +4602,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 				if (_globalCallback != nullptr)
 				{
 					double count = iYBlock * nXBlocks + iXBlock;
-					long newpercent = (long)((double)count / (double)(nXBlocks * nYBlocks)*100.0);
+					long newpercent = (long)((double)count / (double)(nXBlocks * nYBlocks) * 100.0);
 					if (newpercent > percent)
 					{
 						percent = newpercent;
@@ -4660,7 +4680,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 #pragma region "Gdal error handler"
 ICallback* gdalCallback;
 
-void CPL_STDCALL GdalErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
+void CPL_STDCALL GdalErrorHandler(CPLErr eErrClass, int err_no, const char* msg)
 {
 	if (gdalCallback) {
 		CString s = msg;
@@ -4688,7 +4708,7 @@ void SetGdalErrorHandler(ICallback* callback)
 STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*retVal = VARIANT_FALSE;
+		* retVal = VARIANT_FALSE;
 	GDALAllRegister();
 
 	if (_globalCallback) {
@@ -4714,7 +4734,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 		}
 		else
 		{
-			GByte* pabyDataSource, *pabyDataDest;
+			GByte* pabyDataSource, * pabyDataDest;
 			*retVal = VARIANT_TRUE;
 			int count = dsSource->GetRasterCount();
 
@@ -4745,8 +4765,8 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 
 				int nXBlocks = (bandSource->GetXSize() + nXBlockSize - 1) / nXBlockSize;
 				int nYBlocks = (bandSource->GetYSize() + nYBlockSize - 1) / nYBlockSize;
-				pabyDataSource = (GByte *)CPLMalloc(nXBlockSize * nYBlockSize);
-				pabyDataDest = (GByte *)CPLMalloc(nXBlockSize * nYBlockSize);
+				pabyDataSource = (GByte*)CPLMalloc(nXBlockSize * nYBlockSize);
+				pabyDataDest = (GByte*)CPLMalloc(nXBlockSize * nYBlockSize);
 
 				CPLErr err = CPLErr::CE_None;
 				long percent = 0;
@@ -4757,7 +4777,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 						if (_globalCallback != nullptr)
 						{
 							double count = iYBlock * nXBlocks + iXBlock;
-							long newpercent = (long)((double)count / (double)(nXBlocks * nYBlocks)*100.0);
+							long newpercent = (long)((double)count / (double)(nXBlocks * nYBlocks) * 100.0);
 							if (newpercent > percent)
 							{
 								percent = newpercent;
@@ -4849,7 +4869,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 // ********************************************************
 //     ErrorMsgFromObject()
 // ********************************************************
-STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
+STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch* comClass, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		if (!comClass)
@@ -5053,7 +5073,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		get_ErrorMsg(errorCode, retVal);
 		ShapefileColorScheme->Release();
 		return S_OK;
-	}
+}
 #endif
 
 	IShapeNetwork* ShapeNetwork = nullptr;
@@ -5209,7 +5229,7 @@ STDMETHODIMP CUtils::get_ComUsageReport(VARIANT_BOOL unreleasedOnly, BSTR* retVa
 //     ValidateInputNames()
 // ********************************************************
 // Accesses data in safe array of BSTR
-bool CUtils::ValidateInputNames(SAFEARRAY* inputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr)
+bool CUtils::ValidateInputNames(SAFEARRAY* inputNames, LONG& lLBound, LONG& lUBound, BSTR** pbstr)
 {
 	// Check dimensions of the array.
 	if (SafeArrayGetDim(inputNames) != 1)
@@ -5234,7 +5254,7 @@ bool CUtils::ValidateInputNames(SAFEARRAY* inputNames, LONG& lLBound, LONG& lUBo
 	}
 
 	// TODO: add check that we have an array of BSTR and not the other data type
-	hr = SafeArrayAccessData(inputNames, reinterpret_cast<void HUGEP* FAR*>(pbstr));
+	hr = SafeArrayAccessData(inputNames, reinterpret_cast<void HUGEP * FAR*>(pbstr));
 	if (FAILED(hr))
 	{
 		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
@@ -5258,7 +5278,7 @@ GDALDriverH OpenOutputDriver(CString driverName)
 	GDALDriverH outputDriver = GDALGetDriverByName(driverName);
 	if (outputDriver)
 	{
-		char **driverMetadata = GDALGetMetadata(outputDriver, nullptr);
+		char** driverMetadata = GDALGetMetadata(outputDriver, nullptr);
 		if (!CSLFetchBoolean(driverMetadata, GDAL_DCAP_CREATE, false))
 		{
 			outputDriver = nullptr; //driver exist, but it does not support the create operation
@@ -5274,8 +5294,8 @@ GDALDataset* OpenOutputFile(GDALDriverH outputDriver, CStringW filename, int xSi
 {
 	m_globalSettings.SetGdalUtf8(true);
 
-	char **papszOptions = nullptr;
-	GDALDataset* outputDataset = (GDALDataset *)GDALCreate(outputDriver, Utility::ConvertToUtf8(filename), xSize, ySize, 1, GDT_Float32, papszOptions);
+	char** papszOptions = nullptr;
+	GDALDataset* outputDataset = (GDALDataset*)GDALCreate(outputDriver, Utility::ConvertToUtf8(filename), xSize, ySize, 1, GDT_Float32, papszOptions);
 
 	double transform[6];
 	sourceTransform->GetGeoTransform((double*)&transform);
@@ -5287,7 +5307,7 @@ GDALDataset* OpenOutputFile(GDALDriverH outputDriver, CStringW filename, int xSi
 	return outputDataset;
 }
 
-int atoi_custom(const char *c) {
+int atoi_custom(const char* c) {
 	int value = 0;
 	int sign = 1;
 	if (*c == '+' || *c == '-') {
@@ -5569,7 +5589,7 @@ cleaning:
 // ********************************************************
 //     ParseSafeArray()
 // ********************************************************
-bool CUtils::ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void **pbstr)
+bool CUtils::ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void** pbstr)
 {
 	// Check dimensions of the array.
 	if (SafeArrayGetDim(arr) != 1)
@@ -5593,7 +5613,7 @@ bool CUtils::ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void *
 		return false;
 	}
 
-	hr = SafeArrayAccessData(arr, static_cast<void HUGEP* FAR*>(pbstr));
+	hr = SafeArrayAccessData(arr, static_cast<void HUGEP * FAR*>(pbstr));
 	if (FAILED(hr))
 	{
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
@@ -5635,7 +5655,7 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 	//	return S_OK;
 	//}
 
-	double* lows, *highs, *vals;
+	double* lows, * highs, * vals;
 	LONG lb1, ub1, lb2, ub2, lb3, ub3;
 	if (!ParseSafeArray(LowBounds, lb1, ub1, reinterpret_cast<void**>(&lows)))
 	{
@@ -5775,7 +5795,7 @@ STDMETHODIMP CUtils::IsTiffGrid(BSTR Filename, VARIANT_BOOL* retVal)
 	{
 		USES_CONVERSION;
 		const char* name = OLE2CA(Filename);
-		TIFF *tiff = XTIFFOpen(name, "r"); // TIFF-level descriptor
+		TIFF* tiff = XTIFFOpen(name, "r"); // TIFF-level descriptor
 		if (tiff)
 		{
 			int w = 0, h = 0;
@@ -5878,12 +5898,12 @@ inline bool CUtils::almostEqual(double d1, double d2, double tolerance)
 // *************************************************
 //			LineInterpolatePoint()
 // *************************************************
-STDMETHODIMP CUtils::LineInterpolatePoint(IShape* sourceLine, IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint **retVal)
+STDMETHODIMP CUtils::LineInterpolatePoint(IShape* sourceLine, IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 		// initialize return point to null
-		*retVal = nullptr;
+		* retVal = nullptr;
 
 	// basic validation
 	if (sourceLine == nullptr || startPoint == nullptr)
@@ -6012,7 +6032,7 @@ STDMETHODIMP CUtils::LineProjectDistanceTo(IShape* sourceLine, IShape* reference
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 		// initialize return value
-		*distance = 0;
+		* distance = 0;
 
 	// basic validation
 	if (sourceLine == nullptr || referenceShape == nullptr)
