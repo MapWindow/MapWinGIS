@@ -14,9 +14,9 @@ public class EpsgTests
     {
         var geoProjection = new GeoProjection();
         geoProjection.ShouldNotBeNull();
-        var retVal =  geoProjection.ImportFromEPSG(28992);
+        var retVal = geoProjection.ImportFromEPSG(28992);
         retVal.ShouldBe(true);
-        
+
         // Checks
         geoProjection.Checks(true);
         geoProjection.ProjectionName.ShouldBe("Amersfoort / RD New");
@@ -47,9 +47,9 @@ public class EpsgTests
     {
         var geoProjection = new GeoProjection();
         geoProjection.ShouldNotBeNull();
-        var retVal =  geoProjection.ImportFromEPSG(4326);
+        var retVal = geoProjection.ImportFromEPSG(4326);
         retVal.ShouldBe(true);
-        
+
         // Checks
         geoProjection.Checks(false);
         geoProjection.GeogCSName.ShouldBe("WGS 84");
@@ -80,9 +80,9 @@ public class EpsgTests
     {
         var geoProjection = new GeoProjection();
         geoProjection.ShouldNotBeNull();
-        var retVal =  geoProjection.ImportFromEPSG(3857);
+        var retVal = geoProjection.ImportFromEPSG(3857);
         retVal.ShouldBe(true);
-        
+
         // Checks
         geoProjection.Checks(true);
         geoProjection.GeogCSName.ShouldBe("WGS 84");

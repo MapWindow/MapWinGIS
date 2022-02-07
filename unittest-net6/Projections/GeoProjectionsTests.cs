@@ -1,6 +1,4 @@
-﻿using System.IdentityModel.Tokens;
-
-namespace unittest_net6.Projections;
+﻿namespace unittest_net6.Projections;
 
 public class GeoProjectionsTests
 {
@@ -160,7 +158,7 @@ public class GeoProjectionsTests
         }
         else
         {
-            geoProjection.IsProjected.ShouldBeTrue(); 
+            geoProjection.IsProjected.ShouldBeTrue();
         }
         var retVal = geoProjection.TryAutoDetectEpsg(out var epsgCode);
         retVal.ShouldBeTrue();

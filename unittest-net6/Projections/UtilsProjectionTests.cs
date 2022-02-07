@@ -33,12 +33,7 @@ public class UtilsProjectionTests
         var sfPoint = Helpers.MakeShapefile(ShpfileType.SHP_POINT);
 
         // Add shape:
-        var shp = Helpers.MakeShape(ShpfileType.SHP_POINT);
-        // Add point:
-        var pointIndex = shp.AddPoint(srcX, srcY);
-        pointIndex.ShouldBe(0, "Invaldid point index");
-        var shapeIndex = sfPoint.EditAddShape(shp);
-        shapeIndex.ShouldNotBe(-1, "EditAddShape failed");
+        Helpers.AddPointShape(sfPoint, srcX, srcY);
 
         var geoProjectionSource = Helpers.MakeProjection(srcEpsgCode);
         var geoProjectionTarget = Helpers.MakeProjection(dstEpsgCode);
@@ -46,7 +41,7 @@ public class UtilsProjectionTests
         // Test:
         var utils = new Utils();
         var sfNew = utils.ReprojectShapefile(sfPoint, geoProjectionSource, geoProjectionTarget);
-        
+
         // Check
         sfNew.ShouldNotBeNull("ReprojectShapefile failed");
         sfNew.ShapefileType.ShouldBe(ShpfileType.SHP_POINT);
@@ -58,6 +53,5 @@ public class UtilsProjectionTests
         _testOutputHelper.WriteLine("X: {0}, Y: {1}", pntNew.x, pntNew.y);
         pntNew.x.ShouldBe(dstX, tolerance);
         pntNew.y.ShouldBe(dstY, tolerance);
-
     }
 }
