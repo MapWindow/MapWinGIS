@@ -2689,7 +2689,7 @@ STDMETHODIMP CShapefile::get_IsGeographicProjection(VARIANT_BOOL* pVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::Reproject(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
     if (!this->ReprojectCore(newProjection, reprojectedCount, retVal, false))
         *retVal = nullptr;
@@ -2701,7 +2701,7 @@ STDMETHODIMP CShapefile::Reproject(IGeoProjection* newProjection, LONG* reprojec
 // *****************************************************************
 STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* reprojectedCount, VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     if (!_isEditingShapes)
     {
         ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
@@ -2753,7 +2753,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
         return false;
     }
 
-    if (!ValidateInput(this, "Reproject/ReprojectInPlace", "this", VARIANT_FALSE))
+    if (!ValidateInput(this, "Reproject/ReprojectCore", "this", VARIANT_FALSE))
         return false;
 
     m_globalSettings.gdalErrorMessage = "";
@@ -2945,11 +2945,11 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 
     if (!reprojectInPlace)
     {
-        this->ValidateOutput(retVal, "Reproject/ReprojectInPlace", "Shapefile", false);
+        this->ValidateOutput(retVal, "Reproject/ReprojectCore", "Shapefile", false);
     }
     else
     {
-        this->ValidateOutput(this, "Reproject/ReprojectInPlace", "Shapefile", false);
+        this->ValidateOutput(this, "Reproject/ReprojectCore", "Shapefile", false);
     }
 
     // it's critical to set correct projection, so false will be returned if it wasn't done
