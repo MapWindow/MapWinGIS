@@ -64,4 +64,21 @@ internal static class Helpers
         return shp;
     }
     #endregion
+
+    public static void SaveSf(MapWinGIS.Shapefile sf, string fileLocation)
+    {
+        sf.ShouldNotBeNull("sf is null");
+        var retVal = sf.SaveAs(fileLocation);
+        retVal.ShouldBeTrue("sf.SaveAs failed");
+    }
+
+    public static MapWinGIS.Shapefile OpenShapefile(string fileLocation)
+    {
+        File.Exists(fileLocation).ShouldBeTrue("Could not find shapefile to open");
+
+        var sf = new MapWinGIS.Shapefile();
+        var retVal = sf.Open(fileLocation);
+        retVal.ShouldBeTrue("sf.Open failed");
+        return sf;
+    }
 }
