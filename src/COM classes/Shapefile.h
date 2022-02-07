@@ -512,6 +512,7 @@ public:
 		for (auto const& it : _ogrFid2ShapeIndex)
 			if (it.second == shapeIndex)
 				_deletedFids.insert(it.first);
+		return true;
 	}
 	std::set<long> GetDeletedShapeFIDs()
 	{

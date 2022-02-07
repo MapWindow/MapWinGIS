@@ -359,7 +359,7 @@ void CMapView::DrawCircleOnGraphics(Gdiplus::Graphics* graphics, _DrawCircle* ci
 	auto color = Utility::OleColor2GdiPlus(circle->color, circle->alpha);
 	auto radius = (float)circle->radius;
 	if (project)
-		radius *= _pixelPerProjectionX;
+		radius *= static_cast<float>(_pixelPerProjectionX);
 	auto width = (float)circle->width;
 
 	Gdiplus::REAL pixX = (float)circle->x; 

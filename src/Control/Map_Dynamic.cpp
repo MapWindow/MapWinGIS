@@ -269,8 +269,8 @@ void CMapView::DrawCoordinates(Gdiplus::Graphics* g)
 					CStringW lat = AngleHelper::FormatAngle(prY, _showCoordinatesFormat, 3, false);
 					CStringW lng = AngleHelper::FormatAngle(prX, _showCoordinatesFormat, 3, false);
 
-					s.Format(L"%s: %s; %s: %s", m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsLatitude), lat,
-						m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsLongitude), lng);
+					s.Format(L"%s: %s; %s: %s", (LPCWSTR)m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsLatitude), (LPCWSTR)lat,
+						(LPCWSTR)m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsLongitude), (LPCWSTR)lng);
 				}
 				else
 				{
@@ -288,7 +288,7 @@ void CMapView::DrawCoordinates(Gdiplus::Graphics* g)
                     if (_showCoordinatesBackground)
                     {
 					    // draw a white box behind the coordinates
-					    Gdiplus::Rect r(_viewWidth - rect.Width - 7.0f, 7.0f, rect.Width, rect.Height);
+					    const Gdiplus::Rect r(_viewWidth - static_cast<int>(rect.Width - 7.0f), 7, static_cast<int>(rect.Width), static_cast<int>(rect.Height));
 					    g->FillRectangle(&GetMeasuringBase()->_whiteBrush, r);
                         // with white background, we don't need shadowed text
                         g->DrawString(s.GetString(), s.GetLength(), _fontCourier, point, &GetMeasuringBase()->_textBrush);
