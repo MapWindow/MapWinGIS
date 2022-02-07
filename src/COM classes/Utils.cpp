@@ -276,7 +276,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	}
 
 	long ncols = 0, nrows = 0;
-	IGridHeader * header = NULL;
+	IGridHeader * header = nullptr;
 	Grid->get_Header(&header);
 	header->get_NumberCols(&ncols);
 	header->get_NumberRows(&nrows);
@@ -320,7 +320,7 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 
 		ICallback* callback = cBack ? cBack : _globalCallback;
 
-	if (Grid == NULL)
+	if (Grid == nullptr)
 	{
 		ErrorMessage(callback, tkUNEXPECTED_NULL_PARAMETER);
 		*retval = VARIANT_FALSE;
@@ -329,7 +329,7 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 
 	long ncols = 0, nrows = 0;
 	double nodatavalue;
-	IGridHeader * header = NULL;
+	IGridHeader * header = nullptr;
 	VARIANT nodataval_variant;
 	VariantInit(&nodataval_variant);
 	Grid->get_Header(&header);
@@ -378,7 +378,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-    if (Shapes == NULL)
+    if (Shapes == nullptr)
     {
         *retval = NULL;
         ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -424,7 +424,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
     {
         for (int currentShape = 0; currentShape < numShapes; currentShape++)
         {
-            IShape * shape = NULL;
+            IShape * shape = nullptr;
             ((CShapefile*)Shapes)->GetValidatedShape(currentShape, &shape);
             if (!shape) continue;
 
@@ -469,7 +469,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
                 three.y = (LONG)threey;
 
                 YRedBlackNode * prbn = rb.GetNode(three);
-                if (prbn != NULL)
+                if (prbn != nullptr)
                 {
                     if (prbn->canSetColinear)
                     {
@@ -502,7 +502,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
                     rb.Insert(p);
 
                     YRedBlackNode * prbn = rb.GetNode(p);
-                    if (prbn != NULL)
+                    if (prbn != nullptr)
                     {
                         if (prbn->isColinear == true && prbn->useCount < 2)
                         {	//Don't Keep the Point
@@ -518,7 +518,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
                 PointsToKeep.push_back(PointsToKeep[0]);
                 for (int i = 0; i < (int)PointsToKeep.size(); i++)
                 {
-                    IPoint * pnt = NULL;
+                    IPoint * pnt = nullptr;
                     ComHelper::CreatePoint(&pnt);
 
                     pnt->put_X(PointsToKeep[i].x);
@@ -534,7 +534,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
             }
 
             shape->Release();
-            shape = NULL;
+            shape = nullptr;
         }
     }
 
@@ -594,7 +594,7 @@ STDMETHODIMP CUtils::get_Length(IShape *Shape, double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (Shape == NULL)
+		if (Shape == nullptr)
 		{
 			*pVal = 0.0;
 			this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -608,7 +608,7 @@ STDMETHODIMP CUtils::get_Perimeter(IShape *Shape, double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (Shape == NULL)
+		if (Shape == nullptr)
 		{
 			*pVal = 0.0;
 			this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -622,7 +622,7 @@ STDMETHODIMP CUtils::get_Perimeter(IShape *Shape, double *pVal)
 STDMETHODIMP CUtils::get_Area(IShape *Shape, double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Shape == NULL)
+		if (Shape == nullptr)
 		{
 			*pVal = 0.0;
 			this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -737,7 +737,7 @@ STDMETHODIMP CUtils::get_GlobalCallback(ICallback **pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 		*pVal = _globalCallback;
-	if (_globalCallback != NULL)
+	if (_globalCallback != nullptr)
 	{
 		_globalCallback->AddRef();
 	}
@@ -784,7 +784,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	//Check the Array Type
 	if (Grids.vt != (VT_ARRAY | VT_DISPATCH))
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		ErrorMessage(callback, tkINVALID_VARIANT_TYPE);
 		return S_OK;
 	}
@@ -794,7 +794,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	SAFEARRAYBOUND arraybound = arr->rgsabound[0];
 	if (arraybound.cElements <= 0)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		return S_OK;
 	}
 
@@ -805,25 +805,25 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 
 	for (int index = 0; index < elements; index++)
 	{
-		IUnknown * unknown = NULL;
+		IUnknown * unknown = nullptr;
 		long ind = index;
 		SafeArrayGetElement(arr, &ind, &unknown);
 
-		if (unknown == NULL)
+		if (unknown == nullptr)
 			continue;
 
 		//Determine if the IUnknown supports the IGrid Interface
-		IGrid * grid = NULL;
+		IGrid * grid = nullptr;
 		if (unknown->QueryInterface(IID_IGrid, reinterpret_cast<void**>(&grid)) != S_OK)
 		{
-			*retval = NULL;
+			*retval = nullptr;
 			ErrorMessage(callback, tkINTERFACE_NOT_SUPPORTED);
 
 			gridSize = (int)allGrids.size(); //ah 6/6/05
 			for (int c = 0; c < gridSize; c++)
 			{
 				allGrids[c]->Release();
-				allGrids[c] = NULL;
+				allGrids[c] = nullptr;
 			}
 			return S_OK;
 		}
@@ -833,7 +833,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 
 	if (allGrids.size() <= 0)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		return S_OK;
 	}
 
@@ -841,10 +841,10 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	ProjectionTools * pt = new ProjectionTools();
 	for (int i = 0; i < gridSize; i++)
 	{
-		char * currentComparingProj = NULL;
+		char * currentComparingProj = nullptr;
 		if (i == 0)
 		{
-			IGridHeader * header = NULL;
+			IGridHeader * header = nullptr;
 			allGrids[i]->get_Header(&header);
 			header->get_Projection(&final_projection);
 			currentComparingProj = OLE2A(final_projection);
@@ -853,7 +853,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		else
 		{
 			CComBSTR bstrProj;
-			IGridHeader * header = NULL;
+			IGridHeader * header = nullptr;
 			allGrids[i]->get_Header(&header);
 			header->get_Projection(&bstrProj);
 			char * nextProj = OLE2A(bstrProj);
@@ -897,7 +897,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	{
 		if (i == 0)
 		{
-			IGridHeader * header = NULL;
+			IGridHeader * header = nullptr;
 			allGrids[i]->get_Header(&header);
 			header->get_dX(&final_dx);
 			header->get_dY(&final_dy);
@@ -917,7 +917,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		}
 		else
 		{
-			IGridHeader * header = NULL;
+			IGridHeader * header = nullptr;
 			allGrids[i]->get_Header(&header);
 			header->get_dX(&ind_dx);
 			header->get_dY(&ind_dy);
@@ -937,28 +937,28 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 
 			if (ind_dx != final_dx)
 			{
-				*retval = NULL;
+				*retval = nullptr;
 				ErrorMessage(callback, tkINCOMPATIBLE_DX);
 
 				gridSize = (int)allGrids.size();
 				for (int c = 0; c < gridSize; c++)
 				{
 					allGrids[c]->Release();
-					allGrids[c] = NULL;
+					allGrids[c] = nullptr;
 				}
 				VariantClear(&vndv);
 				return S_OK;
 			}
 			else if (ind_dy != final_dy)
 			{
-				*retval = NULL;
+				*retval = nullptr;
 				ErrorMessage(callback, tkINCOMPATIBLE_DY);
 
 				gridSize = (int)allGrids.size();
 				for (int c = 0; c < gridSize; c++)
 				{
 					allGrids[c]->Release();
-					allGrids[c] = NULL;
+					allGrids[c] = nullptr;
 				}
 				VariantClear(&vndv);
 				return S_OK;
@@ -979,7 +979,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 
 	if (final_dType == UnknownDataType || final_dType == InvalidDataType)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		ErrorMessage(callback, tkINVALID_DATA_TYPE);
 
 		gridSize = (int)allGrids.size();
@@ -987,7 +987,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		for (int c = 0; c < gridSize; c++)
 		{
 			allGrids[c]->Release();
-			allGrids[c] = NULL;
+			allGrids[c] = nullptr;
 		}
 		VariantClear(&vndv);
 		return S_OK;
@@ -995,20 +995,20 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 
 	if (total <= 0)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		gridSize = (int)allGrids.size();
 
 		for (int c = 0; c < gridSize; c++)
 		{
 			allGrids[c]->Release();
-			allGrids[c] = NULL;
+			allGrids[c] = nullptr;
 		}
 		VariantClear(&vndv);
 		return S_OK;
 	}
 
-	IGridHeader * final_header = NULL;
-	CoCreateInstance(CLSID_GridHeader, NULL, CLSCTX_INPROC_SERVER, IID_IGridHeader, reinterpret_cast<void**>(&final_header));
+	IGridHeader * final_header = nullptr;
+	CoCreateInstance(CLSID_GridHeader, nullptr, CLSCTX_INPROC_SERVER, IID_IGridHeader, reinterpret_cast<void**>(&final_header));
 	final_header->put_NumberCols((long)((final_xurcenter - final_xllcenter) / final_dx) + 1);
 	final_header->put_NumberRows((long)((final_yurcenter - final_yllcenter) / final_dy) + 1);
 	final_header->put_dX(final_dx);
@@ -1019,18 +1019,18 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	final_header->put_Projection(final_projection);
 
 	VARIANT_BOOL vbretval = FALSE;
-	CoCreateInstance(CLSID_Grid, NULL, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(retval));
+	CoCreateInstance(CLSID_Grid, nullptr, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(retval));
 	(*retval)->CreateNew(MergeFilename, final_header, final_dType, vndv, InRam, GrdFileType, cBack, &vbretval);
 	final_header->Release();
 
 	if (vbretval == FALSE)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		gridSize = (int)allGrids.size();
 		for (int c = 0; c < gridSize; c++)
 		{
 			allGrids[c]->Release();
-			allGrids[c] = NULL;
+			allGrids[c] = nullptr;
 		}
 		VariantClear(&vndv);
 		return S_OK;
@@ -1045,7 +1045,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	gridSize = (int)allGrids.size();
 	for (int n = gridSize - 1; n >= 0; n--)
 	{
-		IGridHeader * header = NULL;
+		IGridHeader * header = nullptr;
 		allGrids[n]->get_Header(&header);
 		header->get_XllCenter(&ind_xllcenter);
 		header->get_YllCenter(&ind_yllcenter);
@@ -1076,7 +1076,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	for (int c = 0; c < gridSize; c++)
 	{
 		allGrids[c]->Release();
-		allGrids[c] = NULL;
+		allGrids[c] = nullptr;
 	}
 
 	VariantClear(&vndv);
@@ -1099,23 +1099,23 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 
 	ICallback* callback = cBack ? cBack : _globalCallback;
 
-	if (Grid == NULL)
+	if (Grid == nullptr)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		ErrorMessage(callback, tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
 
 	long ncols = 0, nrows = 0;
 
-	IGridHeader * header = NULL;
+	IGridHeader * header = nullptr;
 	Grid->get_Header(&header);
 	header->get_NumberCols(&ncols);
 	header->get_NumberRows(&nrows);
 
 	if (ncols <= 0 || nrows <= 0)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		ErrorMessage(callback, tkZERO_ROWS_OR_COLS);
 		return S_OK;
 	}
@@ -1124,7 +1124,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 	VariantInit(&vndv);
 	header->get_NodataValue(&vndv);
 
-	CoCreateInstance(CLSID_Grid, NULL, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(retval));
+	CoCreateInstance(CLSID_Grid, nullptr, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(retval));
 	VARIANT_BOOL vbretval;
 	(*retval)->CreateNew(m_globalSettings.emptyBstr, header, OutDataType, vndv, TRUE, UseExtension, cBack, &vbretval);
 	header->Release();
@@ -1154,15 +1154,15 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (Shapefile == NULL || Grid == NULL)
+	if (Shapefile == nullptr || Grid == nullptr)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
 
 	long ncols = 0, nrows = 0;
-	IGridHeader * header = NULL;
+	IGridHeader * header = nullptr;
 	Grid->get_Header(&header);
 	header->get_NumberCols(&ncols);
 	header->get_NumberRows(&nrows);
@@ -1172,7 +1172,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 	Grid->CellToProj(0, 0, &left, &bottom);
 	Grid->CellToProj(ncols - 1, nrows - 1, &right, &top);
 
-	IExtents * box = NULL;
+	IExtents * box = nullptr;
 	Shapefile->get_Extents(&box);
 	double s_left = 0, s_bottom = 0, s_right = 0, s_top = 0, nval;
 	box->GetBounds(&s_left, &s_bottom, &nval, &s_right, &s_top, &nval);
@@ -1181,7 +1181,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 	//Check the bounds
 	if (s_left < left || s_right > right || s_bottom < bottom || s_top < top)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		this->ErrorMessage(tkSHAPEFILE_LARGER_THAN_GRID);
 		return S_OK;
 	}
@@ -1189,14 +1189,14 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 	VARIANT_BOOL vbretval;
 	ShpfileType shapetype = SHP_NULLSHAPE;
 	Shapefile->get_ShapefileType(&shapetype);
-	CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, reinterpret_cast<void**>(retval));
+	CoCreateInstance(CLSID_Shapefile, nullptr, CLSCTX_INPROC_SERVER, IID_IShapefile, reinterpret_cast<void**>(retval));
 	(*retval)->CreateNew(m_globalSettings.emptyBstr, shapetype, &vbretval);
 
 	long numFields = 0;
 	Shapefile->get_NumFields(&numFields);
 	for (int i = 0; i < numFields; i++)
 	{
-		IField * field = NULL;
+		IField * field = nullptr;
 		Shapefile->get_Field(i, &field);
 		long fpos = i;
 		(*retval)->EditInsertField(field, &fpos, cBack, &vbretval);
@@ -1207,7 +1207,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 	Shapefile->get_NumShapes(&numShapes);
 	for (int j = 0; j < numShapes; j++)
 	{
-		IShape * shape = NULL;
+		IShape * shape = nullptr;
 		Shapefile->get_Shape(j, &shape);
 
 		long numPoints = 0;
@@ -1218,7 +1218,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 			double x = 0, y = 0;
 			double z = 0;
 
-			IPoint * point = NULL;
+			IPoint * point = nullptr;
 			shape->get_Point(p, &point);
 			point->get_X(&x);
 			point->get_Y(&y);
@@ -1255,9 +1255,9 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
 
-	if (Tin == NULL)
+	if (Tin == nullptr)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
@@ -1271,7 +1271,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 	long percent = 0, newpercent = 0;
 	double total = numTriangles;
 
-	CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, reinterpret_cast<void**>(retval));
+	CoCreateInstance(CLSID_Shapefile, nullptr, CLSCTX_INPROC_SERVER, IID_IShapefile, reinterpret_cast<void**>(retval));
 
 	if (Type == SHP_POLYGON || Type == SHP_POLYGONZ)
 	{
@@ -1280,15 +1280,15 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		(*retval)->CreateNew(m_globalSettings.emptyBstr, Type, &vbretval);
 
 		long pos = 0;
-		IField * field = NULL;
-		CoCreateInstance(CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, reinterpret_cast<void**>(&field));
+		IField * field = nullptr;
+		CoCreateInstance(CLSID_Field, nullptr, CLSCTX_INPROC_SERVER, IID_IField, reinterpret_cast<void**>(&field));
 		CComBSTR bstrName("Tin");
 		field->put_Name(bstrName);
 		field->put_Type(INTEGER_FIELD);
 		field->put_Width(5);
 		(*retval)->EditInsertField(field, &pos, cBack, &vbretval);
 		field->Release();
-		field = NULL;
+		field = nullptr;
 
 		long vtx1, vtx2, vtx3;
 		double x1, y1, z1;
@@ -1302,14 +1302,14 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			Tin->Vertex(vtx2, &x3, &y3, &z3);
 			Tin->Vertex(vtx3, &x2, &y2, &z2);
 
-			IShape * shape = NULL;
+			IShape * shape = nullptr;
 			ComHelper::CreateShape(&shape);
 			shape->Create(Type, &vbretval);
 
 			pos = 0;
 			shape->InsertPart(0, &pos, &vbretval);
 
-			IPoint * point = NULL;
+			IPoint * point = nullptr;
 			ComHelper::CreatePoint(&point);
 			point->put_X(x1);
 			point->put_Y(y1);
@@ -1317,7 +1317,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			pos = 0;
 			shape->InsertPoint(point, &pos, &vbretval);
 			point->Release();
-			point = NULL;
+			point = nullptr;
 
 			ComHelper::CreatePoint(&point);
 			point->put_X(x2);
@@ -1326,7 +1326,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			pos = 1;
 			shape->InsertPoint(point, &pos, &vbretval);
 			point->Release();
-			point = NULL;
+			point = nullptr;
 
 			ComHelper::CreatePoint(&point);
 			point->put_X(x3);
@@ -1335,7 +1335,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			pos = 2;
 			shape->InsertPoint(point, &pos, &vbretval);
 			point->Release();
-			point = NULL;
+			point = nullptr;
 
 			ComHelper::CreatePoint(&point);
 			point->put_X(x1);
@@ -1344,12 +1344,12 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			pos = 3;
 			shape->InsertPoint(point, &pos, &vbretval);
 			point->Release();
-			point = NULL;
+			point = nullptr;
 
 			pos = i;
 			(*retval)->EditInsertShape(shape, &pos, &vbretval);
 			shape->Release();
-			shape = NULL;
+			shape = nullptr;
 
 			VARIANT val;
 			VariantInit(&val);
@@ -1370,8 +1370,8 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		(*retval)->CreateNew(m_globalSettings.emptyBstr, Type, &vbretval);
 
 		long pos = 0;
-		IField * field = NULL;
-		CoCreateInstance(CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, reinterpret_cast<void**>(&field));
+		IField * field = nullptr;
+		CoCreateInstance(CLSID_Field, nullptr, CLSCTX_INPROC_SERVER, IID_IField, reinterpret_cast<void**>(&field));
 
 		CComBSTR bstrName("Vertex");
 		field->put_Name(bstrName);
@@ -1379,7 +1379,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		field->put_Width(5);
 		(*retval)->EditInsertField(field, &pos, cBack, &vbretval);
 		field->Release();
-		field = NULL;
+		field = nullptr;
 
 		double x1, y1, z1;
 
@@ -1387,11 +1387,11 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		{
 			Tin->Vertex(i, &x1, &y1, &z1);
 
-			IShape * shape = NULL;
+			IShape * shape = nullptr;
 			ComHelper::CreateShape(&shape);
 			shape->Create(Type, &vbretval);
 
-			IPoint * point = NULL;
+			IPoint * point = nullptr;
 			ComHelper::CreatePoint(&point);
 			point->put_X(x1);
 			point->put_Y(y1);
@@ -1399,11 +1399,11 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			pos = 0;
 			shape->InsertPoint(point, &pos, &vbretval);
 			point->Release();
-			point = NULL;
+			point = nullptr;
 
 			(*retval)->EditInsertShape(shape, &i, &vbretval);
 			shape->Release();
-			shape = NULL;
+			shape = nullptr;
 
 			VARIANT val;
 			VariantInit(&val);
@@ -1465,15 +1465,15 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 		ICallback* callback = cBack ? cBack : _globalCallback;
 
-	if (Grid == NULL)
+	if (Grid == nullptr)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		ErrorMessage(callback, tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
 
 	//Create a grid that is twice the size of the original
-	IGridHeader * header = NULL;
+	IGridHeader * header = nullptr;
 	Grid->get_Header(&header);
 	long cols = 0, rows = 0;
 	header->get_NumberCols(&cols);
@@ -1492,11 +1492,11 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	header->get_XllCenter(&xllCenter);
 	header->get_YllCenter(&yllCenter);
 	header->Release();
-	header = NULL;
+	header = nullptr;
 
 	if (cols <= 0 || rows <= 0)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		ErrorMessage(callback, tkZERO_ROWS_OR_COLS);
 		VariantClear(&vndv);
 		return S_OK;
@@ -1515,9 +1515,9 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 	VARIANT_BOOL vbretval = FALSE;
 
-	CoCreateInstance(CLSID_Grid, NULL, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(&_expand_grid));
-	IGridHeader * expand_header = NULL;
-	CoCreateInstance(CLSID_GridHeader, NULL, CLSCTX_INPROC_SERVER, IID_IGridHeader, reinterpret_cast<void**>(&expand_header));
+	CoCreateInstance(CLSID_Grid, nullptr, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(&_expand_grid));
+	IGridHeader * expand_header = nullptr;
+	CoCreateInstance(CLSID_GridHeader, nullptr, CLSCTX_INPROC_SERVER, IID_IGridHeader, reinterpret_cast<void**>(&expand_header));
 	expand_header->put_dX(dx*.5);
 	expand_header->put_dY(dy*.5);
 	expand_header->put_XllCenter(xllCenter - dx * .5);
@@ -1531,7 +1531,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	_expand_grid->CreateNew(bstr, expand_header, dType, vndv, VARIANT_TRUE, UseExtension, cBack, &vbretval);
 
 	expand_header->Release();
-	expand_header = NULL;
+	expand_header = nullptr;
 
 	_connection_grid = ConnectionGrid;
 
@@ -1722,18 +1722,18 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 					//Convex polygon test
 					else if (polygon_id == DECISION)
 					{
-						if (_connection_grid != NULL)
+						if (_connection_grid != nullptr)
 						{
 							long contract_x = (i - 1) / 2;
 							long contract_y = (j - 1) / 2;
 
-							IGridHeader * cHeader = NULL;
+							IGridHeader * cHeader = nullptr;
 							_connection_grid->get_Header(&cHeader);
 							VARIANT cndv;
 							VariantInit(&cndv);
 							cHeader->get_NodataValue(&cndv);
 							cHeader->Release();
-							cHeader = NULL;
+							cHeader = nullptr;
 
 							double nodata = -1;
 							dVal(cndv, nodata);
@@ -1744,7 +1744,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 							if (decision == nodata)
 							{
 								_expand_grid->Close(&vbretval);
-								*retval = NULL;
+								*retval = nullptr;
 								ErrorMessage(callback, tkCONCAVE_POLYGONS);
 								return S_OK;
 							}
@@ -1801,19 +1801,19 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	}
 
 	//Create the shapefile
-	CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, reinterpret_cast<void**>(retval));
+	CoCreateInstance(CLSID_Shapefile, nullptr, CLSCTX_INPROC_SERVER, IID_IShapefile, reinterpret_cast<void**>(retval));
 	(*retval)->CreateNew(m_globalSettings.emptyBstr, SHP_POLYGON, &vbretval);
 
 	long fieldpos = 0;
-	IField * field = NULL;
-	CoCreateInstance(CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, reinterpret_cast<void**>(&field));
+	IField * field = nullptr;
+	CoCreateInstance(CLSID_Field, nullptr, CLSCTX_INPROC_SERVER, IID_IField, reinterpret_cast<void**>(&field));
 	CComBSTR bstrName("PolygonID");
 	field->put_Name(bstrName);
 	field->put_Type(INTEGER_FIELD);
 	field->put_Width(10);
 	(*retval)->EditInsertField(field, &fieldpos, cBack, &vbretval);
 	field->Release();
-	field = NULL;
+	field = nullptr;
 
 	//Create the polygons
 	//Only look at the center value of the cells
@@ -1884,7 +1884,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 
 					//Write the final polygon
-					IShape * shape = NULL;
+					IShape * shape = nullptr;
 					ComHelper::CreateShape(&shape);
 					shape->Create(SHP_POLYGON, &vbretval);
 					long ppos = 0;
@@ -1976,32 +1976,32 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 							if (last_point_index < 0)
 								last_point_index = point;
 							_expand_grid->CellToProj(polygon[point].column, polygon[point].row, &poly_x, &poly_y);
-							IPoint * ipoint = NULL;
+							IPoint * ipoint = nullptr;
 							ComHelper::CreatePoint(&ipoint);
 							ipoint->put_X(poly_x);
 							ipoint->put_Y(poly_y);
 							long pindex = point;
 							shape->InsertPoint(ipoint, &pindex, &vbretval);
 							ipoint->Release();
-							ipoint = NULL;
+							ipoint = nullptr;
 						}
 					}
 					//Write the last point again
 					_expand_grid->CellToProj(polygon[last_point_index].column, polygon[last_point_index].row, &poly_x, &poly_y);
-					IPoint * ipoint = NULL;
+					IPoint * ipoint = nullptr;
 					ComHelper::CreatePoint(&ipoint);
 					ipoint->put_X(poly_x);
 					ipoint->put_Y(poly_y);
 					long pindex = point + 1;
 					shape->InsertPoint(ipoint, &pindex, &vbretval);
 					ipoint->Release();
-					ipoint = NULL;
+					ipoint = nullptr;
 
 					long sindex = number_polygons;
 					(*retval)->EditInsertShape(shape, &sindex, &vbretval);
 
 					shape->Release();
-					shape = NULL;
+					shape = nullptr;
 
 					VARIANT cval;
 					VariantInit(&cval);
@@ -2019,7 +2019,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 	_expand_grid->Close(&vbretval);
 	_expand_grid->Release();
-	_expand_grid = NULL;
+	_expand_grid = nullptr;
 
 	VariantClear(&vndv);
 
@@ -2050,7 +2050,7 @@ inline bool CUtils::is_decision(IGrid * g, int x, int y)
 	double two = getValue(g, x + 1, y - 1);
 	double six = getValue(g, x - 1, y + 1);
 
-	IGridHeader * header = NULL;
+	IGridHeader * header = nullptr;
 	g->get_Header(&header);
 	VARIANT vval;
 	VariantInit(&vval);
@@ -2059,7 +2059,7 @@ inline bool CUtils::is_decision(IGrid * g, int x, int y)
 	dVal(vval, nodata);
 	VariantClear(&vval);
 	header->Release();
-	header = NULL;
+	header = nullptr;
 
 	if (two == six)
 	{
@@ -2386,7 +2386,7 @@ void CUtils::trace_polygon(long x, long y, std::deque<RasterPoint> & polygon)
 		{
 			if (getValue(_expand_grid, x + 1, y) == DECISION)
 			{
-				if (_connection_grid == NULL)
+				if (_connection_grid == nullptr)
 				{
 					polygon.clear();
 					return;
@@ -2465,7 +2465,7 @@ void CUtils::trace_polygon(long x, long y, std::deque<RasterPoint> & polygon)
 		{
 			if (getValue(_expand_grid, x, y - 1) == DECISION)
 			{
-				if (_connection_grid == NULL)
+				if (_connection_grid == nullptr)
 				{
 					polygon.clear();
 					return;
@@ -2544,7 +2544,7 @@ void CUtils::trace_polygon(long x, long y, std::deque<RasterPoint> & polygon)
 		{
 			if (getValue(_expand_grid, x - 1, y) == DECISION)
 			{
-				if (_connection_grid == NULL)
+				if (_connection_grid == nullptr)
 				{
 					polygon.clear();
 					return;
@@ -2622,7 +2622,7 @@ void CUtils::trace_polygon(long x, long y, std::deque<RasterPoint> & polygon)
 		if (!moved_turtle) {
 			if (getValue(_expand_grid, x, y + 1) == DECISION)
 			{
-				if (_connection_grid == NULL)
+				if (_connection_grid == nullptr)
 				{
 					polygon.clear();
 					return;
@@ -2733,9 +2733,9 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 
 		USES_CONVERSION;
 
-	if (Shpfile == NULL)
+	if (Shpfile == nullptr)
 	{
-		*retval = NULL;
+		*retval = nullptr;
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
@@ -2743,7 +2743,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 	if (!((CShapefile*)Shpfile)->ValidateInput(Shpfile, "ShapefileToGrid", "Shpfile", VARIANT_FALSE, "Utils"))
 		return S_OK;
 
-	CoCreateInstance(CLSID_Grid, NULL, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(retval));
+	CoCreateInstance(CLSID_Grid, nullptr, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(retval));
 
 	VARIANT_BOOL result = VARIANT_FALSE;
 	VARIANT vndv; //no data value
@@ -2753,11 +2753,11 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 
 	if (UseShapefileBounds == VARIANT_FALSE)
 	{
-		if (GridHeader == NULL)
+		if (GridHeader == nullptr)
 		{	//if the user doesn't want to use the shapefilebounds, then they MUST
 			//give us a GridHeader...so, if this is null, fail
 			(*retval)->Release();
-			*retval = NULL;
+			*retval = nullptr;
 			this->ErrorMessage(tkINVALID_PARAMETER_VALUE);
 			goto cleaning;
 		}
@@ -2772,7 +2772,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			//we must fail because we can't use the nodatavalue from the grid
 			//as the singlevalue of the shapefile being converted to a grid;
 			(*retval)->Release();
-			*retval = NULL;
+			*retval = nullptr;
 			this->ErrorMessage(tkINVALID_PARAMETER_VALUE);
 			goto cleaning;
 		}
@@ -2783,7 +2783,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		{ //failed to create new grid
 			(*retval)->get_LastErrorCode(&_lastErrorCode);
 			(*retval)->Release();
-			*retval = NULL;
+			*retval = nullptr;
 			ErrorMessage(_lastErrorCode);
 			goto cleaning;
 		}
@@ -2792,7 +2792,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 
 		Shpfile->get_NumShapes(&NumShapes);
 
-		IShape * shape = NULL;
+		IShape * shape = nullptr;
 
 		short cellValue;
 
@@ -2846,7 +2846,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 
 		if (Cellsize <= 1)
 		{
-			*retval = NULL;
+			*retval = nullptr;
 			this->ErrorMessage(tkINVALID_PARAMETER_VALUE);
 			goto cleaning;
 		}
@@ -2874,7 +2874,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		{ //failed to create new grid
 			(*retval)->get_LastErrorCode(&_lastErrorCode);
 			(*retval)->Release();
-			*retval = NULL;
+			*retval = nullptr;
 			ErrorMessage(_lastErrorCode);
 			return S_OK;
 		}
@@ -2883,7 +2883,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 
 		Shpfile->get_NumShapes(&NumShapes);
 
-		IShape * shape = NULL;
+		IShape * shape = nullptr;
 
 		short cellValue;
 
@@ -2917,14 +2917,14 @@ bool CUtils::PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue)
 	LineBresenham Line;
 	std::vector<lbPoint> ListOfPoints;
 	lbPoint StartPoint, EndPoint;
-	IPoint * shpPoint = NULL;
+	IPoint * shpPoint = nullptr;
 	long NumPoints = 0;
 	double CurX;
 	double CurY;
 
 	ListOfPoints.clear();
 
-	if (shape == NULL || grid == NULL)
+	if (shape == nullptr || grid == nullptr)
 	{
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return false;
@@ -3010,8 +3010,8 @@ STDMETHODIMP CUtils::hBitmapToPicture(long hBitmap, IPictureDisp **retval)
 	pictdesc.cbSizeofstruct = sizeof(PICTDESC);
 	pictdesc.picType = PICTYPE_BITMAP;
 	pictdesc.bmp.hbitmap = bitmap;
-	pictdesc.bmp.hpal = NULL;
-	*retval = NULL;
+	pictdesc.bmp.hpal = nullptr;
+	*retval = nullptr;
 	OleCreatePictureIndirect(&pictdesc, IID_IPictureDisp, TRUE, reinterpret_cast<void**>(retval));
 
 	return S_OK;
@@ -3076,7 +3076,7 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 		GDALAllRegister();
 
 		poDataset = GdalHelper::OpenRasterDatasetW(OLE2W(bstrGridFilename), GA_ReadOnly);
-		if (poDataset == NULL)
+		if (poDataset == nullptr)
 		{
 			CallbackHelper::ErrorMsg(Debug::Format("Generate hill shade: couldn't open dataset %s\n", pszGridFilename));
 			return S_OK;
@@ -3103,7 +3103,7 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 		poDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
 		GDALDataset      *poShadeDS;
 		GDALRasterBand   *poShadeBand;
-		char **papszOptions = NULL;
+		char **papszOptions = nullptr;
 
 		poShadeDS = poDriver->Create(pszShadeFilename, nXSize, nYSize, 1, GDT_Byte,
 			papszOptions);
@@ -3295,9 +3295,9 @@ STDMETHODIMP CUtils::OGRLayerToShapefile(BSTR Filename, ShpfileType shpType, ICa
 STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IShape* ClipPolygon, IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*retval = NULL;
+		*retval = nullptr;
 
-	if (SubjectPolygon == NULL || ClipPolygon == NULL)
+	if (SubjectPolygon == nullptr || ClipPolygon == nullptr)
 	{
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
@@ -3323,16 +3323,16 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 	if (geos)
 	{
 		OGRGeometry* geomSubject = OgrConverter::ShapeToGeometry(SubjectPolygon);
-		if (geomSubject == NULL) return S_OK;
+		if (geomSubject == nullptr) return S_OK;
 
 		OGRGeometry* geomClip = OgrConverter::ShapeToGeometry(ClipPolygon);
-		if (geomClip == NULL)
+		if (geomClip == nullptr)
 		{
 			OGRGeometryFactory::destroyGeometry(geomSubject);
 			return S_OK;
 		}
 
-		OGRGeometry* oGeom = NULL;
+		OGRGeometry* oGeom = nullptr;
 		switch (op)
 		{
 		case DIFFERENCE_OPERATION:
@@ -3352,7 +3352,7 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 		OGRGeometryFactory::destroyGeometry(geomClip);
 		OGRGeometryFactory::destroyGeometry(geomSubject);
 
-		if (oGeom != NULL)
+		if (oGeom != nullptr)
 		{
 			SubjectPolygon->get_ShapeType(&shptype);
 
@@ -3366,7 +3366,7 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 				// if there are more than one poly, we should release them
 				for (int i = 1; i < (int)vShapes.size(); i++)
 				{
-					if (vShapes[i] != NULL)
+					if (vShapes[i] != nullptr)
 					{
 						vShapes[i]->Release();
 					}
@@ -3579,22 +3579,22 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	if (!sf || !source || !target)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		*result = NULL;
+		*result = nullptr;
 		return S_OK;
 	}
 
-	OGRSpatialReference* ref1 = ((CGeoProjection*)source)->get_SpatialReference();
-	OGRSpatialReference* ref2 = ((CGeoProjection*)target)->get_SpatialReference();
+	OGRSpatialReference* ref1 = static_cast<CGeoProjection*>(source)->get_SpatialReference();
+	OGRSpatialReference* ref2 = static_cast<CGeoProjection*>(target)->get_SpatialReference();
 
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation(ref1, ref2);
 	if (!transf)
 	{
 		ErrorMessage(tkFAILED_TO_REPROJECT);
-		*result = NULL;
+		*result = nullptr;
 		return S_OK;
 	}
 
-	if (!((CShapefile*)sf)->ValidateInput(sf, "ReprojectShapefile", "sf", VARIANT_FALSE, "Utils"))
+	if (!static_cast<CShapefile*>(sf)->ValidateInput(sf, "ReprojectShapefile", "sf", VARIANT_FALSE, "Utils"))
 		return S_OK;
 
 	// ------------------------------------------------
@@ -3617,10 +3617,10 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	{
 		CallbackHelper::Progress(_globalCallback, i, numShapes, "Reprojecting...", _key, percent);
 
-		IShape* shp = NULL;
+		IShape* shp = nullptr;
 		sf->get_Shape(i, &shp);
 
-		IShape* shpNew = NULL;
+		IShape* shpNew = nullptr;
 		shp->Clone(&shpNew);
 
 		if (shpNew)
@@ -3644,7 +3644,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 					// if there is at least one failed point, reprojection will be interrupted
 					shpNew->Release();
 					(*result)->Release();
-					(*result) = NULL;
+					(*result) = nullptr;
 					ErrorMessage(tkFAILED_TO_REPROJECT);
 					return S_OK;
 				}
@@ -3666,7 +3666,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	//    Validating output
 	// --------------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	((CShapefile*)sf)->ValidateOutput(&sf, "ReprojectShapefile", "Utils");
+	static_cast<CShapefile*>(sf)->ValidateOutput(&sf, "ReprojectShapefile", "Utils");
 
 	return S_OK;
 }
@@ -3724,14 +3724,14 @@ STDMETHODIMP CUtils::ClipGridWithPolygon(BSTR inputGridfile, IShape* poly, BSTR 
 		return S_OK;
 	}
 
-	IGrid* grid = NULL;
-	CoCreateInstance(CLSID_Grid, NULL, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(&grid));
+	IGrid* grid = nullptr;
+	CoCreateInstance(CLSID_Grid, nullptr, CLSCTX_INPROC_SERVER, IID_IGrid, reinterpret_cast<void**>(&grid));
 
 	if (grid)
 	{
 		bool inRam = false;
 		VARIANT_BOOL vb;
-		grid->Open(inputGridfile, GridDataType::UnknownDataType, inRam, GridFileType::UseExtension, NULL, &vb);
+		grid->Open(inputGridfile, GridDataType::UnknownDataType, inRam, GridFileType::UseExtension, nullptr, &vb);
 		if (vb) {
 			this->ClipGridWithPolygon2(grid, poly, resultGridfile, keepExtents, retVal);
 			grid->Close(&vb);
@@ -3764,13 +3764,13 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 	VARIANT_BOOL vb;
 
 	// find cell bounds
-	IExtents* ext1 = NULL;
+	IExtents* ext1 = nullptr;
 	poly->get_Extents(&ext1);
 
-	IExtents* ext2 = NULL;
+	IExtents* ext2 = nullptr;
 	((CGrid*)grid)->get_Extents(&ext2);
 
-	IExtents* bounds = NULL;
+	IExtents* bounds = nullptr;
 	((CExtents*)ext1)->GetIntersection(ext2, &bounds);
 
 	ext1->Release();
@@ -3785,7 +3785,7 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 		grid->ProjToCell(xMin, yMin, &firstCol, &firstRow);
 		grid->ProjToCell(xMax, yMax, &lastCol, &lastRow);
 
-		IGrid* newGrid = NULL;
+		IGrid* newGrid = nullptr;
 
 		if (!keepExtents) {
 			newGrid = ((CGrid*)grid)->Clip(resultGridfile, firstCol, lastCol, firstRow, lastRow);
@@ -3798,7 +3798,7 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 		if (newGrid)
 		{
 			double dx, dy, xll, yll;
-			IGridHeader* header = NULL;
+			IGridHeader* header = nullptr;
 			newGrid->get_Header(&header);
 			header->get_dX(&dx);
 			header->get_dY(&dy);
@@ -3869,7 +3869,7 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 				delete[] vals;
 			}
 
-			newGrid->Save(resultGridfile, GridFileType::UseExtension, NULL, &vb);
+			newGrid->Save(resultGridfile, GridFileType::UseExtension, nullptr, &vb);
 			newGrid->Close(&vb);
 			newGrid->Release();
 			*retVal = VARIANT_TRUE;
@@ -3883,7 +3883,7 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 // ********************************************************
 void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bool overwrite)
 {
-	CComPtr<ITable> tbl = NULL;
+	CComPtr<ITable> tbl = nullptr;
 	sf->get_Table(&tbl);
 
 	VARIANT_BOOL vb;
@@ -3895,7 +3895,7 @@ void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bo
 			CComBSTR bstrName(fields[i]);
 			tbl->get_FieldIndexByName(bstrName, &index);
 			if (index != -1) {
-				tbl->EditDeleteField(index, NULL, &vb);
+				tbl->EditDeleteField(index, nullptr, &vb);
 			}
 		}
 	}
@@ -4128,10 +4128,10 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 		return S_OK;
 	}
 
-	IExtents* extSf = NULL;
+	IExtents* extSf = nullptr;
 	sf->get_Extents(&extSf);
 
-	IExtents* extGrid = NULL;
+	IExtents* extGrid = nullptr;
 	((CGrid*)grid)->get_Extents(&extGrid);
 
 	VARIANT_BOOL vb;
@@ -4154,7 +4154,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 	CreateStatisticsFields(sf, fieldIndices, overwriteFields ? true : false);
 
 	double dx, dy, xll, yll;
-	IGridHeader* header = NULL;
+	IGridHeader* header = nullptr;
 	grid->get_Header(&header);
 	header->get_dX(&dx);
 	header->get_dY(&dy);
@@ -4188,15 +4188,15 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 		if (selectedOnly && !vb)
 			continue;
 
-		IShape* poly = NULL;
+		IShape* poly = nullptr;
 		sf->get_Shape(n, &poly);
 
-		IExtents* bounds = NULL;
+		IExtents* bounds = nullptr;
 		poly->get_Extents(&extSf);
 		((CExtents*)extGrid)->GetIntersection(extSf, &bounds);
 		extSf->Release();
 
-		if (bounds != NULL)
+		if (bounds != nullptr)
 		{
 			// determine rows & cols which correspond to a poly
 			double xMin, yMin, zMin, xMax, yMax, zMax;
@@ -4579,7 +4579,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 		{
 			for (int iXBlock = 0; iXBlock < nXBlocks; iXBlock++)
 			{
-				if (_globalCallback != NULL)
+				if (_globalCallback != nullptr)
 				{
 					double count = iYBlock * nXBlocks + iXBlock;
 					long newpercent = (long)((double)count / (double)(nXBlocks * nYBlocks)*100.0);
@@ -4671,7 +4671,7 @@ void CPL_STDCALL GdalErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
 
 void ClearGdalErrorHandler()
 {
-	gdalCallback = NULL;
+	gdalCallback = nullptr;
 }
 
 void SetGdalErrorHandler(ICallback* callback)
@@ -4754,7 +4754,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 				{
 					for (int iXBlock = 0; iXBlock < nXBlocks; iXBlock++)
 					{
-						if (_globalCallback != NULL)
+						if (_globalCallback != nullptr)
 						{
 							double count = iYBlock * nXBlocks + iXBlock;
 							long newpercent = (long)((double)count / (double)(nXBlocks * nYBlocks)*100.0);
@@ -4838,7 +4838,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 
 
 
-	if (_globalCallback != NULL)
+	if (_globalCallback != nullptr)
 	{
 		ClearGdalErrorHandler();
 		CallbackHelper::ProgressCompleted(_globalCallback);
@@ -4860,7 +4860,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		}
 	long errorCode;
 
-	ICharts* Charts = NULL;
+	ICharts* Charts = nullptr;
 	comClass->QueryInterface(IID_ICharts, reinterpret_cast<void**>(&Charts));
 	if (Charts)
 	{
@@ -4870,7 +4870,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IColorScheme* ColorScheme = NULL;
+	IColorScheme* ColorScheme = nullptr;
 	comClass->QueryInterface(IID_IColorScheme, reinterpret_cast<void**>(&ColorScheme));
 	if (ColorScheme)
 	{
@@ -4880,7 +4880,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IESRIGridManager* ESRIGridManager = NULL;
+	IESRIGridManager* ESRIGridManager = nullptr;
 	comClass->QueryInterface(IID_IESRIGridManager, reinterpret_cast<void**>(&ESRIGridManager));
 	if (ESRIGridManager)
 	{
@@ -4892,7 +4892,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 
 	//IExtents* Extents = NULL;
 
-	IField* Field = NULL;
+	IField* Field = nullptr;
 	comClass->QueryInterface(IID_IField, reinterpret_cast<void**>(&Field));
 	if (Field)
 	{
@@ -4902,7 +4902,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IGeoProjection* GeoProjection = NULL;
+	IGeoProjection* GeoProjection = nullptr;
 	comClass->QueryInterface(IID_IGeoProjection, reinterpret_cast<void**>(&GeoProjection));
 	if (GeoProjection)
 	{
@@ -4914,7 +4914,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 
 	//IGlobalSettings* GlobalSettings = NULL;
 
-	IGrid* Grid = NULL;
+	IGrid* Grid = nullptr;
 	comClass->QueryInterface(IID_IGrid, reinterpret_cast<void**>(&Grid));
 	if (Grid)
 	{
@@ -4924,7 +4924,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IGridColorBreak* GridColorBreak = NULL;
+	IGridColorBreak* GridColorBreak = nullptr;
 	comClass->QueryInterface(IID_IGridColorBreak, reinterpret_cast<void**>(&GridColorBreak));
 	if (GridColorBreak)
 	{
@@ -4934,7 +4934,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IGridColorScheme* GridColorScheme = NULL;
+	IGridColorScheme* GridColorScheme = nullptr;
 	comClass->QueryInterface(IID_IGridColorScheme, reinterpret_cast<void**>(&GridColorScheme));
 	if (GridColorScheme)
 	{
@@ -4944,7 +4944,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IGridHeader* GridHeader = NULL;
+	IGridHeader* GridHeader = nullptr;
 	comClass->QueryInterface(IID_IGridHeader, reinterpret_cast<void**>(&GridHeader));
 	if (GridHeader)
 	{
@@ -4954,7 +4954,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IImage* Image = NULL;
+	IImage* Image = nullptr;
 	comClass->QueryInterface(IID_IImage, reinterpret_cast<void**>(&Image));
 	if (Image)
 	{
@@ -4966,7 +4966,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 
 	//ILabelCategory* LabelCategory = NULL;
 
-	ILabels* Labels = NULL;
+	ILabels* Labels = nullptr;
 	comClass->QueryInterface(IID_ILabels, reinterpret_cast<void**>(&Labels));
 	if (Labels)
 	{
@@ -4976,7 +4976,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	ILinePattern* LinePattern = NULL;
+	ILinePattern* LinePattern = nullptr;
 	comClass->QueryInterface(IID_ILinePattern, reinterpret_cast<void**>(&LinePattern));
 	if (LinePattern)
 	{
@@ -4990,7 +4990,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 
 	//IMeasuring* Measuring = NULL;
 
-	IPoint* Point = NULL;
+	IPoint* Point = nullptr;
 	comClass->QueryInterface(IID_IPoint, reinterpret_cast<void**>(&Point));
 	if (Point)
 	{
@@ -5000,7 +5000,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IShape* Shape = NULL;
+	IShape* Shape = nullptr;
 	comClass->QueryInterface(IID_IShape, reinterpret_cast<void**>(&Shape));
 	if (Shape)
 	{
@@ -5010,7 +5010,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IShapeDrawingOptions* ShapeDrawingOptions = NULL;
+	IShapeDrawingOptions* ShapeDrawingOptions = nullptr;
 	comClass->QueryInterface(IID_IShapeDrawingOptions, reinterpret_cast<void**>(&ShapeDrawingOptions));
 	if (ShapeDrawingOptions)
 	{
@@ -5020,7 +5020,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IShapefile* Shapefile = NULL;
+	IShapefile* Shapefile = nullptr;
 	comClass->QueryInterface(IID_IShapefile, reinterpret_cast<void**>(&Shapefile));
 	if (Shapefile)
 	{
@@ -5030,7 +5030,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IShapefileCategories* ShapefileCategories = NULL;
+	IShapefileCategories* ShapefileCategories = nullptr;
 	comClass->QueryInterface(IID_IShapefileCategories, reinterpret_cast<void**>(&ShapefileCategories));
 	if (ShapefileCategories)
 	{
@@ -5056,7 +5056,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 	}
 #endif
 
-	IShapeNetwork* ShapeNetwork = NULL;
+	IShapeNetwork* ShapeNetwork = nullptr;
 	comClass->QueryInterface(IID_IShapeNetwork, reinterpret_cast<void**>(&ShapeNetwork));
 	if (ShapeNetwork)
 	{
@@ -5066,7 +5066,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	CComPtr<ITable> Table = NULL;
+	CComPtr<ITable> Table = nullptr;
 	comClass->QueryInterface(IID_ITable, reinterpret_cast<void**>(&Table));
 	if (Table)
 	{
@@ -5075,7 +5075,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	ITileProviders* TileProviders = NULL;
+	ITileProviders* TileProviders = nullptr;
 	comClass->QueryInterface(IID_ITileProviders, reinterpret_cast<void**>(&TileProviders));
 	if (TileProviders)
 	{
@@ -5085,7 +5085,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	ITin* Tin = NULL;
+	ITin* Tin = nullptr;
 	comClass->QueryInterface(IID_ITin, reinterpret_cast<void**>(&Tin));
 	if (Tin)
 	{
@@ -5095,7 +5095,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IUtils* Utils = NULL;
+	IUtils* Utils = nullptr;
 	comClass->QueryInterface(IID_IUtils, reinterpret_cast<void**>(&Utils));
 	if (Utils)
 	{
@@ -5105,7 +5105,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IVector* Vector = NULL;
+	IVector* Vector = nullptr;
 	comClass->QueryInterface(IID_IVector, reinterpret_cast<void**>(&Vector));
 	if (Vector)
 	{
@@ -5115,7 +5115,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		return S_OK;
 	}
 
-	IFileManager* FileManager = NULL;
+	IFileManager* FileManager = nullptr;
 	comClass->QueryInterface(IID_IFileManager, reinterpret_cast<void**>(&FileManager));
 	if (FileManager)
 	{
@@ -5127,7 +5127,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 
 	//IShapeValidationInfo* ShapeValidationInfo = NULL;
 
-	IFieldStatOperations* FieldStatOperations = NULL;
+	IFieldStatOperations* FieldStatOperations = nullptr;
 	comClass->QueryInterface(IID_IFieldStatOperations, reinterpret_cast<void**>(&FieldStatOperations));
 	if (FieldStatOperations)
 	{
@@ -5146,7 +5146,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 // ********************************************************
 HRESULT CUtils::TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal)
 {
-	*retVal = NULL;
+	*retVal = nullptr;
 
 	if (projection != Amersfoort && projection != SphericalMercator)
 		return S_OK;
@@ -5159,7 +5159,7 @@ HRESULT CUtils::TileProjectionToGeoProjectionCore(tkTileProjection projection, V
 	}
 	else
 	{
-		IGeoProjection* gp = NULL;
+		IGeoProjection* gp = nullptr;
 		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&gp);
 		VARIANT_BOOL vb;
 		switch (projection)
@@ -5258,10 +5258,10 @@ GDALDriverH OpenOutputDriver(CString driverName)
 	GDALDriverH outputDriver = GDALGetDriverByName(driverName);
 	if (outputDriver)
 	{
-		char **driverMetadata = GDALGetMetadata(outputDriver, NULL);
+		char **driverMetadata = GDALGetMetadata(outputDriver, nullptr);
 		if (!CSLFetchBoolean(driverMetadata, GDAL_DCAP_CREATE, false))
 		{
-			outputDriver = NULL; //driver exist, but it does not support the create operation
+			outputDriver = nullptr; //driver exist, but it does not support the create operation
 		}
 	}
 	return outputDriver;
@@ -5274,7 +5274,7 @@ GDALDataset* OpenOutputFile(GDALDriverH outputDriver, CStringW filename, int xSi
 {
 	m_globalSettings.SetGdalUtf8(true);
 
-	char **papszOptions = NULL;
+	char **papszOptions = nullptr;
 	GDALDataset* outputDataset = (GDALDataset *)GDALCreate(outputDriver, Utility::ConvertToUtf8(filename), xSize, ySize, 1, GDT_Float32, papszOptions);
 
 	double transform[6];
@@ -5313,7 +5313,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 
 	CustomExpression expr;
 	CStringW err;
-	GDALDataset* dtOutput = NULL; // used in clean-up when something false, throws an exception when is it not yet created.
+	GDALDataset* dtOutput = nullptr; // used in clean-up when something false, throws an exception when is it not yet created.
 
 	// --------------------------------------------------------
 	//   Open input
@@ -5337,7 +5337,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	int xSize = 0;
 	int ySize = 0;
 
-	float* calcData = NULL;
+	float* calcData = nullptr;
 
 	GDALAllRegister();
 
@@ -5410,7 +5410,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	// --------------------------------------------------------	
 	GDALDriverH driver = OpenOutputDriver(OLE2A(gdalOutputFormat));
 	// GDALDataset* dtOutput = NULL; Moved up, because it fails on clean up
-	if (driver != NULL)
+	if (driver != nullptr)
 	{
 		dtOutput = OpenOutputFile(driver, OLE2W(outputFilename), xSize, ySize, datasets.begin()->second);
 	}
@@ -5669,8 +5669,8 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 		breaks.push_back(b);
 	}
 
-	GDALDataset* dtOutput = NULL;
-	float* data = NULL;
+	GDALDataset* dtOutput = nullptr;
+	float* data = nullptr;
 
 	// -------------------------------------------------------
 	//		Source
@@ -5701,7 +5701,7 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 	//		Creating output
 	// -------------------------------------------------------
 	GDALDriverH driver = OpenOutputDriver(OLE2A(gdalOutputFormat));
-	if (driver != NULL)
+	if (driver != nullptr)
 	{
 		dtOutput = OpenOutputFile(driver, OLE2W(outputName), xSize, ySize, dt);
 	}
@@ -5886,7 +5886,7 @@ STDMETHODIMP CUtils::LineInterpolatePoint(IShape* sourceLine, IPoint* startPoint
 		*retVal = nullptr;
 
 	// basic validation
-	if (sourceLine == NULL || startPoint == NULL)
+	if (sourceLine == nullptr || startPoint == nullptr)
 	{
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
@@ -6015,7 +6015,7 @@ STDMETHODIMP CUtils::LineProjectDistanceTo(IShape* sourceLine, IShape* reference
 		*distance = 0;
 
 	// basic validation
-	if (sourceLine == NULL || referenceShape == NULL)
+	if (sourceLine == nullptr || referenceShape == nullptr)
 	{
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
