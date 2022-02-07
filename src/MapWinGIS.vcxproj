@@ -172,6 +172,7 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</MultiProcessorCompilation>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdc11</LanguageStandard_C>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
@@ -185,6 +186,8 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     </Midl>
     <ClCompile>
       <PreprocessorDefinitions>WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdc11</LanguageStandard_C>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
@@ -195,6 +198,10 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='VLD'">
     <ClCompile>
       <PreprocessorDefinitions>VLD_FORCE_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">stdc11</LanguageStandard_C>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">stdc11</LanguageStandard_C>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">stdcpp14</LanguageStandard>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <RegisterOutput>false</RegisterOutput>
