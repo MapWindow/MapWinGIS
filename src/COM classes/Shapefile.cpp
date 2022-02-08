@@ -227,13 +227,13 @@ bool CShapefile::GetVisibilityFlags(map<long, BYTE> &flags)
     {
         BYTE visibilityFlags = 0;
         // get currently-assocaited ShapeID
-        long shapeID = _ogrFid2ShapeIndex[iter->first];
+        const long shapeID = _ogrFid2ShapeIndex[iter->first];
         // only consider Hidden and Selected values, as others are not intended to be persisted
         if (_shapeData[shapeID]->hidden()) visibilityFlags |= tkShapeRecordFlags::shpHidden;
         if (_shapeData[shapeID]->selected()) visibilityFlags |= tkShapeRecordFlags::shpSelected;
         // set into mapping, mapping OGR_FID to visibility flags
         flags.insert(std::make_pair(iter->first, visibilityFlags));
-        iter++;
+        ++iter;
     }
     return true;
 }
@@ -259,7 +259,7 @@ bool CShapefile::SetVisibilityFlags(map<long, BYTE> &flags)
             _shapeData[shapeID]->hidden((visibilityFlags & tkShapeRecordFlags::shpHidden) ? true : false);
             _shapeData[shapeID]->selected((visibilityFlags & tkShapeRecordFlags::shpSelected) ? true : false);
         }
-        iter++;
+        ++iter;
     }
     return true;
 }

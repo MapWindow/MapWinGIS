@@ -84,7 +84,7 @@ namespace Utility
 	
 	// units conversions
 	CStringW GetLocalizedUnitsText(tkUnitsOfMeasure units);
-	double GetConversionFactor(tkUnitsOfMeasure Units);
+	double GetConversionFactor(tkUnitsOfMeasure units);
 	bool ConvertDistance(tkUnitsOfMeasure source, tkUnitsOfMeasure target, double& value);
 	CString GetUnitOfMeasureText(tkUnitsOfMeasure units);
 

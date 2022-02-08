@@ -101,7 +101,7 @@ OGRErr ProjectionHelper::ImportFromWkt(OGRSpatialReference* sr, CString proj)
 	// TODO: Deprecated: GDAL 2.3. Use importFromWkt(const char**) instead.
 	return sr->importFromWkt(&s);
 
-	// TODO: Use Validate (https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference8ValidateEv)
+	// TODO: Should we use Validate (https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference8ValidateEv)
 	// Validate CRS imported with importFromWkt()
 }
 

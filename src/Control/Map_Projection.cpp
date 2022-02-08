@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "map.h"
+#include "StdAfx.h"
+#include "Map.h"
 #include "GeoProjection.h"
 #include "Tiles.h"
 #include "ExtentsHelper.h"
@@ -11,26 +11,26 @@ IGeoProjection* CMapView::GetMapToWgs84Transform()
 { 
 	VARIANT_BOOL vb;
 	_projection->get_HasTransformation(&vb);
-	return vb ?  _projection : NULL; 
+	return vb ?  _projection : nullptr; 
 }
 IGeoProjection* CMapView::GetWgs84ToMapTransform() 
 { 
 	VARIANT_BOOL vb;
 	_wgsProjection->get_HasTransformation(&vb);
-	return vb ?  _wgsProjection : NULL; 
+	return vb ?  _wgsProjection : nullptr; 
 }
 IGeoProjection* CMapView::GetTilesToMapTransform() 
 { 
 	VARIANT_BOOL vb;
 	_tileProjection->get_HasTransformation(&vb);
-	return vb ?  _tileProjection : NULL; 
+	return vb ?  _tileProjection : nullptr; 
 }
 
 IGeoProjection* CMapView::GetMapToTilesTransform() 
 {
 	VARIANT_BOOL vb;
 	_tileReverseProjection->get_HasTransformation(&vb);
-	return vb ?  _tileReverseProjection : NULL; 
+	return vb ?  _tileReverseProjection : nullptr; 
 }
 
 IGeoProjection* CMapView::GetWgs84Projection() { return _wgsProjection; }
@@ -76,7 +76,7 @@ void CMapView::InitProjections()
 	
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_projection);
 
-	CComPtr<IGeoProjection> p = NULL;
+	CComPtr<IGeoProjection> p = nullptr;
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&p);
 	SetGeoProjection(p);
 }
@@ -92,7 +92,7 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	}
 
 	bool preserveExtents = _activeLayers.size() == 0;
-	IExtents* ext = preserveExtents ? GetGeographicExtents() : NULL;	// try to preserve extents
+	IExtents* ext = preserveExtents ? GetGeographicExtents() : nullptr;	// try to preserve extents
 
 	((CGeoProjection*)_projection)->SetIsFrozen(false);
 	_projection->StopTransform();
@@ -136,14 +136,14 @@ void CMapView::UpdateMapTranformation()
 {
 	bool isEmpty = ProjectionHelper::IsEmpty(_projection);
 
-	IGeoProjection* gp = NULL;
+	IGeoProjection* gp = nullptr;
 
 	_wgsProjection->StopTransform();
 
 	if (!isEmpty)
 	{
 		VARIANT_BOOL isSame, vb;
-		CComPtr<IExtents> box = NULL;
+		CComPtr<IExtents> box = nullptr;
 		box.Attach(ExtentsHelper::GetWorldBounds());
 		_wgsProjection->get_IsSameExt(_projection, box, 20, &isSame);
 
@@ -195,7 +195,7 @@ void CMapView::ClearMapProjectionWithLastLayer()
 		_projection->get_IsEmpty(&isEmpty);
 		if (!isEmpty)
 		{
-			CComPtr<IGeoProjection> proj = NULL;
+			CComPtr<IGeoProjection> proj = nullptr;
 			ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&proj);
 			if (proj)
 			{
