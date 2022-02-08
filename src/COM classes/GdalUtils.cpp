@@ -53,7 +53,7 @@ STDMETHODIMP CGdalUtils::GdalRasterWarp(BSTR sourceFilename, BSTR destinationFil
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Source file %s does not exists."), srcFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Source file %s does not exists."), srcFilename));
 		_detailedError = "Source file " + srcFilename + " does not exists.";
 		return S_OK;
 	}
@@ -63,7 +63,7 @@ STDMETHODIMP CGdalUtils::GdalRasterWarp(BSTR sourceFilename, BSTR destinationFil
 	GDALDatasetH dt = GdalHelper::OpenRasterDatasetW(srcFilename, GA_ReadOnly);
 	if (!dt)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Can't open %s as a raster file."), srcFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Can't open %s as a raster file."), srcFilename));
 		_detailedError = "Can't open " + srcFilename + " as a raster file.";
 		ErrorMsg(tkINVALID_FILENAME);
 		goto cleaning;
@@ -72,7 +72,7 @@ STDMETHODIMP CGdalUtils::GdalRasterWarp(BSTR sourceFilename, BSTR destinationFil
 	// Make options:		
 	if (SafeArrayGetDim(options) != 1)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("The warp options are invalid.")));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("The warp options are invalid.")));
 		_detailedError = "The option array doesn't have 1 dimension";
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
 		goto cleaning;
@@ -82,7 +82,7 @@ STDMETHODIMP CGdalUtils::GdalRasterWarp(BSTR sourceFilename, BSTR destinationFil
 	const auto gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, nullptr);
 	if (!gdalWarpOptions)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("The warp options are invalid.")));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("The warp options are invalid.")));
 		_detailedError = "Can't convert the option array to GDALWarpAppOptions";
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
 		goto cleaning;
@@ -139,7 +139,7 @@ STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinati
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Source file %s does not exists."), srcFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Source file %s does not exists."), srcFilename));
 		_detailedError = "Source file " + srcFilename + " does not exists.";
 		return S_OK;
 	}
@@ -149,7 +149,7 @@ STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinati
 	const auto dt = GdalHelper::OpenRasterDatasetW(srcFilename, GA_ReadOnly);
 	if (!dt)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Can't open %s as a raster file."), srcFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Can't open %s as a raster file."), srcFilename));
 		_detailedError = "Can't open " + srcFilename + " as a raster file.";
 		ErrorMsg(tkINVALID_FILENAME);
 		goto cleaning;
@@ -170,7 +170,7 @@ STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinati
 	const auto gdalTranslateOptions = GDALTranslateOptionsNew(translateOptions, nullptr);
 	if (!gdalTranslateOptions)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("The translate options are invalid.")));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("The translate options are invalid.")));
 		_detailedError = "Can't convert the option array to GDALTranslateOptions";
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
 		goto cleaning;
@@ -212,21 +212,53 @@ cleaning:
 	return S_OK;
 }
 
+
+// *********************************************************
+//	     GdalVectorReproject()
+// *********************************************************
+STDMETHODIMP CGdalUtils::GdalVectorReproject(const BSTR sourceFilename, const BSTR destinationFilename,
+	const int sourceEpsgCode, const int destinationEpsgCode,
+	const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
+{
+	CString sourceEpsgCodeBuilder = "EPSG:";
+	char cbuf[20];
+	_itoa(sourceEpsgCode, cbuf, 10);
+	sourceEpsgCodeBuilder.Append(cbuf);
+
+	CString destEpsgCodeBuilder = "EPSG:";
+	char cbuf2[20];
+	_itoa(destinationEpsgCode, cbuf2, 10);
+	destEpsgCodeBuilder.Append(cbuf2);
+
+	CComSafeArray<BSTR> options(5);
+	options[0] = "-s_srs";
+	options[1] = sourceEpsgCodeBuilder;
+	options[2] = "-t_srs";
+	options[3] = destEpsgCodeBuilder;
+	options[4] = "-overwrite";
+	
+	this->GdalVectorTranslate(sourceFilename, destinationFilename, options, useSharedConnection, retVal);
+
+	return S_OK;
+}
+
 // *********************************************************
 //	     GdalVectorTranslate()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR sourceFilename, BSTR destinationFilename, SAFEARRAY* options, const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
+STDMETHODIMP CGdalUtils::GdalVectorTranslate(const BSTR sourceFilename, const BSTR destinationFilename,
+	SAFEARRAY* options, const VARIANT_BOOL useSharedConnection,
+	VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		* retVal = VARIANT_FALSE;
 	_detailedError = "No error";
-	struct CallbackParams params(_globalCallback, "Vector translate");
+	CallbackParams params(_globalCallback, "Vector translate");
 
 	USES_CONVERSION;
 	const CStringW srcFilename = OLE2W(sourceFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Source file %s does not exists."), srcFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Source file %s does not exists."), srcFilename));
 		_detailedError = "Subject file " + srcFilename + " does not exists.";
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
@@ -238,7 +270,7 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR sourceFilename, BSTR destinati
 	GDALDatasetH dt = GdalHelper::OpenOgrDatasetW(srcFilename, GA_ReadOnly, useSharedConnection == VARIANT_TRUE);
 	if (!dt)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Can't open %s as a vector file."), srcFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Can't open %s as a vector file."), srcFilename));
 		_detailedError = "Can't open " + srcFilename + " as a vector file.";
 		ErrorMsg(tkINVALID_FILENAME);
 		goto cleaning;
@@ -247,7 +279,7 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR sourceFilename, BSTR destinati
 	// Make options:		
 	if (SafeArrayGetDim(options) != 1)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("The vector translate options are invalid.")));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("The vector translate options are invalid.")));
 		_detailedError = "The option array doesn't have 1 dimension";
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
 		goto cleaning;
@@ -257,7 +289,7 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR sourceFilename, BSTR destinati
 	const auto gdalVectorTranslateOptions = GDALVectorTranslateOptionsNew(translateOptions, nullptr);
 	if (!gdalVectorTranslateOptions)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("The vector translate options are invalid.")));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("The vector translate options are invalid.")));
 		_detailedError = "Can't convert the option array to GDALVectorTranslateOptions";
 		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
 		goto cleaning;
@@ -312,7 +344,7 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR subjectFilename, BSTR overlay
 	const CStringW inputSubjectFilename = OLE2W(subjectFilename);
 	if (!Utility::FileExistsW(inputSubjectFilename))
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Subject file %s does not exists."), inputSubjectFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Subject file %s does not exists."), inputSubjectFilename));
 		_detailedError = "Subject file " + inputSubjectFilename + " does not exists.";
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
@@ -321,7 +353,7 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR subjectFilename, BSTR overlay
 	const CStringW inputOverlayFilename = OLE2W(overlayFilename);
 	if (!Utility::FileExistsW(inputOverlayFilename))
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Overlay file %s does not exists."), inputOverlayFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Overlay file %s does not exists."), inputOverlayFilename));
 		_detailedError = "Overlay file " + inputOverlayFilename + " does not exists.";
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
@@ -343,7 +375,7 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR subjectFilename, BSTR overlay
 //	     GdalBuildOverviews()
 // *********************************************************
 STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALResamplingMethod resamplingMethod,
-	SAFEARRAY* overviewList, SAFEARRAY *bandList, SAFEARRAY* configOptions, VARIANT_BOOL* retVal)
+	SAFEARRAY* overviewList, SAFEARRAY* bandList, SAFEARRAY* configOptions, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -355,7 +387,7 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALRes
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Source file %s does not exists."), srcFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Source file %s does not exists."), srcFilename));
 		_detailedError = "Source file " + srcFilename + " does not exists.";
 		return S_OK;
 	}
@@ -365,7 +397,7 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALRes
 	const auto dt = GdalHelper::OpenRasterDatasetW(srcFilename, GA_ReadOnly);
 	if (!dt)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("Can't open %s as a raster file."), srcFilename));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Can't open %s as a raster file."), srcFilename));
 		_detailedError = "Can't open " + srcFilename + " as a raster file.";
 		ErrorMsg(tkINVALID_FILENAME);
 		goto cleaning;
@@ -454,7 +486,7 @@ cleaning:
 	delete[] panOverviewList;
 	delete[] panBandList;
 	// TODO: Doesn't work: delete[] pszResampling;
-	
+
 	CallbackHelper::ProgressCompleted(_globalCallback);
 
 	return S_OK;
@@ -478,10 +510,10 @@ void CGdalUtils::HandleException(const int exception)
 // *********************************************************************
 //		get_LastErrorCode
 // *********************************************************************
-STDMETHODIMP CGdalUtils::get_LastErrorCode(long *pVal)
+STDMETHODIMP CGdalUtils::get_LastErrorCode(long* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*pVal = _lastErrorCode;
+		* pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
@@ -489,7 +521,7 @@ STDMETHODIMP CGdalUtils::get_LastErrorCode(long *pVal)
 // *********************************************************************
 //		get_ErrorMsg
 // *********************************************************************
-STDMETHODIMP CGdalUtils::get_ErrorMsg(const long errorCode, BSTR *pVal)
+STDMETHODIMP CGdalUtils::get_ErrorMsg(const long errorCode, BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -500,7 +532,7 @@ STDMETHODIMP CGdalUtils::get_ErrorMsg(const long errorCode, BSTR *pVal)
 // *********************************************************************
 //		get_DetailedErrorMsg
 // *********************************************************************
-STDMETHODIMP CGdalUtils::get_DetailedErrorMsg(BSTR *pVal)
+STDMETHODIMP CGdalUtils::get_DetailedErrorMsg(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -512,11 +544,11 @@ STDMETHODIMP CGdalUtils::get_DetailedErrorMsg(BSTR *pVal)
 // *********************************************************************
 //		GlobalCallback
 // *********************************************************************
-STDMETHODIMP CGdalUtils::get_GlobalCallback(ICallback **pVal)
+STDMETHODIMP CGdalUtils::get_GlobalCallback(ICallback** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		*pVal = _globalCallback;
+		* pVal = _globalCallback;
 	if (_globalCallback != nullptr)
 	{
 		_globalCallback->AddRef();
@@ -524,14 +556,14 @@ STDMETHODIMP CGdalUtils::get_GlobalCallback(ICallback **pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGdalUtils::put_GlobalCallback(ICallback *newVal)
+STDMETHODIMP CGdalUtils::put_GlobalCallback(ICallback* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		ComHelper::SetRef(newVal, reinterpret_cast<IDispatch**>(&_globalCallback));
 	return S_OK;
 }
 
-STDMETHODIMP CGdalUtils::get_Key(BSTR *pVal)
+STDMETHODIMP CGdalUtils::get_Key(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
@@ -571,17 +603,17 @@ char** CGdalUtils::ConvertSafeArrayToChar(SAFEARRAY* safeArray) const
 
 	if (SafeArrayGetDim(safeArray) != 1)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("The safe array list is invalid.")));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("The safe array list is invalid.")));
 		throw tkINVALID_PARAMETERS_ARRAY;
 	}
 
 	USES_CONVERSION;
 	char** papszStrList = nullptr;
 	LONG lLBound, lUBound;
-	BSTR HUGEP *pbstr;
+	BSTR HUGEP* pbstr;
 	const auto hr1 = SafeArrayGetLBound(safeArray, 1, &lLBound);
 	const auto  hr2 = SafeArrayGetUBound(safeArray, 1, &lUBound);
-	const auto  hr3 = SafeArrayAccessData(safeArray, reinterpret_cast<void HUGEP* FAR*>(&pbstr));
+	const auto  hr3 = SafeArrayAccessData(safeArray, reinterpret_cast<void HUGEP * FAR*>(&pbstr));
 	if (!FAILED(hr1) && !FAILED(hr2) && !FAILED(hr3))
 	{
 		const auto  count = lUBound - lLBound + 1;
@@ -604,14 +636,14 @@ char** CGdalUtils::ConvertSafeArrayToChar(SAFEARRAY* safeArray) const
 //		ConvertSafeArray()
 //      Convert a safearray (coming outside the ocx) to int[] (used internal) 
 // ***************************************************************************************
-auto CGdalUtils::ConvertSafeArrayToInt(SAFEARRAY* safeArray, int &size) -> int*
+auto CGdalUtils::ConvertSafeArrayToInt(SAFEARRAY* safeArray, int& size) -> int*
 {
 	size = 0;
 	if (safeArray == nullptr) return new int[1024];
 
 	if (SafeArrayGetDim(safeArray) != 1)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("The safe array list is invalid.")));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("The safe array list is invalid.")));
 		throw tkINVALID_PARAMETERS_ARRAY;
 	}
 
@@ -649,16 +681,16 @@ VOID CGdalUtils::SetConfigOptionFromSafeArray(SAFEARRAY* configOptions, const bo
 
 	if (SafeArrayGetDim(configOptions) != 1)
 	{
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char *>("The config options list is invalid.")));
+		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("The config options list is invalid.")));
 		throw tkINVALID_PARAMETERS_ARRAY;
 	}
 
 	USES_CONVERSION;
 	LONG lLBound, lUBound;
-	BSTR HUGEP *pbstr;
+	BSTR HUGEP* pbstr;
 	const auto hr1 = SafeArrayGetLBound(configOptions, 1, &lLBound);
 	const auto  hr2 = SafeArrayGetUBound(configOptions, 1, &lUBound);
-	const auto  hr3 = SafeArrayAccessData(configOptions, reinterpret_cast<void HUGEP* FAR*>(&pbstr));
+	const auto  hr3 = SafeArrayAccessData(configOptions, reinterpret_cast<void HUGEP * FAR*>(&pbstr));
 	if (!FAILED(hr1) && !FAILED(hr2) && !FAILED(hr3))
 	{
 		const auto  count = lUBound - lLBound + 1;
