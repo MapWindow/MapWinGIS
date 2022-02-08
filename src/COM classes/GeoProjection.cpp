@@ -529,51 +529,60 @@ STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal
 	if (!proj)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
 	}
-	else
-	{
-		VARIANT_BOOL vb, vb2;
-		this->get_IsEmpty(&vb);
-		proj->get_IsEmpty(&vb2);
-		if (vb || vb2) {
-			return S_OK;
-		}
 
-		const OGRSpatialReference* ref = static_cast<CGeoProjection*>(proj)->get_SpatialReference();
-		OGRSpatialReference ref2;
+	VARIANT_BOOL vb, vb2;
+	this->get_IsEmpty(&vb);
+	proj->get_IsEmpty(&vb2);
+	if (vb || vb2) {
+		ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
+		return S_OK;
+	}
 
-		char* s1 = nullptr;
-		OGRErr err = ref->exportToProj4(&s1);
+	// const OGRSpatialReference* ref = static_cast<CGeoProjection*>(proj)->get_SpatialReference();
+	const OGRSpatialReference* const ref = dynamic_cast<CGeoProjection*>(proj)->get_SpatialReference();
+	*pVal =_projection->IsSame(ref) ? VARIANT_TRUE : VARIANT_FALSE;
+		return S_OK;
+}
+
+/*
+    Old get_IsSame, after simplification no longer needed
+	OGRSpatialReference ref2;
+
+	char* s1 = nullptr;
+	OGRErr err = ref->exportToProj4(&s1);
+
+	if (err == OGRERR_NONE) {
+		OGRSpatialReference ref1;
+		err = ref1.importFromProj4(s1);
 
 		if (err == OGRERR_NONE) {
-			OGRSpatialReference ref1;
-			err = ref1.importFromProj4(s1);
+			char* s2 = nullptr;
+			err = _projection->exportToProj4(&s2);
 
 			if (err == OGRERR_NONE) {
-				char* s2 = nullptr;
-				err = _projection->exportToProj4(&s2);
+				ref2.importFromProj4(s2);
+				*pVal = ref1.IsSame(&ref2) ? VARIANT_TRUE : VARIANT_FALSE;
+			}
 
-				if (err == OGRERR_NONE) {
-					ref2.importFromProj4(s2);
-					*pVal = ref1.IsSame(&ref2) ? VARIANT_TRUE : VARIANT_FALSE;
-				}
-
-				if (s2) {
-					CPLFree(s2);
-				}
+			if (s2) {
+				CPLFree(s2);
 			}
 		}
+	}
 
-		if (s1) {
-			CPLFree(s1);
-		}
+	if (s1) {
+		CPLFree(s1);
+	}
 
-		if (err != OGRERR_NONE) {
-			ReportOgrError(err);
-		}
+	if (err != OGRERR_NONE) {
+		ReportOgrError(err);
 	}
 	return S_OK;
 }
+*/
+
 
 // *******************************************************
 //		IsSameProjection()

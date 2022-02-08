@@ -1,4 +1,6 @@
-﻿namespace unittest_net6;
+﻿using System.Reflection;
+
+namespace unittest_net6;
 
 internal static class Helpers
 {
@@ -82,9 +84,39 @@ internal static class Helpers
     }
     #endregion
 
+    internal static void CheckEpsgCode(IGeoProjection geoProjection, int epsgCodeToCheck, bool isGeographic = true)
+    {
+        geoProjection.ShouldNotBeNull();
+        geoProjection.IsEmpty.ShouldBeFalse();
+        if (isGeographic)
+        {
+            geoProjection.IsGeographic.ShouldBeTrue();
+        }
+        else
+        {
+            geoProjection.IsProjected.ShouldBeTrue();
+        }
+        var retVal = geoProjection.TryAutoDetectEpsg(out var epsgCode);
+        retVal.ShouldBeTrue();
+        epsgCode.ShouldBe(epsgCodeToCheck);
+    }
+
+
+    internal static Image LoadImageUsingFileManager(string filename)
+    {
+        File.Exists(filename).ShouldBeTrue("Input file does not exist: " + filename);
+
+        var fm = new FileManager();
+        var obj = fm.Open(filename);
+        fm.LastOpenIsSuccess.ShouldBeTrue(fm.ErrorMsg[fm.LastErrorCode]);
+        var img = obj as Image;
+        img.ShouldNotBeNull("Loaded object is not an image");
+        return img;
+    }
+
     internal static string GetTestDataLocation()
     {
-        var pathAssembly = System.Reflection.Assembly.GetExecutingAssembly().Location;
+        var pathAssembly = Assembly.GetExecutingAssembly().Location;
         var folderAssembly = Path.GetDirectoryName(pathAssembly);
         if (folderAssembly?.EndsWith(@"\") == false) folderAssembly += @"\";
         var folderProjectLevel = Path.GetFullPath(folderAssembly + @"..\..\..\..\TestData\");
@@ -93,6 +125,4 @@ internal static class Helpers
 
         return folderProjectLevel;
     }
-
-
 }

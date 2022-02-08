@@ -69,6 +69,53 @@ public class GeoProjectionsTests
     }
 
     [Fact]
+    public void IsSameTest()
+    {
+        // Setup:
+        var geoProjection3857 = new GeoProjection();
+        geoProjection3857.ShouldNotBeNull();
+
+        var geoProjection28992 = new GeoProjection();
+        geoProjection28992.ShouldNotBeNull();
+
+        var geoProjection3857_2 = new GeoProjection();
+        geoProjection3857_2.ShouldNotBeNull();
+
+        // Check:
+        geoProjection3857.IsSame[geoProjection28992].ShouldBeFalse("GeoProjections should not be the same.");
+
+        // Import first projection:
+        var retVal = geoProjection3857.ImportFromEPSG(3857);
+        retVal.ShouldBeTrue();
+
+        // Check:
+        geoProjection3857.IsSame[geoProjection28992].ShouldBeFalse("GeoProjections should not be the same.");
+        geoProjection28992.IsSame[geoProjection3857].ShouldBeFalse("GeoProjections should not be the same.");
+
+        // Import second projection:
+        retVal = geoProjection28992.ImportFromEPSG(28992);
+        retVal.ShouldBeTrue();
+
+        // Check:
+        geoProjection3857.IsSame[geoProjection28992].ShouldBeFalse("GeoProjections should not be the same.");
+        geoProjection28992.IsSame[geoProjection3857].ShouldBeFalse("GeoProjections should not be the same.");
+
+        // Import 3rd projection:
+        retVal = geoProjection3857_2.ImportFromEPSG(3857);
+        retVal.ShouldBeTrue();
+
+        // Check:
+        geoProjection3857.IsSame[geoProjection3857_2].ShouldBeTrue("GeoProjections should be the same.");
+        geoProjection3857_2.IsSame[geoProjection3857].ShouldBeTrue("GeoProjections should be the same.");
+
+        // Load prj-file:
+        var geoProjectionPrj = ReadPrjFile("Amersfoort.prj");
+        geoProjection3857.IsSame[geoProjectionPrj].ShouldBeFalse("GeoProjections should not be the same.");
+        geoProjection28992.IsSame[geoProjectionPrj].ShouldBeTrue("GeoProjections should be the same.");
+        geoProjectionPrj.IsSame[geoProjection28992].ShouldBeTrue("GeoProjections should be the same.");
+    }
+
+    [Fact]
     public void ImportFromAutoDetectTest()
     {
         var geoProjection = new GeoProjection();
@@ -89,7 +136,7 @@ public class GeoProjectionsTests
         wkt.StartsWith("GEOGCRS[\"WGS 84\",").ShouldBeTrue();
 
         // Read prj file:
-        var prjFileLocationAmersfoort = Path.Combine(Helpers.GetTestDataLocation(),  "Amersfoort.prj");
+        var prjFileLocationAmersfoort = Path.Combine(Helpers.GetTestDataLocation(), "Amersfoort.prj");
         File.Exists(prjFileLocationAmersfoort).ShouldBeTrue("prjFileLocationAmersfoort doesn't exists.");
         // Read file:
         var prjString = File.ReadAllText(prjFileLocationAmersfoort, Encoding.UTF8);
@@ -100,7 +147,7 @@ public class GeoProjectionsTests
         _testOutputHelper.WriteLine(wkt);
         wkt.StartsWith("PROJCRS[\"Amersfoort_RD_New\",").ShouldBeTrue();
     }
-    
+
     [Fact]
     public void TryAutoDetectEpsgTest()
     {
@@ -110,7 +157,7 @@ public class GeoProjectionsTests
         // Projected
         var retVal = geoProjection.ImportFromEPSG(3857);
         retVal.ShouldBeTrue();
-        CheckEpsgCode(geoProjection, 3857, false);
+        Helpers.CheckEpsgCode(geoProjection, 3857, false);
 
         // Reset:
         retVal = geoProjection.Clear();
@@ -123,7 +170,7 @@ public class GeoProjectionsTests
         // Geopgraphic
         retVal = geoProjection.ImportFromEPSG(4326);
         retVal.ShouldBeTrue();
-        CheckEpsgCode(geoProjection, 4326);
+        Helpers.CheckEpsgCode(geoProjection, 4326);
 
         // Reset:
         retVal = geoProjection.Clear();
@@ -133,17 +180,17 @@ public class GeoProjectionsTests
         // Using Well known enums:
         retVal = geoProjection.SetWellKnownGeogCS(tkCoordinateSystem.csWGS_84);
         retVal.ShouldBeTrue();
-        CheckEpsgCode(geoProjection, 4326);
+        Helpers.CheckEpsgCode(geoProjection, 4326);
 
         // Using OGR WKT from https://epsg.io/4326
         retVal = geoProjection.ImportFromAutoDetect("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");
         retVal.ShouldBeTrue();
-        CheckEpsgCode(geoProjection, 4326);
+        Helpers.CheckEpsgCode(geoProjection, 4326);
 
         // Amersfoort:
         retVal = geoProjection.ImportFromEPSG(28992);
         retVal.ShouldBeTrue();
-        CheckEpsgCode(geoProjection, 28992, false);
+        Helpers.CheckEpsgCode(geoProjection, 28992, false);
 
     }
 
@@ -158,40 +205,29 @@ public class GeoProjectionsTests
         var retVal = geoProjection.ImportFromESRI(proj);
         retVal.ShouldBeTrue();
         _testOutputHelper.WriteLine(geoProjection.ExportToWktEx());
-        CheckEpsgCode(geoProjection, 4326);
+        Helpers.CheckEpsgCode(geoProjection, 4326);
         _testOutputHelper.WriteLine(geoProjection.ExportToWktEx());
     }
 
     [Fact]
     public void ReadFromFile()
     {
+        var geoProjection = ReadPrjFile("Amersfoort.prj");
+        Helpers.CheckEpsgCode(geoProjection, 28992, false);
+        _testOutputHelper.WriteLine(geoProjection.ExportToWktEx());
+    }
+
+    private GeoProjection ReadPrjFile(string prjFileLocation)
+    {
         var geoProjection = new GeoProjection();
         geoProjection.ShouldNotBeNull();
 
-        var prjFileLocationAmersfoort = Path.Combine(Helpers.GetTestDataLocation(),  "Amersfoort.prj");
+        var prjFileLocationAmersfoort = Path.Combine(Helpers.GetTestDataLocation(), prjFileLocation);
         File.Exists(prjFileLocationAmersfoort).ShouldBeTrue("prjFileLocationAmersfoort doesn't exists.");
 
         var retVal = geoProjection.ReadFromFile(prjFileLocationAmersfoort);
         retVal.ShouldBeTrue("geoProjection.ReadFromFile failed");
-        geoProjection.TryAutoDetectEpsg(out var epsgCode);
-        epsgCode.ShouldBe(28992);
-        _testOutputHelper.WriteLine(geoProjection.ExportToWktEx());
-    }
 
-    private static void CheckEpsgCode(IGeoProjection geoProjection, int epsgCodeToCheck, bool isGeographic = true)
-    {
-        geoProjection.ShouldNotBeNull();
-        geoProjection.IsEmpty.ShouldBeFalse();
-        if (isGeographic)
-        {
-            geoProjection.IsGeographic.ShouldBeTrue();
-        }
-        else
-        {
-            geoProjection.IsProjected.ShouldBeTrue();
-        }
-        var retVal = geoProjection.TryAutoDetectEpsg(out var epsgCode);
-        retVal.ShouldBeTrue();
-        epsgCode.ShouldBe(epsgCodeToCheck);
+        return geoProjection;
     }
 }
