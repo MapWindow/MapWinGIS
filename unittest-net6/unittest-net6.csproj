@@ -42,4 +42,14 @@
 		</PackageReference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="TestData\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="TestData\Amersfoort.prj">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>

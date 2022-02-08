@@ -23,6 +23,23 @@ internal static class Helpers
         sf.ShapefileType.ShouldBe(sfType, "Shapefile type is unexpected");
         return sf;
     }
+
+    internal static void SaveSf(MapWinGIS.Shapefile sf, string fileLocation)
+    {
+        sf.ShouldNotBeNull("sf is null");
+        var retVal = sf.SaveAs(fileLocation);
+        retVal.ShouldBeTrue("sf.SaveAs failed");
+    }
+
+    internal static MapWinGIS.Shapefile OpenShapefile(string fileLocation)
+    {
+        File.Exists(fileLocation).ShouldBeTrue("Could not find shapefile to open");
+
+        var sf = new MapWinGIS.Shapefile();
+        var retVal = sf.Open(fileLocation);
+        retVal.ShouldBeTrue("sf.Open failed");
+        return sf;
+    }
     #endregion
 
     #region shape
@@ -65,20 +82,17 @@ internal static class Helpers
     }
     #endregion
 
-    public static void SaveSf(MapWinGIS.Shapefile sf, string fileLocation)
+    internal static string GetTestDataLocation()
     {
-        sf.ShouldNotBeNull("sf is null");
-        var retVal = sf.SaveAs(fileLocation);
-        retVal.ShouldBeTrue("sf.SaveAs failed");
+        var pathAssembly = System.Reflection.Assembly.GetExecutingAssembly().Location;
+        var folderAssembly = Path.GetDirectoryName(pathAssembly);
+        if (folderAssembly?.EndsWith(@"\") == false) folderAssembly += @"\";
+        var folderProjectLevel = Path.GetFullPath(folderAssembly + @"..\..\..\..\TestData\");
+        if (!Directory.Exists(folderProjectLevel))
+            throw new DirectoryNotFoundException("Cannot find TestData folder at " + folderProjectLevel);
+
+        return folderProjectLevel;
     }
 
-    public static MapWinGIS.Shapefile OpenShapefile(string fileLocation)
-    {
-        File.Exists(fileLocation).ShouldBeTrue("Could not find shapefile to open");
 
-        var sf = new MapWinGIS.Shapefile();
-        var retVal = sf.Open(fileLocation);
-        retVal.ShouldBeTrue("sf.Open failed");
-        return sf;
-    }
 }

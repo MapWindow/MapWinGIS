@@ -1,4 +1,6 @@
-﻿namespace unittest_net6.Projections;
+﻿using System.Text;
+
+namespace unittest_net6.Projections;
 
 public class GeoProjectionsTests
 {
@@ -85,8 +87,20 @@ public class GeoProjectionsTests
         var wkt = geoProjection.ExportToWktEx();
         _testOutputHelper.WriteLine(wkt);
         wkt.StartsWith("GEOGCRS[\"WGS 84\",").ShouldBeTrue();
-    }
 
+        // Read prj file:
+        var prjFileLocationAmersfoort = Path.Combine(Helpers.GetTestDataLocation(),  "Amersfoort.prj");
+        File.Exists(prjFileLocationAmersfoort).ShouldBeTrue("prjFileLocationAmersfoort doesn't exists.");
+        // Read file:
+        var prjString = File.ReadAllText(prjFileLocationAmersfoort, Encoding.UTF8);
+        prjString.ShouldNotBeNullOrEmpty();
+        retVal = geoProjection.ImportFromAutoDetect(prjString);
+        retVal.ShouldBeTrue();
+        wkt = geoProjection.ExportToWktEx();
+        _testOutputHelper.WriteLine(wkt);
+        wkt.StartsWith("PROJCRS[\"Amersfoort_RD_New\",").ShouldBeTrue();
+    }
+    
     [Fact]
     public void TryAutoDetectEpsgTest()
     {
@@ -145,6 +159,22 @@ public class GeoProjectionsTests
         retVal.ShouldBeTrue();
         _testOutputHelper.WriteLine(geoProjection.ExportToWktEx());
         CheckEpsgCode(geoProjection, 4326);
+        _testOutputHelper.WriteLine(geoProjection.ExportToWktEx());
+    }
+
+    [Fact]
+    public void ReadFromFile()
+    {
+        var geoProjection = new GeoProjection();
+        geoProjection.ShouldNotBeNull();
+
+        var prjFileLocationAmersfoort = Path.Combine(Helpers.GetTestDataLocation(),  "Amersfoort.prj");
+        File.Exists(prjFileLocationAmersfoort).ShouldBeTrue("prjFileLocationAmersfoort doesn't exists.");
+
+        var retVal = geoProjection.ReadFromFile(prjFileLocationAmersfoort);
+        retVal.ShouldBeTrue("geoProjection.ReadFromFile failed");
+        geoProjection.TryAutoDetectEpsg(out var epsgCode);
+        epsgCode.ShouldBe(28992);
         _testOutputHelper.WriteLine(geoProjection.ExportToWktEx());
     }
 

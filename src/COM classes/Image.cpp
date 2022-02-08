@@ -143,10 +143,10 @@ STDMETHODIMP CImageClass::Open(BSTR ImageFileName, ImageType FileType, VARIANT_B
 // ***************************************************************
 void CImageClass::ReadProjection()
 {
-	CStringW prjFilename = Utility::GetProjectionFilename(_fileName);
+	const CStringW prjFilename = Utility::GetProjectionFilename(_fileName);
 
 	VARIANT_BOOL vb;
-	CComBSTR bstr(prjFilename);
+	const CComBSTR bstr(prjFilename);
 	_projection->ReadFromFile(bstr, &vb);
 
 	CString wkt;
