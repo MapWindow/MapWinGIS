@@ -281,6 +281,9 @@
     <None Include="Testdata\Issues\MWGIS-98\3dPoint.shx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Testdata\sf\Amersfoort.prj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Testdata\sf\clipByMapExtents.dbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

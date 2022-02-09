@@ -19,6 +19,8 @@ namespace interopCreator
             const string tilesLogging = @"D:\tmp\axmap.tiles\TileRequests.log";
             _settings.StartLogTileRequests(tilesLogging);
             txtResults.Text += @"Tiles logging at " + tilesLogging;
+            axMap1.MapUnits = tkUnitsOfMeasure.umKilometers;
+            axMap1.ShowCoordinates = tkCoordinatesDisplay.cdmMapUnits;
         }
 
         public void Progress(string KeyOfSender, int Percent, string Message)
@@ -162,7 +164,7 @@ namespace interopCreator
                                      FormatBytes(currentProcess.WorkingSet64));
 
                     var header = grd.Header;
-                    var noDataValue = (double) grd.Header.NodataValue;
+                    var noDataValue = (double)grd.Header.NodataValue;
                     var extents = grd.Extents;
 
                     // Set projection:
@@ -218,7 +220,7 @@ namespace interopCreator
 
         private static string FormatBytes(long bytes)
         {
-            string[] Suffix = {"B", "KB", "MB", "GB", "TB"};
+            string[] Suffix = { "B", "KB", "MB", "GB", "TB" };
             int i;
             double dblSByte = bytes;
             for (i = 0; i < Suffix.Length && bytes >= 1024; i++, bytes /= 1024) dblSByte = bytes / 1024.0;
@@ -433,8 +435,16 @@ namespace interopCreator
 
         private void axMap1_FileDropped(object sender, _DMapEvents_FileDroppedEvent e)
         {
-            txtResults.Text += $@"Opening {e.filename} after dropping.";
+            txtResults.Text += $@"Opening {e.filename} after dropping.{Environment.NewLine}";
             axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
+            if (axMap1.GeoProjection.TryAutoDetectEpsg(out var epsgCode))
+            {
+                txtResults.Text += $@"Map projection: EPSG:{epsgCode}{Environment.NewLine}";
+            }
+            else
+            {
+                txtResults.Text += $@"Map projection: {axMap1.GeoProjection.ExportToWktEx()}{Environment.NewLine}";
+            }
         }
 
         private void button9_Click(object sender, EventArgs e)
@@ -465,7 +475,7 @@ namespace interopCreator
                 @"D:\dev\MapwinGIS\GitHub\unittests\MapWinGISTests\Testdata\Issues\MWGIS-98\3dPoint.shp",
                 tkFileOpenStrategy.fosAutoDetect, true);
         }
-        
+
         private void btnPrefetchTiles_Click(object sender, EventArgs e)
         {
             if (axMap1.Projection == tkMapProjection.PROJECTION_NONE)
@@ -479,7 +489,7 @@ namespace interopCreator
             axMap1.ZoomBehavior = tkZoomBehavior.zbUseTileLevels;
             var outputFolder = $@"D:\tmp\axmap.tiles\{axMap1.Tiles.Provider.ToString()}";
             if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
-            
+
             var numTilesToCache = axMap1.Tiles.PrefetchToFolder(axMap1.Extents, axMap1.Tiles.CurrentZoom,
                 Convert.ToInt32(axMap1.Tiles.Provider), outputFolder, ".png", null);
             txtResults.Text += $@"{Environment.NewLine}numTilesToCache: " + numTilesToCache;
@@ -494,6 +504,31 @@ namespace interopCreator
         private void button12_Click(object sender, EventArgs e)
         {
             axMap1.ZoomIn(0.3);
+        }
+
+        private void BtnOpenGeoPackage_Click(object sender, EventArgs e)
+        {
+            const string fileName = @"D:\dev\GIS-data\Formats\GeoPackage\codepo_gb.gpkg";
+            var retVal = axMap1.FileManager.CanOpenAs[fileName, tkFileOpenStrategy.fosAutoDetect];
+            retVal = axMap1.FileManager.CanOpenAs[fileName, tkFileOpenStrategy.fosVectorLayer];
+            retVal = axMap1.FileManager.IsSupported[fileName];
+            retVal = axMap1.FileManager.IsVectorLayer[fileName];
+            var ogrLayer = axMap1.FileManager.OpenVectorLayer(fileName);
+            var featureCounts = ogrLayer.FeatureCount[false];
+            var buffer = ogrLayer.GetBuffer();
+            axMap1.AddLayer(buffer, true);
+            //axMap1.AddLayer(ogrLayer, true);
+            //var ogrDatasource = axMap1.FileManager.OpenVectorDatasource(fileName);
+            //axMap1.AddLayer(ogrDatasource, true);
+            //axMap1.AddLayerFromFilename(fileName, tkFileOpenStrategy.fosVectorLayer, true);
+            //txtResults.Text += $@"{Environment.NewLine}Add GeoPackage: " + axMap1.FileManager.ErrorMsg[axMap1.FileManager.LastErrorCode];
+        }
+
+        private void BtnClearMap_Click(object sender, EventArgs e)
+        {
+            axMap1.Clear();
+            txtResults.Text = "";
+            txtResults.Text += $@"Map is cleared. Projection is empty: {axMap1.GeoProjection.IsEmpty}";
         }
     }
 }

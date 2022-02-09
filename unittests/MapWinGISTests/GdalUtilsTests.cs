@@ -264,6 +264,18 @@ namespace MapWinGISTests
             WriteLine(outputFilename + " is created");
         }
 
+        [TestMethod]
+        public void GdalVectorReproject()
+        {
+            var outputFilename = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()), ".shp");
+            var retVal = _gdalUtils.GdalVectorReproject(
+                @"D:\dev\GIS-data\Siebe\20200116 Clip\afwateringseenheden_2019_copy_join_pgb_20190704.shp",
+                outputFilename, 28992, 4326);
+            Assert.IsTrue(retVal, "gdalUtils.GdalVectorReproject() returned false: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode]);
+            Assert.IsTrue(File.Exists(outputFilename), "Can't find the output file");
+            WriteLine(outputFilename + " is created");
+        }
+
         // No testdata: [TestMethod, Timeout(5 * 60 * 1000)]
         public void VeryLargeClip()
         {

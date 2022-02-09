@@ -97,7 +97,8 @@ namespace ConsoleApplication1
             //t.GenerateEmptyWKT();
 
             var t = new GeoProjectionTest();
-            t.ImportFromEsriTest();
+            //t.ImportFromEsriTest();
+            t.ImportFromFile();
 
             Console.WriteLine("Finished");
             Console.ReadLine();
