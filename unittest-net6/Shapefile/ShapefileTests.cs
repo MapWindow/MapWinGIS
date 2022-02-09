@@ -10,7 +10,7 @@ public class ShapefileTests
     }
 
     [Fact]
-    public void CreatePolygonShapefileTest()
+    public void CreatePolygonShapefileFromWktTest()
     {
         // Create shapefile:
         var sfPolygon = Helpers.MakeShapefile(ShpfileType.SHP_POLYGON);
@@ -40,8 +40,93 @@ public class ShapefileTests
         // Checks:
         sfPoint.ShapefileType.ShouldBe(ShpfileType.SHP_POINT);
         sfPoint.NumShapes.ShouldBe(numPoints);
+    }
 
-        _testOutputHelper.WriteLine("CreatePolygonShapefileTest finished");
+    [Fact]
+    public void CreatePolygonShapefileTest()
+    {
+        // Also used the check if the scalebar is correct (MWGIS-276)
+
+        // Create shapefile:
+        var sfPolygon = Helpers.MakeShapefile(ShpfileType.SHP_POLYGON);
+        // Set projection:
+        sfPolygon.GeoProjection = Helpers.MakeProjection(28992);
+        // Add shape:
+        var shp = Helpers.MakeShape(ShpfileType.SHP_POLYGON);
+        // Add points to create a square:
+        var pointIndex = shp.AddPoint(187810, 433910);
+        pointIndex.ShouldBe(0, "Invalid point index");
+        shp.AddPoint(187810, 433910 - 50);
+        shp.AddPoint(187810 - 50, 433910 - 50);
+        shp.AddPoint(187810 - 50, 433910);
+        shp.AddPoint(187810, 433910); // Repeat first point to close
+        shp.IsValid.ShouldBeTrue(shp.IsValidReason);
+
+        var shapeIndex = sfPolygon.EditAddShape(shp);
+        shapeIndex.ShouldNotBe(-1, "EditAddShape failed");
+
+        sfPolygon.HasInvalidShapes().ShouldBeFalse("sfPolygon.HasInvalidShapes()");
+
+        // Save shapefile:
+        var baseFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+        var fileName = Path.ChangeExtension($"{baseFileName}-28992", ".shp");
+        var retVal = sfPolygon.SaveAs(fileName);
+        retVal.ShouldBeTrue("sfPolygon.SaveAs failed");
+        _testOutputHelper.WriteLine("Saved " + fileName);
+
+        // Reproject this shapefile to WGS84:
+        var newFileName = Path.ChangeExtension($"{baseFileName}-4326", ".shp");
+        var u = new MapWinGIS.GdalUtils();
+        retVal = u.GdalVectorReproject(fileName, newFileName, 28992, 4326);
+        retVal.ShouldBeTrue("GdalVectorReproject failed");
+        _testOutputHelper.WriteLine("Saved " + newFileName);
+
+        // Reproject to Google Mercator:
+        newFileName = Path.ChangeExtension($"{baseFileName}-3857", ".shp");
+        retVal = u.GdalVectorReproject(fileName, newFileName, 28992, 3857);
+        retVal.ShouldBeTrue("GdalVectorReproject failed");
+        _testOutputHelper.WriteLine("Saved " + newFileName);
+    }
+
+    [Fact]
+    public void SaveSfAndCheckProjection()
+    {
+        // Create shapefile:
+        var sf = Helpers.MakeShapefile(ShpfileType.SHP_POINT);
+        // Set projection:
+        sf.GeoProjection = Helpers.MakeProjection(28992);
+        // Add shape:
+        var shp = Helpers.MakeShape(ShpfileType.SHP_POINT);
+        // Add points to create a square:
+        var pointIndex = shp.AddPoint(187810, 433910);
+        pointIndex.ShouldBe(0, "Invalid point index");
+
+        var shapeIndex = sf.EditAddShape(shp);
+        shapeIndex.ShouldNotBe(-1, "EditAddShape failed");
+
+        sf.HasInvalidShapes().ShouldBeFalse("sf.HasInvalidShapes()");
+
+        // Save shapefile:
+        var baseFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+        var fileName = Path.ChangeExtension($"{baseFileName}-28992", ".shp");
+        var retVal = sf.SaveAs(fileName);
+        retVal.ShouldBeTrue("sf.SaveAs failed");
+        _testOutputHelper.WriteLine("Saved " + fileName);
+
+        // Close shapefile:
+        retVal = sf.Close();
+        retVal.ShouldBeTrue("sf.Close failed");
+
+        // Reopen shapefile:
+        var sf2 = new MapWinGIS.Shapefile();
+        retVal = sf2.Open(fileName);
+        retVal.ShouldBeTrue("sf2.Open failed");
+
+        // Get EpsgCode:
+        retVal = sf2.GeoProjection.TryAutoDetectEpsg(out var epsgCode);
+        retVal.ShouldBeTrue("TryAutoDetectEpsg failed");
+        epsgCode.ShouldBe(28992);
+        _testOutputHelper.WriteLine(sf2.GeoProjection.ExportToWktEx());
     }
 
     [Fact]
@@ -70,7 +155,7 @@ public class ShapefileTests
 
         var count = 0;
         var sfNew = sfPoint.Reproject(Helpers.MakeProjection(dstEpsgCode), ref count);
-        
+
         // Checks:
         sfNew.ShouldNotBeNull("ReprojectShapefile failed");
         sfNew.ShapefileType.ShouldBe(ShpfileType.SHP_POINT);
