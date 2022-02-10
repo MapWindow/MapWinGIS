@@ -123,9 +123,7 @@ public class ShapefileTests
         retVal.ShouldBeTrue("sf2.Open failed");
 
         // Get EpsgCode:
-        retVal = sf2.GeoProjection.TryAutoDetectEpsg(out var epsgCode);
-        retVal.ShouldBeTrue("TryAutoDetectEpsg failed");
-        epsgCode.ShouldBe(28992);
+        Helpers.CheckEpsgCode(sf2.GeoProjection, 28992, false);
         _testOutputHelper.WriteLine(sf2.GeoProjection.ExportToWktEx());
     }
 
@@ -142,6 +140,16 @@ public class ShapefileTests
         ReprojectShapefile(4.5703125, 51.944265, 4.5706292, 51.945227, 0.000001, 4258, 4289);
         // Swap:
         ReprojectShapefile(4.5706292, 51.945227, 4.5703125, 51.944265, 0.000001, 4289, 4258);
+    }
+
+    [Fact]
+    public void LoadShapefileFromDisk()
+    {
+        var sf = new MapWinGIS.Shapefile();
+        sf.ShouldNotBeNull("Could not initialize Shapefile object");
+        var retVal = sf.Open(Path.Combine(Helpers.GetTestDataLocation(), "UnitedStates.shp"));
+        retVal.ShouldBeTrue("sf.Open failed: " + sf.ErrorMsg[sf.LastErrorCode]);
+        Helpers.CheckEpsgCode(sf.GeoProjection, 3857, false);
     }
 
     private void ReprojectShapefile(double srcX, double srcY, double dstX, double dstY, double tolerance, int srcEpsgCode, int dstEpsgCode)

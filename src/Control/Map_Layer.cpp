@@ -346,7 +346,7 @@ long CMapView::AddLayer(LPDISPATCH object, BOOL visible)
 	}
 
 	CComPtr<IOgrDatasource> ds = nullptr;
-	object->QueryInterface(IID_IOgrDatasource, reinterpret_cast<void**>(&ds));
+	object->QueryInterface(IID_IOgrDatasource, (void**)&ds); // TODO: Don't use C-style cast
 	if (ds)
 	{
 		const bool mapIsEmpty = GetNumLayers() == 0;
@@ -388,19 +388,19 @@ long CMapView::AddSingleLayer(LPDISPATCH object, BOOL visible)
 	long layerHandle = -1;
 
 	IShapefile* ishp = nullptr;
-	object->QueryInterface(IID_IShapefile, reinterpret_cast<void**>(&ishp));
+	object->QueryInterface(IID_IShapefile, (void**)&ishp); // TODO: Don't use C-style cast
 
 	IImage* iimg = nullptr;
-	object->QueryInterface(IID_IImage, reinterpret_cast<void**>(&iimg));
+	object->QueryInterface(IID_IImage, (void**)&iimg); // TODO: Don't use C-style cast
 
 	IGrid* igrid = nullptr;
-	object->QueryInterface(IID_IGrid, reinterpret_cast<void**>(&igrid));
+	object->QueryInterface(IID_IGrid, (void**)&igrid); // TODO: Don't use C-style cast
 
 	IOgrLayer* iogr = nullptr;
-	object->QueryInterface(IID_IOgrLayer, reinterpret_cast<void**>(&iogr));
+	object->QueryInterface(IID_IOgrLayer, (void**)&iogr); // TODO: Don't use C-style cast
 
 	IWmsLayer* iwms = nullptr;
-	object->QueryInterface(IID_IWmsLayer, reinterpret_cast<void**>(&iwms));
+	object->QueryInterface(IID_IWmsLayer, (void**)&iwms); // TODO: Don't use C-style cast
 
 	if (!igrid && !iimg && !ishp && !iogr && !iwms)
 	{
@@ -450,7 +450,6 @@ long CMapView::AddSingleLayer(LPDISPATCH object, BOOL visible)
 
 	// grids aren't added directly; an image representation is created first 
 	// using particular color scheme
-	CStringW gridFilename = L"";
 
 	if (igrid != nullptr)
 	{
@@ -466,7 +465,7 @@ long CMapView::AddSingleLayer(LPDISPATCH object, BOOL visible)
 		//CGrid* grid = static_cast<CGrid*>(igrid);
 		const auto grid = dynamic_cast<CGrid*>(igrid);
 
-		gridFilename = grid->GetFilename();
+		CStringW gridFilename = grid->GetFilename();
 		CStringW proxyName = grid->GetProxyName();
 		//CStringW legendName = grid->GetProxyLegendName();
 		CStringW imageName;
@@ -661,14 +660,15 @@ void CMapView::UpdateWmsLayerBounds(IWmsLayer* wms, Layer& layer)
 	}
 	else {
 		// need to transform them first
-		VARIANT_BOOL vb, vb2;
+		VARIANT_BOOL vb;
 		gp->StartTransform(_projection, &vb);
 		if (vb)
 		{
-			gp->Transform(&projBox.left, &projBox.top, &vb);
-			gp->Transform(&projBox.right, &projBox.bottom, &vb2);
+			VARIANT_BOOL vb2, vb3;
+			gp->Transform(&projBox.left, &projBox.top, &vb2);
+			gp->Transform(&projBox.right, &projBox.bottom, &vb3);
 
-			if (vb && vb2) {
+			if (vb2 && vb3) {
 				layer.extents = projBox;
 			}
 
@@ -744,14 +744,14 @@ void CMapView::GrabLayerProjection(Layer* layer)
 		GetMapProjection()->get_IsEmpty(&isEmpty);
 		if (isEmpty)
 		{
-			IGeoProjection* gp = layer->GetGeoProjection();
-			if (gp)
+			if (IGeoProjection* gp = layer->GetGeoProjection())
 			{
 				gp->get_IsEmpty(&isEmpty);
 				if (!isEmpty)
 				{
 					IGeoProjection* newProj = nullptr;
 					gp->Clone(&newProj);
+
 					if (!newProj)
 					{
 						ErrorMsg(tkFAILED_TO_COPY_PROJECTION);
@@ -1429,7 +1429,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW projectName, bool 
 	{
 		// opening image
 		IImage* img = nullptr;
-		CoCreateInstance( CLSID_Image, nullptr, CLSCTX_INPROC_SERVER, IID_IImage, (void**)&img );  // TODO: Don't use C-style cast
+		CoCreateInstance(CLSID_Image, nullptr, CLSCTX_INPROC_SERVER, IID_IImage, (void**)&img);  // TODO: Don't use C-style cast
 
 		if (img)
 		{
@@ -1722,12 +1722,12 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG layerHandle, CPLXMLNode*
 	}
 
 	// actual layer type
-	bool injectShapefileToOgr = false;
+	//bool injectShapefileToOgr = false;
 	Layer* layer = _allLayers[layerHandle];
 
 	if (layer->IsOgrLayer() && layerType == ShapefileLayer)
 	{
-		injectShapefileToOgr = true; // TODO: Never used??
+		//injectShapefileToOgr = true; // TODO: Never used??
 	}
 	else if (layer->get_LayerType() != layerType)
 	{

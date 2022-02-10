@@ -266,6 +266,16 @@ IGeoProjection* Layer::GetGeoProjection()
 		}
 	}
 
+	// Updates for GDAL3+
+	// Enrich projection data:
+	VARIANT_BOOL isEmpty = VARIANT_FALSE;
+	gp->get_IsEmpty(&isEmpty);
+	if (!isEmpty)
+	{		
+		int  epsgCode;
+		VARIANT_BOOL vb;
+		gp->TryAutoDetectEpsg(&epsgCode, &vb);
+	}
 	return gp;
 }
 
@@ -370,7 +380,7 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 		layer->QueryOgrLayer(&ogr);
 		if (ogr)
 		{
-			OGRLayer* ds = static_cast<COgrLayer*>(ogr)->GetDatasource();
+			OGRLayer* ds = dynamic_cast<COgrLayer*>(ogr)->GetDatasource();
 			// ULONG count = ogr->Release();
 			ogr->Release();
 
@@ -533,6 +543,8 @@ BSTR Layer::GetFilename()
 		}
 		break;
 	}
+	default:
+		return SysAllocString(L"");
 	}
 	return SysAllocString(L"");
 }

@@ -13,13 +13,29 @@ internal static class Helpers
         geoProjection.Name.ShouldNotBeNull();
         return geoProjection;
     }
+    internal static void CheckEpsgCode(IGeoProjection geoProjection, int epsgCodeToCheck, bool isGeographic = true)
+    {
+        geoProjection.ShouldNotBeNull();
+        geoProjection.IsEmpty.ShouldBeFalse();
+        if (isGeographic)
+        {
+            geoProjection.IsGeographic.ShouldBeTrue();
+        }
+        else
+        {
+            geoProjection.IsProjected.ShouldBeTrue();
+        }
+        var retVal = geoProjection.TryAutoDetectEpsg(out var epsgCode);
+        retVal.ShouldBeTrue();
+        epsgCode.ShouldBe(epsgCodeToCheck);
+    }
     #endregion
 
     #region shapefile
     internal static MapWinGIS.Shapefile MakeShapefile(ShpfileType sfType)
     {
         var sf = new MapWinGIS.Shapefile();
-        sf.ShouldNotBeNull("Could not create Shapefile");
+        sf.ShouldNotBeNull("Could not initialize Shapefile object");
         var retVal = sf.CreateNewWithShapeID("", sfType);
         retVal.ShouldBeTrue("sf.CreateNewWithShapeID() failed");
         sf.ShapefileType.ShouldBe(sfType, "Shapefile type is unexpected");
@@ -84,32 +100,15 @@ internal static class Helpers
     }
     #endregion
 
-    internal static void CheckEpsgCode(IGeoProjection geoProjection, int epsgCodeToCheck, bool isGeographic = true)
-    {
-        geoProjection.ShouldNotBeNull();
-        geoProjection.IsEmpty.ShouldBeFalse();
-        if (isGeographic)
-        {
-            geoProjection.IsGeographic.ShouldBeTrue();
-        }
-        else
-        {
-            geoProjection.IsProjected.ShouldBeTrue();
-        }
-        var retVal = geoProjection.TryAutoDetectEpsg(out var epsgCode);
-        retVal.ShouldBeTrue();
-        epsgCode.ShouldBe(epsgCodeToCheck);
-    }
 
-
-    internal static Image LoadImageUsingFileManager(string filename)
+    internal static MapWinGIS.Image LoadImageUsingFileManager(string filename)
     {
         File.Exists(filename).ShouldBeTrue("Input file does not exist: " + filename);
 
         var fm = new FileManager();
         var obj = fm.Open(filename);
         fm.LastOpenIsSuccess.ShouldBeTrue(fm.ErrorMsg[fm.LastErrorCode]);
-        var img = obj as Image;
+        var img = obj as MapWinGIS.Image;
         img.ShouldNotBeNull("Loaded object is not an image");
         return img;
     }

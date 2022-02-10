@@ -288,12 +288,12 @@ STDMETHODIMP CGeoProjection::Clear(VARIANT_BOOL* retVal)
 // *******************************************************
 STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		IGeoProjection* gp = nullptr;
-	ComHelper::CreateInstance(idGeoProjection, reinterpret_cast<IDispatch**>(&gp));
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	IGeoProjection* gp;
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&gp); // TODO: Don't use C-style cast
 	*retVal = gp;
 
-	static_cast<CGeoProjection*>(gp)->InjectSpatialReference(_projection);
+	dynamic_cast<CGeoProjection*>(gp)->InjectSpatialReference(_projection);
 	return S_OK;
 }
 
