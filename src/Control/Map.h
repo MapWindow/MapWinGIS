@@ -163,10 +163,10 @@ public:
 	afx_msg long GetNumLayers();
 	afx_msg long GetLastErrorCode();	
 	afx_msg short GetIsLocked();
-	afx_msg LPDISPATCH GetGetObject(long LayerHandle);
+	afx_msg LPDISPATCH GetGetObject(long layerHandle);
 	afx_msg BSTR GetErrorMsg(long ErrorCode);
-	afx_msg long GetLayerPosition(long LayerHandle);
-	afx_msg long GetLayerHandle(long LayerPosition);
+	afx_msg long GetLayerPosition(long layerHandle);
+	afx_msg long GetLayerHandle(long layerPosition);
 	afx_msg LPDISPATCH GetColorScheme(long LayerHandle);
 	afx_msg VARIANT_BOOL get_Fileame(LONG LayerHandle, BSTR* layerName );
 
@@ -196,11 +196,11 @@ public:
 	afx_msg IExtents* GetExtents();
 	afx_msg void SetExtents(IExtents* newValue);
 
-	afx_msg BSTR GetLayerKey(long LayerHandle);
-	afx_msg void SetLayerKey(long LayerHandle, LPCTSTR lpszNewValue);
+	afx_msg BSTR GetLayerKey(long layerHandle);
+	afx_msg void SetLayerKey(long layerHandle, LPCTSTR lpszNewValue);
 
-	afx_msg BOOL GetLayerVisible(long LayerHandle);
-	afx_msg void SetLayerVisible(long LayerHandle, BOOL bNewValue);
+	afx_msg BOOL GetLayerVisible(long layerHandle);
+	afx_msg void SetLayerVisible(long layerHandle, BOOL bNewValue);
 
 	afx_msg void SetTrapRMouseDown(BOOL nNewValue);
 	afx_msg BOOL GetTrapRMouseDown();
@@ -233,32 +233,32 @@ public:
 	afx_msg IImage* GetImage(LONG LayerHandle);
 	afx_msg void SetImage(LONG LayerHandle, IImage* pVal);
 
-	afx_msg BSTR GetLayerName(LONG LayerHandle);
-	afx_msg void SetLayerName(LONG LayerHandle, LPCTSTR newVal);
+	afx_msg BSTR GetLayerName(LONG layerHandle);
+	afx_msg void SetLayerName(LONG layerHandle, LPCTSTR newVal);
 
 	afx_msg IGeoProjection* GetGeoProjection(void);
 	afx_msg void SetGeoProjection(IGeoProjection* pVal);
 
-	afx_msg DOUBLE GetLayerMaxVisibleScale(LONG LayerHandle);
-	afx_msg void SetLayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal);
+	afx_msg DOUBLE GetLayerMaxVisibleScale(LONG layerHandle);
+	afx_msg void SetLayerMaxVisibleScale(LONG layerHandle, DOUBLE newVal);
 
-	afx_msg DOUBLE GetLayerMinVisibleScale(LONG LayerHandle);
-	afx_msg void SetLayerMinVisibleScale(LONG LayerHandle, DOUBLE newVal);
+	afx_msg DOUBLE GetLayerMinVisibleScale(LONG layerHandle);
+	afx_msg void SetLayerMinVisibleScale(LONG layerHandle, DOUBLE newVal);
 
-	afx_msg int GetLayerMaxVisibleZoom(LONG LayerHandle);
-	afx_msg void SetLayerMaxVisibleZoom(LONG LayerHandle, int newVal);
+	afx_msg int GetLayerMaxVisibleZoom(LONG layerHandle);
+	afx_msg void SetLayerMaxVisibleZoom(LONG layerHandle, int newVal);
 
-	afx_msg int GetLayerMinVisibleZoom(LONG LayerHandle);
-	afx_msg void SetLayerMinVisibleZoom(LONG LayerHandle, int newVal);
+	afx_msg int GetLayerMinVisibleZoom(LONG layerHandle);
+	afx_msg void SetLayerMinVisibleZoom(LONG layerHandle, int newVal);
 
-	afx_msg VARIANT_BOOL GetLayerDynamicVisibility(LONG LayerHandle);
-	afx_msg void SetLayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal);
+	afx_msg VARIANT_BOOL GetLayerDynamicVisibility(LONG layerHandle);
+	afx_msg void SetLayerDynamicVisibility(LONG layerHandle, VARIANT_BOOL newVal);
 
 	afx_msg VARIANT_BOOL SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths, VARIANT_BOOL Overwrite);
 	afx_msg VARIANT_BOOL LoadMapState(LPCTSTR Filename, LPDISPATCH Callback);
 
-	afx_msg VARIANT_BOOL SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, VARIANT_BOOL Overwrite, LPCTSTR Description);
-	afx_msg VARIANT_BOOL LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description);
+	afx_msg VARIANT_BOOL SaveLayerOptions(LONG layerHandle, LPCTSTR optionsName, VARIANT_BOOL overwrite, LPCTSTR description);
+	afx_msg VARIANT_BOOL LoadLayerOptions(LONG layerHandle, LPCTSTR optionsName, BSTR* description);
 
 	afx_msg IExtents* GetGeographicExtents();
 	afx_msg VARIANT_BOOL SetGeographicExtents(IExtents* extents);
@@ -270,8 +270,8 @@ public:
 	afx_msg void ProjToPixel(double projX, double projY, double FAR* pixelX, double FAR* pixelY);
 	afx_msg void PixelToProj(double pixelX, double pixelY, double FAR* projX, double FAR* projY);
 
-	afx_msg BSTR GetLayerDescription(LONG LayerHandle);
-	afx_msg void SetLayerDescription(LONG LayerHandle, LPCTSTR newVal);
+	afx_msg BSTR GetLayerDescription(LONG layerHandle);
+	afx_msg void SetLayerDescription(LONG layerHandle, LPCTSTR newVal);
 
 	afx_msg BSTR GetGridFileName(LONG LayerHandle);
 	afx_msg void SetGridFileName(LONG LayerHandle, LPCTSTR newVal);
@@ -294,8 +294,8 @@ public:
 	afx_msg ILabels* GetDrawingLabels(long DrawingLayerIndex);
 	afx_msg void SetDrawingLabels(long DrawingLayerIndex, ILabels* newValue); //LPDISPATCH newValue);
 
-	afx_msg VARIANT_BOOL GetLayerSkipOnSaving(LONG LayerHandle);
-	afx_msg void SetLayerSkipOnSaving(LONG LayerHandle, VARIANT_BOOL newVal);
+	afx_msg VARIANT_BOOL GetLayerSkipOnSaving(LONG layerHandle);
+	afx_msg void SetLayerSkipOnSaving(LONG layerHandle, VARIANT_BOOL newVal);
 
 	afx_msg void Clear();
 
@@ -471,15 +471,15 @@ public:
 	afx_msg void Redraw3(tkRedrawType redrawType, VARIANT_BOOL reloadTiles);
 	afx_msg void Redraw2(tkRedrawType redrawType);
 	afx_msg void Redraw();
-	afx_msg long AddLayer(LPDISPATCH Object, BOOL Visible);
-	afx_msg void RemoveLayer(long LayerHandle);
-	afx_msg void RemoveLayerWithoutClosing(long LayerHandle);
+	afx_msg long AddLayer(LPDISPATCH object, BOOL Visible);
+	afx_msg void RemoveLayer(long layerHandle);
+	afx_msg void RemoveLayerWithoutClosing(long layerHandle);
 	afx_msg void RemoveAllLayers();
-	afx_msg BOOL MoveLayerUp(long InitialPosition);
-	afx_msg BOOL MoveLayerDown(long InitialPosition);
-	afx_msg BOOL MoveLayer(long InitialPosition, long TargetPosition);
-	afx_msg BOOL MoveLayerTop(long InitialPosition);
-	afx_msg BOOL MoveLayerBottom(long InitialPosition);
+	afx_msg BOOL MoveLayerUp(long initialPosition);
+	afx_msg BOOL MoveLayerDown(long initialPosition);
+	afx_msg BOOL MoveLayer(long initialPosition, long targetPosition);
+	afx_msg BOOL MoveLayerTop(long initialPosition);
+	afx_msg BOOL MoveLayerBottom(long initialPosition);
 	afx_msg void ZoomToMaxExtents();
 	afx_msg void ZoomToMaxVisibleExtents();
 	afx_msg void ZoomToLayer(long LayerHandle);
@@ -527,9 +527,9 @@ public:
 	afx_msg BOOL IsTIFFGrid(LPCTSTR Filename);
 	afx_msg BOOL IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b);
 	afx_msg long HWnd();
-	afx_msg void ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath);
-    afx_msg BOOL ReloadOgrLayerFromSource(long OgrLayerHandle);
-	afx_msg void RestartBackgroundLoading(long OgrLayerHandle);
+	afx_msg void ReSourceLayer(long layerHandle, LPCTSTR newSrcPath);
+    afx_msg BOOL ReloadOgrLayerFromSource(long ogrLayerHandle);
+	afx_msg void RestartBackgroundLoading(long ogrLayerHandle);
     afx_msg BOOL AdjustLayerExtents(long LayerHandle);	// Rob Cairns 29-Jun-09
 	afx_msg void SetCurrentScale(DOUBLE newVal);
 	afx_msg DOUBLE GetCurrentScale(void);
@@ -548,24 +548,24 @@ public:
 	afx_msg void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill, byte alpha = 255);
 	afx_msg void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, byte alpha = 255);
 	afx_msg void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, byte alpha = 255);
-	afx_msg BSTR SerializeLayer(LONG LayerHandle);
-	afx_msg VARIANT_BOOL DeserializeLayer(LONG LayerHandle, LPCTSTR newVal);
+	afx_msg BSTR SerializeLayer(LONG layerHandle);
+	afx_msg VARIANT_BOOL DeserializeLayer(LONG layerHandle, LPCTSTR newVal);
 	afx_msg IDispatch* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);
 	afx_msg IDispatch* SnapShot3(double left, double right, double top, double bottom, long Width);
 	afx_msg VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
 	afx_msg void UpdateImage(LONG LayerHandle);
 	afx_msg VARIANT_BOOL DeserializeMapState(LPCTSTR State, VARIANT_BOOL LoadLayers, LPCTSTR BasePath);
 	afx_msg BSTR SerializeMapState(VARIANT_BOOL RelativePaths, LPCTSTR BasePath);
-	afx_msg CString get_OptionsFilename(LONG LayerHandle, LPCTSTR OptionsName);
-	afx_msg VARIANT_BOOL RemoveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName);
+	afx_msg CString get_OptionsFilename(LONG layerHandle, LPCTSTR optionsName);
+	afx_msg VARIANT_BOOL RemoveLayerOptions(LONG layerHandle, LPCTSTR optionsName);
 	afx_msg VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
 	afx_msg VARIANT_BOOL ZoomToTileLevel(int zoom);
 	afx_msg IMeasuring* GetMeasuring(void);
 	afx_msg IShapeEditor* GetShapeEditor(void);
 	afx_msg VARIANT_BOOL ZoomToWorld(void);
 	afx_msg VARIANT_BOOL FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound);
-	afx_msg long AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL visible);
-	afx_msg long AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR layerNameOrQuery, VARIANT_BOOL visible);
+	afx_msg long AddLayerFromFilename(LPCTSTR filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL visible);
+	afx_msg long AddLayerFromDatabase(LPCTSTR connectionString, LPCTSTR layerNameOrQuery, VARIANT_BOOL visible);
 	afx_msg VARIANT_BOOL SetGeographicExtents2(double xLongitude, double yLatitude, double widthKilometers);
 	afx_msg IExtents* GetKnownExtents(tkKnownExtents extents);
 	afx_msg void SetLatitude(float nNewValue);
@@ -1073,9 +1073,9 @@ private:
 	// ---------------------------------------------
 	CPLXMLNode* SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW ProjectName);		// used by SaveMapState and GetMapState
 	bool DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, VARIANT_BOOL LoadLayers, IStopExecution* callback);
-	CPLXMLNode* SerializeLayerCore(LONG LayerHandle, CStringW Filename);
-	int DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool utf8Filenames, IStopExecution* callback);		// adds new layer on loading (is used by map state)
-	VARIANT_BOOL DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode* node);
+	CPLXMLNode* SerializeLayerCore(LONG layerHandle, CStringW filename);
+	int DeserializeLayerCore(CPLXMLNode* node, CStringW projectName, bool utf8Filenames, IStopExecution* callback);		// adds new layer on loading (is used by map state)
+	VARIANT_BOOL DeserializeLayerOptionsCore(LONG layerHandle, CPLXMLNode* node);
 	void WriteXmlHeaderAttributes(CPLXMLNode* psTree, CString fileType);
 	
 	// -------------------------------------------
@@ -1100,7 +1100,7 @@ private:
 	// ---------------------------------------------
 	bool IsValidLayer( long layerHandle );
 	BSTR GetLayerFilename(LONG layerHandle);
-	void RemoveLayerCore(long LayerHandle, bool closeDatasources, bool fromRemoveAll = false, bool suppressEvent = false);
+	void RemoveLayerCore(long layerHandle, bool closeDatasources, bool fromRemoveAll = false, bool suppressEvent = false);
 	
 	// shapefiles	
 	bool IsValidShape( long layerHandle, long shape );
@@ -1161,7 +1161,7 @@ private:
 	double GetCurrentTileSize( int zoom );
 	bool GetMinMaxZoom(int& minZoom, int& maxZoom);
 	bool GetTileMismatchMinZoom( int& minZoom );
-	VARIANT_BOOL LoadLayerOptionsCore(CString baseName, LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description);
+	VARIANT_BOOL LoadLayerOptionsCore(CString baseName, LONG layerHandle, LPCTSTR optionsName, BSTR* description);
 	bool LayerIsEmpty(long LayerHandle);
 	LayerShape FindShapeAtScreenPoint(CPoint point, LayerSelector selector);
 	LayerShape FindShapeAtProjPoint(double projX, double projY, std::vector<int>& layers);
@@ -1225,7 +1225,7 @@ private:
 	bool ReprojectLayer(Layer* layer, int layerHandle);
 	void StartDragging(DraggingOperation operation);
 	void DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics* graphics, CImageDrawer& imgDrawer);
-	long AddSingleLayer(LPDISPATCH Object, BOOL pVisible);
+	long AddSingleLayer(LPDISPATCH object, BOOL pVisible);
 	void OnDrawingLayersChanged();
 	bool HandleOnCopyrightMouseMove(CPoint point);
 	void StartMouseTracking();
