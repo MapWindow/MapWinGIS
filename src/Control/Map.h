@@ -878,7 +878,7 @@ public:
 	// ---------------------------------------------
 	//	Projections
 	// ---------------------------------------------
-	IGeoProjection* _projection;			// must always have transformation to WWGS84
+	IGeoProjection* _projection;			// must always have transformation to WGS84. Since proj.7 transformation to WGS84 is no longer mandatory
 	IGeoProjection* _wgsProjection;		// must always have transform to current map projection (set in map.SetGeoProjection)
 	IGeoProjection* _gmercProjection;		// must always have transform to current map projection (set in map.SetGeoProjection)
 	IGeoProjection* _tileProjection;
@@ -1007,6 +1007,7 @@ public:
 	IGeoProjection* GetTilesToMapTransform();
 	IGeoProjection* GetWgs84Projection();
 	IGeoProjection* GetGMercProjection();
+	// Return GeoProjection
 	IGeoProjection* GetMapProjection();
 	
 	void RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadTiles = false );

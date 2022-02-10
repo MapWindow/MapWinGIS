@@ -136,6 +136,7 @@ void CGeoProjection::ReportOgrError(long errorCode, tkCallbackVerbosity verbosit
 	case OGRERR_NON_EXISTING_FEATURE:
 		code = tkOGR_NON_EXISTING_FEATURE;
 		break;
+	default:;
 	}
 
 	if (code != tkNO_ERROR)
@@ -542,12 +543,12 @@ STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal
 
 	// const OGRSpatialReference* ref = static_cast<CGeoProjection*>(proj)->get_SpatialReference();
 	const OGRSpatialReference* const ref = dynamic_cast<CGeoProjection*>(proj)->get_SpatialReference();
-	*pVal =_projection->IsSame(ref) ? VARIANT_TRUE : VARIANT_FALSE;
-		return S_OK;
+	*pVal = _projection->IsSame(ref) ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
 }
 
 /*
-    Old get_IsSame, after simplification no longer needed
+	Old get_IsSame, after simplification no longer needed
 	OGRSpatialReference ref2;
 
 	char* s1 = nullptr;
@@ -847,8 +848,8 @@ STDMETHODIMP CGeoProjection::get_ProjectionParam(tkProjectionParameter name, dou
 STDMETHODIMP CGeoProjection::get_IsEmpty(VARIANT_BOOL* retVal)
 {
 	// https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference7IsEmptyEv
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* retVal = _projection->IsEmpty() ? VARIANT_TRUE : VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = _projection->IsEmpty() ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -1233,7 +1234,7 @@ STDMETHODIMP CGeoProjection::Transform(double* x, double* y, VARIANT_BOOL* retva
 	}
 	else
 	{
-		BOOL res = _transformation->Transform(1, x, y);
+		const BOOL res = _transformation->Transform(1, x, y);
 		*retval = res ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 	return S_OK;
@@ -1259,6 +1260,8 @@ STDMETHODIMP CGeoProjection::StopTransform()
 STDMETHODIMP CGeoProjection::SetGoogleMercator(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// TODO: For GDAL3 Shouldn't this not be this->ImportFromEPSG(3857, retVal);
 
 	CComBSTR bstr = L"PROJCS[\"WGS 84 / Pseudo-Mercator\","
 		L"GEOGCS[\"WGS 84\","
@@ -1296,6 +1299,8 @@ STDMETHODIMP CGeoProjection::SetWgs84(VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 #if GDAL_VERSION_MAJOR >= 3
+
+	// TODO: Shouldn't this not be this->ImportFromEPSG(4326, retVal);
 
 	// --- new value: SRS_WKT_WGS84_LAT_LONG
 	CComBSTR bstr = L"GEOGCS[\"WGS 84\","
@@ -1343,8 +1348,8 @@ STDMETHODIMP CGeoProjection::get_IsFrozen(VARIANT_BOOL* retVal)
 // ************************************************************
 STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* epsgCode = -1;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*epsgCode = -1;
 	if (!_isFrozen) {
 
 		// Copied from https://github.com/OSGeo/gdal/blob/master/frmts/sigdem/sigdemdataset.cpp

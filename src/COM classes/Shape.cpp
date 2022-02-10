@@ -2332,8 +2332,8 @@ STDMETHODIMP CShape::ImportFromBinary(VARIANT bytesArray, VARIANT_BOOL* retVal)
 	SafeArrayAccessData(bytesArray.parray,(void HUGEP* FAR*)(&p));
 
 	char* data = reinterpret_cast<char*>(p);
-	
-	int recordLength = static_cast<int>(bytesArray.parray->cbElements);
+
+	const int recordLength = static_cast<int>(bytesArray.parray->cbElements);
 	bool result = _shp->put_RawData(data, recordLength);
 	
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;

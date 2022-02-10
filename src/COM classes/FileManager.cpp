@@ -410,7 +410,7 @@ STDMETHODIMP CFileManager::OpenShapefile(BSTR filename, ICallback* callback, ISh
 	if (!IsShapefile(filenameW))
 		return S_OK;
 
-	IShapefile* sf = nullptr;
+	IShapefile* sf;
 	ComHelper::CreateInstance(idShapefile, (IDispatch**)&sf);
 	sf->Open(filename, _globalCallback, &vb);
 	if (!vb)

@@ -2835,8 +2835,8 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
                 }
 
                 // will work faster after embedding to the CShape class
-                const BOOL res = transf->Transform(numPoints, x, y);
-                if (!res)
+                //const BOOL res = transf->Transform(numPoints, x, y);
+                if (!transf->Transform(numPoints, x, y))
                 {
                     // save error message and continue
                     if (m_globalSettings.gdalErrorMessage == "")
