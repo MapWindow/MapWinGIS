@@ -30,7 +30,7 @@
 	    <Guid>c368d713-cc5f-40ed-9f53-f84fe197b96a</Guid>
 	    <Lcid>0</Lcid>
 	    <Isolated>false</Isolated>
-	    <EmbedInteropTypes>true</EmbedInteropTypes>
+	    <EmbedInteropTypes>False</EmbedInteropTypes>
 	  </COMReference>
 	</ItemGroup>
 
@@ -42,10 +42,15 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="coverlet.collector" Version="3.1.1">
+		<PackageReference Include="coverlet.collector" Version="3.1.2">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="Xunit.StaFact" Version="1.1.11" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\WinFormsApp1\WinFormsApp1.csproj" />
 	</ItemGroup>
 
 </Project>

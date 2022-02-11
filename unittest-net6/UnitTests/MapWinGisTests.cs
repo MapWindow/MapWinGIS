@@ -9,14 +9,16 @@ public class MapWinGisTests
         _testOutputHelper = testOutputHelper;
     }
 
-    [Fact]
+    [WpfFact]
     public void VersionTest()
     {
-        _testOutputHelper.WriteLine("TODO");
-        // TODO, need a form:
-        //var map = new AxMap();
-        //var versionNumber = map.VersionNumber;
-        //_testOutputHelper.WriteLine(@"MapWinGIS.VersionNumber: " + versionNumber);
-        //Assert.NotNull(versionNumber);
+        using var form = new WinFormsApp1.Form1();
+
+        var version = form.GetMapWinGisVersion();
+        version.ShouldNotBeNull();
+        _testOutputHelper.WriteLine(version.ToString());
+        version.Major.ShouldBe(5);
+        version.Minor.ShouldBe(4);
+        version.Build.ShouldBeGreaterThanOrEqualTo(0);
     }
 }
