@@ -6,6 +6,7 @@
 		<Nullable>enable</Nullable>
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<Platforms>x86;x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
