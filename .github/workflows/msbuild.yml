@@ -144,12 +144,17 @@ jobs:
       with:
         msbuild-architecture: x64
         
-    - name: Build test solution ${{matrix.platform}}
+    - name: Build test solution x86
       working-directory: ${{env.GITHUB_WORKSPACE}}
+      if: ${{matrix.platform == 'Win32' }}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}      
+      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x86 -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}  
+    - name: Build test solution x64
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      if: ${{matrix.platform == 'x64' }}
+      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}       
       
     # Run unit tests
     - name: Setup VSTest.console.exe
