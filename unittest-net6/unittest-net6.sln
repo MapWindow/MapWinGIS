@@ -28,7 +28,9 @@ Global
 		{AE06C298-7CB8-44FE-BCA9-B05FE9F59559}.Debug|x86.ActiveCfg = Debug|x86
 		{AE06C298-7CB8-44FE-BCA9-B05FE9F59559}.Debug|x86.Build.0 = Debug|x86
 		{AE06C298-7CB8-44FE-BCA9-B05FE9F59559}.Release|x64.ActiveCfg = Release|x64
+		{AE06C298-7CB8-44FE-BCA9-B05FE9F59559}.Release|x64.Build.0 = Release|x64
 		{AE06C298-7CB8-44FE-BCA9-B05FE9F59559}.Release|x86.ActiveCfg = Release|x86
+		{AE06C298-7CB8-44FE-BCA9-B05FE9F59559}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
