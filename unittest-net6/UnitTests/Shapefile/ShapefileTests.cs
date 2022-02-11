@@ -147,7 +147,7 @@ public class ShapefileTests
     {
         var sf = new MapWinGIS.Shapefile();
         sf.ShouldNotBeNull("Could not initialize Shapefile object");
-        var retVal = sf.Open(Path.Combine(Helpers.GetTestDataLocation(), "UnitedStates.shp"));
+        var retVal = sf.Open(Path.Combine(Helpers.GetTestDataLocation(), "UnitedStates-3857.shp"));
         retVal.ShouldBeTrue("sf.Open failed: " + sf.ErrorMsg[sf.LastErrorCode]);
         Helpers.CheckEpsgCode(sf.GeoProjection, 3857, false);
     }
