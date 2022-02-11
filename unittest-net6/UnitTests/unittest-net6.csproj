@@ -17,6 +17,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="TestData\**" />
+	  <EmbeddedResource Remove="TestData\**" />
+	  <None Remove="TestData\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <COMReference Include="MapWinGIS">
 	    <WrapperTool>tlbimp</WrapperTool>
 	    <VersionMinor>4</VersionMinor>
@@ -40,16 +46,6 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="TestData\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="TestData\Amersfoort.prj">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </None>
 	</ItemGroup>
 
 </Project>

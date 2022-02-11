@@ -118,7 +118,7 @@ internal static class Helpers
         var pathAssembly = Assembly.GetExecutingAssembly().Location;
         var folderAssembly = Path.GetDirectoryName(pathAssembly);
         if (folderAssembly?.EndsWith(@"\") == false) folderAssembly += @"\";
-        var folderProjectLevel = Path.GetFullPath(folderAssembly + @"..\..\..\..\TestData\");
+        var folderProjectLevel = Path.GetFullPath(folderAssembly + @"..\..\..\..\..\TestData\");
         if (!Directory.Exists(folderProjectLevel))
             throw new DirectoryNotFoundException("Cannot find TestData folder at " + folderProjectLevel);
 
