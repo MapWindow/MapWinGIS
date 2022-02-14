@@ -807,7 +807,7 @@ CStringW GdalHelper::GetConfigPath(GdalPath option)
 // ****************************************************************
 void GdalHelper::SetDefaultConfigPaths()
 {
-	constexpr GdalPath options[] = { PathGdalData, PathGdalPlugins };
+	constexpr GdalPath options[] = { PathGdalData, PathGdalPlugins, PathProjLib };
 
 	for (auto& option : options)
 	{

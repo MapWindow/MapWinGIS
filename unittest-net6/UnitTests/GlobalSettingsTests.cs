@@ -39,7 +39,7 @@ public class GlobalSettingsTests
         var projPath = gs.ProjPath;
         _testOutputHelper.WriteLine("projPath: " + projPath);
         projPath.ShouldNotBeNullOrEmpty("ProjPath is not set");
-        projPath.EndsWith("\\proj7\\share").ShouldBeTrue();
+        projPath.EndsWith("\\proj7\\share\\").ShouldBeTrue();
     }
 
     [Fact]
