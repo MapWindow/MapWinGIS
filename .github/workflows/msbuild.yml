@@ -28,8 +28,8 @@ jobs:
 
     strategy:
       matrix:
-        platform: ['Win32', 'x64']
-        # platform: ['Win32']
+        # platform: ['Win32', 'x64']
+        platform: ['Win32']
 
     steps:
     - uses: actions/checkout@v2
@@ -91,8 +91,8 @@ jobs:
     
     strategy:
       matrix:
-        platform: ['Win32', 'x64']
-        # platform: ['Win32']
+        # platform: ['Win32', 'x64']
+        platform: ['Win32']
         
     steps:
     - uses: actions/checkout@v2
@@ -144,27 +144,23 @@ jobs:
       with:
         msbuild-architecture: x64
         
-    - name: Build test solution x86
+    - name: Build test solution ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      if: ${{matrix.platform == 'Win32' }}
+      if: ${{matrix.latform == 'Win32' }}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x86 -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}  
-    - name: Build test solution x64
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      if: ${{matrix.platform == 'x64' }}
-      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}       
+      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}      
       
     # Run unit tests
     - name: Setup VSTest.console.exe
       uses: darenm/Setup-VSTest@v1  
     - name: Unit Testing x86
       if: ${{matrix.platform == 'Win32' }}
-      run: vstest.console.exe /Parallel /Platform:x86 -e:PROJ_LIB="D:\a\MapWinGIS\MapWinGIS\src\bin\Release\${{matrix.platform}}\proj7\share\" .\unittest-net6\UnitTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
+      run: vstest.console.exe /Parallel /Platform:x86 -e:PROJ_LIB="D:\a\MapWinGIS\MapWinGIS\src\bin\Release\x86\proj7\share\" .\unittest-net6\UnitTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
     - name: Unit Testing x64
       if: ${{matrix.platform == 'x64' }}
-      run: vstest.console.exe /Parallel /Platform:x64 -e:PROJ_LIB="D:\a\MapWinGIS\MapWinGIS\src\bin\Release\${{matrix.platform}}\proj7\share\" .\unittest-net6\UnitTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
-
+      run: vstest.console.exe /Parallel /Platform:x64 -e:PROJ_LIB="D:\a\MapWinGIS\MapWinGIS\src\bin\Release\x64\proj7\share\" .\unittest-net6\UnitTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
+     
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      
