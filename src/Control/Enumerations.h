@@ -1,3 +1,4 @@
+// ReSharper disable CppInconsistentNaming
 # ifndef ENUMERATIONS_H
 # define ENUMERATIONS_H
 
@@ -263,6 +264,7 @@ enum GdalPath
 {
 	PathGdalData = 0,
 	PathGdalPlugins =1,
+	PathProjLib = 2
 };
 
 enum BandChannel

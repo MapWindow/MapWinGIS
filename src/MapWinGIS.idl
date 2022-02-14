@@ -6020,6 +6020,8 @@ interface IGlobalSettings : IDispatch {
 	[propget, id(71)] HRESULT AllowLayersWithIncompleteReprojection([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(71)] HRESULT AllowLayersWithIncompleteReprojection([in] VARIANT_BOOL newVal);
 	[id(72)] HRESULT SetHttpUserAgent([in] BSTR userAgent);
+	[propget, id(73)] HRESULT ProjPath([out, retval] BSTR* pVal);
+	[propput, id(73)] HRESULT ProjPath([in] BSTR newVal);
 };
 
 [

@@ -189,7 +189,9 @@ public:
 	STDMETHOD(put_GdalPluginPath)(BSTR newVal);
 	STDMETHOD(get_GdalDataPath)(BSTR* pVal);
 	STDMETHOD(put_GdalDataPath)(BSTR newVal);
-	
+	STDMETHOD(get_ProjPath)(BSTR* pVal);
+	STDMETHOD(put_ProjPath)(BSTR newVal);
+
 	// Tiles:
 	STDMETHOD(get_BingApiKey)(BSTR* pVal);
 	STDMETHOD(put_BingApiKey)(BSTR newVal);

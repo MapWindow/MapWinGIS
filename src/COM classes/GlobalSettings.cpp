@@ -909,7 +909,7 @@ STDMETHODIMP CGlobalSettings::put_ForceHideLabels(VARIANT_BOOL newVal)
 STDMETHODIMP CGlobalSettings::get_GdalPluginPath(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CStringW path = GdalHelper::GetConfigPath(PathGdalPlugins);
+	const CStringW path = GdalHelper::GetConfigPath(PathGdalPlugins);
 	*pVal = W2BSTR(path);
 	return S_OK;
 }
@@ -926,7 +926,7 @@ STDMETHODIMP CGlobalSettings::put_GdalPluginPath(BSTR newVal)
 STDMETHODIMP CGlobalSettings::get_GdalDataPath(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CStringW path = GdalHelper::GetConfigPath(PathGdalData);
+	const CStringW path = GdalHelper::GetConfigPath(PathGdalData);
 	*pVal = W2BSTR(path);
 	return S_OK;
 }
@@ -934,6 +934,22 @@ STDMETHODIMP CGlobalSettings::put_GdalDataPath(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	GdalHelper::SetConfigPath(PathGdalData, OLE2W(newVal));
+	return S_OK;
+}
+// ***************************************************************
+//		PROJ.7 path
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_ProjPath(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	const CStringW path = GdalHelper::GetConfigPath(PathProjLib);
+	*pVal = W2BSTR(path);
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_ProjPath(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	GdalHelper::SetConfigPath(PathProjLib, OLE2W(newVal));
 	return S_OK;
 }
 
