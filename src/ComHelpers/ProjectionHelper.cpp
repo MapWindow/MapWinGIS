@@ -92,17 +92,25 @@ OGRErr ProjectionHelper::ImportFromEsri(OGRSpatialReference* sr, CString proj)
 // ***************************************************************
 OGRErr ProjectionHelper::ImportFromWkt(OGRSpatialReference* sr, CString proj)
 {
-	if (!sr) {
+	if (!sr)
+	{
 		return false;
 	}
 
-	char* s = proj.GetBuffer();
+	const char* s = proj.GetBuffer();
 
-	// TODO: Deprecated: GDAL 2.3. Use importFromWkt(const char**) instead.
-	return sr->importFromWkt(&s);
-
-	// TODO: Should we use Validate (https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference8ValidateEv)
-	// Validate CRS imported with importFromWkt()
+	OGRErr result = OGRERR_NONE;
+	// use newer method importFromWkt(const char*)
+	if ((result = sr->importFromWkt(&s)) == OGRERR_NONE)
+	{
+		// then Validate (https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference8ValidateEv)
+		return sr->Validate();
+	}
+	else
+	{
+		// return error from failed import
+		return result;
+	}
 }
 
 // ***************************************************************
