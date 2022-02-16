@@ -27,19 +27,8 @@
 #include "StdAfx.h"
 #include "GeoProjection.h"
 #include "ProjectionHelper.h"
-#include <malloc.h>
 
-// ************************************************************
-//		InjectSpatialReference()
-// ************************************************************
-bool CGeoProjection::get_IsSame(IGeoProjection* proj)
-{
-	VARIANT_BOOL vbretval;
-	this->get_IsSame(proj, &vbretval);
-	return vbretval ? true : false;
-}
-
-// ************************************************************
+//// ************************************************************
 //		InjectSpatialReference()
 // ************************************************************
 void CGeoProjection::InjectSpatialReference(OGRSpatialReference* sr)
@@ -543,7 +532,8 @@ STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal
 
 	// const OGRSpatialReference* ref = static_cast<CGeoProjection*>(proj)->get_SpatialReference();
 	const OGRSpatialReference* const ref = dynamic_cast<CGeoProjection*>(proj)->get_SpatialReference();
-	*pVal = _projection->IsSame(ref) ? VARIANT_TRUE : VARIANT_FALSE;
+	// use OGRSpatialReference to test same-ness
+	*pVal = (_projection->IsSame(ref) == TRUE) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 

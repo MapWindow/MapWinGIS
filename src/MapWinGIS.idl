@@ -5856,7 +5856,7 @@ interface IGeoProjection : IDispatch {
 	//[id(27), helpstring("method SetGeographicCS")] HRESULT SetGeographicCS([in] tkCoordinateSystem coordinateSystem);
 	[id(28), helpstring("method SetWgs84Projection")] HRESULT SetWgs84Projection([in] tkWgs84Projection Projection);
 	[id(29), helpstring("method SetNad83Projection")] HRESULT SetNad83Projection([in] tkNad83Projection Projection);
-	[propget, id(30), helpstring("property IsSame")] HRESULT IsSameExt([in] IGeoProjection* proj, [in] IExtents* bounds,
+	[propget, id(30), helpstring("property IsSameExt")] HRESULT IsSameExt([in] IGeoProjection* proj, [in] IExtents* bounds,
 		[in, defaultvalue(8)]int numSamplingPoints, [out, retval] VARIANT_BOOL* pVal);
 	[id(31), helpstring("method ReadFromFile")] HRESULT ReadFromFile([in]BSTR Filename, [out, retval]VARIANT_BOOL* retVal);
 	[id(32), helpstring("method WriteToFile")] HRESULT WriteToFile([in]BSTR Filename, [out, retval]VARIANT_BOOL* retVal);

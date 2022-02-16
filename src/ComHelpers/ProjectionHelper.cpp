@@ -26,6 +26,16 @@ bool ProjectionHelper::IsGeographic(IGeoProjection* gp)
 // ***************************************************************
 //		IsSame()
 // ***************************************************************
+bool ProjectionHelper::IsSame(const OGRSpatialReference* sr1, const OGRSpatialReference* sr2)
+{
+	if (!sr1 || !sr2) return false;
+	// use OGRSpatialReference to test same-ness
+	return(sr1->IsSame(sr2) == TRUE);
+}
+
+// ***************************************************************
+//		IsSame() (including Extents verification)
+// ***************************************************************
 bool ProjectionHelper::IsSame(IGeoProjection* gp1, IGeoProjection* gp2, IExtents* bounds, int sampleSize)
 {
 	if (!gp1 || !gp2 || !bounds) return false;
@@ -94,7 +104,7 @@ OGRErr ProjectionHelper::ImportFromWkt(OGRSpatialReference* sr, CString proj)
 {
 	if (!sr)
 	{
-		return false;
+		return OGRERR_FAILURE;
 	}
 
 	const char* s = proj.GetBuffer();

@@ -160,7 +160,6 @@ private:
 
 public:
 	OGRSpatialReference* get_SpatialReference() { return _projection; }
-	bool get_IsSame(IGeoProjection* proj);
 	void SetIsFrozen(bool frozen) { _isFrozen = frozen; }
 	void InjectSpatialReference(OGRSpatialReference* sr);
 };
