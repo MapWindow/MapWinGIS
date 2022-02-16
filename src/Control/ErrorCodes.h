@@ -1,3 +1,4 @@
+// ReSharper disable CppInconsistentNaming
 # ifndef TKERROR_CODES
 /*
 0 = tkNO_ERROR
@@ -106,6 +107,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkNO_INTERACTIVE_EDITING 246
 # define tkEXPRESSION_NO_SHAPEFILE 247
 # define tkAPPEND_MODE_NO_FILE 248
+# define tkUSE_SPATIALINDEX_IS_FALSE 249
 
 //301-400 = OGR layers
 # define tkFAILED_TO_OPEN_OGR_LAYER 301

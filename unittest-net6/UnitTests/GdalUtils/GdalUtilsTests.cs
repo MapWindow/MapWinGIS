@@ -33,9 +33,8 @@ public class GdalUtilsTests
         // Add shape:
         Helpers.AddPointShape(sfPoint, srcX, srcY);
         // Save shapefile to disk:
-        var fileLocation = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()), ".shp");
+        var fileLocation = Helpers.SaveSfToTempFile(sfPoint, "");
         _testOutputHelper.WriteLine("fileLocation: " + fileLocation);
-        Helpers.SaveSf(sfPoint, fileLocation);
 
         // New file:
         var newFileLocation = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()), ".shp");

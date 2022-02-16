@@ -23,7 +23,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "IndexSearching.h"
 #include "IndexShapeFiles.h"
 
@@ -32,140 +32,144 @@ namespace IndexSearching
 	/* ************************************************************************* **
 	**
 	**   Function to create a spatial index on a shape file.
-	** 
-	**  
+	**
+	**
 	**
 	** ************************************************************************* */
-	 int createSpatialIndex(double utilization, int capacity, char *fileName)
-	  {
-	  
-	  std::string baseName = fileName;
+	int CreateSpatialIndex(double utilization, int capacity, char* fileName)
+	{
+		const std::string baseName = fileName;
 
-	  bool bRet = createIndexFile(utilization, capacity, baseName);
+		const bool bRet = CreateIndexFile(utilization, capacity, baseName);
 
-	  return (int) bRet;
-	  }
+		return bRet;
+	}
 	/* ************************************************************************* **
 	**
 	**  Function to check if current index file is valid
-	** 
+	**
 	**  Returns true/false
 	**
 	** ************************************************************************* */
-	 bool isValidSpatialIndex(const char *fileName, int bufferSize)
-	  {
-	  string baseName = fileName;
-	  return(isValidIndexFile(baseName, bufferSize));
-	  }
+	bool IsValidSpatialIndex(const char* fileName, int bufferSize)
+	{
+		const string baseName = fileName;
+		return IsValidIndexFile(baseName, bufferSize);
+	}
 	/* ************************************************************************* **
 	**
 	**  Function to select shapes from shapefile
-	** 
+	**
 	**  Returns a <queue> of found shape file index numbers.
 	**
 	** ************************************************************************* */
-	 int selectShapesFromIndex(const char* fileName, double *lowVals, double *hiVals, QueryTypeFlags queryType, int bufferSize, CIndexSearching *resulSet)
-	  {	
-	  IStorageManager         *diskfile;
-	  StorageManager::IBuffer *file;
-	  ISpatialIndex           *tree;
+	int SelectShapesFromIndex(const char* fileName, double* lowVals, double* hiVals, QueryTypeFlags queryType, int bufferSize, CIndexSearching* resulSet)
+	{
+		IStorageManager* diskfile = nullptr;
+		StorageManager::IBuffer* file = nullptr;
+		ISpatialIndex* tree = nullptr;
 
-	  int rCode;
-	  try
-	  {
-		  
+		int rCode;
+		try
+		{
 			diskfile = StorageManager::loadDiskStorageManager(string(fileName));
 			// this will try to locate and open an already existing storage manager.
 			file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
 
-			tree = RTree::loadRTree(*file, 1); 
+			tree = RTree::loadRTree(*file, 1);
 
-			rCode = selectShapesFromIndex(tree, lowVals, hiVals, queryType, resulSet);
-	  }
-	  catch(...)
-	  {
-		  cerr << "Error running query on spatial index." << endl;
-		  rCode = unknownError;
-	  }
+			rCode = SelectShapesFromIndex(tree, lowVals, hiVals, queryType, resulSet);
+		}
+		catch (...)
+		{
+			cerr << "Error running query on spatial index." << endl;
+			rCode = unknownError;
+		}
 
-	  delete tree;
-	  delete file;
-	  delete diskfile;
+		delete tree;
+		delete file;
+		delete diskfile;
 
-	  return rCode;
-	  }
+		return rCode;
+	}
 
-	 int selectShapesFromIndex(CSpatialIndexID spatialIndexID, double *lowVals, double *hiVals, QueryTypeFlags queryType, CIndexSearching *resulSet)
+	int SelectShapesFromIndex(CSpatialIndexID spatialIndexID, double* lowVals, double* hiVals, QueryTypeFlags queryType, CIndexSearching* resulSet)
 	{
-		ISpatialIndex* spatialIndex = CSpatialIndexCache::Instance().getSpatialIndexByID(spatialIndexID);
-		if (spatialIndex == NULL)
+		ISpatialIndex* spatialIndex = CSpatialIndexCache::Instance().GetSpatialIndexById(spatialIndexID);
+		if (spatialIndex == nullptr)
 			return spatialIndexNotFound;
 
-		return selectShapesFromIndex(spatialIndex, lowVals, hiVals, queryType, resulSet);
+		return SelectShapesFromIndex(spatialIndex, lowVals, hiVals, queryType, resulSet);
 	}
 
-	 bool loadSpatialIndex(string baseName, bool validateIndex, int bufferSize, CSpatialIndexID& spatialIndexID)
+	bool LoadSpatialIndex(string baseName, bool validateIndex, int bufferSize, CSpatialIndexID& spatialIndexID)
 	{
-	  IStorageManager         *diskfile;
-	  StorageManager::IBuffer *file;
-	  ISpatialIndex           *tree;
+		IStorageManager* diskfile;
+		StorageManager::IBuffer* file;
+		ISpatialIndex* tree;
 
-	  try
-	  {
-		  diskfile = StorageManager::loadDiskStorageManager(baseName);
-		  // this will try to locate and open an already existing storage manager.
-		  file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
+		try
+		{
+			diskfile = StorageManager::loadDiskStorageManager(baseName);
+			// this will try to locate and open an already existing storage manager.
+			file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
 
-		  tree = RTree::loadRTree(*file, 1); 
-		   
-		  spatialIndexID = CSpatialIndexCache::Instance().cacheSpatialIndex(tree, diskfile, file);
+			tree = RTree::loadRTree(*file, 1);
 
-		  if (validateIndex && !tree->isIndexValid())
-		  {
-			CSpatialIndexCache::Instance().uncacheSpatialIndex(spatialIndexID, true);
+			spatialIndexID = CSpatialIndexCache::Instance().CacheSpatialIndex(tree, diskfile, file);
+
+			if (validateIndex && !tree->isIndexValid())
+			{
+				CSpatialIndexCache::Instance().UncacheSpatialIndex(spatialIndexID, true);
+				return false;
+			}
+		}
+		catch (...)
+		{
+			cerr << "Error loading spatial index." << endl;
 			return false;
-		  }
-	  }
-	  catch(...)
-	  {
-		  cerr << "Error loading spatial index." << endl;
-		  return false;
-	  }
+		}
 
-	  return true;
+		// pm, feb. 2020 added the 3 lines:
+		// TODO: Shouldn't these 3 not be deleted?
+		delete tree;
+		delete file;
+		delete diskfile;
+
+		return true;
 	}
 
-	 void unloadSpatialIndex(CSpatialIndexID spatialIndex)
+	void UnloadSpatialIndex(CSpatialIndexID spatialIndex)
 	{
-		CSpatialIndexCache::Instance().uncacheSpatialIndex(spatialIndex, true);
+		CSpatialIndexCache::Instance().UncacheSpatialIndex(spatialIndex, true);
 	}
 
 	// This is the constructor of a class that has been exported.
 	// see SpatialIndexing.h for the class definition
 	CIndexSearching::CIndexSearching()
-	  {
-	  resultList = new IDXLIST();
-	  }
+	{
+		resultList = new IDXLIST();
+	}
 	CIndexSearching::~CIndexSearching()
-	  {
-	  delete resultList;
-	  }
-	long CIndexSearching::getValue(int index)
-	  {
-	  long &val = resultList->at(index);
-	  return(val);
-	  }
-	void CIndexSearching::addValue(long Val)
-	  {
-	  resultList->push_back(Val);
-	  }
-	int  CIndexSearching::getLength(void)
-	  {
-	  return (resultList->size());
-	  }
+	{
+		delete resultList;
+	}
+	long CIndexSearching::GetValue(int index)
+	{
+		long& val = resultList->at(index);
+		return(val);
+	}
+	void CIndexSearching::AddValue(long val)
+	{
+		resultList->push_back(val);
+	}
+	int  CIndexSearching::GetLength(void)
+	{
+		return resultList->size();
+	}
 
-	void CIndexSearching::setCapacity(int capacity)
-	  {
-	  resultList->reserve(capacity);
-	  }
+	void CIndexSearching::SetCapacity(int capacity)
+	{
+		resultList->reserve(capacity);
+	}
 }

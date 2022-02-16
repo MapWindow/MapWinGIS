@@ -32,7 +32,6 @@
 
 // Windows Header Files:
 #pragma once
-#include <windows.h>
 #include <string>
 #include <queue>
 
@@ -42,26 +41,27 @@ namespace IndexSearching
 {
 	typedef vector<long> IDXLIST;
 	// This class is exported from the SpatialIndexing.dll
-	class CIndexSearching 
+	class CIndexSearching
 	{
-		public:
-			CIndexSearching(void);
-		 ~CIndexSearching(void);
-		  long getValue(int index);
-		  void addValue(long Val);
-		  int  getLength(void);
-		  void setCapacity(int capacity);
+	public:
+		CIndexSearching(void);
+		~CIndexSearching();
+		long GetValue(int index);
+		void AddValue(long val);
+		int  GetLength();
+		void SetCapacity(int capacity);
 
-		private:
-		  IDXLIST *resultList;
+	private:
+		IDXLIST* resultList;
 	};
 
 	typedef unsigned int CSpatialIndexID;
 
 	enum QueryTypeFlags
-	  { intersection = 1,
+	{
+		intersection = 1,
 		contained = 2
-	  };
+	};
 
 	enum SpatialIndexQueryErrors
 	{
@@ -70,10 +70,10 @@ namespace IndexSearching
 		spatialIndexNotFound = -2
 	};
 
-	int  createSpatialIndex(double utilization, int capacity, char *fileName);
-	bool isValidSpatialIndex(const char *fileName, int bufferSize);
-	bool loadSpatialIndex(string baseName, bool validateIndex, int bufferSize, CSpatialIndexID& spatialIndexID);
-	void unloadSpatialIndex(CSpatialIndexID spatialIndex);
-	int  selectShapesFromIndex(CSpatialIndexID CSpatialIndexID, double *lowVals, double *highVals, QueryTypeFlags queryType, CIndexSearching *resulSet);
-	int  selectShapesFromIndex(const char *fileName, double *lowVals, double *hiVals, QueryTypeFlags queryType, int bufferSize, CIndexSearching *resulSet);
+	int  CreateSpatialIndex(double utilization, int capacity, char* fileName);
+	bool IsValidSpatialIndex(const char* fileName, int bufferSize);
+	bool LoadSpatialIndex(string baseName, bool validateIndex, int bufferSize, CSpatialIndexID& spatialIndexId);
+	void UnloadSpatialIndex(CSpatialIndexID spatialIndex);
+	int  SelectShapesFromIndex(CSpatialIndexID spatialIndexId, double* lowVals, double* highVals, QueryTypeFlags queryType, CIndexSearching* resulSet);
+	int  SelectShapesFromIndex(const char* fileName, double* lowVals, double* hiVals, QueryTypeFlags queryType, int bufferSize, CIndexSearching* resulSet);
 }

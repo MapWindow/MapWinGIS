@@ -2350,13 +2350,13 @@ std::vector<long>* CShapefileDrawer::SelectShapesFromSpatialIndex(char* sFilenam
 	
 	IndexSearching::CIndexSearching *res = new IndexSearching::CIndexSearching();	
 
-	if (IndexSearching::selectShapesFromIndex((char *)baseName.c_str(), lowVals, highVals, IndexSearching::intersection, 100, res) == 0)	
+	if (IndexSearching::SelectShapesFromIndex((char *)baseName.c_str(), lowVals, highVals, IndexSearching::intersection, 100, res) == 0)	
 	{
 		std::vector<long>* selectResult = new std::vector<long>;	
-		selectResult->reserve(res->getLength());
-		for (int i = 0 ;i < res->getLength(); i++)
+		selectResult->reserve(res->GetLength());
+		for (int i = 0 ;i < res->GetLength(); i++)
 		{
-			selectResult->push_back((long)res->getValue(i));
+			selectResult->push_back((long)res->GetValue(i));
 		}
 		
 		delete res;

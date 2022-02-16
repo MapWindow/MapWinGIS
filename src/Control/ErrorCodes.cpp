@@ -209,6 +209,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Expression can be set only for labels of shapefile layer.";
 		case tkAPPEND_MODE_NO_FILE:
 			return "Append mode works with disk-based shapefiles in non-edit mode only.";
+		case tkUSE_SPATIALINDEX_IS_FALSE:
+			return "The property UseSpatialIndex is set to false";
 		
 		//301-400 = OGR
 		case tkFAILED_TO_OPEN_OGR_LAYER:

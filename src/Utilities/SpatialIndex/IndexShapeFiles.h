@@ -26,9 +26,7 @@
 #include "spatialindex/SpatialIndex.h"
 #include "IndexSearching.h"
 #include <string>
-#include <list>
 #include <queue>
-#include <ios>
 
 //Shapefile File Info
 #define HEADER_BYTES_16 50
@@ -46,46 +44,46 @@ using namespace SpatialIndex;
 namespace IndexSearching
 {
 	class ShapeIdxVisitor : public IVisitor
-	  {
-	  private:
+	{
+	private:
 
-	  public:
-		  size_t m_indexIO;
-		  size_t m_leafIO;
+	public:
+		size_t m_indexIO;
+		size_t m_leafIO;
 		queue<SpatialIndex::id_type> ids;
 
-	  public:
+	public:
 		~ShapeIdxVisitor()
-		  {
-		  }
-		  ShapeIdxVisitor() : m_indexIO(0), m_leafIO(0) {}
+		{
+		}
+		ShapeIdxVisitor() : m_indexIO(0), m_leafIO(0) {}
 
 		void ShapeIdxVisitor::visitData(const IData& d);
 
-		  void visitNode(const INode& n);
+		void visitNode(const INode& n);
 
-		void visitData(std::vector<const IData*>& v){};
-	  };
+		void visitData(std::vector<const IData*>& v) {};
+	};
 
-	class CSpatialIndexCache 
-	  {
-	  public:
+	class CSpatialIndexCache
+	{
+	public:
 		static CSpatialIndexCache& Instance();
-		ISpatialIndex* getSpatialIndexByID(CSpatialIndexID spatialIndexID);
-		CSpatialIndexID cacheSpatialIndex(ISpatialIndex* tree, IStorageManager* diskfile, StorageManager::IBuffer* file);
-		void uncacheSpatialIndex(CSpatialIndexID spatialIndexID, bool releaseAll);
-	  private:
+		ISpatialIndex* GetSpatialIndexById(CSpatialIndexID spatialIndexId);
+		CSpatialIndexID CacheSpatialIndex(ISpatialIndex* tree, IStorageManager* diskfile, StorageManager::IBuffer* file);
+		void UncacheSpatialIndex(CSpatialIndexID spatialIndexId, bool releaseAll);
+	private:
 		struct CacheItem
-		  {
-		  public:
-			IStorageManager         *m_diskfile;
-			StorageManager::IBuffer *m_file;
-			ISpatialIndex           *m_tree;
-	      
-			CacheItem() : m_diskfile(NULL), m_file(NULL), m_tree(NULL) {}
-			CacheItem(IStorageManager* diskfile, StorageManager::IBuffer* file, ISpatialIndex* tree) : m_diskfile(diskfile), m_file(file), m_tree(tree){}
-			void releaseAll();
-		  };
+		{
+		public:
+			IStorageManager* m_diskfile;
+			StorageManager::IBuffer* m_file;
+			ISpatialIndex* m_tree;
+
+			CacheItem() : m_diskfile(nullptr), m_file(nullptr), m_tree(nullptr) {}
+			CacheItem(IStorageManager* diskfile, StorageManager::IBuffer* file, ISpatialIndex* tree) : m_diskfile(diskfile), m_file(file), m_tree(tree) {}
+			void ReleaseAll();
+		};
 
 		CSpatialIndexCache() : m_nextSpatialIndexID(1) {}
 		CSpatialIndexCache(const CSpatialIndexCache&);                 // Prevent copy-construction
@@ -93,10 +91,10 @@ namespace IndexSearching
 
 		map<CSpatialIndexID, CacheItem> m_cache;
 		CSpatialIndexID m_nextSpatialIndexID;
-	  };
+	};
 
-	bool createIndexFile(double utilization, int capacity, std::string baseName);
-	bool isValidIndexFile(string baseName, int bufferSize);
-	void queryIndexFile(ISpatialIndex *spatialIndex, SpatialIndex::Region queryRegion, int bufferSize, QueryTypeFlags queryType, ShapeIdxVisitor *vis);
-	int  selectShapesFromIndex(ISpatialIndex *spatialIndex, double *lowVals, double *hiVals, QueryTypeFlags queryType, CIndexSearching *resulSet);
+	bool CreateIndexFile(double utilization, int capacity, std::string baseName);
+	bool IsValidIndexFile(string baseName, int bufferSize);
+	void QueryIndexFile(ISpatialIndex* spatialIndex, SpatialIndex::Region queryRegion, int bufferSize, QueryTypeFlags queryType, ShapeIdxVisitor* vis);
+	int  SelectShapesFromIndex(ISpatialIndex* spatialIndex, double* lowVals, double* hiVals, QueryTypeFlags queryType, CIndexSearching* resulSet);
 }

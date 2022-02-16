@@ -78,9 +78,6 @@ public class GeoProjectionsTests
         var geoProjection28992 = new GeoProjection();
         geoProjection28992.ShouldNotBeNull();
 
-        var geoProjection3857_2 = new GeoProjection();
-        geoProjection3857_2.ShouldNotBeNull();
-
         // Check:
         geoProjection3857.IsSame[geoProjection28992].ShouldBeFalse("GeoProjections should not be the same.");
 
@@ -101,12 +98,14 @@ public class GeoProjectionsTests
         geoProjection28992.IsSame[geoProjection3857].ShouldBeFalse("GeoProjections should not be the same.");
 
         // Import 3rd projection:
-        retVal = geoProjection3857_2.ImportFromEPSG(3857);
+        var geoProjection3857B = new GeoProjection();
+        geoProjection3857B.ShouldNotBeNull();
+        retVal = geoProjection3857B.ImportFromEPSG(3857);
         retVal.ShouldBeTrue();
 
         // Check:
-        geoProjection3857.IsSame[geoProjection3857_2].ShouldBeTrue("GeoProjections should be the same.");
-        geoProjection3857_2.IsSame[geoProjection3857].ShouldBeTrue("GeoProjections should be the same.");
+        geoProjection3857.IsSame[geoProjection3857B].ShouldBeTrue("GeoProjections should be the same.");
+        geoProjection3857B.IsSame[geoProjection3857].ShouldBeTrue("GeoProjections should be the same.");
 
         // Load prj-file:
         var geoProjectionPrj = ReadPrjFile("Amersfoort.prj");

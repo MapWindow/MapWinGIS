@@ -127,6 +127,7 @@ public:
  	STDMETHOD(get_HasSpatialIndex)(/*[out, retval]*/VARIANT_BOOL *pVal);
 	STDMETHOD(put_HasSpatialIndex)(/*[in]*/VARIANT_BOOL pVal);
     STDMETHOD(CreateSpatialIndex)(/*[in]*/BSTR ShapefileName, /*[out, retval]*/ VARIANT_BOOL  *pVal);
+	HRESULT CreateSpatialIndex(VARIANT_BOOL* retval);
 	STDMETHOD(Resource)(/*[in]*/ BSTR newSrcPath, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(IsSpatialIndexValid)(/*[out, retval]*/ VARIANT_BOOL  *pVal);
 	STDMETHOD(put_SpatialIndexMaxAreaPercent)(/*[in]*/ DOUBLE newVal);
@@ -140,7 +141,7 @@ public:
 	STDMETHOD(put_CacheExtents)(VARIANT_BOOL newVal);
 	STDMETHOD(RefreshExtents)(VARIANT_BOOL * pVal);
 	STDMETHOD(RefreshShapeExtents)(LONG ShapeId, VARIANT_BOOL *pVal);
-	STDMETHOD(QuickQueryInEditMode)(/*[in]*/IExtents * BoundBox,int ** Result, int* ResultCount);
+	STDMETHOD(QuickQueryInEditMode)(/*[in]*/IExtents * boundBox,int ** result, int* resultCount);
 	STDMETHOD(get_UseQTree)(VARIANT_BOOL * pVal);
 	STDMETHOD(put_UseQTree)(VARIANT_BOOL pVal);
 	STDMETHOD(Save)(/*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
@@ -402,13 +403,13 @@ private:
 	void put_ReferenceToCharts(bool bNullReference = false);
 
 	// quad tree
-    QTree* GenerateQTreeCore(bool SelectedOnly);
+    QTree* GenerateQTreeCore(bool selectedOnly);
     QTree* GenerateEmptyQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax);
     void ClearQTree(double* xMin, double* xMax, double* yMin, double* yMax, double* zMin, double* zMax);
 	void GenerateQTree();
 
     // temp quad tree
-	bool GenerateTempQTree(bool SelectedOnly);
+	bool GenerateTempQTree(bool selectedOnly);
 	void ClearTempQTree();
 	QTree* GetTempQTree();
 
@@ -454,8 +455,8 @@ public:
 	bool ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal, bool reprojectInPlace);
 
 	// errors
-	void ErrorMessage(long ErrorCode);
-	void ErrorMessage(long ErrorCode, ICallback* cBack);
+	void ErrorMessage(long errorCode);
+	void ErrorMessage(long errorCode, ICallback* cBack);
 
 	// underlying data
 	std::vector<ShapeRecord*>* get_ShapeVector();

@@ -111,17 +111,17 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 		qType = (SelectMode == INTERSECTION) ? IndexSearching::intersection : IndexSearching::contained;
 		res = new IndexSearching::CIndexSearching();
 
-		int ret = selectShapesFromIndex(_spatialIndexID, lowVals, highVals, qType, res);
+		int ret = SelectShapesFromIndex(_spatialIndexID, lowVals, highVals, qType, res);
 		if (ret != 0)
 		{
 			_hasSpatialIndex = false;
 			_spatialIndexLoaded = false;
-			IndexSearching::unloadSpatialIndex(_spatialIndexID);
+			IndexSearching::UnloadSpatialIndex(_spatialIndexID);
 			delete res;		//TODO throw error
 		}
 		else
 		{
-			local_numShapes = res->getLength();
+			local_numShapes = res->GetLength();
 			useSpatialIndexResults = true;
 		}
 	}
@@ -167,7 +167,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 			{
 				if (useSpatialIndexResults) 
 				{
-					shapeVal = (res->getValue(i)) - 1;
+					shapeVal = (res->GetValue(i)) - 1;
 				}
 				else if (useQTreeResults)
 				{
@@ -217,7 +217,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 		{	
 			if (useSpatialIndexResults) 
 			{
-				shapeVal = (res->getValue(i)) - 1;
+				shapeVal = (res->GetValue(i)) - 1;
 			}
 			else if (useQTreeResults)
 			{
