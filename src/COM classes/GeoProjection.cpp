@@ -71,7 +71,8 @@ STDMETHODIMP CGeoProjection::put_GlobalCallback(ICallback* newVal)
 STDMETHODIMP CGeoProjection::get_ErrorMsg(long ErrorCode, BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	USES_CONVERSION;
+
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
 	return S_OK;
 }
@@ -82,7 +83,8 @@ STDMETHODIMP CGeoProjection::get_ErrorMsg(long ErrorCode, BSTR* pVal)
 STDMETHODIMP CGeoProjection::get_LastErrorCode(long* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* pVal = _lastErrorCode;
+
+	*pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
@@ -150,14 +152,16 @@ void CGeoProjection::ErrorMessage(const long errorCode)
 STDMETHODIMP CGeoProjection::get_Key(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	USES_CONVERSION;
+
 	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 STDMETHODIMP CGeoProjection::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		::SysFreeString(_key);
+	
+	::SysFreeString(_key);
 	_key = OLE2BSTR(newVal);
 	return S_OK;
 }
@@ -215,7 +219,7 @@ STDMETHODIMP CGeoProjection::ImportFromProj4(BSTR proj, VARIANT_BOOL* retVal)
 	}
 
 	USES_CONVERSION;
-	const CString str = OLE2CA(proj);
+	const CString str(proj);
 	if (str.GetLength() == 0)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -292,24 +296,34 @@ STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
 STDMETHODIMP CGeoProjection::ImportFromESRI(const BSTR proj, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (_isFrozen)
-		{
-			ErrorMessage(tkPROJECTION_IS_FROZEN);
-			*retVal = VARIANT_FALSE;
-		}
-		else
-		{
-			USES_CONVERSION;
 
-			const CString s = OLE2A(proj);
-			const OGRErr err = ProjectionHelper::ImportFromEsri(_projection, s);
+	if (_isFrozen)
+	{
+		ErrorMessage(tkPROJECTION_IS_FROZEN);
+		*retVal = VARIANT_FALSE;
+	}
+	else
+	{
+		USES_CONVERSION;
 
-			*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
-			if (err != OGRERR_NONE)
-			{
-				ReportOgrError(err);
-			}
+		// convert BSTR to CString
+		CString strProj(proj);
+		// get char* buffer from CString
+		const char* s = strProj.GetBuffer();
+
+		// Parameters: papszPrj	NULL terminated list of strings containing the definition.
+		char** papszPrj{};
+		papszPrj = CSLAddString(papszPrj, s);
+		const OGRErr err = _projection->importFromESRI(papszPrj);
+		// release CString buffer
+		strProj.ReleaseBuffer();
+
+		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
+		if (err != OGRERR_NONE)
+		{
+			ReportOgrError(err);
 		}
+	}
 	return S_OK;
 }
 
