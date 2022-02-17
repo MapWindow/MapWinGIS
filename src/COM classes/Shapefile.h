@@ -467,14 +467,14 @@ public:
 	
 	// serialization
 	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);
-	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName, bool serializeCategories);
+	CPLXMLNode* SerializeCore(VARIANT_BOOL saveSelection, CString elementName, bool serializeCategories);
 
 	// charts
 	void SetChartsPositions(tkLabelPositioning Method);
 	void ClearChartFrames();
 	
 	// selection
-	bool SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult, bool renderedOnly);
+	bool SelectShapesCore(Extent& extents, double tolerance, SelectMode selectMode, std::vector<long>& selectResult, bool renderedOnly);
 	bool QuickExtentsCore(long ShapeIndex, Extent& result);
 	bool QuickExtentsCore(long ShapeIndex, double* xMin, double* yMin, double* xMax, double* yMax);
 

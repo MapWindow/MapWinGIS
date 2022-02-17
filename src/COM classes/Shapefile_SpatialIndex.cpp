@@ -447,7 +447,7 @@ void CShapefile::GenerateQTree()
 // **********************************************************************
 // 						GenerateQTreeCore()				           
 // **********************************************************************
-QTree* CShapefile::GenerateQTreeCore(bool selectedOnly)
+QTree* CShapefile::GenerateQTreeCore(const bool selectedOnly)
 {
 
 	double xMin, xMax, yMin, yMax, zMin, zMax;
@@ -473,7 +473,7 @@ QTree* CShapefile::GenerateQTreeCore(bool selectedOnly)
 		node.index = i;
 		qtree->AddNode(node);
 
-		CallbackHelper::Progress(_globalCallback, i, numShapes, "Building index...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Building QTree index...", _key, percent);
 	}
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 

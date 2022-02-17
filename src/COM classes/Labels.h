@@ -132,10 +132,10 @@ public:
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
 	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
-	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
+	STDMETHOD(get_ErrorMsg)(/*[in]*/ long errorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
 	
-	STDMETHOD(AddLabel)(BSTR Text, double x, double y, double Rotation, long Category = -1, double offsetX = 0, double offsetY = 0);
+	STDMETHOD(AddLabel)(BSTR text, double x, double y, double rotation, long category = -1, double offsetX = 0, double offsetY = 0);
 	STDMETHOD(InsertLabel)(long Index, BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY, VARIANT_BOOL* retVal);
 	STDMETHOD(RemoveLabel)(long Index, VARIANT_BOOL* vbretval);
 	
@@ -152,14 +152,14 @@ public:
 
 	// managing labels
 	STDMETHOD(get_Count)(/*[out, retval]*/long* pVal)				{*pVal = _labels.size();	return S_OK;};
-	STDMETHOD(get_NumParts)(/*[in]*/long Index, /*[out, retval]*/long* pVal);
+	STDMETHOD(get_NumParts)(/*[in]*/long index, /*[out, retval]*/long* pVal);
 	STDMETHOD(get_NumCategories)(/*[out, retval]*/long* pVal);
 	
-	STDMETHOD(get_Label)(long Index, long Part, ILabel** pVal);
+	STDMETHOD(get_Label)(long index, long part, ILabel** pVal);
 	//STDMETHOD(put_Label)(long Index, long Part, ILabel* newVal);
 	
-	STDMETHOD(get_Category)(long Index, ILabelCategory** retval);
-	STDMETHOD(put_Category)(long Index, ILabelCategory* newVal);
+	STDMETHOD(get_Category)(long index, ILabelCategory** retval);
+	STDMETHOD(put_Category)(long index, ILabelCategory* newVal);
 
 	// selection
 	STDMETHOD(Select)(IExtents* BoundingBox, long Tolerance, SelectMode SelectMode, VARIANT* LabelIndices, VARIANT* PartIndices, VARIANT_BOOL* retval);
@@ -456,7 +456,7 @@ private:
 	VARIANT_BOOL _synchronized;
 
 private:
-	inline void ErrorMessage(long ErrorCode);
+	inline void ErrorMessage(long errorCode);
 	bool GetMinMaxCategoryValue(double& globalMax, double& globalMin);
     void SetCategoryForLabel(long labelIndex, long categoryIndex);
     void UpdateLabelOffsetsFromShapefile(long labelIndex, long categoryIndex);

@@ -2261,12 +2261,12 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 // ********************************************************
 //     SerializeCore()
 // ********************************************************
-CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName, bool serializeCategories)
+CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elementName, bool serializeCategories)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		USES_CONVERSION;
 
-	CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, ElementName);
+	CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, elementName);
 
 	if (psTree)
 	{
@@ -2276,7 +2276,7 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString Elemen
 
 
 		if (_useQTree != FALSE)
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "UseQTree", CPLString().Printf("%d", (int)_useQTree));
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "UseQTree", CPLString().Printf("%d", _useQTree));
 
 		if (_collisionMode != LocalList)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "CollisionMode",
@@ -2353,7 +2353,7 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString Elemen
 		long numSelected;
 		this->get_NumSelected(&numSelected);
 
-		if (numSelected > 0 && SaveSelection)
+		if (numSelected > 0 && saveSelection)
 		{
 			auto* selection = new char[_shapeData.size() + 1];
 			selection[_shapeData.size()] = '\0';
@@ -2401,8 +2401,7 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString Elemen
 
 			// when there are no indices assigned, write an empty node with Count = 0;
 			// to signal, that categories must not be applied automatically (behavior for older versions)
-			CPLXMLNode* nodeCats = CPLCreateXMLElementAndValue(psTree, "CategoryIndices", s.GetBuffer());
-			if (nodeCats)
+			if (CPLXMLNode* nodeCats = CPLCreateXMLElementAndValue(psTree, "CategoryIndices", s.GetBuffer()))
 			{
 				Utility::CPLCreateXMLAttributeAndValue(nodeCats, "Count",
 					CPLString().Printf(
@@ -2415,8 +2414,7 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString Elemen
 		// ----------------------------------------------------
 		if (_table)
 		{
-			CPLXMLNode* psTable = ((CTableClass*)_table)->SerializeCore("TableClass");
-			if (psTable)
+			if (CPLXMLNode* psTable = ((CTableClass*)_table)->SerializeCore("TableClass"))
 			{
 				CPLAddXMLChild(psTree, psTable);
 			}

@@ -1,13 +1,13 @@
 /**************************************************************************************
- * File name: LabelClass.cpp 
+ * File name: LabelClass.cpp
  *
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  * Description: Implementation of CLabelClass
  *
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -18,29 +18,29 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
  // lsu: jan 2010 - created the file.
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "LabelClass.h"
 
 // ***********************************************************
 //		LabelText
 // ***********************************************************
 // Passing pointer to LabelInfo structure through COM
-STDMETHODIMP CLabelClass::get_Text(BSTR* retval)						
+STDMETHODIMP CLabelClass::get_Text(BSTR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	*retval = _label->text.AllocSysString();
 	return S_OK;
 };
 STDMETHODIMP CLabelClass::put_Text(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 	// _label->text = OLE2CA(newVal);
 	_label->text = newVal;
 	return S_OK;
@@ -56,13 +56,13 @@ char* CLabelClass::get_LabelData()
 void CLabelClass::put_LabelData(char* newVal)
 {
 	if (newVal == NULL) return;
-	
+
 	// if the memory was allocated in this class we should free it;
 	if (_canDelete)
 		delete _label;
 
 	_label = reinterpret_cast<CLabelInfo*>(newVal);
-	
+
 	_canDelete = false; // we can't delete the object hereafter as we didn't allocate the memory;
 }
 
@@ -76,15 +76,15 @@ STDMETHODIMP CLabelClass::get_ScreenExtents(IExtents** retval)
 	if (_label->horizontalFrame)
 	{
 		ComHelper::CreateExtents(&ext);
-		ext->SetBounds( _label->horizontalFrame->left, _label->horizontalFrame->top, 0.0,
-						_label->horizontalFrame->right, _label->horizontalFrame->bottom, 0.0);
+		ext->SetBounds(_label->horizontalFrame->left, _label->horizontalFrame->top, 0.0,
+			_label->horizontalFrame->right, _label->horizontalFrame->bottom, 0.0);
 		*retval = ext;
 	}
 	else if (_label->rotatedFrame)
 	{
 		ComHelper::CreateExtents(&ext);
 		CRect* rect = _label->rotatedFrame->BoundingBox();
-		ext->SetBounds( rect->left, rect->top, 0.0, rect->right, rect->bottom, 0.0);
+		ext->SetBounds(rect->left, rect->top, 0.0, rect->right, rect->bottom, 0.0);
 		*retval = ext;
 	}
 	else
