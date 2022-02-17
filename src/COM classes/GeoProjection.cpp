@@ -31,7 +31,7 @@
 //// ************************************************************
 //		InjectSpatialReference()
 // ************************************************************
-void CGeoProjection::InjectSpatialReference(OGRSpatialReference* sr)
+void CGeoProjection::InjectSpatialReference(const gsl::not_null<OGRSpatialReference*> sr)
 {
 	if (_projection)
 	{
