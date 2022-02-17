@@ -126,8 +126,7 @@ public:
 	STDMETHOD(put_UseSpatialIndex)(/*[in]*/VARIANT_BOOL pVal);
  	STDMETHOD(get_HasSpatialIndex)(/*[out, retval]*/VARIANT_BOOL *pVal);
 	STDMETHOD(put_HasSpatialIndex)(/*[in]*/VARIANT_BOOL pVal);
-    STDMETHOD(CreateSpatialIndex)(/*[in]*/BSTR ShapefileName, /*[out, retval]*/ VARIANT_BOOL  *pVal);
-	STDMETHOD(CreateSpatialIndex0)(VARIANT_BOOL* retval);
+    STDMETHOD(CreateSpatialIndex)(/*[in, optional]*/BSTR shapefileName, /*[out, retval]*/ VARIANT_BOOL  *retval);
 	STDMETHOD(Resource)(/*[in]*/ BSTR newSrcPath, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(IsSpatialIndexValid)(/*[out, retval]*/ VARIANT_BOOL  *pVal);
 	STDMETHOD(put_SpatialIndexMaxAreaPercent)(/*[in]*/ DOUBLE newVal);

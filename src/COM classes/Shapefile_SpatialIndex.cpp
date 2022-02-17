@@ -193,6 +193,11 @@ STDMETHODIMP CShapefile::get_CanUseSpatialIndex(IExtents* pArea, VARIANT_BOOL* p
 				return S_OK;
 			}
 		}
+		else
+		{
+			ErrorMessage(tkEXCEEDS_SPATIALINDEXMAXAREAPERCENT);
+			return S_OK;
+		}
 	}
 
 	return S_OK;
@@ -202,50 +207,7 @@ STDMETHODIMP CShapefile::get_CanUseSpatialIndex(IExtents* pArea, VARIANT_BOOL* p
 //		CreateSpatialIndex()
 // ***********************************************************
 //ajp June 2008 Function to create an Index file
-__declspec(deprecated("This is a deprecated function, use CShapefile::CreateSpatialIndex0() instead"))
-STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR ShapefileName, VARIANT_BOOL* retval)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	USES_CONVERSION;
-
-	*retval = VARIANT_TRUE;
-
-	CString tmp_shpfileName = OLE2CA(ShapefileName);
-	if (tmp_shpfileName.GetLength() <= 3)
-	{
-		*retval = VARIANT_FALSE;
-		ErrorMessage(tkINVALID_FILENAME);
-	}
-	else
-	{
-		string baseName;
-		baseName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 4);
-
-		// 0.9 = utilization rate, 100 = Node Capacity
-		// Creates two files baseName.dat and baseName.idx
-		try
-		{
-			if (!IndexSearching::CreateSpatialIndex(0.9, _spatialIndexNodeCapacity, (char*)baseName.c_str()))
-			{
-				*retval = VARIANT_FALSE;
-				ErrorMessage(tkINVALID_FILENAME);
-			}
-		}
-		catch (...)
-		{
-			*retval = VARIANT_FALSE;
-		}
-	}
-
-	return S_OK;
-}
-
-// ***********************************************************
-//		CreateSpatialIndex()
-// ***********************************************************
-//pm Feb 2022 No need to pass in filename
-STDMETHODIMP CShapefile::CreateSpatialIndex0(VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::CreateSpatialIndex(const BSTR shapefileName, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -253,21 +215,35 @@ STDMETHODIMP CShapefile::CreateSpatialIndex0(VARIANT_BOOL* retval)
 
 	*retval = VARIANT_FALSE;
 
-	if (_shpfileName.GetLength() <= 3)
+	string baseName;
+	if (CComBSTR(shapefileName).Length() < 2)
 	{
-		ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
-		return S_OK;
+		if (_shpfileName.GetLength() <= 3)
+		{
+			ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
+			return S_OK;
+		}
+
+		baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));	// TODO: use Unicode, is also used in different locations. Perhaps create a function for it?
+	}
+	else
+	{
+		const CString tmp_shpfileName = OLE2CA(shapefileName);
+		if (tmp_shpfileName.GetLength() <= 3)
+		{
+			*retval = VARIANT_FALSE;
+			ErrorMessage(tkINVALID_FILENAME);
+		}
+		else
+		{
+			baseName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 4);
+		}
 	}
 
-	const string baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));	// TODO: use Unicode, is also used in different locations. Perhaps create a function for it?
-
-	// 0.9 = utilization rate, 100 = Node Capacity
-	// Creates two files baseName.dat and baseName.idx
 	try
 	{
 		if (!IndexSearching::CreateSpatialIndex(0.9, _spatialIndexNodeCapacity, (char*)baseName.c_str()))
 		{
-			// ErrorMessage(tkINVALID_FILENAME);  // TODO: Is this the expected error code? Isn't tkFAILED_TO_BUILD_SPATIAL_INDEX better?
 			ErrorMessage(tkFAILED_TO_BUILD_SPATIAL_INDEX);
 		}
 		else
@@ -282,7 +258,6 @@ STDMETHODIMP CShapefile::CreateSpatialIndex0(VARIANT_BOOL* retval)
 		*retval = VARIANT_FALSE;
 	}
 
-
 	return S_OK;
 }
 
@@ -291,17 +266,25 @@ STDMETHODIMP CShapefile::CreateSpatialIndex0(VARIANT_BOOL* retval)
 // ***********************************************************
 STDMETHODIMP CShapefile::IsSpatialIndexValid(VARIANT_BOOL* retval)
 {
+	*retval = VARIANT_FALSE;
+
+	if (_shpfileName.GetLength() <= 3)
+	{
+		ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
+		return S_OK;
+	}
+
 	VARIANT_BOOL hasSpatialIndex;
 	get_HasSpatialIndex(&hasSpatialIndex);
-	if (!hasSpatialIndex)
-		*retval = VARIANT_FALSE;
-	else
-	{
-		USES_CONVERSION;
-		const string baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));		// TODO: use Unicode
-		const bool bIsValid = IndexSearching::IsValidSpatialIndex(baseName.c_str(), _spatialIndexNodeCapacity);
-		*retval = bIsValid ? VARIANT_TRUE : VARIANT_FALSE;
+	if (!hasSpatialIndex) {
+		ErrorMessage(tkHAS_NO_SPATIALINDEX);
+		return S_OK;
 	}
+
+	USES_CONVERSION;
+	const string baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));		// TODO: use Unicode
+	const bool bIsValid = IndexSearching::IsValidSpatialIndex(baseName.c_str(), _spatialIndexNodeCapacity);
+	*retval = bIsValid ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return S_OK;
 }

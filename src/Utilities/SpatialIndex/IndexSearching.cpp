@@ -51,7 +51,7 @@ namespace IndexSearching
 	**  Returns true/false
 	**
 	** ************************************************************************* */
-	bool IsValidSpatialIndex(const char* fileName, int bufferSize)
+	bool IsValidSpatialIndex(const char* fileName, const int bufferSize)
 	{
 		const string baseName = fileName;
 		return IsValidIndexFile(baseName, bufferSize);
@@ -63,7 +63,7 @@ namespace IndexSearching
 	**  Returns a <queue> of found shape file index numbers.
 	**
 	** ************************************************************************* */
-	int SelectShapesFromIndex(const char* fileName, double* lowVals, double* hiVals, QueryTypeFlags queryType, int bufferSize, CIndexSearching* resulSet)
+	int SelectShapesFromIndex(const char* fileName, double* lowVals, double* hiVals, const QueryTypeFlags queryType, const int bufferSize, CIndexSearching* resulSet)
 	{
 		IStorageManager* diskfile = nullptr;
 		StorageManager::IBuffer* file = nullptr;
@@ -93,16 +93,16 @@ namespace IndexSearching
 		return rCode;
 	}
 
-	int SelectShapesFromIndex(CSpatialIndexID spatialIndexID, double* lowVals, double* hiVals, QueryTypeFlags queryType, CIndexSearching* resulSet)
+	int SelectShapesFromIndex(const CSpatialIndexID spatialIndexId, double* lowVals, double* highVals, const QueryTypeFlags queryType, CIndexSearching* resulSet)
 	{
-		ISpatialIndex* spatialIndex = CSpatialIndexCache::Instance().GetSpatialIndexById(spatialIndexID);
+		ISpatialIndex* spatialIndex = CSpatialIndexCache::Instance().GetSpatialIndexById(spatialIndexId);
 		if (spatialIndex == nullptr)
 			return spatialIndexNotFound;
 
-		return SelectShapesFromIndex(spatialIndex, lowVals, hiVals, queryType, resulSet);
+		return SelectShapesFromIndex(spatialIndex, lowVals, highVals, queryType, resulSet);
 	}
 
-	bool LoadSpatialIndex(string baseName, bool validateIndex, int bufferSize, CSpatialIndexID& spatialIndexID)
+	bool LoadSpatialIndex(string baseName, const bool validateIndex, const int bufferSize, CSpatialIndexID& spatialIndexId)
 	{
 		IStorageManager* diskfile;
 		StorageManager::IBuffer* file;
@@ -116,11 +116,11 @@ namespace IndexSearching
 
 			tree = RTree::loadRTree(*file, 1);
 
-			spatialIndexID = CSpatialIndexCache::Instance().CacheSpatialIndex(tree, diskfile, file);
+			spatialIndexId = CSpatialIndexCache::Instance().CacheSpatialIndex(tree, diskfile, file);
 
 			if (validateIndex && !tree->isIndexValid())
 			{
-				CSpatialIndexCache::Instance().UncacheSpatialIndex(spatialIndexID, true);
+				CSpatialIndexCache::Instance().UncacheSpatialIndex(spatialIndexId, true);
 				return false;
 			}
 		}
@@ -139,7 +139,7 @@ namespace IndexSearching
 		return true;
 	}
 
-	void UnloadSpatialIndex(CSpatialIndexID spatialIndex)
+	void UnloadSpatialIndex(const CSpatialIndexID spatialIndex)
 	{
 		CSpatialIndexCache::Instance().UncacheSpatialIndex(spatialIndex, true);
 	}
@@ -154,21 +154,21 @@ namespace IndexSearching
 	{
 		delete resultList;
 	}
-	long CIndexSearching::GetValue(int index)
+	long CIndexSearching::GetValue(const int index)
 	{
 		long& val = resultList->at(index);
 		return(val);
 	}
-	void CIndexSearching::AddValue(long val)
+	void CIndexSearching::AddValue(const long val)
 	{
 		resultList->push_back(val);
 	}
-	int  CIndexSearching::GetLength(void)
+	int  CIndexSearching::GetLength()
 	{
 		return resultList->size();
 	}
 
-	void CIndexSearching::SetCapacity(int capacity)
+	void CIndexSearching::SetCapacity(const int capacity)
 	{
 		resultList->reserve(capacity);
 	}

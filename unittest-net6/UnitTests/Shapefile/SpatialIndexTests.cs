@@ -1,6 +1,4 @@
-﻿using System.Security.Policy;
-
-namespace unittest_net6.Shapefile;
+﻿namespace unittest_net6.Shapefile;
 public class SpatialIndexTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
@@ -80,24 +78,55 @@ public class SpatialIndexTests
         var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
         _testOutputHelper.WriteLine(sfFileLocation);
 
+        // Test again, should now return false, but no error:
+        retVal = sfPolygon.CanUseSpatialIndex[sfPolygon.Extents];
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("No Error");
 
-        // TODO:
-        //// Test again, should now return false, but no error:
-        //retVal = sfPolygon.CanUseSpatialIndex[sfPolygon.Extents];
-        //retVal.ShouldBeFalse();
-        //sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("No Error");
+        // Create index:
+        retVal = sfPolygon.CreateSpatialIndex();
+        retVal.ShouldBeTrue("CreateSpatialIndex failed");
 
-        //// Create again:
-        //retVal = sfPolygon.CreateSpatialIndex();
-        //retVal.ShouldBeTrue("CreateSpatialIndex failed");
+        // Test again, should still return false:
+        retVal = sfPolygon.CanUseSpatialIndex[sfPolygon.Extents];
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("The selected extents divided by the shapefile extents exceeds the SpatialIndexMaxAreaPercent setting");
 
-        //sfPolygon.EditingShapes.ShouldBeFalse();
-        //sfPolygon.InteractiveEditing.ShouldBeFalse();
+        // Test again with smaller extent, should return true:
+        sfPolygon.Extents.GetBounds(out var xMin, out var yMin, out var zMin, out var xMax, out var yMax, out var zMax);
+        var enlargedExtent = new Extents();
+        const int enlargeValue = -100;
+        enlargedExtent.SetBounds(xMin - enlargeValue, yMin - enlargeValue, zMin, xMax + enlargeValue, yMax + enlargeValue, zMax);
+        retVal = sfPolygon.CanUseSpatialIndex[enlargedExtent];
+        retVal.ShouldBeTrue("CanUseSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+    }
 
-        //sfPolygon.UseSpatialIndex = true;
+    [Fact]
+    public void IsSpatialIndexValidTest()
+    {
+        // Create shapefile:
+        var sfPolygon = Helpers.CreateTestPolygonShapefile();
 
-        //// Test again, should now return true:
-        //retVal = sfPolygon.CanUseSpatialIndex[sfPolygon.Extents];
-        //retVal.ShouldBeTrue("CanUseSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+        // Test, shoud return false and error:
+        var retVal = sfPolygon.IsSpatialIndexValid();
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("The method isn't applicable to the in-memory object");
+
+        // Save shapefile:
+        var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
+        _testOutputHelper.WriteLine(sfFileLocation);
+
+        // Test again, should return false
+        retVal = sfPolygon.IsSpatialIndexValid();
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("No valid spatial index can be found");
+
+        // Create index:
+        retVal = sfPolygon.CreateSpatialIndex();
+        retVal.ShouldBeTrue("CreateSpatialIndex failed");
+
+        // Test again, should return true:
+        retVal = sfPolygon.IsSpatialIndexValid();
+        retVal.ShouldBeTrue("IsSpatialIndexValid failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
     }
 }
