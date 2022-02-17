@@ -30,7 +30,7 @@ public class MapWinGisTests
     }
 
     [WpfFact]
-    public void OpenInvalidShapefile()
+    public void OpenShapefileWithInvalidSpatialIndex()
     {
         using var form = new WinFormsApp1.Form1();
         form.ShouldNotBeNull();
@@ -41,11 +41,16 @@ public class MapWinGisTests
 
         var sf = form.GetShapefileFromLayer(layerHandle);
         sf.ShouldNotBeNull("Could not get shapefile from layer");
+
         // Test
         sf.HasSpatialIndex.ShouldBeTrue();
         sf.UseSpatialIndex.ShouldBeTrue();
         sf.IsSpatialIndexValid().ShouldBeTrue();
         sf.HasInvalidShapes().ShouldBeFalse();
         sf.NumShapes.ShouldBe(13424);
+        sf.Extents.xMin.ShouldBe(108.722071, 0.00001);
+        sf.Extents.yMin.ShouldBe(34.149021, 0.00001);
+        sf.Extents.xMax.ShouldBe(109.139842, 0.00001);
+        sf.Extents.yMax.ShouldBe(34.457816, 0.00001);
     }
 }

@@ -173,13 +173,51 @@ public class SpatialIndexTests
     public void InvalidIndexFilesTest()
     {
         // As mentioned in https://github.com/MapWindow/MapWinGIS/issues/216
+
+        // ogrinfo -geom=SUMMARY -so "D:\dev\MapWindow\MapWinGIS\git\unittest-net6\TestData\Issue-216.shp" Issue-216
+        //Layer name: Issue-216
+        //Geometry: Line String
+        //Feature Count: 13424
+        //Extent: (108.722071, 34.149021) - (109.139842, 34.457816)
+        //Layer SRS WKT:
+        //GEOGCRS["WGS 84",
+        //    DATUM["World Geodetic System 1984",
+        //        ELLIPSOID["WGS 84",6378137,298.257223563,
+        //            LENGTHUNIT["metre",1]]],
+        //    PRIMEM["Greenwich",0,
+        //        ANGLEUNIT["degree",0.0174532925199433]],
+        //    CS[ellipsoidal,2],
+        //    AXIS["latitude",north,
+        //        ORDER[1],
+        //        ANGLEUNIT["degree",0.0174532925199433]],
+        //    AXIS["longitude",east,
+        //        ORDER[2],
+        //        ANGLEUNIT["degree",0.0174532925199433]],
+        //    ID["EPSG",4326]]
+        //Data axis to CRS axis mapping: 2,1
+        //osm_id: String (10.0)
+        //code: Integer (5.0)
+        //fclass: String (28.0)
+        //name: String (100.0)
+        //    ref: String (20.0)
+        //oneway: String (1.0)
+        //maxspeed: Integer (5.0)
+        //layer: Real (19.11)
+        //bridge: String (1.0)
+        //tunnel: String (1.0)
+
         var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
         var sf = Helpers.OpenShapefile(sfLocation);
+        Helpers.CheckEpsgCode(sf.GeoProjection, 4326, true);
         sf.HasSpatialIndex.ShouldBeTrue();
         sf.UseSpatialIndex.ShouldBeTrue();
         sf.IsSpatialIndexValid().ShouldBeTrue();
         sf.HasInvalidShapes().ShouldBeFalse();
         sf.NumShapes.ShouldBe(13424);
+        sf.Extents.xMin.ShouldBe(108.722071, 0.00001);
+        sf.Extents.yMin.ShouldBe(34.149021, 0.00001);
+        sf.Extents.xMax.ShouldBe(109.139842, 0.00001);
+        sf.Extents.yMax.ShouldBe(34.457816, 0.00001);
 
         // Open using FileManager:
         var sf2 = Helpers.LoadSfUsingFileManager(sfLocation);
@@ -188,5 +226,9 @@ public class SpatialIndexTests
         sf2.IsSpatialIndexValid().ShouldBeTrue();
         sf2.HasInvalidShapes().ShouldBeFalse();
         sf2.NumShapes.ShouldBe(13424);
+        sf2.Extents.xMin.ShouldBe(108.722071, 0.00001);
+        sf2.Extents.yMin.ShouldBe(34.149021, 0.00001);
+        sf2.Extents.xMax.ShouldBe(109.139842, 0.00001);
+        sf2.Extents.yMax.ShouldBe(34.457816, 0.00001);
     }
 }
