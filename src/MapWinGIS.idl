@@ -4096,7 +4096,7 @@ interface IShapefile : IDispatch {
 	[id(42), helpstring("method CreateNewWithShapeID")] HRESULT CreateNewWithShapeID([in] BSTR ShapefileName, [in] ShpfileType ShapefileType, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(43), helpstring("property UseSpatialIndex")] HRESULT UseSpatialIndex([out, retval]  VARIANT_BOOL* pVal);
 	[propput, id(43), helpstring("property UseSpatialIndex")] HRESULT UseSpatialIndex([in] VARIANT_BOOL pVal);
-	[id(44), helpstring("Deprecated method CreateSpatialIndex, use CShapefile::CreateSpatialIndex0 instead")] HRESULT CreateSpatialIndex([in] BSTR ShapefileName, [out, retval] VARIANT_BOOL* retval);
+	[id(44), helpstring("method CreateSpatialIndex")] HRESULT CreateSpatialIndex([in, defaultvalue(NULL)] BSTR shapefileName, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(45), helpstring("property HasSpatialIndex")] HRESULT HasSpatialIndex([out, retval]  VARIANT_BOOL* pVal);
 	[propput, id(45), helpstring("property HasSpatialIndex")] HRESULT HasSpatialIndex([in] VARIANT_BOOL);
 	[id(46), helpstring("method Resource")] HRESULT Resource([in] BSTR newShpPath, [out, retval] VARIANT_BOOL* pVal);
@@ -4235,7 +4235,7 @@ interface IShapefile : IDispatch {
 		[out]long* shapeIndex, [out] double* fx, [out] double* fy, [out] double* distance, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(145)] HRESULT HasOgrFidMapping([out, retval] VARIANT_BOOL* pVal);
 	[id(146)] HRESULT OgrFid2ShapeIndex([in] long OgrFid, [out, retval] LONG* ShapeIndex);
-	[id(147), helpstring("method CreateSpatialIndex0")] HRESULT CreateSpatialIndex0([out, retval] VARIANT_BOOL* retval);
+	//[id(147), helpstring("method CreateSpatialIndexNew")] HRESULT CreateSpatialIndexNew([out, retval] VARIANT_BOOL* retval);
 };
 
 /****************************  Shape Interface ***********************/

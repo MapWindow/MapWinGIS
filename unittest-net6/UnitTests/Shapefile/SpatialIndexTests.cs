@@ -1,6 +1,4 @@
-﻿using System.Security.Policy;
-
-namespace unittest_net6.Shapefile;
+﻿namespace unittest_net6.Shapefile;
 public class SpatialIndexTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
@@ -11,7 +9,7 @@ public class SpatialIndexTests
     }
 
     [Fact]
-    public void CreateIndexTest()
+    public void CreateSpatialIndexTest()
     {
         // Create shapefile:
         var sfPolygon = Helpers.CreateTestPolygonShapefile();
@@ -37,7 +35,7 @@ public class SpatialIndexTests
     }
 
     [Fact]
-    public void HasIndexTest()
+    public void HasSpatialIndexTest()
     {
         // Create shapefile:
         var sfPolygon = Helpers.CreateTestPolygonShapefile();
@@ -80,24 +78,157 @@ public class SpatialIndexTests
         var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
         _testOutputHelper.WriteLine(sfFileLocation);
 
+        // Test again, should now return false, but no error:
+        retVal = sfPolygon.CanUseSpatialIndex[sfPolygon.Extents];
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("No Error");
 
-        // TODO:
-        //// Test again, should now return false, but no error:
-        //retVal = sfPolygon.CanUseSpatialIndex[sfPolygon.Extents];
-        //retVal.ShouldBeFalse();
-        //sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("No Error");
+        // Create index:
+        retVal = sfPolygon.CreateSpatialIndex();
+        retVal.ShouldBeTrue("CreateSpatialIndex failed");
 
-        //// Create again:
-        //retVal = sfPolygon.CreateSpatialIndex();
-        //retVal.ShouldBeTrue("CreateSpatialIndex failed");
+        // Test again, should still return false:
+        retVal = sfPolygon.CanUseSpatialIndex[sfPolygon.Extents];
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("The selected extents divided by the shapefile extents exceeds the SpatialIndexMaxAreaPercent setting");
 
-        //sfPolygon.EditingShapes.ShouldBeFalse();
-        //sfPolygon.InteractiveEditing.ShouldBeFalse();
+        // Test again with smaller extent, should return true:
+        sfPolygon.Extents.GetBounds(out var xMin, out var yMin, out var zMin, out var xMax, out var yMax, out var zMax);
+        var enlargedExtent = new Extents();
+        const int enlargeValue = -100;
+        enlargedExtent.SetBounds(xMin - enlargeValue, yMin - enlargeValue, zMin, xMax + enlargeValue, yMax + enlargeValue, zMax);
+        retVal = sfPolygon.CanUseSpatialIndex[enlargedExtent];
+        retVal.ShouldBeTrue("CanUseSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+    }
 
-        //sfPolygon.UseSpatialIndex = true;
+    [Fact]
+    public void IsSpatialIndexValidTest()
+    {
+        // Create shapefile:
+        var sfPolygon = Helpers.CreateTestPolygonShapefile();
 
-        //// Test again, should now return true:
-        //retVal = sfPolygon.CanUseSpatialIndex[sfPolygon.Extents];
-        //retVal.ShouldBeTrue("CanUseSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+        // Test, shoud return false and error:
+        var retVal = sfPolygon.IsSpatialIndexValid();
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("The method isn't applicable to the in-memory object");
+
+        // Save shapefile:
+        var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
+        _testOutputHelper.WriteLine(sfFileLocation);
+
+        // Test again, should return false
+        retVal = sfPolygon.IsSpatialIndexValid();
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("No valid spatial index can be found");
+
+        // Create index:
+        retVal = sfPolygon.CreateSpatialIndex();
+        retVal.ShouldBeTrue("CreateSpatialIndex failed");
+
+        // Test again, should return true:
+        retVal = sfPolygon.IsSpatialIndexValid();
+        retVal.ShouldBeTrue("IsSpatialIndexValid failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+    }    
+    
+    [Fact]
+    public void RemoveSpatialIndex()
+    {
+        // Create shapefile:
+        var sfPolygon = Helpers.CreateTestPolygonShapefile();
+
+        // Test, shoud return false and error:
+        var retVal = sfPolygon.RemoveSpatialIndex();
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("The method isn't applicable to the in-memory object");
+
+        // Save shapefile:
+        var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
+        _testOutputHelper.WriteLine(sfFileLocation);
+
+        // Test again, should return false
+        retVal = sfPolygon.RemoveSpatialIndex();
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("No valid spatial index can be found");
+
+        // Create index:
+        retVal = sfPolygon.CreateSpatialIndex();
+        retVal.ShouldBeTrue("CreateSpatialIndex failed");
+
+        // Check files, should exist:
+        var mwdFileLocation = Path.ChangeExtension(sfFileLocation, ".mwd");
+        File.Exists(mwdFileLocation).ShouldBeTrue("Can't find mwd file");
+        var mwxFileLocation = Path.ChangeExtension(sfFileLocation, ".mwx");
+        File.Exists(mwxFileLocation).ShouldBeTrue("Can't find mwx file");
+
+        // Test again, should return true:
+        retVal = sfPolygon.RemoveSpatialIndex();
+        retVal.ShouldBeTrue("RemoveSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+
+        // Check files, should be removed:
+        File.Exists(mwdFileLocation).ShouldBeFalse("mwd file still exists.");
+        File.Exists(mwxFileLocation).ShouldBeFalse("mwx file still exists.");
+    }
+
+    [Fact]
+    public void InvalidIndexFilesTest()
+    {
+        // As mentioned in https://github.com/MapWindow/MapWinGIS/issues/216
+
+        // ogrinfo -geom=SUMMARY -so "D:\dev\MapWindow\MapWinGIS\git\unittest-net6\TestData\Issue-216.shp" Issue-216
+        //Layer name: Issue-216
+        //Geometry: Line String
+        //Feature Count: 13424
+        //Extent: (108.722071, 34.149021) - (109.139842, 34.457816)
+        //Layer SRS WKT:
+        //GEOGCRS["WGS 84",
+        //    DATUM["World Geodetic System 1984",
+        //        ELLIPSOID["WGS 84",6378137,298.257223563,
+        //            LENGTHUNIT["metre",1]]],
+        //    PRIMEM["Greenwich",0,
+        //        ANGLEUNIT["degree",0.0174532925199433]],
+        //    CS[ellipsoidal,2],
+        //    AXIS["latitude",north,
+        //        ORDER[1],
+        //        ANGLEUNIT["degree",0.0174532925199433]],
+        //    AXIS["longitude",east,
+        //        ORDER[2],
+        //        ANGLEUNIT["degree",0.0174532925199433]],
+        //    ID["EPSG",4326]]
+        //Data axis to CRS axis mapping: 2,1
+        //osm_id: String (10.0)
+        //code: Integer (5.0)
+        //fclass: String (28.0)
+        //name: String (100.0)
+        //    ref: String (20.0)
+        //oneway: String (1.0)
+        //maxspeed: Integer (5.0)
+        //layer: Real (19.11)
+        //bridge: String (1.0)
+        //tunnel: String (1.0)
+
+        var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
+        var sf = Helpers.OpenShapefile(sfLocation);
+        Helpers.CheckEpsgCode(sf.GeoProjection, 4326, true);
+        sf.HasSpatialIndex.ShouldBeTrue();
+        sf.UseSpatialIndex.ShouldBeTrue();
+        sf.IsSpatialIndexValid().ShouldBeTrue();
+        sf.HasInvalidShapes().ShouldBeFalse();
+        sf.NumShapes.ShouldBe(13424);
+        sf.Extents.xMin.ShouldBe(108.722071, 0.00001);
+        sf.Extents.yMin.ShouldBe(34.149021, 0.00001);
+        sf.Extents.xMax.ShouldBe(109.139842, 0.00001);
+        sf.Extents.yMax.ShouldBe(34.457816, 0.00001);
+
+        // Open using FileManager:
+        var sf2 = Helpers.LoadSfUsingFileManager(sfLocation);
+        sf2.HasSpatialIndex.ShouldBeTrue();
+        sf2.UseSpatialIndex.ShouldBeTrue();
+        sf2.IsSpatialIndexValid().ShouldBeTrue();
+        sf2.HasInvalidShapes().ShouldBeFalse();
+        sf2.NumShapes.ShouldBe(13424);
+        sf2.Extents.xMin.ShouldBe(108.722071, 0.00001);
+        sf2.Extents.yMin.ShouldBe(34.149021, 0.00001);
+        sf2.Extents.xMax.ShouldBe(109.139842, 0.00001);
+        sf2.Extents.yMax.ShouldBe(34.457816, 0.00001);
     }
 }

@@ -211,6 +211,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "Append mode works with disk-based shapefiles in non-edit mode only.";
 		case tkUSE_SPATIALINDEX_IS_FALSE:
 			return "The property UseSpatialIndex is set to false";
+		case tkHAS_NO_SPATIALINDEX:
+			return "No valid spatial index can be found";
+		case tkEXCEEDS_SPATIALINDEXMAXAREAPERCENT:
+			return "The selected extents divided by the shapefile extents exceeds the SpatialIndexMaxAreaPercent setting";
 		
 		//301-400 = OGR
 		case tkFAILED_TO_OPEN_OGR_LAYER:

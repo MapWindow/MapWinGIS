@@ -10,13 +10,13 @@ public sealed partial class Form1
         return ver;
     }
 
-    public bool OpenFile(string fileLocation)
+    public int OpenFile(string fileLocation)
     {
         if (!File.Exists(fileLocation))
             throw new FileNotFoundException(fileLocation);
-        var retVal = axMap1.AddLayerFromFilename(fileLocation, tkFileOpenStrategy.fosAutoDetect, true);
+        var layerHandle = axMap1.AddLayerFromFilename(fileLocation, tkFileOpenStrategy.fosAutoDetect, true);
 
-        return retVal > -1;
+        return layerHandle;
     }
 
     public int GetMapProjectionAsEpsgCode()
@@ -27,5 +27,10 @@ public sealed partial class Form1
         }
 
         return epsgCode;
+    }
+
+    public Shapefile GetShapefileFromLayer(int layerHandle)
+    {
+        return axMap1.get_Shapefile(layerHandle);
     }
 }

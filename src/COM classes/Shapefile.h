@@ -126,8 +126,7 @@ public:
 	STDMETHOD(put_UseSpatialIndex)(/*[in]*/VARIANT_BOOL pVal);
  	STDMETHOD(get_HasSpatialIndex)(/*[out, retval]*/VARIANT_BOOL *pVal);
 	STDMETHOD(put_HasSpatialIndex)(/*[in]*/VARIANT_BOOL pVal);
-    STDMETHOD(CreateSpatialIndex)(/*[in]*/BSTR ShapefileName, /*[out, retval]*/ VARIANT_BOOL  *pVal);
-	STDMETHOD(CreateSpatialIndex0)(VARIANT_BOOL* retval);
+    STDMETHOD(CreateSpatialIndex)(/*[in, optional]*/BSTR shapefileName, /*[out, retval]*/ VARIANT_BOOL  *retval);
 	STDMETHOD(Resource)(/*[in]*/ BSTR newSrcPath, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(IsSpatialIndexValid)(/*[out, retval]*/ VARIANT_BOOL  *pVal);
 	STDMETHOD(put_SpatialIndexMaxAreaPercent)(/*[in]*/ DOUBLE newVal);
@@ -468,14 +467,14 @@ public:
 	
 	// serialization
 	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);
-	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName, bool serializeCategories);
+	CPLXMLNode* SerializeCore(VARIANT_BOOL saveSelection, CString elementName, bool serializeCategories);
 
 	// charts
 	void SetChartsPositions(tkLabelPositioning Method);
 	void ClearChartFrames();
 	
 	// selection
-	bool SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult, bool renderedOnly);
+	bool SelectShapesCore(Extent& extents, double tolerance, SelectMode selectMode, std::vector<long>& selectResult, bool renderedOnly);
 	bool QuickExtentsCore(long ShapeIndex, Extent& result);
 	bool QuickExtentsCore(long ShapeIndex, double* xMin, double* yMin, double* xMax, double* yMax);
 
