@@ -168,4 +168,25 @@ public class SpatialIndexTests
         File.Exists(mwdFileLocation).ShouldBeFalse("mwd file still exists.");
         File.Exists(mwxFileLocation).ShouldBeFalse("mwx file still exists.");
     }
+
+    [Fact]
+    public void InvalidIndexFilesTest()
+    {
+        // As mentioned in https://github.com/MapWindow/MapWinGIS/issues/216
+        var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
+        var sf = Helpers.OpenShapefile(sfLocation);
+        sf.HasSpatialIndex.ShouldBeTrue();
+        sf.UseSpatialIndex.ShouldBeTrue();
+        sf.IsSpatialIndexValid().ShouldBeTrue();
+        sf.HasInvalidShapes().ShouldBeFalse();
+        sf.NumShapes.ShouldBe(13424);
+
+        // Open using FileManager:
+        var sf2 = Helpers.LoadSfUsingFileManager(sfLocation);
+        sf2.HasSpatialIndex.ShouldBeTrue();
+        sf2.UseSpatialIndex.ShouldBeTrue();
+        sf2.IsSpatialIndexValid().ShouldBeTrue();
+        sf2.HasInvalidShapes().ShouldBeFalse();
+        sf2.NumShapes.ShouldBe(13424);
+    }
 }

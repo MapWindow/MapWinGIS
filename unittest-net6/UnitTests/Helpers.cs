@@ -69,6 +69,18 @@ internal static class Helpers
         return sf;
     }
 
+    internal static MapWinGIS.Shapefile LoadSfUsingFileManager(string filename)
+    {
+        File.Exists(filename).ShouldBeTrue("Input file does not exist: " + filename);
+
+        var fm = new FileManager();
+        var obj = fm.Open(filename);
+        fm.LastOpenIsSuccess.ShouldBeTrue(fm.ErrorMsg[fm.LastErrorCode]);
+        var sf = obj as MapWinGIS.Shapefile;
+        sf.ShouldNotBeNull("Loaded object is not an shapefile");
+        return sf;
+    }
+
     internal static MapWinGIS.Shapefile CreateTestPolygonShapefile()
     {
         var sfPolygon = MakeShapefile(ShpfileType.SHP_POLYGON);
@@ -125,14 +137,14 @@ internal static class Helpers
     #endregion
 
 
-    internal static MapWinGIS.Image LoadImageUsingFileManager(string filename)
+    internal static Image LoadImageUsingFileManager(string filename)
     {
         File.Exists(filename).ShouldBeTrue("Input file does not exist: " + filename);
 
         var fm = new FileManager();
         var obj = fm.Open(filename);
         fm.LastOpenIsSuccess.ShouldBeTrue(fm.ErrorMsg[fm.LastErrorCode]);
-        var img = obj as MapWinGIS.Image;
+        var img = obj as Image;
         img.ShouldNotBeNull("Loaded object is not an image");
         return img;
     }
@@ -147,5 +159,13 @@ internal static class Helpers
             throw new DirectoryNotFoundException("Cannot find TestData folder at " + folderProjectLevel);
 
         return folderProjectLevel;
+    }
+
+    internal static string GetTestFilePath(string fileName)
+    {
+        var path = Path.Combine(GetTestDataLocation(), fileName);
+        File.Exists(path).ShouldBeTrue($"{fileName} doesn't exists in the TestData location.");
+
+        return path;
     }
 }
