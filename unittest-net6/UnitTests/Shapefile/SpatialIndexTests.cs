@@ -9,7 +9,7 @@ public class SpatialIndexTests
     }
 
     [Fact]
-    public void CreateIndexTest()
+    public void CreateSpatialIndexTest()
     {
         // Create shapefile:
         var sfPolygon = Helpers.CreateTestPolygonShapefile();
@@ -35,7 +35,7 @@ public class SpatialIndexTests
     }
 
     [Fact]
-    public void HasIndexTest()
+    public void HasSpatialIndexTest()
     {
         // Create shapefile:
         var sfPolygon = Helpers.CreateTestPolygonShapefile();
@@ -128,5 +128,44 @@ public class SpatialIndexTests
         // Test again, should return true:
         retVal = sfPolygon.IsSpatialIndexValid();
         retVal.ShouldBeTrue("IsSpatialIndexValid failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+    }    
+    
+    [Fact]
+    public void RemoveSpatialIndex()
+    {
+        // Create shapefile:
+        var sfPolygon = Helpers.CreateTestPolygonShapefile();
+
+        // Test, shoud return false and error:
+        var retVal = sfPolygon.RemoveSpatialIndex();
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("The method isn't applicable to the in-memory object");
+
+        // Save shapefile:
+        var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
+        _testOutputHelper.WriteLine(sfFileLocation);
+
+        // Test again, should return false
+        retVal = sfPolygon.RemoveSpatialIndex();
+        retVal.ShouldBeFalse();
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("No valid spatial index can be found");
+
+        // Create index:
+        retVal = sfPolygon.CreateSpatialIndex();
+        retVal.ShouldBeTrue("CreateSpatialIndex failed");
+
+        // Check files, should exist:
+        var mwdFileLocation = Path.ChangeExtension(sfFileLocation, ".mwd");
+        File.Exists(mwdFileLocation).ShouldBeTrue("Can't find mwd file");
+        var mwxFileLocation = Path.ChangeExtension(sfFileLocation, ".mwx");
+        File.Exists(mwxFileLocation).ShouldBeTrue("Can't find mwx file");
+
+        // Test again, should return true:
+        retVal = sfPolygon.RemoveSpatialIndex();
+        retVal.ShouldBeTrue("RemoveSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+
+        // Check files, should be removed:
+        File.Exists(mwdFileLocation).ShouldBeFalse("mwd file still exists.");
+        File.Exists(mwxFileLocation).ShouldBeFalse("mwx file still exists.");
     }
 }
