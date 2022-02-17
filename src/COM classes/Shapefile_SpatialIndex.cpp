@@ -202,7 +202,7 @@ STDMETHODIMP CShapefile::get_CanUseSpatialIndex(IExtents* pArea, VARIANT_BOOL* p
 //		CreateSpatialIndex()
 // ***********************************************************
 //ajp June 2008 Function to create an Index file
-__declspec(deprecated("This is a deprecated function, use CShapefile::CreateSpatialIndex() instead"))
+__declspec(deprecated("This is a deprecated function, use CShapefile::CreateSpatialIndex0() instead"))
 STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR ShapefileName, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -245,7 +245,7 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR ShapefileName, VARIANT_BOOL* re
 //		CreateSpatialIndex()
 // ***********************************************************
 //pm Feb 2022 No need to pass in filename
-STDMETHODIMP CShapefile::CreateSpatialIndex(VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::CreateSpatialIndex0(VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
