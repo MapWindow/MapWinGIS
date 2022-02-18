@@ -75,7 +75,8 @@ jobs:
       # uses: lukka/run-vcpkg@c5ce6a7de6e5ce834a25f7d55b6c250a275a6732
       uses: lukka/run-vcpkg@v10.1
       with:
-        runVcpkgInstall: false # TODO
+        runVcpkgInstall: true
+        vcpkgGitCommitId: 96e54919b5270f27ba887966b7a90d39bda170bb
 
     # Build MapWinGIS
     - name: Build MapWinGIS ${{matrix.platform}}
