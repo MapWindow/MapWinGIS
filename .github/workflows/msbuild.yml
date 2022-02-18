@@ -83,8 +83,11 @@ jobs:
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}/src/vcpkg
-        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--x-install-root`, `${{ github.workspace }}/src/vcpkg_installed`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]"
+        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]"
     
+    # Can't get VCPCK to download the files to the correct folder. So move them manually:
+    - name: Move VCPCK files
+      run: dir /s /b ${{env.VCPKG_INSTALLED_DIR}}
 
     # VCPCK install fails when a folder names Control exists, so rename it first:
     - name: Rename Control folder back
