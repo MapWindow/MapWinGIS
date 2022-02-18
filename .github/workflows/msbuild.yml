@@ -82,6 +82,7 @@ jobs:
       uses: lukka/run-vcpkg@v10.1
       with:
         runVcpkgInstall: true
+        vcpkgDirectory:  ${{ github.workspace }}/src/vcpkg
 
     # VCPCK install fails when a folder names Control exists, so rename it first:
     - name: Rename Control folder back
