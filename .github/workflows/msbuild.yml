@@ -33,6 +33,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
