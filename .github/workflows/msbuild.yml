@@ -78,6 +78,8 @@ jobs:
       uses: lukka/run-vcpkg@v10.1
       with:
         runVcpkgInstall: true
+        #vcpkgGitCommitId: 7dc497ccc26dc166432b5a4a9e89d12081e5b28b  # Should not be needed because vcpkg is a submodule
+        vcpkgDirectory: ${{ github.workspace }}/src/vcpkg
 
     # Build MapWinGIS
     - name: Build MapWinGIS ${{matrix.platform}}
