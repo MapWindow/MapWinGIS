@@ -71,6 +71,10 @@ jobs:
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=Release /p:Platform=${{matrix.platform}} ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
   
+    # VCPCK install fails when a folder names Control exists, so rename it first:
+    - name: Rename Control folder
+      run: ren ${{ github.workspace }}/src/Control ${{ github.workspace }}/src/Control_    
+      
     # Install VCPCK
     - name: run-vcpkg
       # You may pin to the exact commit or the version.
@@ -78,9 +82,11 @@ jobs:
       uses: lukka/run-vcpkg@v10.1
       with:
         runVcpkgInstall: true
-        #vcpkgGitCommitId: 7dc497ccc26dc166432b5a4a9e89d12081e5b28b  # Should not be needed because vcpkg is a submodule
-        vcpkgDirectory: ${{ github.workspace }}/src/vcpkg
 
+    # VCPCK install fails when a folder names Control exists, so rename it first:
+    - name: Rename Control folder back
+      run: ren ${{ github.workspace }}/src/Control_ ${{ github.workspace }}/src/Control  
+      
     # Build MapWinGIS
     - name: Build MapWinGIS ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
