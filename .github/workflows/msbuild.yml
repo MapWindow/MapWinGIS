@@ -69,6 +69,14 @@ jobs:
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=Release /p:Platform=${{matrix.platform}} ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
   
+    # Install VCPCK
+    - name: run-vcpkg
+      # You may pin to the exact commit or the version.
+      # uses: lukka/run-vcpkg@c5ce6a7de6e5ce834a25f7d55b6c250a275a6732
+      uses: lukka/run-vcpkg@v10.1
+      with:
+        runVcpkgInstall: false # TODO
+
     # Build MapWinGIS
     - name: Build MapWinGIS ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
