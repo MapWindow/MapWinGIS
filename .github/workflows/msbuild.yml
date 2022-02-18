@@ -73,7 +73,7 @@ jobs:
   
     # VCPCK install fails when a folder names Control exists, so rename it first:
     - name: Rename Control folder
-      run: ren ${{ github.workspace }}/src/Control ${{ github.workspace }}/src/Control_    
+      run: ren ${{ github.workspace }}\src\Control ${{ github.workspace }}\src\Control_    
       
     # Install VCPCK
     - name: run-vcpkg
@@ -82,10 +82,11 @@ jobs:
       uses: lukka/run-vcpkg@v10.1
       with:
         runVcpkgInstall: true
+        runVcpkgFormatString: '[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]'
 
     # VCPCK install fails when a folder names Control exists, so rename it first:
     - name: Rename Control folder back
-      run: ren ${{ github.workspace }}/src/Control_ ${{ github.workspace }}/src/Control  
+      run: ren ${{ github.workspace }}\src\Control_ ${{ github.workspace }}\src\Control  
       
     # Build MapWinGIS
     - name: Build MapWinGIS ${{matrix.platform}}
@@ -142,7 +143,9 @@ jobs:
             4 = "FAIL_ENTRY - GetProcAddress failed";
             5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
           }        
-          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s D:\a\MapWinGIS\MapWinGIS\src\bin\Release\${{matrix.platform}}\MapWinGIS.ocx" -PassThru
+          #$regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s D:\a\MapWinGIS\MapWinGIS\src\bin\Release\${{matrix.platform}}\MapWinGIS.ocx" -PassThru
+          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s ${{ github.workspace }}\src\bin\Release\${{matrix.platform}}\MapWinGIS.ocx" -PassThru
+          
           $regsvrp.WaitForExit(5000) # Wait (up to) 5 seconds
           if($regsvrp.ExitCode -ne 0)
           {
