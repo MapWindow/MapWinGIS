@@ -54,8 +54,7 @@ jobs:
         vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
         runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]"
     
-    # Can't get VCPCK to download the files to the correct folder. So move them manually:
-    - name: Move VCPCK files
+    - name: List downloaded VCPCK files
       uses: Azure/powershell@v1
       with:
         # Specify the Az PowerShell script here.
