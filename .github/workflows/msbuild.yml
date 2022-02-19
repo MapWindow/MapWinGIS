@@ -17,6 +17,7 @@ env:
   SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs.sln
   MAPWINGIS_SOLUTION_FILE_PATH: ./src/MapWinGIS.sln
   UNITTESTS_SOLUTION_FILE_PATH: ./unittest-net6/unittest-net6.sln
+  VCPKG_INSTALLED_DIR: ${{ github.workspace }}/src/vcpkg_installed/
 
   # Configuration type to build.
   BUILD_CONFIGURATION: Release
@@ -39,6 +40,10 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
 
+    # VCPCK install fails when a folder names Control exists, so rename it first:
+    - name: Rename Control folder
+      run: ren ${{ github.workspace }}\src\Control ${{ github.workspace }}\src\Control_    
+     
     # Install VCPCK
     - name: run-vcpkg
       # You may pin to the exact commit or the version.
@@ -47,7 +52,7 @@ jobs:
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}/src/vcpkg
-        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--x-install-root`, `$[env.GITHUB_WORKSPACE]/src/vcpkg_installed`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]"
+        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]"
     
     # Can't get VCPCK to download the files to the correct folder. So move them manually:
     - name: Move VCPCK files
@@ -102,11 +107,7 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=Release /p:Platform=${{matrix.platform}} ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
-  
-    # VCPCK install fails when a folder names Control exists, so rename it first:
-    - name: Rename Control folder
-      run: ren ${{ github.workspace }}\src\Control ${{ github.workspace }}\src\Control_    
-         
+      
     # Build MapWinGIS
     - name: Build MapWinGIS ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
