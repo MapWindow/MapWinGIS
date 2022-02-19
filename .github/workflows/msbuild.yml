@@ -17,7 +17,7 @@ env:
   SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs.sln
   MAPWINGIS_SOLUTION_FILE_PATH: ./src/MapWinGIS.sln
   UNITTESTS_SOLUTION_FILE_PATH: ./unittest-net6/unittest-net6.sln
-  VCPKG_INSTALLED_DIR: ${{ github.workspace }}/src/vcpkg_installed/
+  VCPKG_INSTALLED_DIR: ${{ github.workspace }}\src\vcpkg_installed\
 
   # Configuration type to build.
   BUILD_CONFIGURATION: Release
@@ -51,7 +51,7 @@ jobs:
       uses: lukka/run-vcpkg@v10.1
       with:
         runVcpkgInstall: true
-        vcpkgDirectory:  ${{ github.workspace }}/src/vcpkg
+        vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
         runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]"
     
     # Can't get VCPCK to download the files to the correct folder. So move them manually:
@@ -62,8 +62,8 @@ jobs:
         inlineScript: |
           Write-Host "Test:"
           Write-Host ${{env.VCPKG_INSTALLED_DIR}} 
-          ls ${{env.VCPKG_INSTALLED_DIR}} 
-          Write-Error "Stop"
+          ls -R ${{env.VCPKG_INSTALLED_DIR}} 
+          #Write-Error "Stop"
         
         # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
         azPSVersion: "latest"
