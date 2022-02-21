@@ -17,13 +17,13 @@
 //********************************************************************************************************
 
 #pragma once
+#include <afxmt.h>
 #include <set>
+#include "ClipperConverter.h"
+#include "ColoringGraph.h"
 #include "IndexSearching.h"
 #include "QTree.h"
-#include "ClipperConverter.h"
 #include "ShapeRecord.h"
-#include "ColoringGraph.h"
-#include <afxmt.h>
 
 //Shapefile File Info
 #define HEADER_BYTES_16 50
@@ -98,7 +98,7 @@ public:
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(StopEditingShapes)(/*[in, optional, defaultvalue(TRUE)]*/VARIANT_BOOL ApplyChanges,/*[in,optional,defaultvalue(TRUE)]*/VARIANT_BOOL StopEditTable, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(StartEditingShapes)(/*[in,optional,defaultvalue(TRUE)]*/VARIANT_BOOL StartEditTable,/*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
-	STDMETHOD(SelectShapes)(/*[in]*/ IExtents * BoundBox, /*[in, optional, defaultvalue(0.0)]*/double Tolerance, /*[in, optional, defaultvalue(INTERSECTION)]*/ SelectMode SelectMode, /*[in, out]*/ VARIANT * Result, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(SelectShapes)(/*[in]*/ IExtents * boundBox, /*[in, optional, defaultvalue(0.0)]*/double tolerance, /*[in, optional, defaultvalue(INTERSECTION)]*/ SelectMode selectMode, /*[in, out]*/ VARIANT * result, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(EditDeleteShape)(/*[in]*/long ShapeIndex, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(EditInsertShape)(/*[in]*/IShape * Shape, /*[in, out]*/ long * ShapeIndex, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(EditClear)(/*[out, retval]*/ VARIANT_BOOL * retval);
@@ -148,8 +148,8 @@ public:
 	STDMETHOD(SelectByShapefile)(/*[in]*/IShapefile* sf,  /*[in]*/tkSpatialRelation Relation, /*[in]*/VARIANT_BOOL SelectedOnly, /*[in, out]*/ VARIANT *Result, /*[in, optional, defaultvalue(NULL)]*/ ICallback* cBack, /*[out, retval]*/VARIANT_BOOL *retval);
 	STDMETHOD(get_SelectionDrawingOptions)(/*[out, retval]*/IShapeDrawingOptions** pVal);
 	STDMETHOD(put_SelectionDrawingOptions)(/*[in]*/IShapeDrawingOptions* newVal);
-	STDMETHOD(get_ShapeSelected)(/*[in]*/long ShapeIndex,/*[out, retval]*/ VARIANT_BOOL* pVal);
-	STDMETHOD(put_ShapeSelected)(/*[in]*/long ShapeIndex, /*[in]*/ VARIANT_BOOL newVal);
+	STDMETHOD(get_ShapeSelected)(/*[in]*/long shapeIndex,/*[out, retval]*/ VARIANT_BOOL* pVal);
+	STDMETHOD(put_ShapeSelected)(/*[in]*/long shapeIndex, /*[in]*/ VARIANT_BOOL newVal);
 	STDMETHOD(get_NumSelected)(/*[out, retval]*/long *pVal);
 	STDMETHOD(SelectAll)();
 	STDMETHOD(SelectNone)();
@@ -385,7 +385,7 @@ private:
 	// memory shapes
 	BOOL ReleaseMemoryShapes();
 	BOOL VerifyMemShapes(ICallback * cBack);
-	void TrimMemShapes();
+	//void TrimMemShapes();
 
 	// read/write
 	BOOL ReadShx();
@@ -393,7 +393,7 @@ private:
 	BOOL WriteShp(FILE * shpfile, ICallback * cBack);	
 
 	// selection
-	BOOL DefineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std::vector<long> & parts, std::vector<double> & xPts, std::vector<double> & yPts);
+	BOOL DefineShapePoints(long shapeIndex, ShpfileType & shapeType, std::vector<long> & parts, std::vector<double> & xPts, std::vector<double> & yPts);
 	VARIANT_BOOL SelectShapesAlt(IExtents *BoundBox, double Tolerance, SelectMode SelectMode, VARIANT* arr);
 
 	// initialization
