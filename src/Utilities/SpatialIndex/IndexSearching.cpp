@@ -27,6 +27,7 @@
 #include "IndexSearching.h"
 #include "IndexShapeFiles.h"
 
+// ReSharper disable once CppInconsistentNaming
 namespace IndexSearching
 {
 	/* ************************************************************************* **
@@ -36,7 +37,7 @@ namespace IndexSearching
 	**
 	**
 	** ************************************************************************* */
-	int CreateSpatialIndex(double utilization, int capacity, char* fileName)
+	int CreateSpatialIndex(const double utilization, const int capacity, const char* fileName)
 	{
 		const std::string baseName = fileName;
 
@@ -63,6 +64,7 @@ namespace IndexSearching
 	**  Returns a <queue> of found shape file index numbers.
 	**
 	** ************************************************************************* */
+	// TODO: Lots of compile warnings:
 	int SelectShapesFromIndex(const char* fileName, double* lowVals, double* hiVals, const QueryTypeFlags queryType, const int bufferSize, CIndexSearching* resulSet)
 	{
 		IStorageManager* diskfile = nullptr;
@@ -83,7 +85,7 @@ namespace IndexSearching
 		catch (...)
 		{
 			cerr << "Error running query on spatial index." << endl;
-			rCode = unknownError;
+			rCode = static_cast<int>(SpatialIndexQueryErrors::unknownError);
 		}
 
 		delete tree;
@@ -97,7 +99,7 @@ namespace IndexSearching
 	{
 		ISpatialIndex* spatialIndex = CSpatialIndexCache::Instance().GetSpatialIndexById(spatialIndexId);
 		if (spatialIndex == nullptr)
-			return spatialIndexNotFound;
+			return static_cast<int>(SpatialIndexQueryErrors::spatialIndexNotFound);
 
 		return SelectShapesFromIndex(spatialIndex, lowVals, highVals, queryType, resulSet);
 	}

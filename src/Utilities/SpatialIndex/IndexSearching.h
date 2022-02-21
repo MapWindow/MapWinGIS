@@ -35,10 +35,12 @@
 #include <string>
 #include <queue>
 
-using namespace std;
+//using namespace std;
 
+// ReSharper disable once CppInconsistentNaming
 namespace IndexSearching
 {
+	// ReSharper disable once CppInconsistentNaming
 	typedef vector<long> IDXLIST;
 	// This class is exported from the SpatialIndexing.dll
 	class CIndexSearching
@@ -52,25 +54,31 @@ namespace IndexSearching
 		void SetCapacity(int capacity);
 
 	private:
+		// ReSharper disable once CppInconsistentNaming
 		IDXLIST* resultList;
 	};
 
+	// ReSharper disable once CppInconsistentNaming
 	typedef unsigned int CSpatialIndexID;
 
-	enum QueryTypeFlags
+	// ReSharper disable once CppInconsistentNaming
+	enum class QueryTypeFlags
 	{
 		intersection = 1,
 		contained = 2
 	};
 
-	enum SpatialIndexQueryErrors
+	// ReSharper disable once CppInconsistentNaming
+	enum class SpatialIndexQueryErrors
 	{
 		success = 0,
+		// ReSharper disable once CppInconsistentNaming
 		unknownError = -1,
+		// ReSharper disable once CppInconsistentNaming
 		spatialIndexNotFound = -2
 	};
 
-	int  CreateSpatialIndex(double utilization, int capacity, char* fileName);
+	int  CreateSpatialIndex(double utilization, int capacity, const char* fileName);
 	bool IsValidSpatialIndex(const char* fileName, int bufferSize);
 	bool LoadSpatialIndex(string baseName, bool validateIndex, int bufferSize, CSpatialIndexID& spatialIndexId);
 	void UnloadSpatialIndex(CSpatialIndexID spatialIndex);
