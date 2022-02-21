@@ -27,6 +27,7 @@
 #include "IndexShapeFiles.h"
 #include "ShapeFileStream.h"
 
+// ReSharper disable once CppInconsistentNaming
 namespace IndexSearching
 {
 	/* ************************************************************************* **
@@ -36,12 +37,12 @@ namespace IndexSearching
 	**   Creates baseName.dat and baseName.idx
 	**
 	** ************************************************************************* */
-	bool CreateIndexFile(double utilization, int capacity, string baseName)
+	bool CreateIndexFile(const double utilization, const int capacity, string baseName)
 	{
 		bool ret = false;
-		IStorageManager* diskfile = nullptr;
+		IStorageManager* diskfile = nullptr;  // TODO: Solve compile warning
 		StorageManager::IBuffer* file = nullptr;
-		ISpatialIndex* tree = nullptr;
+		ISpatialIndex* tree = nullptr;  // TODO: Solve compile warning
 
 		try
 		{
@@ -65,20 +66,20 @@ namespace IndexSearching
 			ret = false;
 			cerr << "Got an error " << str << endl;
 		}
-		catch (exception ex)
+		catch (exception& ex)
 		{
 			ret = false;
 			cerr << "Got an error " << ex.what() << endl;
 		}
-		catch (Tools::IllegalStateException ex)
+		catch (Tools::IllegalStateException& ex)
 		{
 			ret = false;
-			cerr << "Got an error " << ex.what() << endl;
+			cerr << "Got an IllegalStateException " << ex.what() << endl;
 		}
-		catch (Tools::IllegalArgumentException ex)
+		catch (Tools::IllegalArgumentException& ex)
 		{
 			ret = false;
-			cerr << "Got an error " << ex.what() << endl;
+			cerr << "Got an IllegalArgumentException " << ex.what() << endl;
 		}
 		delete tree;
 		delete file;
@@ -93,7 +94,7 @@ namespace IndexSearching
 	**
 	**
 	** ************************************************************************* */
-	bool IsValidIndexFile(string baseName, int bufferSize)
+	bool IsValidIndexFile(string baseName, const int bufferSize)
 	{
 		bool ret = false;
 		IStorageManager* diskfile = nullptr;
@@ -109,7 +110,7 @@ namespace IndexSearching
 			tree = RTree::loadRTree(*file, 1);
 			ret = tree->isIndexValid();
 		}
-		catch (char* str)
+		catch (const char* const str)
 		{
 			cerr << "Got an error " << str << endl;
 		}
@@ -126,14 +127,13 @@ namespace IndexSearching
 	**
 	**
 	** ************************************************************************* */
-	void QueryIndexFile(ISpatialIndex* spatialIndex, SpatialIndex::Region queryRegion, QueryTypeFlags queryType, ShapeIdxVisitor* vis)
+	void QueryIndexFile(ISpatialIndex* spatialIndex, const SpatialIndex::Region& queryRegion, const QueryTypeFlags queryType, ShapeIdxVisitor* vis)
 	{
 		try
 		{
-			// TODO: Use enum instead of magic number:
-			if (queryType == 1)
+			if (queryType == IndexSearching::QueryTypeFlags::intersection)
 				spatialIndex->intersectsWithQuery(queryRegion, *vis);
-			else if (queryType == 2)
+			else if (queryType == IndexSearching::QueryTypeFlags::contained)
 				spatialIndex->containsWhatQuery(queryRegion, *vis);
 		}
 		catch (exception ex)
@@ -142,7 +142,7 @@ namespace IndexSearching
 		}
 	}
 
-	int  SelectShapesFromIndex(ISpatialIndex* spatialIndex, double* lowVals, double* hiVals, QueryTypeFlags queryType, CIndexSearching* resulSet)
+	int  SelectShapesFromIndex(ISpatialIndex* spatialIndex, double* lowVals, double* hiVals, const QueryTypeFlags queryType, CIndexSearching* resulSet)
 	{
 		int rCode = 0;
 
@@ -176,15 +176,15 @@ namespace IndexSearching
 			delete queryRegion;
 			delete vis;
 		}
-		catch (exception ex)
+		catch (exception&)
 		{
 			rCode = -1;
 		}
-		catch (Tools::IllegalStateException ex1)
+		catch (Tools::IllegalStateException&)
 		{
 			rCode = -1;
 		}
-		catch (Tools::IllegalArgumentException ex2)
+		catch (Tools::IllegalArgumentException&)
 		{
 			rCode = -1;
 		}
@@ -192,8 +192,9 @@ namespace IndexSearching
 		{
 			rCode = -1;
 		}
-		return (rCode);
+		return rCode;
 	}
+
 	/* ************************************************************************* **
 	**
 	** Function to query shape file.
@@ -230,7 +231,7 @@ namespace IndexSearching
 		return spatialIndexCache;
 	}
 
-	ISpatialIndex* CSpatialIndexCache::GetSpatialIndexById(CSpatialIndexID spatialIndexId)
+	ISpatialIndex* CSpatialIndexCache::GetSpatialIndexById(const CSpatialIndexID spatialIndexId)
 	{
 		const auto mapIterator = m_cache.find(spatialIndexId);
 		if (mapIterator != m_cache.end())
@@ -246,7 +247,7 @@ namespace IndexSearching
 		return newSpatialIndexId;
 	}
 
-	void CSpatialIndexCache::UncacheSpatialIndex(CSpatialIndexID spatialIndexId, bool releaseAll)
+	void CSpatialIndexCache::UncacheSpatialIndex(const CSpatialIndexID spatialIndexId, const bool releaseAll)
 	{
 		const auto mapIterator = m_cache.find(spatialIndexId);
 		if (mapIterator != m_cache.end())

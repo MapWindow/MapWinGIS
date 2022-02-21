@@ -38,31 +38,33 @@
 #define RECORD_HEADER_LENGTH_32 8
 #define RECORD_SHAPE_TYPE_32 8
 
-using namespace std;
-using namespace SpatialIndex;
+using namespace SpatialIndex; // TODO: Where to move to?
 
+// ReSharper disable once CppInconsistentNaming
 namespace IndexSearching
 {
-	class ShapeIdxVisitor : public IVisitor
+	class ShapeIdxVisitor final : public IVisitor
 	{
 	private:
 
 	public:
+		// ReSharper disable once CppInconsistentNaming
 		size_t m_indexIO;
+		// ReSharper disable once CppInconsistentNaming
 		size_t m_leafIO;
-		queue<SpatialIndex::id_type> ids;
+		queue<id_type> ids;
 
 	public:
-		~ShapeIdxVisitor()
+		~ShapeIdxVisitor() override
 		{
 		}
 		ShapeIdxVisitor() : m_indexIO(0), m_leafIO(0) {}
 
-		void ShapeIdxVisitor::visitData(const IData& d);
+		void visitData(const IData& d) override;
 
-		void visitNode(const INode& n);
+		void visitNode(const INode& n) override;
 
-		void visitData(std::vector<const IData*>& v) {};
+		void visitData(std::vector<const IData*>& v) override {}
 	};
 
 	class CSpatialIndexCache
@@ -76,12 +78,16 @@ namespace IndexSearching
 		struct CacheItem
 		{
 		public:
+			// ReSharper disable once CppInconsistentNaming
 			IStorageManager* m_diskfile;
+			// ReSharper disable once CppInconsistentNaming
 			StorageManager::IBuffer* m_file;
+			// ReSharper disable once CppInconsistentNaming
 			ISpatialIndex* m_tree;
 
 			CacheItem() : m_diskfile(nullptr), m_file(nullptr), m_tree(nullptr) {}
-			CacheItem(IStorageManager* diskfile, StorageManager::IBuffer* file, ISpatialIndex* tree) : m_diskfile(diskfile), m_file(file), m_tree(tree) {}
+			CacheItem(IStorageManager* diskfile, StorageManager::IBuffer* file, ISpatialIndex* tree)
+				: m_diskfile(diskfile), m_file(file), m_tree(tree) {}
 			void ReleaseAll();
 		};
 
@@ -89,12 +95,14 @@ namespace IndexSearching
 		CSpatialIndexCache(const CSpatialIndexCache&);                 // Prevent copy-construction
 		CSpatialIndexCache& operator=(const CSpatialIndexCache&);	   // Prevent assignment
 
+		// ReSharper disable once CppInconsistentNaming
 		map<CSpatialIndexID, CacheItem> m_cache;
+		// ReSharper disable once CppInconsistentNaming
 		CSpatialIndexID m_nextSpatialIndexID;
 	};
 
 	bool CreateIndexFile(double utilization, int capacity, std::string baseName);
 	bool IsValidIndexFile(string baseName, int bufferSize);
-	void QueryIndexFile(ISpatialIndex* spatialIndex, SpatialIndex::Region queryRegion, int bufferSize, QueryTypeFlags queryType, ShapeIdxVisitor* vis);
+	void QueryIndexFile(ISpatialIndex* spatialIndex, Region queryRegion, int bufferSize, QueryTypeFlags queryType, ShapeIdxVisitor* vis);
 	int  SelectShapesFromIndex(ISpatialIndex* spatialIndex, double* lowVals, double* hiVals, QueryTypeFlags queryType, CIndexSearching* resulSet);
 }
