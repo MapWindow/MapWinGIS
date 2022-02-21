@@ -25,6 +25,9 @@
 //
 #include <StdAfx.h>
 #include "IndexShapeFiles.h"
+
+#include <gsl/pointers>
+
 #include "ShapeFileStream.h"
 
 // ReSharper disable once CppInconsistentNaming
@@ -61,12 +64,12 @@ namespace IndexSearching
 #endif			
 			ret = tree->isIndexValid();
 		}
-		catch (char* str)
+		catch (const char* str)
 		{
 			ret = false;
 			cerr << "Got an error " << str << endl;
 		}
-		catch (exception& ex)
+		catch (const exception& ex)
 		{
 			ret = false;
 			cerr << "Got an error " << ex.what() << endl;
@@ -127,7 +130,7 @@ namespace IndexSearching
 	**
 	**
 	** ************************************************************************* */
-	void QueryIndexFile(ISpatialIndex* spatialIndex, const SpatialIndex::Region& queryRegion, const QueryTypeFlags queryType, ShapeIdxVisitor* vis)
+	void QueryIndexFile(const gsl::not_null<ISpatialIndex *> spatialIndex, const SpatialIndex::Region& queryRegion, const QueryTypeFlags queryType, ShapeIdxVisitor* vis)
 	{
 		try
 		{
@@ -136,7 +139,7 @@ namespace IndexSearching
 			else if (queryType == IndexSearching::QueryTypeFlags::contained)
 				spatialIndex->containsWhatQuery(queryRegion, *vis);
 		}
-		catch (exception ex)
+		catch (...)
 		{
 			cerr << "Error running query on spatial index." << endl;
 		}

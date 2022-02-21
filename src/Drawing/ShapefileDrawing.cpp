@@ -25,7 +25,7 @@
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 25 june 2010 - created the file
 
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "ShapefileDrawing.h"
 #include "LinePattern.h"
 #include "ShapefileReader.h"
@@ -46,12 +46,18 @@
 
 using namespace Gdiplus;
 
+// ReSharper disable once CppInconsistentNaming
 enum tkDrawingShape
 {
+	// ReSharper disable once CppInconsistentNaming
 	pshPixel = 0,
+	// ReSharper disable once CppInconsistentNaming
 	pshEllipse = 1,
+	// ReSharper disable once CppInconsistentNaming
 	pshPolygon = 2,
+	// ReSharper disable once CppInconsistentNaming
 	pshPicture = 3,
+	// ReSharper disable once CppInconsistentNaming
 	pshCharacter = 4,
 };
 
@@ -63,9 +69,9 @@ bool CShapefileDrawer::Draw(const CRect& rcBounds, IShapefile* sf)
 {
 	if (!sf) return false;
 
-	_shapefile = reinterpret_cast<CShapefile*>(sf);
+	_shapefile = dynamic_cast<CShapefile*>(sf);
 
-	FILE* file = ((CShapefile*)sf)->get_File();
+	FILE* file = static_cast<CShapefile*>(sf)->get_File();
 
 #ifdef USE_TIMER
 	CTimer tmr;
@@ -2336,37 +2342,34 @@ inline void CShapefileDrawer::DrawPolygonPoint(double& xMin, double& xMax, doubl
 //********************************************************************
 //*		SelectShapesFromSpatialIndex()
 //********************************************************************
-std::vector<long>* CShapefileDrawer::SelectShapesFromSpatialIndex(char* sFilename, Extent* extents)
+std::vector<long>* CShapefileDrawer::SelectShapesFromSpatialIndex(const char* sFilename, const Extent* extents)
 {
-	string baseName;
-	baseName = sFilename;
+	string baseName = sFilename;
 	baseName = baseName.substr(0, baseName.find_last_of("."));
 
-	double lowVals[2], highVals[2];
+	double lowVals[2], highVals[2]; // TODO: Fix compile warning
 	lowVals[0] = extents->left;
 	lowVals[1] = extents->bottom;
 	highVals[0] = extents->right;
 	highVals[1] = extents->top;
 
-	IndexSearching::CIndexSearching* res = new IndexSearching::CIndexSearching();
+	const auto res = new IndexSearching::CIndexSearching(); // TODO: Fix compile warning
 
-	if (IndexSearching::SelectShapesFromIndex((char*)baseName.c_str(), lowVals, highVals, IndexSearching::QueryTypeFlags::intersection, 100, res) == 0)
+	if (IndexSearching::SelectShapesFromIndex(baseName.c_str(), lowVals, highVals, IndexSearching::QueryTypeFlags::intersection, 100, res) == 0)
 	{
-		std::vector<long>* selectResult = new std::vector<long>;
+		const auto selectResult = new std::vector<long>; // TODO: Fix compile warning
 		selectResult->reserve(res->GetLength());
 		for (int i = 0; i < res->GetLength(); i++)
 		{
-			selectResult->push_back((long)res->GetValue(i));
+			selectResult->push_back(res->GetValue(i));
 		}
 
 		delete res;
-		return selectResult;
+		return selectResult; // TODO: Fix compile warning
 	}
-	else
-	{
-		delete res;
-		return nullptr;
-	}
+
+	delete res;
+	return nullptr;
 }
 
 #pragma endregion

@@ -126,7 +126,7 @@ public:
 	bool Draw(const CRect & rcBounds, IShapefile* sf);
 	int GetShapeCount() { return _shapeCount; }
 private:	
-	std::vector<long>* SelectShapesFromSpatialIndex(char* sFilename, Extent* extents);
+	std::vector<long>* SelectShapesFromSpatialIndex(const char* sFilename, const Extent* extents);
 	
 	// GDI drawing
 	void DrawLineCategoryGDI( CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection);
