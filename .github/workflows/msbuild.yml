@@ -93,10 +93,10 @@ jobs:
       with:
         # Specify the Az PowerShell script here.
         inlineScript: |
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3.zip" -OutFile ".\Support\release-1928-gdal-3.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3-libs.zip" -OutFile ".\Support\release-1928-gdal-3-libs.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3.zip" -OutFile ".\Support\release-1928-x64-gdal-3.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3-libs.zip" -OutFile ".\Support\release-1928-x64-gdal-3-libs.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1928-gdal-3.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-gdal-3-libs.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-x64-gdal-3.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-x64-gdal-3-libs.zip"
           ls .\Support\
         # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
         azPSVersion: "latest"
