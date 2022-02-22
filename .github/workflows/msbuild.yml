@@ -44,13 +44,13 @@ jobs:
     - name: Rename Control folder
       run: ren ${{ github.workspace }}\src\Control ${{ github.workspace }}\src\Control_    
      
-    - name: Set VCPKG_DEFAULT_TRIPLET
+    - name: Set VcpkgTriplet-x86
       if: ${{matrix.platform == 'Win32' }}
-      run: echo "VCPKG_DEFAULT_TRIPLE=x86-windows" >> $GITHUB_ENV
+      run: echo "VcpkgTriplet=x86-windows" >> $GITHUB_ENV
       
-    - name: Set VCPKG_DEFAULT_TRIPLET
+    - name: Set VcpkgTriplet-x64
       if: ${{matrix.platform == 'x64' }}
-      run: echo "VCPKG_DEFAULT_TRIPLE=x64-windows" >> $GITHUB_ENV
+      run: echo "VcpkgTriplet=x64-windows" >> $GITHUB_ENV
       
     # Install VCPCK
     - name: run-vcpkg      
@@ -60,7 +60,7 @@ jobs:
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
-        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]"
+        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `$[env.VcpkgTriplet]`]"
     
     - name: List downloaded VCPCK files
       uses: Azure/powershell@v1
