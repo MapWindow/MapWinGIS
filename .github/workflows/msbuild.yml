@@ -44,8 +44,16 @@ jobs:
     - name: Rename Control folder
       run: ren ${{ github.workspace }}\src\Control ${{ github.workspace }}\src\Control_    
      
+    - name: Set VCPKG_DEFAULT_TRIPLET
+      if: ${{matrix.platform == 'Win32' }}
+      run: echo "VCPKG_DEFAULT_TRIPLE=x86-windows" >> $GITHUB_ENV
+      
+    - name: Set VCPKG_DEFAULT_TRIPLET
+      if: ${{matrix.platform == 'x64' }}
+      run: echo "VCPKG_DEFAULT_TRIPLE=x64-windows" >> $GITHUB_ENV
+      
     # Install VCPCK
-    - name: run-vcpkg
+    - name: run-vcpkg      
       # You may pin to the exact commit or the version.
       # uses: lukka/run-vcpkg@c5ce6a7de6e5ce834a25f7d55b6c250a275a6732
       uses: lukka/run-vcpkg@v10.1
