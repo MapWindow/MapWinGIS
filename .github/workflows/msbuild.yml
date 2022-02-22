@@ -46,7 +46,9 @@ jobs:
      
     - name: Set VcpkgTriplet-x86
       if: ${{matrix.platform == 'Win32' }}
-      run: echo "VcpkgTriplet=x86-windows" >> $GITHUB_ENV
+      run: |
+           chcp 65001 #set code page to utf-8
+           echo ("VcpkgTriplet=x86-windows") >> $env:GITHUB_ENV
       
     - name: Set VcpkgTriplet-x64
       if: ${{matrix.platform == 'x64' }}
@@ -131,7 +133,9 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
+      run: |
+           echo ${{env.VcpkgTriplet}}
+           msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /p:VcpkgTriplet=x86-windows ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
 
     # Save artifacts:
     - name: Archive production artifacts
