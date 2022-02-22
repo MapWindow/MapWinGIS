@@ -53,15 +53,25 @@ jobs:
       run: echo "VcpkgTriplet=x64-windows" >> $GITHUB_ENV
       
     # Install VCPCK
-    - name: run-vcpkg      
+    - name: run-vcpkg    
+      if: ${{matrix.platform == 'Win32' }}
       # You may pin to the exact commit or the version.
       # uses: lukka/run-vcpkg@c5ce6a7de6e5ce834a25f7d55b6c250a275a6732
       uses: lukka/run-vcpkg@v10.1
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
-        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `${{ env.VcpkgTriplet }}`]"
-    
+        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `x86-windows`]"
+    - name: run-vcpkg    
+      if: ${{matrix.platform == 'x64' }}
+      # You may pin to the exact commit or the version.
+      # uses: lukka/run-vcpkg@c5ce6a7de6e5ce834a25f7d55b6c250a275a6732
+      uses: lukka/run-vcpkg@v10.1
+      with:
+        runVcpkgInstall: true
+        vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
+        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `x64-windows`]" 
+        
     - name: List downloaded VCPCK files
       uses: Azure/powershell@v1
       with:
