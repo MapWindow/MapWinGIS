@@ -80,7 +80,8 @@ jobs:
         # Specify the Az PowerShell script here.
         inlineScript: |
           Write-Host "Test:"
-          Write-Host ${{env.VCPKG_INSTALLED_DIR}} 
+          Write-Host "VCPKG_INSTALLED_DIR: " + ${{env.VCPKG_INSTALLED_DIR}} 
+          Write-Host "VcpkgTriplet: " + ${{env.VcpkgTriplet}} 
           ls -R ${{env.VCPKG_INSTALLED_DIR}} 
           #Write-Error "Stop"
         
@@ -133,9 +134,7 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: |
-           echo ${{env.VcpkgTriplet}}
-           msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /p:VcpkgTriplet=x86-windows ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /p:VcpkgTriplet=x86-windows ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
 
     # Save artifacts:
     - name: Archive production artifacts
