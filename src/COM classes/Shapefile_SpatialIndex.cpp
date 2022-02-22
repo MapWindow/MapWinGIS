@@ -58,6 +58,54 @@ STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL* pVal)
 		_hasSpatialIndex = FALSE;
 	}
 
+	// Since LibSpatial v1.9.3 (added Feb. 2022) we use the default file extensions:
+	if (!_hasSpatialIndex)
+	{
+		// Check if it has the old index files:
+		VARIANT_BOOL hasOldIndexFiles;
+		get_HasOldSpatialIndex(&hasOldIndexFiles);
+		if (hasOldIndexFiles)
+		{
+			// Migrate files by deleting the old ones and creating new ones:
+			VARIANT_BOOL vb;
+			RemoveSpatialIndex(&vb);
+			CreateSpatialIndex(nullptr, &vb);
+			if (vb == VARIANT_TRUE) _hasSpatialIndex = TRUE;
+		}
+	}
+
+	*pVal = _hasSpatialIndex ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CShapefile::get_HasOldSpatialIndex(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_hasSpatialIndex = FALSE;
+
+	if (_shpfileName.GetLength() <= 3)
+	{
+		ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
+		return S_OK;
+	}
+
+	try
+	{
+		const CString datFilename = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwd";
+		const CString idxFilename = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwx";
+		if (Utility::FileExists(datFilename) && Utility::FileExists(idxFilename))
+		{
+			_hasSpatialIndex = TRUE;
+			// TODO: Also check if the spatial index is valid??
+		}
+	}
+	catch (...)
+	{
+		_hasSpatialIndex = FALSE;
+	}
+
 	*pVal = _hasSpatialIndex ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return S_OK;
