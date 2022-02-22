@@ -60,7 +60,7 @@ jobs:
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
-        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `$[env.VcpkgTriplet]`]"
+        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `${{ env.VcpkgTriplet }}`]"
     
     - name: List downloaded VCPCK files
       uses: Azure/powershell@v1
