@@ -42,10 +42,12 @@ STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL* pVal)
 
 	try
 	{
-		// TODO: Stop using custom extension?? Then we can use LibSpatial out of the box:
-		const CString mwdfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwd";
-		const CString mwxfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwx";
-		if (Utility::FileExists(mwdfileName) && Utility::FileExists(mwxfileName))
+		// Stop using custom extension! We're uinge LibSpatial as vcpkg package:
+		//const CString mwdfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwd";
+		//const CString mwxfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwx";
+		const CString datFilename = _shpfileName.Left(_shpfileName.GetLength() - 3) + "dat";
+		const CString idxFilename = _shpfileName.Left(_shpfileName.GetLength() - 3) + "idx";
+		if (Utility::FileExists(datFilename) && Utility::FileExists(idxFilename))
 		{
 			_hasSpatialIndex = TRUE;
 			// TODO: Also check if the spatial index is valid??
@@ -65,7 +67,7 @@ STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL* pVal)
 //		put_HasSpatialIndex()
 // *****************************************************************
 //ajp June 2008 Property does spatial index exist
-STDMETHODIMP CShapefile::put_HasSpatialIndex(VARIANT_BOOL pVal)
+STDMETHODIMP CShapefile::put_HasSpatialIndex(const VARIANT_BOOL pVal)
 {
 	//pm, feb. 2022 TODO: Do we need this method. Is a bit confusing if it exists but doesn't do anything.
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -102,7 +104,7 @@ STDMETHODIMP CShapefile::get_UseSpatialIndex(VARIANT_BOOL* pVal)
 	*pVal = _useSpatialIndex ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CShapefile::put_UseSpatialIndex(VARIANT_BOOL pVal)
+STDMETHODIMP CShapefile::put_UseSpatialIndex(const VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -120,7 +122,7 @@ STDMETHODIMP CShapefile::put_UseSpatialIndex(VARIANT_BOOL pVal)
 //		get/put_SpatialIndexMaxAreaPercent()
 // *****************************************************************
 //08-24-2009 (sm) spatial index performance
-STDMETHODIMP CShapefile::put_SpatialIndexMaxAreaPercent(DOUBLE newVal)
+STDMETHODIMP CShapefile::put_SpatialIndexMaxAreaPercent(const DOUBLE newVal)
 {
 	_spatialIndexMaxAreaPercent = newVal;
 	return S_OK;
@@ -310,10 +312,24 @@ STDMETHODIMP CShapefile::RemoveSpatialIndex(VARIANT_BOOL* retVal)
 		return S_OK;
 	}
 
-	// TODO: Don't use custom extensions anymore:
-	const CStringW names[] = { L"mwd", L"mwx" };
+	// Don't use custom extensions anymore, when they exist do remove them
+	const CStringW oldNames[] = { L"mwd", L"mwx" };
+	for (const auto& i : oldNames)
+	{
+		CString name = _shpfileName.Left(_shpfileName.GetLength() - 3) + i;
+		if (Utility::FileExists(name))
+		{
+			*retVal = VARIANT_TRUE;
+			if (remove(name) != 0) {
+				// Don't report error, migration
+				//ErrorMessage(tkCANT_DELETE_FILE);
+				//*retVal = VARIANT_FALSE;
+			}
+		}
+	}
 
-	for (const auto& i : names)
+	const CStringW newNames[] = { L"dat", L"idx" };
+	for (const auto& i : newNames)
 	{
 		CString name = _shpfileName.Left(_shpfileName.GetLength() - 3) + i;
 		if (Utility::FileExists(name))

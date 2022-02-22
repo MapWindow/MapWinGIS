@@ -4096,7 +4096,7 @@ interface IShapefile : IDispatch {
 	[id(42), helpstring("method CreateNewWithShapeID")] HRESULT CreateNewWithShapeID([in] BSTR ShapefileName, [in] ShpfileType ShapefileType, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(43), helpstring("property UseSpatialIndex")] HRESULT UseSpatialIndex([out, retval]  VARIANT_BOOL* pVal);
 	[propput, id(43), helpstring("property UseSpatialIndex")] HRESULT UseSpatialIndex([in] VARIANT_BOOL pVal);
-	[id(44), helpstring("method CreateSpatialIndex")] HRESULT CreateSpatialIndex([in, defaultvalue(NULL)] BSTR shapefileName, [out, retval] VARIANT_BOOL* retval);
+	[id(44), helpstring("method CreateSpatialIndex")] HRESULT CreateSpatialIndex([in, defaultvalue("")] BSTR shapefileName, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(45), helpstring("property HasSpatialIndex")] HRESULT HasSpatialIndex([out, retval]  VARIANT_BOOL* pVal);
 	[propput, id(45), helpstring("property HasSpatialIndex")] HRESULT HasSpatialIndex([in] VARIANT_BOOL);
 	[id(46), helpstring("method Resource")] HRESULT Resource([in] BSTR newShpPath, [out, retval] VARIANT_BOOL* pVal);

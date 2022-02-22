@@ -64,6 +64,9 @@
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
     <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+  </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
     <VcpkgManifestInstall>false</VcpkgManifestInstall>
@@ -71,8 +74,19 @@
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>
     <PreBuildEvent>
-      <Message>Copying GDAL files ...</Message>
-      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\bin\$(Platform) $(TargetDir)</Command>
+      <Message>Copying dlls ...</Message>
+      <Command>if $(PlatformName) == Win32 (
+  echo "Copying spatialindex-32.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-32.dll $(TargetDir))
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-32.dll $(TargetDir))
+)
+if $(PlatformName) == x64 (
+  echo "Copying spatialindex-64.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-64.dll $(TargetDir))
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-64.dll $(TargetDir))
+)
+
+$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\bin\$(Platform) $(TargetDir)</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Message>
@@ -137,11 +151,11 @@
       </Version>
       <RegisterOutput>true</RegisterOutput>
       <AdditionalOptions>/ignore:4099 /Ignore:4254  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;geos_c.lib;tiff.lib;libcurl_imp.lib;cqlib.lib;ShapeLib.lib;SpatialIndex-mw.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;geos_c.lib;tiff.lib;libcurl_imp.lib;cqlib.lib;ShapeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)..\Support\lib\$(PlatformToolset)\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)..\Support\lib\$(PlatformToolset)\$(Platform)\Release;$(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\lib;$(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>
@@ -181,6 +195,7 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>spatialindex-32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <!-- x64 platform definitions -->
@@ -196,6 +211,7 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <Link>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalDependencies>spatialindex-64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <!-- Visual Leak Detector config -->

@@ -28,12 +28,9 @@ public class SpatialIndexTests
         retVal.ShouldBeTrue("CreateSpatialIndex failed");
 
         // Check files:
-        var mwdFileLocation = Path.ChangeExtension(sfFileLocation, ".mwd");
-        File.Exists(mwdFileLocation).ShouldBeTrue("Can't find mwd file");
-        var mwxFileLocation = Path.ChangeExtension(sfFileLocation, ".mwx");
-        File.Exists(mwxFileLocation).ShouldBeTrue("Can't find mwx file");
+        CheckIndexFiles(sfFileLocation, true);
     }
-
+    
     [Fact]
     public void HasSpatialIndexTest()
     {
@@ -155,18 +152,15 @@ public class SpatialIndexTests
         retVal.ShouldBeTrue("CreateSpatialIndex failed");
 
         // Check files, should exist:
-        var mwdFileLocation = Path.ChangeExtension(sfFileLocation, ".mwd");
-        File.Exists(mwdFileLocation).ShouldBeTrue("Can't find mwd file");
-        var mwxFileLocation = Path.ChangeExtension(sfFileLocation, ".mwx");
-        File.Exists(mwxFileLocation).ShouldBeTrue("Can't find mwx file");
+        CheckIndexFiles(sfFileLocation, true);
+
 
         // Test again, should return true:
         retVal = sfPolygon.RemoveSpatialIndex();
         retVal.ShouldBeTrue("RemoveSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
 
         // Check files, should be removed:
-        File.Exists(mwdFileLocation).ShouldBeFalse("mwd file still exists.");
-        File.Exists(mwxFileLocation).ShouldBeFalse("mwx file still exists.");
+        CheckIndexFiles(sfFileLocation, false);
     }
 
     [Fact]
@@ -209,6 +203,11 @@ public class SpatialIndexTests
         var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
         var sf = Helpers.OpenShapefile(sfLocation);
         Helpers.CheckEpsgCode(sf.GeoProjection, 4326, true);
+
+        // Debug: Create spatial index files:
+        //var retVal = sf.CreateSpatialIndex();
+        //retVal.ShouldBeTrue("CreateSpatialIndex failed");
+
         sf.HasSpatialIndex.ShouldBeTrue();
         sf.UseSpatialIndex.ShouldBeTrue();
         sf.IsSpatialIndexValid().ShouldBeTrue();
@@ -230,5 +229,27 @@ public class SpatialIndexTests
         sf2.Extents.yMin.ShouldBe(34.149021, 0.00001);
         sf2.Extents.xMax.ShouldBe(109.139842, 0.00001);
         sf2.Extents.yMax.ShouldBe(34.457816, 0.00001);
+    }
+
+    private void CheckIndexFiles(string sfFileLocation, bool shouldExists)
+    {
+        var datFileLocation = Path.ChangeExtension(sfFileLocation, ".dat");
+        if (shouldExists)
+        {
+            File.Exists(datFileLocation).ShouldBeTrue("Can't find dat file");
+        }
+        else
+        {
+            File.Exists(datFileLocation).ShouldBeFalse("The dat file still exists");
+        }
+        var idxFileLocation = Path.ChangeExtension(sfFileLocation, ".idx");
+        if (shouldExists)
+        {
+            File.Exists(idxFileLocation).ShouldBeTrue("Can't find idx file");
+        }
+        else
+        {
+            File.Exists(idxFileLocation).ShouldBeFalse("The idx file still exists");
+        }
     }
 }

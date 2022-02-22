@@ -6,6 +6,10 @@
     { 
 		"name": "ms-gsl",
 		"platform": "windows"
+	 },
+	 {
+		"name": "libspatialindex",
+	 	"platform": "windows"
 	 }
   ]
 }
