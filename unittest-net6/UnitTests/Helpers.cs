@@ -48,6 +48,10 @@ internal static class Helpers
         var baseFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
         var fileName = Path.ChangeExtension($"{baseFileName}{filenamePart}", ".shp");
         SaveSf(sf, fileName);
+
+        // Check if shapefile files exists:
+        CheckSfFiles(fileName, true);
+
         return fileName;
     }
 
@@ -56,7 +60,7 @@ internal static class Helpers
         sf.ShouldNotBeNull("sf is null");
         var retVal = sf.SaveAsEx(fileLocation, true, false);
         retVal.ShouldBeTrue("sf.SaveAs failed");
-        sf.EditingShapes.ShouldBeFalse("sf is still in edit mode.");
+        sf.EditingShapes.ShouldBeFalse("sf is still in edit mode. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
     }
 
     internal static MapWinGIS.Shapefile OpenShapefile(string fileLocation)
@@ -167,5 +171,38 @@ internal static class Helpers
         File.Exists(path).ShouldBeTrue($"{fileName} doesn't exists in the TestData location.");
 
         return path;
+    }
+
+    internal static void CheckSfFiles(string sfFileLocation, bool shouldExists)
+    {
+        var shpFileLocation = Path.ChangeExtension(sfFileLocation, ".shp");
+        if (shouldExists)
+        {
+            File.Exists(shpFileLocation).ShouldBeTrue("Can't find .shp file");
+        }
+        else
+        {
+            File.Exists(shpFileLocation).ShouldBeFalse("The .shp file still exists");
+        }
+
+        var dbfFileLocation = Path.ChangeExtension(sfFileLocation, ".dbf");
+        if (shouldExists)
+        {
+            File.Exists(dbfFileLocation).ShouldBeTrue("Can't find .dbf file");
+        }
+        else
+        {
+            File.Exists(dbfFileLocation).ShouldBeFalse("The .dbf file still exists");
+        }
+
+        var shxFileLocation = Path.ChangeExtension(sfFileLocation, ".shx");
+        if (shouldExists)
+        {
+            File.Exists(shxFileLocation).ShouldBeTrue("Can't find .shx file");
+        }
+        else
+        {
+            File.Exists(shxFileLocation).ShouldBeFalse("The .shx file still exists");
+        }
     }
 }
