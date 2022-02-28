@@ -31,6 +31,29 @@ public class SpatialIndexTests
         CheckIndexFiles(sfFileLocation, true);
     }
 
+    [Fact(Skip="Unit test is created, but fix is not yet implemented")]
+    public void CreateSpatialIndexUnicodeTest()
+    {
+        // Create shapefile:
+        var sfPolygon = Helpers.CreateTestPolygonShapefile();
+
+        // Create index, should fail because in-memory shapefile:
+        var retVal = sfPolygon.CreateSpatialIndex();
+        retVal.ShouldBeFalse("CreateSpatialIndex was unexpectly successful");
+        sfPolygon.ErrorMsg[sfPolygon.LastErrorCode].ShouldBe("The method isn't applicable to the in-memory object");
+
+        // Save shapefile:
+        var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "Воздух");
+        _testOutputHelper.WriteLine(sfFileLocation);
+        
+        // Create index again:
+        retVal = sfPolygon.CreateSpatialIndex();
+        retVal.ShouldBeTrue("CreateSpatialIndex failed");
+
+        // Check files:
+        CheckIndexFiles(sfFileLocation, true);
+    }
+
     [Fact]
     public void HasSpatialIndexTest()
     {
