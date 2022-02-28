@@ -42,26 +42,31 @@ namespace IndexSearching
 	** ************************************************************************* */
 	bool CreateIndexFile(const double utilization, const int capacity, string baseName)
 	{
-		bool ret = false;
-		IStorageManager* diskfile = nullptr;  // TODO: Solve compile warning
-		StorageManager::IBuffer* file = nullptr;
-		ISpatialIndex* tree = nullptr;  // TODO: Solve compile warning
+		bool ret;
+		//IStorageManager* diskfile = nullptr;  
+		//StorageManager::IBuffer* file = nullptr;
+		//ISpatialIndex* tree = nullptr;  
 
 		try
 		{
 			// Create a new storage manager with the provided base name and a 4K page size.
-			diskfile = StorageManager::createNewDiskStorageManager(baseName, 4096);
-			file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, capacity, false);
+			//diskfile = StorageManager::createNewDiskStorageManager(baseName, 4096);
+			//file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, capacity, false);
+
+			// Create a new storage manager with the provided base name and a 4K page size.
+			const auto diskfile = unique_ptr<IStorageManager>(StorageManager::createNewDiskStorageManager(baseName, 4096));
+			// this will try to locate and open an already existing storage manager.
+			const auto file = unique_ptr<StorageManager::IBuffer>(StorageManager::createNewRandomEvictionsBuffer(*diskfile, capacity, false));
 
 			ShapeFileStream inputStream(baseName);
 
 			// Create and bulk load a new RTree with dimensionality 2, using "file" as
 			// the StorageManager and the RSTAR splitting policy.
-			id_type indexIdentifier;
-#ifndef __DEBUG
-			tree = RTree::createAndBulkLoadNewRTree(RTree::BLM_STR, inputStream, *file, utilization,
-				capacity, capacity, 2, SpatialIndex::RTree::RV_RSTAR, indexIdentifier);
-#endif			
+			id_type indexIdentifier = 0;
+			// tree = RTree::createAndBulkLoadNewRTree(RTree::BLM_STR, inputStream, *file, utilization, capacity, capacity, 2, SpatialIndex::RTree::RV_RSTAR, indexIdentifier);
+			const auto tree = unique_ptr<ISpatialIndex>(createAndBulkLoadNewRTree(
+				RTree::BLM_STR, inputStream, *file, utilization, capacity, capacity, 2, SpatialIndex::RTree::RV_RSTAR,
+				indexIdentifier));
 			ret = tree->isIndexValid();
 		}
 		catch (const char* str)
@@ -84,9 +89,9 @@ namespace IndexSearching
 			ret = false;
 			cerr << "Got an IllegalArgumentException " << ex.what() << endl;
 		}
-		delete tree;
-		delete file;
-		delete diskfile;
+		//delete tree;
+		//delete file;
+		//delete diskfile;
 
 		return ret;
 	}
@@ -100,17 +105,22 @@ namespace IndexSearching
 	bool IsValidIndexFile(string baseName, const int bufferSize)
 	{
 		bool ret = false;
-		IStorageManager* diskfile = nullptr;
-		StorageManager::IBuffer* file = nullptr;
-		ISpatialIndex* tree = nullptr;
+		//IStorageManager* diskfile = nullptr;
+		//StorageManager::IBuffer* file = nullptr;
+		//ISpatialIndex* tree = nullptr;
 
 		try
 		{
-			diskfile = StorageManager::loadDiskStorageManager(baseName);
+			//diskfile = StorageManager::loadDiskStorageManager(baseName);
 			// this will try to locate and open an already existing storage manager.
-			file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
+			//file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
+			//tree = RTree::loadRTree(*file, 1);
 
-			tree = RTree::loadRTree(*file, 1);
+			const auto diskfile = unique_ptr<IStorageManager>(StorageManager::loadDiskStorageManager(baseName));
+			// this will try to locate and open an already existing storage manager.
+			const auto file = unique_ptr<StorageManager::IBuffer>(StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false));
+			const auto tree = unique_ptr<ISpatialIndex>(RTree::loadRTree(*file, 1));
+
 			ret = tree->isIndexValid();
 		}
 		catch (const char* const str)
@@ -118,9 +128,9 @@ namespace IndexSearching
 			cerr << "Got an error " << str << endl;
 		}
 
-		delete tree;
-		delete file;
-		delete diskfile;
+		//delete tree;
+		//delete file;
+		//delete diskfile;
 		return ret;
 	}
 	/* ************************************************************************* **
@@ -130,13 +140,13 @@ namespace IndexSearching
 	**
 	**
 	** ************************************************************************* */
-	void QueryIndexFile(const gsl::not_null<ISpatialIndex *> spatialIndex, const SpatialIndex::Region& queryRegion, const QueryTypeFlags queryType, ShapeIdxVisitor* vis)
+	void QueryIndexFile(const gsl::not_null<ISpatialIndex*> spatialIndex, const SpatialIndex::Region& queryRegion, const QueryTypeFlags queryType, ShapeIdxVisitor* vis)
 	{
 		try
 		{
-			if (queryType == IndexSearching::QueryTypeFlags::intersection)
+			if (queryType == QueryTypeFlags::intersection)
 				spatialIndex->intersectsWithQuery(queryRegion, *vis);
-			else if (queryType == IndexSearching::QueryTypeFlags::contained)
+			else if (queryType == QueryTypeFlags::contained)
 				spatialIndex->containsWhatQuery(queryRegion, *vis);
 		}
 		catch (...)
@@ -145,7 +155,8 @@ namespace IndexSearching
 		}
 	}
 
-	int  SelectShapesFromIndex(ISpatialIndex* spatialIndex, double* lowVals, double* hiVals, const QueryTypeFlags queryType, CIndexSearching* resulSet)
+	// TODO: Lots of compile warnings:
+	int SelectShapesFromIndex(ISpatialIndex* spatialIndex, double* lowVals, double* hiVals, const QueryTypeFlags queryType, CIndexSearching* resulSet)
 	{
 		int rCode = 0;
 

@@ -64,23 +64,29 @@ namespace IndexSearching
 	**  Returns a <queue> of found shape file index numbers.
 	**
 	** ************************************************************************* */
-	// TODO: Lots of compile warnings:
 	int SelectShapesFromIndex(const char* fileName, double* lowVals, double* hiVals, const QueryTypeFlags queryType, const int bufferSize, CIndexSearching* resulSet)
 	{
-		IStorageManager* diskfile = nullptr;
-		StorageManager::IBuffer* file = nullptr;
-		ISpatialIndex* tree = nullptr;
+		/*	IStorageManager* diskfile = nullptr;
+			StorageManager::IBuffer* file = nullptr;
+			ISpatialIndex* tree = nullptr;*/
 
 		int rCode;
 		try
 		{
-			diskfile = StorageManager::loadDiskStorageManager(string(fileName));
+			//diskfile = StorageManager::loadDiskStorageManager(string(fileName));
+			//// this will try to locate and open an already existing storage manager.
+			//file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
+			//tree = RTree::loadRTree(*file, 1);
+			//rCode = SelectShapesFromIndex(tree, lowVals, hiVals, queryType, resulSet);
+
+			auto s4 = static_cast<string>(fileName);
+			const auto diskfile = unique_ptr<IStorageManager>(StorageManager::loadDiskStorageManager(s4));
 			// this will try to locate and open an already existing storage manager.
-			file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
+			const auto file = unique_ptr<StorageManager::IBuffer>(StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false));
+			const auto tree = unique_ptr<ISpatialIndex>(RTree::loadRTree(*file, 1));
 
-			tree = RTree::loadRTree(*file, 1);
+			rCode = SelectShapesFromIndex(tree.get(), lowVals, hiVals, queryType, resulSet);
 
-			rCode = SelectShapesFromIndex(tree, lowVals, hiVals, queryType, resulSet);
 		}
 		catch (...)
 		{
@@ -88,9 +94,9 @@ namespace IndexSearching
 			rCode = static_cast<int>(SpatialIndexQueryErrors::unknownError);
 		}
 
-		delete tree;
-		delete file;
-		delete diskfile;
+		//delete tree;
+		//delete file;
+		//delete diskfile;
 
 		return rCode;
 	}
@@ -106,19 +112,24 @@ namespace IndexSearching
 
 	bool LoadSpatialIndex(string baseName, const bool validateIndex, const int bufferSize, CSpatialIndexID& spatialIndexId)
 	{
-		IStorageManager* diskfile;
-		StorageManager::IBuffer* file;
-		ISpatialIndex* tree;
+		//IStorageManager* diskfile;
+		//StorageManager::IBuffer* file;
+		//ISpatialIndex* tree;
 
 		try
 		{
-			diskfile = StorageManager::loadDiskStorageManager(baseName);
+			//diskfile = StorageManager::loadDiskStorageManager(baseName);
 			// this will try to locate and open an already existing storage manager.
-			file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
+			//file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
+			//tree = RTree::loadRTree(*file, 1);
+			//spatialIndexId = CSpatialIndexCache::Instance().CacheSpatialIndex(tree, diskfile, file);
 
-			tree = RTree::loadRTree(*file, 1);
+			const auto diskfile = unique_ptr<IStorageManager>(StorageManager::loadDiskStorageManager(baseName));
+			// this will try to locate and open an already existing storage manager.
+			const auto file = unique_ptr<StorageManager::IBuffer>(StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false));
+			const auto tree = unique_ptr<ISpatialIndex>(RTree::loadRTree(*file, 1));
 
-			spatialIndexId = CSpatialIndexCache::Instance().CacheSpatialIndex(tree, diskfile, file);
+			spatialIndexId = CSpatialIndexCache::Instance().CacheSpatialIndex(tree.get(), diskfile.get(), file.get());
 
 			if (validateIndex && !tree->isIndexValid())
 			{
@@ -131,12 +142,6 @@ namespace IndexSearching
 			cerr << "Error loading spatial index." << endl;
 			return false;
 		}
-
-		// pm, feb. 2020 added the 3 lines:
-		// TODO: Shouldn't these 3 not be deleted?
-		delete tree;
-		delete file;
-		delete diskfile;
 
 		return true;
 	}
@@ -158,7 +163,7 @@ namespace IndexSearching
 	}
 	long CIndexSearching::GetValue(const int index)
 	{
-		long& val = resultList->at(index);
+		const long& val = resultList->at(index);
 		return(val);
 	}
 	void CIndexSearching::AddValue(const long val)
@@ -167,7 +172,7 @@ namespace IndexSearching
 	}
 	int  CIndexSearching::GetLength()
 	{
-		return resultList->size();
+		return static_cast<int>(resultList->size());
 	}
 
 	void CIndexSearching::SetCapacity(const int capacity)
