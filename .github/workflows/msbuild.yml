@@ -193,7 +193,7 @@ jobs:
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1.1    
       with:
-        msbuild-architecture: x64
+        msbuild-architecture: x86
         
     - name: Build test solution ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
