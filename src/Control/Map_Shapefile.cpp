@@ -1,17 +1,10 @@
 // This file stores properties of shapefile layers and separate shapes
 // The properties are obsolete, new ShapeDrawingOptions and ShapeCategory classes should be used instead
 // Where possible the call where redirected to the new classes
-#pragma once
-#include "stdafx.h"
+#include <stdafx.h>
 #include "Map.h"
 #include "ShapeDrawingOptions.h"
 #include "Shapefile.h"
-#include "Labels.h"
-#include "SelectionHelper.h"
-#include "ShapeStyleHelper.h"
-#include "ShapefileHelper.h"
-#include "Structures.h"
-#include "EditorHelper.h"
 
 // TODO: the following properties for the new symbology must be implemented
 // ShapeLayerLineStipple
@@ -24,22 +17,22 @@
 //	  ShapefileDrawingOptions
 // *************************************************************
 // Returns drawing options for a given shapefile
-CDrawingOptionsEx* CMapView::get_ShapefileDrawingOptions(long layerHandle)
+CDrawingOptionsEx* CMapView::get_ShapefileDrawingOptions(const long layerHandle)
 {
 	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
-		Layer * layer = _allLayers[layerHandle];
-		if( layer->IsShapefile() )
+		Layer* layer = _allLayers[layerHandle];
+		if (layer->IsShapefile())
 		{
-			IShapefile* sf = NULL;
+			IShapefile* sf;
 			if (layer->QueryShapefile(&sf))
 			{
-				IShapeDrawingOptions* options = NULL;
+				IShapeDrawingOptions* options = nullptr;
 				sf->get_DefaultDrawingOptions(&options);
 				sf->Release();
 				if (options)
 				{
-					CDrawingOptionsEx* retVal = ((CShapeDrawingOptions*)options)->get_UnderlyingOptions();
+					CDrawingOptionsEx* retVal = static_cast<CShapeDrawingOptions*>(options)->get_UnderlyingOptions();
 					options->Release();
 					return retVal;
 				}
@@ -54,7 +47,7 @@ CDrawingOptionsEx* CMapView::get_ShapefileDrawingOptions(long layerHandle)
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 	}
-	return NULL;
+	return nullptr;
 }
 
 // *************************************************************
@@ -65,10 +58,10 @@ ShpfileType CMapView::get_ShapefileType(long layerHandle)
 {
 	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
-		Layer * layer = _allLayers[layerHandle];
-		if( layer->IsShapefile() )
+		Layer* layer = _allLayers[layerHandle];
+		if (layer->IsShapefile())
 		{
-			IShapefile* sf = NULL;
+			IShapefile* sf = nullptr;
 			layer->QueryShapefile(&sf);
 			if (sf)
 			{
@@ -98,21 +91,21 @@ Layer* CMapView::GetShapefileLayer(long layerHandle)
 {
 	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
-		Layer * layer = _allLayers[layerHandle];
-		if( layer->IsShapefile() )
+		Layer* layer = _allLayers[layerHandle];
+		if (layer->IsShapefile())
 		{
 			return layer;
 		}
 		else
 		{
 			this->ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
-			return NULL;
+			return nullptr;
 		}
 	}
 	else
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -128,18 +121,18 @@ Layer* CMapView::GetLayer(long layerHandle)
 	else
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return NULL;
+		return nullptr;
 	}
 }
 
 // ***************************************************************
 //		IsValidLayer()
 // ***************************************************************
-bool CMapView::IsValidLayer( long layerHandle )
+bool CMapView::IsValidLayer(long layerHandle)
 {
 	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
-		return (_allLayers[layerHandle]!=NULL)?true:false;
+		return (_allLayers[layerHandle] != nullptr) ? true : false;
 	}
 	else
 	{
@@ -150,42 +143,42 @@ bool CMapView::IsValidLayer( long layerHandle )
 // ***************************************************************
 //		IsValidShape()
 // ***************************************************************
-bool CMapView::IsValidShape( long layerHandle, long shape )
-{	
-	if( IsValidLayer(layerHandle) )
+bool CMapView::IsValidShape(long layerHandle, long shape)
+{
+	if (IsValidLayer(layerHandle))
 	{
-		Layer * l = _allLayers[layerHandle];
-		if( l->IsShapefile() )
-		{	
+		Layer* l = _allLayers[layerHandle];
+		if (l->IsShapefile())
+		{
 			this->AlignShapeLayerAndShapes(l);
-			
-			IShapefile * ishp = NULL;
+
+			IShapefile* ishp = nullptr;
 			l->QueryShapefile(&ishp);
 
 			long numShapes = 0;
-			if( ishp == NULL )
+			if (ishp == nullptr)
 			{
 				numShapes = 0;
 			}
 			else
-			{	
+			{
 				ishp->get_NumShapes(&numShapes);
 				ishp->Release();
-				ishp = NULL;
+				ishp = nullptr;
 			}
-			
-			if( shape >= 0 && shape < (long)numShapes )
+
+			if (shape >= 0 && shape < (long)numShapes)
 			{
 				return TRUE;
 			}
 			else
-			{	
+			{
 				ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 				return FALSE;
 			}
 		}
 		else
-		{	
+		{
 			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 			return FALSE;
 		}
@@ -195,7 +188,7 @@ bool CMapView::IsValidShape( long layerHandle, long shape )
 		ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return FALSE;
 	}
-	
+
 }
 #pragma endregion
 
@@ -215,11 +208,11 @@ BOOL CMapView::GetShapeLayerDrawPoint(long LayerHandle)
 		if (type == SHP_POINT || type == SHP_POINTM || type == SHP_POINTZ ||
 			type == SHP_MULTIPOINT || type == SHP_MULTIPOINTZ || type == SHP_MULTIPOINTM)
 		{
-			return options->fillVisible?TRUE:FALSE;
+			return options->fillVisible ? TRUE : FALSE;
 		}
 		else
 		{
-			return options->verticesVisible?TRUE:FALSE;
+			return options->verticesVisible ? TRUE : FALSE;
 		}
 	}
 	else
@@ -234,7 +227,7 @@ BOOL CMapView::GetShapeLayerDrawPoint(long LayerHandle)
 void CMapView::SetShapeLayerDrawPoint(long LayerHandle, BOOL bNewValue)
 {
 	CDrawingOptionsEx* options = get_ShapefileDrawingOptions(LayerHandle);
-	
+
 	if (options)
 	{
 		ShpfileType type = this->get_ShapefileType(LayerHandle);
@@ -270,12 +263,12 @@ float CMapView::GetShapeLayerPointSize(long LayerHandle)
 // *****************************************************************
 void CMapView::SetShapeLayerPointSize(long LayerHandle, float newValue)
 {
-	if( newValue < 0.0 )
+	if (newValue < 0.0)
 		newValue = 0.0;
 
 	CDrawingOptionsEx* options = get_ShapefileDrawingOptions(LayerHandle);
 	if (options)
-	{		
+	{
 		options->pointSize = newValue;
 		ScheduleLayerRedraw();
 	}
@@ -306,7 +299,7 @@ void CMapView::SetShapeLayerPointType(long LayerHandle, short nNewValue)
 	{
 		ErrorMessage(tkPROPERTY_NOT_IMPLEMENTED);	// TODO: write conversions between point types	
 	}
-}	
+}
 
 // *****************************************************************
 //		GetShapeLayerPointColor()
@@ -329,7 +322,7 @@ OLE_COLOR CMapView::GetShapeLayerPointColor(long LayerHandle)
 	}
 	else
 	{
-		return RGB(0,0,0);
+		return RGB(0, 0, 0);
 	}
 }
 
@@ -369,10 +362,10 @@ LPDISPATCH CMapView::GetUDPointType(long LayerHandle)
 			return options->picture;
 		}
 		else
-			return NULL;
+			return nullptr;
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 // *****************************************************************
@@ -383,8 +376,8 @@ void CMapView::SetUDPointType(long LayerHandle, LPDISPATCH newValue)
 	CDrawingOptionsEx* options = get_ShapefileDrawingOptions(LayerHandle);
 	if (options)
 	{
-		IImage * iimg = NULL;
-		newValue->QueryInterface( IID_IImage, (void**)&iimg );
+		IImage* iimg = nullptr;
+		newValue->QueryInterface(IID_IImage, (void**)&iimg);
 		ComHelper::SetRef((IDispatch*)iimg, (IDispatch**)&options->picture, true);
 		if (iimg)
 		{
@@ -418,7 +411,7 @@ void CMapView::SetShapeLayerDrawLine(long LayerHandle, BOOL bNewValue)
 		options->linesVisible = (bNewValue == TRUE);
 		ScheduleLayerRedraw();
 	}
-}	
+}
 
 // ***********************************************************
 //		GetShapeLayerLineColor()
@@ -429,7 +422,7 @@ OLE_COLOR CMapView::GetShapeLayerLineColor(long LayerHandle)
 	if (options)
 		return options->lineColor;
 	else
-		return RGB(0,0,0);
+		return RGB(0, 0, 0);
 }
 
 // *****************************************************************
@@ -466,8 +459,8 @@ float CMapView::GetShapeLayerLineWidth(long LayerHandle)
 // *****************************************************************
 void CMapView::SetShapeLayerLineWidth(long LayerHandle, float newValue)
 {
-	if( newValue < 0.0 )
-			newValue = 0.0;
+	if (newValue < 0.0)
+		newValue = 0.0;
 
 	CDrawingOptionsEx* options = get_ShapefileDrawingOptions(LayerHandle);
 	if (options)
@@ -498,10 +491,10 @@ void CMapView::SetShapeLayerLineStipple(long LayerHandle, short nNewValue)
 	ErrorMessage(tkPROPERTY_NOT_IMPLEMENTED);
 	CDrawingOptionsEx* options = get_ShapefileDrawingOptions(LayerHandle);
 	if (options)
-	{	
+	{
 		options->lineStipple = (tkDashStyle)nNewValue;	// TODO: convert between enumerations
 		ScheduleLayerRedraw();
-	}		
+	}
 }
 
 // *****************************************************************
@@ -558,7 +551,7 @@ OLE_COLOR CMapView::GetShapeLayerFillColor(long LayerHandle)
 	if (options)
 		return options->fillColor;
 	else
-		return RGB(0,0,0);
+		return RGB(0, 0, 0);
 }
 
 // **********************************************************
@@ -582,7 +575,7 @@ float CMapView::GetShapeLayerFillTransparency(long LayerHandle)
 	CDrawingOptionsEx* options = get_ShapefileDrawingOptions(LayerHandle);
 	if (options)
 	{
-		return options->fillTransparency/255.0f;
+		return options->fillTransparency / 255.0f;
 	}
 	else
 	{
@@ -595,8 +588,8 @@ float CMapView::GetShapeLayerFillTransparency(long LayerHandle)
 // *****************************************************************
 void CMapView::SetShapeLayerFillTransparency(long LayerHandle, float newValue)
 {
-	if( newValue < 0.0 )		newValue = 0.0;
-	else if( newValue > 1.0 )	newValue = 1.0;
+	if (newValue < 0.0)		newValue = 0.0;
+	else if (newValue > 1.0)	newValue = 1.0;
 
 	CDrawingOptionsEx* options = get_ShapefileDrawingOptions(LayerHandle);
 	if (options)
@@ -632,12 +625,12 @@ void CMapView::SetShapeLayerFillStipple(long LayerHandle, short nNewValue)
 {
 	ErrorMessage(tkPROPERTY_NOT_IMPLEMENTED);
 	CDrawingOptionsEx* options = get_ShapefileDrawingOptions(LayerHandle);
-	if (options)	
+	if (options)
 	{
 		// TODO: write conversion between tkFillStipple and tkGDIPlusHatchStyle enumerations
 		ScheduleLayerRedraw();
 	}
-}	
+}
 
 // *****************************************************************
 //		GetShapeLayerStippleTransparent()
@@ -673,7 +666,7 @@ OLE_COLOR CMapView::GetShapeLayerStippleColor(long LayerHandle)
 	if (options)
 		return options->fillBgColor;
 	else
-		return RGB(0,0,0);
+		return RGB(0, 0, 0);
 }
 
 // *****************************************************************
@@ -703,12 +696,12 @@ long CMapView::GetUDFillStipple(long LayerHandle, long StippleRow)
 // *****************************************************************
 void CMapView::SetUDFillStipple(long LayerHandle, long StippleRow, long nNewValue)
 {
-		ErrorMessage(tkPROPERTY_DEPRECATED);
+	ErrorMessage(tkPROPERTY_DEPRECATED);
 }
 #pragma endregion
 
 #pragma endregion
-	
+
 #pragma region REGION PerShapeDrawingOptions
 
 #pragma region ShapeVisible
@@ -755,7 +748,7 @@ void CMapView::SetShapeDrawPoint(long LayerHandle, long Shape, BOOL bNewValue)
 OLE_COLOR CMapView::GetShapePointColor(long LayerHandle, long Shape)
 {
 	ErrorMessage(tkPROPERTY_DEPRECATED);
-	return RGB(220,220,220);
+	return RGB(220, 220, 220);
 }
 
 // *****************************************************************
@@ -826,7 +819,7 @@ void CMapView::SetShapeDrawLine(long LayerHandle, long Shape, BOOL bNewValue)
 OLE_COLOR CMapView::GetShapeLineColor(long LayerHandle, long Shape)
 {
 	ErrorMessage(tkPROPERTY_DEPRECATED);
-	return RGB(220,220,220);
+	return RGB(220, 220, 220);
 }
 
 // *****************************************************************
@@ -880,7 +873,7 @@ void CMapView::SetShapeLineStipple(long LayerHandle, long Shape, short nNewValue
 BOOL CMapView::GetShapeDrawFill(long LayerHandle, long Shape)
 {
 	ErrorMessage(tkPROPERTY_DEPRECATED);
-	return RGB(220,220,220);
+	return RGB(220, 220, 220);
 }
 
 // *****************************************************************
@@ -897,7 +890,7 @@ void CMapView::SetShapeDrawFill(long LayerHandle, long Shape, BOOL bNewValue)
 OLE_COLOR CMapView::GetShapeFillColor(long LayerHandle, long Shape)
 {
 	ErrorMessage(tkPROPERTY_DEPRECATED);
-	return RGB(220,220,220);
+	return RGB(220, 220, 220);
 }
 
 // *****************************************************************
@@ -968,7 +961,7 @@ void CMapView::SetShapeStippleTransparent(long LayerHandle, long Shape, BOOL nNe
 OLE_COLOR CMapView::GetShapeStippleColor(long LayerHandle, long Shape)
 {
 	ErrorMessage(tkPROPERTY_DEPRECATED);
-	return RGB(220,220,220);
+	return RGB(220, 220, 220);
 }
 
 // *****************************************************************
@@ -998,7 +991,7 @@ long CMapView::get_UDPointImageListCount(long LayerHandle)
 IDispatch* CMapView::get_UDPointImageListItem(long LayerHandle, long ImageIndex)
 {
 	ErrorMessage(tkPROPERTY_DEPRECATED);
-	return NULL;
+	return nullptr;
 }
 
 // *****************************************************************
@@ -1018,7 +1011,7 @@ long CMapView::set_UDPointImageListAdd(long LayerHandle, LPDISPATCH newValue)
 	return -1;
 }
 
-	// *****************************************************************
+// *****************************************************************
 //		SetShapePointImageListID()
 // *****************************************************************
 void CMapView::SetShapePointImageListID(long LayerHandle, long Shape, long ImageIndex)
@@ -1057,7 +1050,7 @@ void CMapView::set_UDPointFontCharFont(long LayerHandle, LPCTSTR FontName, float
 // *****************************************************************
 //		set_UDPointFontCharFontSize()
 // *****************************************************************
-void CMapView::set_UDPointFontCharFontSize(long LayerHandle,  float FontSize)
+void CMapView::set_UDPointFontCharFontSize(long LayerHandle, float FontSize)
 {
 	ErrorMessage(tkPROPERTY_DEPRECATED);
 }
@@ -1083,19 +1076,19 @@ long CMapView::GetShapePointFontCharListID(long LayerHandle, long Shape)
 // *************************************************************
 //		SaveAsEx()
 // *************************************************************
-STDMETHODIMP CShapefile::SaveAsEx(BSTR newFilename, VARIANT_BOOL stopEditing, VARIANT_BOOL unboundFile, VARIANT_BOOL* retVal)
+STDMETHODIMP CShapefile::SaveAsEx(const BSTR newFilename, const VARIANT_BOOL stopEditing, const VARIANT_BOOL unboundFile, VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	if (unboundFile) {
-		Save(NULL, retVal);
+		Save(nullptr, retVal);
 		return S_OK;
 	}
 
-	SaveAs(newFilename, NULL, retVal);
+	SaveAs(newFilename, nullptr, retVal);
 
 	if (retVal && stopEditing) {
-		StopEditingShapes(VARIANT_FALSE, VARIANT_TRUE, NULL, retVal);
+		StopEditingShapes(VARIANT_FALSE, VARIANT_TRUE, nullptr, retVal);
 	}
 
 	return S_OK;

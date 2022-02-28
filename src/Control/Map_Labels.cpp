@@ -1,12 +1,10 @@
 // The old implementation of labels is stored here.
 // The old properties are redirected to the new implementation where applicable.
 
-#pragma once
 #include "stdafx.h"
-#include "Map.h"
 #include "IndexSearching.h"
-#include "LabelCategory.h"
 #include "Labels.h"
+#include "Map.h"
 #include "Shapefile.h"
 
 // *************************************************************
@@ -21,7 +19,7 @@ long CMapView::GetLineSeparationFactor(void)
 {
 	//gReferenceCounter.WriteReport();
 	// 0 is invalid, since it would result in no adjustments
-    if (_lineSeparationFactor == 0) _lineSeparationFactor = 3;
+	if (_lineSeparationFactor == 0) _lineSeparationFactor = 3;
 	return _lineSeparationFactor;
 }
 
@@ -32,15 +30,15 @@ IWmsLayer* CMapView::GetWmsLayer(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	Layer * layer = GetLayer(LayerHandle);
-	if (!layer) return NULL;
+	Layer* layer = GetLayer(LayerHandle);
+	if (!layer) return nullptr;
 
-	IWmsLayer* wms = NULL;
-	if (layer->QueryWmsLayer(&wms))	{
+	IWmsLayer* wms = nullptr;
+	if (layer->QueryWmsLayer(&wms)) {
 		return wms;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // *************************************************************
@@ -49,16 +47,16 @@ IWmsLayer* CMapView::GetWmsLayer(LONG LayerHandle)
 IOgrLayer* CMapView::GetOgrLayer(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	Layer * layer = GetLayer(LayerHandle);
-	if (!layer) return NULL;
-		
-	IOgrLayer* ogr = NULL;
-	if (layer->QueryOgrLayer(&ogr))	{
+
+	Layer* layer = GetLayer(LayerHandle);
+	if (!layer) return nullptr;
+
+	IOgrLayer* ogr = nullptr;
+	if (layer->QueryOgrLayer(&ogr)) {
 		return ogr;
 	}
-	
-	return NULL;
+
+	return nullptr;
 }
 
 // *************************************************************
@@ -67,16 +65,16 @@ IOgrLayer* CMapView::GetOgrLayer(LONG LayerHandle)
 IShapefile* CMapView::GetShapefile(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	Layer * layer = GetLayer(LayerHandle);
-	if (!layer) return NULL;
 
-	IShapefile* sf = NULL;
+	Layer* layer = GetLayer(LayerHandle);
+	if (!layer) return nullptr;
+
+	IShapefile* sf = nullptr;
 	if (layer->QueryShapefile(&sf)) {
 		return sf;
 	}
-	
-	return NULL;
+
+	return nullptr;
 }
 
 void CMapView::SetShapefile(LONG LayerHandle, IShapefile* pVal)
@@ -92,16 +90,16 @@ IImage* CMapView::GetImage(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	Layer * layer = GetLayer(LayerHandle);
-	if (!layer) return NULL;
+	Layer* layer = GetLayer(LayerHandle);
+	if (!layer) return nullptr;
 
-	IImage* img = NULL;
+	IImage* img = nullptr;
 	if (layer->QueryImage(&img))
 	{
 		return img;
 	}
-	
-	return NULL;
+
+	return nullptr;
 }
 void CMapView::SetImage(LONG LayerHandle, IImage* pVal)
 {
@@ -114,9 +112,9 @@ void CMapView::SetImage(LONG LayerHandle, IImage* pVal)
 // *************************************************************
 ILabels* CMapView::GetLayerLabels(LONG LayerHandle)
 {
-	Layer * layer = GetLayer(LayerHandle);
-	if (!layer) return NULL;
-	
+	Layer* layer = GetLayer(LayerHandle);
+	if (!layer) return nullptr;
+
 	return layer->get_Labels();
 }
 
@@ -140,7 +138,7 @@ BOOL CMapView::GetLayerLabelsVisible(long LayerHandle)
 		VARIANT_BOOL visible;
 		labels->get_Visible(&visible);
 		labels->Release();
-		return visible == VARIANT_TRUE?TRUE:FALSE;
+		return visible == VARIANT_TRUE ? TRUE : FALSE;
 	}
 	else
 		return FALSE;
@@ -154,7 +152,7 @@ void CMapView::SetLayerLabelsVisible(long LayerHandle, BOOL bNewValue)
 	ILabels* labels = GetLayerLabels(LayerHandle);
 	if (labels)
 	{
-		VARIANT_BOOL visible = (bNewValue == TRUE)?VARIANT_TRUE:VARIANT_FALSE;
+		VARIANT_BOOL visible = (bNewValue == TRUE) ? VARIANT_TRUE : VARIANT_FALSE;
 		labels->put_Visible(visible);
 		labels->Release();
 	}
@@ -171,7 +169,7 @@ BOOL CMapView::GetLayerLabelsShadow(long LayerHandle)
 		VARIANT_BOOL visible;
 		labels->get_HaloVisible(&visible);
 		labels->Release();
-		return visible == VARIANT_TRUE?TRUE:FALSE;
+		return visible == VARIANT_TRUE ? TRUE : FALSE;
 	}
 	else
 		return FALSE;
@@ -185,7 +183,7 @@ void CMapView::SetLayerLabelsShadow(long LayerHandle, BOOL newValue)
 	ILabels* labels = GetLayerLabels(LayerHandle);
 	if (labels)
 	{
-		VARIANT_BOOL visible = (newValue == TRUE)?VARIANT_TRUE:VARIANT_FALSE;
+		VARIANT_BOOL visible = (newValue == TRUE) ? VARIANT_TRUE : VARIANT_FALSE;
 		labels->put_HaloVisible(visible);
 		labels->Release();
 	}
@@ -202,7 +200,7 @@ BOOL CMapView::GetLayerLabelsScale(long LayerHandle)
 		VARIANT_BOOL scale;
 		labels->get_ScaleLabels(&scale);
 		labels->Release();
-		return scale == VARIANT_TRUE?TRUE:FALSE;
+		return scale == VARIANT_TRUE ? TRUE : FALSE;
 	}
 	else
 		return FALSE;
@@ -216,7 +214,7 @@ void CMapView::SetLayerLabelsScale(long LayerHandle, BOOL newValue)
 	ILabels* labels = GetLayerLabels(LayerHandle);
 	if (labels)
 	{
-		VARIANT_BOOL scale = (newValue == TRUE)?VARIANT_TRUE:VARIANT_FALSE;
+		VARIANT_BOOL scale = (newValue == TRUE) ? VARIANT_TRUE : VARIANT_FALSE;
 		labels->put_ScaleLabels(scale);
 		labels->Release();
 	}
@@ -288,7 +286,7 @@ void CMapView::SetLayerLabelsShadowColor(long LayerHandle, OLE_COLOR color)
 // **********************************************************
 bool CMapView::GetMultilineLabeling()
 {
-	return _multilineLabeling?true:false;
+	return _multilineLabeling ? true : false;
 }
 
 // **********************************************************
@@ -311,7 +309,7 @@ BOOL CMapView::GetUseLabelCollision(long LayerHandle)
 		VARIANT_BOOL value;
 		labels->get_AvoidCollisions(&value);
 		labels->Release();
-		return (value == VARIANT_TRUE)?TRUE:FALSE;
+		return (value == VARIANT_TRUE) ? TRUE : FALSE;
 	}
 	else
 		return FALSE;
@@ -325,7 +323,7 @@ void CMapView::SetUseLabelCollision(long LayerHandle, BOOL value)
 	ILabels* labels = GetLayerLabels(LayerHandle);
 	if (labels)
 	{
-		VARIANT_BOOL avoid = (value == TRUE)?VARIANT_TRUE:VARIANT_FALSE;
+		VARIANT_BOOL avoid = (value == TRUE) ? VARIANT_TRUE : VARIANT_FALSE;
 		labels->put_AvoidCollisions(avoid);
 		labels->Release();
 	}
@@ -357,15 +355,15 @@ void CMapView::LayerFontEx(long LayerHandle, LPCTSTR FontName, long FontSize, BO
 		CComBSTR name(FontName);
 		labels->put_FontName(name);
 		labels->put_FontSize(FontSize);
-		
-		VARIANT_BOOL bold = (isBold == TRUE)? VARIANT_TRUE: VARIANT_FALSE;
-		VARIANT_BOOL italic = (isItalic == TRUE)? VARIANT_TRUE: VARIANT_FALSE;
-		VARIANT_BOOL underline = (isUnderline == TRUE)? VARIANT_TRUE: VARIANT_FALSE;
+
+		VARIANT_BOOL bold = (isBold == TRUE) ? VARIANT_TRUE : VARIANT_FALSE;
+		VARIANT_BOOL italic = (isItalic == TRUE) ? VARIANT_TRUE : VARIANT_FALSE;
+		VARIANT_BOOL underline = (isUnderline == TRUE) ? VARIANT_TRUE : VARIANT_FALSE;
 
 		labels->put_FontBold(bold);
 		labels->put_FontItalic(italic);
 		labels->put_FontUnderline(underline);
-		
+
 		labels->Release();
 	}
 }
@@ -373,14 +371,14 @@ void CMapView::LayerFontEx(long LayerHandle, LPCTSTR FontName, long FontSize, BO
 // **********************************************************
 //		LabelColor()
 // **********************************************************
-void CMapView::LabelColor(LONG LayerHandle, OLE_COLOR LabelFontColor)
+void CMapView::LabelColor(LONG layerHandle, OLE_COLOR labelFontColor)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	ILabels* labels = GetLayerLabels(LayerHandle);
+	ILabels* labels = GetLayerLabels(layerHandle);
 	if (labels)
 	{
 		USES_CONVERSION;
-		labels->put_FontColor(LabelFontColor);
+		labels->put_FontColor(labelFontColor);
 		labels->Release();
 	}
 }
@@ -388,7 +386,7 @@ void CMapView::LabelColor(LONG LayerHandle, OLE_COLOR LabelFontColor)
 // **********************************************************
 //		GetLayerStandardViewWidth()
 // **********************************************************
-void CMapView::GetLayerStandardViewWidth(long LayerHandle, double * Width)
+void CMapView::GetLayerStandardViewWidth(long LayerHandle, double* Width)
 {
 	ErrorMessage(tkPROPERTY_DEPRECATED);
 	*Width = 0.0;
@@ -463,7 +461,7 @@ void CMapView::ClearDrawingLabelFrames()
 		if (isSkip)
 			continue;
 
-		DrawList * dlist = _allDrawLists[_activeDrawLists[j]];
+		DrawList* dlist = _allDrawLists[_activeDrawLists[j]];
 		if (IS_VALID_PTR(dlist))
 		{
 			CLabels* coLabels = static_cast<CLabels*>(dlist->m_labels);
@@ -480,12 +478,12 @@ void CMapView::ClearLabelFrames()
 	// clear frames for regular labels
 	for (int i = 0; i < (int)_activeLayers.size(); i++)
 	{
-		Layer * l = _allLayers[_activeLayers[i]];
-		if (l != NULL)
+		Layer* l = _allLayers[_activeLayers[i]];
+		if (l != nullptr)
 		{
 			if (l->IsShapefile())
 			{
-				IShapefile * sf = NULL;
+				IShapefile* sf = nullptr;
 				if (l->QueryShapefile(&sf))
 				{
 					((CShapefile*)sf)->ClearChartFrames();
@@ -495,11 +493,11 @@ void CMapView::ClearLabelFrames()
 
 			// labels
 			ILabels* LabelsClass = l->get_Labels();
-			if (LabelsClass == NULL) continue;
+			if (LabelsClass == nullptr) continue;
 
 			CLabels* coLabels = static_cast<CLabels*>(LabelsClass);
 			coLabels->ClearLabelFrames();
-			LabelsClass->Release(); LabelsClass = NULL;
+			LabelsClass->Release(); LabelsClass = nullptr;
 		}
 	}
 }

@@ -141,18 +141,18 @@ void CMapView::SetImageLayerPercentTransparent(long LayerHandle, float newValue)
 //  SetImageLayerColorScheme
 // ***************************************************
 // Will be deprecated
-VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme)
+VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG layerHandle, IDispatch* colorScheme)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (IS_VALID_LAYER(LayerHandle, _allLayers))
+	if (IS_VALID_LAYER(layerHandle, _allLayers))
 	{
 		// redirected to image class for backward compatibility
 		IGridColorScheme* scheme = nullptr;
-		ColorScheme->QueryInterface(IID_IGridColorScheme, (void**)&scheme);
+		colorScheme->QueryInterface(IID_IGridColorScheme, (void**)&scheme);
 		if (scheme)
 		{
-			IImage* img = this->GetImage(LayerHandle);
+			IImage* img = this->GetImage(layerHandle);
 			if (img != nullptr)
 			{
 				img->put_CustomColorScheme(scheme);
@@ -175,7 +175,7 @@ VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* Col
 }
 
 // deprecated
-void CMapView::UpdateImage(LONG LayerHandle)
+void CMapView::UpdateImage(LONG layerHandle)
 {
 	ErrorMessage(tkMETHOD_DEPRECATED);
 }
@@ -183,11 +183,11 @@ void CMapView::UpdateImage(LONG LayerHandle)
 // ***************************************************************
 //		LayerIsEmpty()
 // ***************************************************************
-bool CMapView::LayerIsEmpty(long LayerHandle)
+bool CMapView::LayerIsEmpty(long layerHandle)
 {
-	if (IS_VALID_LAYER(LayerHandle, _allLayers))
+	if (IS_VALID_LAYER(layerHandle, _allLayers))
 	{
-		Layer* l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[layerHandle];
 		if (!l) return true;
 		return l->IsEmpty();
 	}
@@ -197,11 +197,11 @@ bool CMapView::LayerIsEmpty(long LayerHandle)
 // ***************************************************************
 //		AdjustLayerExtents()
 // ***************************************************************
-BOOL CMapView::AdjustLayerExtents(long LayerHandle)
+BOOL CMapView::AdjustLayerExtents(long layerHandle)
 {
-	if (IS_VALID_LAYER(LayerHandle, _allLayers))
+	if (IS_VALID_LAYER(layerHandle, _allLayers))
 	{
-		Layer* l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[layerHandle];
 		if (!l->get_Object()) return FALSE;
 		return l->UpdateExtentsFromDatasource() ? TRUE : FALSE;
 	}
@@ -403,10 +403,10 @@ inline void CMapView::ErrorMessage(long ErrorCode, tkCallbackVerbosity verbosity
 // *************************************************
 //			IsSameProjection()						  
 // *************************************************
-BOOL CMapView::IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b)
+BOOL CMapView::IsSameProjection(LPCTSTR proj4A, LPCTSTR proj4B)
 {
 	ProjectionTools* pt = new ProjectionTools();
-	bool rt = pt->IsSameProjection(proj4_a, proj4_b);
+	bool rt = pt->IsSameProjection(proj4A, proj4B);
 	delete pt;
 
 	return (rt ? TRUE : FALSE);
@@ -415,9 +415,9 @@ BOOL CMapView::IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b)
 // *************************************************
 //			IsTIFFGrid()						  
 // *************************************************
-BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
+BOOL CMapView::IsTIFFGrid(LPCTSTR filename)
 {
-	CComBSTR bstrName(Filename);
+	CComBSTR bstrName(filename);
 	VARIANT_BOOL vb;
 	GetUtils()->IsTiffGrid(bstrName, &vb);
 	return vb ? TRUE : FALSE;

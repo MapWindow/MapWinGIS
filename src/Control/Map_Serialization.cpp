@@ -6,12 +6,12 @@
 // *********************************************************
 //		SaveMapState()
 // *********************************************************
-VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths, VARIANT_BOOL Overwrite)
+VARIANT_BOOL CMapView::SaveMapState(LPCTSTR filename, VARIANT_BOOL RelativePaths, VARIANT_BOOL Overwrite)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
 	USES_CONVERSION;
-	CStringW nameW = A2W(Filename);		// TODO: use Unicode
+	CStringW nameW = A2W(filename);		// TODO: use Unicode
 	if (Utility::FileExistsW(nameW))
 	{
 		if (!Overwrite)
@@ -21,7 +21,7 @@ VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths
 		}
 		else
 		{
-			if( !Utility::RemoveFile(nameW) )
+			if (!Utility::RemoveFile(nameW))
 			{
 				ErrorMessage(tkCANT_DELETE_FILE);
 				return VARIANT_FALSE;
@@ -41,7 +41,7 @@ VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths
 VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
 	try {
 		USES_CONVERSION;
 		CStringW nameW = A2W(Filename);		// TODO: use Unicode
@@ -53,10 +53,10 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 			{
 				Callback->QueryInterface(IID_IStopExecution, (void**)&cb);
 			}
-			
+
 			bool result = DeserializeMapStateCore(root, nameW, VARIANT_TRUE, cb);
 
-			if (cb) 
+			if (cb)
 			{
 				cb->Release();
 			}
@@ -66,7 +66,7 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 			return result ? VARIANT_TRUE : VARIANT_FALSE;
 		}
 	}
-	catch(...) {
+	catch (...) {
 		CallbackHelper::ErrorMsg("Exception during LoadMapState.");
 	}
 	return VARIANT_FALSE;
@@ -75,15 +75,15 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 // ******************************************************************
 //	   DeserializeMapState()
 // ******************************************************************
-VARIANT_BOOL CMapView::DeserializeMapState(LPCTSTR State, VARIANT_BOOL LoadLayers, LPCTSTR BasePath)
+VARIANT_BOOL CMapView::DeserializeMapState(LPCTSTR state, VARIANT_BOOL loadLayers, LPCTSTR basePath)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	VARIANT_BOOL result = VARIANT_FALSE;
-	CPLXMLNode* node = CPLParseXMLString(State);
+	CPLXMLNode* node = CPLParseXMLString(state);
 	if (node)
 	{
 		USES_CONVERSION;
-		result = DeserializeMapStateCore(node, A2W(BasePath), LoadLayers, NULL) ? VARIANT_TRUE : VARIANT_FALSE;		// TODO: use Unicode
+		result = DeserializeMapStateCore(node, A2W(basePath), loadLayers, NULL) ? VARIANT_TRUE : VARIANT_FALSE;		// TODO: use Unicode
 		CPLDestroyXMLNode(node);
 	}
 	return result;
@@ -99,14 +99,14 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 		ErrorMessage(tkINVALID_FILE);
 		return false;
 	}
-	
-	if (_stricmp( node->pszValue, "MapWinGIS") != 0)
+
+	if (_stricmp(node->pszValue, "MapWinGIS") != 0)
 	{
 		// it can be MW4 project file, then MapWinGis should be the first child node
 		CPLXMLNode* nodeChild = node->psChild;
 		while (nodeChild)
 		{
-			if (_stricmp( nodeChild->pszValue, "MapWinGIS") == 0)
+			if (_stricmp(nodeChild->pszValue, "MapWinGIS") == 0)
 			{
 				// we got it
 				node = nodeChild;
@@ -114,15 +114,15 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 			}
 			nodeChild = nodeChild->psNext;
 		}
-		
+
 		// check once again, if it wasn't find - abandon it
-		if (_stricmp( node->pszValue, "MapWinGIS") != 0)
+		if (_stricmp(node->pszValue, "MapWinGIS") != 0)
 		{
 			ErrorMessage(tkINVALID_FILE);
 			return false;
 		}
 	}
-	
+
 	CPLXMLNode* nodeState = CPLGetXMLNode(node, "MapState");
 	CPLXMLNode* nodeLayers = CPLGetXMLNode(node, "Layers");
 	CPLXMLNode* nodeTiles = CPLGetXMLNode(node, "Tiles");
@@ -141,84 +141,84 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	utf8 = s.CompareNoCase(UTF8_ENCODING_MARKER) == 0;
 
 	// control options
-	s = CPLGetXMLValue( nodeState, "BackColor", NULL );
+	s = CPLGetXMLValue(nodeState, "BackColor", NULL);
 	m_backColor = (s != "") ? (OLE_COLOR)atoi(s.GetString()) : RGB(255, 255, 255);
-	
-	s = CPLGetXMLValue( nodeState, "ExtentPad", NULL );
+
+	s = CPLGetXMLValue(nodeState, "ExtentPad", NULL);
 	m_extentPad = (s != "") ? atoi(s) : 0.02;
 
-	s = CPLGetXMLValue( nodeState, "ExtentHistory", NULL );
+	s = CPLGetXMLValue(nodeState, "ExtentHistory", NULL);
 	_extentHistoryCount = (s != "") ? atoi(s) : 20;
 
-	s = CPLGetXMLValue( nodeState, "DoubleBuffer", NULL );
+	s = CPLGetXMLValue(nodeState, "DoubleBuffer", NULL);
 	m_doubleBuffer = (s != "") ? (BOOL)atoi(s) : TRUE;
 
-	s = CPLGetXMLValue( nodeState, "SendMouseMove", NULL );
+	s = CPLGetXMLValue(nodeState, "SendMouseMove", NULL);
 	m_sendMouseMove = (s != "") ? (BOOL)atoi(s) : FALSE;
 
-	s = CPLGetXMLValue( nodeState, "SendMouseDown", NULL );
+	s = CPLGetXMLValue(nodeState, "SendMouseDown", NULL);
 	m_sendMouseDown = (s != "") ? (BOOL)atoi(s) : FALSE;
 
-	s = CPLGetXMLValue( nodeState, "SendMouseUp", NULL );
+	s = CPLGetXMLValue(nodeState, "SendMouseUp", NULL);
 	m_sendMouseUp = (s != "") ? (BOOL)atoi(s) : FALSE;
 
-	s = CPLGetXMLValue( nodeState, "SendSelectBoxDrag", NULL );
+	s = CPLGetXMLValue(nodeState, "SendSelectBoxDrag", NULL);
 	m_sendSelectBoxDrag = (s != "") ? (BOOL)atoi(s) : FALSE;
 
-	s = CPLGetXMLValue( nodeState, "SendSelectBoxFinal", NULL );
+	s = CPLGetXMLValue(nodeState, "SendSelectBoxFinal", NULL);
 	m_sendSelectBoxFinal = (s != "") ? (BOOL)atoi(s) : FALSE;
-	
-	s = CPLGetXMLValue( nodeState, "SendOnDrawBackBuffer", NULL );
+
+	s = CPLGetXMLValue(nodeState, "SendOnDrawBackBuffer", NULL);
 	m_sendOnDrawBackBuffer = (s != "") ? (BOOL)atoi(s) : FALSE;
 
-	s = CPLGetXMLValue( nodeState, "ZoomPercent", NULL );
+	s = CPLGetXMLValue(nodeState, "ZoomPercent", NULL);
 	m_zoomPercent = (s != "") ? (float)Utility::atof_custom(s) : 0.3;
-	
-	m_key = CPLGetXMLValue( nodeState, "Key", NULL );
-	
-	s = CPLGetXMLValue( nodeState, "CursorMode", NULL );
+
+	m_key = CPLGetXMLValue(nodeState, "Key", NULL);
+
+	s = CPLGetXMLValue(nodeState, "CursorMode", NULL);
 	m_cursorMode = (s != "") ? (short)atoi(s) : cmZoomIn;
 
-	s = CPLGetXMLValue( nodeState, "MapCursor", NULL );
+	s = CPLGetXMLValue(nodeState, "MapCursor", NULL);
 	m_mapCursor = (s != "") ? (short)atoi(s) : crsrMapDefault;
 
-	s = CPLGetXMLValue( nodeState, "ResizeBehavior", NULL );
+	s = CPLGetXMLValue(nodeState, "ResizeBehavior", NULL);
 	_mapResizeBehavior = (s != "") ? (tkResizeBehavior)atoi(s) : rbClassic;
 
-	s = CPLGetXMLValue( nodeState, "TrapRightMouseDown", NULL );
+	s = CPLGetXMLValue(nodeState, "TrapRightMouseDown", NULL);
 	_doTrapRMouseDown = (s != "") ? (BOOL)atoi(s) : FALSE;
-	
-	s = CPLGetXMLValue( nodeState, "UseSeamlessPan", NULL );
+
+	s = CPLGetXMLValue(nodeState, "UseSeamlessPan", NULL);
 	_useSeamlessPan = (s != "") ? (BOOL)atoi(s) : FALSE;
-	
-	s = CPLGetXMLValue( nodeState, "MouseWheelSpeed", NULL );
+
+	s = CPLGetXMLValue(nodeState, "MouseWheelSpeed", NULL);
 	_mouseWheelSpeed = (s != "") ? Utility::atof_custom(s) : 0.5;
 
-	s = CPLGetXMLValue( nodeState, "ShapeDrawingMethod", NULL );
+	s = CPLGetXMLValue(nodeState, "ShapeDrawingMethod", NULL);
 	_shapeDrawingMethod = (s != "") ? (tkShapeDrawingMethod)atoi(s) : dmNewSymbology;
 
-	s = CPLGetXMLValue( nodeState, "UnitsOfMeasure", NULL );
+	s = CPLGetXMLValue(nodeState, "UnitsOfMeasure", NULL);
 	_unitsOfMeasure = (s != "") ? (tkUnitsOfMeasure)atoi(s) : umMeters;
 
-	s = CPLGetXMLValue( nodeState, "DisableWaitCursor", NULL );
+	s = CPLGetXMLValue(nodeState, "DisableWaitCursor", NULL);
 	_disableWaitCursor = (s != "") ? (BOOL)atoi(s) : FALSE;
 
-	s = CPLGetXMLValue( nodeState, "RotationAngle", NULL );
+	s = CPLGetXMLValue(nodeState, "RotationAngle", NULL);
 	_rotateAngle = (s != "") ? (float)Utility::atof_custom(s) : 0;
 
-	s = CPLGetXMLValue( nodeState, "CanUseImageGrouping", NULL );
+	s = CPLGetXMLValue(nodeState, "CanUseImageGrouping", NULL);
 	_canUseImageGrouping = (s != "") ? (BOOL)atoi(s) : FALSE;
 
-	s = CPLGetXMLValue( nodeState, "ShowRedrawTime", NULL );
+	s = CPLGetXMLValue(nodeState, "ShowRedrawTime", NULL);
 	_showRedrawTime = (s != "") ? (BOOL)atoi(s) : FALSE;
 
-	s = CPLGetXMLValue( nodeState, "ShowVersionNumber", NULL );
+	s = CPLGetXMLValue(nodeState, "ShowVersionNumber", NULL);
 	_showVersionNumber = (s != "") ? (BOOL)atoi(s) : FALSE;
 
 	s = CPLGetXMLValue(nodeState, "IdentifierMode", NULL);
 	tkIdentifierMode mode = s != "" ? (tkIdentifierMode)atoi(s) : imAllLayers;
 	_identifier->put_IdentifierMode(mode);
-	
+
 	s = CPLGetXMLValue(nodeState, "HotTracking", NULL);
 	VARIANT_BOOL hotTracking = s != "" ? (VARIANT_BOOL)atoi(s) : VARIANT_TRUE;
 	_identifier->put_HotTracking(hotTracking);
@@ -229,7 +229,7 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 
 	CComPtr<IGeoProjection> gp = NULL;
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&gp);
-	s = CPLGetXMLValue( nodeState, "Projection", NULL );
+	s = CPLGetXMLValue(nodeState, "Projection", NULL);
 	if (s.GetLength() > 0)
 	{
 		VARIANT_BOOL vb;
@@ -244,8 +244,8 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 		this->RemoveAllLayers();
 
 		wchar_t* cwd = new wchar_t[4096];
-		_wgetcwd(cwd,4096);
-		
+		_wgetcwd(cwd, 4096);
+
 		ProjectName = Utility::GetFolderFromPath(ProjectName);
 		_wchdir(ProjectName);
 
@@ -254,7 +254,7 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 		{
 			if (_stricmp(nodeLayer->pszValue, "Layer") == 0)
 			{
-				int handle = DeserializeLayerCore( nodeLayer, ProjectName, utf8, callback);
+				int handle = DeserializeLayerCore(nodeLayer, ProjectName, utf8, callback);
 			}
 			nodeLayer = nodeLayer->psNext;
 		}
@@ -264,26 +264,26 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 
 	// restoring tiles settings
 	((CTiles*)_tiles)->DeserializeCore(nodeTiles);
-	
+
 	MeasuringHelper::Deserialize(GetMeasuringBase(), nodeMeasuring);
 
 	MeasuringHelper::Deserialize(GetEditorBase(), nodeEditor);
 
 	// extents
 	Extent extents;
-	s = CPLGetXMLValue( nodeState, "ExtentsLeft", NULL );
+	s = CPLGetXMLValue(nodeState, "ExtentsLeft", NULL);
 	if (s != "") extents.left = Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( nodeState, "ExtentsRight", NULL );
+	s = CPLGetXMLValue(nodeState, "ExtentsRight", NULL);
 	if (s != "") extents.right = Utility::atof_custom(s);
-	
-	s = CPLGetXMLValue( nodeState, "ExtentsBottom", NULL );
+
+	s = CPLGetXMLValue(nodeState, "ExtentsBottom", NULL);
 	if (s != "") extents.bottom = Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( nodeState, "ExtentsTop", NULL );
+	s = CPLGetXMLValue(nodeState, "ExtentsTop", NULL);
 	if (s != "") extents.top = Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( nodeState, "ExtentsPad", NULL );
+	s = CPLGetXMLValue(nodeState, "ExtentsPad", NULL);
 	if (s != "") m_extentPad = Utility::atof_custom(s);
 
 	this->SetExtentsCore(extents);
@@ -294,10 +294,10 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 // ************************************************************
 //		SerializeMapState()
 // ************************************************************
-BSTR CMapView::SerializeMapState(VARIANT_BOOL RelativePaths, LPCTSTR BasePath)
+BSTR CMapView::SerializeMapState(VARIANT_BOOL relativePaths, LPCTSTR basePath)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CPLXMLNode* node = SerializeMapStateCore(RelativePaths, BasePath);
+	CPLXMLNode* node = SerializeMapStateCore(relativePaths, basePath);
 	BSTR bstr;
 	Utility::SerializeAndDestroyXmlTree(node, &bstr);
 	return bstr;
@@ -308,53 +308,53 @@ BSTR CMapView::SerializeMapState(VARIANT_BOOL RelativePaths, LPCTSTR BasePath)
 // ************************************************************
 CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW ProjectName)
 {
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWinGIS");
-	if (psTree) 
+	CPLXMLNode* psTree = CPLCreateXMLNode(NULL, CXT_Element, "MapWinGIS");
+	if (psTree)
 	{
 		Utility::WriteXmlHeaderAttributes(psTree, "MapState");
 
 		// control options
-		CPLXMLNode* psState = CPLCreateXMLNode( NULL, CXT_Element, "MapState");
+		CPLXMLNode* psState = CPLCreateXMLNode(NULL, CXT_Element, "MapState");
 		if (psState)
 		{
-			if (m_backColor != RGB(255, 255, 255)) 
+			if (m_backColor != RGB(255, 255, 255))
 				Utility::CPLCreateXMLAttributeAndValue(psState, "BackColor", CPLString().Printf("%d", m_backColor));
 
-			if (m_extentPad != 0.02) 
+			if (m_extentPad != 0.02)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentPad", CPLString().Printf("%f", m_extentPad));
 
-			if (_extentHistoryCount != 20) 
+			if (_extentHistoryCount != 20)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentHistory", CPLString().Printf("%d", _extentHistoryCount));
-			
-			if (m_doubleBuffer != TRUE) 
+
+			if (m_doubleBuffer != TRUE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "DoubleBuffer", CPLString().Printf("%d", m_doubleBuffer));
 
-			if (m_sendMouseMove != FALSE) 
+			if (m_sendMouseMove != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "SendMouseMove", CPLString().Printf("%d", m_sendMouseMove));
 
-			if (m_sendMouseDown != FALSE) 
+			if (m_sendMouseDown != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "SendMouseDown", CPLString().Printf("%d", m_sendMouseDown));
-			
-			if (m_sendMouseUp != FALSE) 
+
+			if (m_sendMouseUp != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "SendMouseUp", CPLString().Printf("%d", m_sendMouseUp));
 
-			if (m_sendSelectBoxDrag != FALSE) 
+			if (m_sendSelectBoxDrag != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "SendSelectBoxDrag", CPLString().Printf("%d", m_sendSelectBoxDrag));
 
-			if (m_sendSelectBoxFinal != FALSE) 
+			if (m_sendSelectBoxFinal != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "SendSelectBoxFinal", CPLString().Printf("%d", m_sendSelectBoxFinal));
 
-			if (m_sendOnDrawBackBuffer != FALSE) 
+			if (m_sendOnDrawBackBuffer != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "SendOnDrawBackBuffer", CPLString().Printf("%d", m_sendOnDrawBackBuffer));
 
-			if (m_zoomPercent != 0.3) 
+			if (m_zoomPercent != 0.3)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "ZoomPercent", CPLString().Printf("%f", m_zoomPercent));
 
 			if (m_key != "")
 				Utility::CPLCreateXMLAttributeAndValue(psState, "Key", m_key);
-			
+
 			if (m_cursorMode != 0)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "CursorMode", CPLString().Printf("%d",(int)m_cursorMode));
+				Utility::CPLCreateXMLAttributeAndValue(psState, "CursorMode", CPLString().Printf("%d", (int)m_cursorMode));
 
 			if (m_mapCursor != 0)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "MapCursor", CPLString().Printf("%d", (int)m_mapCursor));
@@ -382,7 +382,7 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 
 			if (_rotateAngle != 0.0f)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "RotationAngle", CPLString().Printf("%f", _rotateAngle));
-			
+
 			if (_canUseImageGrouping != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "CanUseImageGrouping", CPLString().Printf("%d", (int)_canUseImageGrouping));
 
@@ -423,15 +423,15 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsBottom", CPLString().Printf("%f", _extents.bottom));
 			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsTop", CPLString().Printf("%f", _extents.top));
 			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsPad", CPLString().Printf("%f", m_extentPad));
-			
+
 			CPLAddXMLChild(psTree, psState);
 
 			// layer options
-			CPLXMLNode* psLayers = CPLCreateXMLNode( NULL, CXT_Element, "Layers");
+			CPLXMLNode* psLayers = CPLCreateXMLNode(NULL, CXT_Element, "Layers");
 			if (psLayers)
 			{
-				for(unsigned int i = 0; i < _activeLayers.size(); i++ )
-				{	
+				for (unsigned int i = 0; i < _activeLayers.size(); i++)
+				{
 					LONG handle = _activeLayers[i];
 
 					if (!this->GetLayerSkipOnSaving(handle))
@@ -439,7 +439,7 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 						// getting relative name
 						CComBSTR layerName;
 						layerName.Attach(this->GetLayerFilename(handle));
-						
+
 						USES_CONVERSION;
 						CStringW layerNameW = OLE2W(layerName);
 						if (RelativePaths)
@@ -449,7 +449,7 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 						CPLXMLNode* node = this->SerializeLayerCore(handle, layerNameW);
 						if (node)
 						{
-							CPLAddXMLChild(psLayers, node);	
+							CPLAddXMLChild(psLayers, node);
 						}
 					}
 				}
@@ -495,11 +495,11 @@ BSTR CMapView::GetMapState()
 // ******************************************************************
 void CMapView::SetMapState(LPCTSTR lpszNewValue)
 {
-	_mapstateMutex.Lock();	
+	_mapstateMutex.Lock();
 	CString s = lpszNewValue;
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	this->DeserializeMapStateCore(node, L"", VARIANT_TRUE, NULL);
 	CPLDestroyXMLNode(node);
-	_mapstateMutex.Unlock();	
+	_mapstateMutex.Unlock();
 }
 #pragma endregion

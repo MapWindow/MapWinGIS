@@ -239,6 +239,7 @@ STDMETHODIMP CShapefile::get_CanUseSpatialIndex(IExtents* pArea, VARIANT_BOOL* p
 
 			USES_CONVERSION;
 			const string baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));		// TODO: use Unicode
+			// const string baseName = GetFileNameFromPath(_shpfileName);
 			if (IndexSearching::LoadSpatialIndex(baseName, false, _spatialIndexNodeCapacity, _spatialIndexID))
 			{
 				_spatialIndexLoaded = true;
@@ -296,7 +297,7 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(const BSTR shapefileName, VARIANT_BO
 
 	try
 	{
-		if (!IndexSearching::CreateSpatialIndex(0.9, _spatialIndexNodeCapacity, (char*)baseName.c_str()))
+		if (!IndexSearching::CreateSpatialIndex(0.9, _spatialIndexNodeCapacity, baseName.c_str()))
 		{
 			ErrorMessage(tkFAILED_TO_BUILD_SPATIAL_INDEX);
 		}
@@ -577,4 +578,3 @@ QTree* CShapefile::GetTempQTree()
 {
 	return _tempTree;
 }
-

@@ -57,22 +57,22 @@ END_PROPPAGEIDS(CMapView)
 IMPLEMENT_OLECREATE_EX(CMapView, "MAPWINGIS.Map.1",
 	0x54f4c2f7, 0xed40, 0x43b7, 0x9d, 0x6f, 0xe4, 0x59, 0x65, 0xdf, 0x7f, 0x95)
 
-// Type library ID and version
-IMPLEMENT_OLETYPELIB(CMapView, _tlid, _wVerMajor, _wVerMinor)
+	// Type library ID and version
+	IMPLEMENT_OLETYPELIB(CMapView, _tlid, _wVerMajor, _wVerMinor)
 
-// Interface IDs
-const IID BASED_CODE IID_DMap =
-		{ 0x1d077739, 0xe866, 0x46a0, { 0xb2, 0x56, 0x8a, 0xec, 0xc0, 0x4f, 0x23, 0x12 } };
+	// Interface IDs
+	const IID BASED_CODE IID_DMap =
+{ 0x1d077739, 0xe866, 0x46a0, { 0xb2, 0x56, 0x8a, 0xec, 0xc0, 0x4f, 0x23, 0x12 } };
 const IID BASED_CODE IID_DMapEvents =
-		{ 0xabea1545, 0x8ab, 0x4d5c, { 0xa5, 0x94, 0xd3, 0x1, 0x72, 0x11, 0xea, 0x95 } };
+{ 0xabea1545, 0x8ab, 0x4d5c, { 0xa5, 0x94, 0xd3, 0x1, 0x72, 0x11, 0xea, 0x95 } };
 
 // Control type information
 static const DWORD BASED_CODE _dwMapOleMisc =
-	OLEMISC_ACTIVATEWHENVISIBLE |
-	OLEMISC_SETCLIENTSITEFIRST |
-	OLEMISC_INSIDEOUT |
-	OLEMISC_CANTLINKINSIDE |
-	OLEMISC_RECOMPOSEONRESIZE;
+OLEMISC_ACTIVATEWHENVISIBLE |
+OLEMISC_SETCLIENTSITEFIRST |
+OLEMISC_INSIDEOUT |
+OLEMISC_CANTLINKINSIDE |
+OLEMISC_RECOMPOSEONRESIZE;
 
 IMPLEMENT_OLECTLTYPE(CMapView, IDS_MAP, _dwMapOleMisc)
 
@@ -137,7 +137,7 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("LayerProjectionIsEmpty", eventidLayerProjectionIsEmpty, FireLayerProjectionIsEmpty, VTS_I4 VTS_PI4)
 	EVENT_CUSTOM_ID("ProjectionMismatch", eventidProjectionMismatch, FireProjectionMismatch, VTS_I4 VTS_PI4 VTS_PI4)
 	EVENT_CUSTOM_ID("LayerReprojected", eventidLayerReprojected, FireLayerReprojected, VTS_I4 VTS_BOOL)
-    EVENT_CUSTOM_ID("LayerAdded", eventidLayerAdded, FireLayerAdded, VTS_I4)
+	EVENT_CUSTOM_ID("LayerAdded", eventidLayerAdded, FireLayerAdded, VTS_I4)
 	EVENT_CUSTOM_ID("LayerRemoved", eventidLayerRemoved, FireLayerRemoved, VTS_I4 VTS_BOOL)
 	EVENT_CUSTOM_ID("BackgroundLoadingStarted", eventidBackgroundLoadingStarted, FireBackgroundLoadingStarted, VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("BackgroundLoadingFinished", eventidBackgroundLoadingFinished, FireBackgroundLoadingFinished, VTS_I4 VTS_I4 VTS_I4 VTS_I4)
@@ -145,13 +145,13 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("OnDrawBackBuffer2", eventidOnDrawBackBuffer2, FireOnDrawBackBuffer2, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("BeforeLayers", eventidBeforeLayers, FireBeforeLayers, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("AfterLayers", eventidAfterLayers, FireAfterLayers, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4)
-    EVENT_CUSTOM_ID("LayerReprojectedIncomplete", eventidLayerReprojectedIncomplete, FireLayerReprojectedIncomplete, VTS_I4 VTS_I4 VTS_I4)
+	EVENT_CUSTOM_ID("LayerReprojectedIncomplete", eventidLayerReprojectedIncomplete, FireLayerReprojectedIncomplete, VTS_I4 VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("BeforeVertexDigitized", eventidBeforeVertexDigitized, FireBeforeVertexDigitized, VTS_PR8 VTS_PR8)
-    EVENT_CUSTOM_ID("SnapPointRequested", eventidSnapPointRequested, FireSnapPointRequested, VTS_R8 VTS_R8 VTS_PR8 VTS_PR8 VTS_PI4 VTS_PI4)
-    EVENT_CUSTOM_ID("SnapPointFound", eventidSnapPointFound, FireSnapPointFound, VTS_R8 VTS_R8 VTS_PR8 VTS_PR8)
+	EVENT_CUSTOM_ID("SnapPointRequested", eventidSnapPointRequested, FireSnapPointRequested, VTS_R8 VTS_R8 VTS_PR8 VTS_PR8 VTS_PI4 VTS_PI4)
+	EVENT_CUSTOM_ID("SnapPointFound", eventidSnapPointFound, FireSnapPointFound, VTS_R8 VTS_R8 VTS_PR8 VTS_PR8)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
-	
+
 	// Is never fired: EVENT_CUSTOM_ID("ShapesIdentified", eventidShapesIdentified, FireShapesIdentified, VTS_DISPATCH VTS_R8 VTS_R8)
 END_EVENT_MAP()
 
@@ -160,8 +160,8 @@ END_EVENT_MAP()
 // ********************************************************************
 //		CMapView() constructor
 // ********************************************************************
-CMapView::CMapView() 
-: _vals("AZ0CY1EX2GV3IT4KR5MP6ON7QL8SJ9UH0WF1DB2"),
+CMapView::CMapView()
+	: _vals("AZ0CY1EX2GV3IT4KR5MP6ON7QL8SJ9UH0WF1DB2"),
 	_valsLen(39), _isSnapshot(false),
 	_brushBlue(NULL),
 	_brushBlack(NULL),
@@ -179,8 +179,8 @@ CMapView::CMapView()
 	_moveBitmap(NULL),
 	_volatileBitmap(NULL)
 {
-    // GDI Plus Startup
-    GdiplusStartup();
+	// GDI Plus Startup
+	GdiplusStartup();
 
 	Startup();
 	SetDefaults();
@@ -198,13 +198,13 @@ CMapView::~CMapView()
 	this->ClearDrawings();
 
 	ReleaseTempObjects();
-	
+
 	this->Shutdown();
 
-    // GDI Plus Shutdown
-    // TileCacheManager::CloseAll is now by GdiplusShutdown,
+	// GDI Plus Shutdown
+	// TileCacheManager::CloseAll is now by GdiplusShutdown,
 	// managed within the reference count
-    GdiplusShutdown();
+	GdiplusShutdown();
 }
 
 // **********************************************************************
@@ -231,7 +231,7 @@ void CMapView::Clear()
 void CMapView::Startup()
 {
 	InitializeIIDs(&IID_DMap, &IID_DMapEvents);
-	
+
 	_brushBlue = new Gdiplus::SolidBrush(Gdiplus::Color::Blue);
 	_brushBlack = new Gdiplus::SolidBrush(Gdiplus::Color::Black);
 	_brushWhite = new Gdiplus::SolidBrush(Gdiplus::Color::White);
@@ -243,14 +243,14 @@ void CMapView::Startup()
 	Utility::InitGdiPlusFont(&_fontCourier, L"Courier New", 9.0f);
 	Utility::InitGdiPlusFont(&_fontArial, L"Arial", 9.0f);
 	_fontCourierSmall = new Gdiplus::Font(L"Courier New", 8.0f);
-	_fontCourierLink = new Gdiplus::Font(L"Courier New", 8.0f); 
+	_fontCourierLink = new Gdiplus::Font(L"Courier New", 8.0f);
 
 	m_mapCursor = crsrMapDefault;
 	_interactiveLayerHandle = -1;			// TODO: remove (currently not used)
 	_panningAnimation = false;
 	_zoombarTargetZoom = -1;
-	_dragging.Move = CPoint(0,0);
-	_dragging.Start = CPoint(0,0);
+	_dragging.Move = CPoint(0, 0);
+	_dragging.Start = CPoint(0, 0);
 	_dragging.Operation = DragNone;
 	_currentZoom = -1;
 	_spacePressed = false;
@@ -292,7 +292,7 @@ void CMapView::Startup()
 	m_drawMutex.Unlock();
 	_mapstateMutex.Unlock();
 	_setmaxstdio(2048);
-	srand (time(NULL));
+	srand(time(NULL));
 
 	_imageGroups = NULL;
 	_hotTracking.Shapefile = NULL;
@@ -314,7 +314,7 @@ void CMapView::Startup()
 	ComHelper::CreateInstance(idShapefile, (IDispatch**)&_identifiedShapefile);
 	ComHelper::CreateInstance(idDrawingRectangle, (IDispatch**)&_focusRectangle);
 	_focusRectangle->put_Visible(VARIANT_TRUE);
-	
+
 	InitProjections();
 
 	// let them all work by default 
@@ -369,7 +369,7 @@ void CMapView::SetDefaults()
 	m_doubleBuffer = TRUE;
 	m_zoomPercent = 0.3;
 	m_cursorMode = tkCursorMode::cmZoomIn;
-	m_backColor = RGB( 255, 255, 255 );
+	m_backColor = RGB(255, 255, 255);
 	m_extentPad = 0.02;
 	_rotateAngle = 0.0f;
 	_canUseImageGrouping = FALSE;
@@ -387,10 +387,10 @@ void CMapView::SetDefaults()
 	_shapeDrawingMethod = dmNewSymbology;
 	_unitsOfMeasure = umMeters;
 	_disableWaitCursor = false;
-	_lineSeparationFactor = 3;		
+	_lineSeparationFactor = 3;
 	_useLabelCollision = false;
 	_showRedrawTime = FALSE;
-	_showVersionNumber = FALSE;	
+	_showVersionNumber = FALSE;
 	_scalebarUnits = tkScalebarUnits::GoogleStyle;
 	_zoomBarVerbosity = tkZoomBarVerbosity::zbvFull;
 	_panningInertia = csFalse;
@@ -405,7 +405,7 @@ void CMapView::SetDefaults()
 	_prevExtentsIndex = 0;
 	_useAlternatePanCursor = FALSE;
 	_recenterMapOnZoom = FALSE;
-    _showCoordinatesBackground = FALSE;
+	_showCoordinatesBackground = FALSE;
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:
@@ -419,7 +419,7 @@ void CMapView::SetDefaults()
 //	ReleaseTempObjects
 // **********************************************************************
 void CMapView::ReleaseTempObjects()
-{	
+{
 	_collisionList.Clear();
 
 	_dragging.CloseShapefile();
@@ -457,10 +457,10 @@ void CMapView::Shutdown()
 	Utility::ClosePointer(&_fontCourierSmall);
 	Utility::ClosePointer(&_fontCourierLink);
 	Utility::ClosePointer(&_fontArial);
-	
+
 	((CTiles*)_tiles)->Stop();
 
-	if( _globalCallback )
+	if (_globalCallback)
 		_globalCallback->Release();
 
 	Utility::ClosePointer(&_bufferBitmap);
@@ -489,7 +489,7 @@ void CMapView::Shutdown()
 
 	if (_geodesicShape)
 		_geodesicShape->Release();
-	
+
 	if (_undoList)
 		_undoList->Release();
 
@@ -518,22 +518,22 @@ int CMapView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (COleControl::OnCreate(lpCreateStruct) == -1)
 		return -1;
-	
-	
 
-	DragAcceptFiles( TRUE );
 
-	CRect rect(0,0,0,0);
-	_ttipCtrl->Create(NULL,WS_CHILD,rect,this,IDC_TTBTN);
+
+	DragAcceptFiles(TRUE);
+
+	CRect rect(0, 0, 0, 0);
+	_ttipCtrl->Create(NULL, WS_CHILD, rect, this, IDC_TTBTN);
 	_ttipCtrl->ShowWindow(FALSE);
 
 	//CTool Tip
-	_ttip.Create(this,TTS_ALWAYSTIP);
+	_ttip.Create(this, TTS_ALWAYSTIP);
 	_ttip.Activate(TRUE);
-	_ttip.AddTool(this,"",rect,IDC_TTBTN);
-	_ttip.SetDelayTime(TTDT_AUTOPOP,0);
-	_ttip.SetDelayTime(TTDT_INITIAL,0);
-	_ttip.SetDelayTime(TTDT_RESHOW,0);
+	_ttip.AddTool(this, "", rect, IDC_TTBTN);
+	_ttip.SetDelayTime(TTDT_AUTOPOP, 0);
+	_ttip.SetDelayTime(TTDT_INITIAL, 0);
+	_ttip.SetDelayTime(TTDT_RESHOW, 0);
 
 	return 0;
 }
@@ -558,7 +558,7 @@ DWORD CMapView::GetPropertyExchangeVersion()
 void CMapView::DoPropExchange(CPropExchange* pPX)
 {
 	ExchangeVersion(pPX, GetPropertyExchangeVersion());		// version should be changed when new properties are added
-	
+
 	GetPropertyExchangeVersion();
 
 	// this will exchange stock properties like BackColor or Enabled: 
@@ -569,58 +569,58 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 	{
 		bool loading = pPX->IsLoading();
 
-		PX_Color( pPX, "BackColor", m_backColor, RGB( 255, 255, 255 ) );
-		PX_Double( pPX, "ExtentPad", m_extentPad, .02 );
-		PX_Short( pPX, "CursorMode", m_cursorMode, 0 );
-		PX_Double( pPX, "ZoomPercent", m_zoomPercent, .3 );
-		PX_Bool( pPX, "SendMouseMove", m_sendMouseMove, FALSE );
-		PX_Bool( pPX, "SendMouseDown", m_sendMouseDown, FALSE );
-		PX_Bool( pPX, "SendMouseUp", m_sendMouseUp, FALSE );
-		PX_Bool( pPX, "SendSelectBoxDrag", m_sendSelectBoxDrag, FALSE );
-		PX_Bool( pPX, "SendSelectBoxFinal", m_sendSelectBoxFinal, FALSE );
-		PX_Long( pPX, "ExtentHistory", _extentHistoryCount, 20 );
-		PX_Bool( pPX, "DoubleBuffer", m_doubleBuffer, TRUE );
-		PX_Bool( pPX, "SendOnDrawBackBuffer", m_sendOnDrawBackBuffer, FALSE);
-		PX_Bool( pPX, "ShowRedrawTime", _showRedrawTime, FALSE);
-		PX_Bool( pPX, "ShowVersionNumber", _showVersionNumber, FALSE);
-		PX_Double( pPX, "MouseWheelSpeed", _mouseWheelSpeed, .5 );
-		PX_Bool( pPX, "UseSeamlessPan", _useSeamlessPan, FALSE );
-		PX_Bool( pPX, "MultilineLabels", _multilineLabeling, FALSE );
-		PX_Bool( pPX, "TrapRMouseDown", _doTrapRMouseDown, TRUE );
-		PX_Bool( pPX, "DisableWaitCursor", _disableWaitCursor, FALSE );	
-		PX_Float( pPX, "MapRotationAngle", _rotateAngle, 0.0 );
-		PX_Bool( pPX, "CanUseImageGrouping", _canUseImageGrouping, FALSE );
-		PX_Bool( pPX, "ScalebarVisible", _scalebarVisible, TRUE );
-		
+		PX_Color(pPX, "BackColor", m_backColor, RGB(255, 255, 255));
+		PX_Double(pPX, "ExtentPad", m_extentPad, .02);
+		PX_Short(pPX, "CursorMode", m_cursorMode, 0);
+		PX_Double(pPX, "ZoomPercent", m_zoomPercent, .3);
+		PX_Bool(pPX, "SendMouseMove", m_sendMouseMove, FALSE);
+		PX_Bool(pPX, "SendMouseDown", m_sendMouseDown, FALSE);
+		PX_Bool(pPX, "SendMouseUp", m_sendMouseUp, FALSE);
+		PX_Bool(pPX, "SendSelectBoxDrag", m_sendSelectBoxDrag, FALSE);
+		PX_Bool(pPX, "SendSelectBoxFinal", m_sendSelectBoxFinal, FALSE);
+		PX_Long(pPX, "ExtentHistory", _extentHistoryCount, 20);
+		PX_Bool(pPX, "DoubleBuffer", m_doubleBuffer, TRUE);
+		PX_Bool(pPX, "SendOnDrawBackBuffer", m_sendOnDrawBackBuffer, FALSE);
+		PX_Bool(pPX, "ShowRedrawTime", _showRedrawTime, FALSE);
+		PX_Bool(pPX, "ShowVersionNumber", _showVersionNumber, FALSE);
+		PX_Double(pPX, "MouseWheelSpeed", _mouseWheelSpeed, .5);
+		PX_Bool(pPX, "UseSeamlessPan", _useSeamlessPan, FALSE);
+		PX_Bool(pPX, "MultilineLabels", _multilineLabeling, FALSE);
+		PX_Bool(pPX, "TrapRMouseDown", _doTrapRMouseDown, TRUE);
+		PX_Bool(pPX, "DisableWaitCursor", _disableWaitCursor, FALSE);
+		PX_Float(pPX, "MapRotationAngle", _rotateAngle, 0.0);
+		PX_Bool(pPX, "CanUseImageGrouping", _canUseImageGrouping, FALSE);
+		PX_Bool(pPX, "ScalebarVisible", _scalebarVisible, TRUE);
+
 		// enumerated constants aren't supported directly so temp buffer will be used
 		// we don't care about the direction of exchange, doing both getting and setting
 		long temp;
 		temp = (long)_mapResizeBehavior;
-		PX_Long( pPX, "MapResizeBehavior", temp, 0 );	//rbClassic
+		PX_Long(pPX, "MapResizeBehavior", temp, 0);	//rbClassic
 		_mapResizeBehavior = (tkResizeBehavior)temp;
 
 		temp = (long)_zoomBehavior;
-		PX_Long( pPX, "ZoomBehavior", temp, 1 );	// zbUseTileLevels
+		PX_Long(pPX, "ZoomBehavior", temp, 1);	// zbUseTileLevels
 		_zoomBehavior = (tkZoomBehavior)temp;
 
 		temp = (long)_scalebarUnits;
-		PX_Long( pPX, "ScalebarUnits", temp, 2 );	//suGoogleStyle
+		PX_Long(pPX, "ScalebarUnits", temp, 2);	//suGoogleStyle
 		_scalebarUnits = (tkScalebarUnits)temp;
 
 		temp = (long)_shapeDrawingMethod;
-		PX_Long( pPX, "ShapeDrawingMethod", temp, 3 );	// dmNewSymbology
+		PX_Long(pPX, "ShapeDrawingMethod", temp, 3);	// dmNewSymbology
 		_shapeDrawingMethod = (tkShapeDrawingMethod)temp;
 
 		temp = (long)_unitsOfMeasure;
-		PX_Long( pPX, "MapUnits", temp, 6 );			//umMeters
+		PX_Long(pPX, "MapUnits", temp, 6);			//umMeters
 		_unitsOfMeasure = (tkUnitsOfMeasure)temp;
 
 		temp = (long)_showCoordinates;
-		PX_Long( pPX, "ShowCoordinates", temp, 1 );			//cdmAuto
+		PX_Long(pPX, "ShowCoordinates", temp, 1);			//cdmAuto
 		_showCoordinates = (tkCoordinatesDisplay)temp;
 
 		temp = (long)GetTileProvider();
-		PX_Long( pPX, "TileProvider", temp, 0 );		// OpenStreetMap
+		PX_Long(pPX, "TileProvider", temp, 0);		// OpenStreetMap
 		SetTileProvider((tkTileProvider)temp);
 
 		tkMapProjection projection;
@@ -635,12 +635,12 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 
 		try
 		{
-			PX_Long( pPX, "Projection", temp, 0 );			// PROJECTION_NONE
+			PX_Long(pPX, "Projection", temp, 0);			// PROJECTION_NONE
 			projection = (tkMapProjection)temp;
 			if (loading) {
 				SetProjection(projection);
 			}
-			
+
 			Extent extents;
 			PX_Double(pPX, "xMin", extents.left, .3);
 			PX_Double(pPX, "xMax", extents.right, .3);
@@ -651,36 +651,36 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 				SetExtentsCore(extents, false);
 			}
 		}
-		catch(...) {
+		catch (...) {
 		}
-		
+
 		if (loading) {
 			this->LockWindow(lmUnlock);
 		}
 
-		PX_Bool( pPX, "ShowZoomBar", _zoombarVisible, TRUE );
-		PX_Bool( pPX, "GrabProjectionFromData", _grabProjectionFromData, TRUE );
+		PX_Bool(pPX, "ShowZoomBar", _zoombarVisible, TRUE);
+		PX_Bool(pPX, "GrabProjectionFromData", _grabProjectionFromData, TRUE);
 
 		temp = (long)_zoomAnimation;
-		PX_Long( pPX, "AnimationOnZooming", temp, 0 );			// csAuto
+		PX_Long(pPX, "AnimationOnZooming", temp, 0);			// csAuto
 		_zoomAnimation = (tkCustomState)temp;
 
 		temp = (long)_panningInertia;
-		PX_Long( pPX, "InertiaOnPanning", temp, 0 );			// csAuto
+		PX_Long(pPX, "InertiaOnPanning", temp, 0);			// csAuto
 		_panningInertia = (tkCustomState)temp;
 
-		PX_Bool( pPX, "ReuseTileBuffer", _reuseTileBuffer, TRUE );
+		PX_Bool(pPX, "ReuseTileBuffer", _reuseTileBuffer, TRUE);
 
 		temp = (long)_zoomBarVerbosity;
-		PX_Long( pPX, "ZoomBarVerbosity", temp, 1 );			// zbvFull
+		PX_Long(pPX, "ZoomBarVerbosity", temp, 1);			// zbvFull
 		_zoomBarVerbosity = (tkZoomBarVerbosity)temp;
 
 		temp = (long)_zoomBoxStyle;
-		PX_Long( pPX, "ZoomBoxStyle", temp, 4 );			// zbsBlue
+		PX_Long(pPX, "ZoomBoxStyle", temp, 4);			// zbsBlue
 		_zoomBoxStyle = (tkZoomBoxStyle)temp;
 
-		PX_Long( pPX, "ZoombarMinZoom", _zoomBarMinZoom, -1 );
-		PX_Long( pPX, "ZoombarMaxZoom", _zoomBarMaxZoom, -1 );
+		PX_Long(pPX, "ZoombarMinZoom", _zoomBarMinZoom, -1);
+		PX_Long(pPX, "ZoombarMaxZoom", _zoomBarMaxZoom, -1);
 
 		temp = (long)_showCoordinatesFormat;
 		PX_Long(pPX, "ShowCoordinatesFormat", temp, 0);			// afDegrees
@@ -690,9 +690,9 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 
 		PX_Bool(pPX, "RecenterMapOnZoom", _recenterMapOnZoom, FALSE);
 
-        PX_Bool(pPX, "ShowCoordinatesBackground", _showCoordinatesBackground, FALSE);
+		PX_Bool(pPX, "ShowCoordinatesBackground", _showCoordinatesBackground, FALSE);
 	}
-	catch(...)
+	catch (...)
 	{
 	}
 }
@@ -741,7 +741,7 @@ BOOL CMapView::PreCreateWindow(CREATESTRUCT& cs)
 // ***************************************************************
 
 /* Gdiplus startup/shutdown. Do it on a per control basis.
-NB: this used to be in CMapViewWinGISApp::Init/ExitInstance. 
+NB: this used to be in CMapViewWinGISApp::Init/ExitInstance.
 These functions are called from DllMain during control registration
 and MSDN says it's not allowed to call GdiplusStartup/Shutdown from DllMain.
 Indeed, on our Win2003 and XP boxes, doing so hangs regsvr32.exe.
@@ -752,24 +752,24 @@ So, I decided on "gdiplus registration per control" strategy:
 3. we protect GdiplusStartup/Shutdown calls by a critical section,
    to avoid multithreaded surprises (albeit multiple threads are, I think, highly unlikely).*/
 
-// IMPORTANT: the behavior is changed on 13 oct 14, startup/shutdown is moved back to
-// App::InitInstaance/App::ExitInstance because of issues with tile cache, which uses
-// GdiPlus::Bitmaps. It's desirable to keep it open even when the last CMapView contol
-// is destructed. Solution described at http://mikevdm.com/BlogEntry/Key/GdiplusShutdown-Hangs-Mysteriously
-// was implemented. Hopefully it will work.
-//
-// FOLLOW-UP: Having startup/shutdown being called in InitInstance/ExitInstance was not 
-// working properly from all development environments, and has been moved back to the CMapView
-// constructor/destructor.  The above-mentioned Tile cache issue is being handled by calling 
-// TileCacheManager::CloseAll() just prior to calling GdiplusShutdown.  This better follows
-// Microsoft's recommendations, and allows for transparent initialization whether or not the 
-// calling environment does it's own statrup and shutdown.  If any individual classes end up 
-// requiring GDI initialization outside of the map initialization, these can be handled on a 
-// case-by-case basis. (jf, 11/27/2019, https://mapwindow.atlassian.net/browse/MWGIS-205)
+   // IMPORTANT: the behavior is changed on 13 oct 14, startup/shutdown is moved back to
+   // App::InitInstaance/App::ExitInstance because of issues with tile cache, which uses
+   // GdiPlus::Bitmaps. It's desirable to keep it open even when the last CMapView contol
+   // is destructed. Solution described at http://mikevdm.com/BlogEntry/Key/GdiplusShutdown-Hangs-Mysteriously
+   // was implemented. Hopefully it will work.
+   //
+   // FOLLOW-UP: Having startup/shutdown being called in InitInstance/ExitInstance was not 
+   // working properly from all development environments, and has been moved back to the CMapView
+   // constructor/destructor.  The above-mentioned Tile cache issue is being handled by calling 
+   // TileCacheManager::CloseAll() just prior to calling GdiplusShutdown.  This better follows
+   // Microsoft's recommendations, and allows for transparent initialization whether or not the 
+   // calling environment does it's own statrup and shutdown.  If any individual classes end up 
+   // requiring GDI initialization outside of the map initialization, these can be handled on a 
+   // case-by-case basis. (jf, 11/27/2019, https://mapwindow.atlassian.net/browse/MWGIS-205)
 
-ULONG_PTR CMapView::ms_gdiplusToken=NULL;
-ULONG_PTR CMapView::ms_gdiplusBGThreadToken=NULL;
-unsigned CMapView::ms_gdiplusCount=0;
+ULONG_PTR CMapView::ms_gdiplusToken = NULL;
+ULONG_PTR CMapView::ms_gdiplusBGThreadToken = NULL;
+unsigned CMapView::ms_gdiplusCount = 0;
 ::CCriticalSection CMapView::ms_gdiplusLock;
 Gdiplus::GdiplusStartupOutput CMapView::ms_gdiplusStartupOutput;
 
@@ -820,7 +820,7 @@ void CMapView::ClearPanningList()
 	if (_panningInertia != csFalse)
 	{
 		_panningLock.Lock();
-		for(int i = 0; i < _panningList.size(); i++)
+		for (int i = 0; i < _panningList.size(); i++)
 		{
 			delete _panningList[i];
 		}
@@ -857,16 +857,16 @@ ActiveShape* CMapView::GetActiveShape()
 // ***************************************************************
 //	GetLayerVisibleAtCurrentScale
 // ***************************************************************
-VARIANT_BOOL CMapView::GetLayerVisibleAtCurrentScale(LONG LayerHandle)
+VARIANT_BOOL CMapView::GetLayerVisibleAtCurrentScale(LONG layerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (!IsValidLayer(LayerHandle)) return VARIANT_FALSE;
-	Layer * l = _allLayers[LayerHandle];
+	if (!IsValidLayer(layerHandle)) return VARIANT_FALSE;
+	Layer* l = _allLayers[layerHandle];
 	if (IS_VALID_PTR(l))
 	{
 		double scale = GetCurrentScale();
 		int zoom = GetCurrentZoom();
-		return l->IsVisible(scale, zoom) ? VARIANT_TRUE: VARIANT_FALSE;
+		return l->IsVisible(scale, zoom) ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 	return VARIANT_FALSE;
 }
@@ -896,7 +896,7 @@ void CMapView::ZoomToEditor()
 				double ratio = 2.0;   // increase the size
 				double w = _extents.Width() * ratio;
 				double h = _extents.Height() * ratio;
-				Extent newExt(x - w/2.0, x + w/2.0, y - h/2.0, y + h / 2.0);
+				Extent newExt(x - w / 2.0, x + w / 2.0, y - h / 2.0, y + h / 2.0);
 				SetExtentsWithPadding(newExt);
 			}
 		}
