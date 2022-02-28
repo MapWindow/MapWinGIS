@@ -53,4 +53,40 @@ public class MapWinGisTests
         sf.Extents.xMax.ShouldBe(109.139842, 0.00001);
         sf.Extents.yMax.ShouldBe(34.457816, 0.00001);
     }
+
+    [WpfFact]
+    public void ShapefileKeyTest()
+    {
+        // AS mentioned at https://mapwindow.discourse.group/t/key-property-of-shape-object-not-work/1250
+
+        using var form = new WinFormsApp1.Form1();
+        form.ShouldNotBeNull();
+
+        // Create shapefile:
+        var sfPolygon = Helpers.CreateTestPolygonShapefile();
+
+        // Set key for shapefile:
+        const string sfKeyValue = "This is my sf key";
+        sfPolygon.Key = sfKeyValue;
+        // Check:
+        sfPolygon.Key.ShouldBe(sfKeyValue);
+
+        // Set key for first shape:
+        const string shpKeyValue = "This is my shp key";
+        sfPolygon.Shape[0].Key = shpKeyValue;
+        // Check:
+        sfPolygon.Shape[0].Key.ShouldBe(shpKeyValue);
+        var shp = sfPolygon.Shape[0];
+        shp.Key.ShouldBe(shpKeyValue);
+
+        // Re-check:
+        sfPolygon.Key.ShouldBe(sfKeyValue);
+
+        // Add shapefile to map and test again:
+        var layerHandle = form.AddShapefileToMap(sfPolygon);
+        // Get sf back:
+        var sf = form.GetShapefileFromLayer(layerHandle);
+        sf.Key.ShouldBe(sfKeyValue);
+        sf.Shape[0].Key.ShouldBe(shpKeyValue);
+    }
 }

@@ -12,9 +12,10 @@ public sealed partial class Form1
 
     public int OpenFile(string fileLocation)
     {
-        if (!File.Exists(fileLocation))
-            throw new FileNotFoundException(fileLocation);
+        if (!File.Exists(fileLocation)) throw new FileNotFoundException(fileLocation);
+
         var layerHandle = axMap1.AddLayerFromFilename(fileLocation, tkFileOpenStrategy.fosAutoDetect, true);
+        if (layerHandle == -1) throw new Exception("Could not add file name to map");
 
         return layerHandle;
     }
@@ -32,5 +33,16 @@ public sealed partial class Form1
     public Shapefile GetShapefileFromLayer(int layerHandle)
     {
         return axMap1.get_Shapefile(layerHandle);
+    }
+
+    public int AddShapefileToMap(IShapefile sf)
+    {
+        // Check:
+        ArgumentNullException.ThrowIfNull(sf);
+
+        var layerHandle = axMap1.AddLayer(sf, true);
+        if (layerHandle == -1) throw new Exception("Could not add shapefile object to map");
+
+        return layerHandle;
     }
 }
