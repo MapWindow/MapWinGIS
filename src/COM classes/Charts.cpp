@@ -1272,11 +1272,11 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 		{
 			CRect* frame = (*data)[i]->chart->frame;
 			tkExtentsRelation relation = GeometryHelper::RelateExtents(box, *frame);
-			if ((SelectMode == INTERSECTION) && (relation != erNone))
+			if ((SelectMode == INTERSECTION) && (relation != tkExtentsRelation::erNone))
 			{
 				results.push_back(i);
 			}
-			else if ((SelectMode == INCLUSION) && ((relation == erInclude) || (relation == erEqual)))
+			else if ((SelectMode == INCLUSION) && ((relation == tkExtentsRelation::erInclude) || (relation == tkExtentsRelation::erEqual)))
 			{
 				results.push_back(i);
 			}

@@ -39,7 +39,7 @@ enum tkSimpleShapeType
     shpMultiPoint = 4,
 };
 
-enum tkExtentsRelation
+enum class tkExtentsRelation
 {
 	erNone = 0,
 	erEqual = 1,
@@ -109,7 +109,7 @@ enum HandleImage
 	asFloatOrInt=2   // int32 or float
 };
 
-enum ShapeValidityCheck
+enum class ShapeValidityCheck
 {
 	NoPoints = 0,
 	NotEnoughPoints = 1,

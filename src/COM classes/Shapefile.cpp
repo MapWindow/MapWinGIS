@@ -357,19 +357,20 @@ STDMETHODIMP CShapefile::put_StopExecution(IStopExecution* stopper)
 
 // ************************************************************
 //		get/put_Key()
+// Unit test: unittest_net6.MapWinGisTests.ShapefileKeyTest
 // ************************************************************
 STDMETHODIMP CShapefile::get_Key(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//USES_CONVERSION;
 	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_Key(BSTR newVal)
+STDMETHODIMP CShapefile::put_Key(const BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		SysFreeString(_key);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	SysFreeString(_key);
 	_key = OLE2BSTR(newVal);
 	return S_OK;
 }

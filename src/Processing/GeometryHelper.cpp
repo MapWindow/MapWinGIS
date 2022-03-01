@@ -178,31 +178,31 @@ tkExtentsRelation GeometryHelper::RelateExtents(IExtents* ext1, IExtents* ext2)
 	   xMax2 < xMin1 || 
 	   yMax2 < yMin1)
 	
-		return erNone;
+		return tkExtentsRelation::erNone;
 
 	else if (xMax1 == xMax2 && 
 			 xMin1 == xMin2 && 
 			 yMin1 == yMin2 && 
 			 yMax1 == yMax2)
 		
-		return erEqual;
+		return tkExtentsRelation::erEqual;
 
 	else if (xMin1 <= xMin2 && 
 			 xMax1 >= xMax2 && 
 			 yMin1 <= yMin2 && 
 			 yMax1 >= yMax2)
 		
-		return erInclude;			// 1 include 2
+		return tkExtentsRelation::erInclude;			// 1 include 2
 
 	else if (xMin1 >= xMin2 && 
 			 xMax1 <= xMax2 && 
 			 yMin1 >= yMin2 && 
 			 yMax1 <= yMax2)
 		
-		return erIsIncluded;		// 2 include 1
+		return tkExtentsRelation::erIsIncluded;		// 2 include 1
     
     else
-		return erIntersection;
+		return tkExtentsRelation::erIntersection;
 }
 
 tkExtentsRelation GeometryHelper::RelateExtents(CRect& r1, CRect& r2)
@@ -212,28 +212,28 @@ tkExtentsRelation GeometryHelper::RelateExtents(CRect& r1, CRect& r2)
 	   r2.right  < r1.left || 
 	   r2.bottom < r1.top)
 	
-		return erNone;
+		return tkExtentsRelation::erNone;
 	
 	else if (r1.EqualRect(r2))
 		
-		return erEqual;
+		return tkExtentsRelation::erEqual;
 
 	else if (r1.left <= r2.left && 
 			 r1.right >= r2.right && 
 			 r1.top <= r2.top  && 
 			 r1.bottom >= r2.bottom)
 		
-		return erInclude;			// 1 include 2
+		return tkExtentsRelation::erInclude;			// 1 include 2
 
 	else if (r1.left >= r2.left && 
 			 r1.right <= r2.right && 
 			 r1.top >= r2.top && 
 			 r1.bottom <= r2.bottom)
 		
-		return erIsIncluded;		// 2 include 1
+		return tkExtentsRelation::erIsIncluded;		// 2 include 1
     
     else
-		return erIntersection;
+		return tkExtentsRelation::erIntersection;
 }
 
 //**************************************************************************

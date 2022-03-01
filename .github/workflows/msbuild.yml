@@ -191,12 +191,6 @@ jobs:
         
     # Build test solution
     - name: setup-msbuild
-      if: ${{matrix.platform == 'Win32' }}
-      uses: microsoft/setup-msbuild@v1.1    
-      with:
-        msbuild-architecture: x86
-    - name: setup-msbuild
-      if: ${{matrix.platform == 'x64' }}
       uses: microsoft/setup-msbuild@v1.1    
       with:
         msbuild-architecture: x64

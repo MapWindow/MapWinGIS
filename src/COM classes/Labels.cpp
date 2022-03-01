@@ -742,12 +742,12 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 				{
 					CRect* frame = lbl->horizontalFrame;
 					tkExtentsRelation relation = GeometryHelper::RelateExtents(box, *frame);
-					if (SelectMode == INTERSECTION && relation != erNone)
+					if (SelectMode == INTERSECTION && relation != tkExtentsRelation::erNone)
 					{
 						indices.push_back(i);
 						parts.push_back(j);
 					}
-					else if (SelectMode == INCLUSION && (relation == erInclude || relation == erEqual))
+					else if (SelectMode == INCLUSION && (relation == tkExtentsRelation::erInclude || relation == tkExtentsRelation::erEqual))
 					{
 						indices.push_back(i);
 						parts.push_back(j);
@@ -760,11 +760,11 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 					//	continue;
 
 					tkExtentsRelation relation = GeometryHelper::RelateExtents(*frame->BoundingBox(), box);
-					if (relation == erNone)
+					if (relation == tkExtentsRelation::erNone)
 					{
 						continue;
 					}
-					else if (relation == erEqual)
+					else if (relation == tkExtentsRelation::erEqual)
 					{
 						// this is good for both modes
 						indices.push_back(i);

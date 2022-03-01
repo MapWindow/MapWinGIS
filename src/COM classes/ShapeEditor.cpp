@@ -1103,7 +1103,7 @@ bool CShapeEditor::Validate(IShape** shp)
 	CString errMsg;
 	if (!((CShape*)(*shp))->ValidateBasics(validityCheck, errMsg))
 	{
-		if (validityCheck == DirectionOfPolyRings) 
+		if (validityCheck == ShapeValidityCheck::DirectionOfPolyRings) 
 		{
 			(*shp)->ReversePointsOrder(0, &vb);
 		}
