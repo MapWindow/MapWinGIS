@@ -33,9 +33,9 @@ internal static class Helpers
     #endregion
 
     #region shapefile
-    internal static MapWinGIS.Shapefile MakeShapefile(ShpfileType sfType)
+    internal static Shapefile MakeShapefile(ShpfileType sfType)
     {
-        var sf = new MapWinGIS.Shapefile();
+        var sf = new Shapefile();
         sf.ShouldNotBeNull("Could not initialize Shapefile object");
         var retVal = sf.CreateNewWithShapeID("", sfType);
         retVal.ShouldBeTrue("sf.CreateNewWithShapeID() failed");
@@ -43,7 +43,7 @@ internal static class Helpers
         return sf;
     }
 
-    internal static string SaveSfToTempFile(MapWinGIS.Shapefile sf, string filenamePart)
+    internal static string SaveSfToTempFile(Shapefile sf, string filenamePart)
     {
         var baseFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
         var fileName = Path.ChangeExtension($"{baseFileName}{filenamePart}", ".shp");
@@ -55,7 +55,7 @@ internal static class Helpers
         return fileName;
     }
 
-    internal static void SaveSf(MapWinGIS.Shapefile sf, string fileLocation)
+    internal static void SaveSf(Shapefile sf, string fileLocation)
     {
         sf.ShouldNotBeNull("sf is null");
         var retVal = sf.SaveAsEx(fileLocation, true, false);
@@ -63,29 +63,29 @@ internal static class Helpers
         sf.EditingShapes.ShouldBeFalse("sf is still in edit mode. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
     }
 
-    internal static MapWinGIS.Shapefile OpenShapefile(string fileLocation)
+    internal static Shapefile OpenShapefile(string fileLocation)
     {
         File.Exists(fileLocation).ShouldBeTrue("Could not find shapefile to open");
 
-        var sf = new MapWinGIS.Shapefile();
+        var sf = new Shapefile();
         var retVal = sf.Open(fileLocation);
         retVal.ShouldBeTrue("sf.Open failed");
         return sf;
     }
 
-    internal static MapWinGIS.Shapefile LoadSfUsingFileManager(string filename)
+    internal static Shapefile LoadSfUsingFileManager(string filename)
     {
         File.Exists(filename).ShouldBeTrue("Input file does not exist: " + filename);
 
         var fm = new FileManager();
         var obj = fm.Open(filename);
         fm.LastOpenIsSuccess.ShouldBeTrue(fm.ErrorMsg[fm.LastErrorCode]);
-        var sf = obj as MapWinGIS.Shapefile;
+        var sf = obj as Shapefile;
         sf.ShouldNotBeNull("Loaded object is not an shapefile");
         return sf;
     }
 
-    internal static MapWinGIS.Shapefile CreateTestPolygonShapefile()
+    internal static Shapefile CreateTestPolygonShapefile()
     {
         var sfPolygon = MakeShapefile(ShpfileType.SHP_POLYGON);
         // Add shape to shapefile:
@@ -97,6 +97,35 @@ internal static class Helpers
         sfPolygon.GeoProjection = MakeProjection(28992);
 
         return sfPolygon;
+    }
+
+    internal static Shapefile CreateRandomPointShapefile(int numPoints)
+    {
+        // Create pre-defined shapefile for extent:
+        var sfPolygon = CreateTestPolygonShapefile();
+        var extents = sfPolygon.Extents;
+        extents.ShouldNotBeNull();
+
+        // Create shapefile:
+        var sfPoint = MakeShapefile(ShpfileType.SHP_POINT);
+
+        // Create some random points:
+        var random = new Random();
+        var width = extents.xMax - extents.xMin;
+        var height = extents.yMax - extents.yMin;
+
+        for (var i = 0; i < numPoints; i++)
+        {
+            var x = extents.xMin + width * random.NextDouble();
+            var y = extents.yMin + height * random.NextDouble();
+            Helpers.AddPointShape(sfPoint, x, y);
+        }
+
+        // Checks:
+        sfPoint.ShapefileType.ShouldBe(ShpfileType.SHP_POINT);
+        sfPoint.NumShapes.ShouldBe(numPoints);
+
+        return sfPoint;
     }
     #endregion
 
@@ -111,7 +140,7 @@ internal static class Helpers
         return shp;
     }
 
-    internal static void AddShape(MapWinGIS.Shapefile sf, string wktSting)
+    internal static void AddShape(Shapefile sf, string wktSting)
     {
         // Create shape
         var shp = new Shape();
@@ -127,7 +156,7 @@ internal static class Helpers
         shp.ShapeType.ShouldBe(sf.ShapefileType);
     }
 
-    internal static int AddPointShape(MapWinGIS.Shapefile sf, double x, double y)
+    internal static int AddPointShape(Shapefile sf, double x, double y)
     {
         // Add shape:
         var shp = MakeShape(ShpfileType.SHP_POINT);

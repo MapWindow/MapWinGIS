@@ -1,32 +1,101 @@
 ﻿namespace MapWinGisTests.UnitTests;
 public class ShapeTests
 {
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeNumPointsTest() { }
+    private readonly ITestOutputHelper _testOutputHelper;
+    private readonly Shape _firstShapePoint;
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeNumPartsTest() { }
+    private readonly Extents _sfPointExtents;
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeShapeTypeTest() { }
+    //private readonly Shape _firstShapePointZ;
+    //private readonly Shape _firstShapePointM;
+    //private readonly Shape _firstShapeMultiPoint;
+    //private readonly Shape _firstShapePolyline;
+    // etc
+    public ShapeTests(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+        var sfPoint = Helpers.CreateRandomPointShapefile(50);
+        _sfPointExtents = sfPoint.Extents;
+        _firstShapePoint = sfPoint.Shape[0];
+    }
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapePointTest() { }
+    [Fact]
+    public void ShapeNumPointsTest()
+    {
+        // Point shape
+        _firstShapePoint.numPoints.ShouldBe(1);
+    }
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapePartTest() { }
+    [Fact]
+    public void ShapeNumPartsTest()
+    {
+        // Point shape
+        _firstShapePoint.NumParts.ShouldBe(0);
+    }
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeLastErrorCodeTest() { }
+    [Fact]
+    public void ShapeShapeTypeTest()
+    {
+        // Point shape
+        _firstShapePoint.ShapeType.ShouldBe(ShpfileType.SHP_POINT);
+        // TODO: Check other shapefile types as well
+    }
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeErrorMsgTest() { }
+    [Fact]
+    public void ShapePointTest()
+    {
+        // Point shape
+        _firstShapePoint.Point[0].ShouldNotBeNull();
+        _firstShapePoint.Point[0].x.ShouldBeInRange(_sfPointExtents.xMin, _sfPointExtents.xMax);
+        _firstShapePoint.Point[0].y.ShouldBeInRange(_sfPointExtents.yMin, _sfPointExtents.yMax);
+    }
+
+    [Fact]
+    public void ShapePartTest()
+    {
+        // Point shape
+        _firstShapePoint.Part[0].ShouldBe(-1);
+    }
+
+    [Fact]
+    public void ShapeLastErrorCodeTest()
+    {
+        // Point shape
+        _firstShapePoint.LastErrorCode.ShouldBe(0);
+        // Trigger an error:
+        _firstShapePoint.Part[0].ShouldBe(-1);
+        _firstShapePoint.LastErrorCode.ShouldBe(1);
+    }
+
+    [Fact]
+    public void ShapeErrorMsgTest()
+    {
+        var errorCodes = new Dictionary<int, string>
+        {
+            [-1] = "Invalid Error Code",
+            [0] = "No Error",
+            [1] = "Index Out of Bounds",
+            [2] = "Parameter was NULL",
+            [22]= "The property you called is not implemented",
+            [201] = "Unsupported Shapefile Type"
+        };
+
+        foreach (var (key, value) in errorCodes)
+        {
+            _firstShapePoint.ErrorMsg[key].ShouldBe(value);
+        }
+    }
+    
+    [Fact]
+    public void ShapeKeyTest()
+    {
+        const string keyString = "This is my key";
+        _firstShapePoint.Key = keyString;
+        _firstShapePoint.Key.ShouldBe(keyString);
+    }
 
     [Fact(Skip = "Unit test is not yet implemented")]
     public void ShapeGlobalCallbackTest() { }
-
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeKeyTest() { }
 
     [Fact(Skip = "Unit test is not yet implemented")]
     public void ShapeExtentsTest() { }
@@ -47,7 +116,7 @@ public class ShapeTests
     public void ShapeIsValidTest() { }
 
     [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeXYTest() { }
+    public void ShapeXyTest() { }
 
     [Fact(Skip = "Unit test is not yet implemented")]
     public void ShapePartIsClockWiseTest() { }
@@ -74,7 +143,7 @@ public class ShapeTests
     public void ShapeIsEmptyTest() { }
 
     [Fact(Skip = "Unit test is not yet implemented")]
-    public void Shapeput_ZTest() { }
+    public void ShapePut_ZTest() { }
 
     [Fact(Skip = "Unit test is not yet implemented")]
     public void ShapeMTest() { }
@@ -218,7 +287,5 @@ public class ShapeTests
     public void ShapeClosestPointsTest() { }
 
     [Fact(Skip = "Unit test is not yet implemented")]
-    public void Shapeput_MTest() { }
-
-
+    public void ShapePut_MTest() { }
 }
