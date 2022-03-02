@@ -15,7 +15,7 @@
 5001- = UserDefined
 */
 
-const char * ErrorMsg( long ErrorCode );
+const char* ErrorMsg(long errorCode);
 
 // 0 = tkNO_ERROR
 # define tkNO_ERROR 0

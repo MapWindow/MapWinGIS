@@ -609,7 +609,7 @@ STDMETHODIMP CShape::get_PartAsShape(const long partIndex, IShape** retval)
 		return S_OK;
 	}
 
-	IShape* shp = nullptr;
+	IShape* shp;
 	ComHelper::CreateShape(&shp);
 
 	const ShpfileType shptype = _shp->get_ShapeType();
@@ -620,8 +620,8 @@ STDMETHODIMP CShape::get_PartAsShape(const long partIndex, IShape** retval)
 	shp->InsertPart(0, &part, &vbretval);
 
 	long cnt = 0;
-	IPoint* pntOld = nullptr;
-	IPoint* pntNew = nullptr;
+	IPoint* pntOld;
+	IPoint* pntNew;
 	for (int i = begPart; i <= endPart; i++)
 	{
 		this->get_Point(i, &pntOld);
