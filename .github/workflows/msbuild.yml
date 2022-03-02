@@ -37,8 +37,16 @@ jobs:
       with:
         submodules: true
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.1   
+      if: ${{matrix.platform == 'x64' }}
+      with:
+        msbuild-architecture: x64
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.1 
+      if: ${{matrix.platform == 'Win32' }}
+      with:
+        msbuild-architecture: x86
 
     # VCPCK install fails when a folder names Control exists, so rename it first:
     - name: Rename Control folder
@@ -151,10 +159,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.x'
-
-    - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1
-      
+     
     - name: Download MapWinGIS (${{matrix.platform}}) binaries
       uses: actions/download-artifact@v2
       with:
@@ -191,9 +196,15 @@ jobs:
         
     # Build test solution
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1    
+      uses: microsoft/setup-msbuild@v1.1   
+      if: ${{matrix.platform == 'x64' }}
       with:
         msbuild-architecture: x64
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.1 
+      if: ${{matrix.platform == 'Win32' }}
+      with:
+        msbuild-architecture: x86
         
     - name: Build test solution ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
