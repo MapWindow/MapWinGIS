@@ -1,6 +1,6 @@
-namespace unittest_net6;
+namespace MapWinGisTests;
 
-public class MapWinGisTests
+public class AxMapTests
 {
     [WpfFact]
     public void VersionTest()

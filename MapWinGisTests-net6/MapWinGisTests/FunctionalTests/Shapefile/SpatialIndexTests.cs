@@ -1,4 +1,4 @@
-﻿namespace unittest_net6.Shapefile;
+﻿namespace MapWinGisTests.FunctionalTests.Shapefile;
 public class SpatialIndexTests
 {
     private readonly ITestOutputHelper _testOutputHelper;

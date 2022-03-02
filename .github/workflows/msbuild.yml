@@ -16,7 +16,7 @@ env:
   # Path to the solution files relative to the root of the project.
   SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs.sln
   MAPWINGIS_SOLUTION_FILE_PATH: ./src/MapWinGIS.sln
-  UNITTESTS_SOLUTION_FILE_PATH: ./unittest-net6/unittest-net6.sln
+  UNITTESTS_SOLUTION_FILE_PATH: ./MapWinGisTests-net6/MapWinGisTests-net6.sln
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\src\vcpkg_installed\
 
   # Configuration type to build.
@@ -218,10 +218,10 @@ jobs:
       uses: darenm/Setup-VSTest@v1  
     - name: Unit Testing x86
       if: ${{matrix.platform == 'Win32' }}
-      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x86 -e:PROJ_LIB="${{ github.workspace }}\src\bin\Release\Win32\proj7\share\" .\unittest-net6\UnitTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
+      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x86 -e:PROJ_LIB="${{ github.workspace }}\src\bin\Release\Win32\proj7\share\" .\MapWinGisTests-net6\MapWinGisTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\MapWinGisTests.dll
     - name: Unit Testing x64
       if: ${{matrix.platform == 'x64' }}
-      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x64 -e:PROJ_LIB="${{ github.workspace }}\src\bin\Release\x64\proj7\share\" .\unittest-net6\UnitTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\unittest-net6.dll
+      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x64 -e:PROJ_LIB="${{ github.workspace }}\src\bin\Release\x64\proj7\share\" .\MapWinGisTests-net6\MapWinGisTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\MapWinGisTests.dll
      
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      

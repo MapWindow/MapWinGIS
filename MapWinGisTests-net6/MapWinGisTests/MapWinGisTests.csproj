@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0-windows8.0</TargetFramework>
-		<RootNamespace>unittest_net6</RootNamespace>
+		<RootNamespace>MapWinGisTests</RootNamespace>
 		<Nullable>enable</Nullable>
 
 		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>

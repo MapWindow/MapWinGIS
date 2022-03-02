@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace unittest_net6.Projections;
+namespace MapWinGisTests.FunctionalTests.Projections;
 
 public class GeoProjectionsTests
 {

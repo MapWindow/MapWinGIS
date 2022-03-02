@@ -1,4 +1,4 @@
-﻿namespace unittest_net6;
+﻿namespace MapWinGisTests.FunctionalTests;
 
 public class GlobalSettingsTests
 {

@@ -1,4 +1,4 @@
-﻿namespace unittest_net6.GdalUtils;
+﻿namespace MapWinGisTests.FunctionalTests.GdalUtils;
 public class GdalUtilsTests
 {
     private readonly ITestOutputHelper _testOutputHelper;

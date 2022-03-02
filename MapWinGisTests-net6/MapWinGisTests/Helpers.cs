@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace unittest_net6;
+namespace MapWinGisTests;
 
 internal static class Helpers
 {
@@ -127,16 +127,17 @@ internal static class Helpers
         shp.ShapeType.ShouldBe(sf.ShapefileType);
     }
 
-    internal static Shape AddPointShape(MapWinGIS.Shapefile sf, double x, double y)
+    internal static int AddPointShape(MapWinGIS.Shapefile sf, double x, double y)
     {
         // Add shape:
         var shp = MakeShape(ShpfileType.SHP_POINT);
+        shp.ShouldNotBeNull("shape is null");
         // Add point:
         var pointIndex = shp.AddPoint(x, y);
         pointIndex.ShouldBe(0, "Invaldid point index");
         var shapeIndex = sf.EditAddShape(shp);
         shapeIndex.ShouldNotBe(-1, "EditAddShape failed");
-        return shp;
+        return shapeIndex;
     }
     #endregion
 
@@ -204,5 +205,14 @@ internal static class Helpers
         {
             File.Exists(shxFileLocation).ShouldBeFalse("The .shx file still exists");
         }
+    }
+
+    public static string ReplaceFirstOccurrence (this string source, string find, string replace)
+    {
+        var place = source.IndexOf(find, StringComparison.Ordinal);
+        if (place < 0) return source;
+
+        var result = source.Remove(place, find.Length).Insert(place, replace);
+        return result;
     }
 }
