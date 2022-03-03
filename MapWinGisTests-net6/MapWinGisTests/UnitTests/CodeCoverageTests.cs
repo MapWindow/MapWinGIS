@@ -13,16 +13,22 @@ public class CodeCoverageTests
     [Fact(Skip = "Unit test is not yet implemented")]
     public void CheckShapefileClass()
     {
-        CheckTests(typeof(ShapefileClass), "Shapefile", false);
+        CheckTests(typeof(ShapefileClass), "Shapefile");
     }
 
     [Fact]
     public void CheckShapeClass()
     {
-        CheckTests(typeof(ShapeClass), "Shape", false);
+        CheckTests(typeof(ShapeClass), "Shape");
+    }    
+    
+    [Fact]
+    public void CheckGlobalSettingsClass()
+    {
+        CheckTests(typeof(GlobalSettingsClass), "GlobalSettings");
     }
 
-    private void CheckTests(Type myType, string className, bool scaffoldUnitTests)
+    private void CheckTests(Type myType, string className, bool scaffoldUnitTests = false)
     {
         var names = new List<string>();
         var missingTests = 0;
@@ -62,8 +68,9 @@ public class CodeCoverageTests
         {
             if (scaffoldUnitTests)
             {
-                _testOutputHelper.WriteLine("[Fact(Skip=\"Unit test is not yet implemented\")]");
-                _testOutputHelper.WriteLine($"public void {className}{name}Test() {{}}\n");
+                //_testOutputHelper.WriteLine("[Fact(Skip=\"Unit test is not yet implemented\")]");
+                _testOutputHelper.WriteLine("[Fact]");
+                _testOutputHelper.WriteLine($"public void {className}{name}Test() {{\nvar value = _gs.{name};\n_testOutputHelper.WriteLine(value.ToString());\n}}\n");
             }
             else
             {
