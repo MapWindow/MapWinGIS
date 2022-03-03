@@ -13,7 +13,7 @@ public class GlobalSettingsTests
     public void GdalDataPathTest()
     {
         var gs = new GlobalSettings();
-        gs.ShouldNotBeNull();
+        gs.ShouldNotBeNull("GlobalSettings is null");
         var gdalDataPath = gs.GdalDataPath;
         _testOutputHelper.WriteLine(gdalDataPath);
         gdalDataPath.ShouldNotBeNullOrEmpty("GdalDataPath is not set");
@@ -24,7 +24,7 @@ public class GlobalSettingsTests
     public void GdalPluginPathTest()
     {
         var gs = new GlobalSettings();
-        gs.ShouldNotBeNull();
+        gs.ShouldNotBeNull("GlobalSettings is null");
         var gdalPluginPath = gs.GdalPluginPath;
         _testOutputHelper.WriteLine(gdalPluginPath);
         gdalPluginPath.ShouldNotBeNullOrEmpty("GdalPluginPath is not set");

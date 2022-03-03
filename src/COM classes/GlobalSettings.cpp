@@ -1,13 +1,13 @@
 /**************************************************************************************
  * File name: GlobalSettings.cpp
  *
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  * Description: Implementation of CGlobalSettings
  *
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -18,21 +18,20 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
- 
-#include "stdafx.h"
+
+#include "StdAfx.h"
 #include "GlobalSettings.h"
 #include "BingMapProvider.h"
-#include "HttpProxyHelper.h"
 
-// ****************************************************
-//	    get_MinPolygonArea()
-// ****************************************************
+ // ****************************************************
+ //	    get_MinPolygonArea()
+ // ****************************************************
 STDMETHODIMP CGlobalSettings::get_MinPolygonArea(double* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = m_globalSettings.minPolygonArea;
 	return S_OK;
 }
@@ -40,9 +39,9 @@ STDMETHODIMP CGlobalSettings::get_MinPolygonArea(double* retVal)
 // ****************************************************
 //	    put_MinPolygonArea()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::put_MinPolygonArea(double newVal)
+STDMETHODIMP CGlobalSettings::put_MinPolygonArea(const double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.minPolygonArea = newVal;
 	return S_OK;
 }
@@ -52,7 +51,7 @@ STDMETHODIMP CGlobalSettings::put_MinPolygonArea(double newVal)
 // ****************************************************
 STDMETHODIMP CGlobalSettings::get_MinAreaToPerimeterRatio(double* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = m_globalSettings.minAreaToPerimeterRatio;
 	return S_OK;
 }
@@ -60,9 +59,9 @@ STDMETHODIMP CGlobalSettings::get_MinAreaToPerimeterRatio(double* retVal)
 // ****************************************************
 //	    put_MinAreaToPerimeterRatio()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::put_MinAreaToPerimeterRatio(double newVal)
+STDMETHODIMP CGlobalSettings::put_MinAreaToPerimeterRatio(const double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.minAreaToPerimeterRatio = newVal;
 	return S_OK;
 }
@@ -80,7 +79,7 @@ STDMETHODIMP CGlobalSettings::get_ClipperGcsMultiplicationFactor(DOUBLE* pVal)
 // ****************************************************
 //	    put_ClipperGcsMultiplicationFactor()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::put_ClipperGcsMultiplicationFactor(DOUBLE newVal)
+STDMETHODIMP CGlobalSettings::put_ClipperGcsMultiplicationFactor(const DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.clipperGcsMultiplicationFactor = newVal;
@@ -110,10 +109,10 @@ STDMETHODIMP CGlobalSettings::get_ShapefileFastMode(VARIANT_BOOL* pVal)
 // ****************************************************
 //	    put_ShapefileFastMode()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::put_ShapefileFastMode(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_ShapefileFastMode(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.shapefileFastMode = newVal == VARIANT_FALSE ? false: true;
+	m_globalSettings.shapefileFastMode = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -127,10 +126,10 @@ STDMETHODIMP CGlobalSettings::get_ZoomToFirstLayer(VARIANT_BOOL* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_ZoomToFirstLayer(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_ZoomToFirstLayer(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.zoomToFirstLayer = newVal == VARIANT_FALSE ? false: true;
+	m_globalSettings.zoomToFirstLayer = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -144,7 +143,7 @@ STDMETHODIMP CGlobalSettings::get_LabelsCollisionMode(tkCollisionMode* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_LabelsCollisionMode(tkCollisionMode newVal)
+STDMETHODIMP CGlobalSettings::put_LabelsCollisionMode(const tkCollisionMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.labelsCollisionMode = newVal;
@@ -165,7 +164,7 @@ STDMETHODIMP CGlobalSettings::get_InvalidShapesBufferDistance(DOUBLE* pVal)
 // ****************************************************
 //	    put_InvalidShapesBufferDistance()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::put_InvalidShapesBufferDistance(DOUBLE newVal)
+STDMETHODIMP CGlobalSettings::put_InvalidShapesBufferDistance(const DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.invalidShapesBufferDistance = newVal;
@@ -185,10 +184,10 @@ STDMETHODIMP CGlobalSettings::get_ShapefileFastUnion(VARIANT_BOOL* pVal)
 // ****************************************************
 //	    put_ShapefileFastUnion()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::put_ShapefileFastUnion(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_ShapefileFastUnion(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.shapefileFastUnion = newVal?true:false;
+	m_globalSettings.shapefileFastUnion = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -200,9 +199,10 @@ STDMETHODIMP CGlobalSettings::get_GdalLastErrorNo(tkGdalError* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	int err = CPLGetLastErrorNo();
-	if (err < 0 || err >= (int)GdalErrorUndefined)
-		err = (int)GdalErrorUndefined;
-	*pVal = (tkGdalError)err;
+	if (err < 0 || err >= static_cast<int>(GdalErrorUndefined))
+		err = static_cast<int>(GdalErrorUndefined);
+
+	*pVal = static_cast<tkGdalError>(err);
 	return S_OK;
 }
 
@@ -213,9 +213,10 @@ STDMETHODIMP CGlobalSettings::get_GdalLastErrorType(tkGdalErrorType* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	int err = CPLGetLastErrorType();
-	if (err < 0 || err >= (int)GdalUndefined)
-		err = (int)GdalUndefined;
-	*pVal = (tkGdalErrorType)err;
+	if (err < 0 || err >= static_cast<int>(GdalUndefined))
+		err = static_cast<int>(GdalUndefined);
+
+	*pVal = static_cast<tkGdalErrorType>(err);
 	return S_OK;
 }
 
@@ -225,7 +226,7 @@ STDMETHODIMP CGlobalSettings::get_GdalLastErrorType(tkGdalErrorType* pVal)
 STDMETHODIMP CGlobalSettings::get_GdalLastErrorMsg(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CString s = CPLGetLastErrorMsg();
+	const CString s = CPLGetLastErrorMsg();
 	*pVal = A2BSTR(s);
 	return S_OK;
 }
@@ -243,7 +244,7 @@ STDMETHODIMP CGlobalSettings::get_GdalReprojectionErrorMsg(BSTR* pVal)
 // ****************************************************
 //	    ResetGdalError()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::ResetGdalError(void)
+STDMETHODIMP CGlobalSettings::ResetGdalError()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CPLErrorReset();
@@ -267,7 +268,7 @@ STDMETHODIMP CGlobalSettings::get_LabelsCompositingQuality(tkCompositingQuality*
 // ****************************************************
 //	    put_CompositingQuality()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::put_LabelsCompositingQuality(tkCompositingQuality newVal)
+STDMETHODIMP CGlobalSettings::put_LabelsCompositingQuality(const tkCompositingQuality newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (newVal >= 0 && newVal <= AssumeLinear)
@@ -284,7 +285,7 @@ STDMETHODIMP CGlobalSettings::get_LabelsSmoothingMode(tkSmoothingMode* pVal)
 	*pVal = m_globalSettings.labelsSmoothingMode;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_LabelsSmoothingMode(tkSmoothingMode newVal)
+STDMETHODIMP CGlobalSettings::put_LabelsSmoothingMode(const tkSmoothingMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (newVal >= 0 && newVal <= AntiAlias)
@@ -296,18 +297,16 @@ STDMETHODIMP CGlobalSettings::put_LabelsSmoothingMode(tkSmoothingMode newVal)
 // ****************************************************
 //	    LocalizedString()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::put_LocalizedString(tkLocalizedStrings unit, BSTR localizedString)
+STDMETHODIMP CGlobalSettings::put_LocalizedString(const tkLocalizedStrings unit, BSTR localizedString)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
 	m_globalSettings.shortUnitStrings[unit] = OLE2W(localizedString);
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::get_LocalizedString(tkLocalizedStrings unit, BSTR* retVal)
+STDMETHODIMP CGlobalSettings::get_LocalizedString(const tkLocalizedStrings unit, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CStringW s = m_globalSettings.GetLocalizedString(unit);
-	USES_CONVERSION;
+	const CStringW s = m_globalSettings.GetLocalizedString(unit);
 	*retVal = W2BSTR(s);
 	return S_OK;
 }
@@ -321,7 +320,7 @@ STDMETHODIMP CGlobalSettings::get_GridProxyFormat(tkGridProxyFormat* pVal)
 	*pVal = m_globalSettings.gridProxyFormat;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_GridProxyFormat(tkGridProxyFormat newVal)
+STDMETHODIMP CGlobalSettings::put_GridProxyFormat(const tkGridProxyFormat newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.gridProxyFormat = newVal;
@@ -337,7 +336,7 @@ STDMETHODIMP CGlobalSettings::get_MaxDirectGridSizeMb(double* pVal)
 	*pVal = m_globalSettings.MaxDirectGridSizeMb;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_MaxDirectGridSizeMb(double newVal)
+STDMETHODIMP CGlobalSettings::put_MaxDirectGridSizeMb(const double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.MaxDirectGridSizeMb = newVal;
@@ -353,7 +352,7 @@ STDMETHODIMP CGlobalSettings::get_GridProxyMode(tkGridProxyMode* pVal)
 	*pVal = m_globalSettings.gridProxyMode;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_GridProxyMode(tkGridProxyMode newVal)
+STDMETHODIMP CGlobalSettings::put_GridProxyMode(const tkGridProxyMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.gridProxyMode = newVal;
@@ -369,7 +368,7 @@ STDMETHODIMP CGlobalSettings::get_MaxUniqueValuesCountForGridScheme(int* pVal)
 	*pVal = m_globalSettings.maxUniqueValuesCount;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_MaxUniqueValuesCountForGridScheme(int newVal)
+STDMETHODIMP CGlobalSettings::put_MaxUniqueValuesCountForGridScheme(const int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.maxUniqueValuesCount = newVal;
@@ -379,29 +378,29 @@ STDMETHODIMP CGlobalSettings::put_MaxUniqueValuesCountForGridScheme(int newVal)
 // ****************************************************
 //	    RandomColorSchemeForGrids()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_RandomColorSchemeForGrids(VARIANT_BOOL* pVal)
+STDMETHODIMP CGlobalSettings::get_RandomColorSchemeForGrids(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.randomColorSchemeForGrids ? VARIANT_TRUE: VARIANT_FALSE;
+	*retVal = m_globalSettings.randomColorSchemeForGrids ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_RandomColorSchemeForGrids(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_RandomColorSchemeForGrids(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.randomColorSchemeForGrids = newVal ? true: false;
+	m_globalSettings.randomColorSchemeForGrids = newVal == VARIANT_FALSE ? false : true;;
 	return S_OK;
 }
-	
+
 // ****************************************************
 //	    DefaultColorSchemeForGrids()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_DefaultColorSchemeForGrids(PredefinedColorScheme* pVal)
+STDMETHODIMP CGlobalSettings::get_DefaultColorSchemeForGrids(PredefinedColorScheme* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.defaultColorSchemeForGrids;
+	*retVal = m_globalSettings.defaultColorSchemeForGrids;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_DefaultColorSchemeForGrids(PredefinedColorScheme newVal)
+STDMETHODIMP CGlobalSettings::put_DefaultColorSchemeForGrids(const PredefinedColorScheme newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.defaultColorSchemeForGrids = newVal;
@@ -411,13 +410,13 @@ STDMETHODIMP CGlobalSettings::put_DefaultColorSchemeForGrids(PredefinedColorSche
 // ****************************************************
 //	    ShapeOutputValidationMode
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_ShapeOutputValidationMode(tkShapeValidationMode* pVal)
+STDMETHODIMP CGlobalSettings::get_ShapeOutputValidationMode(tkShapeValidationMode* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.outputValidation;
+	*retVal = m_globalSettings.outputValidation;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_ShapeOutputValidationMode(tkShapeValidationMode newVal)
+STDMETHODIMP CGlobalSettings::put_ShapeOutputValidationMode(const tkShapeValidationMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.outputValidation = newVal;
@@ -427,13 +426,13 @@ STDMETHODIMP CGlobalSettings::put_ShapeOutputValidationMode(tkShapeValidationMod
 // ****************************************************
 //	    ShapeInputValidationMode
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_ShapeInputValidationMode(tkShapeValidationMode* pVal)
+STDMETHODIMP CGlobalSettings::get_ShapeInputValidationMode(tkShapeValidationMode* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.inputValidation;
+	*retVal = m_globalSettings.inputValidation;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_ShapeInputValidationMode(tkShapeValidationMode newVal)
+STDMETHODIMP CGlobalSettings::put_ShapeInputValidationMode(const tkShapeValidationMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.inputValidation = newVal;
@@ -443,13 +442,13 @@ STDMETHODIMP CGlobalSettings::put_ShapeInputValidationMode(tkShapeValidationMode
 // ****************************************************
 //	    GeometryEngine
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_GeometryEngine(tkGeometryEngine* pVal)
+STDMETHODIMP CGlobalSettings::get_GeometryEngine(tkGeometryEngine* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.geometryEngine;
+	*retVal = m_globalSettings.geometryEngine;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_GeometryEngine(tkGeometryEngine newVal)
+STDMETHODIMP CGlobalSettings::put_GeometryEngine(const tkGeometryEngine newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.geometryEngine = newVal;
@@ -459,30 +458,30 @@ STDMETHODIMP CGlobalSettings::put_GeometryEngine(tkGeometryEngine newVal)
 // ****************************************************
 //	    SaveGridColorSchemeToFile
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_SaveGridColorSchemeToFile( VARIANT_BOOL *retVal)
+STDMETHODIMP CGlobalSettings::get_SaveGridColorSchemeToFile(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = m_globalSettings.saveGridColorSchemeToFile ? VARIANT_TRUE: VARIANT_FALSE;
+	*retVal = m_globalSettings.saveGridColorSchemeToFile ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_SaveGridColorSchemeToFile( VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_SaveGridColorSchemeToFile(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.saveGridColorSchemeToFile = newVal ? true : false;
+	m_globalSettings.saveGridColorSchemeToFile = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
 // ****************************************************
 //	    TiffCompression
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_TiffCompression( tkTiffCompression *retVal)
+STDMETHODIMP CGlobalSettings::get_TiffCompression(tkTiffCompression* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = m_globalSettings.tiffCompression;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_TiffCompression( tkTiffCompression newVal)
+STDMETHODIMP CGlobalSettings::put_TiffCompression(const tkTiffCompression newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.tiffCompression = newVal;
@@ -492,13 +491,13 @@ STDMETHODIMP CGlobalSettings::put_TiffCompression( tkTiffCompression newVal)
 // ****************************************************
 //	    RasterOverviewCreation
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_RasterOverviewCreation( tkRasterOverviewCreation *retVal)
+STDMETHODIMP CGlobalSettings::get_RasterOverviewCreation(tkRasterOverviewCreation* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = m_globalSettings.rasterOverviewCreation;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_RasterOverviewCreation( tkRasterOverviewCreation newVal)
+STDMETHODIMP CGlobalSettings::put_RasterOverviewCreation(const tkRasterOverviewCreation newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.rasterOverviewCreation = newVal;
@@ -508,13 +507,13 @@ STDMETHODIMP CGlobalSettings::put_RasterOverviewCreation( tkRasterOverviewCreati
 // ****************************************************
 //	    MinOverviewWidth
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_MinOverviewWidth( int *retVal)
+STDMETHODIMP CGlobalSettings::get_MinOverviewWidth(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = m_globalSettings.minOverviewWidth;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_MinOverviewWidth( int newVal)
+STDMETHODIMP CGlobalSettings::put_MinOverviewWidth(const int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.minOverviewWidth = newVal;
@@ -524,13 +523,13 @@ STDMETHODIMP CGlobalSettings::put_MinOverviewWidth( int newVal)
 // ****************************************************
 //	    RasterOverviewResampling
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_RasterOverviewResampling( tkGDALResamplingMethod *retVal)
+STDMETHODIMP CGlobalSettings::get_RasterOverviewResampling(tkGDALResamplingMethod* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = m_globalSettings.rasterOverviewResampling;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_RasterOverviewResampling( tkGDALResamplingMethod newVal)
+STDMETHODIMP CGlobalSettings::put_RasterOverviewResampling(const tkGDALResamplingMethod newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.rasterOverviewResampling = newVal;
@@ -546,7 +545,7 @@ STDMETHODIMP CGlobalSettings::get_TilesThreadPoolSize(int* pVal)
 	*pVal = m_globalSettings.tilesThreadPoolSize;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_TilesThreadPoolSize(int newVal)
+STDMETHODIMP CGlobalSettings::put_TilesThreadPoolSize(const int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.tilesThreadPoolSize = newVal;
@@ -562,10 +561,10 @@ STDMETHODIMP CGlobalSettings::get_LoadSymbologyOnAddLayer(VARIANT_BOOL* pVal)
 	*pVal = m_globalSettings.loadSymbologyOnAddLayer;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_LoadSymbologyOnAddLayer(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_LoadSymbologyOnAddLayer(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.loadSymbologyOnAddLayer = newVal ? true: false;
+	m_globalSettings.loadSymbologyOnAddLayer = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -578,7 +577,7 @@ STDMETHODIMP CGlobalSettings::get_TilesMinZoomOnProjectionMismatch(int* pVal)
 	*pVal = m_globalSettings.tilesMaxZoomOnProjectionMismatch;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_TilesMinZoomOnProjectionMismatch(int newVal)
+STDMETHODIMP CGlobalSettings::put_TilesMinZoomOnProjectionMismatch(const int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.tilesMaxZoomOnProjectionMismatch = newVal;
@@ -589,13 +588,13 @@ STDMETHODIMP CGlobalSettings::put_TilesMinZoomOnProjectionMismatch(int newVal)
 // *********************************************************
 //	     ImageUpsamplingMode
 // *********************************************************
-STDMETHODIMP CGlobalSettings::get_ImageUpsamplingMode(tkInterpolationMode* pVal)
+STDMETHODIMP CGlobalSettings::get_ImageUpsamplingMode(tkInterpolationMode* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.imageUpsamplingMode;
+	*newVal = m_globalSettings.imageUpsamplingMode;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_ImageUpsamplingMode(tkInterpolationMode newVal)
+STDMETHODIMP CGlobalSettings::put_ImageUpsamplingMode(const tkInterpolationMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.imageUpsamplingMode = newVal;
@@ -605,13 +604,13 @@ STDMETHODIMP CGlobalSettings::put_ImageUpsamplingMode(tkInterpolationMode newVal
 // *********************************************************
 //	     ImageDownsamplingMode
 // *********************************************************
-STDMETHODIMP CGlobalSettings::get_ImageDownsamplingMode(tkInterpolationMode* pVal)
+STDMETHODIMP CGlobalSettings::get_ImageDownsamplingMode(tkInterpolationMode* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.imageDownsamplingMode;
+	*newVal = m_globalSettings.imageDownsamplingMode;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_ImageDownsamplingMode(tkInterpolationMode newVal)
+STDMETHODIMP CGlobalSettings::put_ImageDownsamplingMode(const tkInterpolationMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.imageDownsamplingMode = newVal;
@@ -621,13 +620,13 @@ STDMETHODIMP CGlobalSettings::put_ImageDownsamplingMode(tkInterpolationMode newV
 // *********************************************************
 //	     GridUpsamplingMode
 // *********************************************************
-STDMETHODIMP CGlobalSettings::get_GridUpsamplingMode(tkInterpolationMode* pVal)
+STDMETHODIMP CGlobalSettings::get_GridUpsamplingMode(tkInterpolationMode* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.gridUpsamplingMode;
+	*newVal = m_globalSettings.gridUpsamplingMode;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_GridUpsamplingMode(tkInterpolationMode newVal)
+STDMETHODIMP CGlobalSettings::put_GridUpsamplingMode(const tkInterpolationMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.gridUpsamplingMode = newVal;
@@ -637,13 +636,13 @@ STDMETHODIMP CGlobalSettings::put_GridUpsamplingMode(tkInterpolationMode newVal)
 // *********************************************************
 //	     GridDownsamplingMode
 // *********************************************************
-STDMETHODIMP CGlobalSettings::get_GridDownsamplingMode(tkInterpolationMode* pVal)
+STDMETHODIMP CGlobalSettings::get_GridDownsamplingMode(tkInterpolationMode* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.gridDownsamplingMode;
+	*newVal = m_globalSettings.gridDownsamplingMode;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_GridDownsamplingMode(tkInterpolationMode newVal)
+STDMETHODIMP CGlobalSettings::put_GridDownsamplingMode(const tkInterpolationMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.gridDownsamplingMode = newVal;
@@ -653,14 +652,14 @@ STDMETHODIMP CGlobalSettings::put_GridDownsamplingMode(tkInterpolationMode newVa
 // *********************************************************
 //	     OgrStringEncoding
 // *********************************************************
-STDMETHODIMP CGlobalSettings::get_OgrStringEncoding(tkOgrEncoding* retVal)
+STDMETHODIMP CGlobalSettings::get_OgrStringEncoding(tkOgrEncoding* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = m_globalSettings.ogrEncoding;
+	*newVal = m_globalSettings.ogrEncoding;
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_OgrStringEncoding(tkOgrEncoding pVal)
+STDMETHODIMP CGlobalSettings::put_OgrStringEncoding(const tkOgrEncoding pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.ogrEncoding = pVal;
@@ -676,7 +675,7 @@ STDMETHODIMP CGlobalSettings::get_OgrLayerMaxFeatureCount(LONG* pVal)
 	*pVal = m_globalSettings.ogrLayerMaxFeatureCount;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_OgrLayerMaxFeatureCount(LONG newVal)
+STDMETHODIMP CGlobalSettings::put_OgrLayerMaxFeatureCount(const LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.ogrLayerMaxFeatureCount = newVal;
@@ -689,13 +688,13 @@ STDMETHODIMP CGlobalSettings::put_OgrLayerMaxFeatureCount(LONG newVal)
 STDMETHODIMP CGlobalSettings::get_AutoChooseOgrLoadingMode(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.autoChooseOgrLoadingMode ? VARIANT_TRUE: VARIANT_FALSE;
+	*pVal = m_globalSettings.autoChooseOgrLoadingMode ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_AutoChooseOgrLoadingMode(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_AutoChooseOgrLoadingMode(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.autoChooseOgrLoadingMode = newVal ? true : false;
+	m_globalSettings.autoChooseOgrLoadingMode = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -708,10 +707,10 @@ STDMETHODIMP CGlobalSettings::get_AttachMapCallbackToLayers(VARIANT_BOOL* pVal)
 	*pVal = m_globalSettings.attachMapCallbackToLayers ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_AttachMapCallbackToLayers(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_AttachMapCallbackToLayers(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.attachMapCallbackToLayers = newVal ? true : false;
+	m_globalSettings.attachMapCallbackToLayers = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -724,7 +723,7 @@ STDMETHODIMP CGlobalSettings::get_HotTrackingMaxShapeCount(LONG* pVal)
 	*pVal = m_globalSettings.hotTrackingMaxShapeCount;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_HotTrackingMaxShapeCount(LONG newVal)
+STDMETHODIMP CGlobalSettings::put_HotTrackingMaxShapeCount(const LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.hotTrackingMaxShapeCount = newVal;
@@ -740,10 +739,10 @@ STDMETHODIMP CGlobalSettings::get_AllowLayersWithoutProjections(VARIANT_BOOL* pV
 	*pVal = m_globalSettings.allowLayersWithoutProjection ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_AllowLayersWithoutProjections(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_AllowLayersWithoutProjections(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.allowLayersWithoutProjection = newVal ? true : false;
+	m_globalSettings.allowLayersWithoutProjection = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -756,10 +755,10 @@ STDMETHODIMP CGlobalSettings::get_AllowProjectionMismatch(VARIANT_BOOL* pVal)
 	*pVal = m_globalSettings.allowProjectionMismatch ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_AllowProjectionMismatch(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_AllowProjectionMismatch(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.allowProjectionMismatch = newVal ? true : false;
+	m_globalSettings.allowProjectionMismatch = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -772,10 +771,10 @@ STDMETHODIMP CGlobalSettings::get_ReprojectLayersOnAdding(VARIANT_BOOL* pVal)
 	*pVal = m_globalSettings.reprojectLayersOnAdding ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_ReprojectLayersOnAdding(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_ReprojectLayersOnAdding(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.reprojectLayersOnAdding = newVal ? true : false;
+	m_globalSettings.reprojectLayersOnAdding = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -788,7 +787,7 @@ STDMETHODIMP CGlobalSettings::get_MouseTolerance(DOUBLE* pVal)
 	*pVal = m_globalSettings.mouseTolerance;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_MouseTolerance(DOUBLE newVal)
+STDMETHODIMP CGlobalSettings::put_MouseTolerance(const DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.mouseTolerance = newVal;
@@ -807,7 +806,7 @@ STDMETHODIMP CGlobalSettings::get_ApplicationCallback(ICallback** pVal)
 STDMETHODIMP CGlobalSettings::put_ApplicationCallback(ICallback* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	ComHelper::SetRef(newVal, (IDispatch**)&m_globalSettings.callback);
+	ComHelper::SetRef(newVal, (IDispatch**)&m_globalSettings.callback); // TODO: Fix compile warning
 	return S_OK;
 }
 
@@ -820,7 +819,7 @@ STDMETHODIMP CGlobalSettings::get_MaxReprojectionShapeCount(LONG* pVal)
 	*pVal = m_globalSettings.maxReprojectionShapeCount;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_MaxReprojectionShapeCount(LONG newVal)
+STDMETHODIMP CGlobalSettings::put_MaxReprojectionShapeCount(const LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.maxReprojectionShapeCount = newVal;
@@ -836,7 +835,7 @@ STDMETHODIMP CGlobalSettings::get_PixelOffsetMode(tkPixelOffsetMode* pVal)
 	*pVal = m_globalSettings.pixelOffsetMode;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_PixelOffsetMode(tkPixelOffsetMode newVal)
+STDMETHODIMP CGlobalSettings::put_PixelOffsetMode(const tkPixelOffsetMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.pixelOffsetMode = newVal;
@@ -852,10 +851,10 @@ STDMETHODIMP CGlobalSettings::get_AutoChooseRenderingHintForLabels(VARIANT_BOOL*
 	*pVal = m_globalSettings.autoChooseRenderingHintForLabels ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_AutoChooseRenderingHintForLabels(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_AutoChooseRenderingHintForLabels(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.autoChooseRenderingHintForLabels = newVal ? true : false;
+	m_globalSettings.autoChooseRenderingHintForLabels = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -865,9 +864,10 @@ STDMETHODIMP CGlobalSettings::put_AutoChooseRenderingHintForLabels(VARIANT_BOOL 
 STDMETHODIMP CGlobalSettings::get_GdalVersion(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CComBSTR bstr("");
-	CComBSTR bstrOptions("--version");
-	GetUtils()->GDALInfo(bstr, bstrOptions, NULL, retVal);
+	const CComBSTR bstr("");
+	const CComBSTR bstrOptions("--version");
+	// TODO: Update to GDALUtils ??
+	GetUtils()->GDALInfo(bstr, bstrOptions, nullptr, retVal);
 	return S_OK;
 }
 
@@ -880,10 +880,10 @@ STDMETHODIMP CGlobalSettings::get_OgrLayerForceUpdateMode(VARIANT_BOOL* pVal)
 	*pVal = m_globalSettings.ogrLayerForceUpdateMode ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_OgrLayerForceUpdateMode(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_OgrLayerForceUpdateMode(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.ogrLayerForceUpdateMode = newVal ? true : false;
+	m_globalSettings.ogrLayerForceUpdateMode = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -896,10 +896,10 @@ STDMETHODIMP CGlobalSettings::get_ForceHideLabels(VARIANT_BOOL* pVal)
 	*pVal = m_globalSettings.forceHideLabels ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_ForceHideLabels(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_ForceHideLabels(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.forceHideLabels = newVal ? true : false;
+	m_globalSettings.forceHideLabels = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
@@ -965,8 +965,8 @@ STDMETHODIMP CGlobalSettings::get_BingApiKey(BSTR* pVal)
 STDMETHODIMP CGlobalSettings::put_BingApiKey(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	m_globalSettings.bingApiKey = OLE2A(newVal);
+	//m_globalSettings.bingApiKey = OLE2A(newVal);
+	m_globalSettings.bingApiKey = CString(newVal);
 	return S_OK;
 }
 
@@ -977,9 +977,9 @@ STDMETHODIMP CGlobalSettings::TestBingApiKey(BSTR key, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
-	
-	CString previosKey = m_globalSettings.bingApiKey;
-	m_globalSettings.bingApiKey = key;
+
+	const CString previousKey = m_globalSettings.bingApiKey;
+	m_globalSettings.bingApiKey = CString(key);
 
 	BingMapProvider provider;
 	if (provider.Initialize()) {
@@ -987,7 +987,7 @@ STDMETHODIMP CGlobalSettings::TestBingApiKey(BSTR key, VARIANT_BOOL* retVal)
 		*retVal = VARIANT_TRUE;
 	}
 	else {
-		m_globalSettings.bingApiKey = previosKey;
+		m_globalSettings.bingApiKey = previousKey;
 	}
 
 	return S_OK;
@@ -999,9 +999,8 @@ STDMETHODIMP CGlobalSettings::TestBingApiKey(BSTR key, VARIANT_BOOL* retVal)
 STDMETHODIMP CGlobalSettings::SetHereMapsApiKey(BSTR appId, BSTR appCode)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	m_globalSettings.hereAppCode = OLE2A(appCode);
-	m_globalSettings.hereAppId = OLE2A(appId);
+	m_globalSettings.hereAppCode = CString(appCode);
+	m_globalSettings.hereAppId = CString(appId);
 	return S_OK;
 }
 
@@ -1012,18 +1011,18 @@ STDMETHODIMP CGlobalSettings::get_CompressOverviews(tkTiffCompression* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CString s = "";
+	const CString s = "";
 	CPLGetConfigOption("COMPRESS_OVERVIEW", s);
 	*pVal = GdalHelper::ParseTiffCompression(s);
 
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_CompressOverviews(tkTiffCompression newVal)
+STDMETHODIMP CGlobalSettings::put_CompressOverviews(const tkTiffCompression newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CString s= GdalHelper::TiffCompressionToString(newVal);
+	const CString s = GdalHelper::TiffCompressionToString(newVal);
 
 	CPLSetConfigOption("COMPRESS_OVERVIEW", s);
 
@@ -1042,11 +1041,11 @@ STDMETHODIMP CGlobalSettings::get_GridFavorGreyscale(VARIANT_BOOL* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_GridFavorGreyscale(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_GridFavorGreyscale(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.gridFavorGreyScale = newVal ? true : false;
+	m_globalSettings.gridFavorGreyScale = newVal == VARIANT_FALSE ? false : true;
 
 	return S_OK;
 }
@@ -1063,11 +1062,11 @@ STDMETHODIMP CGlobalSettings::get_GridUseHistogram(VARIANT_BOOL* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_GridUseHistogram(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_GridUseHistogram(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.gridUseHistogram = newVal ? true : false;
+	m_globalSettings.gridUseHistogram = newVal == VARIANT_FALSE ? false : true;
 
 	return S_OK;
 }
@@ -1083,11 +1082,11 @@ STDMETHODIMP CGlobalSettings::get_OverrideLocalCallback(VARIANT_BOOL* pVal)
 
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_OverrideLocalCallback(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_OverrideLocalCallback(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.overrideLocalCallback = newVal ? true : false;
+	m_globalSettings.overrideLocalCallback = newVal == VARIANT_FALSE ? false : true;
 
 	return S_OK;
 }
@@ -1103,11 +1102,11 @@ STDMETHODIMP CGlobalSettings::get_CacheDbfRecords(VARIANT_BOOL* pVal)
 
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_CacheDbfRecords(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_CacheDbfRecords(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.cacheDbfRecords = newVal ? true : false;
+	m_globalSettings.cacheDbfRecords = newVal == VARIANT_FALSE ? false : true;
 
 	return S_OK;
 }
@@ -1123,11 +1122,11 @@ STDMETHODIMP CGlobalSettings::get_CacheShapeRenderingData(VARIANT_BOOL* pVal)
 
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_CacheShapeRenderingData(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_CacheShapeRenderingData(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.cacheShapeRenderingData = newVal ? true : false;
+	m_globalSettings.cacheShapeRenderingData = newVal == VARIANT_FALSE ? false : true;
 
 	return S_OK;
 }
@@ -1135,29 +1134,28 @@ STDMETHODIMP CGlobalSettings::put_CacheShapeRenderingData(VARIANT_BOOL newVal)
 // *********************************************************
 //	     LogErrorsOnly()
 // *********************************************************
-STDMETHODIMP CGlobalSettings::get_LogTileErrorsOnly(VARIANT_BOOL *retVal)
+STDMETHODIMP CGlobalSettings::get_LogTileErrorsOnly(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = tilesLogger.errorsOnly;
+		* retVal = tilesLogger.errorsOnly;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_LogTileErrorsOnly(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_LogTileErrorsOnly(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	tilesLogger.errorsOnly = newVal ? true : false;
+		tilesLogger.errorsOnly = newVal == VARIANT_FALSE ? false : true;
 	return S_OK;
 }
 
 // *********************************************************
 //	     StartLogRequests()
 // *********************************************************
-STDMETHODIMP CGlobalSettings::StartLogTileRequests(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal)
+STDMETHODIMP CGlobalSettings::StartLogTileRequests(BSTR filename, const VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	CStringW path = OLE2W(filename);
+	const CStringW path = OLE2W(filename);
 	tilesLogger.Open(path);
-	tilesLogger.errorsOnly = errorsOnly ? true : false;
+	tilesLogger.errorsOnly = errorsOnly == VARIANT_FALSE ? false : true;
 	*retVal = tilesLogger.IsOpened();
 	return S_OK;
 }
@@ -1188,7 +1186,6 @@ STDMETHODIMP CGlobalSettings::get_TileLogIsOpened(VARIANT_BOOL* retVal)
 STDMETHODIMP CGlobalSettings::get_TileLogFilename(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
 	*retVal = W2BSTR(tilesLogger.GetFilename());
 	return S_OK;
 }
@@ -1196,9 +1193,8 @@ STDMETHODIMP CGlobalSettings::get_TileLogFilename(BSTR* retVal)
 STDMETHODIMP CGlobalSettings::SetHttpUserAgent(BSTR userAgent)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
 	// TODO: Check if not string.empty
-	m_globalSettings.httpUserAgent = OLE2A(userAgent);
+	m_globalSettings.httpUserAgent = CString(userAgent);
 	return S_OK;
 }
 
@@ -1214,11 +1210,11 @@ STDMETHODIMP CGlobalSettings::get_WmsDiskCaching(VARIANT_BOOL* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_WmsDiskCaching(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_WmsDiskCaching(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.wmsDiskCaching = newVal ? true : false;
+	m_globalSettings.wmsDiskCaching = newVal == VARIANT_FALSE ? false : true;
 
 	return S_OK;
 }
@@ -1235,7 +1231,7 @@ STDMETHODIMP CGlobalSettings::get_CallbackVerbosity(tkCallbackVerbosity* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_CallbackVerbosity(tkCallbackVerbosity newVal)
+STDMETHODIMP CGlobalSettings::put_CallbackVerbosity(const tkCallbackVerbosity newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -1256,11 +1252,11 @@ STDMETHODIMP CGlobalSettings::get_OgrShareConnection(VARIANT_BOOL* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_OgrShareConnection(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_OgrShareConnection(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.ogrShareConnection  = (newVal == VARIANT_TRUE) ? true : false;
+	m_globalSettings.ogrShareConnection = newVal == VARIANT_FALSE ? false : true;
 
 	return S_OK;
 }
@@ -1277,11 +1273,11 @@ STDMETHODIMP CGlobalSettings::get_OgrInterpretYNStringAsBoolean(VARIANT_BOOL* pV
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_OgrInterpretYNStringAsBoolean(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_OgrInterpretYNStringAsBoolean(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.ogrInterpretYNStringAsBoolean = (newVal == VARIANT_TRUE) ? true : false;
+	m_globalSettings.ogrInterpretYNStringAsBoolean = newVal == VARIANT_FALSE ? false : true;
 
 	return S_OK;
 }
@@ -1291,18 +1287,18 @@ STDMETHODIMP CGlobalSettings::put_OgrInterpretYNStringAsBoolean(VARIANT_BOOL new
 // *********************************************************
 STDMETHODIMP CGlobalSettings::get_AllowLayersWithIncompleteReprojection(VARIANT_BOOL* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-    *pVal = m_globalSettings.allowLayersWithIncompleteReprojection ? VARIANT_TRUE : VARIANT_FALSE;
+	*pVal = m_globalSettings.allowLayersWithIncompleteReprojection ? VARIANT_TRUE : VARIANT_FALSE;
 
-    return S_OK;
+	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::put_AllowLayersWithIncompleteReprojection(VARIANT_BOOL newVal)
+STDMETHODIMP CGlobalSettings::put_AllowLayersWithIncompleteReprojection(const VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-    m_globalSettings.allowLayersWithIncompleteReprojection = (newVal == VARIANT_TRUE) ? true : false;
+	m_globalSettings.allowLayersWithIncompleteReprojection = newVal == VARIANT_FALSE ? false : true;
 
-    return S_OK;
+	return S_OK;
 }
