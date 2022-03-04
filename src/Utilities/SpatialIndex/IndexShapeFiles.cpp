@@ -27,6 +27,7 @@
 #include "IndexShapeFiles.h"
 
 #include <gsl/pointers>
+#include <gsl/util>
 
 #include "ShapeFileStream.h"
 
@@ -179,9 +180,9 @@ namespace IndexSearching
 
 			QueryIndexFile(spatialIndex, *queryRegion, queryType, vis);
 
-			resulSet->SetCapacity(vis->ids.size());
+			resulSet->SetCapacity(gsl::narrow_cast<int>(vis->ids.size()));
 			// int arrSize = vis->ids.size();
-			for (const unsigned i = 0; i < vis->ids.size(); vis->ids.pop())
+			for (constexpr unsigned int i = 0; i < vis->ids.size(); vis->ids.pop())
 			{
 				const long val = static_cast<long>(vis->ids.front());
 				//int len = resulSet->GetLength();
@@ -223,7 +224,7 @@ namespace IndexSearching
 		uint8_t* pData = nullptr;
 		uint32_t cLen = 0;
 		d.getData(cLen, &pData);
-		delete[] pData;
+		delete[] pData; // TODO: Fix compile warning
 
 		const auto val = d.getIdentifier();
 		ids.push(val);
