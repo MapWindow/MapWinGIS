@@ -1012,8 +1012,8 @@ STDMETHODIMP CGlobalSettings::get_CompressOverviews(tkTiffCompression* pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	const CString s = "";
-	CPLGetConfigOption("COMPRESS_OVERVIEW", s);
-	*pVal = GdalHelper::ParseTiffCompression(s);
+	const char* value = CPLGetConfigOption("COMPRESS_OVERVIEW", s);
+	*pVal = GdalHelper::ParseTiffCompression(value);
 
 	return S_OK;
 }

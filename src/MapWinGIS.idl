@@ -694,6 +694,13 @@ enum tkTiffCompression
 	tkmCCITTFAX3 = 5,
 	tkmCCITTFAX4 = 6,
 	tkmNONE = 7,
+	tkmLZMA = 8,
+	tkmZSTD = 9,
+	tkmLERC = 10,
+	tkmLERC_DEFLATE = 11,
+	tkmLERC_ZSTD = 12,
+	tkmWEBP = 13,
+	tkmJXL = 14,
 } tkTiffCompression;
 
 /************************** tkTilesProjectionStatus Enumerations **********************/

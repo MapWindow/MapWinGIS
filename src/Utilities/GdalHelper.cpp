@@ -854,32 +854,53 @@ CString GdalHelper::get_DriverMetadataItem(GDALDataset* ds, const int metadataIn
 // *************************************************************
 tkTiffCompression GdalHelper::ParseTiffCompression(const CString& option)
 {
-	if (_stricmp(option, "LZW") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "PACKBITS") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "DEFLATE") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "CCITTRLE") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "CCITTFAX3") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "CCITTFAX4") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "LZW") == 0)
-		return tkmLZW;
-
 	if (_stricmp(option, "AUTO") == 0)
 		return tkmAUTO;
 
 	if (_stricmp(option, "JPEG") == 0)
 		return tkmJPEG;
+
+	if (_stricmp(option, "LZW") == 0)
+		return tkmLZW;
+
+	if (_stricmp(option, "PACKBITS") == 0)
+		return tkmPACKBITS;
+
+	if (_stricmp(option, "DEFLATE") == 0)
+		return tkmDEFLATE;
+
+	if (_stricmp(option, "CCITTRLE") == 0)
+		return tkmCCITTRLE;
+
+	if (_stricmp(option, "CCITTFAX3") == 0)
+		return tkmCCITTFAX3;
+
+	if (_stricmp(option, "CCITTFAX4") == 0)
+		return tkmCCITTFAX4;
+
+	if (_stricmp(option, "NONE") == 0)
+		return tkmNONE;
+
+	if (_stricmp(option, "LZMA") == 0)
+		return tkmLZMA;
+
+	if (_stricmp(option, "ZSTD") == 0)
+		return tkmZSTD;
+
+	if (_stricmp(option, "LERC") == 0)
+		return tkmLERC;
+
+	if (_stricmp(option, "LERC_DEFLATE") == 0)
+		return tkmLERC_DEFLATE;
+
+	if (_stricmp(option, "LERC_ZSTD") == 0)
+		return tkmLERC_ZSTD;
+
+	if (_stricmp(option, "WEBP") == 0)
+		return tkmWEBP;
+
+	if (_stricmp(option, "JXL") == 0)
+		return tkmJXL;
 
 	return tkmAUTO;
 }
@@ -889,6 +910,9 @@ tkTiffCompression GdalHelper::ParseTiffCompression(const CString& option)
 // *************************************************************
 CString GdalHelper::TiffCompressionToString(const tkTiffCompression compression)
 {
+	// https://gdal.org/drivers/raster/gtiff.html#creation-options
+	// JPEG/LZW/PACKBITS/DEFLATE/CCITTRLE/CCITTFAX3/CCITTFAX4/LZMA/ZSTD/LERC/LERC_DEFLATE/LERC_ZSTD/WEBP/JXL/NONE
+	// In GDAL NONE is the default.
 	switch (compression)
 	{
 	case tkmLZW:
@@ -903,11 +927,24 @@ CString GdalHelper::TiffCompressionToString(const tkTiffCompression compression)
 		return "CCITTFAX3";
 	case tkmCCITTFAX4:
 		return "CCITTFAX4";
+	case tkmLZMA:
+		return "LZMA";
+	case tkmZSTD:
+		return "ZSTD";
+	case tkmLERC:
+		return "LERC";
+	case tkmLERC_DEFLATE:
+		return "LERC_DEFLATE";
+	case tkmLERC_ZSTD:
+		return "LERC_ZSTD";
+	case tkmWEBP:
+		return "WEBP";
+	case tkmJXL:
+		return "JXL";
 	case tkmNONE:
 		return "NONE";
 	case tkmAUTO:
 	case tkmJPEG:
-	default:
 		return "JPEG";
 	}
 }
