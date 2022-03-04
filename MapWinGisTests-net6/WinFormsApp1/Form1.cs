@@ -49,10 +49,15 @@ public sealed partial class Form1 : Form, ICallback
 
     #endregion
 
-    private void button1_Click(object? sender, EventArgs e)
+    private void ClearMapButtonClick(object? sender, EventArgs e)
     {
         axMap1.Clear();
         TxtProgress.Text = "";
         TxtProgress.Text += $@"Map is cleared. Projection is empty: {axMap1.GeoProjection.IsEmpty}";
+    }
+    private void RunTestButtonClick(object? sender, EventArgs e)
+    {
+        TxtProgress.Text += @"Running GlobalSettingsCompressOverviewsTest";
+        GlobalSettingsCompressOverviewsTest();
     }
 }

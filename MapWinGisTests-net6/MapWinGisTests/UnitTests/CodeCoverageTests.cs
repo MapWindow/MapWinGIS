@@ -30,7 +30,7 @@ public class CodeCoverageTests
 
     private void CheckTests(Type myType, string className, bool scaffoldUnitTests = false)
     {
-        var names = new List<string>();
+        var names = new Dictionary<string, string?>();
         var missingTests = 0;
 
         // Get the properties:
@@ -38,7 +38,7 @@ public class CodeCoverageTests
         foreach (var t in myProperties)
         {
             //_testOutputHelper.WriteLine("The name of the method is {0}.", t.Name);
-            if (!names.Contains(t.Name)) names.Add(t.Name);
+            if (!names.ContainsKey(t.Name)) names[t.Name] = t.PropertyType.FullName;
         }
 
         // Get the public methods.
@@ -50,7 +50,7 @@ public class CodeCoverageTests
                 .ReplaceFirstOccurrence("get_", "")
                 .ReplaceFirstOccurrence("set_", "");
             //_testOutputHelper.WriteLine("The name of the method is {0}.", name);
-            if (!names.Contains(name)) names.Add(name);
+            if (!names.ContainsKey(name)) names[name] = "Method";
         }
 
         // Get all tests available:
@@ -64,13 +64,11 @@ public class CodeCoverageTests
             allTests.AddRange(methods.Select(method => method.Name));
         }
 
-        foreach (var name in names)
+        foreach (var (name, type) in names)
         {
             if (scaffoldUnitTests)
             {
-                //_testOutputHelper.WriteLine("[Fact(Skip=\"Unit test is not yet implemented\")]");
-                _testOutputHelper.WriteLine("[Fact]");
-                _testOutputHelper.WriteLine($"public void {className}{name}Test() {{\nvar value = _gs.{name};\n_testOutputHelper.WriteLine(value.ToString());\n}}\n");
+                ScaffoldUnitTest(className, name, type!);
             }
             else
             {
@@ -83,5 +81,84 @@ public class CodeCoverageTests
         }
 
         missingTests.ShouldBe(0, $"No full code coverage for the {className} class");
+    }
+
+    private void ScaffoldUnitTest(string className, string name, string type)
+    {
+        _testOutputHelper.WriteLine("[Fact]");
+        _testOutputHelper.WriteLine($"public void {className}{name}Test()\n{{");
+        _testOutputHelper.WriteLine($"\t//Read:\n\tvar value = _gs.{name};");
+
+        if (type.Contains("string", StringComparison.CurrentCultureIgnoreCase))
+        {
+            // String
+            _testOutputHelper.WriteLine("\t_testOutputHelper.WriteLine(value);");
+            _testOutputHelper.WriteLine($"\tvalue.ShouldNotBeNullOrEmpty(\"{name} is not set\");");
+            _testOutputHelper.WriteLine("\tvalue.ShouldBe(\"foo\");");
+            _testOutputHelper.WriteLine("\t// Change:\n\tconst string newValue = \"Воздух\";");
+            _testOutputHelper.WriteLine($"\t_gs.{name} = newValue;");
+            _testOutputHelper.WriteLine($"\t// Check:\n\t_gs.{name}.ShouldBe(newValue);");
+            _testOutputHelper.WriteLine($"\t// Reset:\n\t_gs.{name} = value;");
+            _testOutputHelper.WriteLine($"\t_gs.{name}.ShouldBe(value);");
+        }
+
+        if (type.Contains("double", StringComparison.CurrentCultureIgnoreCase))
+        {
+            // Double
+            _testOutputHelper.WriteLine(
+                $"\t_testOutputHelper.WriteLine(value.ToString(CultureInfo.InvariantCulture));");
+            _testOutputHelper.WriteLine($"\tvalue.ShouldBe(100_000);");
+            _testOutputHelper.WriteLine($"\t// Change:\n\t_gs.{name} = value * 2.5;");
+            _testOutputHelper.WriteLine($"\t// Check:\n\t_gs.{name}.ShouldBe(value * 2.5);");
+            _testOutputHelper.WriteLine($"\t// Reset:\n\t_gs.{name} = value;");
+            _testOutputHelper.WriteLine($"\t_gs.{name}.ShouldBe(value);");
+        }
+
+        if (type.Contains("integer", StringComparison.CurrentCultureIgnoreCase))
+        {
+            // Double
+            _testOutputHelper.WriteLine(
+                $"\t_testOutputHelper.WriteLine(value.ToString(CultureInfo.InvariantCulture));");
+            _testOutputHelper.WriteLine($"\tvalue.ShouldBe(500);");
+            _testOutputHelper.WriteLine($"\t// Change:\n\t_gs.{name} = value * 2;");
+            _testOutputHelper.WriteLine($"\t// Check:\n\t_gs.{name}.ShouldBe(value * 2);");
+            _testOutputHelper.WriteLine($"\t// Reset:\n\t_gs.{name} = value;");
+            _testOutputHelper.WriteLine($"\t_gs.{name}.ShouldBe(value);");
+        }
+
+        if (type.Contains("boolean", StringComparison.CurrentCultureIgnoreCase))
+        {
+            // Boolean
+            _testOutputHelper.WriteLine(
+                $"\t_testOutputHelper.WriteLine(value.ToString(CultureInfo.InvariantCulture));");
+            _testOutputHelper.WriteLine($"\tvalue.ShouldBeTrue();");
+            _testOutputHelper.WriteLine($"\t// Change:\n\t_gs.{name} = !value;");
+            _testOutputHelper.WriteLine($"\t// Check:\n\t_gs.{name}.ShouldBe(!value);");
+            _testOutputHelper.WriteLine($"\t// Reset:\n\t_gs.{name} = value;");
+            _testOutputHelper.WriteLine($"\t_gs.{name}.ShouldBe(value);");
+        }
+
+        if (type.Contains("MapWinGIS.", StringComparison.CurrentCultureIgnoreCase))
+        {
+            // Type: MapWinGIS.tkGdalError
+            // Enum
+            var enumClass = type.Replace("MapWinGIS.", "");
+            _testOutputHelper.WriteLine($"\t_testOutputHelper.WriteLine(value.ToString());");
+            _testOutputHelper.WriteLine($"\tvalue.ShouldBe({enumClass}.??);");
+            _testOutputHelper.WriteLine(
+                $"\t// Loop:\n\tforeach ({enumClass} enumValue in Enum.GetValues(typeof({enumClass})))\n\t{{");
+            _testOutputHelper.WriteLine($"\t\t_testOutputHelper.WriteLine(enumValue.ToString());");
+            _testOutputHelper.WriteLine($"\t\t// Change:\n\t\t_gs.{name} = enumValue;");
+            _testOutputHelper.WriteLine($"\t\t// Check:\n\t\t_gs.{name}.ShouldBe(enumValue);\n\t}}");
+            _testOutputHelper.WriteLine($"\t// Reset:\n\t_gs.{name} = value;");
+            _testOutputHelper.WriteLine($"\t_gs.{name}.ShouldBe(value);");
+        }
+
+        if (type == "Method")
+        {
+            _testOutputHelper.WriteLine(
+                "\tthrow new NotImplementedException(\"This unit test is scaffolded, needs attention\");");
+        }
+        _testOutputHelper.WriteLine(@"}");
     }
 }

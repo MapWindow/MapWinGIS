@@ -108,7 +108,7 @@ struct GlobalSettingsInfo
         cacheDbfRecords = true;
         overrideLocalCallback = true;
         proxyAuthentication = asBasic;
-		httpUserAgent = "MapWinGIS/5.0"; // TODO Use VERSION Macros
+		httpUserAgent = "MapWinGIS/5.4"; // TODO Use VERSION Macros
         hereAppId = "";
         hereAppCode = "";
         bingApiKey = "";
@@ -201,9 +201,9 @@ struct GlobalSettingsInfo
         shortUnitStrings[lsSquareMiles] = L"sq.mi";
     }
 
-    BSTR CreateEmptyBSTR()
+    static BSTR CreateEmptyBSTR()
     {
-        USES_CONVERSION;
+        //USES_CONVERSION;
         return A2BSTR("");
     }
 
@@ -220,14 +220,14 @@ struct GlobalSettingsInfo
         PredefinedColorScheme coloring = defaultColorSchemeForGrids;
         if (randomColorSchemeForGrids)
         {
-            srand((unsigned int)time(nullptr));
-            int r = rand();
-            coloring = (PredefinedColorScheme)(r % 7);
+            srand(static_cast<unsigned>(time(nullptr)));
+            const int r = rand();
+            coloring = static_cast<PredefinedColorScheme>(r % 7);
         }
         return coloring;
     }
 
-    CStringW GetLocalizedString(tkLocalizedStrings s)
+    CStringW GetLocalizedString(const tkLocalizedStrings s)
     {
         return shortUnitStrings.find(s) != shortUnitStrings.end() ? shortUnitStrings[s] : L"";
     }
@@ -252,27 +252,24 @@ struct GlobalSettingsInfo
         return minPolygonArea;
     }
 
-    void SetGdalUtf8(bool turnon)
+    void SetGdalUtf8(const bool turnOn)
     {
-        CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", turnon ? "YES" : "NO");
+        CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", turnOn ? "YES" : "NO");
     }
 
     int GetTilesThreadPoolSize()
     {
-        int size = tilesThreadPoolSize > 20 ? 20 : tilesThreadPoolSize;
+	    const int size = tilesThreadPoolSize > 20 ? 20 : tilesThreadPoolSize;
         return size;
     }
 
-    double GetInvalidShapeBufferDistance(tkUnitsOfMeasure units)
+    double GetInvalidShapeBufferDistance(const tkUnitsOfMeasure units)
     {
         double val = invalidShapesBufferDistance;
         if (Utility::ConvertDistance(units, umMeters, val))
         {
             return invalidShapesBufferDistance / val;
         }
-        else
-        {
-            return invalidShapesBufferDistance;
-        }
+        return invalidShapesBufferDistance;
     }
 };

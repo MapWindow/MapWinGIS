@@ -30,7 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.button1 = new System.Windows.Forms.Button();
+            this.ClearMapButton = new System.Windows.Forms.Button();
+            this.RunTestButton = new System.Windows.Forms.Button();
             this.TxtProgress = new System.Windows.Forms.TextBox();
             this.axMap1 = new AxMapWinGIS.AxMap();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -50,7 +51,8 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.button1);
+            this.splitContainer1.Panel1.Controls.Add(this.ClearMapButton);
+            this.splitContainer1.Panel1.Controls.Add(this.RunTestButton);
             this.splitContainer1.Panel1.Controls.Add(this.TxtProgress);
             // 
             // splitContainer1.Panel2
@@ -63,13 +65,23 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Clear map";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.ClearMapButton.Location = new System.Drawing.Point(12, 12);
+            this.ClearMapButton.Name = "BtnClearMap";
+            this.ClearMapButton.Size = new System.Drawing.Size(75, 23);
+            this.ClearMapButton.TabIndex = 0;
+            this.ClearMapButton.Text = "Clear map";
+            this.ClearMapButton.UseVisualStyleBackColor = true;
+            this.ClearMapButton.Click += new System.EventHandler(this.ClearMapButtonClick);
+            // 
+            // button1
+            // 
+            this.RunTestButton.Location = new System.Drawing.Point(12, 36);
+            this.RunTestButton.Name = "BtnRunTest";
+            this.RunTestButton.Size = new System.Drawing.Size(75, 23);
+            this.RunTestButton.TabIndex = 0;
+            this.RunTestButton.Text = "Run test";
+            this.RunTestButton.UseVisualStyleBackColor = true;
+            this.RunTestButton.Click += new System.EventHandler(this.RunTestButtonClick);
             // 
             // TxtProgress
             // 
@@ -114,6 +126,7 @@
         private SplitContainer splitContainer1;
         private TextBox TxtProgress;
         private AxMapWinGIS.AxMap axMap1;
-        private Button button1;
+        private Button ClearMapButton;
+        private Button RunTestButton;
     }
 }

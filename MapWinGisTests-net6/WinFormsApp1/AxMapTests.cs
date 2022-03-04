@@ -1,4 +1,5 @@
-﻿using MapWinGIS;
+﻿using System.Diagnostics;
+using MapWinGIS;
 
 namespace WinFormsApp1;
 public sealed partial class Form1
@@ -44,5 +45,25 @@ public sealed partial class Form1
         if (layerHandle == -1) throw new Exception("Could not add shapefile object to map");
 
         return layerHandle;
+    }
+
+    public void GlobalSettingsCompressOverviewsTest()
+    {
+        var gs = new GlobalSettings();
+        //Read:
+        var value = gs.CompressOverviews;
+        Console.WriteLine(value.ToString());
+        // Loop:
+        foreach (tkTiffCompression enumValue in Enum.GetValues(typeof(tkTiffCompression)))
+        {
+            Console.WriteLine(enumValue.ToString());
+            // Change:
+            gs.CompressOverviews = enumValue;
+            // Check:
+            Console.WriteLine($@"Updated value is: {gs.CompressOverviews}");
+            Debug.Assert(gs.CompressOverviews == enumValue);
+        }
+        // Reset:
+        gs.CompressOverviews = value;
     }
 }
