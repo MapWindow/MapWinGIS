@@ -947,4 +947,5 @@ CString GdalHelper::TiffCompressionToString(const tkTiffCompression compression)
 	case tkmJPEG:
 		return "JPEG";
 	}
+	return "NONE";
 }
