@@ -300,7 +300,7 @@ STDMETHODIMP CGlobalSettings::put_LabelsSmoothingMode(const tkSmoothingMode newV
 STDMETHODIMP CGlobalSettings::put_LocalizedString(const tkLocalizedStrings unit, BSTR localizedString)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.shortUnitStrings[unit] = OLE2W(localizedString);
+	m_globalSettings.shortUnitStrings[unit] = CStringW(localizedString);
 	return S_OK;
 }
 STDMETHODIMP CGlobalSettings::get_LocalizedString(const tkLocalizedStrings unit, BSTR* retVal)
@@ -916,7 +916,7 @@ STDMETHODIMP CGlobalSettings::get_GdalPluginPath(BSTR* pVal)
 STDMETHODIMP CGlobalSettings::put_GdalPluginPath(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	GdalHelper::SetConfigPath(PathGdalPlugins, OLE2W(newVal));
+	GdalHelper::SetConfigPath(PathGdalPlugins, CStringW(newVal));
 	return S_OK;
 }
 
@@ -933,7 +933,7 @@ STDMETHODIMP CGlobalSettings::get_GdalDataPath(BSTR* pVal)
 STDMETHODIMP CGlobalSettings::put_GdalDataPath(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	GdalHelper::SetConfigPath(PathGdalData, OLE2W(newVal));
+	GdalHelper::SetConfigPath(PathGdalData, CStringW(newVal));
 	return S_OK;
 }
 // ***************************************************************
@@ -949,7 +949,7 @@ STDMETHODIMP CGlobalSettings::get_ProjPath(BSTR* pVal)
 STDMETHODIMP CGlobalSettings::put_ProjPath(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	GdalHelper::SetConfigPath(PathProjLib, OLE2W(newVal));
+	GdalHelper::SetConfigPath(PathProjLib, CStringW(newVal));
 	return S_OK;
 }
 
@@ -1153,7 +1153,7 @@ STDMETHODIMP CGlobalSettings::put_LogTileErrorsOnly(const VARIANT_BOOL newVal)
 STDMETHODIMP CGlobalSettings::StartLogTileRequests(BSTR filename, const VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	const CStringW path = OLE2W(filename);
+	const CStringW path(filename);
 	tilesLogger.Open(path);
 	tilesLogger.errorsOnly = errorsOnly == VARIANT_FALSE ? false : true;
 	*retVal = tilesLogger.IsOpened();

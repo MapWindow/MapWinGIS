@@ -784,8 +784,7 @@ void GdalHelper::SetConfigPath(const GdalPath option, const CStringW& newPath)
 
 	if (!Utility::DirExists(newPath))
 	{
-		USES_CONVERSION;
-		CallbackHelper::ErrorMsg(Debug::Format("The specified folder doesn't exist: %s", W2A(newPath))); // TODO: Fix compile warning
+		CallbackHelper::ErrorMsg(Debug::Format("The specified folder doesn't exist: %s", CString(newPath)));
 	}
 
 	Debug::WriteLine("GDAL Config is set: %s = %s", CString(optionName), CString(newPath));
