@@ -370,23 +370,27 @@ STDMETHODIMP CGeoProjection::ExportToWKT(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
-	if (!node) {
+	const OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
+	if (!node) 
+	{
 		*retVal = A2BSTR("");
 		return S_OK;
 	}
 
-	CString proj;
-	const OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
+	char* s = nullptr;
+	const OGRErr err = _projection->exportToWkt(&s);
+	// copy into CString and then free the buffer
+	CString proj(s);
+	CPLFree(s);
 
 	if (err == OGRERR_NONE)
 	{
-		*retVal = A2BSTR(proj);
+		*retVal = A2BSTR((LPCSTR)proj);
 	}
 	else
 	{
 		ReportOgrError(err);
-		*retVal = m_globalSettings.CreateEmptyBSTR();
+		*retVal = A2BSTR("");
 	}
 
 	return S_OK;
@@ -400,23 +404,32 @@ STDMETHODIMP CGeoProjection::ExportToWktEx(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
-	if (!node) {
+	const OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
+	if (!node) 
+	{
 		*retVal = A2BSTR("");
 		return S_OK;
 	}
 
-	CString proj;
-	const OGRErr err = ProjectionHelper::ExportToWktEx(_projection, proj);
+	char* s = nullptr;
+	char** papszOptions{};
+	// build null-terminated array of strings
+	papszOptions = CSLAddString(papszOptions, "FORMAT=WKT2_2019");
+	papszOptions = CSLAddString(papszOptions, "MULTILINE=YES");
+	const OGRErr err = _projection->exportToWkt(&s, papszOptions);
+	// copy into CString and then free the buffer
+	CString proj(s);
+	CPLFree(s);
+	CSLDestroy(papszOptions);
 
 	if (err == OGRERR_NONE)
 	{
-		*retVal = A2BSTR(proj);
+		*retVal = A2BSTR((LPCSTR)proj);
 	}
 	else
 	{
 		ReportOgrError(err);
-		*retVal = m_globalSettings.CreateEmptyBSTR();
+		*retVal = A2BSTR("");
 	}
 
 	return S_OK;
