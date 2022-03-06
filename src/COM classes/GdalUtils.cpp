@@ -220,15 +220,11 @@ STDMETHODIMP CGdalUtils::GdalVectorReproject(const BSTR sourceFilename, const BS
 	const int sourceEpsgCode, const int destinationEpsgCode,
 	const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
 {
-	CString sourceEpsgCodeBuilder = "EPSG:";
-	char cbuf[20];
-	_itoa(sourceEpsgCode, cbuf, 10);
-	sourceEpsgCodeBuilder.Append(cbuf);
+	CString sourceEpsgCodeBuilder;
+	sourceEpsgCodeBuilder.Format("EPSG:%d", sourceEpsgCode);
 
-	CString destEpsgCodeBuilder = "EPSG:";
-	char cbuf2[20];
-	_itoa(destinationEpsgCode, cbuf2, 10);
-	destEpsgCodeBuilder.Append(cbuf2);
+	CString destEpsgCodeBuilder;
+	destEpsgCodeBuilder.Format("EPSG:%d", destinationEpsgCode);
 
 	CComSafeArray<BSTR> options(5);
 	options[0] = "-s_srs";
