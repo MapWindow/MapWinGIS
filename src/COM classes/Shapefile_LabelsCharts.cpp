@@ -71,15 +71,15 @@ void CShapefile::GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CS
 // ************************************************************
 // FieldIndex == -1: labels without text will be generated; 
 // Method == lpNone: labels with (0.0,0.0) coordinates will be generated
-STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Method, VARIANT_BOOL LargestPartOnly, long offsetXFieldIndex, long offsetYFieldIndex, long* Count)
+STDMETHODIMP CShapefile::GenerateLabels(long fieldIndex, tkLabelPositioning method, VARIANT_BOOL largestPartOnly, long offsetXFieldIndex, long offsetYFieldIndex, long* count)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*Count = 0;
+	*count = 0;
 	
 	long numFields;
 	this->get_NumFields(&numFields);
 	
-	if( FieldIndex < -1 || FieldIndex >= numFields)
+	if( fieldIndex < -1 || fieldIndex >= numFields)
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS); 
 		return S_OK;
@@ -104,7 +104,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 		CallbackHelper::Progress(_globalCallback, i, numShapes, "Calculating label positions...", _key, percent);
 		
 		CComBSTR text;
-		GetLabelString(FieldIndex, i, &text, floatFormat);
+		GetLabelString(fieldIndex, i, &text, floatFormat);
 		
         double offsetX, offsetY = 0;
         if (useXOffset)
@@ -123,20 +123,20 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 
 			if( numParts == 1)
 			{
-				ShapeHelper::AddLabelToShape(shp, _labels, text, Method, orientation, offsetX, offsetY);
+				ShapeHelper::AddLabelToShape(shp, _labels, text, method, orientation, offsetX, offsetY);
 				continue;
 			}
 			else if (numParts == 0)
 			{
 				if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 				{
-					ShapeHelper::AddLabelToShape(shp, _labels, text, Method, orientation, offsetX, offsetY);
+					ShapeHelper::AddLabelToShape(shp, _labels, text, method, orientation, offsetX, offsetY);
 					continue;
 				}	
 			}
 			else
 			{
-				if (!LargestPartOnly) 
+				if (!largestPartOnly) 
 				{
 					int partCount = 0;
 					for (int j = 0; j < numParts; j++)
@@ -153,13 +153,13 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 					
 						if (partCount == 0) 
 						{
-							ShapeHelper::AddLabelToShape(shpPart, _labels, text, Method, orientation, offsetX, offsetY);
+							ShapeHelper::AddLabelToShape(shpPart, _labels, text, method, orientation, offsetX, offsetY);
 							partCount++;
 						}
 						else		
 						{
 							double x = 0.0, y = 0.0;
-							ShapeHelper::Cast(shpPart)->get_LabelPosition(Method, x, y, rotation, orientation);
+							ShapeHelper::Cast(shpPart)->get_LabelPosition(method, x, y, rotation, orientation);
 							_labels->AddPart(i, text, x, y, rotation, -1, offsetX, offsetY);
 						}
 					}
@@ -177,7 +177,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 						shp->get_PartAsShape(maxPart, &shpPart);
 						if (shpPart)
 						{
-							ShapeHelper::AddLabelToShape(shpPart, _labels, text, Method, orientation, offsetX, offsetY);
+							ShapeHelper::AddLabelToShape(shpPart, _labels, text, method, orientation, offsetX, offsetY);
 							continue;
 						}
 					}
@@ -187,17 +187,17 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 		((CLabels*)_labels)->AddEmptyLabel();
 	}
 	
-	*Count = LabelsHelper::GetCount(_labels);
+	*count = LabelsHelper::GetCount(_labels);
 	_labels->put_Synchronized(VARIANT_TRUE);
-	_labels->put_Positioning(Method);
+	_labels->put_Positioning(method);
 
-	if (FieldIndex == -1)
+	if (fieldIndex == -1)
 	{
 		((CLabels*)_labels)->ForceRecalculateExpression();
 	}
 	else
 	{
-		((CLabels*)_labels)->SaveSourceField(FieldIndex);	// save it for deserialization
+		((CLabels*)_labels)->SaveSourceField(fieldIndex);	// save it for deserialization
 	}
 
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
@@ -278,7 +278,7 @@ void CShapefile::put_ReferenceToCharts(bool bNullReference)
 // ********************************************************************
 //			SetChartsPositions
 // ********************************************************************
-void CShapefile::SetChartsPositions(tkLabelPositioning Method)
+void CShapefile::SetChartsPositions(tkLabelPositioning method)
 {
 	USES_CONVERSION;
 	double x,y;
@@ -299,7 +299,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 		}
 	}
 
-	if (Method == lpNone)
+	if (method == lpNone)
 	{
 		// simply set 0 positions, the actual positions will be set externally; is needed for loading of previously saved labels
 		for (unsigned int i = 0; i < _shapeData.size(); i++)
@@ -330,7 +330,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 			// ----------------------------------------------------
 			if( numParts == 1)
 			{
-				((CShape*)shp)->get_LabelPosition(Method, x, y, rotation, lorHorizontal);			
+				((CShape*)shp)->get_LabelPosition(method, x, y, rotation, lorHorizontal);			
 			}
 			else if (numParts == 0)
 			{
@@ -378,7 +378,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 				shp->get_PartAsShape(maxPart, &shpPart);
 				if ( shpPart == NULL ) continue;
 				
-				((CShape*)shpPart)->get_LabelPosition(Method, x, y, rotation, lorHorizontal);
+				((CShape*)shpPart)->get_LabelPosition(method, x, y, rotation, lorHorizontal);
 				shpPart->Release(); shpPart = NULL;
 			} // numParts > 1
 			
