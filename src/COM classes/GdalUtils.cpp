@@ -46,14 +46,14 @@ STDMETHODIMP CGdalUtils::GdalRasterWarp(BSTR sourceFilename, BSTR destinationFil
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 	_detailedError = "No error";
-	struct CallbackParams params(_globalCallback, "Warping");
+	CallbackParams params(_globalCallback, "Warping");
 
-	USES_CONVERSION;
-	const CStringW srcFilename = OLE2W(sourceFilename);
+	//USES_CONVERSION;
+	const CStringW srcFilename(sourceFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Source file %s does not exists."), srcFilename));
+		CallbackHelper::ErrorMsg(Debug::Format("Source file %s does not exists.", CString(srcFilename)));
 		_detailedError = "Source file " + srcFilename + " does not exists.";
 		return S_OK;
 	}
@@ -79,7 +79,7 @@ STDMETHODIMP CGdalUtils::GdalRasterWarp(BSTR sourceFilename, BSTR destinationFil
 	}
 
 	const auto warpOptions = ConvertSafeArrayToChar(options);
-	const auto gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, nullptr);
+	GDALWarpAppOptions* const gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, nullptr);
 	if (!gdalWarpOptions)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("The warp options are invalid.")));
@@ -91,7 +91,7 @@ STDMETHODIMP CGdalUtils::GdalRasterWarp(BSTR sourceFilename, BSTR destinationFil
 	// Call the gdalWarp function:		
 	GDALWarpAppOptionsSetProgress(gdalWarpOptions, GDALProgressCallback, &params);
 	m_globalSettings.SetGdalUtf8(true);
-	const auto dtNew = GDALWarp(OLE2A(destinationFilename), nullptr, 1, &dt, gdalWarpOptions, nullptr);
+	const auto dtNew = GDALWarp(CString(destinationFilename), nullptr, 1, &dt, gdalWarpOptions, nullptr);
 	m_globalSettings.SetGdalUtf8(false);
 	if (dtNew)
 	{
@@ -132,9 +132,9 @@ STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinati
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 	_detailedError = "No error";
-	struct CallbackParams params(_globalCallback, "Translating");
+	CallbackParams params(_globalCallback, "Translating");
 
-	USES_CONVERSION;
+	//USES_CONVERSION;
 	const CStringW srcFilename = OLE2W(sourceFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
@@ -161,7 +161,7 @@ STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinati
 	{
 		translateOptions = ConvertSafeArrayToChar(options);
 	}
-	catch (int e)
+	catch (const int e)
 	{
 		HandleException(e);
 		goto cleaning;
@@ -179,6 +179,7 @@ STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinati
 	// Call the gdalWarp function:
 	GDALTranslateOptionsSetProgress(gdalTranslateOptions, GDALProgressCallback, &params);
 	m_globalSettings.SetGdalUtf8(true);
+	USES_CONVERSION;
 	const auto dtNew = GDALTranslate(OLE2A(destinationFilename), dt, gdalTranslateOptions, nullptr);
 	m_globalSettings.SetGdalUtf8(false);
 	if (dtNew)
@@ -216,7 +217,7 @@ cleaning:
 // *********************************************************
 //	     GdalVectorReproject()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalVectorReproject(const BSTR sourceFilename, const BSTR destinationFilename,
+STDMETHODIMP CGdalUtils::GdalVectorReproject(BSTR sourceFilename, BSTR destinationFilename,
 	const int sourceEpsgCode, const int destinationEpsgCode,
 	const VARIANT_BOOL useSharedConnection, VARIANT_BOOL* retVal)
 {
@@ -232,7 +233,7 @@ STDMETHODIMP CGdalUtils::GdalVectorReproject(const BSTR sourceFilename, const BS
 	options[2] = "-t_srs";
 	options[3] = destEpsgCodeBuilder;
 	options[4] = "-overwrite";
-	
+
 	this->GdalVectorTranslate(sourceFilename, destinationFilename, options, useSharedConnection, retVal);
 
 	return S_OK;
@@ -241,7 +242,7 @@ STDMETHODIMP CGdalUtils::GdalVectorReproject(const BSTR sourceFilename, const BS
 // *********************************************************
 //	     GdalVectorTranslate()
 // *********************************************************
-STDMETHODIMP CGdalUtils::GdalVectorTranslate(const BSTR sourceFilename, const BSTR destinationFilename,
+STDMETHODIMP CGdalUtils::GdalVectorTranslate(BSTR sourceFilename, BSTR destinationFilename,
 	SAFEARRAY* options, const VARIANT_BOOL useSharedConnection,
 	VARIANT_BOOL* retVal)
 {
@@ -250,8 +251,8 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(const BSTR sourceFilename, const BS
 	_detailedError = "No error";
 	CallbackParams params(_globalCallback, "Vector translate");
 
-	USES_CONVERSION;
-	const CStringW srcFilename = OLE2W(sourceFilename);
+	//USES_CONVERSION;
+	const CStringW srcFilename(sourceFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Source file %s does not exists."), srcFilename));
@@ -294,6 +295,7 @@ STDMETHODIMP CGdalUtils::GdalVectorTranslate(const BSTR sourceFilename, const BS
 	// Call the gdalWarp function:
 	GDALVectorTranslateOptionsSetProgress(gdalVectorTranslateOptions, GDALProgressCallback, &params);
 	m_globalSettings.SetGdalUtf8(true);
+	USES_CONVERSION;
 	const auto dtNew = GDALVectorTranslate(OLE2A(destinationFilename), nullptr, 1, &dt, gdalVectorTranslateOptions, nullptr);
 	m_globalSettings.SetGdalUtf8(false);
 	if (dtNew)
@@ -336,8 +338,8 @@ STDMETHODIMP CGdalUtils::ClipVectorWithVector(BSTR subjectFilename, BSTR overlay
 	*retVal = VARIANT_FALSE;
 	_detailedError = "No error";
 
-	USES_CONVERSION;
-	const CStringW inputSubjectFilename = OLE2W(subjectFilename);
+	//USES_CONVERSION;
+	const CStringW inputSubjectFilename(subjectFilename);
 	if (!Utility::FileExistsW(inputSubjectFilename))
 	{
 		CallbackHelper::ErrorMsg(Debug::Format(static_cast<char*>("Subject file %s does not exists."), inputSubjectFilename));
@@ -376,10 +378,10 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALRes
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 	_detailedError = "No error";
-	struct CallbackParams params(_globalCallback, "Building overviews");
+	CallbackParams params(_globalCallback, "Building overviews");
 
-	USES_CONVERSION;
-	const CStringW srcFilename = OLE2W(sourceFilename);
+	//USES_CONVERSION;
+	const CStringW srcFilename(sourceFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
@@ -404,7 +406,7 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALRes
 	{
 		SetConfigOptionFromSafeArray(configOptions, false);
 	}
-	catch (int e)
+	catch (const int e)
 	{
 		HandleException(e);
 		goto cleaning;
@@ -416,7 +418,7 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALRes
 	{
 		panOverviewList = ConvertSafeArrayToInt(overviewList, nOverviews);
 	}
-	catch (int e)
+	catch (const int e)
 	{
 		HandleException(e);
 		goto cleaning;
@@ -425,10 +427,10 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALRes
 	if (nOverviews == 0)
 	{
 		// Auto generate levels, see https://github.com/OSGeo/gdal/blob/master/gdal/apps/gdaladdo.cpp#L288
-		const auto nMinSize = 256;
-		const auto nXSize = GDALGetRasterXSize(dt);
-		const auto nYSize = GDALGetRasterYSize(dt);
-		auto nOvrFactor = 1;
+		const int nMinSize = 256;
+		const int nXSize = GDALGetRasterXSize(dt);
+		const int nYSize = GDALGetRasterYSize(dt);
+		int nOvrFactor = 1;
 		while (DIV_ROUND_UP(nXSize, nOvrFactor) > nMinSize ||
 			DIV_ROUND_UP(nYSize, nOvrFactor) > nMinSize)
 		{
@@ -443,7 +445,7 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALRes
 	{
 		panBandList = ConvertSafeArrayToInt(bandList, nListBands);
 	}
-	catch (int e)
+	catch (const int e)
 	{
 		HandleException(e);
 		goto cleaning;
@@ -455,7 +457,7 @@ STDMETHODIMP CGdalUtils::GdalBuildOverviews(BSTR sourceFilename, const tkGDALRes
 	// Call the GDALBuildOverviews function:	
 	m_globalSettings.SetGdalUtf8(true);
 	// BuildOverviews(const char *pszResampling, int nOverviews, int *panOverviewList, int nListBands, int *panBandList, GDALProgressFuncp fnProgress, void *pProgressData)		
-	const auto result = GDALBuildOverviews(dt, pszResampling, nOverviews, panOverviewList, nListBands, panBandList, static_cast<GDALProgressFunc>(GDALProgressCallback), &params);
+	const auto result = GDALBuildOverviews(dt, pszResampling, nOverviews, panOverviewList, nListBands, panBandList, GDALProgressCallback, &params);
 	m_globalSettings.SetGdalUtf8(false);
 	if (result == CE_None)
 	{
@@ -508,8 +510,9 @@ void CGdalUtils::HandleException(const int exception)
 // *********************************************************************
 STDMETHODIMP CGdalUtils::get_LastErrorCode(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* pVal = _lastErrorCode;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
@@ -519,8 +522,8 @@ STDMETHODIMP CGdalUtils::get_LastErrorCode(long* pVal)
 // *********************************************************************
 STDMETHODIMP CGdalUtils::get_ErrorMsg(const long errorCode, BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*pVal = A2BSTR(ErrorMsg(errorCode));
 	return S_OK;
 }
@@ -530,10 +533,9 @@ STDMETHODIMP CGdalUtils::get_ErrorMsg(const long errorCode, BSTR* pVal)
 // *********************************************************************
 STDMETHODIMP CGdalUtils::get_DetailedErrorMsg(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = A2BSTR(static_cast<LPCSTR>(_detailedError));
+	*pVal = A2BSTR(_detailedError);
 	return S_OK;
 }
 
@@ -542,9 +544,9 @@ STDMETHODIMP CGdalUtils::get_DetailedErrorMsg(BSTR* pVal)
 // *********************************************************************
 STDMETHODIMP CGdalUtils::get_GlobalCallback(ICallback** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		* pVal = _globalCallback;
+	*pVal = _globalCallback;
 	if (_globalCallback != nullptr)
 	{
 		_globalCallback->AddRef();
@@ -554,25 +556,23 @@ STDMETHODIMP CGdalUtils::get_GlobalCallback(ICallback** pVal)
 
 STDMETHODIMP CGdalUtils::put_GlobalCallback(ICallback* newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		ComHelper::SetRef(newVal, reinterpret_cast<IDispatch**>(&_globalCallback));
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	ComHelper::SetRef(newVal, reinterpret_cast<IDispatch**>(&_globalCallback));
 	return S_OK;
 }
 
 STDMETHODIMP CGdalUtils::get_Key(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	*pVal = OLE2BSTR(_key);
-
 	return S_OK;
 }
 
 STDMETHODIMP CGdalUtils::put_Key(BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	SysFreeString(_key);
 	_key = OLE2BSTR(newVal);
@@ -643,7 +643,7 @@ auto CGdalUtils::ConvertSafeArrayToInt(SAFEARRAY* safeArray, int& size) -> int*
 		throw tkINVALID_PARAMETERS_ARRAY;
 	}
 
-	USES_CONVERSION;
+	//USES_CONVERSION;
 	LONG lLBound, lUBound;
 	int* pVals;
 	const auto hr1 = SafeArrayGetLBound(safeArray, 1, &lLBound);
