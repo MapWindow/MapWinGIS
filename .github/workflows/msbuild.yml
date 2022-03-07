@@ -148,6 +148,7 @@ jobs:
     runs-on: windows-2022
     
     strategy:
+      max-parallel: 1
       matrix:
         platform: ['Win32', 'x64']
         # platform: ['Win32']
