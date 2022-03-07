@@ -3639,7 +3639,7 @@ interface IShapeEditor : IDispatch {
 
 	[propget, id(1)] HRESULT ShapeType([out, retval] ShpfileType* retVal);
 	[propput, id(1)] HRESULT ShapeType([in] ShpfileType newVal);
-	[propget, id(2)] HRESULT numPoints([out, retval] long* retVal);
+	[propget, id(2)] HRESULT NumPoints([out, retval] long* retVal);
 	[id(3)] HRESULT get_PointXY([in]long pointIndex, [out]double* x, [out]double* y, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(4)] HRESULT ValidatedShape([out, retval] IShape** retVal);
 	[id(5)] HRESULT UndoPoint([out, retval] VARIANT_BOOL* retVal);
@@ -4573,8 +4573,8 @@ interface IShapeNetwork : IDispatch {
 ]
 interface ICallback : IDispatch
 {
-	[id(1), helpstring("method Progress")] HRESULT Progress([in]BSTR KeyOfSender, [in]long Percent, [in]BSTR Message);
-	[id(2), helpstring("method Error")] HRESULT Error([in]BSTR KeyOfSender, [in]BSTR ErrorMsg);
+	[id(1), helpstring("method Progress")] HRESULT Progress([in]BSTR keyOfSender, [in]long percent, [in]BSTR message);
+	[id(2), helpstring("method Error")] HRESULT Error([in]BSTR keyOfSender, [in]BSTR errorMsg);
 };
 
 

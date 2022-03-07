@@ -23,7 +23,7 @@ public class ShapeTests
     public void ShapeNumPointsTest()
     {
         // Point shape
-        _firstShapePoint.numPoints.ShouldBe(1);
+        _firstShapePoint.NumPoints.ShouldBe(1);
     }
 
     [Fact]
