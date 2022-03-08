@@ -53,4 +53,11 @@
 	  <ProjectReference Include="..\WinFormsApp1\WinFormsApp1.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="xunit.runner.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <CustomToolNamespace>https://xunit.net/schema/current/xunit.runner.schema.json</CustomToolNamespace>
+	  </None>
+	</ItemGroup>
+
 </Project>
