@@ -20,12 +20,18 @@ public class CodeCoverageTests
     public void CheckShapeClass()
     {
         CheckTests(typeof(ShapeClass), "Shape");
-    }    
-    
+    }
+
     [Fact]
     public void CheckGlobalSettingsClass()
     {
         CheckTests(typeof(GlobalSettingsClass), "GlobalSettings");
+    }
+
+    [Fact]
+    public void CheckGdalUtilsClass()
+    {
+        CheckTests(typeof(GdalUtilsClass), "GdalUtils");
     }
 
     private void CheckTests(Type myType, string className, bool scaffoldUnitTests = false)
@@ -84,6 +90,22 @@ public class CodeCoverageTests
     }
 
     private void ScaffoldUnitTest(string className, string name, string type)
+    {
+        if (className == "GlobalSettings") ScaffoldUnitTestGlobalSettings(className, name, type);
+        if (className == "GdalUtils") ScaffoldUnitTestGdalUtils(className, name, type);
+
+    }
+
+    private void ScaffoldUnitTestGdalUtils(string className, string name, string type)
+    {
+        _testOutputHelper.WriteLine("[Fact]");
+        _testOutputHelper.WriteLine($"public void {className}{name}Test()\n{{");
+        _testOutputHelper.WriteLine($"\tvar retVal = _gdalUtils.{name};");
+        _testOutputHelper.WriteLine($"\tretVal.ShouldBeTrue();");
+        _testOutputHelper.WriteLine(@"}\n");
+    }
+
+    private void ScaffoldUnitTestGlobalSettings(string className, string name, string type)
     {
         _testOutputHelper.WriteLine("[Fact]");
         _testOutputHelper.WriteLine($"public void {className}{name}Test()\n{{");

@@ -45,8 +45,7 @@ internal static class Helpers
 
     internal static string SaveSfToTempFile(Shapefile sf, string filenamePart)
     {
-        var baseFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
-        var fileName = Path.ChangeExtension($"{baseFileName}{filenamePart}", ".shp");
+        var fileName = GetRandomFilePath(filenamePart, ".shp");
         SaveSf(sf, fileName);
 
         // Check if shapefile files exists:
@@ -203,6 +202,16 @@ internal static class Helpers
         return path;
     }
 
+    internal static string GetRandomFilePath(string filenamePart, string extension)
+    {
+        var baseFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+        var fileName = Path.ChangeExtension($"{baseFileName}{filenamePart}", extension);
+
+        if (File.Exists(fileName)) File.Delete(fileName);
+
+        return fileName;
+    }
+
     internal static void CheckSfFiles(string sfFileLocation, bool shouldExists)
     {
         var shpFileLocation = Path.ChangeExtension(sfFileLocation, ".shp");
@@ -236,12 +245,48 @@ internal static class Helpers
         }
     }
 
-    public static string ReplaceFirstOccurrence (this string source, string find, string replace)
+    internal static string ReplaceFirstOccurrence(this string source, string find, string replace)
     {
         var place = source.IndexOf(find, StringComparison.Ordinal);
         if (place < 0) return source;
 
         var result = source.Remove(place, find.Length).Insert(place, replace);
         return result;
+    }
+
+    internal static void CopyShapefile(string sourceFilename, string destinationFilename)
+    {
+        // Checks:
+        if (!File.Exists(sourceFilename))
+            throw new FileNotFoundException("Source file does not exists", sourceFilename);
+        if (File.Exists(destinationFilename)) DeleteShapefileFiles(destinationFilename);
+
+        var fileDirSource = Path.GetDirectoryName(sourceFilename);
+        if (fileDirSource is null) throw new FileNotFoundException("Source file does not exists", sourceFilename);
+        var fileDirDestination = Path.GetDirectoryName(destinationFilename)!;
+        if (!Directory.Exists(fileDirDestination)) Directory.CreateDirectory(fileDirDestination);
+
+        var dir = new DirectoryInfo(fileDirSource);
+        var baseNameSource = Path.GetFileNameWithoutExtension(sourceFilename);
+        var baseNameDestination = Path.GetFileNameWithoutExtension(destinationFilename);
+        foreach (var file in dir.EnumerateFiles($"{baseNameSource}.*", SearchOption.TopDirectoryOnly))
+        {
+            var ext = Path.GetExtension(file.FullName);
+            File.Copy(file.FullName, Path.Combine(fileDirDestination, $"{baseNameDestination}{ext}"));
+        }
+    }
+
+    internal static void DeleteShapefileFiles(string sfFilename)
+    {
+        var fileDir = Path.GetDirectoryName(sfFilename);
+        if (fileDir is null) return;
+
+        var dir = new DirectoryInfo(fileDir);
+
+        var baseName = Path.GetFileNameWithoutExtension(sfFilename);
+        foreach (var file in dir.EnumerateFiles($"{baseName}.*", SearchOption.TopDirectoryOnly))
+        {
+            file.Delete();
+        }
     }
 }
