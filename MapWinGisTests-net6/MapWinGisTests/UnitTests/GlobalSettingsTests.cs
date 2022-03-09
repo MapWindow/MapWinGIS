@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
 
 namespace MapWinGisTests.UnitTests;
+
+[Collection(nameof(NotThreadSafeResourceCollection))]
 public class GlobalSettingsTests : ICallback
 {
     private readonly GlobalSettings _gs;
@@ -959,14 +961,12 @@ public class GlobalSettingsTests : ICallback
         // Reset:
         _gs.WmsDiskCaching = value;
         _gs.WmsDiskCaching.ShouldBe(value);
-
     }
 
 
     [Fact]
     public void GlobalSettingsCallbackVerbosityTest()
     {
-
         //Read:
         var value = _gs.CallbackVerbosity;
         _testOutputHelper.WriteLine(value.ToString());
@@ -983,7 +983,6 @@ public class GlobalSettingsTests : ICallback
         // Reset:
         _gs.CallbackVerbosity = value;
         _gs.CallbackVerbosity.ShouldBe(value);
-
     }
 
 
@@ -1244,7 +1243,7 @@ public class GlobalSettingsTests : ICallback
 
 
     #region Implementation of ICallback
-
+#pragma warning disable xUnit1013
     public void Progress(string keyOfSender, int percent, string message)
     {
         _testOutputHelper.WriteLine($"Progress of {keyOfSender}: {percent}. Msg: {message}");
@@ -1254,6 +1253,6 @@ public class GlobalSettingsTests : ICallback
     {
         _testOutputHelper.WriteLine($"Error of {keyOfSender}: {errorMsg}");
     }
-
+#pragma warning restore xUnit1013
     #endregion
 }

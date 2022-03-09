@@ -1,5 +1,6 @@
 ﻿namespace MapWinGisTests.FunctionalTests.Shapefile;
 
+[Collection(nameof(NotThreadSafeResourceCollection))]
 public class ShapefileTests
 {
     private readonly ITestOutputHelper _testOutputHelper;

@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 
 namespace MapWinGisTests.UnitTests;
+
+[Collection(nameof(NotThreadSafeResourceCollection))]
 public class CodeCoverageTests
 {
     private readonly ITestOutputHelper _testOutputHelper;

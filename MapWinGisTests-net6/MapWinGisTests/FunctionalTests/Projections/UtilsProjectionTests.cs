@@ -1,5 +1,6 @@
 ﻿namespace MapWinGisTests.FunctionalTests.Projections;
 
+[Collection(nameof(NotThreadSafeResourceCollection))]
 public class UtilsProjectionTests
 {
     private readonly ITestOutputHelper _testOutputHelper;

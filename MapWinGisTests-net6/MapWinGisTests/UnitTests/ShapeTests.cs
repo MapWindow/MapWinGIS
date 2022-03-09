@@ -1,4 +1,6 @@
 ﻿namespace MapWinGisTests.UnitTests;
+
+[Collection(nameof(NotThreadSafeResourceCollection))]
 public class ShapeTests
 {
     private readonly ITestOutputHelper _testOutputHelper;

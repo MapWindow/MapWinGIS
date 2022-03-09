@@ -1,4 +1,6 @@
 ﻿namespace MapWinGisTests.FunctionalTests.GdalUtils;
+
+[Collection(nameof(NotThreadSafeResourceCollection))]
 public class GdalUtilsTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
