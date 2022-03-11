@@ -855,8 +855,7 @@ STDMETHODIMP CGeoProjection::ReadFromFile(BSTR filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	USES_CONVERSION;
-	const CStringW filenameW = OLE2W(filename);
+	const CStringW filenameW(filename);
 
 	*retVal = ReadFromFileCore(filenameW, false) ? VARIANT_TRUE : VARIANT_FALSE;
 
@@ -870,7 +869,6 @@ STDMETHODIMP CGeoProjection::ReadFromFileEx(BSTR filename, VARIANT_BOOL esri, VA
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	USES_CONVERSION;
 	const CStringW filenameW = OLE2W(filename);
 
 	*retVal = ReadFromFileCore(filenameW, esri ? true : false) ? VARIANT_TRUE : VARIANT_FALSE;
@@ -921,7 +919,6 @@ STDMETHODIMP CGeoProjection::WriteToFile(BSTR filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	USES_CONVERSION;
 	const CStringW filenameW = OLE2W(filename);
 
 	*retVal = WriteToFileCore(filenameW, false) ? VARIANT_TRUE : VARIANT_FALSE;
@@ -936,7 +933,6 @@ STDMETHODIMP CGeoProjection::WriteToFileEx(BSTR filename, VARIANT_BOOL esri, VAR
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	USES_CONVERSION;
 	const CStringW filenameW = OLE2W(filename);
 
 	*retVal = WriteToFileCore(filenameW, esri ? true : false) ? VARIANT_TRUE : VARIANT_FALSE;
@@ -1001,7 +997,6 @@ STDMETHODIMP CGeoProjection::get_Name(BSTR* pVal)
 	}
 	else
 	{
-		USES_CONVERSION;
 		*pVal = A2BSTR("");
 	}
 	return S_OK;
@@ -1013,7 +1008,6 @@ STDMETHODIMP CGeoProjection::get_Name(BSTR* pVal)
 STDMETHODIMP CGeoProjection::get_ProjectionName(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
 
 	const char* name = _projection->GetAttrValue("PROJCS");
 	if (name)
@@ -1030,7 +1024,6 @@ STDMETHODIMP CGeoProjection::get_ProjectionName(BSTR* pVal)
 STDMETHODIMP CGeoProjection::get_GeogCSName(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
 
 	const char* name = _projection->GetAttrValue("GEOGCS");
 	if (name)
