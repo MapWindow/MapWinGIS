@@ -49,7 +49,7 @@ STDMETHODIMP CGeoProjection::get_GlobalCallback(ICallback** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		* pVal = _globalCallback;
+	*pVal = _globalCallback;
 	if (_globalCallback != nullptr)
 		_globalCallback->AddRef();
 	return S_OK;
@@ -61,7 +61,8 @@ STDMETHODIMP CGeoProjection::get_GlobalCallback(ICallback** pVal)
 STDMETHODIMP CGeoProjection::put_GlobalCallback(ICallback* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
+
+	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -71,7 +72,6 @@ STDMETHODIMP CGeoProjection::put_GlobalCallback(ICallback* newVal)
 STDMETHODIMP CGeoProjection::get_ErrorMsg(long ErrorCode, BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
 
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
 	return S_OK;
@@ -152,7 +152,6 @@ void CGeoProjection::ErrorMessage(const long errorCode)
 STDMETHODIMP CGeoProjection::get_Key(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
 
 	*pVal = OLE2BSTR(_key);
 	return S_OK;
@@ -181,7 +180,7 @@ STDMETHODIMP CGeoProjection::ExportToProj4(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
+	const OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
 	if (!node) {
 		*retVal = A2BSTR("");
 		return S_OK;
@@ -218,7 +217,6 @@ STDMETHODIMP CGeoProjection::ImportFromProj4(BSTR proj, VARIANT_BOOL* retVal)
 		return S_OK;
 	}
 
-	USES_CONVERSION;
 	const CString str(proj);
 	if (str.GetLength() == 0)
 	{
@@ -250,30 +248,12 @@ STDMETHODIMP CGeoProjection::Clear(VARIANT_BOOL* retVal)
 	}
 	else
 	{
-		this->StopTransform();
+		this->StopTransform(); // precautionary, prior to clear
 		_projection->Clear();
 		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
 }
-
-// *******************************************************
-//		Clone()
-// *******************************************************
-//STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//	*retVal = nullptr;
-//	ComHelper::CreateInstance(idGeoProjection, reinterpret_cast<IDispatch**>(retVal));
-//	VARIANT_BOOL vb;
-//	(*retVal)->CopyFrom(this, &vb);
-//	if (!vb)
-//	{
-//		(*retVal)->Release();
-//		(*retVal) = nullptr;
-//	}
-//	return S_OK;
-//}
 
 // *******************************************************
 //		Clone()
@@ -307,19 +287,15 @@ STDMETHODIMP CGeoProjection::ImportFromESRI(const BSTR proj, VARIANT_BOOL* retVa
 	}
 	else
 	{
-		USES_CONVERSION;
-
 		// convert BSTR to CString
 		CString strProj(proj);
-		// get char* buffer from CString
-		const char* s = strProj.GetBuffer();
 
 		// Parameters: papszPrj	NULL terminated list of strings containing the definition.
-		char** papszPrj{};
-		papszPrj = CSLAddString(papszPrj, s);
+		char** papszPrj{}; 
+		papszPrj = CSLAddString(papszPrj, LPCSTR(strProj));
 		const OGRErr err = _projection->importFromESRI(papszPrj);
-		// release CString buffer
-		strProj.ReleaseBuffer();
+		// destroy string list
+		CSLDestroy(papszPrj);
 
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
