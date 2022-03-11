@@ -824,17 +824,18 @@ STDMETHODIMP CGeoProjection::CopyFrom(IGeoProjection* sourceProj, VARIANT_BOOL* 
 		return S_OK;
 	}
 
-	if (ProjectionHelper::IsEmpty(sourceProj))
+	VARIANT_BOOL bEmpty;
+	if (((sourceProj->get_IsEmpty(&bEmpty)) == S_OK) && bEmpty)
 	{
+		// source is empty, so clear local
 		Clear(retVal);
 		return S_OK;
 	}
 
 	CComBSTR bstr;
 	sourceProj->ExportToWKT(&bstr);
-
-	USES_CONVERSION;
-	char* prj = OLE2A(bstr);
+	CW2A w2a(bstr);
+	char* prj = LPSTR(w2a);
 
 	const OGRErr err = _projection->importFromWkt(&prj);
 	if (err != OGRERR_NONE)
