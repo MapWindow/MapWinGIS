@@ -42,11 +42,10 @@ public:
 	CGeoProjection()
 	{
 		_pUnkMarshaler = nullptr;
-		USES_CONVERSION;
 		_key = A2BSTR("");
 		_globalCallback = nullptr;
 		_lastErrorCode = tkNO_ERROR;
-		_projection = (OGRSpatialReference*)OSRNewSpatialReference(nullptr);
+		_projection = reinterpret_cast<OGRSpatialReference*>(OSRNewSpatialReference(nullptr));
 #if GDAL_VERSION_MAJOR >= 3
 		// TODO: This should be a temporarily fix??
 		_projection->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
@@ -56,7 +55,7 @@ public:
 		_isFrozen = false;
 	}
 
-	~CGeoProjection()
+	~CGeoProjection() noexcept(false)
 	{
 		SysFreeString(_key);
 		StopTransform();
@@ -162,8 +161,8 @@ private:
 	bool ParseLinearUnits(CString s, tkUnitsOfMeasure& units);
 
 public:
-	OGRSpatialReference* get_SpatialReference() { return _projection; }
-	void SetIsFrozen(bool frozen) { _isFrozen = frozen; }
+	OGRSpatialReference* get_SpatialReference() noexcept { return _projection; }
+	void SetIsFrozen(bool frozen) noexcept { _isFrozen = frozen; }
 	void InjectSpatialReference(const gsl::not_null<OGRSpatialReference*> sr);
 };
 
