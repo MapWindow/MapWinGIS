@@ -317,18 +317,6 @@ STDMETHODIMP CGeoProjection::ImportFromEPSG(const LONG projCode, VARIANT_BOOL* r
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
 		*retVal = VARIANT_FALSE;
 	}
-	// Start pm feb-2022, Is this still needed?
-	//else if (projCode == 3857)
-	//{
-	//	SetGoogleMercator(retVal);
-	//	return S_OK;
-	//}
-	//else if (projCode == 4326)
-	//{
-	//	SetWgs84(retVal);
-	//	return S_OK;
-	//}
-	// End pm feb-2022, Is this still needed?
 	else
 	{
 		const OGRErr err = _projection->importFromEPSG(projCode);
@@ -420,24 +408,29 @@ STDMETHODIMP CGeoProjection::ExportToWktEx(BSTR* retVal)
 STDMETHODIMP CGeoProjection::ImportFromWKT(const BSTR proj, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (_isFrozen)
-		{
-			ErrorMessage(tkPROJECTION_IS_FROZEN);
-			*retVal = VARIANT_FALSE;
-		}
-		else
-		{
-			USES_CONVERSION;
+	if (_isFrozen)
+	{
+		ErrorMessage(tkPROJECTION_IS_FROZEN);
+		*retVal = VARIANT_FALSE;
+	}
+	else
+	{
+		CString strProj(proj);
 
-			const CString s = OLE2A(proj);
-			const OGRErr err = ProjectionHelper::ImportFromWkt(_projection, s);
-
-			*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
-			if (err != OGRERR_NONE)
-			{
-				ReportOgrError(err);
-			}
+		OGRErr result = OGRERR_NONE;
+		// use newer method importFromWkt(const char*)
+		if ((result = _projection->importFromWkt(LPCSTR(strProj))) == OGRERR_NONE)
+		{
+			// then Validate (https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference8ValidateEv)
+			result = _projection->Validate();
 		}
+
+		*retVal = result == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
+		if (result != OGRERR_NONE)
+		{
+			ReportOgrError(result);
+		}
+	}
 	return S_OK;
 }
 
