@@ -1,4 +1,6 @@
 ﻿namespace MapWinGisTests.FunctionalTests.Shapefile;
+
+[Collection(nameof(NotThreadSafeResourceCollection))]
 public class SpatialIndexTests
 {
     private readonly ITestOutputHelper _testOutputHelper;

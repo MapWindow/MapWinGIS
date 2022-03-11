@@ -1,5 +1,6 @@
 namespace MapWinGisTests;
 
+[Collection(nameof(NotThreadSafeResourceCollection))]
 public class AxMapTests
 {
     [WpfFact]

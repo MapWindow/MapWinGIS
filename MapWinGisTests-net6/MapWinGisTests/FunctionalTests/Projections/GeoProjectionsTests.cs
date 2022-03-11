@@ -2,6 +2,7 @@
 
 namespace MapWinGisTests.FunctionalTests.Projections;
 
+[Collection(nameof(NotThreadSafeResourceCollection))]
 public class GeoProjectionsTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
