@@ -441,27 +441,27 @@ STDMETHODIMP CGeoProjection::ImportFromAutoDetect(BSTR proj, VARIANT_BOOL* retVa
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (_isFrozen)
-		{
-			ErrorMessage(tkPROJECTION_IS_FROZEN);
-			*retVal = VARIANT_FALSE;
-		}
-		else
-		{
-			USES_CONVERSION;
-			const CString s = OLE2A(proj);
-			*retVal = VARIANT_FALSE;
+	if (_isFrozen)
+	{
+		ErrorMessage(tkPROJECTION_IS_FROZEN);
+		*retVal = VARIANT_FALSE;
+	}
+	else
+	{
+		const CString s(proj);
+		*retVal = VARIANT_FALSE;
 
-			const OGRErr err = _projection->SetFromUserInput(s);
+		const OGRErr err = _projection->SetFromUserInput(s);
 
-			if (err == OGRERR_NONE)
-			{
-				VARIANT_BOOL empty;
-				this->get_IsEmpty(&empty);
-				if (!empty)
-					*retVal = VARIANT_TRUE;
-			}
+		if (err == OGRERR_NONE)
+		{
+			// jf: Based on GDAL documentation, I don't think an empty test is necessary
+			VARIANT_BOOL empty;
+			this->get_IsEmpty(&empty);
+			if (!empty)
+				*retVal = VARIANT_TRUE;
 		}
+	}
 	return S_OK;
 }
 
@@ -471,8 +471,8 @@ STDMETHODIMP CGeoProjection::ImportFromAutoDetect(BSTR proj, VARIANT_BOOL* retVa
 STDMETHODIMP CGeoProjection::SetWellKnownGeogCS(tkCoordinateSystem newVal, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		ImportFromEPSG(newVal, retVal);
-	return S_OK;
+	// pass on to import function
+	return ImportFromEPSG(newVal, retVal);
 }
 #pragma endregion
 
@@ -483,7 +483,7 @@ STDMETHODIMP CGeoProjection::SetWellKnownGeogCS(tkCoordinateSystem newVal, VARIA
 STDMETHODIMP CGeoProjection::get_IsGeographic(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* pVal = _projection->IsGeographic() == 0 ? VARIANT_FALSE : VARIANT_TRUE;
+	*pVal = (_projection->IsGeographic() == 0) ? VARIANT_FALSE : VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -493,7 +493,7 @@ STDMETHODIMP CGeoProjection::get_IsGeographic(VARIANT_BOOL* pVal)
 STDMETHODIMP CGeoProjection::get_IsProjected(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* pVal = _projection->IsProjected() == 0 ? VARIANT_FALSE : VARIANT_TRUE;
+	*pVal = (_projection->IsProjected() == 0) ? VARIANT_FALSE : VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -503,7 +503,7 @@ STDMETHODIMP CGeoProjection::get_IsProjected(VARIANT_BOOL* pVal)
 STDMETHODIMP CGeoProjection::get_IsLocal(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* pVal = _projection->IsLocal() == 0 ? VARIANT_FALSE : VARIANT_TRUE;
+	*pVal = (_projection->IsLocal() == 0) ? VARIANT_FALSE : VARIANT_TRUE;
 	return S_OK;
 }
 
