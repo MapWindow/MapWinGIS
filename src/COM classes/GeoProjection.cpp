@@ -871,18 +871,44 @@ bool CGeoProjection::ReadFromFileCore(CStringW filename, bool esri)
 	if (!Utility::FileExistsW(filename))
 		return false;
 
-	char** papszPrj = GdalHelper::ReadFile(filename);
+	OGRErr err = OGRERR_NONE;
 
+	if (esri)
+	{
+		// importFromEsri requires lines of file as null-terminated list of strings
+		char** papszPrj = GdalHelper::ReadFile(filename);
 	if (!papszPrj) return false;
 
 	// passing the first string only
 	// to keep safe the initial pointer to array
-	char* pszWKT = CPLStrdup(papszPrj[0]);
-
-	const OGRErr err = esri ? _projection->importFromESRI(papszPrj) : _projection->SetFromUserInput(pszWKT);
-
+		char* pszWKT = CPLStrdup(*papszPrj);
+		// do the import
+		err = _projection->importFromESRI(&pszWKT);
+		// clean up strings
 	CSLDestroy(papszPrj);
 	CPLFree(pszWKT);
+	}
+	else
+	{
+		// SetFromUserInput requires entire file as a single string
+		FILE* prjFile = _wfopen(filename, L"r");
+		if (!prjFile) {
+			return false;
+		}
+		// determine file length
+		fseek(prjFile, 0L, SEEK_END);
+		const int fileLen = ftell(prjFile);
+		fseek(prjFile, 0L, SEEK_SET);
+		// allocate buffer for file
+		vector<char> pszWKT = vector<char>(fileLen, 0);
+		// read the file
+		fread(pszWKT.data(), sizeof(char), fileLen, prjFile);
+		fclose(prjFile);
+		// do the import
+		err = _projection->SetFromUserInput(pszWKT.data());
+		// clean up
+		//delete pszWKT;
+	}
 
 	if (err != OGRERR_NONE)
 	{
@@ -950,7 +976,8 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 
 	if (proj.GetLength() != 0)
 	{
-		fprintf(prjFile, "%s", (LPCSTR)proj);
+		fputs((LPCSTR)proj, prjFile);
+		//fprintf(prjFile, "%s", (LPCSTR)proj);
 	}
 
 	fclose(prjFile);
