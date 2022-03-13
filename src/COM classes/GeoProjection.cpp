@@ -1054,8 +1054,8 @@ STDMETHODIMP CGeoProjection::SetGeographicCS(tkCoordinateSystem coordinateSystem
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 #if GDAL_VERSION_MAJOR >= 3
-		VARIANT_BOOL* bret = nullptr;
-	ImportFromEPSG(coordinateSystem, bret);
+		VARIANT_BOOL bRet = VARIANT_FALSE;
+		ImportFromEPSG(coordinateSystem, &bRet);
 #else
 		_projection->importFromEPSG((int)coordinateSystem);
 #endif
@@ -1069,8 +1069,8 @@ STDMETHODIMP CGeoProjection::SetWgs84Projection(tkWgs84Projection projection)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 #if GDAL_VERSION_MAJOR >= 3
-		VARIANT_BOOL* bret = nullptr;
-	ImportFromEPSG(projection, bret);
+		VARIANT_BOOL bRet = VARIANT_FALSE;
+		ImportFromEPSG(projection, &bRet);
 #else
 		_projection->importFromEPSG((int)projection);
 #endif	
@@ -1084,8 +1084,8 @@ STDMETHODIMP CGeoProjection::SetNad83Projection(tkNad83Projection projection)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 #if GDAL_VERSION_MAJOR >= 3
-		VARIANT_BOOL* bret = nullptr;
-	ImportFromEPSG(projection, bret);
+		VARIANT_BOOL bRet = VARIANT_FALSE;
+		ImportFromEPSG(projection, &bRet);
 #else
 		_projection->importFromEPSG((int)projection);
 #endif	
