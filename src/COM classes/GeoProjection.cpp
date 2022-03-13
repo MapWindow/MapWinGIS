@@ -953,21 +953,18 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 	}
 
 	CString proj;
-	if (esri) {
 		CComBSTR bstr;
+	if (esri)
+	{
 		this->ExportToEsri(&bstr);
-		USES_CONVERSION;
-		proj = OLE2A(bstr);
 	}
-	else {
-		// TODO: Use new ExportWktEx instead??
-		const OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
-		if (err != OGRERR_NONE)
+	else 
 		{
-			ReportOgrError(err);
-			return false;
-		}
+		// Use new ExportWktEx 
+		this->ExportToWktEx(&bstr);
 	}
+	// set into CString
+	proj = bstr;
 
 	if (proj.GetLength() != 0)
 	{
