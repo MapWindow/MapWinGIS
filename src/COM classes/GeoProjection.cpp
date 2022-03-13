@@ -1369,25 +1369,26 @@ STDMETHODIMP CGeoProjection::ExportToEsri(BSTR* retVal)
 	// Since GDAL 3.0, this function has only user-visible effects at exportToWkt() time.
 	// It is recommended to use instead exportToWkt(char**, const char* const char*) const with options having FORMAT=WKT1_ESRI.
 
-	OGRSpatialReference projTemp;
-
 	// we can't morph the initial instance, 
 	// since the reverse operation doesn't return the exact same projection;
 	// let's create a copy instead
-	CString proj;
-	const OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
+	char* szProj = nullptr;
+	OGRErr err = _projection->exportToWkt(&szProj);
 	if (err == OGRERR_NONE)
 	{
-		ProjectionHelper::ImportFromWkt(&projTemp, proj);
+		OGRSpatialReference* projTemp = reinterpret_cast<OGRSpatialReference*>(OSRNewSpatialReference(nullptr));
+		err = projTemp->importFromWkt(szProj);
+		CPLFree(szProj);
 
 		if (err == OGRERR_NONE)
 		{
-			projTemp.morphToESRI();
-			const OGRErr err2 = ProjectionHelper::ExportToWkt(&projTemp, proj);
+			projTemp->morphToESRI();
+			const OGRErr err2 = projTemp->exportToWkt(&szProj);
 
 			if (err2 == OGRERR_NONE)
 			{
-				*retVal = A2BSTR(proj);
+				*retVal = A2BSTR(szProj);
+				CPLFree(szProj);
 			}
 			else
 			{
@@ -1395,6 +1396,8 @@ STDMETHODIMP CGeoProjection::ExportToEsri(BSTR* retVal)
 				*retVal = m_globalSettings.CreateEmptyBSTR();
 			}
 		}
+		// destroy spatial reference
+		OGRSpatialReference::DestroySpatialReference(projTemp);
 	}
 
 	return S_OK;
