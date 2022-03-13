@@ -513,7 +513,7 @@ STDMETHODIMP CGeoProjection::get_IsLocal(VARIANT_BOOL* pVal)
 STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* pVal = VARIANT_FALSE;
+	*pVal = VARIANT_FALSE;
 
 	if (!proj)
 	{
@@ -543,7 +543,7 @@ bool CGeoProjection::IsSameProjection(OGRCoordinateTransformation* transf, doubl
 	double xNew = x;
 	double yNew = y;
 
-	BOOL res = transf->Transform(1, &xNew, &yNew);
+	const BOOL res = transf->Transform(1, &xNew, &yNew);
 	{
 		const int tolerance = projected == true ? 3 : 7;
 
@@ -673,7 +673,7 @@ STDMETHODIMP CGeoProjection::get_IsSameGeogCS(IGeoProjection* proj, VARIANT_BOOL
 	}
 	else
 	{
-		const OGRSpatialReference* ref = static_cast<CGeoProjection*>(proj)->get_SpatialReference();
+		const OGRSpatialReference* ref = dynamic_cast<CGeoProjection*>(proj)->get_SpatialReference();
 		*pVal = (_projection->IsSameGeogCS(ref) == 0) ? VARIANT_FALSE : VARIANT_TRUE;
 	}
 	return S_OK;
@@ -776,24 +776,6 @@ STDMETHODIMP CGeoProjection::get_ProjectionParam(tkProjectionParameter name, dou
 
 #pragma endregion
 
-// *******************************************************
-//		get_IsEmpty()
-// *******************************************************
-//STDMETHODIMP CGeoProjection::get_IsEmpty(VARIANT_BOOL* retVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-//		OGR_SRSNode* node = _projection->GetRoot();
-//	if (node)
-//	{
-//		const char* name = _projection->GetAttrValue("GEOGCS");
-//		*retVal = name ? VARIANT_FALSE : VARIANT_TRUE;
-//	}
-//	else
-//	{
-//		*retVal = VARIANT_TRUE;
-//	}
-//	return S_OK;
-//}
 STDMETHODIMP CGeoProjection::get_IsEmpty(VARIANT_BOOL* retVal)
 {
 	// https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference7IsEmptyEv
@@ -953,13 +935,13 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 	}
 
 	CString proj;
-		CComBSTR bstr;
+	CComBSTR bstr;
 	if (esri)
 	{
 		this->ExportToEsri(&bstr);
 	}
 	else 
-		{
+	{
 		// Use new ExportWktEx 
 		this->ExportToWktEx(&bstr);
 	}
@@ -1350,7 +1332,7 @@ STDMETHODIMP CGeoProjection::ExportToEsri(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		OGR_SRSNode* node = _projection->GetRoot();
+	const OGR_SRSNode* node = _projection->GetRoot();
 	if (!node) {
 		*retVal = m_globalSettings.CreateEmptyBSTR();
 		return S_OK;
@@ -1366,7 +1348,7 @@ STDMETHODIMP CGeoProjection::ExportToEsri(BSTR* retVal)
 	// since the reverse operation doesn't return the exact same projection;
 	// let's create a copy instead
 	CString proj;
-	OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
+	const OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
 	if (err == OGRERR_NONE)
 	{
 		ProjectionHelper::ImportFromWkt(&projTemp, proj);
@@ -1374,15 +1356,15 @@ STDMETHODIMP CGeoProjection::ExportToEsri(BSTR* retVal)
 		if (err == OGRERR_NONE)
 		{
 			projTemp.morphToESRI();
-			OGRErr err = ProjectionHelper::ExportToWkt(&projTemp, proj);
+			const OGRErr err2 = ProjectionHelper::ExportToWkt(&projTemp, proj);
 
-			if (err == OGRERR_NONE)
+			if (err2 == OGRERR_NONE)
 			{
 				*retVal = A2BSTR(proj);
 			}
 			else
 			{
-				ReportOgrError(err);
+				ReportOgrError(err2);
 				*retVal = m_globalSettings.CreateEmptyBSTR();
 			}
 		}
@@ -1399,9 +1381,9 @@ STDMETHODIMP CGeoProjection::get_LinearUnits(tkUnitsOfMeasure* pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	char* s = nullptr;
-	double ratio = _projection->GetLinearUnits(&s);	  // don't free the memory, the string was already allocated
+	const double ratio = _projection->GetLinearUnits(&s);	  // don't free the memory, the string is internal to OGRSpatialReference
 
-	CString units = s;
+	CString units(s);
 
 	if (!ParseLinearUnits(units, *pVal))
 	{
@@ -1424,8 +1406,8 @@ bool CGeoProjection::ParseLinearUnits(CString s, tkUnitsOfMeasure& units)
 	}
 	else if (s.CompareNoCase("meter") == 0 || s.CompareNoCase("metre") == 0 || s.CompareNoCase("meters") == 0 || s.CompareNoCase("metres") == 0)
 	{   // jf: based on input on GitHub from ultraTCS, I'm adding the variations of 'meter(s)';
-		// although I do not see any WKT UNIT references being plural 'meters', we had included 
-		// that case before, so I am leaving it - (and the 'metres' variation for completeness)
+		// although the WKT UNIT references are singular, the plural 'Meters' will be returned
+		// by GDAL GetLinearUnits, so we leave that (and the 'metres' variation for completeness)
 		units = umMeters;
 		return true;
 	}
