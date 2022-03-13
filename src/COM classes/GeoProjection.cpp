@@ -1311,10 +1311,13 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 			// Starting with GDAL 3.0, it relies on PROJ’ proj_identify() function.
 			// https://gdal.org/api/ogrspatialref.html?highlight=autoidentifyepsg#_CPPv4NK19OGRSpatialReference11FindMatchesEPPcPiPPi
 			OGRSpatialReferenceH* pahSrs = _projection->FindMatches(nullptr, &nEntries, &panConfidence);
-			if (nEntries > 0 && panConfidence[0] > 80)
+			// create a span over the arrays
+			const gsl::span<OGRSpatialReferenceH> spahSrs(pahSrs, nEntries);
+			const gsl::span<int> spanConfidence(panConfidence, nEntries);
+			if (nEntries > 0 && spanConfidence[0] > 80)
 			{
 				_projection->Release();
-				_projection = static_cast<OGRSpatialReference*>(pahSrs[0]);
+				_projection = static_cast<OGRSpatialReference*>(spahSrs[0]);
 				CPLFree(pahSrs);
 			}
 			else
