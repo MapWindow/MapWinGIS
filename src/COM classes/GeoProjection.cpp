@@ -26,7 +26,6 @@
 // ReSharper disable CppTooWideScopeInitStatement
 #include "StdAfx.h"
 #include "GeoProjection.h"
-#include "ProjectionHelper.h"
 
 //// ************************************************************
 //		InjectSpatialReference()
@@ -458,7 +457,7 @@ STDMETHODIMP CGeoProjection::ImportFromAutoDetect(BSTR proj, VARIANT_BOOL* retVa
 			// jf: Based on GDAL documentation, I don't think an empty test is necessary
 			VARIANT_BOOL empty;
 			this->get_IsEmpty(&empty);
-			if (!empty)
+			if (empty == VARIANT_FALSE)
 				*retVal = VARIANT_TRUE;
 		}
 	}
@@ -524,7 +523,8 @@ STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal
 	VARIANT_BOOL vb, vb2;
 	this->get_IsEmpty(&vb);
 	proj->get_IsEmpty(&vb2);
-	if (vb || vb2) {
+	if (vb || vb2 )
+	{
 		ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
 		return S_OK;
 	}
@@ -579,8 +579,8 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 	VARIANT_BOOL vb, vb2;
 	this->get_IsEmpty(&vb);
 	proj->get_IsEmpty(&vb2);
-
-	if (vb || vb2) {
+	if (vb || vb2 )
+	{
 		return S_OK;
 	}
 
@@ -877,16 +877,16 @@ bool CGeoProjection::ReadFromFileCore(CStringW filename, bool esri)
 	{
 		// importFromEsri requires lines of file as null-terminated list of strings
 		char** papszPrj = GdalHelper::ReadFile(filename);
-	if (!papszPrj) return false;
+		if (!papszPrj) return false;
 
-	// passing the first string only
-	// to keep safe the initial pointer to array
+		// passing the first string only
+		// to keep safe the initial pointer to array
 		char* pszWKT = CPLStrdup(*papszPrj);
 		// do the import
 		err = _projection->importFromESRI(&pszWKT);
 		// clean up strings
-	CSLDestroy(papszPrj);
-	CPLFree(pszWKT);
+		CSLDestroy(papszPrj);
+		CPLFree(pszWKT);
 	}
 	else
 	{
@@ -1149,13 +1149,16 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 
 	StopTransform();
 
-	if (ProjectionHelper::IsEmpty(this) || ProjectionHelper::IsEmpty(target))
+	VARIANT_BOOL vb1, vb2;
+	this->get_IsEmpty(&vb1);
+	target->get_IsEmpty(&vb2);
+	if (vb1 || vb2 )
 	{
 		ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
 		return S_OK;
 	}
 
-	OGRSpatialReference* projTarget = ((CGeoProjection*)target)->get_SpatialReference();
+	const OGRSpatialReference* projTarget = dynamic_cast<CGeoProjection*>(target)->get_SpatialReference();
 
 	_transformation = OGRCreateCoordinateTransformation(_projection, projTarget);
 
