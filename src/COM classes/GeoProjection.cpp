@@ -594,8 +594,8 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	bounds->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 
-	const OGRSpatialReference* projSource = _projection;
-	const OGRSpatialReference* projTarget = static_cast<CGeoProjection*>(proj)->get_SpatialReference();
+	const gsl::not_null<OGRSpatialReference*> projSource = _projection;
+	const OGRSpatialReference* projTarget = dynamic_cast<CGeoProjection*>(proj)->get_SpatialReference();
 
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation(projSource, projTarget);
 	if (!transf)
@@ -607,8 +607,8 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 	const bool projected = projSource->IsProjected() != 0;
 
 	*pVal = VARIANT_TRUE;
-	double* xs = new double[4];
-	double* ys = new double[4];
+	double xs[4]{};
+	double ys[4]{};
 
 	// bounds first
 	xs[0] = xMin;
@@ -625,14 +625,12 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 
 	for (int i = 0; i < 4; i++)
 	{
-		if (!this->IsSameProjection(transf, xs[i], ys[i], projected))
+		if (!this->IsSameProjection(transf, gsl::at(xs, i), gsl::at(ys, i), projected))
 		{
 			*pVal = VARIANT_FALSE;
 			break;
 		}
 	}
-	delete[] xs;
-	delete[] ys;
 
 	// let's take some more random points
 	if (numSamplingPoints < 0)
@@ -642,12 +640,13 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 
 	if (*pVal != VARIANT_FALSE && numSamplingPoints > 0)
 	{
-		//double dx = xMax - xMin;
-		//double dy = yMax - yMin;
-
 		for (int i = 0; i < numSamplingPoints; i++)
 		{
-			if (!this->IsSameProjection(transf, xMin, yMin, projected))
+			// random samplings (not really) will be internal points along the diagonal of the extents
+			const double x = xMin + ((xMax - xMin) / (static_cast<double>(numSamplingPoints) + 1) * (static_cast<double>(i) + 1));
+			const double y = yMin + ((yMax - yMin) / (static_cast<double>(numSamplingPoints) + 1) * (static_cast<double>(i) + 1));
+
+			if (!this->IsSameProjection(transf, x, y, projected))
 			{
 				*pVal = VARIANT_FALSE;
 				break;
