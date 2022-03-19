@@ -156,9 +156,6 @@
     <ClCompile Include="ComHelpers\LabelsHelper.cpp">
       <Filter>ComHelpers</Filter>
     </ClCompile>
-    <ClCompile Include="ComHelpers\ProjectionHelper.cpp">
-      <Filter>ComHelpers</Filter>
-    </ClCompile>
     <ClCompile Include="ComHelpers\RasterBandHelper.cpp">
       <Filter>ComHelpers</Filter>
     </ClCompile>
@@ -1202,9 +1199,6 @@
       <Filter>ComHelpers</Filter>
     </ClInclude>
     <ClInclude Include="ComHelpers\LabelsHelper.h">
-      <Filter>ComHelpers</Filter>
-    </ClInclude>
-    <ClInclude Include="ComHelpers\ProjectionHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
     <ClInclude Include="ComHelpers\RasterBandHelper.h">

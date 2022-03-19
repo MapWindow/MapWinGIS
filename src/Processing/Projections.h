@@ -32,6 +32,7 @@ public:
 	bool compareProj4WithRound5(char * proj1, char * proj2);
 	double round(double doValue, int nPrecision);
 	bool IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b);
+	bool SupportsWorldWideTransform(IGeoProjection* mapProjection, IGeoProjection* wgsProjection);
 };
 
 #endif

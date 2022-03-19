@@ -3,7 +3,6 @@
 #include "GeoProjection.h"
 #include "Tiles.h"
 #include "ExtentsHelper.h"
-#include "ProjectionHelper.h"
 #include "ShapeHelper.h"
 
 // some simple encapsulation for readability of code
@@ -100,8 +99,9 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	ComHelper::SetRef(pVal, (IDispatch**)&_projection);
 
 #ifndef RELEASE_MODE
-	CString s = ProjectionHelper::ToString(_projection);
-	Debug::WriteLine("MAP PROJECTION SET: %s", s);
+	CComBSTR bStr;
+	_projection->ExportToProj4(&bStr);
+	Debug::WriteLine("MAP PROJECTION SET: %s", (LPWSTR)bStr);
 #endif
 
 	_projectionChangeCount++;
@@ -134,13 +134,14 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 // *****************************************************
 void CMapView::UpdateMapTranformation()
 {
-	bool isEmpty = ProjectionHelper::IsEmpty(_projection);
+	VARIANT_BOOL isEmpty;
+	_projection->get_IsEmpty(&isEmpty);
 
 	IGeoProjection* gp = nullptr;
 
 	_wgsProjection->StopTransform();
 
-	if (!isEmpty)
+	if (isEmpty)
 	{
 		VARIANT_BOOL isSame, vb;
 		CComPtr<IExtents> box = nullptr;

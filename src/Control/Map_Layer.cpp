@@ -14,7 +14,6 @@
 #include "OgrLayer.h"
 #include "ShapefileHelper.h"
 #include "OgrHelper.h"
-#include "ComHelpers/ProjectionHelper.h"
 #include "TableHelper.h"
 #include "WmsHelper.h"
 
@@ -636,7 +635,8 @@ void CMapView::UpdateWmsLayerBounds(IWmsLayer* wms, Layer& layer)
 	wms->get_GeoProjection(&gp);
 
 	// if there is no projection - no extents either
-	if (ProjectionHelper::IsEmpty(gp))
+	VARIANT_BOOL vb;
+	if (gp->get_IsEmpty(&vb) == S_OK && vb == VARIANT_TRUE)
 	{
 		layer.extents = Extent();
 		return;
@@ -788,7 +788,8 @@ bool CMapView::CheckLayerProjection(Layer* layer, int layerHandle)
 	CComPtr<IGeoProjection> gp = nullptr;
 	gp.Attach(layer->GetGeoProjection());
 
-	if (ProjectionHelper::IsEmpty(gp))
+	VARIANT_BOOL vb;
+	if (gp->get_IsEmpty(&vb) == S_OK && vb == VARIANT_TRUE)
 	{
 		tkMwBoolean cancel = m_globalSettings.allowLayersWithoutProjection ? blnFalse : blnTrue;
 		FireLayerProjectionIsEmpty(layerHandle, &cancel);
@@ -798,7 +799,7 @@ bool CMapView::CheckLayerProjection(Layer* layer, int layerHandle)
 		}
 
 		// even if user accepted the layer but it clearly doesn't fit we will reject it
-		if (ProjectionHelper::IsGeographic(gpMap) && layer->extents.OutsideWorldBounds())
+		if (gpMap->get_IsGeographic(&vb) == S_OK && vb == VARIANT_TRUE && layer->extents.OutsideWorldBounds())
 		{
 			ErrorMessage(tkGEOGRAPHIC_PROJECTION_EXPECTED);
 			return false;
@@ -807,13 +808,13 @@ bool CMapView::CheckLayerProjection(Layer* layer, int layerHandle)
 	}
 
 	// makes no sense to do the matching
-	if (ProjectionHelper::IsEmpty(gpMap)) return true;
+	if (gpMap->get_IsEmpty(&vb) == S_OK && vb == VARIANT_TRUE) return true;
 
 	// mismatch testing
 	CComPtr<IExtents> bounds = nullptr;
 	layer->GetExtentsAsNewInstance(&bounds);
 
-	if (ProjectionHelper::IsSame(gpMap, gp, bounds, 20))
+	if (gp->get_IsSameExt(gpMap, bounds, 20, &vb) == S_OK && vb == VARIANT_TRUE)
 		return true;
 
 	tkMwBoolean cancelAdding = m_globalSettings.allowProjectionMismatch ? blnFalse : blnTrue;

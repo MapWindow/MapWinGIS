@@ -268,7 +268,6 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <ClInclude Include="ComHelpers\FieldHelper.h" />
     <ClInclude Include="ComHelpers\ImageHelper.h" />
     <ClInclude Include="ComHelpers\LabelsHelper.h" />
-    <ClInclude Include="ComHelpers\ProjectionHelper.h" />
     <ClInclude Include="ComHelpers\RasterBandHelper.h" />
     <ClInclude Include="ComHelpers\SelectionHelper.h" />
     <ClInclude Include="ComHelpers\SelectionListHelper.h" />
@@ -552,7 +551,6 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <ClCompile Include="ComHelpers\FieldHelper.cpp" />
     <ClCompile Include="ComHelpers\ImageHelper.cpp" />
     <ClCompile Include="ComHelpers\LabelsHelper.cpp" />
-    <ClCompile Include="ComHelpers\ProjectionHelper.cpp" />
     <ClCompile Include="ComHelpers\RasterBandHelper.cpp" />
     <ClCompile Include="ComHelpers\SelectionHelper.cpp" />
     <ClCompile Include="ComHelpers\SelectionListHelper.cpp" />
