@@ -108,10 +108,10 @@ void GdiPlusLabelDrawer::TryAutoSetRenderingHint(CLabelOptions* options, bool ha
 // *********************************************************************
 void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX, double piY, double angle)
 {
-	rect.X = (Gdiplus::REAL)r.left;
-	rect.Y = (Gdiplus::REAL)r.top;
-	rect.Width = (Gdiplus::REAL)r.Width();
-	rect.Height = (Gdiplus::REAL)r.Height();
+	rect.X = static_cast<Gdiplus::REAL>(r.left);
+	rect.Y = static_cast<Gdiplus::REAL>(r.top);
+	rect.Width = static_cast<Gdiplus::REAL>(r.Width());
+	rect.Height = static_cast<Gdiplus::REAL>(r.Height());
 
 	Gdiplus::Matrix mtxInit;
 	_graphics->GetTransform(&mtxInit);
@@ -121,8 +121,8 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX,
 	//mtx.Rotate((Gdiplus::REAL)angle);
 	//_graphics->SetTransform(&mtx);
 
-	_graphics->TranslateTransform((Gdiplus::REAL)piX, (Gdiplus::REAL)piY);
-	_graphics->RotateTransform((Gdiplus::REAL)angle);
+	_graphics->TranslateTransform(static_cast<Gdiplus::REAL>(piX), static_cast<Gdiplus::REAL>(piY));
+	_graphics->RotateTransform(static_cast<Gdiplus::REAL>(angle));
 
 	// drawing frame
 	if (options->frameTransparency != 0 && options->frameVisible)
@@ -141,7 +141,7 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX,
 
 	if (options->fontTransparency != 0)
 	{
-		bool pathNeeded = options && (options->shadowVisible || options->haloVisible || options->fontOutlineVisible);
+		const bool pathNeeded = options && (options->shadowVisible || options->haloVisible || options->fontOutlineVisible);
 		GraphicsPath* gp = NULL;
 		if (pathNeeded)
 		{
@@ -150,7 +150,7 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX,
 			FontFamily fam;
 			font->GetFamily(&fam);
 			// JIRA MWGIS-74: GraphicsPath font units are 'em's rather than Points
-			Gdiplus::REAL factor = _graphics->GetDpiX() / 72; // 4.0 / 3.0;
+			const Gdiplus::REAL factor = _graphics->GetDpiX() / 72; // 4.0 / 3.0;
 			gp->AddString(text, text.GetLength(), &fam, font->GetStyle(), (font->GetSize() * factor), rect, &stringFormat);
 			gp->CloseFigure();
 		}
@@ -159,18 +159,24 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX,
 		if (options->shadowVisible)
 		{
 			Gdiplus::Matrix mtx1;
-			mtx1.Translate((Gdiplus::REAL)options->shadowOffsetX, (Gdiplus::REAL)options->shadowOffsetY);
+			mtx1.Translate(static_cast<Gdiplus::REAL>(options->shadowOffsetX), static_cast<Gdiplus::REAL>(options->shadowOffsetY));
 			gp->Transform(&mtx1);
 			_graphics->FillPath(_brushShadow, gp);
-			mtx1.Translate(Gdiplus::REAL(-1 * options->shadowOffsetX), Gdiplus::REAL(-1 * options->shadowOffsetY));
+			mtx1.Translate(static_cast<Gdiplus::REAL>(-1 * options->shadowOffsetX), static_cast<Gdiplus::REAL>(-1 * options->shadowOffsetY));
 			gp->Transform(&mtx1);
 		}
 
 		if (options && options->haloVisible)
+		{
 			_graphics->DrawPath(_penHalo, gp);
+			_graphics->FillPath(_brushFont, gp);
+		}
 
 		if (options->fontOutlineVisible)
+		{
 			_graphics->DrawPath(_penFontOutline, gp);
+			_graphics->FillPath(_brushFont, gp);
+		}
 
 		Gdiplus::Status status;
 
@@ -180,8 +186,9 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX,
 			status = _graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushFontGrad);
 			delete _brushFontGrad;
 		}
-		else
+		else if (!pathNeeded)
 		{
+			// if path has not already been filled, draw the text here
 			status = _graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushFont);
 		}
 
