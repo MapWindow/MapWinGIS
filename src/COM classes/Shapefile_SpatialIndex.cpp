@@ -21,6 +21,8 @@
 
 #include "StdAfx.h"
 #include "Shapefile.h"
+#include <locale>
+#include <codecvt>
 
 #pragma region SpatialIndex
 // *****************************************************************
@@ -271,6 +273,12 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(const BSTR shapefileName, VARIANT_BO
 	*retval = VARIANT_FALSE;
 
 	string baseName;
+	wstring wbaseName;
+	string converted_name;
+	//setup converter from widestring to UTF8 unicode string
+	using convert_type = std::codecvt_utf8<wchar_t>;
+	std::wstring_convert<convert_type, wchar_t> converter;
+
 	if (CComBSTR(shapefileName).Length() < 2)
 	{
 		if (_shpfileName.GetLength() <= 3)
@@ -279,11 +287,20 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(const BSTR shapefileName, VARIANT_BO
 			return S_OK;
 		}
 
+		// set up for unicode test
+		wbaseName = _shpfileName.Left(_shpfileName.GetLength() - 4);
+		converted_name = converter.to_bytes(wbaseName);
+
 		baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));	// TODO: use Unicode, is also used in different locations. Perhaps create a function for it?
 	}
 	else
 	{
-		const CString tmp_shpfileName = OLE2CA(shapefileName);
+		// set up for unicode test
+		CStringW fileName(shapefileName);
+		wbaseName = fileName.Left(fileName.GetLength() - 4);
+		converted_name = converter.to_bytes(wbaseName);
+
+		const CString tmp_shpfileName = W2A(shapefileName);
 		if (tmp_shpfileName.GetLength() <= 3)
 		{
 			*retval = VARIANT_FALSE;
@@ -293,6 +310,13 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(const BSTR shapefileName, VARIANT_BO
 		{
 			baseName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 4);
 		}
+	}
+
+	// if baseName is not the same as converted_str, then input name was likely Unicode
+	if (baseName != converted_name)
+	{
+		ErrorMessage(tkCANNOT_APPLY_UNICODE_TO_SPATIALINDEX);
+		return S_OK;
 	}
 
 	try

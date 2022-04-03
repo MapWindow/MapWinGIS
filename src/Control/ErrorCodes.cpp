@@ -172,6 +172,8 @@ const char* ErrorMsg(const long errorCode)
 		return "Operation wasn't executed because input shapefile has no shapes.";
 	case tkFAILED_TO_BUILD_SPATIAL_INDEX:
 		return "Failed to build temporary spatial index for operation.";
+	case tkCANNOT_APPLY_UNICODE_TO_SPATIALINDEX:
+		return "Cannot create spatial index with Unicode name.";
 	case tkINMEMORY_SHAPEFILE_EXPECTED:
 		return "Operation is valid for in-memory shapefiles only.";
 	case tkNOT_ENOUGH_POINTS_FOR_SHAPE_TYPE:
