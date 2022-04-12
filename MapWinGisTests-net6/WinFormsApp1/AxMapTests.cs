@@ -13,10 +13,12 @@ public sealed partial class Form1
 
     public int OpenFile(string fileLocation)
     {
+        if (axMap1 == null) throw new Exception("MapWinGIS.Map is not initialized");
+        
         if (!File.Exists(fileLocation)) throw new FileNotFoundException(fileLocation);
 
         var layerHandle = axMap1.AddLayerFromFilename(fileLocation, tkFileOpenStrategy.fosAutoDetect, true);
-        if (layerHandle == -1) throw new Exception("Could not add file name to map");
+        if (layerHandle == -1) throw new Exception($"Could not add file [{fileLocation}] to map");
 
         return layerHandle;
     }
@@ -125,6 +127,7 @@ public sealed partial class Form1
         // Save shapefile:
         var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "Воздух");
         Console.WriteLine(sfFileLocation);
+        Debug.Assert(File.Exists(sfFileLocation), "Shapefile wasn't saved");
         
         // Create index again:
         var retVal = sfPolygon.CreateSpatialIndex();

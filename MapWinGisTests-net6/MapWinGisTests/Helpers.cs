@@ -45,13 +45,21 @@ internal static class Helpers
 
     internal static string SaveSfToTempFile(Shapefile sf, string filenamePart)
     {
-        var fileName = GetRandomFilePath(filenamePart, ".shp");
-        SaveSf(sf, fileName);
+        try
+        {
+            var fileName = GetRandomFilePath(filenamePart, ".shp");
+            SaveSf(sf, fileName);
 
-        // Check if shapefile files exists:
-        CheckSfFiles(fileName, true);
+            // Check if shapefile files exists:
+            CheckSfFiles(fileName, true);
 
-        return fileName;
+            return fileName;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(@"Could not write to temp file: " + e.Message);
+            return string.Empty;
+        }
     }
 
     internal static void SaveSf(Shapefile sf, string fileLocation)
@@ -205,6 +213,7 @@ internal static class Helpers
     internal static string GetRandomFilePath(string filenamePart, string extension)
     {
         var baseFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+        Console.WriteLine(@"GetRandomFilePath: " + baseFileName);    
         var fileName = Path.ChangeExtension($"{baseFileName}{filenamePart}", extension);
 
         if (File.Exists(fileName)) File.Delete(fileName);

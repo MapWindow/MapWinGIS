@@ -3,6 +3,13 @@ namespace MapWinGisTests;
 [Collection(nameof(NotThreadSafeResourceCollection))]
 public class AxMapTests
 {
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public AxMapTests(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
+    
     [WpfFact]
     public void VersionTest()
     {
@@ -14,6 +21,7 @@ public class AxMapTests
         version.Major.ShouldBe(5);
         version.Minor.ShouldBe(4);
         version.Build.ShouldBeGreaterThanOrEqualTo(0);
+        _testOutputHelper.WriteLine("Version: {0}", version);
     }
 
     [WpfFact]

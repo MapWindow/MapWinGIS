@@ -37,6 +37,7 @@ public class GdalUtilsTests
         // Save shapefile to disk:
         var fileLocation = Helpers.SaveSfToTempFile(sfPoint, "");
         _testOutputHelper.WriteLine("fileLocation: " + fileLocation);
+        fileLocation.ShouldNotBeNullOrEmpty("Could not save shapefile");
 
         // New file:
         var newFileLocation = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()), ".shp");

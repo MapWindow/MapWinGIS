@@ -24,6 +24,7 @@ public class SpatialIndexTests
         // Save shapefile:
         var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
         _testOutputHelper.WriteLine(sfFileLocation);
+        sfFileLocation.ShouldNotBeNullOrEmpty("Could not save shapefile");
 
         // Create index again:
         retVal = sfPolygon.CreateSpatialIndex();
@@ -48,6 +49,7 @@ public class SpatialIndexTests
         // Save shapefile with Unicode name:
         var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "Воздух");
         _testOutputHelper.WriteLine(sfFileLocation);
+        sfFileLocation.ShouldNotBeNullOrEmpty("Could not save shapefile");        
         
         // Create index again:
         retVal = sfPolygon.CreateSpatialIndex();
@@ -72,6 +74,7 @@ public class SpatialIndexTests
         // Save shapefile:
         var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
         _testOutputHelper.WriteLine(sfFileLocation);
+        sfFileLocation.ShouldNotBeNullOrEmpty("Could not save shapefile");
 
         // Test again, should now return false, but no error:
         retVal = sfPolygon.HasSpatialIndex;
@@ -101,6 +104,7 @@ public class SpatialIndexTests
         // Save shapefile:
         var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
         _testOutputHelper.WriteLine(sfFileLocation);
+        sfFileLocation.ShouldNotBeNullOrEmpty("Could not save shapefile");
 
         // Test again, should now return false, but no error:
         retVal = sfPolygon.CanUseSpatialIndex[sfPolygon.Extents];
@@ -139,6 +143,7 @@ public class SpatialIndexTests
         // Save shapefile:
         var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
         _testOutputHelper.WriteLine(sfFileLocation);
+        sfFileLocation.ShouldNotBeNullOrEmpty("Could not save shapefile");
 
         // Test again, should return false
         retVal = sfPolygon.IsSpatialIndexValid();
@@ -168,6 +173,7 @@ public class SpatialIndexTests
         // Save shapefile:
         var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "");
         _testOutputHelper.WriteLine(sfFileLocation);
+        sfFileLocation.ShouldNotBeNullOrEmpty("Could not save shapefile");
 
         // Test again, should return false
         retVal = sfPolygon.RemoveSpatialIndex();

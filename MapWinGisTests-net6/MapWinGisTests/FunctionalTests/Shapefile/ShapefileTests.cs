@@ -105,6 +105,7 @@ public class ShapefileTests
         // Save shapefile:
         var fileName = Helpers.SaveSfToTempFile(sf, "-28992");
         _testOutputHelper.WriteLine("Saved " + fileName);
+        fileName.ShouldNotBeNullOrEmpty("Could not save shapefile");
 
         // Close shapefile:
         var retVal = sf.Close();
