@@ -186,7 +186,7 @@ enum TileProjectionState
 	ProjectionCompatible = 2,	// WGS84 map; GMercator server; transformation is still necessary but at least results are guaranteed
 };
 
-enum ShapeInputMode
+enum class ShapeInputMode
 {
 	simMeasuring = 0,
 	simEditing = 1,

@@ -11,8 +11,8 @@ public:
 	static ShpfileType Convert2D(ShpfileType shpType);
 	static ShpfileType Get25DShapeType(ShpfileType shpTypeBase, bool isZ, bool isM);
 	static IShapeWrapper* CreateWrapper(char* data, int recordLength, bool forceCom);
-	static IShapeWrapper* CreateWrapper(ShpfileType shpType, bool forceCOM);
-	static IShapeWrapper* CreateEmptyWrapper(bool forceCOM);
+	static IShapeWrapper* CreateWrapper(ShpfileType shpType, bool forceCom);
+	static IShapeWrapper* CreateEmptyWrapper(bool forceCom);
 	static ShapeWrapperType GetShapeWrapperType(ShpfileType shpType, bool forceCom);
 	static void WriteBigEndian(FILE* file, int value);
 	static long ReadIntBigEndian(FILE* file);

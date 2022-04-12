@@ -129,7 +129,7 @@ protected:
 	short _lastErrorCode;
 
 public:
-	ShapeWrapperType get_WrapperType() { return swtFast; }
+	ShapeWrapperType get_WrapperType() { return ShapeWrapperType::swtFast; }
 
 	vector<pointEx>* get_Points() { return &_points; }
 	vector<int>* get_Parts() { return &_parts; }

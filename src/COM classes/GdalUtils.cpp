@@ -78,6 +78,7 @@ STDMETHODIMP CGdalUtils::GdalRasterWarp(BSTR sourceFilename, BSTR destinationFil
 		goto cleaning;
 	}
 
+	// https://gdal.org/tutorials/warp_tut.html
 	const auto warpOptions = ConvertSafeArrayToChar(options);
 	GDALWarpAppOptions* const gdalWarpOptions = GDALWarpAppOptionsNew(warpOptions, nullptr);
 	if (!gdalWarpOptions)
@@ -134,8 +135,7 @@ STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinati
 	_detailedError = "No error";
 	CallbackParams params(_globalCallback, "Translating");
 
-	//USES_CONVERSION;
-	const CStringW srcFilename = OLE2W(sourceFilename);
+	const CStringW srcFilename(sourceFilename);
 	if (!Utility::FileExistsW(srcFilename))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
@@ -156,17 +156,7 @@ STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinati
 	}
 
 	// Make options:	
-	char** translateOptions = nullptr;
-	try
-	{
-		translateOptions = ConvertSafeArrayToChar(options);
-	}
-	catch (const int e)
-	{
-		HandleException(e);
-		goto cleaning;
-	}
-
+	const auto translateOptions = ConvertSafeArrayToChar(options);
 	const auto gdalTranslateOptions = GDALTranslateOptionsNew(translateOptions, nullptr);
 	if (!gdalTranslateOptions)
 	{
@@ -176,12 +166,12 @@ STDMETHODIMP CGdalUtils::GdalRasterTranslate(BSTR sourceFilename, BSTR destinati
 		goto cleaning;
 	}
 
-	// Call the gdalWarp function:
+	// Call the gdalTranslate function:
 	GDALTranslateOptionsSetProgress(gdalTranslateOptions, GDALProgressCallback, &params);
 	m_globalSettings.SetGdalUtf8(true);
-	USES_CONVERSION;
-	const auto dtNew = GDALTranslate(OLE2A(destinationFilename), dt, gdalTranslateOptions, nullptr);
+	const auto dtNew = GDALTranslate(CString(destinationFilename), dt, gdalTranslateOptions, nullptr);
 	m_globalSettings.SetGdalUtf8(false);
+
 	if (dtNew)
 	{
 		*retVal = VARIANT_TRUE;

@@ -336,7 +336,7 @@ void CShapefile::RestoreShapeRecordsMapping()
 void CShapefile::RegisterNewShape(IShape* shape, long shapeIndex)
 {
 	// shape must have correct underlying data structure
-	if ((_fastMode ? true : false) != ((CShape*)shape)->get_fastMode())
+	if ((_fastMode ? true : false) != ((CShape*)shape)->get_FastMode())
 	{
 		((CShape*)shape)->put_FastMode(_fastMode ? true : false);
 	}
@@ -498,7 +498,7 @@ void CShapefile::ReregisterShape(int shapeIndex)
 	IShape* shp = _shapeData[shapeIndex]->shape;
 	
 	bool fastMode = _fastMode ? true : false;
-	if (fastMode != ((CShape*)shp)->get_fastMode())
+	if (fastMode != ((CShape*)shp)->get_FastMode())
 	{
 		((CShape*)shp)->put_FastMode(fastMode);
 	}

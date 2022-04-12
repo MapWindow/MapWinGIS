@@ -18,6 +18,7 @@
 // -------------------------------------------------------------------------------------------------------
 // Contributor(s): (Open source contributors should list themselves and their modifications here). 
 
+// ReSharper disable CppEnforceOverridingFunctionStyle
 #pragma once
 
 #include <gsl/pointers>
@@ -179,7 +180,7 @@ public:
 	bool put_RawData(char* data, int recordLength);
 	IShapeWrapper* get_ShapeWrapper() { return _shp; }
 	void put_FastMode(bool newValue);
-	bool get_fastMode() { return _useFastMode; }
+	bool get_FastMode() { return _useFastMode; }
 	void get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
 	bool get_Z(long pointIndex, double* z);
 	bool get_M(long pointIndex, double* m);

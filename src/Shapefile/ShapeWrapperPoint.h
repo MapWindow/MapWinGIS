@@ -29,17 +29,17 @@ class CShapeWrapperPoint: public IShapeWrapper
 {
 private:
 	CShapeWrapperPoint() 
-		: _lastErrorCode(tkNO_ERROR), _x(0.0), _y(0.0), _z(0.0), _m(0.0), _initialized(false)
+		: _initialized(false), _x(0.0), _y(0.0), _z(0.0), _m(0.0), _lastErrorCode(tkNO_ERROR)
 	{
 	}
 public:
-	CShapeWrapperPoint(ShpfileType shpType)
+	CShapeWrapperPoint(const ShpfileType shpType)
 		: CShapeWrapperPoint()
 	{
 		put_ShapeType(shpType);
 	}
 
-	CShapeWrapperPoint(char* shpData, int recordLength) 
+	CShapeWrapperPoint(char* shpData, const int recordLength) 
 		: CShapeWrapperPoint()
 	{
 		put_RawData(shpData, recordLength);
@@ -56,7 +56,7 @@ private:
 	ShpfileType _shpType;	
 
 public:
-	ShapeWrapperType get_WrapperType() { return swtPoint; }
+	ShapeWrapperType get_WrapperType() { return ShapeWrapperType::swtPoint; }
 
 	int get_ContentLength();
 	int get_PointCount(){ return _initialized ? 1 : 0; }
@@ -64,53 +64,53 @@ public:
 
 	// shpData
 	bool put_RawData(char* shapeData, int recordLength);
-	int* get_RawData(void);
+	int* get_RawData();
 	
 	// type
-	ShpfileType get_ShapeType(void) { return _shpType; }
-	ShpfileType get_ShapeType2D(void){ return ShapeUtility::Convert2D(_shpType); }
+	ShpfileType get_ShapeType() { return _shpType; }
+	ShpfileType get_ShapeType2D(){ return ShapeUtility::Convert2D(_shpType); }
 	bool put_ShapeType(ShpfileType shpType);
 	
 	// bounds
-	void RefreshBounds() { };
-	void RefreshBoundsXY() { };
+	void RefreshBounds() { }
+	void RefreshBoundsXY() { }
 	bool get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax);
 	bool get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax, 
 					double& zMin, double& zMax, double& mMin, double& mMax);
 
-	void get_XYFast(int PointIndex, double& x, double& y);
-	bool get_PointXY(int PointIndex, double& x, double& y);
-	bool put_PointXY(int PointIndex, double x, double y);
-	bool get_PointZ(int PointIndex, double& z);
-	bool get_PointM(int PointIndex, double& m);
-	bool put_PointZ(int PointIndex, double z);
-	bool put_PointM(int PointIndex, double m);
+	void get_XYFast(int pointIndex, double& x, double& y);
+	bool get_PointXY(int pointIndex, double& x, double& y);
+	bool put_PointXY(int pointIndex, double x, double y);
+	bool get_PointZ(int pointIndex, double& z);
+	bool get_PointM(int pointIndex, double& m);
+	bool put_PointZ(int pointIndex, double z);
+	bool put_PointM(int pointIndex, double m);
 	bool get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m);
 	
 	// COM points
-	IPoint* get_Point(long Index);
-	bool put_Point(long Index, IPoint* pnt);
+	IPoint* get_Point(long index);
+	bool put_Point(long index, IPoint* pnt);
 
 	// changing size
 	void Clear() { _initialized = false; }
-	bool InsertPoint(int PointIndex, IPoint* pnt);
-	bool InsertPointXY(int Pointindex, double x, double y);
-	bool InsertPointXYZM(int PointIndex, double x, double y, double z, double m);
-	bool DeletePoint(int Pointindex);
+	bool InsertPoint(int pointIndex, IPoint* pnt);
+	bool InsertPointXY(int pointIndex, double x, double y);
+	bool InsertPointXYZM(int pointIndex, double x, double y, double z, double m);
+	bool DeletePoint(int pointIndex);
 	
 	// parts
-	bool InsertPart(int PartIndex, int PointIndex) { return false; }
-	bool DeletePart(int PartIndex) { return false; }
-	int get_PartStartPoint(int PartIndex) { return -1; }
-	int get_PartEndPoint(int PartIndex) { return -1; }
-	bool put_PartStartPoint(long PartIndex, long newVal) { return false; }
+	bool InsertPart(int partIndex, int pointIndex) { return false; }
+	bool DeletePart(int partIndex) { return false; }
+	int get_PartStartPoint(int partIndex) { return -1; }
+	int get_PartEndPoint(int partIndex) { return -1; }
+	bool put_PartStartPoint(long partIndex, long newVal) { return false; }
 	
 	bool PointInRing(int partIndex, double pointX, double pointY) { return false; }
-	void ReversePoints(long startIndex, long endIndex) { };
+	void ReversePoints(long startIndex, long endIndex) { }
 
 	int get_LastErrorCode()
 	{
-		int code = _lastErrorCode;
+		const int code = _lastErrorCode;
 		_lastErrorCode = tkNO_ERROR;
 		return code;
 	}

@@ -183,7 +183,7 @@ public:
 	void CopyData(int firstIndex, int lastIndex, IShape* target);
 
 	void SetMapCallback(IMapViewCallback* callback) {
-		_activeShape->SetMapCallback(callback, simEditing);
+		_activeShape->SetMapCallback(callback, ShapeInputMode::simEditing);
 		_mapCallback = callback;
 	}
 

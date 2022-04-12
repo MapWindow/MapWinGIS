@@ -73,7 +73,7 @@ private:
 	std::vector<long> _parts;
 
 public:
-	ShapeWrapperType get_WrapperType() { return swtCom; }
+	ShapeWrapperType get_WrapperType() { return ShapeWrapperType::swtCom; }
 
 	int get_PointCount(){ return _points.size(); }
 	int get_PartCount(){ return _parts.size(); }

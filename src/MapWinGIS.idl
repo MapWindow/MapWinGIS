@@ -5997,7 +5997,7 @@ interface IGlobalSettings : IDispatch {
 	[propput, id(52)] HRESULT GdalDataPath([in] BSTR newVal);
 	[propget, id(53)] HRESULT BingApiKey([out, retval] BSTR* pVal);
 	[propput, id(53)] HRESULT BingApiKey([in] BSTR newVal);
-	[id(54)] HRESULT TestBingApiKey([in] BSTR key, [out, retval] VARIANT_BOOL* retVal);
+	[id(54)] HRESULT TestBingApiKey([in] BSTR apiKey, [out, retval] VARIANT_BOOL* retVal);
 	[id(55)] HRESULT SetHereMapsApiKey([in] BSTR appId, [in] BSTR appCode);
 	[propget, id(56)] HRESULT CompressOverviews([out, retval] tkTiffCompression* pVal);
 	[propput, id(56)] HRESULT CompressOverviews([in] tkTiffCompression newVal);
@@ -7157,7 +7157,7 @@ library MapWinGIS
 			[id(202)] VARIANT_BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY,
 												 float ClipX, float ClipY, float clipWidth, float clipHeight);
 			[id(170)] void DrawBackBuffer(int hdc, int ImageWidth, int ImageHeight);
-			[id(201)] VARIANT_BOOL LoadTilesForSnapshot(IExtents* Extents, long Width, LPCTSTR Key);
+			[id(201)] VARIANT_BOOL LoadTilesForSnapshot(IExtents* extents, long width, LPCTSTR key);
 #endif			
 
 #define SERIALIZE_API

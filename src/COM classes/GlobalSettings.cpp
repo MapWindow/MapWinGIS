@@ -973,17 +973,17 @@ STDMETHODIMP CGlobalSettings::put_BingApiKey(BSTR newVal)
 // ***************************************************************
 //		TestBingApiKey
 // ***************************************************************
-STDMETHODIMP CGlobalSettings::TestBingApiKey(BSTR key, VARIANT_BOOL* retVal)
+STDMETHODIMP CGlobalSettings::TestBingApiKey(BSTR apiKey, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
 	const CString previousKey = m_globalSettings.bingApiKey;
-	m_globalSettings.bingApiKey = CString(key);
+	m_globalSettings.bingApiKey = CString(apiKey);
 
 	BingMapProvider provider;
 	if (provider.Initialize()) {
-		m_globalSettings.bingApiKey = key;
+		m_globalSettings.bingApiKey = apiKey;
 		*retVal = VARIANT_TRUE;
 	}
 	else {
@@ -1012,7 +1012,7 @@ STDMETHODIMP CGlobalSettings::get_CompressOverviews(tkTiffCompression* pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	const CString s = "";
-	CString value = CPLGetConfigOption("COMPRESS_OVERVIEW", s);
+	const CString value = CPLGetConfigOption("COMPRESS_OVERVIEW", s);
 	*pVal = GdalHelper::ParseTiffCompression(value);
 
 	return S_OK;

@@ -264,7 +264,7 @@ STDMETHODIMP CShapefile::get_CanUseSpatialIndex(IExtents* pArea, VARIANT_BOOL* p
 // Unit test in unittest_net6.Shapefile.SpatialIndexTests.CreateSpatialIndexTest
 // ***********************************************************
 //ajp June 2008 Function to create an Index file
-STDMETHODIMP CShapefile::CreateSpatialIndex(const BSTR shapefileName, VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR shapefileName, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 

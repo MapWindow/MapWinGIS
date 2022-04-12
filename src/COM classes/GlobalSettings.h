@@ -195,7 +195,7 @@ public:
 	// Tiles:
 	STDMETHOD(get_BingApiKey)(BSTR* pVal);
 	STDMETHOD(put_BingApiKey)(BSTR newVal);
-	STDMETHOD(TestBingApiKey)(BSTR key, VARIANT_BOOL* retVal);
+	STDMETHOD(TestBingApiKey)(BSTR apiKey, VARIANT_BOOL* retVal);
 	STDMETHOD(SetHereMapsApiKey)(BSTR appId, BSTR appCode);
 	STDMETHOD(SetHttpUserAgent)(BSTR userAgent);
 	STDMETHOD(StartLogTileRequests)(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal);

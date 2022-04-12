@@ -171,7 +171,7 @@ STDMETHODIMP CShape::put_GlobalCallback(ICallback* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
+	ComHelper::SetRef(newVal, reinterpret_cast<IDispatch**>(&_globalCallback));
 	return S_OK;
 }
 
@@ -185,7 +185,7 @@ STDMETHODIMP CShape::get_Key(BSTR* pVal)
 	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
-STDMETHODIMP CShape::put_Key(const BSTR newVal)
+STDMETHODIMP CShape::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
