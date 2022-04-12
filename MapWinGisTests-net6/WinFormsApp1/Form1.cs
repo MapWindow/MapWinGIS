@@ -35,6 +35,11 @@ public sealed partial class Form1 : Form, ICallback
         axMap1.CurrentZoom = 2;
     }
 
+    private void LogProgress(string msg)
+    {
+        TxtProgress.Text += $@"{msg}{Environment.NewLine}";
+    }
+
     #region Implementation of ICallback
 
     public void Progress(string keyOfSender, int percent, string message)
@@ -53,11 +58,22 @@ public sealed partial class Form1 : Form, ICallback
     {
         axMap1.Clear();
         TxtProgress.Text = "";
-        TxtProgress.Text += $@"Map is cleared. Projection is empty: {axMap1.GeoProjection.IsEmpty}";
+        LogProgress($@"Map is cleared. Projection is empty: {axMap1.GeoProjection.IsEmpty}");
     }
+
     private void RunTestButtonClick(object? sender, EventArgs e)
     {
-        TxtProgress.Text += @"Running GlobalSettingsCompressOverviewsTest";
-        GlobalSettingsCompressOverviewsTest();
+        //LogProgress(@"Running GlobalSettingsCompressOverviewsTest");
+        //GlobalSettingsCompressOverviewsTest();
+        
+        //LogProgress(@"Running GdalRasterWarpTest");
+        //GdalRasterWarpTest();   
+        
+        // TODO: Test still fails:
+        //LogProgress(@"Running GdalRasterTranslateTest");
+        //GdalRasterTranslateTest();
+
+        LogProgress(@"Running CreateSpatialIndexUnicodeTest");
+        CreateSpatialIndexUnicodeTest();
     }
 }

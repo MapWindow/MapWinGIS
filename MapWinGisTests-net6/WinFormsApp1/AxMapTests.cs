@@ -52,7 +52,7 @@ public sealed partial class Form1
         var gs = new GlobalSettings();
         //Read:
         var value = gs.CompressOverviews;
-        Console.WriteLine(value.ToString());
+        LogProgress(value.ToString());
         // Loop:
         foreach (tkTiffCompression enumValue in Enum.GetValues(typeof(tkTiffCompression)))
         {
@@ -60,10 +60,74 @@ public sealed partial class Form1
             // Change:
             gs.CompressOverviews = enumValue;
             // Check:
-            Console.WriteLine($@"Updated value is: {gs.CompressOverviews}");
+            LogProgress($@"Updated value is: {gs.CompressOverviews}");
             Debug.Assert(gs.CompressOverviews == enumValue);
         }
         // Reset:
         gs.CompressOverviews = value;
+        LogProgress("Done with GlobalSettingsCompressOverviewsTest");
+    }
+
+    private void GdalRasterWarpTest()
+    {
+        GdalUtils gdalUtils = new();
+        var input = Helpers.GetTestFilePath("float32_50m.tif");
+        LogProgress(@"Input file: " + input);
+        var output = Helpers.GetRandomFilePath("GdalWarp", ".vrt");
+        var options = new[]
+        {
+            "-of", "vrt",
+            "-overwrite"
+        };
+
+        var retVal = gdalUtils.GdalRasterWarp(input, output, options);
+        Debug.Assert(retVal, "GdalRasterWarp failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] +
+                            " Detailed error: " + gdalUtils.DetailedErrorMsg);
+        // Check if output file exists:
+        Debug.Assert(File.Exists(output), output + " doesn't exists");
+        LogProgress("Done with GdalRasterWarpTest");
+    }
+
+    private void GdalRasterTranslateTest()
+    {
+        GdalUtils gdalUtils = new();
+        var input = Helpers.GetTestFilePath("float32_50m.tif");
+        LogProgress("Input file: " + input);
+        var output = Helpers.GetRandomFilePath("ChangedResolution", ".tif");
+        var options = new[]
+        {
+            "-ot", "Float32",
+            "-tr", "0.2", "0.2",
+            "-r", "average",
+            "-projwin", "-180", "90", "180", "-90"
+        };
+
+        try
+        {
+            var retVal = gdalUtils.GdalRasterTranslate(input, output, options);
+            Debug.Assert(retVal, "GdalRasterTranslate failed: " + gdalUtils.ErrorMsg[gdalUtils.LastErrorCode] + " Detailed error: " + gdalUtils.DetailedErrorMsg);
+        }
+        catch (Exception e)
+        {
+            Debug.Fail(e.Message, e.InnerException?.Message);
+        }
+
+        // Check if output file exists:
+        Debug.Assert(File.Exists(output), output + " doesn't exists");
+        LogProgress("Done with GdalRasterTranslateTest");
+    }
+
+    private void CreateSpatialIndexUnicodeTest()
+    {
+        // Create shapefile:
+        var sfPolygon = Helpers.CreateTestPolygonShapefile();
+
+        // Save shapefile:
+        var sfFileLocation = Helpers.SaveSfToTempFile(sfPolygon, "Воздух");
+        Console.WriteLine(sfFileLocation);
+        
+        // Create index again:
+        var retVal = sfPolygon.CreateSpatialIndex();
+        Debug.Assert(retVal,"CreateSpatialIndex failed");
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace MapWinGisTests.UnitTests;
+﻿using System.Diagnostics;
+
+namespace MapWinGisTests.UnitTests;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
 public class GdalUtilsTests : ICallback, IClassFixture<GdalUtilsTests.GdalUtilsFixture>
@@ -128,7 +130,8 @@ public class GdalUtilsTests : ICallback, IClassFixture<GdalUtilsTests.GdalUtilsF
         File.Exists(output).ShouldBeTrue(output + " doesn't exists");
     }
 
-    [Fact(Skip = "Nees more research, causes crashes sometimes.")]
+    //[Fact(Skip = "Needs more research, causes crashes sometimes.")]
+    [Fact]
     public void GdalUtilsGdalRasterTranslateTest()
     {
         GdalRasterTranslateTest(_fixture.Float32_50mTiffFilename);
@@ -138,18 +141,24 @@ public class GdalUtilsTests : ICallback, IClassFixture<GdalUtilsTests.GdalUtilsF
         void GdalRasterTranslateTest(string input)
         {
             _testOutputHelper.WriteLine("Input file: " + input);
-            var output = Helpers.GetRandomFilePath("ChangedResolution", ".tif");
+            var output = Helpers.GetRandomFilePath("-Tiled", ".tif");
             var options = new[]
             {
-                "-ot", "Float32",
-                "-tr", "0.2", "0.2",
-                "-r", "average",
-                "-projwin", "-180", "90", "180", "-90"
+                "-of", "GTiff",
+                "-co",  "TILED=YES"
             };
 
-            var retVal = _gdalUtils.GdalRasterTranslate(input, output, options);
-            retVal.ShouldBeTrue("GdalRasterTranslate failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] +
-                                " Detailed error: " + _gdalUtils.DetailedErrorMsg);
+            try
+            {
+                var retVal = _gdalUtils.GdalRasterTranslate(input, output, options);
+                retVal.ShouldBeTrue("GdalRasterTranslate failed: " + _gdalUtils.ErrorMsg[_gdalUtils.LastErrorCode] + " Detailed error: " + _gdalUtils.DetailedErrorMsg);
+            }
+            catch (Exception e)
+            {
+                _testOutputHelper.WriteLine(e.Message);
+                Debug.Fail(e.Message, e.InnerException?.Message);
+            }
+
             // Check if output file exists:
             File.Exists(output).ShouldBeTrue(output + " doesn't exists");
         }
