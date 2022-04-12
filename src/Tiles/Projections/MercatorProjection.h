@@ -47,7 +47,7 @@ public:
 	static void ReleaseGeoProjection();
 
 public:
-	virtual bool IsSphericalMercator() { return true; }
+	virtual bool IsSphericalMercator() noexcept { return true; }
 	
 	IGeoProjection* get_ServerProjection();
 
