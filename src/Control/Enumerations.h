@@ -344,7 +344,7 @@ enum tkShapeRecordFlags
 	shpWasRendered = 16,
 };
 
-enum TileHttpContentType
+enum class TileHttpContentType
 {
 	httpUndefined = 0,
 	httpImage = 1,
