@@ -70,13 +70,19 @@ internal static class Helpers
         sf.EditingShapes.ShouldBeFalse("sf is still in edit mode. Error: " + sf.ErrorMsg[sf.LastErrorCode]);
     }
 
-    internal static Shapefile OpenShapefile(string fileLocation)
+    internal static Shapefile OpenShapefile(string fileLocation, ICallback callback)
     {
+        Console.WriteLine(@"Opening shapefile: " + fileLocation);
         File.Exists(fileLocation).ShouldBeTrue("Could not find shapefile to open");
 
         var sf = new Shapefile();
+        sf.ShouldNotBeNull("Could not initialize Shapefile object");
+        sf.GlobalCallback = callback;
+        Console.WriteLine(@"Before sf.Open");
         var retVal = sf.Open(fileLocation);
+        Console.WriteLine(@"After sf.Open");
         retVal.ShouldBeTrue("sf.Open failed");
+        
         return sf;
     }
 
@@ -213,9 +219,9 @@ internal static class Helpers
     internal static string GetRandomFilePath(string filenamePart, string extension)
     {
         var baseFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
-        Console.WriteLine(@"GetRandomFilePath: " + baseFileName);    
         var fileName = Path.ChangeExtension($"{baseFileName}{filenamePart}", extension);
-
+        Console.WriteLine(@"GetRandomFilePath: " + fileName); 
+        
         if (File.Exists(fileName)) File.Delete(fileName);
 
         return fileName;

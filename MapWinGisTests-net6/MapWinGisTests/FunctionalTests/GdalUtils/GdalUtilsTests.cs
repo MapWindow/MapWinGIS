@@ -1,7 +1,7 @@
 ﻿namespace MapWinGisTests.FunctionalTests.GdalUtils;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
-public class GdalUtilsTests
+public class GdalUtilsTests : ICallback
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
@@ -13,7 +13,7 @@ public class GdalUtilsTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void GdalVectorTranslateReproject(bool useGdalVectorReproject )
+    public void GdalVectorTranslateReproject(bool useGdalVectorReproject)
     {
         // See also UtilsProjectionTests.UtilsReprojectShapefileTest() and ShapefileTests.ReprojectShapefileTest()
 
@@ -43,7 +43,7 @@ public class GdalUtilsTests
         var newFileLocation = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()), ".shp");
         _testOutputHelper.WriteLine("newFileLocation: " + newFileLocation);
 
-        var gdalUtils = new MapWinGIS.GdalUtils();
+        var gdalUtils = new MapWinGIS.GdalUtils { GlobalCallback = this };
         if (useGdalVectorReproject)
         {
             var retVal = gdalUtils.GdalVectorReproject(fileLocation, newFileLocation, srcEpsgCode, dstEpsgCode);
@@ -60,7 +60,7 @@ public class GdalUtilsTests
             retVal.ShouldBeTrue("GdalVectorTranslate failed");
         }
 
-        var sfNew = Helpers.OpenShapefile(newFileLocation);
+        var sfNew = Helpers.OpenShapefile(newFileLocation, this);
 
         // Checks:
         sfNew.ShouldNotBeNull("ReprojectShapefile failed");
@@ -75,4 +75,18 @@ public class GdalUtilsTests
         pntNew.y.ShouldBe(dstY, tolerance);
 
     }
+
+    #region Implementation of ICallback
+#pragma warning disable xUnit1013
+    public void Progress(string keyOfSender, int percent, string message)
+    {
+        _testOutputHelper.WriteLine($"Progress of {keyOfSender}: {percent}. Msg: {message}");
+    }
+
+    public void Error(string keyOfSender, string errorMsg)
+    {
+        _testOutputHelper.WriteLine($"Error of {keyOfSender}: {errorMsg}");
+    }
+#pragma warning restore xUnit1013
+    #endregion
 }

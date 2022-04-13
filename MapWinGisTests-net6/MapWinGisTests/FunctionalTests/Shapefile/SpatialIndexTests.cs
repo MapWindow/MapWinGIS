@@ -1,7 +1,7 @@
 ﻿namespace MapWinGisTests.FunctionalTests.Shapefile;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
-public class SpatialIndexTests
+public class SpatialIndexTests: ICallback
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
@@ -234,7 +234,7 @@ public class SpatialIndexTests
         //tunnel: String (1.0)
 
         var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
-        var sf = Helpers.OpenShapefile(sfLocation);
+        var sf = Helpers.OpenShapefile(sfLocation, this);
         Helpers.CheckEpsgCode(sf.GeoProjection, 4326, true);
 
         // Debug: Create spatial index files:
@@ -285,4 +285,18 @@ public class SpatialIndexTests
             File.Exists(idxFileLocation).ShouldBeFalse("The idx file still exists");
         }
     }
+
+    #region Implementation of ICallback
+#pragma warning disable xUnit1013
+    public void Progress(string keyOfSender, int percent, string message)
+    {
+        _testOutputHelper.WriteLine($"Progress of {keyOfSender}: {percent}. Msg: {message}");
+    }
+
+    public void Error(string keyOfSender, string errorMsg)
+    {
+        _testOutputHelper.WriteLine($"Error of {keyOfSender}: {errorMsg}");
+    }
+#pragma warning restore xUnit1013
+    #endregion    
 }
