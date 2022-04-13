@@ -1142,8 +1142,9 @@ public class GlobalSettingsTests : ICallback
     public void GlobalSettingsApplicationCallbackTest()
     {
         //Read:
-        var value = _gs.ApplicationCallback;
-        value.ShouldBeNull();
+        // Is already set in other unit test class:
+        // var value = _gs.ApplicationCallback;
+        // value.ShouldBeNull();
         // Change:
         _gs.ApplicationCallback = this;
         // Check:
