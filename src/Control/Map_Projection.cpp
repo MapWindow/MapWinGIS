@@ -101,7 +101,7 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 #ifndef RELEASE_MODE
 	CComBSTR bStr;
 	_projection->ExportToProj4(&bStr);
-	Debug::WriteLine("MAP PROJECTION SET: %s", (LPWSTR)bStr);
+	Debug::WriteLine("MAP PROJECTION SET: %s", static_cast<LPWSTR>(bStr));
 #endif
 
 	_projectionChangeCount++;

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "Logger.h"
 
 namespace Debug
@@ -7,8 +7,8 @@ namespace Debug
 	{
 		this->Close();
 
-		USES_CONVERSION;
-		CStringW path = Utility::GetFolderFromPath(filename);
+		//USES_CONVERSION;
+		const CStringW path = Utility::GetFolderFromPath(filename);
 		if (!Utility::DirExists(path))
 			_wmkdir(path);
 

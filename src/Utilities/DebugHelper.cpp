@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "DebugHelper.h"
 
 namespace Debug
@@ -9,7 +9,7 @@ namespace Debug
 	// ****************************************************************** 
 	//		CustomCPLErrorHandler
 	// ****************************************************************** 
-	void CPL_STDCALL CustomCPLErrorHandler(CPLErr error, int errorCode, const char* message)
+	void CPL_STDCALL CustomCPLErrorHandler(const CPLErr error, int errorCode, const char* message)
 	{
 		if (m_globalSettings.suppressGdalErrors && !targets[DebugForceGdal]) return;
 
@@ -37,7 +37,7 @@ namespace Debug
 
 		if (m_globalSettings.callback && !targets[DebugForceGdal])
 		{
-			CComBSTR bstr(s);
+			const CComBSTR bstr(s);
 			m_globalSettings.callback->Error(m_globalSettings.gdalBstr, bstr);
 		}
 		else
@@ -122,7 +122,7 @@ namespace Debug
 	// ****************************************************************** 
 	//		WriteWithThreadId
 	// ****************************************************************** 
-	void WriteWithThreadId(CString msg, DebugTarget target)
+	void WriteWithThreadId(CString msg, const DebugTarget target)
 	{
 #ifndef RELEASE_MODE
 		if (!CheckDebugTarget(target)) return;
@@ -145,7 +145,7 @@ namespace Debug
 		TCHAR buffer[1024];
 		va_list args;
 		va_start(args, format);
-		int len = vsnprintf(buffer, _countof(buffer), format, args);
+		vsnprintf(buffer, _countof(buffer), format, args);
 		va_end(args);
 
 		format = buffer;
