@@ -23,6 +23,7 @@
 #include "Shapefile.h"
 #include <locale>
 #include <codecvt>
+#include <gsl/util>
 
 #pragma region SpatialIndex
 // *****************************************************************
@@ -274,7 +275,7 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR shapefileName, VARIANT_BOOL* re
 
 	string baseName;
 	wstring wbaseName;
-	string converted_name;
+	string convertedName;
 	//setup converter from widestring to UTF8 unicode string
 	using convert_type = std::codecvt_utf8<wchar_t>;
 	std::wstring_convert<convert_type, wchar_t> converter;
@@ -289,18 +290,18 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR shapefileName, VARIANT_BOOL* re
 
 		// set up for unicode test
 		wbaseName = _shpfileName.Left(_shpfileName.GetLength() - 4);
-		converted_name = converter.to_bytes(wbaseName);
+		convertedName = converter.to_bytes(wbaseName);
 
 		baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));	// TODO: use Unicode, is also used in different locations. Perhaps create a function for it?
 	}
 	else
 	{
 		// set up for unicode test
-		CStringW fileName(shapefileName);
+		const CStringW fileName(shapefileName);
 		wbaseName = fileName.Left(fileName.GetLength() - 4);
-		converted_name = converter.to_bytes(wbaseName);
+		convertedName = converter.to_bytes(wbaseName);
 
-		const CString tmp_shpfileName = W2A(shapefileName);
+		const auto tmp_shpfileName = CString(shapefileName);
 		if (tmp_shpfileName.GetLength() <= 3)
 		{
 			*retval = VARIANT_FALSE;
@@ -313,7 +314,7 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR shapefileName, VARIANT_BOOL* re
 	}
 
 	// if baseName is not the same as converted_str, then input name was likely Unicode
-	if (baseName != converted_name)
+	if (baseName != convertedName)
 	{
 		ErrorMessage(tkCANNOT_APPLY_UNICODE_TO_SPATIALINDEX);
 		return S_OK;
@@ -444,10 +445,11 @@ STDMETHODIMP CShapefile::QuickQueryInEditMode(IExtents* boundBox, int** result, 
 		boundBox->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 
 		const vector<int> r = _qtree->GetNodes(QTreeExtent(xMin, xMax, yMax, yMin));
-		const int size = r.size();
+		const int size = gsl::narrow_cast<int>(r.size());
 		*result = new int[size];
 
-		memcpy(*result, &r[0], sizeof(int) * size);
+		//memcpy(*result, &r[0], sizeof(int) * size);
+		memcpy(*result, &gsl::at(r, 0), sizeof(int) * size);
 		*resultCount = size;
 	}
 	return S_OK;
