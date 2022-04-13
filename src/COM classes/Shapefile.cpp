@@ -743,7 +743,7 @@ STDMETHODIMP CShapefile::Open(BSTR shapefileName, ICallback* cBack, VARIANT_BOOL
 		Debug::WriteLine("Before Reading projection");
 		// reading projection
 		const CComBSTR bstrPrj(_prjfileName);
-		_geoProjection->ReadFromFileEx(bstrPrj, VARIANT_TRUE, &vbretval);
+		_geoProjection->ReadFromFileEx(bstrPrj, VARIANT_FALSE, &vbretval);
 
 		Debug::WriteLine("Before ShapeStyleHelper::ApplyRandomDrawingOptions");
 		ShapeStyleHelper::ApplyRandomDrawingOptions(this);
