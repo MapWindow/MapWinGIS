@@ -17,6 +17,7 @@
 //********************************************************************************************************
 
 // ReSharper disable CppEnforceOverridingFunctionStyle
+// ReSharper disable CppInconsistentNaming
 #pragma once
 #include <afxmt.h>
 #include <set>
@@ -90,7 +91,7 @@ public:
 	STDMETHOD(get_EditingTable)(/*[out, retval]*/ VARIANT_BOOL* pVal);
 	STDMETHOD(get_CellValue)(/*[in]*/ long fieldIndex, /*[in]*/ long shapeIndex, /*[out, retval]*/ VARIANT* pVal);
 	STDMETHOD(get_Field)(/*[in]*/ long fieldIndex, /*[out, retval]*/ IField** pVal);
-	STDMETHOD(get_FieldByName)(/*[in]*/ BSTR Fieldname, /*[out, retval] */ IField** pVal);
+	STDMETHOD(get_FieldByName)(/*[in]*/ BSTR fieldname, /*[out, retval] */ IField** pVal);
 	STDMETHOD(StopEditingTable)(/*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL applyChanges, /*[in, optional]*/ ICallback* cBack, /*[out, retval]*/ VARIANT_BOOL* retval);
 	STDMETHOD(StartEditingTable)(/*[in, optional]*/ ICallback* cBack, /*[out, retval]*/ VARIANT_BOOL* retval);
 	STDMETHOD(EditCellValue)(/*[in]*/ long fieldIndex, /*[in]*/ long shapeIndex, /*[in]*/ VARIANT newVal, /*[out, retval]*/ VARIANT_BOOL* retval);
@@ -129,7 +130,7 @@ public:
 	STDMETHOD(get_HasOldSpatialIndex)(/*[out, retval]*/VARIANT_BOOL* pVal);
 	STDMETHOD(put_HasSpatialIndex)(/*[in]*/VARIANT_BOOL pVal);
 	STDMETHOD(CreateSpatialIndex)(/*[in, optional]*/BSTR shapefileName, /*[out, retval]*/ VARIANT_BOOL* retval);
-	STDMETHOD(Resource)(/*[in]*/ BSTR newSrcPath, /*[out, retval]*/ VARIANT_BOOL* retval);
+	STDMETHOD(Resource)(/*[in]*/ BSTR newShpPath, /*[out, retval]*/ VARIANT_BOOL* retval);
 	STDMETHOD(IsSpatialIndexValid)(/*[out, retval]*/ VARIANT_BOOL* retval);
 	STDMETHOD(put_SpatialIndexMaxAreaPercent)(/*[in]*/ DOUBLE newVal);
 	STDMETHOD(get_SpatialIndexMaxAreaPercent)(/*[out, retval]*/ DOUBLE* pVal);
@@ -220,8 +221,8 @@ public:
 	STDMETHOD(put_ShapeCategory2)(long shapeIndex, BSTR categoryName);
 	STDMETHOD(get_ShapeCategory3)(long shapeIndex, IShapefileCategory** category);
 	STDMETHOD(put_ShapeCategory3)(long shapeIndex, IShapefileCategory* category);
-	STDMETHOD(Dump)(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL* retval);
-	STDMETHOD(LoadDataFrom)(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL* retval);
+	STDMETHOD(Dump)(BSTR shapefileName, ICallback* cBack, VARIANT_BOOL* retval);
+	STDMETHOD(LoadDataFrom)(BSTR shapefileName, ICallback* cBack, VARIANT_BOOL* retval);
 	STDMETHOD(Segmentize)(double metersTolerance, IShapefile** retVal);
 	STDMETHOD(get_LastInputValidation)(IShapeValidationInfo** retVal);
 	STDMETHOD(get_LastOutputValidation)(IShapeValidationInfo** retVal);
@@ -281,7 +282,7 @@ private:
 		std::vector<int> Parts;
 	};
 
-	::CCriticalSection _readLock;
+	CCriticalSection _readLock;
 
 	std::vector<PolygonShapefile> _polySf;
 
@@ -463,8 +464,8 @@ public:
 	IShapeWrapper* get_ShapeWrapper(int shapeIndex);
 	IShapeData* get_ShapeRenderingData(int shapeIndex);
 	void put_ShapeRenderingData(int shapeIndex, CShapeData* data);
-	FILE* get_File() { return _shpfile; }
-	::CCriticalSection* get_ReadLock() { return &_readLock; }
+	FILE* get_File() const { return _shpfile; }
+	CCriticalSection* get_ReadLock() { return &_readLock; }
 
 	// serialization
 	bool DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node);
@@ -515,9 +516,11 @@ public:
 				_deletedFids.insert(it.first);
 		return true;
 	}
-	std::set<long> GetDeletedShapeFIDs()
+
+	[[nodiscard]] std::set<long> GetDeletedShapeFIDs() const
 	{
-		return std::set<long>(_deletedFids);
+		// return std::set<long>(_deletedFids);
+		return _deletedFids;
 	}
 	void ClearDeleteShapeFIDs()
 	{

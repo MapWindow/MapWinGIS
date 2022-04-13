@@ -60,7 +60,7 @@ CShapefile::CShapefile()
 	_stopExecution = nullptr;
 
 	_selectionTransparency = 180;
-	_selectionAppearance = saSelectionColor;
+	_selectionAppearance = saSelectionColor;  // Is in MapWinGIS_i.h
 	_selectionColor = RGB(255, 255, 0);
 	_collisionMode = tkCollisionMode::LocalList;
 
@@ -190,22 +190,22 @@ std::vector<ShapeRecord*>* CShapefile::get_ShapeVector()
 	return &_shapeData;
 }
 
-IShapeWrapper* CShapefile::get_ShapeWrapper(int shapeIndex)
+IShapeWrapper* CShapefile::get_ShapeWrapper(const int shapeIndex)
 {
-	return ((CShape*)_shapeData[shapeIndex]->shape)->get_ShapeWrapper();
+	return static_cast<CShape*>(gsl::at(_shapeData, shapeIndex)->shape)->get_ShapeWrapper();
 }
 
-IShapeData* CShapefile::get_ShapeRenderingData(int shapeIndex)
+IShapeData* CShapefile::get_ShapeRenderingData(const int shapeIndex)
 {
-	return _shapeData[shapeIndex]->get_RenderingData();
+	return gsl::at(_shapeData, shapeIndex)->get_RenderingData();
 }
 
-void CShapefile::put_ShapeRenderingData(int shapeIndex, CShapeData* data)
+void CShapefile::put_ShapeRenderingData(const int shapeIndex, CShapeData* data)
 {
-	return _shapeData[shapeIndex]->put_RenderingData(data);
+	return  gsl::at(_shapeData, shapeIndex)->put_RenderingData(data);
 }
 
-void CShapefile::SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType)
+void CShapefile::SetValidationInfo(IShapeValidationInfo* info, const tkShapeValidationType validationType)
 {
 	ComHelper::SetRef(info,
 		(IDispatch**)&(validationType == svtInput ? _inputValidation : _outputValidation), true);
@@ -227,10 +227,10 @@ bool CShapefile::GetVisibilityFlags(map<long, BYTE>& flags)
 	{
 		BYTE visibilityFlags = 0;
 		// get currently-assocaited ShapeID
-		const long shapeID = _ogrFid2ShapeIndex[iter->first];
+		const long shapeId = _ogrFid2ShapeIndex[iter->first];
 		// only consider Hidden and Selected values, as others are not intended to be persisted
-		if (_shapeData[shapeID]->hidden()) visibilityFlags |= tkShapeRecordFlags::shpHidden;
-		if (_shapeData[shapeID]->selected()) visibilityFlags |= tkShapeRecordFlags::shpSelected;
+		if (_shapeData[shapeId]->hidden()) visibilityFlags |= tkShapeRecordFlags::shpHidden;
+		if (_shapeData[shapeId]->selected()) visibilityFlags |= tkShapeRecordFlags::shpSelected;
 		// set into mapping, mapping OGR_FID to visibility flags
 		flags.insert(std::make_pair(iter->first, visibilityFlags));
 		++iter;
@@ -250,14 +250,14 @@ bool CShapefile::SetVisibilityFlags(map<long, BYTE>& flags)
 	while (iter != _ogrFid2ShapeIndex.end())
 	{
 		// does FID still exist (from the previous mapping)?
-		if (flags.find(iter->first) != flags.end())
+		if (flags.find(iter->first) != flags.end()) // TODO: Fix compile warning
 		{
-			BYTE visibilityFlags = flags[iter->first];
+			const BYTE visibilityFlags = flags[iter->first];
 			// get currently-assocaited ShapeID
-			long shapeID = _ogrFid2ShapeIndex[iter->first];
+			const long shapeId = _ogrFid2ShapeIndex[iter->first];
 			// only consider Hidden and Selected values, as others are not intended to be persisted
-			_shapeData[shapeID]->hidden((visibilityFlags & tkShapeRecordFlags::shpHidden) ? true : false);
-			_shapeData[shapeID]->selected((visibilityFlags & tkShapeRecordFlags::shpSelected) ? true : false);
+			_shapeData[shapeId]->hidden((visibilityFlags & tkShapeRecordFlags::shpHidden) ? true : false);
+			_shapeData[shapeId]->selected((visibilityFlags & tkShapeRecordFlags::shpSelected) ? true : false);
 		}
 		++iter;
 	}
@@ -293,8 +293,8 @@ STDMETHODIMP CShapefile::get_LastErrorCode(long* pVal)
 STDMETHODIMP CShapefile::get_CdlgFilter(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
-	*pVal = A2BSTR("ESRI Shapefiles (*.shp)|*.shp");
+		//USES_CONVERSION;
+		* pVal = A2BSTR("ESRI Shapefiles (*.shp)|*.shp");
 	return S_OK;
 }
 
@@ -351,7 +351,7 @@ STDMETHODIMP CShapefile::put_GlobalCallback(ICallback* newVal)
 STDMETHODIMP CShapefile::put_StopExecution(IStopExecution* stopper)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		ComHelper::SetRef((IDispatch*)stopper, (IDispatch**)&_stopExecution, true);
+		ComHelper::SetRef(stopper, (IDispatch**)&_stopExecution, true);
 	return S_OK;
 }
 
@@ -367,7 +367,7 @@ STDMETHODIMP CShapefile::get_Key(BSTR* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_Key(const BSTR newVal)
+STDMETHODIMP CShapefile::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	SysFreeString(_key);
@@ -381,8 +381,8 @@ STDMETHODIMP CShapefile::put_Key(const BSTR newVal)
 STDMETHODIMP CShapefile::get_VisibilityExpression(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
-	*pVal = OLE2BSTR(_expression);
+		//USES_CONVERSION;
+		* pVal = OLE2BSTR(_expression);
 	return S_OK;
 }
 
@@ -397,24 +397,24 @@ STDMETHODIMP CShapefile::put_VisibilityExpression(BSTR newVal)
 // ************************************************************
 //		get/put_Volatile
 // ************************************************************
-STDMETHODIMP CShapefile::get_Volatile(VARIANT_BOOL* pVal)
+STDMETHODIMP CShapefile::get_Volatile(VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (_interactiveEditing)
-		{
-			*pVal = VARIANT_TRUE;
-		}
-		else
-		{
-			*pVal = _volatile ? VARIANT_TRUE : VARIANT_FALSE;
-		}
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (_interactiveEditing)
+	{
+		*retval = VARIANT_TRUE;
+	}
+	else
+	{
+		*retval = _volatile ? VARIANT_TRUE : VARIANT_FALSE;
+	}
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_Volatile(VARIANT_BOOL newVal)
+STDMETHODIMP CShapefile::put_Volatile(const VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		_volatile = newVal == VARIANT_TRUE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_volatile = newVal == VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -423,8 +423,8 @@ STDMETHODIMP CShapefile::put_Volatile(VARIANT_BOOL newVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::get_NumShapes(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* pVal = _shapeData.size(); //_numShapes;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = gsl::narrow_cast<long>(_shapeData.size()); //_numShapes;
 	return S_OK;
 }
 
@@ -433,14 +433,14 @@ STDMETHODIMP CShapefile::get_NumShapes(long* pVal)
 // **************************************************************
 STDMETHODIMP CShapefile::get_NumFields(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (_table != nullptr)
-			_table->get_NumFields(pVal);
-		else
-		{
-			ErrorMessage(tkFILE_NOT_OPEN);
-			*pVal = 0;
-		}
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (_table != nullptr)
+		_table->get_NumFields(pVal);
+	else
+	{
+		ErrorMessage(tkFILE_NOT_OPEN);
+		*pVal = 0;
+	}
 	return S_OK;
 }
 
@@ -457,10 +457,10 @@ STDMETHODIMP CShapefile::get_ShapefileType(ShpfileType* pVal)
 // *****************************************************************
 //	   get_ErrorMsg()
 // *****************************************************************
-STDMETHODIMP CShapefile::get_ErrorMsg(long errorCode, BSTR* pVal)
+STDMETHODIMP CShapefile::get_ErrorMsg(const long errorCode, BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//USES_CONVERSION;
 	*pVal = A2BSTR(ErrorMsg(errorCode));
 	return S_OK;
 }
@@ -470,14 +470,14 @@ STDMETHODIMP CShapefile::get_ErrorMsg(long errorCode, BSTR* pVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::get_FileHandle(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (_shpfile != nullptr)
-		{
-			const int handle = _fileno(_shpfile);
-			*pVal = _dup(handle);
-		}
-		else
-			*pVal = -1;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (_shpfile != nullptr)
+	{
+		const int handle = _fileno(_shpfile);
+		*pVal = _dup(handle);
+	}
+	else
+		*pVal = -1;
 
 	return S_OK;
 }
@@ -497,13 +497,13 @@ STDMETHODIMP CShapefile::get_Filename(BSTR* pVal)
 // **************************************************************
 //		ErrorMessage()
 // **************************************************************
-void CShapefile::ErrorMessage(long errorCode)
+void CShapefile::ErrorMessage(const long errorCode)
 {
 	_lastErrorCode = errorCode;
 	CallbackHelper::ErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
-void CShapefile::ErrorMessage(long errorCode, ICallback* cBack)
+void CShapefile::ErrorMessage(const long errorCode, ICallback* cBack)
 {
 	_lastErrorCode = errorCode;
 	CallbackHelper::ErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
@@ -521,7 +521,7 @@ STDMETHODIMP CShapefile::get_MinDrawingSize(LONG* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_MinDrawingSize(LONG newVal)
+STDMETHODIMP CShapefile::put_MinDrawingSize(const LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_minDrawingSize = newVal;
@@ -547,11 +547,11 @@ STDMETHODIMP CShapefile::get_SourceType(tkShapefileSourceType* pVal)
 //		LoadDataFrom()
 // ************************************************************
 // Loads shape and DBF data from disk file into in-memory mode
-STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::LoadDataFrom(BSTR shapefileName, ICallback* cBack, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//USES_CONVERSION;
 
-		USES_CONVERSION;
 	*retval = VARIANT_FALSE;
 	if (_sourceType != sstInMemory)
 	{
@@ -559,7 +559,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback* cBack, VARI
 		return S_OK;
 	}
 
-	if (OpenCore(OLE2CA(ShapefileName), cBack))
+	if (OpenCore(CStringW(shapefileName), cBack))
 	{
 		// loading data in-memory
 		VARIANT_BOOL vb;
@@ -574,7 +574,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback* cBack, VARI
 			CComVariant var;
 			for (size_t i = 0; i < _shapeData.size(); i++)
 			{
-				_table->get_CellValue(0, i, &var);
+				_table->get_CellValue(0, gsl::narrow_cast<long>(i), &var);
 			}
 		}
 
@@ -592,7 +592,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback* cBack, VARI
 		_shxfile = nullptr;
 
 		if (_table != nullptr)
-			((CTableClass*)_table)->CloseUnderlyingFile();
+			static_cast<CTableClass*>(_table)->CloseUnderlyingFile();
 
 		*retval = vb;
 	}
@@ -604,7 +604,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback* cBack, VARI
 // ************************************************************
 bool CShapefile::OpenCore(CStringW tmpShpfileName, ICallback* cBack)
 {
-	USES_CONVERSION;
+	//USES_CONVERSION;
 	VARIANT_BOOL vbretval;
 
 	// saving the provided names; 
@@ -630,7 +630,7 @@ bool CShapefile::OpenCore(CStringW tmpShpfileName, ICallback* cBack)
 	}
 
 	_table->put_GlobalCallback(_globalCallback);
-	((CTableClass*)_table)->InjectShapefile(this);
+	static_cast<CTableClass*>(_table)->InjectShapefile(this);
 
 	const CComBSTR bstrDbf(_dbffileName);
 	_table->Open(bstrDbf, cBack, &vbretval);
@@ -697,9 +697,11 @@ bool CShapefile::OpenCore(CStringW tmpShpfileName, ICallback* cBack)
 // ************************************************************
 STDMETHODIMP CShapefile::Open(BSTR shapefileName, ICallback* cBack, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* retval = VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retval = VARIANT_FALSE;
 	VARIANT_BOOL vbretval;
+
+	Debug::WriteLine("In CShapefile::Open");
 
 	if (_globalCallback == nullptr && cBack != nullptr)
 	{
@@ -707,59 +709,66 @@ STDMETHODIMP CShapefile::Open(BSTR shapefileName, ICallback* cBack, VARIANT_BOOL
 		_globalCallback->AddRef();
 	}
 
-	USES_CONVERSION;
-	CStringW tmp_shpfileName = OLE2CW(shapefileName);
+	//USES_CONVERSION;
+	const auto tmpShpfileName = CStringW(shapefileName);
 
-	if (tmp_shpfileName.GetLength() == 0)
+	if (tmpShpfileName.GetLength() == 0)
 	{
 		// better to use CreateNew directly, but this call will be preserved for backward compatibility
 		this->CreateNew(m_globalSettings.emptyBstr, _shpfiletype, &vbretval);
+		return S_OK;
 	}
-	else if (tmp_shpfileName.GetLength() <= 3)
+
+	if (tmpShpfileName.GetLength() <= 3)
 	{
 		ErrorMessage(tkINVALID_FILENAME);
+		return S_OK;
 	}
-	else
+
+	Debug::WriteLine("Closing the opened shapefile");
+	// close the opened shapefile
+	this->Close(&vbretval);
+
+	if (vbretval == VARIANT_FALSE)
 	{
-		// close the opened shapefile
-		this->Close(&vbretval);
-
-		if (vbretval == VARIANT_FALSE)
-		{
-			// error code in the function
-			return S_OK;
-		}
-
-		if (OpenCore(tmp_shpfileName, cBack))
-		{
-			_sourceType = sstDiskBased;
-
-			// reading projection
-			const CComBSTR bstrPrj(_prjfileName);
-			_geoProjection->ReadFromFileEx(bstrPrj, VARIANT_TRUE, &vbretval);
-
-			ShapeStyleHelper::ApplyRandomDrawingOptions(this);
-			LabelsHelper::UpdateLabelsPositioning(this);
-			*retval = VARIANT_TRUE;
-		}
+		// error code in the function
+		return S_OK;
 	}
+
+	Debug::WriteLine("Before OpenCore");
+	if (OpenCore(tmpShpfileName, cBack))
+	{
+		_sourceType = sstDiskBased;
+
+		Debug::WriteLine("Before Reading projection");
+		// reading projection
+		const CComBSTR bstrPrj(_prjfileName);
+		_geoProjection->ReadFromFileEx(bstrPrj, VARIANT_TRUE, &vbretval);
+
+		Debug::WriteLine("Before ShapeStyleHelper::ApplyRandomDrawingOptions");
+		ShapeStyleHelper::ApplyRandomDrawingOptions(this);
+		Debug::WriteLine("LabelsHelper::UpdateLabelsPositioning");
+		LabelsHelper::UpdateLabelsPositioning(this);
+		*retval = VARIANT_TRUE;
+	}
+
+	Debug::WriteLine("CShapefile::Open is finished");
 	return S_OK;
 }
 
 // *********************************************************
 //		CreateNew()
 // *********************************************************
-STDMETHODIMP CShapefile::CreateNew(BSTR shapefileName, ShpfileType shapefileType, VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::CreateNew(BSTR shapefileName, const ShpfileType shapefileType, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		return this->CreateNewCore(shapefileName, shapefileType, true, retval);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return this->CreateNewCore(shapefileName, shapefileType, true, retval);
 }
 
 // *********************************************************
 //		CreateNewCore()
 // *********************************************************
-HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType shapefileType, bool applyRandomOptions,
-	VARIANT_BOOL* retval)
+HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, const ShpfileType shapefileType, const bool applyRandomOptions, VARIANT_BOOL* retval)
 {
 	*retval = VARIANT_FALSE;
 	VARIANT_BOOL vb;
@@ -783,13 +792,14 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType shapefileType,
 		return S_OK;
 	}
 
-	USES_CONVERSION;
-	CString tmp_shpfileName = OLE2CA(ShapefileName);
+	//USES_CONVERSION;
+	//CString tmp_shpfileName = OLE2CA(ShapefileName);
+	const auto tmpShpfileName = CString(ShapefileName);
 
 	// ----------------------------------------------
 	// in memory shapefile (without name)
 	// ----------------------------------------------
-	if (tmp_shpfileName.GetLength() == 0)
+	if (tmpShpfileName.GetLength() == 0)
 	{
 		// closing the old shapefile (error code inside the function)
 		Close(&vb);
@@ -811,7 +821,7 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType shapefileType,
 			else
 			{
 
-				((CTableClass*)_table)->InjectShapefile(this);
+				static_cast<CTableClass*>(_table)->InjectShapefile(this);
 				_shpfiletype = shapefileType;
 				_isEditingShapes = true;
 				_sourceType = sstInMemory;
@@ -828,16 +838,16 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType shapefileType,
 		return S_OK;
 	}
 
-	if (tmp_shpfileName.GetLength() <= 3)
+	if (tmpShpfileName.GetLength() <= 3)
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
 	}
 
-	const CString& shpName = tmp_shpfileName;
-	const CString shxName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "shx";
-	const CString dbfName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
-	const CString prjName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "prj";
+	const CString& shpName = tmpShpfileName;
+	const CString shxName = tmpShpfileName.Left(tmpShpfileName.GetLength() - 3) + "shx";
+	const CString dbfName = tmpShpfileName.Left(tmpShpfileName.GetLength() - 3) + "dbf";
+	const CString prjName = tmpShpfileName.Left(tmpShpfileName.GetLength() - 3) + "prj";
 
 	// new file is created, so there must not be any files with this names
 	if (Utility::FileExists(shpName) != FALSE)
@@ -870,7 +880,7 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType shapefileType,
 
 		_table->put_GlobalCallback(_globalCallback);
 
-		const CString newDbfName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
+		const CString newDbfName = tmpShpfileName.Left(tmpShpfileName.GetLength() - 3) + "dbf";
 		const CComBSTR bstrName(newDbfName);
 		_table->CreateNew(bstrName, &vb);
 
@@ -883,11 +893,11 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType shapefileType,
 		}
 		else
 		{
-			((CTableClass*)_table)->InjectShapefile(this);
-			_shpfileName = tmp_shpfileName;
-			_shxfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "shx";
-			_dbffileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
-			_prjfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "prj";
+			static_cast<CTableClass*>(_table)->InjectShapefile(this);
+			_shpfileName = tmpShpfileName;
+			_shxfileName = tmpShpfileName.Left(tmpShpfileName.GetLength() - 3) + "shx";
+			_dbffileName = tmpShpfileName.Left(tmpShpfileName.GetLength() - 3) + "dbf";
+			_prjfileName = tmpShpfileName.Left(tmpShpfileName.GetLength() - 3) + "prj";
 
 			_shpfiletype = shapefileType;
 			_isEditingShapes = true;
@@ -910,10 +920,10 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType shapefileType,
 // *********************************************************
 //		CreateNewWithShapeID()
 // *********************************************************
-STDMETHODIMP CShapefile::CreateNewWithShapeID(BSTR shapefileName, ShpfileType shapefileType, VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::CreateNewWithShapeID(BSTR shapefileName, const ShpfileType shapefileType, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	// USES_CONVERSION;
 
 	CreateNew(shapefileName, shapefileType, retval);
 
@@ -931,12 +941,12 @@ STDMETHODIMP CShapefile::CreateNewWithShapeID(BSTR shapefileName, ShpfileType sh
 // *****************************************************************
 STDMETHODIMP CShapefile::Close(VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		if (_appendMode)
-		{
-			StopAppendMode();
-		}
+	if (_appendMode)
+	{
+		StopAppendMode();
+	}
 
 	ClearCachedGeometries();
 
@@ -1033,7 +1043,7 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL* retval)
 //		Dump()
 // **********************************************************
 //Saves shapefile without reopening it in a new location
-STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::Dump(BSTR shapefileName, ICallback* cBack, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		* retval = VARIANT_FALSE;
@@ -1061,32 +1071,32 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL
 	if (!this->ValidateOutput(this, "Dump", "Shapefile", false))
 		return S_OK;
 
-	USES_CONVERSION;
-	CString sa_shpfileName = OLE2CA(ShapefileName);
+	//USES_CONVERSION;
+	const auto saShpfileName = CString(shapefileName);
 
-	if (sa_shpfileName.GetLength() <= 3)
+	if (saShpfileName.GetLength() <= 3)
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 	}
 	else
 	{
-		const CString sa_shxfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + "shx";
-		CString sa_dbffileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + "dbf";
+		const CString saShxfileName = saShpfileName.Left(saShpfileName.GetLength() - 3) + "shx";
+		const CString saDbffileName = saShpfileName.Left(saShpfileName.GetLength() - 3) + "dbf";
 
 		// -----------------------------------------------
 		// it's not allowed to rewrite the existing files
 		// -----------------------------------------------
-		if (Utility::FileExists(sa_shpfileName))
+		if (Utility::FileExists(saShpfileName))
 		{
 			ErrorMessage(tkSHP_FILE_EXISTS);
 			return S_OK;
 		}
-		if (Utility::FileExists(sa_shxfileName))
+		if (Utility::FileExists(saShxfileName))
 		{
 			ErrorMessage(tkSHX_FILE_EXISTS);
 			return S_OK;
 		}
-		if (Utility::FileExists(sa_dbffileName))
+		if (Utility::FileExists(saDbffileName))
 		{
 			ErrorMessage(tkDBF_FILE_EXISTS);
 			return S_OK;
@@ -1111,7 +1121,7 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL
 		// -----------------------------------------------
 		// opening files
 		// -----------------------------------------------
-		FILE* shpfile = fopen(sa_shpfileName, "wb+");
+		FILE* shpfile = fopen(saShpfileName, "wb+");
 		if (shpfile == nullptr)
 		{
 			ErrorMessage(tkCANT_CREATE_SHP);
@@ -1119,7 +1129,7 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL
 		}
 
 		//shx
-		FILE* shxfile = fopen(sa_shxfileName, "wb+");
+		FILE* shxfile = fopen(saShxfileName, "wb+");
 		if (shxfile == nullptr)
 		{
 			fclose(shpfile);
@@ -1139,7 +1149,7 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL
 		// ------------------------------------------------
 		//	saving dbf table
 		// ------------------------------------------------
-		_table->Dump(sa_dbffileName.AllocSysString(), cBack, retval);
+		_table->Dump(saDbffileName.AllocSysString(), cBack, retval);
 		if (*retval == FALSE)
 		{
 			_table->get_LastErrorCode(&_lastErrorCode);
@@ -1148,7 +1158,7 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL
 
 		// saving projection in new format
 		VARIANT_BOOL vbretval;
-		const CStringW prjfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + L"prj";
+		const CStringW prjfileName = saShpfileName.Left(saShpfileName.GetLength() - 3) + L"prj";
 		const CComBSTR bstr(prjfileName);
 		_geoProjection->WriteToFileEx(bstr, VARIANT_TRUE, &vbretval);
 
@@ -1170,8 +1180,8 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback* cBack, VARIANT_BOOL
 // Saves shapefile to the new or the same location. Doesn't stop editing mode.
 STDMETHODIMP CShapefile::SaveAs(BSTR shapefileName, ICallback* cBack, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* retval = VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retval = VARIANT_FALSE;
 
 	const bool callbackIsNull = _globalCallback == nullptr;
 	if (_globalCallback == nullptr && cBack != nullptr)
@@ -1196,8 +1206,8 @@ STDMETHODIMP CShapefile::SaveAs(BSTR shapefileName, ICallback* cBack, VARIANT_BO
 	if (!this->ValidateOutput(this, "SaveAs", "Shapefile", false))
 		return S_OK;
 
-	USES_CONVERSION;
-	CStringW newShpName = OLE2W(shapefileName);
+	//USES_CONVERSION;
+	const auto newShpName = CStringW(shapefileName);
 
 	if (newShpName.GetLength() <= 3)
 	{
@@ -1339,8 +1349,8 @@ STDMETHODIMP CShapefile::SaveAs(BSTR shapefileName, ICallback* cBack, VARIANT_BO
 // saving without exiting edit mode
 STDMETHODIMP CShapefile::Save(ICallback* cBack, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* retval = VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retval = VARIANT_FALSE;
 
 	if (_globalCallback == nullptr && cBack != nullptr)
 	{
@@ -1466,7 +1476,7 @@ STDMETHODIMP CShapefile::Save(ICallback* cBack, VARIANT_BOOL* retval)
 // ************************************************************
 STDMETHODIMP CShapefile::Resource(BSTR newShpPath, VARIANT_BOOL* retval)
 {
-	USES_CONVERSION;
+	//USES_CONVERSION;
 	Close(retval);
 	Open(newShpPath, nullptr, retval);
 	return S_OK;
@@ -1479,8 +1489,8 @@ STDMETHODIMP CShapefile::Resource(BSTR newShpPath, VARIANT_BOOL* retval)
 //  Creates new shapefile with the same type and fields as existing one
 STDMETHODIMP CShapefile::Clone(IShapefile** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		ShapefileHelper::CloneCore(this, retVal, _shpfiletype);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());;
+	ShapefileHelper::CloneCore(this, retVal, _shpfiletype);
 	return S_OK;
 }
 
@@ -1489,9 +1499,9 @@ STDMETHODIMP CShapefile::Clone(IShapefile** retVal)
 // ************************************************************
 STDMETHODIMP CShapefile::get_Extents(IExtents** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		IExtents* bBox = nullptr;
+	IExtents* bBox = nullptr;
 	ComHelper::CreateExtents(&bBox);
 
 	// Extents could change because of the moving of points of a single shape
@@ -1517,10 +1527,10 @@ STDMETHODIMP CShapefile::get_Extents(IExtents** pVal)
 // ****************************************************************
 STDMETHODIMP CShapefile::EditInsertField(IField* newField, long* fieldIndex, ICallback* cBack, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		if (cBack == nullptr && _globalCallback != nullptr)
-			cBack = _globalCallback;
+	if (cBack == nullptr && _globalCallback != nullptr)
+		cBack = _globalCallback;
 
 	if (_table != nullptr)
 	{
@@ -1546,7 +1556,7 @@ STDMETHODIMP CShapefile::EditInsertField(IField* newField, long* fieldIndex, ICa
 // ****************************************************************
 //	  EditDeleteField()
 // ****************************************************************
-STDMETHODIMP CShapefile::EditDeleteField(long fieldIndex, ICallback* cBack, VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::EditDeleteField(const long fieldIndex, ICallback* cBack, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
@@ -1579,20 +1589,20 @@ STDMETHODIMP CShapefile::EditDeleteField(long fieldIndex, ICallback* cBack, VARI
 // ****************************************************************
 //	  EditCellValue()
 // ****************************************************************
-STDMETHODIMP CShapefile::EditCellValue(long fieldIndex, long shapeIndex, VARIANT newVal, VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::EditCellValue(const long fieldIndex, const long shapeIndex, const VARIANT newVal, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		if (_table != nullptr)
-		{
-			_table->EditCellValue(fieldIndex, shapeIndex, newVal, retval);
-		}
-		else
-		{
-			*retval = VARIANT_FALSE;
-			ErrorMessage(tkFILE_NOT_OPEN);
-			return S_OK;
-		}
+	if (_table != nullptr)
+	{
+		_table->EditCellValue(fieldIndex, shapeIndex, newVal, retval);
+	}
+	else
+	{
+		*retval = VARIANT_FALSE;
+		ErrorMessage(tkFILE_NOT_OPEN);
+		return S_OK;
+	}
 
 	if (*retval == VARIANT_FALSE)
 	{
@@ -1607,14 +1617,14 @@ STDMETHODIMP CShapefile::EditCellValue(long fieldIndex, long shapeIndex, VARIANT
 // ****************************************************************
 STDMETHODIMP CShapefile::StartEditingTable(ICallback* cBack, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		if (_appendMode)
-		{
-			ErrorMessage(tkDBF_NO_EDIT_MODE_WHEN_APPENDING);
-			*retval = VARIANT_FALSE;
-			return S_OK;
-		}
+	if (_appendMode)
+	{
+		ErrorMessage(tkDBF_NO_EDIT_MODE_WHEN_APPENDING);
+		*retval = VARIANT_FALSE;
+		return S_OK;
+	}
 
 	if (_globalCallback == nullptr && cBack != nullptr)
 	{
@@ -1645,15 +1655,15 @@ STDMETHODIMP CShapefile::StartEditingTable(ICallback* cBack, VARIANT_BOOL* retva
 // ****************************************************************
 //	  StopEditingTable()
 // ****************************************************************
-STDMETHODIMP CShapefile::StopEditingTable(VARIANT_BOOL applyChanges, ICallback* cBack, VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::StopEditingTable(const VARIANT_BOOL applyChanges, ICallback* cBack, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		if (_globalCallback == nullptr && cBack != nullptr)
-		{
-			_globalCallback = cBack;
-			_globalCallback->AddRef();
-		}
+	if (_globalCallback == nullptr && cBack != nullptr)
+	{
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
+	}
 
 	if (_table != nullptr)
 	{
@@ -1678,29 +1688,29 @@ STDMETHODIMP CShapefile::StopEditingTable(VARIANT_BOOL applyChanges, ICallback* 
 // *****************************************************************
 //	   get_Field()
 // *****************************************************************
-STDMETHODIMP CShapefile::get_Field(long fieldIndex, IField** pVal)
+STDMETHODIMP CShapefile::get_Field(const long fieldIndex, IField** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		if (_table != nullptr)
+	if (_table != nullptr)
+	{
+		_table->get_Field(fieldIndex, pVal);
+		if (*pVal != nullptr)
 		{
-			_table->get_Field(fieldIndex, pVal);
-			if (*pVal != nullptr)
-			{
-				// we need to report error from field class, and will use callback from this class for it
-				ICallback* cBack = nullptr;
-				if ((*pVal)->get_GlobalCallback(&cBack) == NULL && this->_globalCallback != nullptr)
-					(*pVal)->put_GlobalCallback(_globalCallback);
+			// we need to report error from field class, and will use callback from this class for it
+			ICallback* cBack = nullptr;
+			if ((*pVal)->get_GlobalCallback(&cBack) == NULL && this->_globalCallback != nullptr)
+				(*pVal)->put_GlobalCallback(_globalCallback);
 
-				if (cBack != nullptr)
-					cBack->Release(); // we put a reference in field class so must release it here
-			}
+			if (cBack != nullptr)
+				cBack->Release(); // we put a reference in field class so must release it here
 		}
-		else
-		{
-			ErrorMessage(tkFILE_NOT_OPEN);
-			return S_OK;
-		}
+	}
+	else
+	{
+		ErrorMessage(tkFILE_NOT_OPEN);
+		return S_OK;
+	}
 
 	return S_OK;
 }
@@ -1708,22 +1718,21 @@ STDMETHODIMP CShapefile::get_Field(long fieldIndex, IField** pVal)
 // *****************************************************************
 //	   get_FieldByName()
 // *****************************************************************
-STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField** pVal)
+STDMETHODIMP CShapefile::get_FieldByName(BSTR fieldname, IField** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//USES_CONVERSION;
 
 	long max;
-
-	CString strFieldname;
 	IField* testVal;
 
 	_table->get_NumFields(&max);
 	if (_table != nullptr)
 	{
-		if (_tcslen(OLE2CA(Fieldname)) > 0)
+		CString strFieldname;
+		if (_tcslen(CString(fieldname)) > 0)
 		{
-			strFieldname = OLE2A(Fieldname);
+			strFieldname = CString(fieldname);
 		}
 		else
 		{
@@ -1733,10 +1742,9 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField** pVal)
 		for (int fld = 0; fld < max; fld++)
 		{
 			_table->get_Field(fld, &testVal);
-			CComBSTR Testname;
-			testVal->get_Name(&Testname);
-			CString strTestname = OLE2A(Testname);
-			if (strTestname.CompareNoCase(strFieldname) == 0)
+			CComBSTR testname;
+			testVal->get_Name(&testname);
+			if (CString(testname).CompareNoCase(strFieldname) == 0)
 			{
 				*pVal = testVal;
 				return S_OK;
@@ -1758,19 +1766,19 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField** pVal)
 // *****************************************************************
 //	   get_CellValue()
 // *****************************************************************
-STDMETHODIMP CShapefile::get_CellValue(long fieldIndex, long shapeIndex, VARIANT* pVal)
+STDMETHODIMP CShapefile::get_CellValue(const long fieldIndex, const long shapeIndex, VARIANT* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		if (_table != nullptr)
-		{
-			_table->get_CellValue(fieldIndex, shapeIndex, pVal);
-		}
-		else
-		{
-			ErrorMessage(tkFILE_NOT_OPEN);
-			return S_OK;
-		}
+	if (_table != nullptr)
+	{
+		_table->get_CellValue(fieldIndex, shapeIndex, pVal);
+	}
+	else
+	{
+		ErrorMessage(tkFILE_NOT_OPEN);
+		return S_OK;
+	}
 
 	return S_OK;
 }
@@ -1780,17 +1788,17 @@ STDMETHODIMP CShapefile::get_CellValue(long fieldIndex, long shapeIndex, VARIANT
 // *****************************************************************
 STDMETHODIMP CShapefile::get_EditingTable(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (_table != nullptr)
-		{
-			_table->get_EditingTable(pVal);
-		}
-		else
-		{
-			*pVal = VARIANT_FALSE;
-			ErrorMessage(tkFILE_NOT_OPEN);
-			return S_OK;
-		}
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (_table != nullptr)
+	{
+		_table->get_EditingTable(pVal);
+	}
+	else
+	{
+		*pVal = VARIANT_FALSE;
+		ErrorMessage(tkFILE_NOT_OPEN);
+		return S_OK;
+	}
 
 	return S_OK;
 }
@@ -1800,8 +1808,8 @@ STDMETHODIMP CShapefile::get_EditingTable(VARIANT_BOOL* pVal)
 // *************************************************************
 STDMETHODIMP CShapefile::get_Table(ITable** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* retVal = _table;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = _table;
 	if (_table)
 	{
 		_table->AddRef();
@@ -1815,68 +1823,68 @@ STDMETHODIMP CShapefile::get_Table(ITable** retVal)
 // *************************************************************
 //		get_ShapeRotation()
 // *************************************************************
-STDMETHODIMP CShapefile::get_ShapeRotation(long shapeIndex, double* pVal)
+STDMETHODIMP CShapefile::get_ShapeRotation(const long shapeIndex, double* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		*pVal = -1;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
-		*pVal = _shapeData[shapeIndex]->rotation;
+
+	*pVal = _shapeData[shapeIndex]->rotation;
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_ShapeRotation(long shapeIndex, double newVal)
+STDMETHODIMP CShapefile::put_ShapeRotation(const long shapeIndex, const double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
-		_shapeData[shapeIndex]->rotation = static_cast<float>(newVal);
 
+	_shapeData[shapeIndex]->rotation = static_cast<float>(newVal);
 	return S_OK;
 }
 
 // *************************************************************
 //		get_ShapeVisible()
 // *************************************************************
-STDMETHODIMP CShapefile::get_ShapeVisible(long shapeIndex, VARIANT_BOOL* pVal)
+STDMETHODIMP CShapefile::get_ShapeVisible(const long shapeIndex, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = VARIANT_FALSE;
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
+
+	// this particular shape was not hidden explicitly or via visibility expression
+	if (!_shapeData[shapeIndex]->hidden() && _shapeData[shapeIndex]->isVisible())
 	{
-		// this particular shape was not hidden explicitly or via visibility expression
-		if (!_shapeData[shapeIndex]->hidden() && _shapeData[shapeIndex]->isVisible())
+		long ctIndex = -1;
+		get_ShapeCategory(shapeIndex, &ctIndex);
+		if (ctIndex == -1)
 		{
-			long ctIndex = -1;
-			get_ShapeCategory(shapeIndex, &ctIndex);
-			if (ctIndex == -1)
+			// no category, check default options
+			_defaultDrawOpt->get_Visible(pVal);
+		}
+		else
+		{
+			// there is category, check whether it is visible
+			CComPtr<IShapefileCategory> ct = nullptr;
+			get_ShapeCategory3(shapeIndex, &ct);
+			if (ct)
 			{
-				// no category, check default options
-				_defaultDrawOpt->get_Visible(pVal);
-			}
-			else
-			{
-				// there is category, check whether it is visible
-				CComPtr<IShapefileCategory> ct = nullptr;
-				get_ShapeCategory3(shapeIndex, &ct);
-				if (ct)
+				CComPtr<IShapeDrawingOptions> options = nullptr;
+				ct->get_DrawingOptions(&options);
+				if (options)
 				{
-					CComPtr<IShapeDrawingOptions> options = nullptr;
-					ct->get_DrawingOptions(&options);
-					if (options)
-					{
-						options->get_Visible(pVal);
-					}
+					options->get_Visible(pVal);
 				}
 			}
 		}
@@ -1887,65 +1895,62 @@ STDMETHODIMP CShapefile::get_ShapeVisible(long shapeIndex, VARIANT_BOOL* pVal)
 // *************************************************************
 //		ShapeIsHidden()
 // *************************************************************
-STDMETHODIMP CShapefile::get_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL* pVal)
+STDMETHODIMP CShapefile::get_ShapeIsHidden(const LONG shapeIndex, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	*pVal = VARIANT_FALSE;
+
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
-		*pVal = VARIANT_FALSE;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
-	{
-		*pVal = _shapeData[shapeIndex]->hidden() ? VARIANT_TRUE : VARIANT_FALSE;
-	}
+
+	*pVal = _shapeData[shapeIndex]->hidden() ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL newVal)
+STDMETHODIMP CShapefile::put_ShapeIsHidden(const LONG shapeIndex, const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
-		_shapeData[shapeIndex]->hidden(newVal != 0);
 
+	_shapeData[shapeIndex]->hidden(newVal != 0);
 	return S_OK;
 }
 
 // *************************************************************
 //		get_ShapeModified()
 // *************************************************************
-STDMETHODIMP CShapefile::get_ShapeModified(long shapeIndex, VARIANT_BOOL* retVal)
+STDMETHODIMP CShapefile::get_ShapeModified(const long shapeIndex, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	*retVal = -1;
+
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
-		*retVal = -1;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-	}
-	else
-	{
-		*retVal = _shapeData[shapeIndex]->modified() ? VARIANT_TRUE : VARIANT_FALSE;
+		return S_OK;
 	}
 
+	*retVal = _shapeData[shapeIndex]->modified() ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_ShapeModified(long shapeIndex, VARIANT_BOOL newVal)
+STDMETHODIMP CShapefile::put_ShapeModified(const long shapeIndex, const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-	}
-	else
-	{
-		_shapeData[shapeIndex]->modified(newVal != 0);
+		return S_OK;
 	}
 
+	_shapeData[shapeIndex]->modified(newVal != 0);
 	return S_OK;
 }
 
@@ -1953,133 +1958,131 @@ STDMETHODIMP CShapefile::put_ShapeModified(long shapeIndex, VARIANT_BOOL newVal)
 // *************************************************************
 //		get_ShapeCategory()
 // *************************************************************
-STDMETHODIMP CShapefile::get_ShapeCategory(long shapeIndex, long* pVal)
+STDMETHODIMP CShapefile::get_ShapeCategory(const long shapeIndex, long* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size()) //_numShapes)
+	*pVal = -1;
+
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
-		*pVal = -1;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
-		*pVal = _shapeData[shapeIndex]->category;
+
+	*pVal = _shapeData[shapeIndex]->category;
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_ShapeCategory(long shapeIndex, long newVal)
+STDMETHODIMP CShapefile::put_ShapeCategory(const long shapeIndex, const long newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size()) //_numShapes )
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
-		_shapeData[shapeIndex]->category = (int)newVal;
 
+	_shapeData[shapeIndex]->category = newVal;
 	return S_OK;
 }
 
 // *************************************************************
 //		get_ShapeCategory2()
 // *************************************************************
-STDMETHODIMP CShapefile::put_ShapeCategory2(long shapeIndex, BSTR categoryName)
+STDMETHODIMP CShapefile::put_ShapeCategory2(const long shapeIndex, BSTR categoryName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
+
+	int index;
+	_categories->get_CategoryIndexByName(categoryName, &index);
+	if (index == -1)
 	{
-		int index;
-		_categories->get_CategoryIndexByName(categoryName, &index);
-		if (index == -1)
-		{
-			ErrorMessage(tkCATEGORY_WASNT_FOUND);
-		}
-		else
-		{
-			_shapeData[shapeIndex]->category = (int)index;
-		}
+		ErrorMessage(tkCATEGORY_WASNT_FOUND);
+		return S_OK;
 	}
+
+	_shapeData[shapeIndex]->category = index;
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::get_ShapeCategory2(long shapeIndex, BSTR* categoryName)
+STDMETHODIMP CShapefile::get_ShapeCategory2(const long shapeIndex, BSTR* categoryName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	*categoryName = SysAllocString(L"");
+
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
+
+	const long index = _shapeData[shapeIndex]->category;
+	long count;
+	_categories->get_Count(&count);
+	if (index >= 0 && index < count)
 	{
-		const int index = _shapeData[shapeIndex]->category;
-		long count;
-		_categories->get_Count(&count);
-		if (index >= 0 && index < count)
-		{
-			IShapefileCategory* ct;
-			_categories->get_Item(index, &ct);
-			ct->get_Name(categoryName);
-			ct->Release();
-			return S_OK;
-		}
-		ErrorMessage(tkCATEGORY_WASNT_FOUND);
+		IShapefileCategory* ct;
+		_categories->get_Item(index, &ct);
+		ct->get_Name(categoryName);
+		ct->Release();
+		return S_OK;
 	}
-	*categoryName = SysAllocString(L"");
+
+	ErrorMessage(tkCATEGORY_WASNT_FOUND);
 	return S_OK;
 }
 
 // *************************************************************
 //		put_ShapeCategory3()
 // *************************************************************
-STDMETHODIMP CShapefile::put_ShapeCategory3(long shapeIndex, IShapefileCategory* category)
+STDMETHODIMP CShapefile::put_ShapeCategory3(const long shapeIndex, IShapefileCategory* category)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
+
+	int index;
+	_categories->get_CategoryIndex(category, &index);
+	if (index == -1)
 	{
-		int index;
-		_categories->get_CategoryIndex(category, &index);
-		if (index == -1)
-		{
-			ErrorMessage(tkCATEGORY_WASNT_FOUND);
-		}
-		else
-		{
-			_shapeData[shapeIndex]->category = (int)index;
-		}
+		ErrorMessage(tkCATEGORY_WASNT_FOUND);
+		return S_OK;
 	}
+
+	_shapeData[shapeIndex]->category = index;
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::get_ShapeCategory3(long shapeIndex, IShapefileCategory** category)
+STDMETHODIMP CShapefile::get_ShapeCategory3(const long shapeIndex, IShapefileCategory** category)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*category = nullptr;
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
+	}
+
+	const long index = _shapeData[shapeIndex]->category;
+	long count;
+	_categories->get_Count(&count);
+	if (index >= 0 && index < count)
+	{
+		IShapefileCategory* ct;
+		_categories->get_Item(index, &ct);
+		*category = ct; // ref was added in the get_Item
 	}
 	else
 	{
-		const int index = _shapeData[shapeIndex]->category;
-		long count;
-		_categories->get_Count(&count);
-		if (index >= 0 && index < count)
-		{
-			IShapefileCategory* ct;
-			_categories->get_Item(index, &ct);
-			*category = ct; // ref was added in the get_Item
-		}
-		else
-		{
-			ErrorMessage(tkCATEGORY_WASNT_FOUND);
-		}
+		ErrorMessage(tkCATEGORY_WASNT_FOUND);
 	}
 	return S_OK;
 }
@@ -2142,9 +2145,10 @@ STDMETHODIMP CShapefile::put_DefaultDrawingOptions(IShapeDrawingOptions* newVal)
 // ***********************************************************************
 //		put_ReferenceToCategories
 // ***********************************************************************
-void CShapefile::put_ReferenceToCategories(bool bNullReference)
+void CShapefile::put_ReferenceToCategories(const bool bNullReference)
 {
 	if (_categories == nullptr) return;
+
 	auto* coCategories = dynamic_cast<CShapefileCategories*>(_categories);
 	if (!bNullReference)
 		coCategories->put_ParentShapefile(this);
@@ -2165,9 +2169,9 @@ STDMETHODIMP CShapefile::get_Categories(IShapefileCategories** pVal)
 
 STDMETHODIMP CShapefile::put_Categories(IShapefileCategories* newVal)
 {
-	if (ComHelper::SetRef((IDispatch*)newVal, (IDispatch**)&_categories, false))
+	if (ComHelper::SetRef(newVal, (IDispatch**)&_categories, false))
 	{
-		((CShapefileCategories*)_categories)->put_ParentShapefile(this);
+		static_cast<CShapefileCategories*>(_categories)->put_ParentShapefile(this);
 	}
 	return S_OK;
 }
@@ -2183,7 +2187,7 @@ STDMETHODIMP CShapefile::get_SelectionColor(OLE_COLOR* retval)
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_SelectionColor(OLE_COLOR newVal)
+STDMETHODIMP CShapefile::put_SelectionColor(const OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_selectionColor = newVal;
@@ -2218,7 +2222,7 @@ STDMETHODIMP CShapefile::get_SelectionAppearance(tkSelectionAppearance* retval)
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_SelectionAppearance(tkSelectionAppearance newVal)
+STDMETHODIMP CShapefile::put_SelectionAppearance(const tkSelectionAppearance newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_selectionAppearance = newVal;
@@ -2235,7 +2239,7 @@ STDMETHODIMP CShapefile::get_CollisionMode(tkCollisionMode* retval)
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_CollisionMode(tkCollisionMode newVal)
+STDMETHODIMP CShapefile::put_CollisionMode(const tkCollisionMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_collisionMode = newVal;
@@ -2246,15 +2250,16 @@ STDMETHODIMP CShapefile::put_CollisionMode(tkCollisionMode newVal)
 // ********************************************************
 //     Serialize()
 // ********************************************************
-STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL saveSelection, BSTR* retVal)
+STDMETHODIMP CShapefile::Serialize(const VARIANT_BOOL saveSelection, BSTR* retVal)
 {
 	return Serialize2(saveSelection, VARIANT_FALSE, retVal);
 }
 
-STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL saveSelection, VARIANT_BOOL serializeCategories, BSTR* retVal)
+STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL saveSelection, const VARIANT_BOOL serializeCategories, BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		CPLXMLNode* psTree = this->SerializeCore(VARIANT_TRUE, "ShapefileClass", serializeCategories != 0);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CPLXMLNode* psTree = this->SerializeCore(VARIANT_TRUE, "ShapefileClass", serializeCategories != 0);
 	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
@@ -2262,16 +2267,16 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL saveSelection, VARIANT_BOOL ser
 // ********************************************************
 //     SerializeCore()
 // ********************************************************
-CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elementName, bool serializeCategories)
+CPLXMLNode* CShapefile::SerializeCore(const VARIANT_BOOL saveSelection, CString elementName, bool serializeCategories)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//USES_CONVERSION;
 
 	CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, elementName);
 
 	if (psTree)
 	{
-		CString s = OLE2CA(_expression);
+		CString s = CString(_expression);
 		if (s != "")
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "VisibilityExpression", s);
 
@@ -2281,19 +2286,19 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elemen
 
 		if (_collisionMode != LocalList)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "CollisionMode",
-				CPLString().Printf("%d", (int)_collisionMode));
+				CPLString().Printf("%d", static_cast<int>(_collisionMode)));
 
 		if (_selectionAppearance != saSelectionColor)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "SelectionAppearance",
-				CPLString().Printf("%d", (int)_selectionAppearance));
+				CPLString().Printf("%d", static_cast<int>(_selectionAppearance)));
 
 		if (_selectionColor != RGB(255, 255, 0))
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "SelectionColor",
-				CPLString().Printf("%d", (int)_selectionColor));
+				CPLString().Printf("%d", static_cast<int>(_selectionColor)));
 
 		if (_selectionTransparency != 180)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "SelectionTransparency",
-				CPLString().Printf("%d", (int)_selectionTransparency));
+				CPLString().Printf("%d", static_cast<int>(_selectionTransparency)));
 
 		if (_minDrawingSize != 1)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "MinDrawingSize", CPLString().Printf("%d", _minDrawingSize));
@@ -2301,18 +2306,18 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elemen
 		// for in-memory shapefiles only
 		if (_sourceType == sstInMemory)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "ShpType",
-				CPLString().Printf("%d", (int)this->_shpfiletype));
+				CPLString().Printf("%d", static_cast<int>(this->_shpfiletype)));
 
-		s = OLE2CA(_sortField);
+		s = CString(_sortField);
 		if (s != "")
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "SortField", s);
 
 		if (_sortAscending != VARIANT_FALSE)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "SortAscending",
-				CPLString().Printf("%d", (int)_sortAscending));
+				CPLString().Printf("%d", static_cast<int>(_sortAscending)));
 
 		// drawing options
-		CPLXMLNode* node = ((CShapeDrawingOptions*)_defaultDrawOpt)->SerializeCore("DefaultDrawingOptions");
+		CPLXMLNode* node = static_cast<CShapeDrawingOptions*>(_defaultDrawOpt)->SerializeCore("DefaultDrawingOptions");
 		if (node)
 		{
 			CPLAddXMLChild(psTree, node);
@@ -2320,7 +2325,7 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elemen
 
 		if (_selectionAppearance == saDrawingOptions)
 		{
-			node = ((CShapeDrawingOptions*)_selectDrawOpt)->SerializeCore("SelectionDrawingOptions");
+			node = static_cast<CShapeDrawingOptions*>(_selectDrawOpt)->SerializeCore("SelectionDrawingOptions");
 			if (node)
 			{
 				CPLAddXMLChild(psTree, node);
@@ -2328,21 +2333,21 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elemen
 		}
 
 		// categories
-		node = ((CShapefileCategories*)_categories)->SerializeCore("ShapefileCategoriesClass");
+		node = static_cast<CShapefileCategories*>(_categories)->SerializeCore("ShapefileCategoriesClass");
 		if (node)
 		{
 			CPLAddXMLChild(psTree, node);
 		}
 
 		// labels
-		CPLXMLNode* psLabels = ((CLabels*)_labels)->SerializeCore("LabelsClass");
+		CPLXMLNode* psLabels = static_cast<CLabels*>(_labels)->SerializeCore("LabelsClass");
 		if (psLabels)
 		{
 			CPLAddXMLChild(psTree, psLabels);
 		}
 
 		// charts
-		CPLXMLNode* psCharts = ((CCharts*)_charts)->SerializeCore("ChartsClass");
+		CPLXMLNode* psCharts = static_cast<CCharts*>(_charts)->SerializeCore("ChartsClass");
 		if (psCharts)
 		{
 			CPLAddXMLChild(psTree, psCharts);
@@ -2381,7 +2386,7 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elemen
 		//            Is this correct?
 		bool serializeCategories = false;
 
-		for (auto& i : _shapeData)
+		for (auto& i : _shapeData)  // TODO: Fix compile warning
 		{
 			if (i->category != -1)
 			{
@@ -2394,7 +2399,7 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elemen
 			s = "";
 			// doing it with CString is ugly of course, better to allocate a buffer
 			CString temp;
-			for (auto& i : _shapeData)
+			for (auto& i : _shapeData)  // TODO: Fix compile warning
 			{
 				temp.Format("%d,", i->category);
 				s += temp;
@@ -2415,7 +2420,7 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elemen
 		// ----------------------------------------------------
 		if (_table)
 		{
-			if (CPLXMLNode* psTable = ((CTableClass*)_table)->SerializeCore("TableClass"))
+			if (CPLXMLNode* psTable = static_cast<CTableClass*>(_table)->SerializeCore("TableClass"))
 			{
 				CPLAddXMLChild(psTree, psTable);
 			}
@@ -2429,10 +2434,10 @@ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL saveSelection, CString elemen
 // ********************************************************
 STDMETHODIMP CShapefile::Deserialize(VARIANT_BOOL loadSelection, BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//USES_CONVERSION;
 
-	CString s = OLE2CA(newVal);
+	const auto s = CString(newVal);
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
@@ -2449,9 +2454,9 @@ STDMETHODIMP CShapefile::Deserialize(VARIANT_BOOL loadSelection, BSTR newVal)
 // ********************************************************
 //     DeserializeCore()
 // ********************************************************
-bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
+bool CShapefile::DeserializeCore(const VARIANT_BOOL loadSelection, CPLXMLNode* node)
 {
-	USES_CONVERSION;
+	USES_CONVERSION;  // TODO: Remove the use of this
 
 	if (!node)
 		return false;
@@ -2461,19 +2466,19 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 	_expression = A2BSTR(s);
 
 	s = CPLGetXMLValue(node, "UseQTree", nullptr);
-	put_UseQTree(s != "" ? (BOOL)atoi(s.GetString()) : FALSE);
+	put_UseQTree(s != "" ? atoi(s.GetString()) : FALSE);
 
 	s = CPLGetXMLValue(node, "CollisionMode", nullptr);
-	_collisionMode = s != "" ? (tkCollisionMode)atoi(s.GetString()) : LocalList;
+	_collisionMode = s != "" ? static_cast<tkCollisionMode>(atoi(s.GetString())) : LocalList;
 
 	s = CPLGetXMLValue(node, "SelectionAppearance", nullptr);
-	_selectionAppearance = s != "" ? (tkSelectionAppearance)atoi(s.GetString()) : saSelectionColor;
+	_selectionAppearance = s != "" ? static_cast<tkSelectionAppearance>(atoi(s.GetString())) : saSelectionColor;
 
 	s = CPLGetXMLValue(node, "SelectionColor", nullptr);
-	_selectionColor = s != "" ? (OLE_COLOR)atoi(s.GetString()) : RGB(255, 255, 0);
+	_selectionColor = s != "" ? static_cast<OLE_COLOR>(atoi(s.GetString())) : RGB(255, 255, 0);
 
 	s = CPLGetXMLValue(node, "SelectionTransparency", nullptr);
-	_selectionTransparency = s != "" ? (unsigned char)atoi(s.GetString()) : 180;
+	_selectionTransparency = s != "" ? static_cast<unsigned char>(atoi(s.GetString())) : 180;
 
 	s = CPLGetXMLValue(node, "MinDrawingSize", nullptr);
 	_minDrawingSize = s != "" ? atoi(s.GetString()) : 1;
@@ -2483,7 +2488,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 	this->put_SortField(bstrSortField);
 
 	s = CPLGetXMLValue(node, "SortAscending", nullptr);
-	const VARIANT_BOOL sortAsc = s != "" ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
+	const VARIANT_BOOL sortAsc = s != "" ? static_cast<VARIANT_BOOL>(atoi(s.GetString())) : VARIANT_FALSE;
 	this->put_SortAscending(sortAsc);
 
 	if (_sourceType == sstInMemory)
@@ -2491,7 +2496,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 		s = CPLGetXMLValue(node, "ShpType", nullptr);
 		if (s != "")
 		{
-			_shpfiletype = (ShpfileType)atoi(s.GetString());
+			_shpfiletype = static_cast<ShpfileType>(atoi(s.GetString()));
 		}
 	}
 
@@ -2499,7 +2504,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 	CPLXMLNode* psChild = CPLGetXMLNode(node, "DefaultDrawingOptions");
 	if (psChild)
 	{
-		((CShapeDrawingOptions*)_defaultDrawOpt)->DeserializeCore(psChild);
+		static_cast<CShapeDrawingOptions*>(_defaultDrawOpt)->DeserializeCore(psChild);
 	}
 
 	if (_selectionAppearance == saDrawingOptions)
@@ -2507,7 +2512,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 		psChild = CPLGetXMLNode(node, "SelectionDrawingOptions");
 		if (psChild)
 		{
-			((CShapeDrawingOptions*)_selectDrawOpt)->DeserializeCore(psChild);
+			static_cast<CShapeDrawingOptions*>(_selectDrawOpt)->DeserializeCore(psChild);
 		}
 	}
 
@@ -2515,7 +2520,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 	psChild = CPLGetXMLNode(node, "ShapefileCategoriesClass");
 	if (psChild)
 	{
-		((CShapefileCategories*)_categories)->DeserializeCore(psChild, false);
+		static_cast<CShapefileCategories*>(_categories)->DeserializeCore(psChild, false);
 	}
 
 	CPLXMLNode* nodeCats = CPLGetXMLNode(node, "CategoryIndices");
@@ -2537,9 +2542,9 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 				}
 			}
 
-			if (foundCount == savedCount && foundCount == _shapeData.size())
+			if (foundCount == savedCount && foundCount == gsl::narrow_cast<int>(_shapeData.size()))
 			{
-				const int size = _shapeData.size();
+				const int size = gsl::narrow_cast<int>(_shapeData.size());
 				int pos = 0, count = 0;
 				CString ct = indices.Tokenize(",", pos);
 				while (ct.GetLength() != 0 && count < size)
@@ -2548,7 +2553,8 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 					ct = indices.Tokenize(",", pos);
 					count++;
 				};
-				bool needsApplyExpression = false;
+				//bool needsApplyExpression = false;
+				needsApplyExpression = false;
 			}
 		}
 	}
@@ -2556,21 +2562,21 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 	// If no indices or invalid indices, re-apply:
 	if (needsApplyExpression)
 	{
-		((CShapefileCategories*)_categories)->ApplyExpressions();
+		static_cast<CShapefileCategories*>(_categories)->ApplyExpressions();
 	}
 
 	// Labels
 	psChild = CPLGetXMLNode(node, "LabelsClass");
 	if (psChild)
 	{
-		((CLabels*)_labels)->DeserializeCore(psChild);
+		static_cast<CLabels*>(_labels)->DeserializeCore(psChild);
 	}
 
 	// Charts
 	psChild = CPLGetXMLNode(node, "ChartsClass");
 	if (psChild)
 	{
-		((CCharts*)_charts)->DeserializeCore(psChild);
+		static_cast<CCharts*>(_charts)->DeserializeCore(psChild);
 	}
 
 	// selection
@@ -2582,7 +2588,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 		s = CPLGetXMLValue(nodeSelection, "TotalCount", "0");
 		const long count = atoi(s);
 		s = CPLGetXMLValue(nodeSelection, "=Selection", "");
-		if (s.GetLength() == count && s.GetLength() == _shapeData.size())
+		if (s.GetLength() == count && s.GetLength() == gsl::narrow_cast<int>(_shapeData.size()))
 		{
 			char* selection = s.GetBuffer();
 			for (unsigned int i = 0; i < _shapeData.size(); i++)
@@ -2602,7 +2608,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 		psChild = CPLGetXMLNode(node, "TableClass");
 		if (psChild)
 		{
-			((CTableClass*)_table)->DeserializeCore(psChild);
+			static_cast<CTableClass*>(_table)->DeserializeCore(psChild);
 		}
 	}
 	return true;
@@ -2616,8 +2622,8 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL loadSelection, CPLXMLNode* node)
 // *****************************************************************
 STDMETHODIMP CShapefile::get_Projection(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		_geoProjection->ExportToProj4(pVal);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_geoProjection->ExportToProj4(pVal);
 	return S_OK;
 }
 
@@ -2626,8 +2632,8 @@ STDMETHODIMP CShapefile::get_Projection(BSTR* pVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::put_Projection(BSTR proj4Projection)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//USES_CONVERSION;
 
 	VARIANT_BOOL vbretval;
 	_geoProjection->ImportFromProj4(proj4Projection, &vbretval);
@@ -2658,7 +2664,7 @@ STDMETHODIMP CShapefile::get_GeoProjection(IGeoProjection** retVal)
 STDMETHODIMP CShapefile::put_GeoProjection(IGeoProjection* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	ComHelper::SetRef((IDispatch*)pVal, (IDispatch**)&_geoProjection, false);
+	ComHelper::SetRef(pVal, (IDispatch**)&_geoProjection, false);
 	if (_prjfileName.GetLength() != 0)
 	{
 		VARIANT_BOOL vbretval;
@@ -2688,10 +2694,10 @@ STDMETHODIMP CShapefile::get_IsGeographicProjection(VARIANT_BOOL* pVal)
 // *****************************************************************
 STDMETHODIMP CShapefile::Reproject(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-		if (!this->ReprojectCore(newProjection, reprojectedCount, retVal, false))
-			*retVal = nullptr;
+	if (!this->ReprojectCore(newProjection, reprojectedCount, retVal, false))
+		*retVal = nullptr;
 	return S_OK;
 }
 
@@ -2700,31 +2706,31 @@ STDMETHODIMP CShapefile::Reproject(IGeoProjection* newProjection, LONG* reprojec
 // *****************************************************************
 STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* reprojectedCount, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (!_isEditingShapes)
-		{
-			ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
-			*retVal = VARIANT_FALSE;
-		}
-		else
-		{
-			if (this->ReprojectCore(newProjection, reprojectedCount, nullptr, true))
-			{
-				// spatial index must be deleted, as it became useful all the same
-				VARIANT_BOOL vb;
-				RemoveSpatialIndex(&vb);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (!_isEditingShapes)
+	{
+		ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
+		*retVal = VARIANT_FALSE;
+		return S_OK;
+	}
 
-				// update qtree
-				if (_useQTree)
-					GenerateQTree();
+	if (this->ReprojectCore(newProjection, reprojectedCount, nullptr, true))
+	{
+		// spatial index must be deleted, as it became useful all the same
+		VARIANT_BOOL vb;
+		RemoveSpatialIndex(&vb);
 
-				VARIANT_BOOL vbretval;
-				this->RefreshExtents(&vbretval);
-				*retVal = VARIANT_TRUE;
-				return S_OK;
-			}
-			*retVal = NULL;
-		}
+		// update qtree
+		if (_useQTree)
+			GenerateQTree();
+
+		VARIANT_BOOL vbretval;
+		this->RefreshExtents(&vbretval);
+		*retVal = VARIANT_TRUE;
+		return S_OK;
+	}
+
+	*retVal = NULL;
 	return S_OK;
 }
 
@@ -2756,8 +2762,8 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		return false;
 
 	m_globalSettings.gdalErrorMessage = "";
-	OGRSpatialReference* projSource = ((CGeoProjection*)_geoProjection)->get_SpatialReference();
-	OGRSpatialReference* projTarget = ((CGeoProjection*)newProjection)->get_SpatialReference();
+	OGRSpatialReference* projSource = static_cast<CGeoProjection*>(_geoProjection)->get_SpatialReference();
+	OGRSpatialReference* projTarget = static_cast<CGeoProjection*>(newProjection)->get_SpatialReference();
 
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation(projSource, projTarget);
 	if (!transf)
@@ -2777,7 +2783,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 	//   Processing
 	// ------------------------------------------------------
 	CComVariant var;
-	const long numShapes = _shapeData.size();
+	const long numShapes = gsl::narrow_cast<long>(_shapeData.size());
 	long newIndex = 0;
 
 	long numFields, percent = 0;
@@ -2788,13 +2794,13 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 	if (_hasOgrFidMapping && !reprojectInPlace)
 	{
 		// set flag in new Shapefile
-		((CShapefile*)(*retVal))->HasOgrFidMapping(true);
+		static_cast<CShapefile*>(*retVal)->HasOgrFidMapping(true);
 		// one-time set up of reverse mapping for optimized reverse lookup
 		auto iter = _ogrFid2ShapeIndex.begin();
 		while (iter != _ogrFid2ShapeIndex.end())
 		{
 			reverseOgrFidMapping.insert(std::make_pair(iter->second, iter->first));
-			iter++;
+			++iter;
 		}
 	}
 
@@ -2869,7 +2875,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 						if (_hasOgrFidMapping)
 						{
 							// find OgrFid for the current index i, map it to newIndex
-							((CShapefile*)(*retVal))->MapOgrFid2ShapeIndex(reverseOgrFidMapping[i], newIndex);
+							static_cast<CShapefile*>(*retVal)->MapOgrFid2ShapeIndex(reverseOgrFidMapping[i], newIndex);
 						}
 					}
 					// 
@@ -2898,9 +2904,9 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 			VARIANT_BOOL vb;
 			// copy 'selectable' attribute
 			this->get_Selectable(&vb);
-			((CShapefile*)(*retVal))->put_Selectable(vb);
+			static_cast<CShapefile*>(*retVal)->put_Selectable(vb);
 			// restore visibility flags
-			((CShapefile*)(*retVal))->SetVisibilityFlags(visibilityFlags);
+			static_cast<CShapefile*>(*retVal)->SetVisibilityFlags(visibilityFlags);
 		}
 		// clean up reverse-mapping
 		reverseOgrFidMapping.clear();
@@ -2972,7 +2978,7 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 // *********************************************************
 //		FixUpShapes2()
 // *********************************************************
-STDMETHODIMP CShapefile::FixUpShapes2(VARIANT_BOOL selectedOnly, IShapefile** result, VARIANT_BOOL* fixed)
+STDMETHODIMP CShapefile::FixUpShapes2(const VARIANT_BOOL selectedOnly, IShapefile** result, VARIANT_BOOL* fixed)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -2991,7 +2997,7 @@ STDMETHODIMP CShapefile::FixUpShapes2(VARIANT_BOOL selectedOnly, IShapefile** re
 // *********************************************************
 //		FixupShapesCore()
 // *********************************************************
-VARIANT_BOOL CShapefile::FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* result)
+VARIANT_BOOL CShapefile::FixupShapesCore(const VARIANT_BOOL selectedOnly, IShapefile* result)
 {
 	if (!result) return VARIANT_FALSE;
 
@@ -3002,7 +3008,7 @@ VARIANT_BOOL CShapefile::FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* 
 	this->get_NumFields(&numFields);
 
 	long percent = 0;
-	const int numShapes = _shapeData.size();
+	const long numShapes = gsl::narrow_cast<long>(_shapeData.size());
 	// VARIANT_BOOL fixed = VARIANT_TRUE;
 
 	for (int i = 0; i < numShapes; i++)
@@ -3059,12 +3065,11 @@ VARIANT_BOOL CShapefile::FixupShapesCore(VARIANT_BOOL selectedOnly, IShapefile* 
 // *********************************************************
 //		GetRelatedShapes()
 // *********************************************************
-STDMETHODIMP CShapefile::GetRelatedShapes(long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray,
-	VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::GetRelatedShapes(const long referenceIndex, const tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retval = VARIANT_FALSE;
-	if (referenceIndex < 0 || referenceIndex >(long)_shapeData.size())
+	if (referenceIndex < 0 || referenceIndex > gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		this->ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
@@ -3083,8 +3088,7 @@ STDMETHODIMP CShapefile::GetRelatedShapes(long referenceIndex, tkSpatialRelation
 // *********************************************************
 //		GetRelatedShapes2()
 // *********************************************************
-STDMETHODIMP CShapefile::GetRelatedShapes2(IShape* referenceShape, tkSpatialRelation relation, VARIANT* resultArray,
-	VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::GetRelatedShapes2(IShape* referenceShape, const tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retval = VARIANT_FALSE;
@@ -3101,7 +3105,7 @@ STDMETHODIMP CShapefile::GetRelatedShapes2(IShape* referenceShape, tkSpatialRela
 // *********************************************************
 //		GetRelatedShapeCore()
 // *********************************************************
-void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation,
+void CShapefile::GetRelatedShapeCore(IShape* referenceShape, const long referenceIndex, const tkSpatialRelation relation,
 	VARIANT* resultArray, VARIANT_BOOL* retval)
 {
 	// rather than generate geometries for all shapes,
@@ -3114,20 +3118,22 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 	if (!useQTree) this->put_UseQTree(VARIANT_TRUE);
 
 	double xMin, xMax, yMin, yMax;
-	if (((CShape*)referenceShape)->get_ExtentsXY(xMin, yMin, xMax, yMax))
+	if (static_cast<CShape*>(referenceShape)->get_ExtentsXY(xMin, yMin, xMax, yMax))
 	{
 		const QTreeExtent query(xMin, xMax, yMax, yMin);
-		std::vector<int> shapes = this->_qtree->GetNodes(query);
+		const std::vector<int> shapes = this->_qtree->GetNodes(query);
 		std::vector<int> arr;
 
 		// were any shapes returned ?
-		if (shapes.size() > 0)
+		if (!shapes.empty())
 		{
 			// generate GEOS geometries only for shapes within qtree extent
 			std::set<int> list;
-			for (size_t i = 0; i < shapes.size(); i++)
+			for (int shape : shapes)
+			{
 				// add subset of indices to local list
-				list.insert(shapes[i]);
+				list.insert(shape);
+			}
 			// now generate only for list of shapes
 			this->ReadGeosGeometries(list);
 
@@ -3143,13 +3149,13 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 
 			if (geomBase)
 			{
-				for (size_t i = 0; i < shapes.size(); i++)
+				for (int shape : shapes)
 				{
-					if (shapes[i] == referenceIndex)
+					if (shape == referenceIndex)
 						continue; // it doesn't make sense to compare the shape with itself
 
 					// ReSharper disable once CppLocalVariableMayBeConst
-					GEOSGeom geom = _shapeData[shapes[i]]->geosGeom;
+					GEOSGeom geom = _shapeData[shape]->geosGeom;
 					if (geom != nullptr)
 					{
 						char res = 0;
@@ -3161,7 +3167,7 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 							break;
 						case srEquals: res = GeosHelper::Equals(geomBase, geom);
 							break;
-						case srIntersects: res = GeosHelper::Intersects(geomBase, geom);
+						case srIntersects: res = GeosHelper::Intersects(geomBase, geom);  // TODO: Fix compile warning
 							break;
 						case srOverlaps: res = GeosHelper::Overlaps(geomBase, geom);
 							break;
@@ -3173,13 +3179,12 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 							break;
 						case srCoveredBy: res = GeosHelper::CoveredBy(geomBase, geom);
 							break;
-						default:
 						case srDisjoint: res = GeosHelper::Disjoint(geomBase, geom);
 							break;
 						}
 						if (res)
 						{
-							arr.push_back(shapes[i]);
+							arr.push_back(shape);
 						}
 					}
 				}
@@ -3207,7 +3212,7 @@ STDMETHODIMP CShapefile::get_Identifiable(VARIANT_BOOL* retVal)
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_Identifiable(VARIANT_BOOL newVal)
+STDMETHODIMP CShapefile::put_Identifiable(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_hotTracking = newVal;
@@ -3217,17 +3222,16 @@ STDMETHODIMP CShapefile::put_Identifiable(VARIANT_BOOL newVal)
 // *****************************************************************
 //		EditAddField()
 // *****************************************************************
-STDMETHODIMP CShapefile::EditAddField(BSTR name, FieldType type, int precision, int width, long* fieldIndex)
+STDMETHODIMP CShapefile::EditAddField(BSTR name, const FieldType type, const int precision, const int width, long* fieldIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (!this->_table)
 	{
 		this->ErrorMessage(tkDBF_FILE_DOES_NOT_EXIST);
+		return S_OK;
 	}
-	else
-	{
-		_table->EditAddField(name, type, precision, width, fieldIndex);
-	}
+
+	_table->EditAddField(name, type, precision, width, fieldIndex);
 	return S_OK;
 }
 
@@ -3239,7 +3243,7 @@ STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	VARIANT_BOOL retval;
-	*shapeIndex = _shapeData.size();
+	*shapeIndex = gsl::narrow_cast<long>(_shapeData.size());
 
 	EditInsertShape(shape, shapeIndex, &retval);
 
@@ -3252,7 +3256,7 @@ STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
 // *****************************************************************
 //		GetClosestVertex()
 // *****************************************************************
-STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance,
+STDMETHODIMP CShapefile::GetClosestVertex(const double x, const double y, const double maxDistance,
 	long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -3266,7 +3270,8 @@ STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance
 	{
 		// search through all shapefile
 		std::vector<long> ids;
-		for (size_t i = 0; i < _shapeData.size(); i++)
+		const long numShapes = gsl::narrow_cast<long>(_shapeData.size());
+		for (long i = 0; i < numShapes; i++)
 		{
 			ids.push_back(i);
 		}
@@ -3288,7 +3293,7 @@ STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance
 // *****************************************************************
 //		GetClosestSnapPosition()
 // *****************************************************************
-STDMETHODIMP CShapefile::GetClosestSnapPosition(double x, double y, double maxDistance,
+STDMETHODIMP CShapefile::GetClosestSnapPosition(const double x, const double y, const double maxDistance,
 	long* shapeIndex, double* fx, double* fy, double* distance, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -3301,7 +3306,8 @@ STDMETHODIMP CShapefile::GetClosestSnapPosition(double x, double y, double maxDi
 	{
 		// search through all shapefile
 		std::vector<long> ids;
-		for (size_t i = 0; i < _shapeData.size(); i++)
+		const long numShapes = gsl::narrow_cast<long>(_shapeData.size());
+		for (long i = 0; i < numShapes; i++)
 		{
 			ids.push_back(i);
 		}
@@ -3327,9 +3333,9 @@ STDMETHODIMP CShapefile::HasInvalidShapes(VARIANT_BOOL* result)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*result = VARIANT_FALSE;
-	const int numShapes = _shapeData.size();
 
-	for (int i = 0; i < numShapes; i++)
+	const long numShapes = gsl::narrow_cast<long>(_shapeData.size());
+	for (long i = 0; i < numShapes; i++)
 	{
 		IShape* shp = nullptr;
 		this->get_Shape(i, &shp);
@@ -3374,7 +3380,7 @@ STDMETHODIMP CShapefile::get_Snappable(VARIANT_BOOL* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_Snappable(VARIANT_BOOL newVal)
+STDMETHODIMP CShapefile::put_Snappable(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_snappable = newVal;
@@ -3394,10 +3400,10 @@ STDMETHODIMP CShapefile::get_ShapefileType2D(ShpfileType* pVal)
 // *****************************************************************
 //		FieldIndexByName()
 // *****************************************************************
-STDMETHODIMP CShapefile::get_FieldIndexByName(BSTR FieldName, LONG* pVal)
+STDMETHODIMP CShapefile::get_FieldIndexByName(BSTR fieldName, LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_table->get_FieldIndexByName(FieldName, pVal);
+	_table->get_FieldIndexByName(fieldName, pVal);
 	return S_OK;
 }
 
@@ -3411,7 +3417,7 @@ STDMETHODIMP CShapefile::get_Selectable(VARIANT_BOOL* retVal)
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_Selectable(VARIANT_BOOL newVal)
+STDMETHODIMP CShapefile::put_Selectable(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_selectable = newVal;
@@ -3421,7 +3427,7 @@ STDMETHODIMP CShapefile::put_Selectable(VARIANT_BOOL newVal)
 // *****************************************************************
 //		Move()
 // *****************************************************************
-STDMETHODIMP CShapefile::Move(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BOOL* retVal)
+STDMETHODIMP CShapefile::Move(const DOUBLE xProjOffset, const DOUBLE yProjOffset, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -3430,6 +3436,7 @@ STDMETHODIMP CShapefile::Move(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BO
 		ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
 		return S_OK;
 	}
+
 	long numShapes;
 	get_NumShapes(&numShapes);
 	for (long i = 0; i < numShapes; i++)
@@ -3448,19 +3455,18 @@ STDMETHODIMP CShapefile::Move(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BO
 // *****************************************************************
 //		get_ShapeRendered()
 // *****************************************************************
-STDMETHODIMP CShapefile::get_ShapeRendered(LONG shapeIndex, VARIANT_BOOL* pVal)
+STDMETHODIMP CShapefile::get_ShapeRendered(const LONG shapeIndex, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	*pVal = VARIANT_FALSE;
-	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
-	{
-		*pVal = _shapeData[shapeIndex]->wasRendered() ? VARIANT_TRUE : VARIANT_FALSE;
-	}
+
+	*pVal = _shapeData[shapeIndex]->wasRendered() ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -3482,7 +3488,7 @@ STDMETHODIMP CShapefile::get_SortField(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	USES_CONVERSION;
+	//USES_CONVERSION;
 	*pVal = OLE2BSTR(_sortField);
 
 	return S_OK;
@@ -3493,7 +3499,7 @@ STDMETHODIMP CShapefile::put_SortField(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	SysFreeString(_sortField);
-	USES_CONVERSION;
+	//USES_CONVERSION;
 	_sortField = OLE2BSTR(newVal);
 
 	_sortingChanged = true;
@@ -3518,7 +3524,7 @@ STDMETHODIMP CShapefile::get_SortAscending(VARIANT_BOOL* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_SortAscending(VARIANT_BOOL newVal)
+STDMETHODIMP CShapefile::put_SortAscending(const VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -3569,11 +3575,11 @@ bool CShapefile::GetSorting(vector<long>** indices)
 
 	_sortingChanged = false;
 
-	if (((CTableClass*)_table)->GetSorting(fieldIndex, _sorting))
+	if (static_cast<CTableClass*>(_table)->GetSorting(fieldIndex, _sorting))
 	{
 		if (!_sortAscending)
 		{
-			std::reverse(_sorting.begin(), _sorting.end());
+			std::reverse(_sorting.begin(), _sorting.end());  // TODO: Fix compile warning
 		}
 
 		*indices = &_sorting;
@@ -3599,7 +3605,7 @@ STDMETHODIMP CShapefile::get_HasOgrFidMapping(VARIANT_BOOL* pVal)
 // *****************************************************************
 //		OgrFid2ShapeIndex()
 // *****************************************************************
-STDMETHODIMP CShapefile::OgrFid2ShapeIndex(long ogrFid, LONG* retVal)
+STDMETHODIMP CShapefile::OgrFid2ShapeIndex(const long ogrFid, LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -3609,11 +3615,10 @@ STDMETHODIMP CShapefile::OgrFid2ShapeIndex(long ogrFid, LONG* retVal)
 	if (!_hasOgrFidMapping || _ogrFid2ShapeIndex.find(ogrFid) == _ogrFid2ShapeIndex.end())
 	{
 		ErrorMessage(tkNO_OGR_DATA_WAS_LOADED);
+		return S_OK;
 	}
-	else
-	{
-		// else return the mapping
-		*retVal = _ogrFid2ShapeIndex[ogrFid];
-	}
+
+	// else return the mapping
+	*retVal = _ogrFid2ShapeIndex[ogrFid];
 	return S_OK;
 }
