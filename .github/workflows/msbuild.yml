@@ -140,7 +140,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: binaries-${{matrix.platform}}
-        path: .\src\bin\Release\${{matrix.platform}}\**\*
+        path: .\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\**\*
         
   unit-tests:
     name: Unit Testing
@@ -165,7 +165,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: binaries-${{matrix.platform}}
-        path: .\src\bin\Release\${{matrix.platform}}\
+        path: .\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\
         
     - name: Register MapWinGIS.ocx (${{matrix.platform}})
       uses: Azure/powershell@v1
@@ -180,7 +180,7 @@ jobs:
             4 = "FAIL_ENTRY - GetProcAddress failed";
             5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
           }        
-          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s ${{ github.workspace }}\src\bin\Release\${{matrix.platform}}\MapWinGIS.ocx" -PassThru
+          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s ${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\MapWinGIS.ocx" -PassThru
           
           $regsvrp.WaitForExit(5000) # Wait (up to) 5 seconds
           if($regsvrp.ExitCode -ne 0)
