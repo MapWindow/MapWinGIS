@@ -15,6 +15,8 @@ public sealed partial class Form1 : Form, ICallback
         };
         
         LoadOsm();
+
+        GetMapWinGisVersion();
     }
 
     private void AxMap1_FileDropped(object sender, _DMapEvents_FileDroppedEvent e)

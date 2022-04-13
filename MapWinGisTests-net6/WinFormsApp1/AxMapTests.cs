@@ -8,6 +8,7 @@ public sealed partial class Form1
     {
         var versionString = axMap1.VersionNumber;
         var ver = Version.Parse(versionString);
+        LogProgress("MapWinGIS version: " + ver);    
         return ver;
     }
 
@@ -138,5 +139,9 @@ public sealed partial class Form1
     {
         var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
         var sf = Helpers.OpenShapefile(sfLocation, this);
+        LogProgress(sf.GeoProjection.ExportToWktEx());
+        sf.GeoProjection.TryAutoDetectEpsg(out var epgCode);
+        LogProgress("Issue-216.shp has EPSG code: " + epgCode);
+        LogProgress("Done with OpenShapefile");
     }
 }
