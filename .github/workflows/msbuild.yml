@@ -219,10 +219,10 @@ jobs:
       uses: darenm/Setup-VSTest@v1  
     - name: Unit Testing x86
       if: ${{matrix.platform == 'Win32' }}
-      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x86 -e:PROJ_LIB="${{ github.workspace }}\src\bin\Release\Win32\proj7\share\" .\MapWinGisTests-net6\MapWinGisTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\MapWinGisTests.dll
+      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x86 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32\proj7\share\" .\MapWinGisTests-net6\MapWinGisTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\MapWinGisTests.dll
     - name: Unit Testing x64
       if: ${{matrix.platform == 'x64' }}
-      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x64 -e:PROJ_LIB="${{ github.workspace }}\src\bin\Release\x64\proj7\share\" .\MapWinGisTests-net6\MapWinGisTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\MapWinGisTests.dll
+      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x64 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64\proj7\share\" .\MapWinGisTests-net6\MapWinGisTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\MapWinGisTests.dll
      
    # TODO: Create installer using innosetup   
    # TODO: Publish installer to GitHub Releases      
