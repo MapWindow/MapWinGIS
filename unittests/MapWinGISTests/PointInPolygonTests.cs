@@ -27,7 +27,7 @@ namespace MapWinGISTests
             for (var i = 0; i < numShapes; i++)
             {
                 var shape = sfLine.Shape[i];
-                var numPoints = shape.numPoints;
+                var numPoints = shape.NumPoints;
                 Debug.WriteLine("");
                 Debug.WriteLine("***************");
                 Debug.WriteLine($"Shape {i} has {numPoints} points");
@@ -67,7 +67,7 @@ namespace MapWinGISTests
 
             // Get long line:
             var shape = sfLine.Shape[16];
-            var numPoints = shape.numPoints;
+            var numPoints = shape.NumPoints;
             Debug.WriteLine($"Shape 16 has {numPoints} points");
             for (var j = 0; j < numPoints; j++)
             {

@@ -23,6 +23,12 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
+        public void OpenShapefile()
+        {
+            Helper.OpenShapefile(@"D:\dev\MapWindow\MapWinGIS\git\MapWinGisTests-net6\TestData\Issue-216.shp", this);
+        }
+
+        [TestMethod]
         public void SpatialIndexTest()
         {
             // Create shapefile:
@@ -59,7 +65,7 @@ namespace MapWinGISTests
 
             // Test, shoud return false and error:
             retVal = sfPolygon.RemoveSpatialIndex();
-            Assert.IsTrue(retVal, "RemoveSpatialIndex failed: "+ sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+            Assert.IsTrue(retVal, "RemoveSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
 
 
             // Test again with larger extent, should return true:
@@ -153,7 +159,7 @@ namespace MapWinGISTests
                     y = 200
                 };
                 // Add point:
-                var pointIndex = shp.numPoints;
+                var pointIndex = shp.NumPoints;
                 result = shp.InsertPoint(pnt, ref pointIndex);
                 Assert.IsTrue(result, "Could not insert point");
                 var shapeIndex = sf.NumShapes;
@@ -353,7 +359,7 @@ namespace MapWinGISTests
                     y = 200
                 };
                 // Add point:
-                var pointIndex = shp.numPoints;
+                var pointIndex = shp.NumPoints;
                 result = shp.InsertPoint(pnt, ref pointIndex);
                 Assert.IsTrue(result, "Could not insert point");
                 var shapeIndex = sf.NumShapes;
@@ -535,7 +541,7 @@ namespace MapWinGISTests
             // Make shape from map extents:
             var clipShape = _axMap1.Extents.ToShape();
             Assert.IsNotNull(clipShape, "Could not make shape from map extents");
-            Debug.WriteLine(clipShape.numPoints);
+            Debug.WriteLine(clipShape.NumPoints);
             // Make in-memory shapefile from shape:
             var sfClip = new Shapefile();
             if (!sfClip.CreateNewWithShapeID("", ShpfileType.SHP_POLYGON))
@@ -1003,7 +1009,7 @@ namespace MapWinGISTests
                 throw new Exception("Cannot StartEditingShapes: " + sf.ErrorMsg[sf.LastErrorCode]);
 
             var shp = sf.Shape[0];
-            var numPoints = shp.numPoints;
+            var numPoints = shp.NumPoints;
             for (var i = 0; i < numPoints; i++)
             {
                 // Add the index as Z value
@@ -1333,7 +1339,7 @@ namespace MapWinGISTests
             {
                 var shp = sfInput.Shape[i];
                 var line = new List<Point>();
-                for (var j = 0; j < shp.numPoints; j++)
+                for (var j = 0; j < shp.NumPoints; j++)
                 {
                     line.Add(shp.Point[j]);
                 }
@@ -1474,5 +1480,6 @@ namespace MapWinGISTests
         {
             Assert.Fail("Found error: " + ErrorMsg);
         }
+
     }
 }

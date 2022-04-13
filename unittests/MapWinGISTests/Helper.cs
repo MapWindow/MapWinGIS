@@ -146,6 +146,24 @@ namespace MapWinGISTests
             return sf;
         }
 
+        public static Shapefile OpenShapefile(string fileLocation, ICallback callback)
+        {
+            Console.WriteLine(@"Opening shapefile: " + fileLocation);
+            if (!File.Exists(fileLocation))
+                throw new FileNotFoundException("Could not find shapefile to open", fileLocation);
+
+            var sf = new Shapefile();
+            if (sf is null) throw new Exception("Could not initialize Shapefile object");
+            if (callback != null) sf.GlobalCallback = callback;
+
+            Console.WriteLine(@"Before sf.Open");
+            var retVal = sf.Open(fileLocation, callback);
+            Console.WriteLine(@"After sf.Open");
+            if (!retVal) throw new Exception("sf.Open failed");
+
+            return sf;
+        }
+
         public static Shapefile OpenShapefile(string fileLocation, bool checkInvalidShapes = true, ICallback callback = null)
         {
             if (!File.Exists(fileLocation))
@@ -250,7 +268,7 @@ namespace MapWinGISTests
                 if (shp == null)
                     throw new NullReferenceException("Cannot get shape: " + sf.ErrorMsg[sf.LastErrorCode]);
 
-                Console.WriteLine("numPoints: " + shp.numPoints);
+                Console.WriteLine("numPoints: " + shp.NumPoints);
                 Console.WriteLine("NumParts: " + shp.NumParts);
                 Console.WriteLine("ShapeType: " + shp.ShapeType);
                 Console.WriteLine("ShapeType2D: " + shp.ShapeType2D);
@@ -365,7 +383,7 @@ namespace MapWinGISTests
             if (_axMap1 != null) return _axMap1;
 
             // Create form and add MapWinGIS:
-            var myForm = new Form {Width = 600, Height = 600};
+            var myForm = new Form { Width = 600, Height = 600 };
 
             // Create MapWinGIS:
             _axMap1 = new AxMap();
@@ -376,7 +394,7 @@ namespace MapWinGISTests
             if (showForm)
             {
                 _axMap1.Dock = DockStyle.Fill;
-                ((System.ComponentModel.ISupportInitialize) (_axMap1)).BeginInit();
+                ((System.ComponentModel.ISupportInitialize)(_axMap1)).BeginInit();
                 myForm.SuspendLayout();
             }
 
@@ -384,7 +402,7 @@ namespace MapWinGISTests
 
             if (showForm)
             {
-                ((System.ComponentModel.ISupportInitialize) (_axMap1)).EndInit();
+                ((System.ComponentModel.ISupportInitialize)(_axMap1)).EndInit();
                 myForm.ResumeLayout(false);
                 myForm.PerformLayout();
                 myForm.Show();
