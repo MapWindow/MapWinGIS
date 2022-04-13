@@ -20,7 +20,7 @@ env:
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\src\vcpkg_installed\
 
   # Configuration type to build.
-  BUILD_CONFIGURATION: Release
+  BUILD_CONFIGURATION: Debug
 
 jobs:
   build:
