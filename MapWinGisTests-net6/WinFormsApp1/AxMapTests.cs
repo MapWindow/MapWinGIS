@@ -133,4 +133,10 @@ public sealed partial class Form1
         var retVal = sfPolygon.CreateSpatialIndex();
         Debug.Assert(retVal,"CreateSpatialIndex failed");
     }
+
+    private void OpenShapefile()
+    {
+        var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
+        var sf = Helpers.OpenShapefile(sfLocation, this);
+    }
 }

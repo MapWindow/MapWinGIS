@@ -84,6 +84,24 @@ public static class Helpers
         if (File.Exists(fileName)) File.Delete(fileName);
 
         return fileName;
-
     }
+
+    internal static Shapefile OpenShapefile(string fileLocation, ICallback callback)
+    {
+        Console.WriteLine(@"Opening shapefile: " + fileLocation);
+        if (!File.Exists(fileLocation))
+            throw new FileNotFoundException("Could not find shapefile to open",fileLocation);
+
+        var sf = new Shapefile();
+        if (sf is null)
+            throw new NullReferenceException("Could not create shapefile object");
+        sf.GlobalCallback = callback;
+        Console.WriteLine(@"Before sf.Open");
+        var retVal = sf.Open(fileLocation, callback);
+        Console.WriteLine(@"After sf.Open");
+        if (!retVal)
+            throw new Exception("Could not open shapefile");    
+        
+        return sf;
+    }    
 }

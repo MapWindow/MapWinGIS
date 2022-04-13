@@ -8,6 +8,12 @@ public sealed partial class Form1 : Form, ICallback
     {
         InitializeComponent();
 
+        _ = new GlobalSettings
+        {
+            ApplicationCallback = this,
+            CallbackVerbosity = tkCallbackVerbosity.cvAll
+        };
+        
         LoadOsm();
     }
 
@@ -73,7 +79,10 @@ public sealed partial class Form1 : Form, ICallback
         //LogProgress(@"Running GdalRasterTranslateTest");
         //GdalRasterTranslateTest();
 
-        LogProgress(@"Running CreateSpatialIndexUnicodeTest");
-        CreateSpatialIndexUnicodeTest();
+        //LogProgress(@"Running CreateSpatialIndexUnicodeTest");
+        //CreateSpatialIndexUnicodeTest();
+
+        LogProgress(@"Running OpenShapefile");
+        OpenShapefile();
     }
 }

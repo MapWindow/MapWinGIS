@@ -8,6 +8,11 @@ public class GdalUtilsTests : ICallback
     public GdalUtilsTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
+        _ = new GlobalSettings
+        {
+            ApplicationCallback = this,
+            CallbackVerbosity = tkCallbackVerbosity.cvAll
+        };
     }
 
     [Theory]

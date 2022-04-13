@@ -8,6 +8,11 @@ public class SpatialIndexTests: ICallback
     public SpatialIndexTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
+        _ = new GlobalSettings
+        {
+            ApplicationCallback = this,
+            CallbackVerbosity = tkCallbackVerbosity.cvAll
+        };
     }
 
     [Fact]

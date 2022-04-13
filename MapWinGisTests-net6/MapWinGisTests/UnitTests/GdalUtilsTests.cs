@@ -14,6 +14,12 @@ public class GdalUtilsTests : ICallback, IClassFixture<GdalUtilsTests.GdalUtilsF
         _testOutputHelper = testOutputHelper;
         _fixture = fixture;
         _gdalUtils = new GdalUtils();
+
+        _ = new GlobalSettings
+        {
+            ApplicationCallback = this,
+            CallbackVerbosity = tkCallbackVerbosity.cvAll
+        };
     }
 
     [Fact]

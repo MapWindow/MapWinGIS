@@ -79,7 +79,7 @@ internal static class Helpers
         sf.ShouldNotBeNull("Could not initialize Shapefile object");
         sf.GlobalCallback = callback;
         Console.WriteLine(@"Before sf.Open");
-        var retVal = sf.Open(fileLocation);
+        var retVal = sf.Open(fileLocation, callback);
         Console.WriteLine(@"After sf.Open");
         retVal.ShouldBeTrue("sf.Open failed");
         
