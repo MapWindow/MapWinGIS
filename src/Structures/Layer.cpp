@@ -1,10 +1,8 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "Layer.h"
 #include "OgrLayer.h"
 #include "OgrHelper.h"
 #include "Ogr2RawData.h"
-#include "ShapefileCategories.h"
-#include "TableHelper.h"
 #include "ShapefileHelper.h"
 #include "WmsLayer.h"
 #include "WmsHelper.h"
@@ -18,34 +16,34 @@ void Layer::CloseDatasources()
 	VARIANT_BOOL vb;
 	if (IsOgrLayer())
 	{
-		CComPtr<IOgrLayer> layer = NULL;
+		CComPtr<IOgrLayer> layer = nullptr;
 		if (QueryOgrLayer(&layer)) {
 			layer->Close();
 		}
 	}
 	else if (IsShapefile())
 	{
-		CComPtr<IShapefile> ishp = NULL;
+		CComPtr<IShapefile> ishp = nullptr;
 		if (QueryShapefile(&ishp)) {
 			ishp->Close(&vb);
 		}
 	}
 	else if (IsWmsLayer())
 	{
-		CComPtr<IWmsLayer> wms = NULL;
+		CComPtr<IWmsLayer> wms = nullptr;
 		if (QueryWmsLayer(&wms)) {
 			wms->Close();
 		}
 	}
 
-	CComPtr<IImage> iimg = NULL;
+	CComPtr<IImage> iimg = nullptr;
 	if (QueryImage(&iimg)) {
 		iimg->Close(&vb);
 	}
 
-	CComPtr<IGrid> igrid = NULL;
-	_object->QueryInterface(IID_IGrid, (void**)&igrid);
-	if (igrid != NULL) {
+	CComPtr<IGrid> igrid = nullptr;
+	_object->QueryInterface(IID_IGrid, (void**)&igrid); // TODO: Don't use C-style cast
+	if (igrid != nullptr) {
 		igrid->Close(&vb);
 	}
 }
@@ -54,11 +52,11 @@ void Layer::CloseDatasources()
 //		OnRemoved()
 // ****************************************************
 void Layer::OnRemoved()
-{ 
+{
 	if (IsWmsLayer())
 	{
-		CComPtr<IWmsLayer> wms = NULL;
-		if (QueryWmsLayer(&wms)) 
+		CComPtr<IWmsLayer> wms = nullptr;
+		if (QueryWmsLayer(&wms))
 		{
 			WmsHelper::Cast(wms)->ResizeBuffer(0, 0);
 		}
@@ -74,7 +72,7 @@ bool Layer::IsInMemoryShapefile()
 	if (_type == ImageLayer) return false;
 	if (_type == ShapefileLayer)
 	{
-		CComPtr<IShapefile> sf = NULL;
+		CComPtr<IShapefile> sf = nullptr;
 		if (QueryShapefile(&sf))
 		{
 			tkShapefileSourceType sourceType;
@@ -95,13 +93,13 @@ bool Layer::IsDiskBased()
 
 	if (_type == OgrLayerSource)
 	{
-		CComPtr<IOgrLayer> layer = NULL;
+		CComPtr<IOgrLayer> layer = nullptr;
 		if (QueryOgrLayer(&layer))
 			return OgrHelper::GetSourceType(layer) == ogrFile;
 	}
-	else if (_type == ShapefileLayer) 
+	else if (_type == ShapefileLayer)
 	{
-		CComPtr<IShapefile> sf = NULL;
+		CComPtr<IShapefile> sf = nullptr;
 		if (QueryShapefile(&sf))
 			return ShapefileHelper::GetSourceType(sf) == sstDiskBased;
 	}
@@ -114,7 +112,7 @@ bool Layer::IsDiskBased()
 bool Layer::IsDynamicOgrLayer()
 {
 	if (_type != OgrLayerSource) return false;
-	CComPtr<IOgrLayer> layer = NULL;
+	CComPtr<IOgrLayer> layer = nullptr;
 	if (QueryOgrLayer(&layer))
 	{
 		VARIANT_BOOL vb;
@@ -129,12 +127,12 @@ bool Layer::IsDynamicOgrLayer()
 // ****************************************************
 OgrDynamicLoader* Layer::GetOgrLoader()
 {
-	if (_type != OgrLayerSource) return NULL;
-	OgrDynamicLoader* loader = NULL;
-	IOgrLayer* layer = NULL;
+	if (_type != OgrLayerSource) return nullptr;
+	OgrDynamicLoader* loader = nullptr;
+	IOgrLayer* layer;
 	if (QueryOgrLayer(&layer))
 	{
-		loader = ((COgrLayer*)layer)->GetDynamicLoader();
+		loader = dynamic_cast<COgrLayer*>(layer)->GetDynamicLoader();
 		layer->Release();
 	}
 	return loader;
@@ -146,18 +144,18 @@ OgrDynamicLoader* Layer::GetOgrLoader()
 bool Layer::QueryShapefile(IShapefile** sf)
 {
 	if (!_object) return false;
-	_object->QueryInterface(IID_IShapefile, (void**)sf);
-	if (!(*sf))
+	_object->QueryInterface(IID_IShapefile, (void**)sf); // TODO: Don't use C-style cast
+	if (!*sf)
 	{
 		// in case of OGR, we will return underlying shapefile
-		CComPtr<IOgrLayer> ogr = NULL;
-		_object->QueryInterface(IID_IOgrLayer, (void**)&ogr);
+		CComPtr<IOgrLayer> ogr = nullptr;
+		_object->QueryInterface(IID_IOgrLayer, (void**)&ogr); // TODO: Don't use C-style cast
 		if (ogr)
 		{
 			ogr->GetBuffer(sf);
 		}
 	}
-	return (*sf) != NULL;
+	return *sf != nullptr;
 }
 
 // ****************************************************
@@ -166,8 +164,8 @@ bool Layer::QueryShapefile(IShapefile** sf)
 bool Layer::QueryImage(IImage** img)
 {
 	if (!_object) return false;
-	_object->QueryInterface(IID_IImage, (void**)img);
-	return (*img) != NULL;
+	_object->QueryInterface(IID_IImage, (void**)img);  // TODO: Don't use C-style cast
+	return *img != nullptr;
 }
 
 // ****************************************************
@@ -176,8 +174,8 @@ bool Layer::QueryImage(IImage** img)
 bool Layer::QueryOgrLayer(IOgrLayer** ogrLayer)
 {
 	if (!_object) return false;
-	_object->QueryInterface(IID_IOgrLayer, (void**)ogrLayer);
-	return (*ogrLayer) != NULL;
+	_object->QueryInterface(IID_IOgrLayer, (void**)ogrLayer); // TODO: Don't use C-style cast
+	return *ogrLayer != nullptr;
 }
 
 // ****************************************************
@@ -186,8 +184,8 @@ bool Layer::QueryOgrLayer(IOgrLayer** ogrLayer)
 bool Layer::QueryWmsLayer(IWmsLayer** wmsLayer)
 {
 	if (!_object) return false;
-	_object->QueryInterface(IID_IWmsLayer, (void**)wmsLayer);
-	return (*wmsLayer) != NULL;
+	_object->QueryInterface(IID_IWmsLayer, (void**)wmsLayer);  // TODO: Don't use C-style cast
+	return (*wmsLayer) != nullptr;
 }
 
 // ****************************************************
@@ -203,11 +201,11 @@ bool Layer::IsVisible(double scale, int zoom)
 			return (scale >= minVisibleScale && scale <= maxVisibleScale &&
 				zoom >= minVisibleZoom && zoom <= maxVisibleZoom);
 		}
-		else
-			return true;
+
+		return true;
 	}
-	else
-		return false;
+
+	return false;
 }
 
 // ---------------------------------------------------------
@@ -215,37 +213,37 @@ bool Layer::IsVisible(double scale, int zoom)
 // ---------------------------------------------------------
 ILabels* Layer::get_Labels()
 {
-	ILabels* labels = NULL;
+	ILabels* labels = nullptr;
 	if (this->IsShapefile())
 	{
-		IShapefile * sf = NULL;
+		IShapefile* sf;
 		if (this->QueryShapefile(&sf))
 		{
 			sf->get_Labels(&labels);
-			sf->Release(); sf = NULL;
+			sf->Release(); sf = nullptr;
 		}
 	}
 	else if (this->IsImage())
 	{
-		IImage * img = NULL;
+		IImage* img;
 		if (this->QueryImage(&img))
 		{
 			img->get_Labels(&labels);
-			img->Release(); img = NULL;
+			img->Release(); img = nullptr;
 		}
 	}
 	return labels;
-};
+}
 
 // ---------------------------------------------------------
 //	 Returning projection of underlying object
 // ---------------------------------------------------------
 IGeoProjection* Layer::GetGeoProjection()
 {
-	IGeoProjection* gp = NULL;
+	IGeoProjection* gp = nullptr;
 	if (IsShapefile())
 	{
-		CComPtr<IShapefile> sf = NULL;
+		CComPtr<IShapefile> sf = nullptr;
 		if (QueryShapefile(&sf))
 		{
 			sf->get_GeoProjection(&gp);
@@ -253,7 +251,7 @@ IGeoProjection* Layer::GetGeoProjection()
 	}
 	else if (IsImage())
 	{
-		CComPtr<IImage> img = NULL;
+		CComPtr<IImage> img = nullptr;
 		if (QueryImage(&img))
 		{
 			img->get_GeoProjection(&gp);
@@ -261,13 +259,23 @@ IGeoProjection* Layer::GetGeoProjection()
 	}
 	else if (IsWmsLayer())
 	{
-		CComPtr<IWmsLayer> wms = NULL;
+		CComPtr<IWmsLayer> wms = nullptr;
 		if (QueryWmsLayer(&wms))
 		{
 			wms->get_GeoProjection(&gp);
 		}
 	}
 
+	// Updates for GDAL3+
+	// Enrich projection data:
+	VARIANT_BOOL isEmpty = VARIANT_FALSE;
+	gp->get_IsEmpty(&isEmpty);
+	if (!isEmpty)
+	{		
+		int  epsgCode;
+		VARIANT_BOOL vb;
+		gp->TryAutoDetectEpsg(&epsgCode, &vb);
+	}
 	return gp;
 }
 
@@ -278,7 +286,7 @@ bool Layer::UpdateExtentsFromDatasource()
 {
 	if (IsImage())
 	{
-		CComPtr<IImage> iimg = NULL;
+		CComPtr<IImage> iimg = nullptr;
 		if (!this->QueryImage(&iimg)) return false;
 
 		double xllCenter = 0, yllCenter = 0, dx = 0, dy = 0;
@@ -290,18 +298,18 @@ bool Layer::UpdateExtentsFromDatasource()
 		iimg->get_OriginalDY(&dy);
 		iimg->get_OriginalWidth(&width);
 		iimg->get_OriginalHeight(&height);
-		this->extents = Extent(xllCenter - dx / 2, xllCenter - dx / 2 + dx*width, yllCenter - dy /2, yllCenter - dy / 2 + dy*height);
-		
+		this->extents = Extent(xllCenter - dx / 2, xllCenter - dx / 2 + dx * width, yllCenter - dy / 2, yllCenter - dy / 2 + dy * height);
+
 		return true;
 	}
-	
+
 	if (IsDynamicOgrLayer())
 	{
 		// regular OGR layers will use underlying shapefile to get extents
-		CComPtr<IOgrLayer> ogr = NULL;
+		CComPtr<IOgrLayer> ogr = nullptr;
 		if (!this->QueryOgrLayer(&ogr)) return false;
-		
-		CComPtr<IExtents> box = NULL;
+
+		CComPtr<IExtents> box = nullptr;
 		VARIANT_BOOL vb;
 		ogr->get_Extents(&box, VARIANT_FALSE, &vb);
 		if (vb && box) {
@@ -315,10 +323,10 @@ bool Layer::UpdateExtentsFromDatasource()
 
 	if (IsShapefile())
 	{
-		CComPtr<IShapefile> ishp = NULL;
+		CComPtr<IShapefile> ishp = nullptr;
 		if (!this->QueryShapefile(&ishp)) return false;
 
-		CComPtr<IExtents> box = NULL;
+		CComPtr<IExtents> box = nullptr;
 		ishp->get_Extents(&box);
 		double xm, ym, zm, xM, yM, zM;
 		box->GetBounds(&xm, &ym, &zm, &xM, &yM, &zM);
@@ -327,8 +335,7 @@ bool Layer::UpdateExtentsFromDatasource()
 		return true;
 	}
 
-
-	return FALSE;
+	return false;
 }
 
 // ****************************************************
@@ -336,15 +343,15 @@ bool Layer::UpdateExtentsFromDatasource()
 // ****************************************************
 UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 {
-	UINT res = 0;
-	AsyncLoadingParams* options = (AsyncLoadingParams*)pParam;
+	//UINT res = 0;
+	const auto options = static_cast<AsyncLoadingParams*>(pParam);
 	if (!options || !options->IsKindOf(RUNTIME_CLASS(AsyncLoadingParams)))
 	{
 		// if pObject is not valid; return 0
-		if (options) delete options;
+		// Not needed: if (options) delete options;
 		return 0;
 	}
-	
+
 	Layer* layer = options->layer;
 	if (!layer)
 	{
@@ -352,7 +359,7 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 		return 0;
 	}
 	OgrDynamicLoader* loader = layer->GetOgrLoader();
-		
+
 	Debug::WriteWithThreadId("Processing new loading task", DebugOgrLoading);
 	if (loader->SignalWaitingTask())		// signal previously started thread
 	{
@@ -369,20 +376,21 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 		}
 
 		layer->put_AsyncLoading(true);
-		IOgrLayer* ogr = NULL;
+		IOgrLayer* ogr = nullptr;
 		layer->QueryOgrLayer(&ogr);
 		if (ogr)
 		{
-			OGRLayer * ds = ((COgrLayer*)ogr)->GetDatasource();
-			ULONG count = ogr->Release();
+			OGRLayer* ds = dynamic_cast<COgrLayer*>(ogr)->GetDatasource();
+			// ULONG count = ogr->Release();
+			ogr->Release();
 
-			bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, options->task);
+			const bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, options->task);
 
-            // Fire event for this task:
-            OgrLoadingTask* task = options->task;
-            task->Finished = true;
-            task->Cancelled = !success;
-            options->map->_FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, 0);
+			// Fire event for this task:
+			OgrLoadingTask* task = options->task;
+			task->Finished = true;
+			task->Cancelled = !success;
+			options->map->_FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, 0);
 
 			loader->ClearFinishedTasks();
 
@@ -390,7 +398,7 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 		layer->put_AsyncLoading(false);
 		Debug::WriteWithThreadId("Releasing loading lock. \n", DebugOgrLoading);
 	}
-			
+
 	delete options;
 	return 1;
 }
@@ -402,7 +410,7 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 {
 	if (!IsDynamicOgrLayer())
 		return;
-	
+
 	OgrDynamicLoader* loader = GetOgrLoader();
 	if (!loader) return;
 
@@ -420,7 +428,7 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 	// This prevents race condition between the started & completed event.
 	AsyncLoadingParams* param = new AsyncLoadingParams(mapView, extents, this, task);
 	mapView->_FireBackgroundLoadingStarted(task->Id, layerHandle);
-    OgrAsyncLoadingThreadProc(param);
+	OgrAsyncLoadingThreadProc(param);
 
 	//CWinThread* thread = AfxBeginThread(OgrAsyncLoadingThreadProc, (LPVOID)param);
 }
@@ -429,14 +437,14 @@ void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandl
 //*		UpdateShapefile()
 //***********************************************************************
 void Layer::UpdateShapefile()
- {
+{
 	if (!IsDynamicOgrLayer())
 		return;
 
-    IOgrLayer* layer = NULL;
+	IOgrLayer* layer;
 	if (!QueryOgrLayer(&layer))
 		return;
-    ((COgrLayer*)layer)->UpdateShapefileFromOGRLoader();
+	static_cast<COgrLayer*>(layer)->UpdateShapefileFromOGRLoader();
 }
 
 //****************************************************
@@ -444,11 +452,11 @@ void Layer::UpdateShapefile()
 //****************************************************
 bool Layer::IsEmpty()
 {
-	if (_object == NULL) return true;
+	if (_object == nullptr) return true;
 	if (this->IsDynamicOgrLayer())return false;
 	if (this->IsShapefile())
 	{
-		IShapefile * ishp = NULL;
+		IShapefile* ishp;
 		if (!this->QueryShapefile(&ishp)) return true;
 
 		long numShapes;
@@ -477,7 +485,7 @@ void Layer::GrabLayerNameFromDatasource()
 
 	if (IsOgrLayer())
 	{
-		CComPtr<IOgrLayer> layer = NULL;
+		CComPtr<IOgrLayer> layer = nullptr;
 		if (QueryOgrLayer(&layer))
 		{
 			CComBSTR name;
@@ -489,7 +497,7 @@ void Layer::GrabLayerNameFromDatasource()
 	{
 		CComBSTR bstr;
 		bstr.Attach(GetFilename());
-		CStringW path = OLE2W(bstr);
+		const CStringW path = OLE2W(bstr);
 		name = Utility::GetNameFromPathWoExtension(path);
 	}
 }
@@ -499,42 +507,44 @@ void Layer::GrabLayerNameFromDatasource()
 //****************************************************
 BSTR Layer::GetFilename()
 {
-	BSTR filename;	
+	BSTR filename;
 	switch (this->_type)
 	{
-		case ShapefileLayer:
+	case ShapefileLayer:
+	{
+		CComPtr<IShapefile> sf = nullptr;
+		if (QueryShapefile(&sf))
 		{
-			CComPtr<IShapefile> sf = NULL;
-			if (QueryShapefile(&sf))
+			sf->get_Filename(&filename);
+			return filename;
+		}
+		break;
+	}
+	case ImageLayer:
+	{
+		CComPtr<IImage> img = nullptr;
+		if (QueryImage(&img))
+		{
+			img->get_Filename(&filename);
+			return filename;
+		}
+		break;
+	}
+	case OgrLayerSource:
+	{
+		CComPtr<IOgrLayer> ogr = nullptr;
+		if (QueryOgrLayer(&ogr))
+		{
+			if (OgrHelper::GetSourceType(ogr) == ogrFile)
 			{
-				sf->get_Filename(&filename);
+				ogr->GetConnectionString(&filename);
 				return filename;
 			}
-			break;
 		}
-		case ImageLayer:
-		{
-			CComPtr<IImage> img = NULL;
-			if (QueryImage(&img))
-			{
-				img->get_Filename(&filename);
-				return filename;
-			}
-			break;
-		}
-		case OgrLayerSource:
-		{
-			CComPtr<IOgrLayer> ogr = NULL;
-			if (QueryOgrLayer(&ogr))
-			{
-				if (OgrHelper::GetSourceType(ogr) == ogrFile)
-				{
-					ogr->GetConnectionString(&filename);
-					return filename;
-				}
-			}
-			break;
-		}
+		break;
+	}
+	default:
+		return SysAllocString(L"");
 	}
 	return SysAllocString(L"");
 }
@@ -546,5 +556,3 @@ bool Layer::PointWithinExtents(double projX, double projY)
 {
 	return !(projX < extents.left || projX > extents.right || projY < extents.bottom || projY > extents.top);
 }
-
-

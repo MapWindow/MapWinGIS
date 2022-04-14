@@ -1,36 +1,35 @@
-#include "stdafx.h"
-#include "map.h"
+#include "StdAfx.h"
+#include "Map.h"
 #include "GeoProjection.h"
 #include "Tiles.h"
 #include "ExtentsHelper.h"
-#include "ProjectionHelper.h"
 #include "ShapeHelper.h"
 
 // some simple encapsulation for readability of code
-IGeoProjection* CMapView::GetMapToWgs84Transform() 
-{ 
+IGeoProjection* CMapView::GetMapToWgs84Transform()
+{
 	VARIANT_BOOL vb;
 	_projection->get_HasTransformation(&vb);
-	return vb ?  _projection : NULL; 
+	return vb ? _projection : nullptr;
 }
-IGeoProjection* CMapView::GetWgs84ToMapTransform() 
-{ 
+IGeoProjection* CMapView::GetWgs84ToMapTransform()
+{
 	VARIANT_BOOL vb;
 	_wgsProjection->get_HasTransformation(&vb);
-	return vb ?  _wgsProjection : NULL; 
+	return vb ? _wgsProjection : nullptr;
 }
-IGeoProjection* CMapView::GetTilesToMapTransform() 
-{ 
+IGeoProjection* CMapView::GetTilesToMapTransform()
+{
 	VARIANT_BOOL vb;
 	_tileProjection->get_HasTransformation(&vb);
-	return vb ?  _tileProjection : NULL; 
+	return vb ? _tileProjection : nullptr;
 }
 
-IGeoProjection* CMapView::GetMapToTilesTransform() 
+IGeoProjection* CMapView::GetMapToTilesTransform()
 {
 	VARIANT_BOOL vb;
 	_tileReverseProjection->get_HasTransformation(&vb);
-	return vb ?  _tileReverseProjection : NULL; 
+	return vb ? _tileReverseProjection : nullptr;
 }
 
 IGeoProjection* CMapView::GetWgs84Projection() { return _wgsProjection; }
@@ -42,22 +41,22 @@ IGeoProjection* CMapView::GetMapProjection() { return _projection; }
 // *****************************************************
 void CMapView::ReleaseProjections()
 {
-	((CGeoProjection*)_projection)->SetIsFrozen(false);
+	dynamic_cast<CGeoProjection*>(_projection)->SetIsFrozen(false);
 	VARIANT_BOOL vb;
 	_projection->Clear(&vb);
-	UINT count = _projection->Release();
+	_projection->Release();
 
 	_tileProjection->Clear(&vb);
-	count = _tileProjection->Release();
+	_tileProjection->Release();
 
 	_tileReverseProjection->Clear(&vb);
-	count = _tileReverseProjection->Release();
-	
+	_tileReverseProjection->Release();
+
 	_wgsProjection->Clear(&vb);
-	count = _wgsProjection->Release();
-	
+	_wgsProjection->Release();
+
 	_gmercProjection->Clear(&vb);
-	count = _gmercProjection->Release();
+	_gmercProjection->Release();
 }
 
 // *****************************************************
@@ -65,7 +64,7 @@ void CMapView::ReleaseProjections()
 // *****************************************************
 void CMapView::InitProjections()
 {
-	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_tileProjection);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_tileProjection);  // TODO: Don't use C-style cast
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_tileReverseProjection);
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_wgsProjection);
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_gmercProjection);
@@ -73,10 +72,10 @@ void CMapView::InitProjections()
 	VARIANT_BOOL vb;
 	_wgsProjection->SetWgs84(&vb);				// EPSG:4326
 	_gmercProjection->SetGoogleMercator(&vb);	// EPSG:3857
-	
+
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_projection);
 
-	CComPtr<IGeoProjection> p = NULL;
+	CComPtr<IGeoProjection> p = nullptr;
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&p);
 	SetGeoProjection(p);
 }
@@ -92,7 +91,7 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	}
 
 	bool preserveExtents = _activeLayers.size() == 0;
-	IExtents* ext = preserveExtents ? GetGeographicExtents() : NULL;	// try to preserve extents
+	IExtents* ext = preserveExtents ? GetGeographicExtents() : nullptr;	// try to preserve extents
 
 	((CGeoProjection*)_projection)->SetIsFrozen(false);
 	_projection->StopTransform();
@@ -100,15 +99,16 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	ComHelper::SetRef(pVal, (IDispatch**)&_projection);
 
 #ifndef RELEASE_MODE
-	CString s = ProjectionHelper::ToString(_projection);
-	Debug::WriteLine("MAP PROJECTION SET: %s", s);
+	CComBSTR bStr;
+	_projection->ExportToProj4(&bStr);
+	Debug::WriteLine("MAP PROJECTION SET: %s", static_cast<LPWSTR>(bStr));
 #endif
 
 	_projectionChangeCount++;
-	
+
 	UpdateMapTranformation();
 
-	UpdateTileProjection();	
+	UpdateTileProjection();
 
 	((CGeoProjection*)_projection)->SetIsFrozen(true);
 
@@ -117,7 +117,7 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	ClearExtentHistory();
 
 	// restore extents
-	if (ext) 
+	if (ext)
 	{
 		if (preserveExtents) {
 			SetGeographicExtents(ext);
@@ -125,7 +125,7 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 
 		ext->Release();
 	}
-	
+
 	FireProjectionChanged();
 }
 
@@ -134,16 +134,17 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 // *****************************************************
 void CMapView::UpdateMapTranformation()
 {
-	bool isEmpty = ProjectionHelper::IsEmpty(_projection);
+	VARIANT_BOOL isEmpty;
+	_projection->get_IsEmpty(&isEmpty);
 
-	IGeoProjection* gp = NULL;
+	IGeoProjection* gp = nullptr;
 
 	_wgsProjection->StopTransform();
 
-	if (!isEmpty)
+	if (isEmpty)
 	{
 		VARIANT_BOOL isSame, vb;
-		CComPtr<IExtents> box = NULL;
+		CComPtr<IExtents> box = nullptr;
 		box.Attach(ExtentsHelper::GetWorldBounds());
 		_wgsProjection->get_IsSameExt(_projection, box, 20, &isSame);
 
@@ -176,7 +177,7 @@ void CMapView::UpdateMapTranformation()
 // *****************************************************
 //		GetProjection()
 // *****************************************************
-IGeoProjection* CMapView::GetGeoProjection (void)
+IGeoProjection* CMapView::GetGeoProjection(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (_projection)
@@ -195,7 +196,7 @@ void CMapView::ClearMapProjectionWithLastLayer()
 		_projection->get_IsEmpty(&isEmpty);
 		if (!isEmpty)
 		{
-			CComPtr<IGeoProjection> proj = NULL;
+			CComPtr<IGeoProjection> proj = nullptr;
 			ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&proj);
 			if (proj)
 			{
@@ -235,9 +236,9 @@ DOUBLE CMapView::GeodesicLength(IShape* polyline)
 	_geodesicShape->SetShape(polyline);
 
 	double length = 0.0;
-	 _geodesicShape->get_Length(&length);
-	
-	 return length;
+	_geodesicShape->get_Length(&length);
+
+	return length;
 }
 
 // ***************************************************************
@@ -289,7 +290,7 @@ DOUBLE CMapView::GeodesicDistance(DOUBLE projX1, DOUBLE projY1, DOUBLE projX2, D
 
 	VARIANT_BOOL transform;
 	gp->get_HasTransformation(&transform);
-	if (_transformationMode == tmNotDefined || !transform)  {
+	if (_transformationMode == tmNotDefined || !transform) {
 		ErrorMessage(tkFAILED_TRANSFORM_MAP_TO_WGS84);
 		return 0.0;
 	}

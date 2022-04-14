@@ -153,21 +153,21 @@ TileHttpContentType SecureHttpClient::get_ContentType(int providerId) const
 
     if (contentType.Left(5).CompareNoCase(_T("image")) == 0)
     {
-        return httpImage;
+        return TileHttpContentType::httpImage;
     }
 
     if (contentType.MakeLower().Find("xml") != -1)
     {
-        return httpXml;
+        return TileHttpContentType::httpXml;
     }
 
     if (providerId == (int)tkTileProvider::Rosreestr)
     {
         // ad-hoc fix
-        return httpImage;
+        return TileHttpContentType::httpImage;
     }
 
-    return httpUndefined;
+    return TileHttpContentType::httpUndefined;
 }
 
 // get request status

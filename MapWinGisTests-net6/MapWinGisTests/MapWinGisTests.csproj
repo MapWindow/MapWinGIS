@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0-windows8.0</TargetFramework>
+		<RootNamespace>MapWinGisTests</RootNamespace>
+		<Nullable>enable</Nullable>
+
+		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<EnableDynamicLoading>true</EnableDynamicLoading>
+
+		<IsPackable>false</IsPackable>
+
+		<Platforms>x64;x86</Platforms>
+
+		<ImplicitUsings>enable</ImplicitUsings>
+
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="TestData\**" />
+	  <EmbeddedResource Remove="TestData\**" />
+	  <None Remove="TestData\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <COMReference Include="MapWinGIS">
+	    <WrapperTool>tlbimp</WrapperTool>
+	    <VersionMinor>4</VersionMinor>
+	    <VersionMajor>5</VersionMajor>
+	    <Guid>c368d713-cc5f-40ed-9f53-f84fe197b96a</Guid>
+	    <Lcid>0</Lcid>
+	    <Isolated>false</Isolated>
+	    <EmbedInteropTypes>False</EmbedInteropTypes>
+	  </COMReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+		<PackageReference Include="Shouldly" Version="4.0.3" />
+		<PackageReference Include="xunit" Version="2.4.1" />
+		<PackageReference Include="xunit.analyzers" Version="0.10.0" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="coverlet.collector" Version="3.1.2">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Xunit.StaFact" Version="1.1.11" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\WinFormsApp1\WinFormsApp1.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="xunit.runner.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <CustomToolNamespace>https://xunit.net/schema/current/xunit.runner.schema.json</CustomToolNamespace>
+	  </None>
+	</ItemGroup>
+
+</Project>

@@ -77,7 +77,7 @@ public:
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
 	STDMETHOD(Clear)();
-	STDMETHOD(get_numPoints)(long* retVal);
+	STDMETHOD(get_NumPoints)(long* retVal);
 	STDMETHOD(get_PointXY)(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal);
 	STDMETHOD(put_PointXY)(long pointIndex, double x, double y, VARIANT_BOOL* retVal);
 	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);
@@ -183,7 +183,7 @@ public:
 	void CopyData(int firstIndex, int lastIndex, IShape* target);
 
 	void SetMapCallback(IMapViewCallback* callback) {
-		_activeShape->SetMapCallback(callback, simEditing);
+		_activeShape->SetMapCallback(callback, ShapeInputMode::simEditing);
 		_mapCallback = callback;
 	}
 

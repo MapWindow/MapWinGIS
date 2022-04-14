@@ -28,7 +28,7 @@ DATA_TYPE GridManager::getGridDataType( const char * cfilename, GRID_TYPE GridTy
 		TIFF *tiff = XTIFFOpen((char *)cfilename, "r"); // TIFF-level descriptor
 		if(tiff)
 		{
-			uint16 sampleFormat, bitsPerSample;
+			uint16_t sampleFormat, bitsPerSample;
 
 			TIFFGetField(tiff,TIFFTAG_SAMPLEFORMAT, &sampleFormat);
 			TIFFGetField(tiff, TIFFTAG_BITSPERSAMPLE, &bitsPerSample);

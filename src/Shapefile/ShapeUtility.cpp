@@ -9,41 +9,46 @@
 // **************************************************************
 //		IsM()
 // **************************************************************
-bool ShapeUtility::IsM(ShpfileType shpType)
+bool ShapeUtility::IsM(const ShpfileType shpType)
 {
-	return shpType == SHP_POINTM || shpType == SHP_MULTIPOINTM || shpType == SHP_POLYLINEM || shpType == SHP_POLYGONM;
+	return shpType == SHP_POINTM
+		|| shpType == SHP_MULTIPOINTM
+		|| shpType == SHP_POLYLINEM
+		|| shpType == SHP_POLYGONM;
 }
 
 // **************************************************************
 //		ShapeTypeIsZ()
 // **************************************************************
-bool ShapeUtility::IsZ(ShpfileType shpType)
+bool ShapeUtility::IsZ(const ShpfileType shpType)
 {
-	return shpType == SHP_POINTZ || shpType == SHP_MULTIPOINTZ || shpType == SHP_POLYLINEZ || shpType == SHP_POLYGONZ;
+	return shpType == SHP_POINTZ
+		|| shpType == SHP_MULTIPOINTZ
+		|| shpType == SHP_POLYLINEZ
+		|| shpType == SHP_POLYGONZ;
 }
 
 // **************************************************************
 //		Convert2D()
 // **************************************************************
-ShpfileType ShapeUtility::Convert2D(ShpfileType shpType)
+ShpfileType ShapeUtility::Convert2D(const ShpfileType shpType)
 {
 	if (shpType == SHP_NULLSHAPE)																return SHP_NULLSHAPE;
-	else if (shpType == SHP_POINT || shpType == SHP_POINTM || shpType == SHP_POINTZ)				return SHP_POINT;
-	else if (shpType == SHP_MULTIPOINT || shpType == SHP_MULTIPOINTM || shpType == SHP_MULTIPOINTZ)	return SHP_MULTIPOINT;
-	else if (shpType == SHP_POLYGON || shpType == SHP_POLYGONM || shpType == SHP_POLYGONZ)			return SHP_POLYGON;
-	else if (shpType == SHP_POLYLINE || shpType == SHP_POLYLINEM || shpType == SHP_POLYLINEZ)		return SHP_POLYLINE;
-	else																							return shpType;
+	if (shpType == SHP_POINT || shpType == SHP_POINTM || shpType == SHP_POINTZ)				    return SHP_POINT;
+	if (shpType == SHP_MULTIPOINT || shpType == SHP_MULTIPOINTM || shpType == SHP_MULTIPOINTZ)	return SHP_MULTIPOINT;
+	if (shpType == SHP_POLYGON || shpType == SHP_POLYGONM || shpType == SHP_POLYGONZ)			return SHP_POLYGON;
+	if (shpType == SHP_POLYLINE || shpType == SHP_POLYLINEM || shpType == SHP_POLYLINEZ)		return SHP_POLYLINE;
+	return shpType;
 }
 
 // **************************************************************
 //		SwapEndian()
 // **************************************************************
-void ShapeUtility::SwapEndian(char* a, int size)
+void ShapeUtility::SwapEndian(char* a, const int size)
 {
-	char hold;
-	for (int i = 0; i < size*.5; i++)
+	for (int i = 0; i < size * .5; i++)
 	{
-		hold = a[i];
+		const char hold = a[i];
 		a[i] = a[size - i - 1];
 		a[size - i - 1] = hold;
 	}
@@ -52,7 +57,7 @@ void ShapeUtility::SwapEndian(char* a, int size)
 // **************************************************************
 //		get_ContentLength 
 // **************************************************************
-int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numParts)
+int ShapeUtility::get_ContentLength(const ShpfileType shptype, const int numPoints, const int numParts)
 {
 	int contentLength;
 	if (shptype == SHP_NULLSHAPE)
@@ -78,7 +83,7 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 			sizeof(double) * 4 +
 			sizeof(int) +
 			sizeof(int) +
-			sizeof(int)*numParts +
+			sizeof(int) * numParts +
 			sizeof(double) * 2 * numPoints;
 	}
 	else if (shptype == SHP_POLYLINEZ)
@@ -87,12 +92,12 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 			sizeof(double) * 4 +
 			sizeof(int) +
 			sizeof(int) +
-			sizeof(int)*numParts +
+			sizeof(int) * numParts +
 			sizeof(double) * 2 * numPoints +
 			sizeof(double) * 2 +
-			sizeof(double)*numPoints +
+			sizeof(double) * numPoints +
 			sizeof(double) * 2 +
-			sizeof(double)*numPoints;
+			sizeof(double) * numPoints;
 	}
 	else if (shptype == SHP_POLYLINEM)
 	{
@@ -100,10 +105,10 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 			sizeof(double) * 4 +
 			sizeof(int) +
 			sizeof(int) +
-			sizeof(int)*numParts +
+			sizeof(int) * numParts +
 			sizeof(double) * 2 * numPoints +
 			sizeof(double) * 2 +
-			sizeof(double)*numPoints;
+			sizeof(double) * numPoints;
 	}
 	else if (shptype == SHP_POLYGON)
 	{
@@ -111,7 +116,7 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 			sizeof(double) * 4 +
 			sizeof(int) +
 			sizeof(int) +
-			sizeof(int)*numParts +
+			sizeof(int) * numParts +
 			sizeof(double) * 2 * numPoints;
 	}
 	else if (shptype == SHP_POLYGONZ)
@@ -120,12 +125,12 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 			sizeof(double) * 4 +
 			sizeof(int) +
 			sizeof(int) +
-			sizeof(int)*numParts +
+			sizeof(int) * numParts +
 			sizeof(double) * 2 * numPoints +
 			sizeof(double) * 2 +
-			sizeof(double)*numPoints +
+			sizeof(double) * numPoints +
 			sizeof(double) * 2 +
-			sizeof(double)*numPoints;
+			sizeof(double) * numPoints;
 	}
 	else if (shptype == SHP_POLYGONM)
 	{
@@ -133,10 +138,10 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 			sizeof(double) * 4 +
 			sizeof(int) +
 			sizeof(int) +
-			sizeof(int)*numParts +
+			sizeof(int) * numParts +
 			sizeof(double) * 2 * numPoints +
 			sizeof(double) * 2 +
-			sizeof(double)*numPoints;
+			sizeof(double) * numPoints;
 	}
 	else if (shptype == SHP_MULTIPOINT)
 	{
@@ -152,9 +157,9 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 			sizeof(int) +
 			sizeof(double) * 2 * numPoints +
 			sizeof(double) * 2 +
-			sizeof(double)*numPoints +
+			sizeof(double) * numPoints +
 			sizeof(double) * 2 +
-			sizeof(double)*numPoints;
+			sizeof(double) * numPoints;
 	}
 	else if (shptype == SHP_MULTIPOINTM)
 	{
@@ -163,7 +168,7 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 			sizeof(int) +
 			sizeof(double) * 2 * numPoints +
 			sizeof(double) * 2 +
-			sizeof(double)*numPoints;
+			sizeof(double) * numPoints;
 	}
 	else
 	{
@@ -175,49 +180,47 @@ int ShapeUtility::get_ContentLength(ShpfileType shptype, int numPoints, int numP
 // **************************************************************
 //		CreateFastWrapper 
 // **************************************************************
-IShapeWrapper* ShapeUtility::CreateWrapper(char* data, int recordLength, bool forceCom)
+IShapeWrapper* ShapeUtility::CreateWrapper(char* data, const int recordLength, const bool forceCom)
 {
 	if (!data) {
 		Debug::WriteError("CreateWrapper: shape data was expected.");
-		return NULL;
+		return nullptr;
 	}
 
-	ShpfileType shpType = (ShpfileType)*(int*)data;
-	ShpfileType shpType2D = ShapeUtility::Convert2D(shpType);
+	ShpfileType shpType = (ShpfileType) * (int*)data;  // TODO: Fix compile warning
+	//ShpfileType shpType2D = ShapeUtility::Convert2D(shpType);
 
-	ShapeWrapperType wrapperType = GetShapeWrapperType(shpType, forceCom);
-
-	switch (wrapperType)
+	switch (GetShapeWrapperType(shpType, forceCom))
 	{
-		case swtPoint:
-			return new CShapeWrapperPoint(data, recordLength);
-		case swtFast:
-			return new CShapeWrapper(data, recordLength);
-		case swtCom:
-			return new CShapeWrapperCOM(data, recordLength);
-		case swtEmpty:
-		default:
-			return new CShapeWrapperEmpty();
+	case ShapeWrapperType::swtPoint:
+		return new CShapeWrapperPoint(data, recordLength);
+	case ShapeWrapperType::swtFast:
+		return new CShapeWrapper(data, recordLength);
+	case ShapeWrapperType::swtCom:
+		return new CShapeWrapperCOM(data, recordLength);
+	case ShapeWrapperType::swtEmpty:
+		return new CShapeWrapperEmpty();
 	}
+
+	// let's return a stub for any unforeseen situations, it stands a better chance of avoiding a crash
+	return new CShapeWrapperEmpty();
 }
 
 // **************************************************************
 //		CreateWrapper 
 // **************************************************************
-IShapeWrapper* ShapeUtility::CreateWrapper(ShpfileType shpType, bool forceCom)
+IShapeWrapper* ShapeUtility::CreateWrapper(const ShpfileType shpType, const bool forceCom)
 {
-	ShapeWrapperType wrapperType = GetShapeWrapperType(shpType, forceCom);
-
-	switch (wrapperType)
+	switch (GetShapeWrapperType(shpType, forceCom))
 	{
-		case swtEmpty:
-			return new CShapeWrapperEmpty();
-		case swtPoint:
-			return new CShapeWrapperPoint(shpType);
-		case swtFast:
-			return new CShapeWrapper(shpType);
-		case swtCom:
-			return new CShapeWrapperCOM(shpType);
+	case ShapeWrapperType::swtEmpty:
+		return new CShapeWrapperEmpty();
+	case ShapeWrapperType::swtPoint:
+		return new CShapeWrapperPoint(shpType);
+	case ShapeWrapperType::swtFast:
+		return new CShapeWrapper(shpType);
+	case ShapeWrapperType::swtCom:
+		return new CShapeWrapperCOM(shpType);
 	}
 
 	// let's return a stub for any unforeseen situations, it stands a better chance of avoiding a crash
@@ -227,41 +230,37 @@ IShapeWrapper* ShapeUtility::CreateWrapper(ShpfileType shpType, bool forceCom)
 // **************************************************************
 //		GetShapeWrapperType 
 // **************************************************************
-ShapeWrapperType ShapeUtility::GetShapeWrapperType(ShpfileType shpType, bool forceCom)
+ShapeWrapperType ShapeUtility::GetShapeWrapperType(const ShpfileType shpType, const bool forceCom)
 {
 	if (forceCom) {
-		return swtCom;
+		return ShapeWrapperType::swtCom;
 	}
 
-	ShpfileType shpType2D = ShapeUtility::Convert2D(shpType);
+	const ShpfileType shpType2D = ShapeUtility::Convert2D(shpType);
 
 	if (shpType == SHP_NULLSHAPE)
 	{
-		return swtEmpty;
+		return ShapeWrapperType::swtEmpty;
 	}
-	else if (shpType2D == SHP_POINT)
+	if (shpType2D == SHP_POINT)
 	{
-		return swtPoint;
+		return ShapeWrapperType::swtPoint;
 	}
-	else if (IsM(shpType) || IsZ(shpType)) {
-		return swtCom;
+	if (IsM(shpType) || IsZ(shpType)) {
+		return ShapeWrapperType::swtCom;
 	}
-	else {
-		return swtFast;
-	}
+	return ShapeWrapperType::swtFast;
 }
 
 // **************************************************************
 //		CreateEmptyWrapper 
 // **************************************************************
-IShapeWrapper* ShapeUtility::CreateEmptyWrapper(bool forceCOM)
+IShapeWrapper* ShapeUtility::CreateEmptyWrapper(const bool forceCom)
 {
-	if (forceCOM) {
+	if (forceCom) {
 		return new CShapeWrapperCOM(SHP_NULLSHAPE);
 	}
-	else {
-		return new CShapeWrapperEmpty();
-	}
+	return new CShapeWrapperEmpty();
 }
 
 // **************************************************************
@@ -271,10 +270,10 @@ void ShapeUtility::WriteBigEndian(FILE* file, int value)
 {
 	if (!file) return;
 
-	void* intbuf = (char*)&value;
-	ShapeUtility::SwapEndian((char*)intbuf, sizeof(int));
+	void* intbuf = (char*)&value; // TODO: Fix compile warning
+	ShapeUtility::SwapEndian((char*)intbuf, sizeof(int)); // TODO: Fix compile warning
 
-	size_t size = fwrite(intbuf, sizeof(int), 1, file);
+	const size_t size = fwrite(intbuf, sizeof(int), 1, file);
 	if (size != 1)
 	{
 		CallbackHelper::ErrorMsg("Failed to write int value");
@@ -288,14 +287,14 @@ long ShapeUtility::ReadIntBigEndian(FILE* file)
 {
 	int buf;
 	fread(&buf, sizeof(int), 1, file);
-	ShapeUtility::SwapEndian((char*)&buf, sizeof(int));
+	ShapeUtility::SwapEndian((char*)&buf, sizeof(int)); // TODO: Fix compile warning
 	return buf;
 }
 
 // **************************************************************
 //		WritePointXY 
 // **************************************************************
-void ShapeUtility::WritePointXY(IShapeWrapper* shape, int pointIndex, FILE* file)
+void ShapeUtility::WritePointXY(IShapeWrapper* shape, const int pointIndex, FILE* file)
 {
 	double x, y;
 	shape->get_PointXY(pointIndex, x, y);
@@ -306,7 +305,7 @@ void ShapeUtility::WritePointXY(IShapeWrapper* shape, int pointIndex, FILE* file
 // **************************************************************
 //		WritePointXYM 
 // **************************************************************
-void ShapeUtility::WritePointXYM(IShapeWrapper* shape, int pointIndex, FILE* file)
+void ShapeUtility::WritePointXYM(IShapeWrapper* shape, const int pointIndex, FILE* file)
 {
 	double x, y, m, z;
 	shape->get_PointXYZM(pointIndex, x, y, z, m);
@@ -318,7 +317,7 @@ void ShapeUtility::WritePointXYM(IShapeWrapper* shape, int pointIndex, FILE* fil
 // **************************************************************
 //		WritePointXYZ 
 // **************************************************************
-void ShapeUtility::WritePointXYZ(IShapeWrapper* shape, int pointIndex, FILE* file)
+void ShapeUtility::WritePointXYZ(IShapeWrapper* shape, const int pointIndex, FILE* file)
 {
 	double x, y, m, z;
 	shape->get_PointXYZM(pointIndex, x, y, z, m);
@@ -331,7 +330,7 @@ void ShapeUtility::WritePointXYZ(IShapeWrapper* shape, int pointIndex, FILE* fil
 // **************************************************************
 //		WritePointZ 
 // **************************************************************
-void ShapeUtility::WritePointZ(IShapeWrapper* shape, int pointIndex, FILE* file)
+void ShapeUtility::WritePointZ(IShapeWrapper* shape, const int pointIndex, FILE* file)
 {
 	double z;
 	shape->get_PointZ(pointIndex, z);
@@ -341,7 +340,7 @@ void ShapeUtility::WritePointZ(IShapeWrapper* shape, int pointIndex, FILE* file)
 // **************************************************************
 //		WritePointM 
 // **************************************************************
-void ShapeUtility::WritePointM(IShapeWrapper* shape, int pointIndex, FILE* file)
+void ShapeUtility::WritePointM(IShapeWrapper* shape, const int pointIndex, FILE* file)
 {
 	double m;
 	shape->get_PointM(pointIndex, m);
@@ -386,28 +385,28 @@ void ShapeUtility::WriteExtentsZ(IShapeWrapper* shape, FILE* file)
 // **************************************************************
 //		Get25DShapeType 
 // **************************************************************
-ShpfileType ShapeUtility::Get25DShapeType(ShpfileType shpTypeBase, bool isZ, bool isM)
+ShpfileType ShapeUtility::Get25DShapeType(const ShpfileType shpTypeBase, const bool isZ, const bool isM)
 {
 	switch (shpTypeBase)
 	{
-		case SHP_POINT:
-			if (isZ) return SHP_POINTZ;
-			if (isM) return SHP_POINTM;
-			return SHP_POINT;
-		case SHP_MULTIPOINT:
-			if (isZ) return SHP_MULTIPOINTZ;
-			if (isM) return SHP_MULTIPOINTM;
-			return SHP_MULTIPOINT;
-		case SHP_POLYLINE:
-			if (isZ) return SHP_POLYLINEZ;
-			if (isM) return SHP_POLYLINEM;
-			return SHP_POLYLINE;
-		case SHP_POLYGON:
-			if (isZ) return SHP_POLYGONZ;
-			if (isM) return SHP_POLYGONM;
-			return SHP_POLYGON;
+	case SHP_POINT:
+		if (isZ) return SHP_POINTZ;
+		if (isM) return SHP_POINTM;
+		return SHP_POINT;
+	case SHP_MULTIPOINT:
+		if (isZ) return SHP_MULTIPOINTZ;
+		if (isM) return SHP_MULTIPOINTM;
+		return SHP_MULTIPOINT;
+	case SHP_POLYLINE:
+		if (isZ) return SHP_POLYLINEZ;
+		if (isM) return SHP_POLYLINEM;
+		return SHP_POLYLINE;
+	case SHP_POLYGON:
+		if (isZ) return SHP_POLYGONZ;
+		if (isM) return SHP_POLYGONM;
+		return SHP_POLYGON;
+	default: 
+		return shpTypeBase;
 	}
-
-	return shpTypeBase;
 }
 

@@ -197,7 +197,7 @@ public:
 	STDMETHOD(Close)(/*[out, retval]*/VARIANT_BOOL * retval);
 	STDMETHOD(CreateNew)(/*[in]*/long NewWidth, /*[in]*/long NewHeight, /*[out, retval]*/VARIANT_BOOL * retval);
 	STDMETHOD(Save)(/*[in]*/BSTR imageFileName, /*[in, optional, defaultvalue(FALSE)]*/VARIANT_BOOL WriteWorldFile,/*[in, optional, defaultvalue(USE_FILE_EXTENSION)]*/ImageType FileType, /*[in, optional]*/ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
-	STDMETHOD(Open)(/*[in]*/BSTR ImageFileName, /*[in, optional, defaultvalue(USE_FILE_EXTENSION)]*/ImageType FileType, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL InRam, /*[in, optional]*/ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(Open)(/*[in]*/BSTR imageFileName, /*[in, optional, defaultvalue(USE_FILE_EXTENSION)]*/ImageType fileType, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL inRam, /*[in, optional]*/ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	//Rob Cairns
 	STDMETHOD (SetVisibleExtents)(/*[in]*/double newMinX,/*[in]*/ double newMinY,/*[in]*/ double newMaxX,/*[in]*/ double newMaxY,/*[in]*/long pixInView, /*[in]*/float transPercent);
 	STDMETHOD(SetProjection)(/*[in]*/BSTR Proj4, /*[out, retval]*/ VARIANT_BOOL * retval);
@@ -442,7 +442,7 @@ public:
 	void ClearBuffer();
 	bool SaveNotNullPixels(bool forceSaving = false);
 	void ClearNotNullPixels();
-	void OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval);
+	void OpenImage(CStringW imageFileName, ImageType fileType, VARIANT_BOOL inRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval);
 	
 	int GetOriginalBufferWidth();
 	int GetOriginalBufferHeight();

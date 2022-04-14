@@ -27,7 +27,7 @@ namespace MapWinGISTests
 
             var sfOriginal = Helper.OpenShapefile(Path.Combine(workingFolder, "Parish_Kirkoswald.shp"));
             Debug.WriteLine($"Original has {sfOriginal.NumShapes} shapes");
-            Debug.WriteLine($"Original first shape has {sfOriginal.Shape[0].numPoints} points.");
+            Debug.WriteLine($"Original first shape has {sfOriginal.Shape[0].NumPoints} points.");
 
             var area = sfOriginal.Shape[0].Area;
             utils.ConvertDistance(sfOriginal.GeoProjection.LinearUnits, tkUnitsOfMeasure.umMeters, ref area);
@@ -35,7 +35,7 @@ namespace MapWinGISTests
 
             var sfSimplifyLines = sfOriginal.SimplifyLines(0d, false);
             Debug.WriteLine($"Simplified (0 tolerance) has {sfSimplifyLines.NumShapes} shapes");
-            Debug.WriteLine($"Simplified (0 tolerance) first shape has {sfSimplifyLines.Shape[0].numPoints} points.");
+            Debug.WriteLine($"Simplified (0 tolerance) first shape has {sfSimplifyLines.Shape[0].NumPoints} points.");
             sfSimplifyLines.Close();
 
 
@@ -45,7 +45,7 @@ namespace MapWinGISTests
 
             sfSimplifyLines = sfOriginal.SimplifyLines(tolerance, false);
             Debug.WriteLine($"Simplified (1m tolerance) has {sfSimplifyLines.NumShapes} shapes");
-            Debug.WriteLine($"Simplified (1m tolerance) first shape has {sfSimplifyLines.Shape[0].numPoints} points.");
+            Debug.WriteLine($"Simplified (1m tolerance) first shape has {sfSimplifyLines.Shape[0].NumPoints} points.");
 
             area = sfOriginal.Shape[0].Area;
             utils.ConvertDistance(sfOriginal.GeoProjection.LinearUnits, tkUnitsOfMeasure.umMeters, ref area);

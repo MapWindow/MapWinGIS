@@ -274,8 +274,8 @@ void CopyShape(IShapefile* sfSource, IShape* shp, IShapefile* sfResult)
 //  Returns numbers(ids) of shapes of this shapefile which are situated 
 //	in certain spatial relation to the shapes of the input shapefile. 
 
-STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Relation,
-                                           VARIANT_BOOL SelectedOnly, VARIANT* arr, ICallback* cBack,
+STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation relation,
+                                           VARIANT_BOOL selectedOnly, VARIANT* arr, ICallback* cBack,
                                            VARIANT_BOOL* retval)
 {
     
@@ -322,7 +322,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
     {
         CallbackHelper::Progress(_globalCallback, shapeid2, _numShapes2, "Calculating...", _key, percent);
 
-        if (SelectedOnly && !(*data)[shapeid2]->selected())
+        if (selectedOnly && !(*data)[shapeid2]->selected())
             continue;
 
         double xMin, xMax, yMin, yMax;
@@ -359,14 +359,14 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
                         }
 
                         OGRBoolean res = 0;
-                        if (Relation == srContains) res = oGeom1->Contains(oGeom2);
-                        else if (Relation == srCrosses) res = oGeom1->Crosses(oGeom2);
-                        else if (Relation == srEquals) res = oGeom1->Equals(oGeom2);
-                        else if (Relation == srIntersects) res = oGeom1->Intersects(oGeom2);
-                        else if (Relation == srDisjoint) res = oGeom1->Intersects(oGeom2);
-                        else if (Relation == srOverlaps) res = oGeom1->Overlaps(oGeom2);
-                        else if (Relation == srTouches) res = oGeom1->Touches(oGeom2);
-                        else if (Relation == srWithin) res = oGeom1->Within(oGeom2);
+                        if (relation == srContains) res = oGeom1->Contains(oGeom2);
+                        else if (relation == srCrosses) res = oGeom1->Crosses(oGeom2);
+                        else if (relation == srEquals) res = oGeom1->Equals(oGeom2);
+                        else if (relation == srIntersects) res = oGeom1->Intersects(oGeom2);
+                        else if (relation == srDisjoint) res = oGeom1->Intersects(oGeom2);
+                        else if (relation == srOverlaps) res = oGeom1->Overlaps(oGeom2);
+                        else if (relation == srTouches) res = oGeom1->Touches(oGeom2);
+                        else if (relation == srWithin) res = oGeom1->Within(oGeom2);
 
                         if (res)
                         {
@@ -381,7 +381,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 
     // disjoint is opposite to intersects; so to get it we need to find shapes that do intersect with input
     // and then invert the selection
-    if (Relation == srDisjoint)
+    if (relation == srDisjoint)
     {
         vector<long> v;
         set<long>::iterator p = result.begin();
@@ -433,12 +433,12 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 //	a substitute for SelectShapes function after some improvements.
 //  returns VARIANT_TRUE when shapes were selected, and VARIANT_FALSE if
 //	no shapes fell into selection
-VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents* BoundBox, double Tolerance, SelectMode SelectMode, VARIANT* arr)
+VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents* boundBox, double tolerance, SelectMode selectMode, VARIANT* arr)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
     double xMin, xMax, yMin, yMax, zMin, zMax;
-    BoundBox->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+    boundBox->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 
     if (xMin == xMax && yMin == yMax)
     {
@@ -453,21 +453,21 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents* BoundBox, double Tolerance, S
         return NULL;
     }
 
-    if (Tolerance > 0.0)
+    if (tolerance > 0.0)
     {
-        xMin = xMin - Tolerance / 2;
-        yMin = yMin - Tolerance / 2;
-        xMax = xMax + Tolerance / 2;
-        yMax = yMax + Tolerance / 2;
+        xMin = xMin - tolerance / 2;
+        yMin = yMin - tolerance / 2;
+        xMax = xMax + tolerance / 2;
+        yMax = yMax + tolerance / 2;
     }
 
-    BoundBox->SetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
+    boundBox->SetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
 
     set<long> results;
     vector<int> shapeIds = qTree->GetNodes(QTreeExtent(xMin, xMax, yMax, yMin));
 
     IShape* temp = nullptr;
-    ((CExtents*)BoundBox)->ToShape(&temp);
+    ((CExtents*)boundBox)->ToShape(&temp);
     OGRGeometry* oBox = OgrConverter::ShapeToGeometry(temp);
     temp->Release();
 
@@ -483,7 +483,7 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents* BoundBox, double Tolerance, S
         if (!res)
             res = oGeom->Contains(oBox);
 
-        if (SelectMode == INTERSECTION && !res)
+        if (selectMode == INTERSECTION && !res)
             res = oGeom->Intersects(oBox);
 
         if (res) results.insert(shapeId);
@@ -504,21 +504,21 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents* BoundBox, double Tolerance, S
 // *************************************************************
 //  Merges shapes of the shapefile based on the attribute of the given
 // 	field. Shapes with the same attribute are merged into one.
-STDMETHODIMP CShapefile::Dissolve(long FieldIndex, VARIANT_BOOL SelectedOnly, IShapefile** sf)
+STDMETHODIMP CShapefile::Dissolve(long fieldIndex, VARIANT_BOOL selectedOnly, IShapefile** sf)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    DissolveCore(FieldIndex, SelectedOnly, nullptr, sf);
+    DissolveCore(fieldIndex, selectedOnly, nullptr, sf);
     return S_OK;
 }
 
 // *************************************************************
 //     DissolveWithStats()
 // *************************************************************
-STDMETHODIMP CShapefile::DissolveWithStats(long FieldIndex, VARIANT_BOOL SelectedOnly,
+STDMETHODIMP CShapefile::DissolveWithStats(long fieldIndex, VARIANT_BOOL selectedOnly,
                                            IFieldStatOperations* statOperations, IShapefile** sf)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    DissolveCore(FieldIndex, SelectedOnly, statOperations, sf);
+    DissolveCore(fieldIndex, selectedOnly, statOperations, sf);
     return S_OK;
 }
 
@@ -527,7 +527,7 @@ STDMETHODIMP CShapefile::DissolveWithStats(long FieldIndex, VARIANT_BOOL Selecte
 // *************************************************************
 //  Merges shapes of the shapefile based on the attribute of the given
 // 	field. Shapes with the same attribute are merged into one.
-void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* operations,
+void CShapefile::DissolveCore(long fieldIndex, VARIANT_BOOL selectedOnly, IFieldStatOperations* operations,
                               IShapefile** sf)
 {
     // ----------------------------------------------
@@ -536,13 +536,13 @@ void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
     long numFields;
     this->get_NumFields(&numFields);
 
-    if (FieldIndex < 0 || FieldIndex >= numFields)
+    if (fieldIndex < 0 || fieldIndex >= numFields)
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         return;
     }
 
-    if (!ValidateInput(this, "Dissolve", "this", SelectedOnly))
+    if (!ValidateInput(this, "Dissolve", "this", selectedOnly))
         return;
 
     // ----------------------------------------------
@@ -568,18 +568,18 @@ void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
         ErrorMessage(errorCode);
         return;
     }
-    CloneField(this, *sf, FieldIndex, -1);
+    CloneField(this, *sf, fieldIndex, -1);
 
     // -------------------------------------------
     //  processing
     // -------------------------------------------
     if (_geometryEngine == engineGeos)
     {
-        this->DissolveGEOS(FieldIndex, SelectedOnly, operations, *sf);
+        this->DissolveGEOS(fieldIndex, selectedOnly, operations, *sf);
     }
     else
     {
-        this->DissolveClipper(FieldIndex, SelectedOnly, operations, *sf);
+        this->DissolveClipper(fieldIndex, selectedOnly, operations, *sf);
     }
 
     // -------------------------------------------
@@ -840,7 +840,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 // *************************************************************
 //     DissolveGEOS()
 // *************************************************************
-void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* operations,
+void CShapefile::DissolveGEOS(long fieldIndex, VARIANT_BOOL selectedOnly, IFieldStatOperations* operations,
                               IShapefile* sf)
 {
     map<int, vector<int>*> fieldMap; // index in output, indices in input
@@ -858,7 +858,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
         calcStats = count > 0;
     }
 
-    ReadGeosGeometries(SelectedOnly);
+    ReadGeosGeometries(selectedOnly);
 
     long percent = 0;
     int size = (int)_shapeData.size();
@@ -866,13 +866,13 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
     {
         CallbackHelper::Progress(_globalCallback, i, size, "Grouping shapes...", _key, percent);
 
-        if (!ShapeAvailable(i, SelectedOnly))
+        if (!ShapeAvailable(i, selectedOnly))
             continue;
 
         GEOSGeometry* gsGeom = this->GetGeosGeometry(i);
         if (gsGeom != nullptr)
         {
-            this->get_CellValue(FieldIndex, i, &val);
+            this->get_CellValue(fieldIndex, i, &val);
             if (shapeMap.find(val) != shapeMap.end())
             {
                 shapeMap[val]->push_back(gsGeom);
@@ -971,7 +971,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 // *************************************************************
 //     DissolveClipper()
 // *************************************************************
-void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* operations,
+void CShapefile::DissolveClipper(long fieldIndex, VARIANT_BOOL selectedOnly, IFieldStatOperations* operations,
                                  IShapefile* sf)
 {
     map<int, vector<int>*> fieldMap; // index in output, indices in input
@@ -1000,7 +1000,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IFi
     {
         CallbackHelper::Progress(_globalCallback, i, size, "Merging shapes...", _key, percent);
 
-        if (!ShapeAvailable(i, SelectedOnly))
+        if (!ShapeAvailable(i, selectedOnly))
             continue;
 
         IShape* shp = nullptr;
@@ -1013,7 +1013,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IFi
 
         if (poly == nullptr) continue;
 
-        this->get_CellValue(FieldIndex, i, &val);
+        this->get_CellValue(fieldIndex, i, &val);
 
         if (shapeMap.find(val) != shapeMap.end())
         {
@@ -1109,21 +1109,21 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IFi
 // ********************************************************************
 //		AggregateShapesWithStats()
 // ********************************************************************
-STDMETHODIMP CShapefile::AggregateShapesWithStats(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
+STDMETHODIMP CShapefile::AggregateShapesWithStats(VARIANT_BOOL selectedOnly, LONG fieldIndex,
                                                   IFieldStatOperations* statOperations, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    AggregateShapesCore(SelectedOnly, FieldIndex, statOperations, retval);
+    AggregateShapesCore(selectedOnly, fieldIndex, statOperations, retval);
     return S_OK;
 }
 
 // ********************************************************************
 //		AggregateShapes()
 // ********************************************************************
-STDMETHODIMP CShapefile::AggregateShapes(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IShapefile** retval)
+STDMETHODIMP CShapefile::AggregateShapes(VARIANT_BOOL selectedOnly, LONG fieldIndex, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    AggregateShapesCore(SelectedOnly, FieldIndex, nullptr, retval);
+    AggregateShapesCore(selectedOnly, fieldIndex, nullptr, retval);
     return S_OK;
 }
 
@@ -1131,19 +1131,19 @@ STDMETHODIMP CShapefile::AggregateShapes(VARIANT_BOOL SelectedOnly, LONG FieldIn
 //		AggregateShapesCore()
 // ********************************************************************
 // Returns new shapefile instance.
-void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IFieldStatOperations* operations,
+void CShapefile::AggregateShapesCore(VARIANT_BOOL selectedOnly, LONG fieldIndex, IFieldStatOperations* operations,
                                      IShapefile** retval)
 {
     long numFields;
     this->get_NumFields(&numFields);
 
-    if (FieldIndex != -1 && !(FieldIndex >= 0 && FieldIndex < numFields))
+    if (fieldIndex != -1 && !(fieldIndex >= 0 && fieldIndex < numFields))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         return;
     }
 
-    if (!ValidateInput(this, "AggregateShapes", "this", SelectedOnly))
+    if (!ValidateInput(this, "AggregateShapes", "this", selectedOnly))
         return;
 
     // ----------------------------------------------
@@ -1170,7 +1170,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
         return;
     }
     const long newFieldIndex = 0;
-    CloneField(this, *retval, FieldIndex, newFieldIndex);
+    CloneField(this, *retval, fieldIndex, newFieldIndex);
 
     // ----------------------------------------------
     //   Building groups by field id
@@ -1197,15 +1197,15 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
     {
         CallbackHelper::Progress(_globalCallback, i, size, "Grouping shapes...", _key, percent);
 
-        if (!ShapeAvailable(i, SelectedOnly))
+        if (!ShapeAvailable(i, selectedOnly))
             continue;
 
         IShape* shp = nullptr;
         this->GetValidatedShape(i, &shp);
         if (!shp) continue;
 
-        if (FieldIndex != -1)
-            this->get_CellValue(FieldIndex, i, &val);
+        if (fieldIndex != -1)
+            this->get_CellValue(fieldIndex, i, &val);
 
         if (shapeMap.find(val) != shapeMap.end())
         {
@@ -1378,12 +1378,12 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 // ********************************************************************
 //		BufferByDistance()
 // ********************************************************************
-STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly,
-                                          VARIANT_BOOL MergeResults, IShapefile** sf)
+STDMETHODIMP CShapefile::BufferByDistance(double distance, LONG nSegments, VARIANT_BOOL selectedOnly,
+                                          VARIANT_BOOL mergeResults, IShapefile** sf)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-    if (MergeResults)
+    if (mergeResults)
     {
         // ShapefileHelper::CloneNoFields(this, sf, SHP_POLYGON, true);
         // -----------------------------------------------
@@ -1405,7 +1405,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
         ShapefileHelper::CloneCore(this, sf, SHP_POLYGON, false);
     }
 
-    if (!BufferByDistanceCore(Distance, nSegments, SelectedOnly, MergeResults, *sf))
+    if (!BufferByDistanceCore(distance, nSegments, selectedOnly, mergeResults, *sf))
     {
         (*sf)->Release();
         *sf = nullptr;
@@ -1417,13 +1417,13 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 // ********************************************************************
 //		BufferByDistance()
 // ********************************************************************
-VARIANT_BOOL CShapefile::BufferByDistanceCore(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly,
-                                              VARIANT_BOOL MergeResults, IShapefile* sf)
+VARIANT_BOOL CShapefile::BufferByDistanceCore(double distance, LONG nSegments, VARIANT_BOOL selectedOnly,
+                                              VARIANT_BOOL mergeResults, IShapefile* sf)
 {
     // -------------------------------------------
     //  validating
     // -------------------------------------------
-    if (!ValidateInput(this, "BufferByDistance", "this", SelectedOnly))
+    if (!ValidateInput(this, "BufferByDistance", "this", selectedOnly))
         return VARIANT_FALSE;
 
     // -------------------------------------------
@@ -1437,7 +1437,7 @@ VARIANT_BOOL CShapefile::BufferByDistanceCore(double Distance, LONG nSegments, V
     std::vector<GEOSGeometry*> results;
     results.reserve(size);
 
-    ReadGeosGeometries(SelectedOnly);
+    ReadGeosGeometries(selectedOnly);
 
     const bool isM = ShapeUtility::IsM(_shpfiletype);
 
@@ -1445,17 +1445,17 @@ VARIANT_BOOL CShapefile::BufferByDistanceCore(double Distance, LONG nSegments, V
     {
         CallbackHelper::Progress(_globalCallback, i, size, "Buffering shapes...", _key, percent);
 
-        if (!ShapeAvailable(i, SelectedOnly))
+        if (!ShapeAvailable(i, selectedOnly))
             continue;
 
         GEOSGeometry* oGeom1 = this->GetGeosGeometry(i);
         if (oGeom1)
         {
-            GEOSGeometry* oGeom2 = GeosHelper::Buffer(oGeom1, Distance, (int)nSegments);
+            GEOSGeometry* oGeom2 = GeosHelper::Buffer(oGeom1, distance, (int)nSegments);
 
             if (oGeom2 == nullptr) continue;
 
-            if (MergeResults)
+            if (mergeResults)
             {
                 results.push_back(oGeom2);
             }
@@ -1476,7 +1476,7 @@ VARIANT_BOOL CShapefile::BufferByDistanceCore(double Distance, LONG nSegments, V
     // -------------------------------------------
     //  merging the results
     // -------------------------------------------
-    if (MergeResults)
+    if (mergeResults)
     {
         GEOSGeometry* gsGeom = GeosConverter::MergeGeometries(results, _globalCallback);
         // geometries will be released in the process
@@ -1542,22 +1542,22 @@ VARIANT_BOOL CShapefile::BufferByDistanceCore(double Distance, LONG nSegments, V
 // ********************************************************************
 //		GetDifference()
 // ********************************************************************
-STDMETHODIMP CShapefile::Difference(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay,
-                                    VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
+STDMETHODIMP CShapefile::Difference(VARIANT_BOOL selectedOnlySubject, IShapefile* sfOverlay,
+                                    VARIANT_BOOL selectedOnlyOverlay, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clDifference);
+    DoClipOperation(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, retval, clDifference);
     return S_OK;
 }
 
 // ********************************************************************
 //		Clip()
 // ********************************************************************
-STDMETHODIMP CShapefile::Clip(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay,
+STDMETHODIMP CShapefile::Clip(VARIANT_BOOL selectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL selectedOnlyOverlay,
                               IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clClip);
+    DoClipOperation(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, retval, clClip);
     // enumeration should be repaired
     return S_OK;
 }
@@ -1565,23 +1565,23 @@ STDMETHODIMP CShapefile::Clip(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOv
 // **********************************************************************
 // *	GetIntersection()				             
 // **********************************************************************
-STDMETHODIMP CShapefile::GetIntersection(VARIANT_BOOL SelectedOnlyOfThis, IShapefile* sf,
-                                         VARIANT_BOOL SelectedOnly, ShpfileType fileType, ICallback* cBack,
+STDMETHODIMP CShapefile::GetIntersection(VARIANT_BOOL selectedOnlyOfThis, IShapefile* sf,
+                                         VARIANT_BOOL selectedOnly, ShpfileType fileType, ICallback* cBack,
                                          IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    DoClipOperation(SelectedOnlyOfThis, sf, SelectedOnly, retval, clIntersection, fileType);
+    DoClipOperation(selectedOnlyOfThis, sf, selectedOnly, retval, clIntersection, fileType);
     return S_OK;
 }
 
 // ********************************************************************
 //		GetSymmDifference()
 // ********************************************************************
-STDMETHODIMP CShapefile::SymmDifference(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay,
-                                        VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
+STDMETHODIMP CShapefile::SymmDifference(VARIANT_BOOL selectedOnlySubject, IShapefile* sfOverlay,
+                                        VARIANT_BOOL selectedOnlyOverlay, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clSymDifference);
+    DoClipOperation(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, retval, clSymDifference);
     // enumeration should be repaired
     return S_OK;
 }
@@ -1589,11 +1589,11 @@ STDMETHODIMP CShapefile::SymmDifference(VARIANT_BOOL SelectedOnlySubject, IShape
 // ********************************************************************
 //		GetUnion()
 // ********************************************************************
-STDMETHODIMP CShapefile::Union(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay,
-                               VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
+STDMETHODIMP CShapefile::Union(VARIANT_BOOL selectedOnlySubject, IShapefile* sfOverlay,
+                               VARIANT_BOOL selectedOnlyOverlay, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clUnion);
+    DoClipOperation(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, retval, clUnion);
     return S_OK;
 }
 
@@ -1757,8 +1757,8 @@ bool CShapefile::ValidateClippingOutputType(ShpfileType type1, ShpfileType type2
 // ********************************************************************
 //		DoClipOperarion()
 // ********************************************************************
-void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay,
-                                 VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval,
+void CShapefile::DoClipOperation(VARIANT_BOOL selectedOnlySubject, IShapefile* sfOverlay,
+                                 VARIANT_BOOL selectedOnlyOverlay, IShapefile** retval,
                                  tkClipOperation operation, ShpfileType returnType)
 {
     // ----------------------------------------------
@@ -1786,10 +1786,10 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
         return;
     }
 
-    if (!ValidateInput(this, GetClipOperationName(operation), "this", SelectedOnlySubject))
+    if (!ValidateInput(this, GetClipOperationName(operation), "this", selectedOnlySubject))
         return;
 
-    if (!ValidateInput(sfOverlay, GetClipOperationName(operation), "sfOverlay", SelectedOnlyOverlay))
+    if (!ValidateInput(sfOverlay, GetClipOperationName(operation), "sfOverlay", selectedOnlyOverlay))
     {
         return;
     }
@@ -1830,7 +1830,7 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
     }
 
     // building spatial index for the operation
-    if (! ((CShapefile*)sfOverlay)->GenerateTempQTree(SelectedOnlyOverlay != 0))
+    if (! ((CShapefile*)sfOverlay)->GenerateTempQTree(selectedOnlyOverlay != 0))
     {
         ErrorMessage(tkFAILED_TO_BUILD_SPATIAL_INDEX);
         goto cleaning;
@@ -1838,7 +1838,7 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 
     if (operation == clSymDifference || operation == clUnion)
     {
-        if (! this->GenerateTempQTree(SelectedOnlySubject != 0))
+        if (! this->GenerateTempQTree(selectedOnlySubject != 0))
         {
             ErrorMessage(tkFAILED_TO_BUILD_SPATIAL_INDEX);
             goto cleaning;
@@ -1851,60 +1851,60 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
         switch (operation)
         {
         case clDifference:
-            this->DifferenceClipper(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+            this->DifferenceClipper(this, selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval);
             break;
         case clIntersection:
-            this->IntersectionClipper(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap);
+            this->IntersectionClipper(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval, &fieldMap);
             break;
         case clClip:
-            this->ClipClipper(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+            this->ClipClipper(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval);
             break;
         case clSymDifference:
-            this->DifferenceClipper(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
-            this->DifferenceClipper(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap);
+            this->DifferenceClipper(this, selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval);
+            this->DifferenceClipper(sfOverlay, selectedOnlyOverlay, this, selectedOnlySubject, *retval, &fieldMap);
             break;
         case clUnion:
             std::set<int> shapesToSkipSubject;
             std::set<int> shapesToSkipClipping;
-            this->IntersectionClipper(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap,
+            this->IntersectionClipper(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval, &fieldMap,
                                       &shapesToSkipSubject, &shapesToSkipClipping);
-            this->DifferenceClipper(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, nullptr,
+            this->DifferenceClipper(this, selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval, nullptr,
                                     &shapesToSkipSubject);
-            this->DifferenceClipper(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap,
+            this->DifferenceClipper(sfOverlay, selectedOnlyOverlay, this, selectedOnlySubject, *retval, &fieldMap,
                                     &shapesToSkipClipping);
         }
     }
     else
     {
-        this->ReadGeosGeometries(SelectedOnlySubject);
-        ((CShapefile*)sfOverlay)->ReadGeosGeometries(SelectedOnlyOverlay);
+        this->ReadGeosGeometries(selectedOnlySubject);
+        ((CShapefile*)sfOverlay)->ReadGeosGeometries(selectedOnlyOverlay);
 
         // do calculation by GEOS
         switch (operation)
         {
         case clDifference:
-            this->DifferenceGEOS(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+            this->DifferenceGEOS(this, selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval);
             break;
         case clIntersection:
-            this->IntersectionGEOS(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap);
+            this->IntersectionGEOS(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval, &fieldMap);
             break;
         case clClip:
-            this->ClipGEOS(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+            this->ClipGEOS(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval);
             break;
         case clSymDifference:
             // 2 differences
-            this->DifferenceGEOS(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
-            this->DifferenceGEOS(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap);
+            this->DifferenceGEOS(this, selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval);
+            this->DifferenceGEOS(sfOverlay, selectedOnlyOverlay, this, selectedOnlySubject, *retval, &fieldMap);
             break;
         case clUnion:
             // intersection + symmetrical difference
             std::set<int> shapesToSkipSubject;
             std::set<int> shapesToSkipClipping;
-            this->IntersectionGEOS(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap,
+            this->IntersectionGEOS(selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval, &fieldMap,
                                    &shapesToSkipSubject, &shapesToSkipClipping);
-            this->DifferenceGEOS(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, nullptr,
+            this->DifferenceGEOS(this, selectedOnlySubject, sfOverlay, selectedOnlyOverlay, *retval, nullptr,
                                  &shapesToSkipSubject);
-            this->DifferenceGEOS(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap,
+            this->DifferenceGEOS(sfOverlay, selectedOnlyOverlay, this, selectedOnlySubject, *retval, &fieldMap,
                                  &shapesToSkipClipping);
             break;
         }
@@ -1937,7 +1937,7 @@ cleaning:
 // ********************************************************************
 //		ClipGEOS()
 // ********************************************************************
-void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay,
+void CShapefile::ClipGEOS(VARIANT_BOOL selectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL selectedOnlyOverlay,
                           IShapefile* sfResult)
 {
     QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQTree();
@@ -1952,7 +1952,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
     {
         CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Clipping shapes...", _key, percent);
 
-        if (!ShapeAvailable(subjectId, SelectedOnlySubject))
+        if (!ShapeAvailable(subjectId, selectedOnlySubject))
             continue;
 
         double xMin, xMax, yMin, yMax;
@@ -1983,7 +1983,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
                     }
 
                     // extracting clip geometry
-                    if (!((CShapefile*)sfOverlay)->ShapeAvailable(clipId, SelectedOnlyOverlay))
+                    if (!((CShapefile*)sfOverlay)->ShapeAvailable(clipId, selectedOnlyOverlay))
                         continue;
 
                     GEOSGeometry* gsGeom2 = ((CShapefile*)sfOverlay)->GetGeosGeometry(clipId);
@@ -2036,7 +2036,7 @@ cleaning:
 // ********************************************************************
 //		ClipClipper()
 // ********************************************************************
-void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay,
+void CShapefile::ClipClipper(VARIANT_BOOL selectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL selectedOnlyOverlay,
                              IShapefile* sfResult)
 {
     QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQTree();
@@ -2057,7 +2057,7 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
     {
         CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Clipping shapes...", _key, percent);
 
-        if (!ShapeAvailable(subjectId, SelectedOnlySubject))
+        if (!ShapeAvailable(subjectId, selectedOnlySubject))
             continue;
 
         double xMin, xMax, yMin, yMax;
@@ -2092,7 +2092,7 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
                         }
                     }
 
-                    if (!((CShapefile*)sfOverlay)->ShapeAvailable(clipId, SelectedOnlyOverlay))
+                    if (!((CShapefile*)sfOverlay)->ShapeAvailable(clipId, selectedOnlyOverlay))
                         continue;
 
                     vector<IShape*> vShapes;
@@ -2175,7 +2175,7 @@ cleaning:
 // ******************************************************************
 // shapesToExclude - vector to return shapes sum of intersected results for those is equals to the initial area
 // such shapes can be excluded from further calculation in case of union; 
-void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfClip, VARIANT_BOOL SelectedOnlyClip,
+void CShapefile::IntersectionGEOS(VARIANT_BOOL selectedOnlySubject, IShapefile* sfClip, VARIANT_BOOL selectedOnlyClip,
                                   IShapefile* sfResult, map<long, long>* fieldMap,
                                   std::set<int>* subjectShapesToSkip,
                                   std::set<int>* clippingShapesToSkip)
@@ -2193,7 +2193,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
     {
         CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", _key, percent);
 
-        if (!ShapeAvailable(subjectId, SelectedOnlySubject))
+        if (!ShapeAvailable(subjectId, selectedOnlySubject))
             continue;
 
         double xMin, xMax, yMin, yMax;
@@ -2225,7 +2225,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
                     }
 
                     // extracting clip geometry
-                    if (!((CShapefile*)sfClip)->ShapeAvailable(clipId, SelectedOnlyClip))
+                    if (!((CShapefile*)sfClip)->ShapeAvailable(clipId, selectedOnlyClip))
                         continue;
 
                     GEOSGeometry* geom2 = ((CShapefile*)sfClip)->GetGeosGeometry(clipId);
@@ -2254,8 +2254,8 @@ cleaning:
 // ******************************************************************
 //		IntersectionClipperNoAttributes()
 // ******************************************************************
-IShapefile* CShapefile::IntersectionClipperNoAttributes(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfClip,
-                                                        VARIANT_BOOL SelectedOnlyClip)
+IShapefile* CShapefile::IntersectionClipperNoAttributes(VARIANT_BOOL selectedOnlySubject, IShapefile* sfClip,
+                                                        VARIANT_BOOL selectedOnlyClip)
 {
     if (!sfClip)
         return nullptr;
@@ -2264,8 +2264,8 @@ IShapefile* CShapefile::IntersectionClipperNoAttributes(VARIANT_BOOL SelectedOnl
     this->Clone(&sfResult);
 
     ClipperLib::Clipper clp;
-    ClipperConverter::AddPolygons(this, clp, ClipperLib::PolyType::ptSubject, SelectedOnlySubject == VARIANT_TRUE);
-    ClipperConverter::AddPolygons(sfClip, clp, ClipperLib::PolyType::ptClip, SelectedOnlyClip == VARIANT_TRUE);
+    ClipperConverter::AddPolygons(this, clp, ClipperLib::PolyType::ptSubject, selectedOnlySubject == VARIANT_TRUE);
+    ClipperConverter::AddPolygons(sfClip, clp, ClipperLib::PolyType::ptClip, selectedOnlyClip == VARIANT_TRUE);
 
     // ClipperLib::Polygons polyResult;
     ClipperLib::Paths polyResult;
@@ -2288,8 +2288,8 @@ IShapefile* CShapefile::IntersectionClipperNoAttributes(VARIANT_BOOL SelectedOnl
 // ******************************************************************
 //		IntersectionClipper()
 // ******************************************************************
-void CShapefile::IntersectionClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfClip,
-                                     VARIANT_BOOL SelectedOnlyClip,
+void CShapefile::IntersectionClipper(VARIANT_BOOL selectedOnlySubject, IShapefile* sfClip,
+                                     VARIANT_BOOL selectedOnlyClip,
                                      IShapefile* sfResult, map<long, long>* fieldMap,
                                      std::set<int>* subjectShapesToSkip,
                                      std::set<int>* clippingShapesToSkip)
@@ -2335,7 +2335,7 @@ void CShapefile::IntersectionClipper(VARIANT_BOOL SelectedOnlySubject, IShapefil
     {
         CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", _key, percent);
 
-        if (!this->ShapeAvailable(subjectId, SelectedOnlySubject))
+        if (!this->ShapeAvailable(subjectId, selectedOnlySubject))
             continue;
 
         double xMin, xMax, yMin, yMax;
@@ -2375,7 +2375,7 @@ void CShapefile::IntersectionClipper(VARIANT_BOOL SelectedOnlySubject, IShapefil
                         }
                     }
 
-                    if (!((CShapefile*)sfClip)->ShapeAvailable(clipId, SelectedOnlyClip))
+                    if (!((CShapefile*)sfClip)->ShapeAvailable(clipId, selectedOnlyClip))
                         continue;
 
                     // vector<IShape*> vShapes;
@@ -2486,8 +2486,8 @@ cleaning:
 // ********************************************************************
 //		DifferenceGEOS()
 // ********************************************************************
-void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay,
-                                VARIANT_BOOL SelectedOnlyOverlay,
+void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL selectedOnlySubject, IShapefile* sfOverlay,
+                                VARIANT_BOOL selectedOnlyOverlay,
                                 IShapefile* sfResult, map<long, long>* fieldMap, set<int>* shapesToSkip)
 {
     QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQTree();
@@ -2504,7 +2504,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
         CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Calculating difference...", _key,
                                  percent);
 
-        if (!((CShapefile*)sfSubject)->ShapeAvailable(subjectId, SelectedOnlySubject))
+        if (!((CShapefile*)sfSubject)->ShapeAvailable(subjectId, selectedOnlySubject))
             continue;
 
         // those shapes are marked to skip in the course of intersection
@@ -2542,7 +2542,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
                 }
 
                 // extracting clip geometry
-                if (!((CShapefile*)sfOverlay)->ShapeAvailable(clipId, SelectedOnlyOverlay))
+                if (!((CShapefile*)sfOverlay)->ShapeAvailable(clipId, selectedOnlyOverlay))
                     continue;
 
                 GEOSGeometry* gsGeom2 = ((CShapefile*)sfOverlay)->GetGeosGeometry(clipId);
@@ -2639,8 +2639,8 @@ void SerializePolygon(ofstream& out, ClipperLib::Polygons* poly)
 // ******************************************************************
 //		DifferenceClipper()
 // ******************************************************************
-void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedOnlySubject, IShapefile* sfClip,
-                                   VARIANT_BOOL SelectedOnlyClip,
+void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL selectedOnlySubject, IShapefile* sfClip,
+                                   VARIANT_BOOL selectedOnlyClip,
                                    IShapefile* sfResult, map<long, long>* fieldMap, set<int>* shapesToSkip)
 {
     QTree* qTree = ((CShapefile*)sfClip)->GetTempQTree();
@@ -2661,7 +2661,7 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
         CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Calculating difference...", _key,
                                  percent);
 
-        if (!((CShapefile*)sfSubject)->ShapeAvailable(subjectId, SelectedOnlySubject))
+        if (!((CShapefile*)sfSubject)->ShapeAvailable(subjectId, selectedOnlySubject))
             continue;
 
         if (shapesToSkip != nullptr)
@@ -2706,7 +2706,7 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
                         }
                     }
 
-                    if (!((CShapefile*)sfClip)->ShapeAvailable(clipId, SelectedOnlyClip))
+                    if (!((CShapefile*)sfClip)->ShapeAvailable(clipId, selectedOnlyClip))
                         continue;
 
                     vector<IShape*> vShapes;
@@ -2829,11 +2829,11 @@ STDMETHODIMP CShapefile::put_GeometryEngine(tkGeometryEngine newVal)
 // ********************************************************************
 //		PointInShape()
 // ********************************************************************
-STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIANT_BOOL* retval)
+STDMETHODIMP CShapefile::PointInShape(LONG shapeIndex, DOUBLE x, DOUBLE y, VARIANT_BOOL* retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-    if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+    if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
     {
         *retval = VARIANT_FALSE;
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -2853,7 +2853,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
         }
 
         double xMin, yMin, xMax, yMax;
-        this->QuickExtentsCore(ShapeIndex, &xMin, &yMin, &xMax, &yMax);
+        this->QuickExtentsCore(shapeIndex, &xMin, &yMin, &xMax, &yMax);
 
         if (x < xMin || y < yMin || x > xMax || y > yMax)
         {
@@ -2862,7 +2862,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
         }
 
         // retrieving shapes from memory
-        IShape* shp = _shapeData[ShapeIndex]->shape;
+        IShape* shp = _shapeData[shapeIndex]->shape;
         shp->get_NumParts(&numParts);
         shp->get_NumPoints(&numPoints);
         Parts = new long[numParts + 1];
@@ -2883,7 +2883,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
         CSingleLock lock(&_readLock, TRUE);
 
         int shpType;
-        fseek(_shpfile, _shpOffsets[ShapeIndex] + sizeof(int) * 2, SEEK_SET);
+        fseek(_shpfile, _shpOffsets[shapeIndex] + sizeof(int) * 2, SEEK_SET);
         fread(&shpType, sizeof(int), 1, _shpfile);
 
         shpType = ShapeUtility::Convert2D((ShpfileType)shpType);
@@ -2984,7 +2984,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
 // ********************************************************************
 //		PointInShapefile()
 // ********************************************************************
-STDMETHODIMP CShapefile::PointInShapefile(DOUBLE x, DOUBLE y, LONG* ShapeIndex)
+STDMETHODIMP CShapefile::PointInShapefile(DOUBLE x, DOUBLE y, LONG* shapeIndex)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -3064,12 +3064,12 @@ STDMETHODIMP CShapefile::PointInShapefile(DOUBLE x, DOUBLE y, LONG* ShapeIndex)
 
         if (CrossCount & 1)
         {
-            *ShapeIndex = nShape;
+            *shapeIndex = nShape;
             return S_OK;
         }
     }
 
-    *ShapeIndex = -1;
+    *shapeIndex = -1;
     return S_OK;
 }
 
@@ -3151,12 +3151,12 @@ STDMETHODIMP CShapefile::EndPointInShapefile()
 // ********************************************************************
 //		ExplodeShapesCore()
 // ********************************************************************
-VARIANT_BOOL CShapefile::ExplodeShapesCore(VARIANT_BOOL SelectedOnly, IShapefile* result)
+VARIANT_BOOL CShapefile::ExplodeShapesCore(VARIANT_BOOL selectedOnly, IShapefile* result)
 {
     // ----------------------------------------------
     //   Validation
     // ----------------------------------------------
-    if (!ValidateInput(this, "ExplodeShapes", "this", SelectedOnly))
+    if (!ValidateInput(this, "ExplodeShapes", "this", selectedOnly))
     {
         return VARIANT_FALSE;
     }
@@ -3180,7 +3180,7 @@ VARIANT_BOOL CShapefile::ExplodeShapesCore(VARIANT_BOOL SelectedOnly, IShapefile
     {
         CallbackHelper::Progress(_globalCallback, i, numShapes, "Exploding...", _key, percent);
 
-        if (!ShapeAvailable(i, SelectedOnly))
+        if (!ShapeAvailable(i, selectedOnly))
             continue;
 
         IShape* shp = nullptr;
@@ -3223,13 +3223,13 @@ VARIANT_BOOL CShapefile::ExplodeShapesCore(VARIANT_BOOL SelectedOnly, IShapefile
 // ********************************************************************
 //		ExplodeShapes()
 // ********************************************************************
-STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** retval)
+STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL selectedOnly, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
     Clone(retval);
 
-    if (!ExplodeShapesCore(SelectedOnly, *retval))
+    if (!ExplodeShapesCore(selectedOnly, *retval))
     {
         (*retval)->Release();
         *retval = nullptr;
@@ -3334,7 +3334,7 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 // ********************************************************************
 //		Sort()
 // ********************************************************************
-STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefile** retval)
+STDMETHODIMP CShapefile::Sort(LONG fieldIndex, VARIANT_BOOL ascending, IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
     USES_CONVERSION;
@@ -3376,7 +3376,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
             const CComBSTR bstr(str);
             shp->put_Key(bstr);
 
-            this->get_CellValue(FieldIndex, i, &val);
+            this->get_CellValue(fieldIndex, i, &val);
             pair<CComVariant, IShape*> myPair(val, shp);
             shapeMap.insert(myPair);
         }
@@ -3387,7 +3387,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
     // -------------------------------------------
     // writing the results
     // -------------------------------------------
-    if (Ascending)
+    if (ascending)
     {
 	    multimap<CComVariant, IShape*>::iterator p = shapeMap.begin();
 
@@ -3424,7 +3424,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 // ********************************************************************
 //		Merge()
 // ********************************************************************
-STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VARIANT_BOOL SelectedOnly,
+STDMETHODIMP CShapefile::Merge(VARIANT_BOOL selectedOnlyThis, IShapefile* sf, VARIANT_BOOL selectedOnly,
                                IShapefile** retval)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -3449,10 +3449,10 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
         return S_OK;
     }
 
-    if (!ValidateInput(this, "Merge", "this", SelectedOnlyThis))
+    if (!ValidateInput(this, "Merge", "this", selectedOnlyThis))
         return S_OK;
 
-    if (!ValidateInput(sf, "Merge", "sf", SelectedOnly))
+    if (!ValidateInput(sf, "Merge", "sf", selectedOnly))
     {
         return S_OK;
     }
@@ -3490,7 +3490,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
     {
         CallbackHelper::Progress(_globalCallback, count, numShapes1, "Writing...", _key, percent);
 
-        if (!ShapeAvailable(i, SelectedOnlyThis))
+        if (!ShapeAvailable(i, selectedOnlyThis))
             continue;
 
         IShape* shp = nullptr;
@@ -3534,7 +3534,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
     {
         CallbackHelper::Progress(_globalCallback, i, numShapes2, "Writing...", _key, percent);
 
-        if (!((CShapefile*)sf)->ShapeAvailable(i, SelectedOnly))
+        if (!((CShapefile*)sf)->ShapeAvailable(i, selectedOnly))
             continue;
 
         IShape* shp = nullptr;
@@ -3588,7 +3588,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 // **********************************************************************
 //		SimplifyLines()
 // **********************************************************************
-STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOnly, IShapefile** retVal)
+STDMETHODIMP CShapefile::SimplifyLines(DOUBLE tolerance, VARIANT_BOOL selectedOnly, IShapefile** retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
     USES_CONVERSION;
@@ -3603,7 +3603,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
         return S_OK;
     }
 
-    if (!ValidateInput(this, "SimplifyLines", "this", SelectedOnly))
+    if (!ValidateInput(this, "SimplifyLines", "this", selectedOnly))
         return S_OK;
 
     // ----------------------------------------------
@@ -3618,7 +3618,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
     // ----------------------------------------------
     //	  Processing
     // ----------------------------------------------
-    ReadGeosGeometries(SelectedOnly);
+    ReadGeosGeometries(selectedOnly);
     // long index = 0;
     long percent = 0;
 
@@ -3627,7 +3627,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
     {
         CallbackHelper::Progress(_globalCallback, i, numShapes, "Calculating...", _key, percent);
 
-        if (!ShapeAvailable(i, SelectedOnly))
+        if (!ShapeAvailable(i, selectedOnly))
             continue;
 
         GEOSGeometry* gsGeom = GetGeosGeometry(i);
@@ -3638,7 +3638,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
         if (shpType == SHP_POLYLINE)
         {
             // ReSharper disable once CppLocalVariableMayBeConst
-            GEOSGeom gsNew = GeosHelper::Simplify(gsGeom, Tolerance);
+            GEOSGeom gsNew = GeosHelper::Simplify(gsGeom, tolerance);
             if (gsNew)
             {
                 InsertGeosGeometry(sfNew, gsNew, this, i);
@@ -3654,7 +3654,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
             if (type != "MultiPolygon")
             {
                 // ReSharper disable once CppLocalVariableMayBeConst
-                GEOSGeom gsNew = GeosConverter::SimplifyPolygon(gsGeom, Tolerance);
+                GEOSGeom gsNew = GeosConverter::SimplifyPolygon(gsGeom, tolerance);
                 if (gsNew)
                 {
                     InsertGeosGeometry(sfNew, gsNew, this, i);
@@ -3667,7 +3667,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
                 {
                     const GEOSGeometry* gsPart = GeosHelper::GetGeometryN(gsGeom, n);
                     // ReSharper disable once CppLocalVariableMayBeConst
-                    GEOSGeom gsNew = GeosConverter::SimplifyPolygon(gsPart, Tolerance);
+                    GEOSGeom gsNew = GeosConverter::SimplifyPolygon(gsPart, tolerance);
                     if (gsPart)
                     {
                         InsertGeosGeometry(sfNew, gsNew, this, i);

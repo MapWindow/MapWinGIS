@@ -31,13 +31,13 @@
 // ************************************************************
 //		get_Shape()
 // ************************************************************
-STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
+STDMETHODIMP CShapefile::get_Shape(long shapeIndex, IShape **pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	VARIANT_BOOL vbretval = VARIANT_FALSE;
 
 	// out of bounds?
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	if( shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*pVal = NULL;
@@ -45,22 +45,22 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 	}
 
 	// last shape in the append mode is always in memory
-	bool appendedShape = _appendMode && ShapeIndex == _shapeData.size() - 1;
+	bool appendedShape = _appendMode && shapeIndex == _shapeData.size() - 1;
 
 	// editing shapes?
 	if (_isEditingShapes || appendedShape)
 	{
-		if (_shapeData[ShapeIndex]->shape) {
-			_shapeData[ShapeIndex]->shape->AddRef();
+		if (_shapeData[shapeIndex]->shape) {
+			_shapeData[shapeIndex]->shape->AddRef();
 		}
 
-		*pVal = _shapeData[ShapeIndex]->shape;
+		*pVal = _shapeData[shapeIndex]->shape;
 		return S_OK;
 	}
 
 	CSingleLock lock(&_readLock, TRUE);
 
-	*pVal = _fastMode ? ReadFastModeShape(ShapeIndex) : ReadComShape(ShapeIndex);
+	*pVal = _fastMode ? ReadFastModeShape(shapeIndex) : ReadComShape(shapeIndex);
 
 	return S_OK;
 }
@@ -68,13 +68,13 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 // ************************************************************
 //		ReadFastModeShape()
 // ************************************************************
-IShape* CShapefile::ReadFastModeShape(long ShapeIndex)
-{	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
+IShape* CShapefile::ReadFastModeShape(long shapeIndex)
+{	fseek(_shpfile, _shpOffsets[shapeIndex], SEEK_SET);
 
 	// read the shp from disk
 	int index = ShapeUtility::ReadIntBigEndian(_shpfile);
 
-	if (index != ShapeIndex + 1)
+	if (index != shapeIndex + 1)
 	{
 		ErrorMessage(tkINVALID_SHP_FILE);
 		return NULL;
@@ -111,16 +111,16 @@ IShape* CShapefile::ReadFastModeShape(long ShapeIndex)
 // ************************************************************
 //		ReadComShape()
 // ************************************************************
-IShape* CShapefile::ReadComShape(long ShapeIndex)
+IShape* CShapefile::ReadComShape(long shapeIndex)
 {	// read the shp from disk
-	fseek(_shpfile, _shpOffsets[ShapeIndex], SEEK_SET);
+	fseek(_shpfile, _shpOffsets[shapeIndex], SEEK_SET);
 
 	int intbuf;
 	fread(&intbuf, sizeof(int), 1, _shpfile);
 	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int));
 
 	// shape records are 1 based - Allow for a mistake
-	if (intbuf != ShapeIndex + 1 && intbuf != ShapeIndex)
+	if (intbuf != shapeIndex + 1 && intbuf != shapeIndex)
 	{
 		ErrorMessage(tkINVALID_SHP_FILE);
 		return NULL;

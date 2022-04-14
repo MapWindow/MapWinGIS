@@ -23,6 +23,7 @@
 
 using namespace std;
 
+// pm, feb 2022 TODO: Shouldn't we use GeoProjection and/or ProjectionHelper instead?
 void ProjectionTools::GetProj4FromPRJFile(char * prjfileName, char ** prj4)
 {
 	FILE * pFile;
@@ -273,4 +274,51 @@ bool ProjectionTools::compareProj4WithRound5(char * proj1, char * proj2)
 	delete[] proj2Params;
 
 	return allMatched;
+}
+
+// ************************************************************
+//		SupportsWorldWideTransform
+// ************************************************************
+bool ProjectionTools::SupportsWorldWideTransform(IGeoProjection* mapProjection, IGeoProjection* wgsProjection)
+{
+	VARIANT_BOOL isGeograpic;
+	mapProjection->get_IsGeographic(&isGeograpic);
+	if (isGeograpic)
+	{
+		return true;
+	}
+
+	double TOLERANCE = 0.00001;
+	VARIANT_BOOL vb1, vb2, vb3;
+	double minLng = -180.0, maxLng = 180.0, minLat = -85.05112878, maxLat = 85.05112878;
+	double x1 = minLng, x2 = maxLng, y1 = minLat, y2 = maxLat;
+	double x3 = 0.0, y3 = 0.0;
+
+	m_globalSettings.suppressGdalErrors = true;
+	wgsProjection->Transform(&x1, &y1, &vb1);
+	wgsProjection->Transform(&x2, &y2, &vb2);
+	wgsProjection->Transform(&x3, &y3, &vb3);
+	m_globalSettings.suppressGdalErrors = false;
+
+	if ((y3 > y2 && y3 > y1) || (y3 < y2 && y3 < y1))
+	{
+		// this check that direction of Y axis is the same on its whole length;
+		// for Lambert Conformal Conic, that's not the case
+		return false;
+	}
+
+	if (vb1 && vb2 && vb3)
+	{
+		mapProjection->Transform(&x1, &y1, &vb1);
+		mapProjection->Transform(&x2, &y2, &vb1);
+		if (abs(x1 - minLng) < TOLERANCE &&
+			abs(x2 - maxLng) < TOLERANCE &&
+			abs(y1 - minLat) < TOLERANCE &&
+			abs(y2 - maxLat) < TOLERANCE)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

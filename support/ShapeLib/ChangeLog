@@ -1,3 +1,43 @@
+2019-02-28  Even Rouault  <even.rouault at spatialys.com>
+	* Fix 'make distcheck' broken by nth-2 commit
+	* Shapelib 1.5.0 released
+
+2019-02-28  Even Rouault  <even.rouault at spatialys.com>
+
+	* shpopen.c: resync with GDAL internal shapelib to avoid being dependent
+	on correctness of file size field in .shp. Fixes
+	https://lists.osgeo.org/pipermail/gdal-dev/2018-October/049218.html
+
+2019-02-28  Even Rouault  <even.rouault at spatialys.com>
+
+	* contrib/shpgeo.h/.c: Remove PROJ.4 dependency and functionality,
+	 causing removal of SHPProject(), SHPSetProjection() and SHPFreeProjection()
+	* contrib/shpproj.c: removed
+
+2018-08-16  Even Rouault  <even.rouault at spatialys.com>
+
+	* shpopen.c, dbfopen.c, shptree.c, sbnsearch.c: resyc with GDAL
+	internal shapelib. Mostly to allow building those files as C++
+	without warning. Also add FTDate entry in DBFFieldType
+	(see https://github.com/OSGeo/gdal/pull/308). And some other
+	code cleanups
+
+2018-08-16  Even Rouault  <even.rouault at spatialys.com>
+
+	* dbfopen.c: fix a bug where the end of file character was
+	written on top of the first character of the first field name
+	when deleting a field on a .dbf without records.
+	Fixes https://github.com/OSGeo/gdal/issues/863
+
+2018-06-15  Even Rouault  <even.rouault at spatialys.com>
+
+	* safileio.c: remove duplicate test. Patch by Jaroslav Fojtik.
+	Fixes http://bugzilla.maptools.org/show_bug.cgi?id=2744
+
+2017-09-14  Even Rouault  <even.rouault at spatialys.com>
+
+	* Shapelib 1.4.1 released
+
 2017-09-10  Even Rouault  <even.rouault at spatialys.com>
 
 	* shpopen.c: resync with GDAL copy. Make sure to zero terminate all
@@ -19,14 +59,14 @@
 
 	* configure.ac: change soname to 2:1:0 to be in sync with Debian soname.
 	http://bugzilla.maptools.org/show_bug.cgi?id=2628
-	Patch by Bas Couwenberg 
+	Patch by Bas Couwenberg
 
 	* contrib/doc/Shape_PointInPoly_README.txt, contrib/shpgeo.c: typo fixes.
 	http://bugzilla.maptools.org/show_bug.cgi?id=2629
 	Patch by Bas Couwenberg
 
 	* web/*: use a local .css file to avoid a privacy breach issue reported
-	by the lintian QA tool. 
+	by the lintian QA tool.
 	http://bugzilla.maptools.org/show_bug.cgi?id=2630
 	Patch by Bas Couwenberg
 
@@ -94,8 +134,8 @@
 
 2011-07-24    <warmerdam@pobox.com>
 
-	* shpopen.c, dbfopen.c, shptree.c, shapefil.h: Minimize use of 
-	CPL services in favor of SAHooks.Error(). 
+	* shpopen.c, dbfopen.c, shptree.c, shapefil.h: Minimize use of
+	CPL services in favor of SAHooks.Error().
 
 	* Makefile: Remove all the shared library building stuff, it is just
 	too half assed, and results in all sorts of bug reports and complaints.
@@ -127,7 +167,7 @@
 
 2010-12-06  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* dbfopen.c: fix read past end of init data fetching code page 
+	* dbfopen.c: fix read past end of init data fetching code page
 	http://bugzilla.maptools.org/show_bug.cgi?id=2276
 
 2010-07-01  Frank Warmerdam  <warmerdam@pobox.com>
@@ -146,7 +186,7 @@
 	* shpopen.c/shapefil.h: Handle the .shp file length limits more
 	gracefully. (http://trac.osgeo.org/gdal/ticket/3236)
 
-	* shpopen.c: Improve the numerical accurancy of algorithms in
+	* shpopen.c: Improve the numerical accuracy of algorithms in
 	SHPRewind() (http://trac.osgeo.org/gdal/ticket/3363).
 
 2010-01-16  Frank Warmerdam  <warmerdam@pobox.com>
@@ -218,11 +258,11 @@
 
 2007-12-15  Bram de Greve <bram.degreve@bramz.net>
 
-	* dbfopen.c/shapefil.h/safileio.c: read the Code Page information 
-	from the DBF file, and exports this information as a string through 
+	* dbfopen.c/shapefil.h/safileio.c: read the Code Page information
+	from the DBF file, and exports this information as a string through
 	the DBFGetCodePage function.  This is either the number from the LDID
-	header field ("LDID/<number>") or as the content of an accompanying 
-	.CPG file.	When creating a DBF file, the code can be set using 
+	header field ("LDID/<number>") or as the content of an accompanying
+	.CPG file.	When creating a DBF file, the code can be set using
 	DBFCreateEx.
 
 2007-12-12  Bram de Greve <bram.degreve@bramz.net>
@@ -236,7 +276,7 @@
 
 2007-11-14  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* shpopen.c: checks after mallocs to detect for corrupted/voluntary 
+	* shpopen.c: checks after mallocs to detect for corrupted/voluntary
 	broken shapefiles.  http://trac.osgeo.org/gdal/ticket/1991
 
 2007-09-03  Frank Warmerdam  <warmerdam@pobox.com>
@@ -245,26 +285,26 @@
 	Fix contributed by Andrea Peri.
 
 	* dbfopen.c: Move the static dDoubleField return buffer into DBFInfo
-	structure to avoid multithreaded risks. 
+	structure to avoid multithreaded risks.
 
 	* dbfopen.c: Simplify DBFReadTuple() to avoid use of static tuple.
-	Note that this means DBFReadTuple() results are only valid till the 
+	Note that this means DBFReadTuple() results are only valid till the
 	next record is read for any reason.
 
 2007-06-21  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* shpopen.c: Fix for SHPRewind() for "contact at one vertex" 
+	* shpopen.c: Fix for SHPRewind() for "contact at one vertex"
 	cases in rings. http://trac.osgeo.org/gdal/ticket/976
 
 2006-11-06  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* contrib/shpgeo.c: Modified SHPProject to use pj_transform() so 
+	* contrib/shpgeo.c: Modified SHPProject to use pj_transform() so
 	it works for datums and stuff.  Submitted by Steffen Macke.
 
 2006-09-04  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* shpeopen.c: (MLoskot) Added stronger test of Shapefile reading 
-	failures, e.g. truncated files.  The problem was discovered by Tim 
+	* shpeopen.c: (MLoskot) Added stronger test of Shapefile reading
+	failures, e.g. truncated files.  The problem was discovered by Tim
 	Sutton and reported here:
 	      https://svn.qgis.org/trac/ticket/200
 
@@ -299,7 +339,7 @@
 
 	* shpopen.c, shapefil.h, shpdump.c: Added bMeasureIsUsed support as
 	per http://bugzilla.maptools.org/show_bug.cgi?id=1249
-	
+
 2006-01-04  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* dbfopen.c/shapefil.h: Added functions to check if dbf record is
@@ -311,7 +351,7 @@
 
 	* Fixed bug 305 in DBFCloneEmpty() - header length problem.
 
-	* Make the pszStringField buffer for DBFReadAttribute() static char 
+	* Make the pszStringField buffer for DBFReadAttribute() static char
 	[256] as per bug 306.
 
 2004-09-15  Frank Warmerdam  <warmerdam@pobox.com>
@@ -340,7 +380,7 @@
 	* dbfopen.c: Added DBFWriteAttributeDirectly() from the AVCE00
 	distribution to simplify AVC integration in GDAL.
 
-	* shptree.c: added use of qsort() in place of bubble sort as 
+	* shptree.c: added use of qsort() in place of bubble sort as
 	submitted by Bernhard Herzog.
 
 2002-04-10  Frank Warmerdam  <warmerdam@pobox.com>
@@ -356,7 +396,7 @@
 2002-01-17  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* contrib/ShapeFileII.pas: Contributed Delphi Pascal interface
-	to Shapelib. 
+	to Shapelib.
 
 2002-01-15  Frank Warmerdam  <warmerdam@pobox.com>
 
@@ -365,12 +405,12 @@
 
 	* dbfopen.c: Compute nHeaderLength in DBFCloneEmpty() instead of
 	copying it from the source file so we don't have quirks when copying
-	from files with extra bytes of spacers in the header that don't 
+	from files with extra bytes of spacers in the header that don't
 	themselves get copied properly.
 
 2001-12-07  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* shpopen.c: Fix fclose() of SHX file if SHX file fails to open. 
+	* shpopen.c: Fix fclose() of SHX file if SHX file fails to open.
 	Should be closing SHP file.  Reported by Ben Discoe.
 
 2001-11-28  Frank Warmerdam  <warmerdam@pobox.com>
@@ -380,7 +420,7 @@
 
 2001-11-01  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* shpopen.c/shapefil.h: Move record buffer into SHPInfo so that 
+	* shpopen.c/shapefil.h: Move record buffer into SHPInfo so that
 	different threads can safely access separate files.  Other threading
 	issues may remain.
 
@@ -393,12 +433,12 @@
 
 2001-07-03  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* shpopen.c: cleanup better if SHX missing, provided by 
+	* shpopen.c: cleanup better if SHX missing, provided by
 	Riccardo Cohen.
 
 2001-06-21  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* dbfopen.c: Fixed NULL support with patches from Jim Matthews. 
+	* dbfopen.c: Fixed NULL support with patches from Jim Matthews.
 
 	* shpopen.c: Be more careful of establishing initial file bounds in
 	face of possible NULL shapes.
@@ -414,7 +454,7 @@
 	* dbfopen.c: added DBFGetFieldIndex(), contributed by Jim Matthews.
 
 	* dbfopen.c/shapefil.h/dbf_api.h: added support for NULL fields
-	in .dbf files. 
+	in .dbf files.
 
 2001-05-28  Frank Warmerdam  <warmerdam@pobox.com>
 
@@ -424,11 +464,11 @@
 2001-05-23  Frank Warmerdam  <warmerdam@pobox.com>
 
 	* shapefile.h, shpopen.c, dbfopen.c, shptree.c: added the SHPAPI_CALL
-	macro to allow compilation with _stdcall conventions. 
+	macro to allow compilation with _stdcall conventions.
 
 2001-02-06  Frank Warmerdam  <warmerdam@pobox.com>
 
-	* Fixed a few memory leaks when SHPOpen() fails. 
+	* Fixed a few memory leaks when SHPOpen() fails.
 
 2000-12-05  Frank Warmerdam  <warmerdam@pobox.com>
 
@@ -456,15 +496,15 @@
 
 2000-07-07  Frank Warmerdam  <warmerda@cs46980-c>
 
-	* Added stdlib.h and string.h where needed, and removed lots of 
+	* Added stdlib.h and string.h where needed, and removed lots of
 	unused variables, mainly from example mainlines at the suggestion
-	of Bill Hughes. 
+	of Bill Hughes.
 
 2000-05-24  Frank Warmerdam  <warmerda@cs46980-c>
 
-	* Added logic to shpadd to grow vertex lists at the suggestion of 
+	* Added logic to shpadd to grow vertex lists at the suggestion of
 	Santiago Nullo <sn@softhome.net>.
-	
+
 2000-05-23  Frank Warmerdam  <warmerda@cs46980-c>
 
 	* Added checks in dbfopen.c on return result of fseek() and fread().
@@ -495,19 +535,19 @@ Wed Dec 15 08:49:53 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
 
 	* Fixed record size written at beginning of records in .shp
 	file.  It was 4 bytes to long (thanks to Mikko Syrja of 3D-system Oy)
-	
+
 	* Use atof() instead of sscanf() in dbfopen.c, and add stdlib.h.
 
 Mon Dec 13 12:29:01 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
 
-	* Added support for uppercase .DBF extention c/o 
+	* Added support for uppercase .DBF extension c/o
           Dennis Christopher <dennis@avenza.com>
 
 Fri Nov  5 09:12:31 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
 
 	* Updated license headers to include the option of use of the code
 	  under the LGPL.
-	  
+
 1999-09-15 <warmerda@CS46980-B>
 
 	* Added shapelib.dll target to makefile.vc.
@@ -518,7 +558,7 @@ Mon May 10 23:19:42 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
 
 	* Added ``raw tuple'' api to dbfopen.c, still not in dbf_api.html.
 	  From candrsn.
-	
+
 
 Tue May  4 11:04:31 1999  Frank Warmerdam  <warmerda@gdal.velocet.ca>
 

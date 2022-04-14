@@ -7,7 +7,6 @@
 #include "Shape.h"
 #include "ShapefileHelper.h"
 #include "GroupOperation.h"
-#include "ShapeHelper.h"
 #include "SelectionHelper.h"
 #include "EditorHelper.h"
 #include "Digitizer.h"
@@ -31,7 +30,7 @@ bool CMapView::HandleLButtonUpDragVertexOrShape(UINT nFlags)
 	if (_dragging.HasMoved && operation == DragMoveVertex)
 	{
 		bool shift = (nFlags & MK_SHIFT) != 0;
-        bool alt = GetKeyState(VK_MENU) < 0 ? true : false;
+		bool alt = GetKeyState(VK_MENU) < 0 ? true : false;
 
 		if (SnappingIsOn(shift))
 		{
@@ -40,9 +39,9 @@ bool CMapView::HandleLButtonUpDragVertexOrShape(UINT nFlags)
 				return true;		// can't proceed without snapping in this mode
 		}
 
-        if (alt) { // user wants to intercept coordinates and possibly modify them
-            this->FireBeforeVertexDigitized(&x2, &y2);
-        }
+		if (alt) { // user wants to intercept coordinates and possibly modify them
+			this->FireBeforeVertexDigitized(&x2, &y2);
+		}
 
 		GetEditorBase()->MoveVertex(x2, y2);		// don't save state; it's already saved at the beginning of operation
 	}
@@ -71,7 +70,7 @@ bool CMapView::SnappingIsOn(UINT flags)
 
 bool CMapView::SnappingIsOn(bool shift)
 {
-	if (EditorHelper::IsSnappableCursor((tkCursorMode)m_cursorMode)) 
+	if (EditorHelper::IsSnappableCursor((tkCursorMode)m_cursorMode))
 	{
 		tkLayerSelection behavior = EditorHelper::GetSnappingBehavior(_shapeEditor);
 		if (behavior == lsAllLayers || behavior == lsActiveLayer) return true;
@@ -90,20 +89,20 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 	_shapeEditor->get_SnapBehavior(&snapBehavior);
 
 	double projX, projY;
-    VARIANT_BOOL snapped = FindSnapPointCore(x, y, &projX, &projY);
+	VARIANT_BOOL snapped = FindSnapPointCore(x, y, &projX, &projY);
 	if (!snapped) {
 		PixelToProjection(x, y, projX, projY);
 		GetEditorBase()->ClearSnapPoint();
 	}
 	else {
-        double sX, sY;
-        ProjToPixel(projX, projY, &sX, &sY);
-        GetEditorBase()->SetSnapPoint(sX, sY);
-    }
-		
+		double sX, sY;
+		ProjToPixel(projX, projY, &sX, &sY);
+		GetEditorBase()->SetSnapPoint(sX, sY);
+	}
 
-	if ((_dragging.Operation == DragMoveVertex || 
-		 _dragging.Operation == DragMoveShape || 
+
+	if ((_dragging.Operation == DragMoveVertex ||
+		_dragging.Operation == DragMoveShape ||
 		_dragging.Operation == DragMovePart))      // && (nFlags & MK_LBUTTON) && _leftButtonDown
 	{
 		_dragging.Snapped = false;
@@ -116,7 +115,7 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 		// in case of vertex moving underlying data is changed in the process (to update displayed length);
 		// for other types of moving we simply display the shape with offset and modify the data when dragging
 		// has finished, i.e. LButtonMouseUp event
-		if (_dragging.Operation == DragMoveVertex) 
+		if (_dragging.Operation == DragMoveVertex)
 		{
 			EditorBase* edit = GetEditorBase();
 			MeasurePoint* pnt = edit->GetPoint(edit->_selectedVertex);
@@ -138,7 +137,7 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 		_canUseMainBuffer = false;
 		return true;
 	}
-	else 
+	else
 	{
 		EditorBase* base = GetEditorBase();
 		bool handled = false;
@@ -164,12 +163,12 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 			}
 			else {
 				if (base->ClearHighlightedVertex()) {
-					_canUseMainBuffer = false;	
+					_canUseMainBuffer = false;
 					return true;
 				}
 			}
 		}
-		
+
 		// highlighting parts
 		if (behavior == ebPartEditor)	//if (nFlags & MK_CONTROL) {
 		{
@@ -178,7 +177,7 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 				_canUseMainBuffer = false;
 
 			int partIndex = _shapeEditor->GetClosestPart(projX, projY, GetMouseTolerance(ToleranceSelect));
-			if (partIndex != -1) 
+			if (partIndex != -1)
 			{
 				if (base->SetHighlightedPart(partIndex)) {
 					_canUseMainBuffer = false;
@@ -186,7 +185,7 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 				return true;
 			}
 
-			if (base->ClearHighlightedPart()){
+			if (base->ClearHighlightedPart()) {
 				_canUseMainBuffer = false;
 				handled = true;
 			}
@@ -215,7 +214,7 @@ void CMapView::HandleOnLButtonMoveOrRotate(long x, long y)
 	long layerHandle = -1;
 	FireChooseLayer(x, y, &layerHandle);
 	if (layerHandle == -1) return;
-	
+
 	CComPtr<IShapefile> sf = NULL;
 	sf.Attach(GetShapefile(layerHandle));
 	if (sf)
@@ -247,7 +246,7 @@ void CMapView::RegisterGroupOperation(DraggingOperation operation)
 	int layerHandle = _dragging.LayerHandle;
 	CComPtr<IShapefile> source = NULL;
 	source.Attach(GetShapefile(layerHandle));
-	if (source) 
+	if (source)
 	{
 		vector<int>* selection = ShapefileHelper::GetSelectedIndices(source);
 		if (!selection) return;
@@ -259,21 +258,21 @@ void CMapView::RegisterGroupOperation(DraggingOperation operation)
 		}
 
 		bool added = false;
-		switch (operation) 
+		switch (operation)
 		{
-			case DragMoveShapes:
-			{
-				Point2D pnt = GetDraggingProjOffset();
-				added = ((CUndoList*)_undoList)->AddMoveOperation(_dragging.LayerHandle, selection, -pnt.x, -pnt.y);
-				break;
-			}
-			case DragRotateShapes:
-			{
-				double angle = GetDraggingRotationAngle();
-				added = ((CUndoList*)_undoList)->AddRotateOperation(_dragging.LayerHandle, selection, 
-						_dragging.RotateCenter.x, _dragging.RotateCenter.y, angle);
-				break;
-			}
+		case DragMoveShapes:
+		{
+			Point2D pnt = GetDraggingProjOffset();
+			added = ((CUndoList*)_undoList)->AddMoveOperation(_dragging.LayerHandle, selection, -pnt.x, -pnt.y);
+			break;
+		}
+		case DragRotateShapes:
+		{
+			double angle = GetDraggingRotationAngle();
+			added = ((CUndoList*)_undoList)->AddRotateOperation(_dragging.LayerHandle, selection,
+				_dragging.RotateCenter.x, _dragging.RotateCenter.y, angle);
+			break;
+		}
 		}
 		if (!added) delete selection;
 	}
@@ -385,35 +384,35 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 	_shapeEditor->StartUnboundShape((tkCursorMode)m_cursorMode);
 
 	long layerHandle = -1;
-    bool selectingSelectable = false;
-    CComPtr<IShapefile> sf = NULL;
+	bool selectingSelectable = false;
+	CComPtr<IShapefile> sf = NULL;
 
-    FireChooseLayer(0, 0, &layerHandle);
-    // if none specified, consider all 'selectable' layers
-    if (layerHandle == -1)
-    {
-        // only in 'selection' mode is -1 acceptable
-        if (m_cursorMode == cmSelectByPolygon)
-        {
-            // select based on all selectable layers
-            selectingSelectable = true;
-        }
-        else
-        {
-            // any other mode, layerHandle must be specified
-            return;
-        }
-    }
-    else
-    {
-        // single layer specified for selection
-        sf.Attach(GetShapefile(layerHandle));
-        if (!sf)
-        {
-            ErrorMessage(tkINVALID_LAYER_HANDLE);
-            return;
-        }
-    }
+	FireChooseLayer(0, 0, &layerHandle);
+	// if none specified, consider all 'selectable' layers
+	if (layerHandle == -1)
+	{
+		// only in 'selection' mode is -1 acceptable
+		if (m_cursorMode == cmSelectByPolygon)
+		{
+			// select based on all selectable layers
+			selectingSelectable = true;
+		}
+		else
+		{
+			// any other mode, layerHandle must be specified
+			return;
+		}
+	}
+	else
+	{
+		// single layer specified for selection
+		sf.Attach(GetShapefile(layerHandle));
+		if (!sf)
+		{
+			ErrorMessage(tkINVALID_LAYER_HANDLE);
+			return;
+		}
+	}
 
 	bool editing = m_cursorMode == cmSplitByPolyline ||
 		m_cursorMode == cmSplitByPolygon ||
@@ -429,63 +428,63 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 		}
 	}
 
-    if (m_cursorMode == cmSplitByPolyline)
-    {
-        ShpfileType shpType;
-        sf->get_ShapefileType2D(&shpType);
-        if (shpType != SHP_POLYGON && shpType != SHP_POLYLINE)
-        {
-            ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
-            return;
-        }
-    }
+	if (m_cursorMode == cmSplitByPolyline)
+	{
+		ShpfileType shpType;
+		sf->get_ShapefileType2D(&shpType);
+		if (shpType != SHP_POLYGON && shpType != SHP_POLYLINE)
+		{
+			ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+			return;
+		}
+	}
 
 	bool redrawNeeded = false;
 	int errorCode = tkNO_ERROR;
 
 	if (m_cursorMode == cmSelectByPolygon)
 	{
-        // if single layer selection
-        if (sf)
-        {
-            SelectionHelper::SelectByPolygon(sf, shp, errorCode);
-            // selection has (likely) changed for this layer
-            FireSelectionChanged(layerHandle);
-            redrawNeeded = true;
-        }
-        else if (selectingSelectable)
-        {
-            // iterate all layers
-            for (int layerPosition = 0; layerPosition < GetNumLayers(); layerPosition++)
-            {
+		// if single layer selection
+		if (sf)
+		{
+			SelectionHelper::SelectByPolygon(sf, shp, errorCode);
+			// selection has (likely) changed for this layer
+			FireSelectionChanged(layerHandle);
+			redrawNeeded = true;
+		}
+		else if (selectingSelectable)
+		{
+			// iterate all layers
+			for (int layerPosition = 0; layerPosition < GetNumLayers(); layerPosition++)
+			{
 				layerHandle = GetLayerHandle(layerPosition);
-                sf.Attach(GetShapefile(layerHandle));
-                if (sf)
-                {
-                    // is layer selectable?
-                    VARIANT_BOOL isSelectable = VARIANT_FALSE;
-                    sf->get_Selectable(&isSelectable);
-                    if (isSelectable == VARIANT_TRUE)
-                    {
-                        int tempError = tkNO_ERROR;
-                        SelectionHelper::SelectByPolygon(sf, shp, tempError);
-                        // save error code if any layer returns an error
-                        if (tempError != tkNO_ERROR) errorCode = tempError;
-                        // selection has changed for this layer
-                        FireSelectionChanged(layerHandle);
-                        redrawNeeded = true;
-                    }
-                }
-            }
-        }
-    }
+				sf.Attach(GetShapefile(layerHandle));
+				if (sf)
+				{
+					// is layer selectable?
+					VARIANT_BOOL isSelectable = VARIANT_FALSE;
+					sf->get_Selectable(&isSelectable);
+					if (isSelectable == VARIANT_TRUE)
+					{
+						int tempError = tkNO_ERROR;
+						SelectionHelper::SelectByPolygon(sf, shp, tempError);
+						// save error code if any layer returns an error
+						if (tempError != tkNO_ERROR) errorCode = tempError;
+						// selection has changed for this layer
+						FireSelectionChanged(layerHandle);
+						redrawNeeded = true;
+					}
+				}
+			}
+		}
+	}
 	else
-    {
+	{
 		redrawNeeded = GroupOperation::Run((tkCursorMode)m_cursorMode, layerHandle, sf, shp, _undoList, errorCode);
 	}
 
 	if (errorCode != tkNO_ERROR)
-    {
+	{
 		ErrorMessage(errorCode);
 	}
 
@@ -502,7 +501,7 @@ VARIANT_BOOL CMapView::StartNewBoundShape(DOUBLE x, DOUBLE y)
 	{
 		long layerHandle = -1;
 		FireEvent(eventidChooseLayer, EVENT_PARAM(VTS_R8 VTS_R8 VTS_PI4), x, y, &layerHandle);
-		if (layerHandle == -1) 
+		if (layerHandle == -1)
 			return VARIANT_FALSE;
 		else
 			return StartNewBoundShapeEx(layerHandle);
@@ -513,40 +512,40 @@ VARIANT_BOOL CMapView::StartNewBoundShape(DOUBLE x, DOUBLE y)
 // ***************************************************************
 //	StartNewBoundShape
 // ***************************************************************
-VARIANT_BOOL CMapView::StartNewBoundShapeEx(long LayerHandle)
+VARIANT_BOOL CMapView::StartNewBoundShapeEx(long layerHandle)
 {
 	if (m_cursorMode == cmAddShape && EditorHelper::IsEmpty(_shapeEditor))
 	{
-		if (LayerHandle == -1) return VARIANT_FALSE;
+		if (layerHandle == -1) return VARIANT_FALSE;
 
 		CComPtr<IShapefile> sf = NULL;
-		sf.Attach(GetShapefile(LayerHandle));
+		sf.Attach(GetShapefile(layerHandle));
 		if (!sf) {
 			ErrorMessage(tkINVALID_LAYER_HANDLE);
 			return VARIANT_FALSE;
 		}
 
-        if (!ShapefileHelper::InteractiveEditing(sf))
-        {
-            ErrorMessage(tkNO_INTERACTIVE_EDITING);
-            return VARIANT_FALSE;
-        }
+		if (!ShapefileHelper::InteractiveEditing(sf))
+		{
+			ErrorMessage(tkNO_INTERACTIVE_EDITING);
+			return VARIANT_FALSE;
+		}
 
-        // Get shape type
-        ShpfileType shpType;
-        sf->get_ShapefileType(&shpType);
+		// Get shape type
+		ShpfileType shpType;
+		sf->get_ShapefileType(&shpType);
 
-        // Get drawing options
-        CComPtr<IShapeDrawingOptions> options = NULL;
-        sf->get_DefaultDrawingOptions(&options);
+		// Get drawing options
+		CComPtr<IShapeDrawingOptions> options = NULL;
+		sf->get_DefaultDrawingOptions(&options);
 
-        // Check if this is an OGR layer & try get active shape type
-        CComPtr<IOgrLayer> ogrLayer = NULL;
-        ogrLayer.Attach(GetOgrLayer(LayerHandle));
-        if (ogrLayer != nullptr)
-            ogrLayer->get_ActiveShapeType(&shpType);
+		// Check if this is an OGR layer & try get active shape type
+		CComPtr<IOgrLayer> ogrLayer = NULL;
+		ogrLayer.Attach(GetOgrLayer(layerHandle));
+		if (ogrLayer != nullptr)
+			ogrLayer->get_ActiveShapeType(&shpType);
 
-		Digitizer::StartNewBoundShape(_shapeEditor, shpType, options, LayerHandle);
+		Digitizer::StartNewBoundShape(_shapeEditor, shpType, options, layerHandle);
 		return VARIANT_TRUE;
 	}
 	return VARIANT_TRUE;   // no need to choose

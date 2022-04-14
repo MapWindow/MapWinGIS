@@ -144,13 +144,13 @@ public:
 	STDMETHOD(put_TilesMinZoomOnProjectionMismatch)(int newVal);
 	STDMETHOD(get_TilesMinZoomOnProjectionMismatch)(int* pVal);
 	STDMETHOD(get_ImageUpsamplingMode)(tkInterpolationMode* newVal);
-	STDMETHOD(put_ImageUpsamplingMode)(tkInterpolationMode pVal);
+	STDMETHOD(put_ImageUpsamplingMode)(tkInterpolationMode newVal);
 	STDMETHOD(get_ImageDownsamplingMode)(tkInterpolationMode* newVal);
-	STDMETHOD(put_ImageDownsamplingMode)(tkInterpolationMode pVal);
+	STDMETHOD(put_ImageDownsamplingMode)(tkInterpolationMode newVal);
 	STDMETHOD(get_GridUpsamplingMode)(tkInterpolationMode* newVal);
-	STDMETHOD(put_GridUpsamplingMode)(tkInterpolationMode pVal);
+	STDMETHOD(put_GridUpsamplingMode)(tkInterpolationMode newVal);
 	STDMETHOD(get_GridDownsamplingMode)(tkInterpolationMode* newVal);
-	STDMETHOD(put_GridDownsamplingMode)(tkInterpolationMode pVal);
+	STDMETHOD(put_GridDownsamplingMode)(tkInterpolationMode newVal);
 
 	STDMETHOD(get_OgrStringEncoding)(tkOgrEncoding* newVal);
 	STDMETHOD(put_OgrStringEncoding)(tkOgrEncoding pVal);
@@ -189,11 +189,13 @@ public:
 	STDMETHOD(put_GdalPluginPath)(BSTR newVal);
 	STDMETHOD(get_GdalDataPath)(BSTR* pVal);
 	STDMETHOD(put_GdalDataPath)(BSTR newVal);
-	
+	STDMETHOD(get_ProjPath)(BSTR* pVal);
+	STDMETHOD(put_ProjPath)(BSTR newVal);
+
 	// Tiles:
 	STDMETHOD(get_BingApiKey)(BSTR* pVal);
 	STDMETHOD(put_BingApiKey)(BSTR newVal);
-	STDMETHOD(TestBingApiKey)(BSTR key, VARIANT_BOOL* retVal);
+	STDMETHOD(TestBingApiKey)(BSTR apiKey, VARIANT_BOOL* retVal);
 	STDMETHOD(SetHereMapsApiKey)(BSTR appId, BSTR appCode);
 	STDMETHOD(SetHttpUserAgent)(BSTR userAgent);
 	STDMETHOD(StartLogTileRequests)(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal);
@@ -201,7 +203,7 @@ public:
 	STDMETHOD(get_TileLogFilename)(BSTR* retVal);	
 	STDMETHOD(get_TileLogIsOpened)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_LogTileErrorsOnly)(VARIANT_BOOL* retVal);
-	STDMETHOD(put_LogTileErrorsOnly)(VARIANT_BOOL pVal);
+	STDMETHOD(put_LogTileErrorsOnly)(VARIANT_BOOL newVal);
 	STDMETHOD(get_WmsDiskCaching)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_WmsDiskCaching)(VARIANT_BOOL newVal);
 

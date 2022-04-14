@@ -51,21 +51,21 @@ public:
 	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
-	STDMETHOD(get_IsSupportedBy)(BSTR Filename, tkSupportType supportType, VARIANT_BOOL* retVal);
-	STDMETHOD(get_IsSupported)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(get_IsRgbImage)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(get_IsGrid)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(get_IsVectorLayer)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(get_OpenStrategy)(BSTR Filename, tkFileOpenStrategy* retVal);
-	STDMETHOD(get_CanOpenAs)(BSTR Filename, tkFileOpenStrategy strategy, VARIANT_BOOL* retVal);
-	STDMETHOD(get_HasProjection)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(get_GeoProjection)(BSTR Filename, IGeoProjection** retVal);
-	STDMETHOD(get_IsSameProjection)(BSTR Filename, IGeoProjection* projection, VARIANT_BOOL* retVal);
-	STDMETHOD(Open)(BSTR Filename, tkFileOpenStrategy openStrategy, ICallback* callback, IDispatch** retVal);
-	STDMETHOD(OpenShapefile)(BSTR Filename, ICallback* callback, IShapefile** retVal);
-	STDMETHOD(OpenRaster)(BSTR Filename, tkFileOpenStrategy openStrategy, ICallback* callback, IImage** retVal);
-	STDMETHOD(DeleteDatasource)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
+	STDMETHOD(get_IsSupportedBy)(BSTR filename, tkSupportType supportType, VARIANT_BOOL* retVal);
+	STDMETHOD(get_IsSupported)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_IsRgbImage)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_IsGrid)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_IsVectorLayer)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_OpenStrategy)(BSTR filename, tkFileOpenStrategy* retVal);
+	STDMETHOD(get_CanOpenAs)(BSTR filename, tkFileOpenStrategy strategy, VARIANT_BOOL* retVal);
+	STDMETHOD(get_HasProjection)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_GeoProjection)(BSTR filename, IGeoProjection** retVal);
+	STDMETHOD(get_IsSameProjection)(BSTR filename, IGeoProjection* projection, VARIANT_BOOL* retVal);
+	STDMETHOD(Open)(BSTR filename, tkFileOpenStrategy openStrategy, ICallback* callback, IDispatch** retVal);
+	STDMETHOD(OpenShapefile)(BSTR filename, ICallback* callback, IShapefile** retVal);
+	STDMETHOD(OpenRaster)(BSTR filename, tkFileOpenStrategy openStrategy, ICallback* callback, IImage** retVal);
+	STDMETHOD(DeleteDatasource)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_ErrorMsg)(/*[in]*/ long errorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
@@ -74,15 +74,15 @@ public:
 	STDMETHOD(get_LastOpenStrategy)(tkFileOpenStrategy* retVal);
 	STDMETHOD(get_LastOpenFilename)(BSTR* retVal);
 	STDMETHOD(get_LastOpenIsSuccess)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_HasGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(ClearGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(BuildGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(get_NeedsGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(RemoveProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(get_HasValidProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_HasGdalOverviews)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(ClearGdalOverviews)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(BuildGdalOverviews)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_NeedsGdalOverviews)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(RemoveProxyForGrid)(BSTR filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_HasValidProxyForGrid)(BSTR filename, VARIANT_BOOL* retVal);
 	STDMETHOD(OpenFromDatabase)(BSTR connectionString, BSTR layerNameOrQuery, IOgrLayer** retVal);
-	STDMETHOD(OpenVectorLayer)(BSTR Filename, ShpfileType preferedShapeType, VARIANT_BOOL forUpdate, IOgrLayer** retVal);
-	STDMETHOD(OpenVectorDatasource)(BSTR Filename, IOgrDatasource** retVal);
+	STDMETHOD(OpenVectorLayer)(BSTR filename, ShpfileType preferedShapeType, VARIANT_BOOL forUpdate, IOgrLayer** retVal);
+	STDMETHOD(OpenVectorDatasource)(BSTR filename, IOgrDatasource** retVal);
 	STDMETHOD(get_CdlgFilter)(BSTR* pVal);
 	STDMETHOD(get_CdlgRasterFilter)(BSTR* pVal);
 	STDMETHOD(get_CdlgVectorFilter)(BSTR* pVal);
@@ -98,8 +98,8 @@ private:
 	BSTR _key;
 
 private:
-	tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename);
-	void ErrorMessage(long ErrorCode);
+	tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR filename);
+	void ErrorMessage(long errorCode);
 	bool IsShapefile(CStringW filename);
 	CString GetFilter(OpenFileDialogFilter filter);
 	

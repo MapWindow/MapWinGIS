@@ -28,7 +28,7 @@
 class CShapeWrapperEmpty: public IShapeWrapper
 {
 public:
-	ShapeWrapperType get_WrapperType() { return swtEmpty; }
+	ShapeWrapperType get_WrapperType() { return ShapeWrapperType::swtEmpty; }
 
 	int get_ContentLength() { return ShapeUtility::get_ContentLength(SHP_NULLSHAPE, 0, 0); }
 	int get_PointCount(){ return 0; }
@@ -36,7 +36,7 @@ public:
 
 	// shpData
 	bool put_RawData(char* shapeData, int recordLength) { return false; }
-	int* get_ShapeData(void) {return NULL; } 
+	int* get_ShapeData(void) {return nullptr; } 
 	
 	// type
 	ShpfileType get_ShapeType(void) { return SHP_NULLSHAPE; }

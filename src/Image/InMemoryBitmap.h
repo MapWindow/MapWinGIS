@@ -19,7 +19,7 @@
  * (Open source contributors should list themselves and their modifications here). */
   // lsu 21 aug 2011 - created the file
 
-#pragma once;
+#pragma once
 #include "base64.h"
 
 // A wrapper for GDI+ bitmap located in the global heap

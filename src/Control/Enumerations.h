@@ -1,3 +1,4 @@
+// ReSharper disable CppInconsistentNaming
 # ifndef ENUMERATIONS_H
 # define ENUMERATIONS_H
 
@@ -38,7 +39,7 @@ enum tkSimpleShapeType
     shpMultiPoint = 4,
 };
 
-enum tkExtentsRelation
+enum class tkExtentsRelation
 {
 	erNone = 0,
 	erEqual = 1,
@@ -108,7 +109,7 @@ enum HandleImage
 	asFloatOrInt=2   // int32 or float
 };
 
-enum ShapeValidityCheck
+enum class ShapeValidityCheck
 {
 	NoPoints = 0,
 	NotEnoughPoints = 1,
@@ -185,7 +186,7 @@ enum TileProjectionState
 	ProjectionCompatible = 2,	// WGS84 map; GMercator server; transformation is still necessary but at least results are guaranteed
 };
 
-enum ShapeInputMode
+enum class ShapeInputMode
 {
 	simMeasuring = 0,
 	simEditing = 1,
@@ -263,6 +264,7 @@ enum GdalPath
 {
 	PathGdalData = 0,
 	PathGdalPlugins =1,
+	PathProjLib = 2
 };
 
 enum BandChannel
@@ -342,7 +344,7 @@ enum tkShapeRecordFlags
 	shpWasRendered = 16,
 };
 
-enum TileHttpContentType
+enum class TileHttpContentType
 {
 	httpUndefined = 0,
 	httpImage = 1,

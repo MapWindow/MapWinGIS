@@ -11,7 +11,10 @@
 #include "geo_normalize.h"
 #include "geovalues.h"
 #include "tiffio.h"
+
+#if GDAL_VERSION_MAJOR < 3
 #include "tiffiop.h"
+#endif
 
 // ReSharper disable CppUseAuto
 
@@ -22,7 +25,7 @@
 //ajp (June 2010)
 IPoint* CMapView::GetBaseProjectionPoint(double rotPixX, double rotPixY)
 {
-	IPoint *curPoint = nullptr;
+	IPoint* curPoint = nullptr;
 	long basePixX = 0, basePixY = 0;
 	double baseProjX = 0, baseProjY = 0;
 
@@ -51,7 +54,7 @@ IPoint* CMapView::GetBaseProjectionPoint(double rotPixX, double rotPixY)
 IExtents* CMapView::GetRotatedExtent()
 {
 	Extent rotExtent;
-	IExtents * box = nullptr;
+	IExtents* box = nullptr;
 
 	rotExtent = _extents;
 	ComHelper::CreateExtents(&box);
@@ -86,7 +89,7 @@ float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 		Layer* l = _allLayers[LayerHandle];
 		if (l->IsImage())
 		{
-			IImage * iimg = nullptr;
+			IImage* iimg = nullptr;
 
 			if (!l->QueryImage(&iimg))
 				return 1.0;
@@ -96,11 +99,11 @@ float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 			iimg->Release(); iimg = nullptr;
 			return static_cast<float>(val);
 		}
-		
+
 		ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 		return 0.0f;
 	}
-	
+
 	ErrorMessage(tkINVALID_LAYER_HANDLE);
 	return 0.0f;
 }
@@ -116,10 +119,10 @@ void CMapView::SetImageLayerPercentTransparent(long LayerHandle, float newValue)
 
 	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
-		Layer * l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[LayerHandle];
 		if (l->IsImage())
 		{
-			IImage * iimg = nullptr;
+			IImage* iimg = nullptr;
 
 			//if( iimg == NULL )	return;
 			if (!l->QueryImage(&iimg))
@@ -138,18 +141,18 @@ void CMapView::SetImageLayerPercentTransparent(long LayerHandle, float newValue)
 //  SetImageLayerColorScheme
 // ***************************************************
 // Will be deprecated
-VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme)
+VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG layerHandle, IDispatch* colorScheme)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (IS_VALID_LAYER(LayerHandle, _allLayers))
+	if (IS_VALID_LAYER(layerHandle, _allLayers))
 	{
 		// redirected to image class for backward compatibility
 		IGridColorScheme* scheme = nullptr;
-		ColorScheme->QueryInterface(IID_IGridColorScheme, (void**)&scheme);
+		colorScheme->QueryInterface(IID_IGridColorScheme, (void**)&scheme);
 		if (scheme)
 		{
-			IImage* img = this->GetImage(LayerHandle);
+			IImage* img = this->GetImage(layerHandle);
 			if (img != nullptr)
 			{
 				img->put_CustomColorScheme(scheme);
@@ -157,22 +160,22 @@ VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* Col
 				scheme->Release();
 				return VARIANT_TRUE;
 			}
-			
+
 			scheme->Release();
 			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 			return VARIANT_FALSE;
 		}
-		
+
 		ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 		return VARIANT_FALSE;
 	}
-	
+
 	ErrorMessage(tkINVALID_LAYER_HANDLE);
 	return VARIANT_FALSE;
 }
 
 // deprecated
-void CMapView::UpdateImage(LONG LayerHandle)
+void CMapView::UpdateImage(LONG layerHandle)
 {
 	ErrorMessage(tkMETHOD_DEPRECATED);
 }
@@ -180,11 +183,11 @@ void CMapView::UpdateImage(LONG LayerHandle)
 // ***************************************************************
 //		LayerIsEmpty()
 // ***************************************************************
-bool CMapView::LayerIsEmpty(long LayerHandle)
+bool CMapView::LayerIsEmpty(long layerHandle)
 {
-	if (IS_VALID_LAYER(LayerHandle, _allLayers))
+	if (IS_VALID_LAYER(layerHandle, _allLayers))
 	{
-		Layer * l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[layerHandle];
 		if (!l) return true;
 		return l->IsEmpty();
 	}
@@ -194,15 +197,15 @@ bool CMapView::LayerIsEmpty(long LayerHandle)
 // ***************************************************************
 //		AdjustLayerExtents()
 // ***************************************************************
-BOOL CMapView::AdjustLayerExtents(long LayerHandle)
+BOOL CMapView::AdjustLayerExtents(long layerHandle)
 {
-	if (IS_VALID_LAYER(LayerHandle, _allLayers))
+	if (IS_VALID_LAYER(layerHandle, _allLayers))
 	{
-		Layer * l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[layerHandle];
 		if (!l->get_Object()) return FALSE;
 		return l->UpdateExtentsFromDatasource() ? TRUE : FALSE;
 	}
-	
+
 	ErrorMessage(tkINVALID_LAYER_HANDLE);
 	return FALSE;
 }
@@ -254,7 +257,7 @@ void CMapView::Resize(long Width, long Height)
 	CSize size;
 	size.cx = pl.x;
 	size.cy = pl.y;
-	CDC *dc = GetDC();
+	CDC* dc = GetDC();
 	dc->HIMETRICtoDP(&size);
 	ReleaseDC(dc);
 
@@ -400,10 +403,10 @@ inline void CMapView::ErrorMessage(long ErrorCode, tkCallbackVerbosity verbosity
 // *************************************************
 //			IsSameProjection()						  
 // *************************************************
-BOOL CMapView::IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b)
+BOOL CMapView::IsSameProjection(LPCTSTR proj4A, LPCTSTR proj4B)
 {
-	ProjectionTools * pt = new ProjectionTools();
-	bool rt = pt->IsSameProjection(proj4_a, proj4_b);
+	ProjectionTools* pt = new ProjectionTools();
+	bool rt = pt->IsSameProjection(proj4A, proj4B);
 	delete pt;
 
 	return (rt ? TRUE : FALSE);
@@ -412,9 +415,9 @@ BOOL CMapView::IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b)
 // *************************************************
 //			IsTIFFGrid()						  
 // *************************************************
-BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
+BOOL CMapView::IsTIFFGrid(LPCTSTR filename)
 {
-	CComBSTR bstrName(Filename);
+	CComBSTR bstrName(filename);
 	VARIANT_BOOL vb;
 	GetUtils()->IsTiffGrid(bstrName, &vb);
 	return vb ? TRUE : FALSE;
@@ -429,7 +432,7 @@ BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
 // Refreshes drawing options for shapes (old implementation), creates
 // or deletes if necessary. If the shape count was changed, the options
 // will be initialize with default values
-void CMapView::AlignShapeLayerAndShapes(Layer * layer)
+void CMapView::AlignShapeLayerAndShapes(Layer* layer)
 {
 	return;
 }
@@ -450,7 +453,7 @@ LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 {
 	if (IS_VALID_LAYER(LayerHandle, _allLayers))
 	{
-		Layer * l = _allLayers[LayerHandle];
+		Layer* l = _allLayers[LayerHandle];
 		if (l->IsShapefile())
 		{
 			return nullptr;	// probably return ShapeDrawingOptions ?

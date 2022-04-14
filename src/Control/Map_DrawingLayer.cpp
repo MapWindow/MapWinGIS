@@ -2,7 +2,6 @@
 // Drawing layer functionality is stored here
 // TODO: this code should be wrapped in a separate class
 
-#pragma once
 #include "stdafx.h"
 #include "Map.h"
 #include "LabelDrawing.h"
@@ -14,7 +13,7 @@ bool CMapView::IsValidDrawList(long listHandle)
 {
 	if (listHandle >= 0 && listHandle < (long)_allDrawLists.size())
 	{
-		return _allDrawLists[listHandle]!=NULL;
+		return _allDrawLists[listHandle] != nullptr;
 	}
 	return false;
 }
@@ -26,7 +25,7 @@ bool CMapView::IsValidDrawList(long listHandle)
 // ***************************************************************
 long CMapView::GetDrawingLabelsOffset(long drawHandle)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
 		ErrorMessage(tkPROPERTY_DEPRECATED);
 		return 0;
@@ -40,7 +39,7 @@ long CMapView::GetDrawingLabelsOffset(long drawHandle)
 // ***************************************************************
 void CMapView::SetDrawingLabelsOffset(long drawHandle, long Offset)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
 		ErrorMessage(tkPROPERTY_DEPRECATED);
 		return;
@@ -53,16 +52,16 @@ void CMapView::SetDrawingLabelsOffset(long drawHandle, long Offset)
 // ***************************************************************
 OLE_COLOR CMapView::GetDrawingLabelsShadowColor(long drawHandle)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
 		OLE_COLOR clr;
 		_allDrawLists[drawHandle]->m_labels->get_HaloColor(&clr);
 		return clr;
 	}
 	else
-	{	
+	{
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
-		return RGB(255,255,255);
+		return RGB(255, 255, 255);
 	}
 }
 
@@ -71,7 +70,7 @@ OLE_COLOR CMapView::GetDrawingLabelsShadowColor(long drawHandle)
 // ***************************************************************
 void CMapView::SetDrawingLabelsShadowColor(long drawHandle, OLE_COLOR color)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
 		_allDrawLists[drawHandle]->m_labels->put_HaloColor(color);
 		OnDrawingLayersChanged();
@@ -85,9 +84,9 @@ void CMapView::SetDrawingLabelsShadowColor(long drawHandle, OLE_COLOR color)
 // ***************************************************************
 void CMapView::SetDrawingLabelsShadow(long drawHandle, BOOL newValue)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
-		_allDrawLists[drawHandle]->m_labels->put_HaloVisible(newValue? VARIANT_TRUE : VARIANT_FALSE);
+		_allDrawLists[drawHandle]->m_labels->put_HaloVisible(newValue ? VARIANT_TRUE : VARIANT_FALSE);
 		OnDrawingLayersChanged();
 	}
 	else
@@ -99,14 +98,14 @@ void CMapView::SetDrawingLabelsShadow(long drawHandle, BOOL newValue)
 // ***************************************************************
 BOOL CMapView::GetDrawingLabelsShadow(long drawHandle)
 {
-	if( IsValidDrawList(drawHandle) )
-	{	
+	if (IsValidDrawList(drawHandle))
+	{
 		VARIANT_BOOL visible;
 		_allDrawLists[drawHandle]->m_labels->get_HaloVisible(&visible);
-		return visible ? TRUE: FALSE;
+		return visible ? TRUE : FALSE;
 	}
 	else
-	{	
+	{
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
 		return FALSE;
 	}
@@ -117,9 +116,9 @@ BOOL CMapView::GetDrawingLabelsShadow(long drawHandle)
 // ***************************************************************
 void CMapView::SetDrawingLabelsScale(long drawHandle, BOOL newValue)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
-		_allDrawLists[drawHandle]->m_labels->put_ScaleLabels(newValue? VARIANT_TRUE : VARIANT_FALSE);
+		_allDrawLists[drawHandle]->m_labels->put_ScaleLabels(newValue ? VARIANT_TRUE : VARIANT_FALSE);
 		OnDrawingLayersChanged();
 	}
 	else
@@ -131,14 +130,14 @@ void CMapView::SetDrawingLabelsScale(long drawHandle, BOOL newValue)
 // ***************************************************************
 BOOL CMapView::GetDrawingLabelsScale(long drawHandle)
 {
-	if( IsValidDrawList(drawHandle) )
-	{	
+	if (IsValidDrawList(drawHandle))
+	{
 		VARIANT_BOOL scale;
 		_allDrawLists[drawHandle]->m_labels->get_ScaleLabels(&scale);
-		return scale ? TRUE: FALSE;
+		return scale ? TRUE : FALSE;
 	}
 	else
-	{	
+	{
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
 		return FALSE;
 	}
@@ -149,14 +148,14 @@ BOOL CMapView::GetDrawingLabelsScale(long drawHandle)
 // ***************************************************************
 BOOL CMapView::GetUseDrawingLabelCollision(long drawHandle)
 {
-	if( IsValidDrawList(drawHandle) )
-	{	
+	if (IsValidDrawList(drawHandle))
+	{
 		VARIANT_BOOL val;
 		_allDrawLists[drawHandle]->m_labels->get_AvoidCollisions(&val);
-		return val ? TRUE: FALSE;
+		return val ? TRUE : FALSE;
 	}
 	else
-	{	
+	{
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
 		return FALSE;
 	}
@@ -167,7 +166,7 @@ BOOL CMapView::GetUseDrawingLabelCollision(long drawHandle)
 // ***************************************************************
 void CMapView::SetUseDrawingLabelCollision(long drawHandle, BOOL bNewValue)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
 		_allDrawLists[drawHandle]->m_labels->put_AvoidCollisions(bNewValue ? VARIANT_TRUE : VARIANT_FALSE);
 		OnDrawingLayersChanged();
@@ -181,14 +180,14 @@ void CMapView::SetUseDrawingLabelCollision(long drawHandle, BOOL bNewValue)
 // ***************************************************************
 BOOL CMapView::GetDrawingLabelsVisible(long drawHandle)
 {
-	if( IsValidDrawList(drawHandle) )
-	{	
+	if (IsValidDrawList(drawHandle))
+	{
 		VARIANT_BOOL visible;
 		_allDrawLists[drawHandle]->m_labels->get_Visible(&visible);
-		return visible ? TRUE: FALSE;
+		return visible ? TRUE : FALSE;
 	}
 	else
-	{	
+	{
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
 		return FALSE;
 	}
@@ -199,7 +198,7 @@ BOOL CMapView::GetDrawingLabelsVisible(long drawHandle)
 // ***************************************************************
 void CMapView::SetDrawingLabelsVisible(long drawHandle, BOOL bNewValue)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
 		_allDrawLists[drawHandle]->m_labels->put_Visible(bNewValue ? VARIANT_TRUE : VARIANT_FALSE);
 		OnDrawingLayersChanged();
@@ -211,10 +210,10 @@ void CMapView::SetDrawingLabelsVisible(long drawHandle, BOOL bNewValue)
 // ***************************************************************
 //		GetDrawingStandardViewWidth()
 // ***************************************************************
-void CMapView::GetDrawingStandardViewWidth(long drawHandle, double * Width)
+void CMapView::GetDrawingStandardViewWidth(long drawHandle, double* Width)
 {
 	*Width = 0.0;
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
 		ErrorMessage(tkPROPERTY_DEPRECATED);
 		return;
@@ -227,7 +226,7 @@ void CMapView::GetDrawingStandardViewWidth(long drawHandle, double * Width)
 // ***************************************************************
 void CMapView::SetDrawingStandardViewWidth(long drawHandle, double Width)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
 		ErrorMessage(tkPROPERTY_DEPRECATED);
 		return;
@@ -249,7 +248,7 @@ bool CMapView::HasDrawLists()
 // ******************************************************************
 //		Draw the DrawLayers
 // ******************************************************************
-void CMapView::DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tkDrawReferenceList listType)
+void CMapView::DrawLists(const CRect& rcBounds, Gdiplus::Graphics* graphics, tkDrawReferenceList listType)
 {
 	// TODO: implement proper collision list for drawing labels; 
 	// frames for drawing labels should be cleared from list while frames from the rest layers should remain 
@@ -257,17 +256,17 @@ void CMapView::DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tk
 	CCollisionList collisionList;
 
 	// label drawer for spatially referenced list
-	CLabelDrawer lblDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, 
-		this->GetCurrentScale(), _currentZoom, &collisionList, _rotateAngle, _isSnapshot );
-	
+	CLabelDrawer lblDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY,
+		this->GetCurrentScale(), _currentZoom, &collisionList, _rotateAngle, _isSnapshot);
+
 	// label drawer for screen referenced list
 	Extent ext(rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom);
-	CLabelDrawer lblDrawerScreen(graphics, &ext, &collisionList, _rotateAngle );
+	CLabelDrawer lblDrawerScreen(graphics, &ext, &collisionList, _rotateAngle);
 
 	std::vector<ILabels*> topLabels;	// labels that should be drawn above all layers
 	std::vector<tkDrawReferenceList> labelsType;
-	
-	for(unsigned int j = 0; j < _activeDrawLists.size(); j++ )
+
+	for (unsigned int j = 0; j < _activeDrawLists.size(); j++)
 	{
 		bool isSkip = false;
 		for (unsigned int i = 0; i < _drawingLayerInvisilbe.size(); i++)
@@ -275,30 +274,30 @@ void CMapView::DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tk
 			if (_drawingLayerInvisilbe[i] == j)
 			{
 				isSkip = true;	// skip if this layer is set invisible
-				break;  
+				break;
 			}
 		}
-		if(isSkip) 
+		if (isSkip)
 		{
 			continue;
 		}
 
-		DrawList * dlist = _allDrawLists[_activeDrawLists[j]];
-		if( IS_VALID_PTR(dlist) )
+		DrawList* dlist = _allDrawLists[_activeDrawLists[j]];
+		if (IS_VALID_PTR(dlist))
 		{
 			if (dlist->listType == listType)
 			{
-                // the main drawing
-				this->DrawDrawing( graphics, dlist);
-				
+				// the main drawing
+				this->DrawDrawing(graphics, dlist);
+
 				// labels
 				ILabels* labels = dlist->m_labels;
-				
-				if(labels )
+
+				if (labels)
 				{
 					tkVerticalPosition vertPos;
 					labels->get_VerticalPosition(&vertPos);
-					if (vertPos == vpAboveParentLayer)		
+					if (vertPos == vpAboveParentLayer)
 					{
 						if (dlist->listType == dlSpatiallyReferencedList)
 						{
@@ -336,8 +335,8 @@ void CMapView::DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tk
 // *****************************************************************
 //		DrawDrawing()
 // *****************************************************************
-void CMapView::DrawDrawing(Gdiplus::Graphics* graphics, DrawList * dlist)
-{	
+void CMapView::DrawDrawing(Gdiplus::Graphics* graphics, DrawList* dlist)
+{
 	bool project = (dlist->listType == dlSpatiallyReferencedList);
 
 	for (auto polygon : dlist->m_dpolygons)
@@ -359,26 +358,26 @@ void CMapView::DrawCircleOnGraphics(Gdiplus::Graphics* graphics, _DrawCircle* ci
 	auto color = Utility::OleColor2GdiPlus(circle->color, circle->alpha);
 	auto radius = (float)circle->radius;
 	if (project)
-		radius *= _pixelPerProjectionX;
+		radius *= static_cast<float>(_pixelPerProjectionX);
 	auto width = (float)circle->width;
 
-	Gdiplus::REAL pixX = (float)circle->x; 
+	Gdiplus::REAL pixX = (float)circle->x;
 	Gdiplus::REAL pixY = (float)circle->y;
 	if (project)
 		PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
 	pixX -= radius;
 	pixY -= radius;
-	
+
 
 	if (circle->fill)
 	{
 		Gdiplus::SolidBrush brush(color);
-		graphics->FillEllipse(&brush, pixX, pixY, radius*2, radius*2);
+		graphics->FillEllipse(&brush, pixX, pixY, radius * 2, radius * 2);
 	}
 	else
 	{
 		Gdiplus::Pen pen(color, width);
-		graphics->DrawEllipse(&pen, pixX, pixY, radius*2, radius*2);
+		graphics->DrawEllipse(&pen, pixX, pixY, radius * 2, radius * 2);
 	}
 }
 
@@ -405,7 +404,7 @@ void CMapView::DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* 
 	}
 
 	if (polygon->fill)
-	{	
+	{
 		Gdiplus::SolidBrush brush(color);
 		graphics->FillPolygon(&brush, pnts, (INT)pointCount);
 	}
@@ -433,7 +432,7 @@ void CMapView::DrawLineOnGraphics(Gdiplus::Graphics* graphics, _DrawLine* line, 
 	auto pixY2 = std::lround(line->y2);
 	if (project)
 		PROJECTION_TO_PIXEL_INT(line->x2, line->y2, pixX2, pixY2);
-	
+
 	Gdiplus::Pen pen(color, width);
 	graphics->DrawLine(&pen, Gdiplus::Point(pixX1, pixY1), Gdiplus::Point(pixX2, pixY2));
 
@@ -475,30 +474,30 @@ void CMapView::OnDrawingLayersChanged()
 // *****************************************************************
 void CMapView::ClearDrawing(long Drawing)
 {
-	if( Drawing == _currentDrawing )
+	if (Drawing == _currentDrawing)
 		_currentDrawing = -1;
 
 	USES_CONVERSION;
 
-	if( IsValidDrawList (Drawing) )
+	if (IsValidDrawList(Drawing))
 	{
 		long endcondition = _activeDrawLists.size();
-		for(int i = 0; i < endcondition; i++ )
-		{	
-			if( _activeDrawLists[i] == Drawing )
-			{	
-				_activeDrawLists.erase( _activeDrawLists.begin() + i );
+		for (int i = 0; i < endcondition; i++)
+		{
+			if (_activeDrawLists[i] == Drawing)
+			{
+				_activeDrawLists.erase(_activeDrawLists.begin() + i);
 				break;
 			}
 		}
-		if( _allDrawLists[Drawing] )
+		if (_allDrawLists[Drawing])
 		{
 			// it's cleared in destructor I think, but I add it here as well t be sure
 			_allDrawLists[Drawing]->m_labels->Clear();
-		
+
 			delete _allDrawLists[Drawing];
 		}
-		_allDrawLists[Drawing] = NULL;
+		_allDrawLists[Drawing] = nullptr;
 
 		OnDrawingLayersChanged();
 	}
@@ -525,7 +524,7 @@ LONG CMapView::DrawLabelEx(LONG drawHandle, LPCTSTR text, DOUBLE x, DOUBLE y, DO
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (IsValidDrawList(drawHandle))
 	{
-		if (_allDrawLists[drawHandle]->m_labels) 
+		if (_allDrawLists[drawHandle]->m_labels)
 		{
 			CComBSTR bstr(text);
 			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, rotation);
@@ -543,8 +542,8 @@ LONG CMapView::DrawLabelEx(LONG drawHandle, LPCTSTR text, DOUBLE x, DOUBLE y, DO
 // *****************************************************************
 void CMapView::AddDrawingLabel(long drawHandle, LPCTSTR Text, OLE_COLOR Color, double x, double y, short hJustification)
 {
-	if( IsValidDrawList (drawHandle) )
-	{	
+	if (IsValidDrawList(drawHandle))
+	{
 		if (_allDrawLists[drawHandle]->m_labels) {
 			CComBSTR bstr(Text);
 			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y);
@@ -560,8 +559,8 @@ void CMapView::AddDrawingLabel(long drawHandle, LPCTSTR Text, OLE_COLOR Color, d
 // *****************************************************************
 void CMapView::AddDrawingLabelEx(long drawHandle, LPCTSTR Text, OLE_COLOR Color, double x, double y, short hJustification, double Rotation)
 {
-	if( IsValidDrawList(drawHandle) )
-	{	
+	if (IsValidDrawList(drawHandle))
+	{
 		if (_allDrawLists[drawHandle]->m_labels) {
 			CComBSTR bstr(Text);
 			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, Rotation);
@@ -577,14 +576,14 @@ void CMapView::AddDrawingLabelEx(long drawHandle, LPCTSTR Text, OLE_COLOR Color,
 // *****************************************************************
 void CMapView::ClearDrawingLabels(long drawHandle)
 {
-	if( IsValidDrawList(drawHandle) )
-	{	
+	if (IsValidDrawList(drawHandle))
+	{
 		_allDrawLists[drawHandle]->m_labels->Clear();
 		OnDrawingLayersChanged();
 	}
 	else
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
-	
+
 }
 
 // *****************************************************************
@@ -592,9 +591,9 @@ void CMapView::ClearDrawingLabels(long drawHandle)
 // *****************************************************************
 void CMapView::DrawingFont(long drawHandle, LPCTSTR FontName, long FontSize)
 {
-	if( IsValidDrawList(drawHandle) )
+	if (IsValidDrawList(drawHandle))
 	{
-		DrawList * dlist = _allDrawLists[drawHandle];
+		DrawList* dlist = _allDrawLists[drawHandle];
 		CComBSTR bstr(FontName);
 		dlist->m_labels->put_FontName(bstr);
 		dlist->m_labels->put_FontSize(FontSize);
@@ -608,13 +607,13 @@ void CMapView::DrawingFont(long drawHandle, LPCTSTR FontName, long FontSize)
 //		ClearDrawings()
 // *****************************************************************
 void CMapView::ClearDrawings()
-{	
+{
 	_currentDrawing = -1;
 
 	long endcondition = _allDrawLists.size();
-	for(int i = 0; i < endcondition; i++ )
-	{	
-		if( IsValidDrawList(i) )
+	for (int i = 0; i < endcondition; i++)
+	{
+		if (IsValidDrawList(i))
 			ClearDrawing(i);
 	}
 	_allDrawLists.clear();
@@ -625,31 +624,31 @@ void CMapView::ClearDrawings()
 // *****************************************************************
 //		NewDrawing()
 // *****************************************************************
-long CMapView::NewDrawing(short Projection)
+long CMapView::NewDrawing(short projection)
 {
-	DrawList * dlist = new DrawList();
-	dlist->listType = (tkDrawReferenceList)Projection;
+	DrawList* dlist = new DrawList();
+	dlist->listType = (tkDrawReferenceList)projection;
 	bool inserted = false;
-	long drawHandle =  - 1;
+	long drawHandle = -1;
 	register int i;
 
 	long endcondition = _allDrawLists.size();
-	for( i = 0; i < endcondition && !inserted; i++ )
-	{	
-		if( _allDrawLists[i] == NULL )
-		{	
+	for (i = 0; i < endcondition && !inserted; i++)
+	{
+		if (_allDrawLists[i] == nullptr)
+		{
 			drawHandle = i;
 			_allDrawLists[i] = dlist;
 			inserted = true;
 		}
 	}
-	if( inserted == false )
-	{	
+	if (inserted == false)
+	{
 		drawHandle = _allDrawLists.size();
 		_allDrawLists.push_back(dlist);
 	}
 
-	_activeDrawLists.push_back( drawHandle );
+	_activeDrawLists.push_back(drawHandle);
 	_currentDrawing = drawHandle;
 	return drawHandle;
 }
@@ -659,10 +658,10 @@ long CMapView::NewDrawing(short Projection)
 // *****************************************************************
 void CMapView::DrawPoint(double x, double y, long size, OLE_COLOR color, BYTE alpha)
 {
-	if( IsValidDrawList(_currentDrawing) )
-	{	
-		DrawList * dlist = _allDrawLists[_currentDrawing];
-		_DrawPoint * dp = new _DrawPoint;
+	if (IsValidDrawList(_currentDrawing))
+	{
+		DrawList* dlist = _allDrawLists[_currentDrawing];
+		_DrawPoint* dp = new _DrawPoint;
 		dp->x = x;
 		dp->y = y;
 		dp->size = size;
@@ -680,10 +679,10 @@ void CMapView::DrawPoint(double x, double y, long size, OLE_COLOR color, BYTE al
 // *****************************************************************
 void CMapView::DrawLine(double x1, double y1, double x2, double y2, long width, OLE_COLOR color, BYTE alpha)
 {
-	if( IsValidDrawList(_currentDrawing) )
-	{	
-		DrawList * dlist = _allDrawLists[_currentDrawing];
-		_DrawLine * dl = new _DrawLine;
+	if (IsValidDrawList(_currentDrawing))
+	{
+		DrawList* dlist = _allDrawLists[_currentDrawing];
+		_DrawLine* dl = new _DrawLine;
 		dl->x1 = x1;
 		dl->x2 = x2;
 		dl->y1 = y1;
@@ -703,10 +702,10 @@ void CMapView::DrawLine(double x1, double y1, double x2, double y2, long width, 
 // *****************************************************************
 void CMapView::DrawCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, BYTE alpha)
 {
-	if( IsValidDrawList(_currentDrawing) )
-	{	
-		DrawList * dlist = _allDrawLists[_currentDrawing];
-		_DrawCircle * dc = new _DrawCircle;
+	if (IsValidDrawList(_currentDrawing))
+	{
+		DrawList* dlist = _allDrawLists[_currentDrawing];
+		_DrawCircle* dc = new _DrawCircle;
 		dc->x = x;
 		dc->y = y;
 		dc->radius = radius;
@@ -728,10 +727,10 @@ void CMapView::DrawWideCircle(double x, double y, double radius, OLE_COLOR color
 {
 	USES_CONVERSION;
 
-	if( IsValidDrawList(_currentDrawing) )
-	{	
-		DrawList * dlist = _allDrawLists[_currentDrawing];
-		_DrawCircle * dc = new _DrawCircle;
+	if (IsValidDrawList(_currentDrawing))
+	{
+		DrawList* dlist = _allDrawLists[_currentDrawing];
+		_DrawCircle* dc = new _DrawCircle;
 		dc->x = x;
 		dc->y = y;
 		dc->radius = radius;
@@ -749,24 +748,26 @@ void CMapView::DrawWideCircle(double x, double y, double radius, OLE_COLOR color
 // *****************************************************************
 //		DrawPolygon()
 // *****************************************************************
-void CMapView::DrawPolygon(VARIANT *xPoints,VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, BYTE alpha)
+void CMapView::DrawPolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoints, OLE_COLOR color, BOOL fill, BYTE alpha)
 {
 	USES_CONVERSION;
-	SAFEARRAY *sax = *xPoints->pparray;
-	SAFEARRAY *say = *yPoints->pparray;
-	double *xPts = (double *)sax->pvData;
-	double *yPts =(double*)say->pvData;
+	SAFEARRAY* sax = *xPoints->pparray;
+	SAFEARRAY* say = *yPoints->pparray;
+	double* xPts = (double*)sax->pvData;
+	double* yPts = (double*)say->pvData;
 
-	if( IsValidDrawList( _currentDrawing) )
-	{	
-		DrawList * dlist = _allDrawLists[_currentDrawing];
-		_DrawPolygon * dp = new _DrawPolygon();
-		if( numPoints )
-		{	dp->xpnts = new double[numPoints];
+	if (IsValidDrawList(_currentDrawing))
+	{
+		DrawList* dlist = _allDrawLists[_currentDrawing];
+		_DrawPolygon* dp = new _DrawPolygon();
+		if (numPoints)
+		{
+			dp->xpnts = new double[numPoints];
 			dp->ypnts = new double[numPoints];
 			register int i;
-			for( i = 0; i < numPoints; i++ )
-			{	dp->xpnts[i] = xPts[i];
+			for (i = 0; i < numPoints; i++)
+			{
+				dp->xpnts[i] = xPts[i];
 				dp->ypnts[i] = yPts[i];
 			}
 		}
@@ -776,7 +777,7 @@ void CMapView::DrawPolygon(VARIANT *xPoints,VARIANT *yPoints, long numPoints, OL
 		dp->fill = (fill == TRUE);
 		dp->width = 1;
 		dlist->m_dpolygons.push_back(dp);
-    
+
 		OnDrawingLayersChanged();
 	}
 	else
@@ -786,24 +787,26 @@ void CMapView::DrawPolygon(VARIANT *xPoints,VARIANT *yPoints, long numPoints, OL
 // ***********************************************************
 //	  DrawWidePolygon()
 // ***********************************************************
-void CMapView::DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, short Width, BYTE alpha)
+void CMapView::DrawWidePolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoints, OLE_COLOR color, BOOL fill, short width, BYTE alpha)
 {
 	USES_CONVERSION;
-	SAFEARRAY *sax = *xPoints->pparray;
-	SAFEARRAY *say = *yPoints->pparray;
-	double *xPts = (double *)sax->pvData;
-	double *yPts =(double*)say->pvData;
+	SAFEARRAY* sax = *xPoints->pparray;
+	SAFEARRAY* say = *yPoints->pparray;
+	double* xPts = (double*)sax->pvData;
+	double* yPts = (double*)say->pvData;
 
-	if( IsValidDrawList(_currentDrawing) )
-	{	
-		DrawList * dlist = _allDrawLists[_currentDrawing];
-		_DrawPolygon * dp = new _DrawPolygon();
-		if( numPoints )
-		{	dp->xpnts = new double[numPoints];
+	if (IsValidDrawList(_currentDrawing))
+	{
+		DrawList* dlist = _allDrawLists[_currentDrawing];
+		_DrawPolygon* dp = new _DrawPolygon();
+		if (numPoints)
+		{
+			dp->xpnts = new double[numPoints];
 			dp->ypnts = new double[numPoints];
 			register int i;
-			for( i = 0; i < numPoints; i++ )
-			{	dp->xpnts[i] = xPts[i];
+			for (i = 0; i < numPoints; i++)
+			{
+				dp->xpnts[i] = xPts[i];
 				dp->ypnts[i] = yPts[i];
 			}
 		}
@@ -811,7 +814,7 @@ void CMapView::DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoint
 		dp->color = color;
 		dp->alpha = alpha;
 		dp->fill = (fill == TRUE);
-		dp->width = Width;
+		dp->width = width;
 		dlist->m_dpolygons.push_back(dp);
 		OnDrawingLayersChanged();
 	}
@@ -822,24 +825,24 @@ void CMapView::DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoint
 // *****************************************************************
 //		DrawWideCircleEx()
 // *****************************************************************
-void CMapView::DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, BYTE alpha)
+void CMapView::DrawWideCircleEx(LONG layerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short outlineWidth, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	long oldCurrentLayer = this->_currentDrawing;	//Save the current layer for restore
-	this->_currentDrawing = LayerHandle;
-	this->DrawWideCircle(x, y, radius,color,fill, OutlineWidth, alpha);
+	this->_currentDrawing = layerHandle;
+	this->DrawWideCircle(x, y, radius, color, fill, outlineWidth, alpha);
 	this->_currentDrawing = oldCurrentLayer;		// restore current layer
 }
 
 // ***********************************************************
 //	  DrawWidePolygonEx()
 // ***********************************************************
-void CMapView::DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth, BYTE alpha)
+void CMapView::DrawWidePolygonEx(LONG layerHandle, VARIANT* xPoints, VARIANT* yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short outlineWidth, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	long oldCurrentLayer = this->_currentDrawing;	//Save the current layer for restore
-	this->_currentDrawing = LayerHandle;
-	this->DrawWidePolygon(xPoints,yPoints,numPoints,color,fill, OutlineWidth, alpha);
+	this->_currentDrawing = layerHandle;
+	this->DrawWidePolygon(xPoints, yPoints, numPoints, color, fill, outlineWidth, alpha);
 	this->_currentDrawing = oldCurrentLayer;		// restore current layer
 }
 
@@ -860,13 +863,13 @@ void CMapView::DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOU
 // *****************************************************************
 //		DrawPointEx()
 // *****************************************************************
-void CMapView::DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color, BYTE alpha)
+void CMapView::DrawPointEx(LONG layerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
-	this->_currentDrawing = LayerHandle;
-	this->DrawPoint(x,y,pixelSize,color, alpha);
+	this->_currentDrawing = layerHandle;
+	this->DrawPoint(x, y, pixelSize, color, alpha);
 	this->_currentDrawing = oldCurrentLayer; // restore current layer
 
 }
@@ -874,45 +877,45 @@ void CMapView::DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize,
 // *****************************************************************
 //		DrawCircleEx()
 // *****************************************************************
-void CMapView::DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, BYTE alpha)
+void CMapView::DrawCircleEx(LONG layerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
-	this->_currentDrawing = LayerHandle;
-	this->DrawCircle(x,y,pixelRadius,color,fill, alpha);
+	this->_currentDrawing = layerHandle;
+	this->DrawCircle(x, y, pixelRadius, color, fill, alpha);
 	this->_currentDrawing = oldCurrentLayer; // restore current layer
 }
 
 // *****************************************************************
 //		DrawPolygonEx()
 // *****************************************************************
-void CMapView::DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill, BYTE alpha)
+void CMapView::DrawPolygonEx(LONG layerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill, BYTE alpha)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
-	this->_currentDrawing = LayerHandle;
-	this->DrawPolygon(xPoints,yPoints,numPoints,color,fill, alpha);
+	this->_currentDrawing = layerHandle;
+	this->DrawPolygon(xPoints, yPoints, numPoints, color, fill, alpha);
 	this->_currentDrawing = oldCurrentLayer; // restore current layer
 }
 
 // *****************************************************************
 //		SetDrawingLayerVisible()
 // *****************************************************************
-void CMapView::SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible)
+void CMapView::SetDrawingLayerVisible(LONG layerHandle, VARIANT_BOOL visible)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if(!Visible)
+	if (!visible)
 	{
 		for (unsigned int i = 0; i < _drawingLayerInvisilbe.size(); i++)
 		{
-			if (_drawingLayerInvisilbe[i] == LayerHandle)
+			if (_drawingLayerInvisilbe[i] == layerHandle)
 				break;
 		}
 		//Put the layer into invisible list
-		_drawingLayerInvisilbe.push_back(LayerHandle); 
+		_drawingLayerInvisilbe.push_back(layerHandle);
 
 		OnDrawingLayersChanged();
 	}
@@ -920,10 +923,10 @@ void CMapView::SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible)
 	{
 		for (unsigned int i = 0; i < _drawingLayerInvisilbe.size(); i++)
 		{
-			if (_drawingLayerInvisilbe[i] == LayerHandle)
+			if (_drawingLayerInvisilbe[i] == layerHandle)
 			{
 				//Release the layer from invisible list
-				_drawingLayerInvisilbe.erase(_drawingLayerInvisilbe.begin() + i); 
+				_drawingLayerInvisilbe.erase(_drawingLayerInvisilbe.begin() + i);
 				break;
 			}
 		}
@@ -936,12 +939,12 @@ void CMapView::SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible)
 // *****************************************************************
 BSTR CMapView::GetDrawingKey(long DrawHandle)
 {
-	if( IsValidDrawList(DrawHandle) )
-	{	
-		return OLE2BSTR( _allDrawLists[DrawHandle]->key );
+	if (IsValidDrawList(DrawHandle))
+	{
+		return OLE2BSTR(_allDrawLists[DrawHandle]->key);
 	}
 	else
-	{	
+	{
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
 		CString result;
 		return result.AllocSysString();
@@ -953,8 +956,8 @@ BSTR CMapView::GetDrawingKey(long DrawHandle)
 // *****************************************************************
 void CMapView::SetDrawingKey(long DrawHandle, LPCTSTR lpszNewValue)
 {
-	if( IsValidDrawList (DrawHandle) )
-	{	
+	if (IsValidDrawList(DrawHandle))
+	{
 		::SysFreeString(_allDrawLists[DrawHandle]->key);
 		_allDrawLists[DrawHandle]->key = A2BSTR(lpszNewValue);
 	}
@@ -969,17 +972,17 @@ void CMapView::SetDrawingKey(long DrawHandle, LPCTSTR lpszNewValue)
 ILabels* CMapView::GetDrawingLabels(long DrawingLayerIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if( IsValidDrawList(DrawingLayerIndex))
-	{	
+	if (IsValidDrawList(DrawingLayerIndex))
+	{
 		_allDrawLists[DrawingLayerIndex]->m_labels->AddRef();
 		return _allDrawLists[DrawingLayerIndex]->m_labels;
 	}
 	else
-	{	
+	{
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
-		return FALSE;
+		return nullptr;
 	}
-	return  NULL;
+	return nullptr;
 }
 
 // **********************************************************
@@ -989,14 +992,14 @@ ILabels* CMapView::GetDrawingLabels(long DrawingLayerIndex)
 void CMapView::SetDrawingLabels(long DrawingLayerIndex, ILabels* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if( newVal == NULL )
-	{	
+	if (newVal == nullptr)
+	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return;
 	}
-	
-	if( IsValidDrawList(DrawingLayerIndex))
-	{	
+
+	if (IsValidDrawList(DrawingLayerIndex))
+	{
 		ComHelper::SetRef((IDispatch*)newVal, (IDispatch**)&_allDrawLists[DrawingLayerIndex]->m_labels, false);
 	}
 	else

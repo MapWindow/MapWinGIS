@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography;
 using MapWinGISTests;
 
 namespace ConsoleApplication1
@@ -43,7 +44,7 @@ namespace ConsoleApplication1
             //var t = new PostGisTest();
             //t.ReadAttributesFromPostGISLayer();
 
-            //var t = new ShapefileTests();
+            var t = new ShapefileTests();
             //t.TableQueryTest();
             //t.ImportExportWKT();
             //t.ShapefileDataTest();
@@ -55,6 +56,8 @@ namespace ConsoleApplication1
             //t.TestPointInPolygonWithHole();
             //t.TestPointInMultiPolygon();
             //t.TestPointInLotsOfPolygons();
+            //t.SpatialIndexTest();
+            t.OpenShapefile();
 
             //var t = new NewSfMethodsTests();
             //t.DifferenceTest2();
@@ -93,8 +96,12 @@ namespace ConsoleApplication1
             //var t = new TilesTests();
             //t.PrefetchToFolderDutchOSM();
 
-            var t = new OgrDatasourceTests();
-            t.GenerateEmptyWKT();
+            //var t = new OgrDatasourceTests();
+            //t.GenerateEmptyWKT();
+
+            //var t = new GeoProjectionTest();
+            //t.ImportFromEsriTest();
+            //t.ImportFromFile();
 
             Console.WriteLine("Finished");
             Console.ReadLine();

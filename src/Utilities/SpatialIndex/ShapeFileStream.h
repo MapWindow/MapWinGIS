@@ -43,68 +43,68 @@ using namespace SpatialIndex;
 class ShapeFileStream : public IDataStream
 {
 public:
-	ShapeFileStream(string shapeFile) : m_pShpNext(0), m_pIdxNext(0)
-    {
+	ShapeFileStream(string shapeFile) : m_pShpNext(nullptr), m_pIdxNext(nullptr)
+	{
 		idxID = -1;
 		idxOffset = -1;
 		idxLength = -1;
 		SHXIdxLen = -1;
 
-		string sShpFile = std::string(shapeFile) + ".shp";
-		string sShpIdxFile = std::string(shapeFile) + ".shx";
+		const string sShpFile = std::string(shapeFile) + ".shp";
+		const string sShpIdxFile = std::string(shapeFile) + ".shx";
 
-		m_ShpIdx.open(sShpIdxFile.c_str(),ios_base::in | ios_base::binary);
-		m_ShpFile.open(sShpFile.c_str(),ios_base::in | ios_base::binary);
+		m_ShpIdx.open(sShpIdxFile.c_str(), ios_base::in | ios_base::binary);
+		m_ShpFile.open(sShpFile.c_str(), ios_base::in | ios_base::binary);
 
-		if (! m_ShpIdx || !m_ShpFile)
+		if (!m_ShpIdx || !m_ShpFile)
 			throw "Input file not found.";
 
-		readSHXFile(-1);
+		ReadShxFile(-1);
 
 		if (!m_ShpIdx.good() || !m_ShpFile.good())
-        {
+		{
 			throw Tools::IllegalStateException("Input file not found.");
-        }
-     }
+		}
+	}
 
-	 virtual ~ShapeFileStream()
-	 {
-		if (m_pShpNext != 0)
-        delete m_pShpNext;
-	 }
+	virtual ~ShapeFileStream()
+	{
+		if (m_pShpNext != nullptr)
+			delete m_pShpNext;
+	}
 
-	 virtual IData* getNext();
-	 virtual IData* getNextShapeRecord();
-     virtual IData* getExact(int index);
-	 virtual bool hasNext() throw (Tools::NotSupportedException)
-	 {
-		return (m_pShpNext != 0);
-	 }
+	virtual IData* getNext();
+	virtual IData* GetNextShapeRecord();
+	virtual IData* GetExact(int index);
+	virtual bool hasNext() throw (Tools::NotSupportedException)
+	{
+		return m_pShpNext != nullptr;
+	}
 
-	 virtual uint32_t size() throw (Tools::NotSupportedException)
-	 {
+	virtual uint32_t size() throw (Tools::NotSupportedException)
+	{
 		throw Tools::NotSupportedException("Operation not supported.");
-  	 }
+	}
 
-	 virtual void rewind() throw (Tools::NotSupportedException)
-  	 {
+	virtual void rewind() throw (Tools::NotSupportedException)
+	{
 		throw Tools::NotSupportedException("Operation not supported.");
-	 }
+	}
 
-	  std::ifstream m_ShpIdx, m_ShpFile;
-	  RTree::Data* m_pShpNext;
+	std::ifstream m_ShpIdx, m_ShpFile;
+	RTree::Data* m_pShpNext;
 
-  private:
-    void readSHXFile(int recordID);
-    void readSHPFile(void);
-    void readSHXFileHeader(void);
-    void readSHPFileHeader(void);
-    inline void swapEndian(char* a,int size);
+private:
+	void ReadShxFile(int recordId);
+	void ReadShpFile(void);
+	void ReadShxFileHeader(void);
+	void ReadShpFileHeader(void);
+	static inline void SwapEndian(char* a, int size);
 
-	  RTree::Data* m_pIdxNext;
+	RTree::Data* m_pIdxNext;
 
-    int idxID;
-    int idxOffset;
-    int idxLength;
+	int idxID;
+	int idxOffset;
+	int idxLength;
 	streamoff SHXIdxLen;
 };

@@ -23,10 +23,15 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //
-#include "stdafx.h"
+#include <StdAfx.h>
 #include "IndexShapeFiles.h"
+
+#include <gsl/pointers>
+#include <gsl/util>
+
 #include "ShapeFileStream.h"
 
+// ReSharper disable once CppInconsistentNaming
 namespace IndexSearching
 {
 	/* ************************************************************************* **
@@ -36,53 +41,58 @@ namespace IndexSearching
 	**   Creates baseName.dat and baseName.idx
 	**
 	** ************************************************************************* */
-	bool createIndexFile(double utilization, int capacity, string baseName)
+	bool CreateIndexFile(const double utilization, const int capacity, string baseName)
 	{
-		bool ret = false;
-		IStorageManager         *diskfile = nullptr;
-		StorageManager::IBuffer *file = nullptr;
-		ISpatialIndex           *tree = nullptr;
+		bool ret;
+		//IStorageManager* diskfile = nullptr;  
+		//StorageManager::IBuffer* file = nullptr;
+		//ISpatialIndex* tree = nullptr;  
 
 		try
 		{
 			// Create a new storage manager with the provided base name and a 4K page size.
-			diskfile = StorageManager::createNewDiskStorageManager(baseName, 4096);
-			file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, capacity, false);
+			//diskfile = StorageManager::createNewDiskStorageManager(baseName, 4096);
+			//file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, capacity, false);
+
+			// Create a new storage manager with the provided base name and a 4K page size.
+			const auto diskfile = unique_ptr<IStorageManager>(StorageManager::createNewDiskStorageManager(baseName, 4096));
+			// this will try to locate and open an already existing storage manager.
+			const auto file = unique_ptr<StorageManager::IBuffer>(StorageManager::createNewRandomEvictionsBuffer(*diskfile, capacity, false));
 
 			ShapeFileStream inputStream(baseName);
 
 			// Create and bulk load a new RTree with dimensionality 2, using "file" as
 			// the StorageManager and the RSTAR splitting policy.
-			id_type indexIdentifier;
-#ifndef __DEBUG
-			tree = RTree::createAndBulkLoadNewRTree(RTree::BLM_STR, inputStream, *file, utilization,
-				capacity, capacity, 2, SpatialIndex::RTree::RV_RSTAR, indexIdentifier);
-#endif			
+			id_type indexIdentifier = 0;
+			// tree = RTree::createAndBulkLoadNewRTree(RTree::BLM_STR, inputStream, *file, utilization, capacity, capacity, 2, SpatialIndex::RTree::RV_RSTAR, indexIdentifier);
+			const auto tree = unique_ptr<ISpatialIndex>(createAndBulkLoadNewRTree(
+				RTree::BLM_STR, inputStream, *file, utilization, capacity, capacity, 2, SpatialIndex::RTree::RV_RSTAR,
+				indexIdentifier));
 			ret = tree->isIndexValid();
 		}
-		catch (char *str)
+		catch (const char* str)
 		{
 			ret = false;
 			cerr << "Got an error " << str << endl;
 		}
-		catch (exception ex)
+		catch (const exception& ex)
 		{
 			ret = false;
 			cerr << "Got an error " << ex.what() << endl;
 		}
-		catch (Tools::IllegalStateException ex)
+		catch (Tools::IllegalStateException& ex)
 		{
 			ret = false;
-			cerr << "Got an error " << ex.what() << endl;
+			cerr << "Got an IllegalStateException " << ex.what() << endl;
 		}
-		catch (Tools::IllegalArgumentException ex)
+		catch (Tools::IllegalArgumentException& ex)
 		{
 			ret = false;
-			cerr << "Got an error " << ex.what() << endl;
+			cerr << "Got an IllegalArgumentException " << ex.what() << endl;
 		}
-		delete tree;
-		delete file;
-		delete diskfile;
+		//delete tree;
+		//delete file;
+		//delete diskfile;
 
 		return ret;
 	}
@@ -93,30 +103,35 @@ namespace IndexSearching
 	**
 	**
 	** ************************************************************************* */
-	bool isValidIndexFile(string baseName, int bufferSize)
+	bool IsValidIndexFile(string baseName, const int bufferSize)
 	{
 		bool ret = false;
-		IStorageManager         *diskfile;
-		StorageManager::IBuffer *file;
-		ISpatialIndex           *tree;
+		//IStorageManager* diskfile = nullptr;
+		//StorageManager::IBuffer* file = nullptr;
+		//ISpatialIndex* tree = nullptr;
 
 		try
 		{
-			diskfile = StorageManager::loadDiskStorageManager(baseName);
+			//diskfile = StorageManager::loadDiskStorageManager(baseName);
 			// this will try to locate and open an already existing storage manager.
-			file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
+			//file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
+			//tree = RTree::loadRTree(*file, 1);
 
-			tree = RTree::loadRTree(*file, 1);
+			const auto diskfile = unique_ptr<IStorageManager>(StorageManager::loadDiskStorageManager(baseName));
+			// this will try to locate and open an already existing storage manager.
+			const auto file = unique_ptr<StorageManager::IBuffer>(StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false));
+			const auto tree = unique_ptr<ISpatialIndex>(RTree::loadRTree(*file, 1));
+
 			ret = tree->isIndexValid();
 		}
-		catch (char *str)
+		catch (const char* const str)
 		{
 			cerr << "Got an error " << str << endl;
 		}
 
-		delete tree;
-		delete file;
-		delete diskfile;
+		//delete tree;
+		//delete file;
+		//delete diskfile;
 		return ret;
 	}
 	/* ************************************************************************* **
@@ -126,66 +141,65 @@ namespace IndexSearching
 	**
 	**
 	** ************************************************************************* */
-	void queryIndexFile(ISpatialIndex *spatialIndex, SpatialIndex::Region queryRegion, QueryTypeFlags queryType, ShapeIdxVisitor *vis)
+	void QueryIndexFile(const gsl::not_null<ISpatialIndex*> spatialIndex, const SpatialIndex::Region& queryRegion, const QueryTypeFlags queryType, ShapeIdxVisitor* vis)
 	{
 		try
 		{
-			if (queryType == 1)
+			if (queryType == QueryTypeFlags::intersection)
 				spatialIndex->intersectsWithQuery(queryRegion, *vis);
-			else if (queryType == 2)
+			else if (queryType == QueryTypeFlags::contained)
 				spatialIndex->containsWhatQuery(queryRegion, *vis);
 		}
-		catch (exception ex)
+		catch (...)
 		{
 			cerr << "Error running query on spatial index." << endl;
 		}
 	}
 
-	int  selectShapesFromIndex(ISpatialIndex *spatialIndex, double *lowVals, double *hiVals, QueryTypeFlags queryType, CIndexSearching *resulSet)
+	// TODO: Lots of compile warnings:
+	int SelectShapesFromIndex(ISpatialIndex* spatialIndex, double* lowVals, double* hiVals, const QueryTypeFlags queryType, CIndexSearching* resulSet)
 	{
 		int rCode = 0;
 
 		try
 		{
-			long val;
-			double xmin, ymin, xmax, ymax;
 			vector <long> res;
 
-			xmin = (lowVals[0] < hiVals[0]) ? lowVals[0] : hiVals[0];
-			ymin = (lowVals[1] < hiVals[1]) ? lowVals[1] : hiVals[1];
-			xmax = (lowVals[0] > hiVals[0]) ? lowVals[0] : hiVals[0];
-			ymax = (lowVals[1] > hiVals[1]) ? lowVals[1] : hiVals[1];
+			const double xmin = lowVals[0] < hiVals[0] ? lowVals[0] : hiVals[0];
+			const double ymin = lowVals[1] < hiVals[1] ? lowVals[1] : hiVals[1];
+			const double xmax = lowVals[0] > hiVals[0] ? lowVals[0] : hiVals[0];
+			const double ymax = lowVals[1] > hiVals[1] ? lowVals[1] : hiVals[1];
 
 			lowVals[0] = xmin;
 			lowVals[1] = ymin;
 			hiVals[0] = xmax;
 			hiVals[1] = ymax;
 
-			Region *queryRegion = new Region(lowVals, hiVals, 2);
-			ShapeIdxVisitor *vis = new ShapeIdxVisitor();
+			const Region* const queryRegion = new Region(lowVals, hiVals, 2);
+			const auto vis = new ShapeIdxVisitor();
 
-			queryIndexFile(spatialIndex, *queryRegion, queryType, vis);
+			QueryIndexFile(spatialIndex, *queryRegion, queryType, vis);
 
-			resulSet->setCapacity(vis->ids.size());
-			int arrSize = vis->ids.size();
-			for (unsigned i = 0; i < vis->ids.size(); vis->ids.pop())
+			resulSet->SetCapacity(gsl::narrow_cast<int>(vis->ids.size()));
+			// int arrSize = vis->ids.size();
+			for (constexpr unsigned int i = 0; i < vis->ids.size(); vis->ids.pop())
 			{
-				val = (long)vis->ids.front();
-				int len = resulSet->getLength();
-				resulSet->addValue(val);
+				const long val = static_cast<long>(vis->ids.front());
+				//int len = resulSet->GetLength();
+				resulSet->AddValue(val);
 			}
 			delete queryRegion;
 			delete vis;
 		}
-		catch (exception ex)
+		catch (exception&)
 		{
 			rCode = -1;
 		}
-		catch (Tools::IllegalStateException ex1)
+		catch (Tools::IllegalStateException&)
 		{
 			rCode = -1;
 		}
-		catch (Tools::IllegalArgumentException ex2)
+		catch (Tools::IllegalArgumentException&)
 		{
 			rCode = -1;
 		}
@@ -193,8 +207,9 @@ namespace IndexSearching
 		{
 			rCode = -1;
 		}
-		return (rCode);
+		return rCode;
 	}
+
 	/* ************************************************************************* **
 	**
 	** Function to query shape file.
@@ -206,20 +221,21 @@ namespace IndexSearching
 	{
 
 		// data should be an array of characters representing a Region as a string.
-		byte* pData = 0;
+		uint8_t* pData = nullptr;
 		uint32_t cLen = 0;
 		d.getData(cLen, &pData);
-		delete[] pData;
+		delete[] pData; // TODO: Fix compile warning
 
-		__int64 val;
-		val = d.getIdentifier();
+		const auto val = d.getIdentifier();
 		ids.push(val);
 	}
 
 	void ShapeIdxVisitor::visitNode(const INode& n)
 	{
-		if (n.isLeaf()) m_leafIO++;
-		else m_indexIO++;
+		if (n.isLeaf())
+			m_leafIO++;
+		else
+			m_indexIO++;
 	}
 
 
@@ -230,34 +246,34 @@ namespace IndexSearching
 		return spatialIndexCache;
 	}
 
-	ISpatialIndex* CSpatialIndexCache::getSpatialIndexByID(CSpatialIndexID spatialIndexID)
+	ISpatialIndex* CSpatialIndexCache::GetSpatialIndexById(const CSpatialIndexID spatialIndexId)
 	{
-		map<CSpatialIndexID, CacheItem>::iterator mapIterator = m_cache.find(spatialIndexID);
+		const auto mapIterator = m_cache.find(spatialIndexId);
 		if (mapIterator != m_cache.end())
 			return (*mapIterator).second.m_tree;
 
-		return NULL;
+		return nullptr;
 	}
 
-	CSpatialIndexID CSpatialIndexCache::cacheSpatialIndex(ISpatialIndex *tree, IStorageManager *diskfile, StorageManager::IBuffer *file)
+	CSpatialIndexID CSpatialIndexCache::CacheSpatialIndex(ISpatialIndex* tree, IStorageManager* diskfile, StorageManager::IBuffer* file)
 	{
-		CSpatialIndexID newSpatialIndexID = m_nextSpatialIndexID++;
-		m_cache[newSpatialIndexID] = CacheItem(diskfile, file, tree);
-		return newSpatialIndexID;
+		const CSpatialIndexID newSpatialIndexId = m_nextSpatialIndexID++;
+		m_cache[newSpatialIndexId] = CacheItem(diskfile, file, tree);
+		return newSpatialIndexId;
 	}
 
-	void CSpatialIndexCache::uncacheSpatialIndex(CSpatialIndexID spatialIndexID, bool releaseAll)
+	void CSpatialIndexCache::UncacheSpatialIndex(const CSpatialIndexID spatialIndexId, const bool releaseAll)
 	{
-		map<CSpatialIndexID, CacheItem>::iterator mapIterator = m_cache.find(spatialIndexID);
+		const auto mapIterator = m_cache.find(spatialIndexId);
 		if (mapIterator != m_cache.end())
 		{
 			if (releaseAll)
-				(*mapIterator).second.releaseAll();
+				(*mapIterator).second.ReleaseAll();
 			m_cache.erase(mapIterator);
 		}
 	}
 
-	void CSpatialIndexCache::CacheItem::releaseAll()
+	void CSpatialIndexCache::CacheItem::ReleaseAll()
 	{
 		delete m_tree;
 		delete m_file;

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include <StdAfx.h>
 #include "ProjectionHelper.h"
 
 // ***************************************************************
@@ -26,12 +26,22 @@ bool ProjectionHelper::IsGeographic(IGeoProjection* gp)
 // ***************************************************************
 //		IsSame()
 // ***************************************************************
+bool ProjectionHelper::IsSame(const OGRSpatialReference* sr1, const OGRSpatialReference* sr2)
+{
+	if (!sr1 || !sr2) return false;
+	// use OGRSpatialReference to test same-ness
+	return(sr1->IsSame(sr2) == TRUE);
+}
+
+// ***************************************************************
+//		IsSame() (including Extents verification)
+// ***************************************************************
 bool ProjectionHelper::IsSame(IGeoProjection* gp1, IGeoProjection* gp2, IExtents* bounds, int sampleSize)
 {
 	if (!gp1 || !gp2 || !bounds) return false;
 	VARIANT_BOOL vb;
 	gp1->get_IsSameExt(gp2, bounds, sampleSize, &vb);
-	return vb ? true: false;
+	return vb ? true : false;
 }
 
 // ***************************************************************
@@ -42,7 +52,7 @@ CString ProjectionHelper::ToString(IGeoProjection* gp)
 	if (!gp) return "";
 
 	CComBSTR str;
-	if (!ProjectionHelper::IsEmpty(gp)) {
+	if (!IsEmpty(gp)) {
 		gp->ExportToProj4(&str);
 	}
 	else {
@@ -60,6 +70,7 @@ void ProjectionHelper::GetSpatialReference(IGeoProjection* gp, OGRSpatialReferen
 {
 	if (!gp) return;
 
+	// TODO: importFromProj4 is deprecated:
 	CComBSTR bstr;
 	gp->ExportToProj4(&bstr);
 
@@ -77,9 +88,13 @@ OGRErr ProjectionHelper::ImportFromEsri(OGRSpatialReference* sr, CString proj)
 		return false;
 	}
 
+	char* apszPrj[2];
 	char* s = proj.GetBuffer();
+	apszPrj[0] = s;
+	apszPrj[1] = nullptr;
 
-	return sr->importFromESRI(&s);
+	// Parameters: papszPrj	NULL terminated list of strings containing the definition.
+	return sr->importFromESRI(apszPrj);
 }
 
 // ***************************************************************
@@ -87,13 +102,25 @@ OGRErr ProjectionHelper::ImportFromEsri(OGRSpatialReference* sr, CString proj)
 // ***************************************************************
 OGRErr ProjectionHelper::ImportFromWkt(OGRSpatialReference* sr, CString proj)
 {
-	if (!sr) {
-		return false;
+	if (!sr)
+	{
+		return OGRERR_FAILURE;
 	}
 
-	char* s = proj.GetBuffer();
+	const char* s = proj.GetBuffer();
 
-	return sr->importFromWkt(&s);
+	OGRErr result = OGRERR_NONE;
+	// use newer method importFromWkt(const char*)
+	if ((result = sr->importFromWkt(&s)) == OGRERR_NONE)
+	{
+		// then Validate (https://gdal.org/api/ogrspatialref.html#_CPPv4NK19OGRSpatialReference8ValidateEv)
+		return sr->Validate();
+	}
+	else
+	{
+		// return error from failed import
+		return result;
+	}
 }
 
 // ***************************************************************
@@ -105,11 +132,34 @@ OGRErr ProjectionHelper::ExportToWkt(OGRSpatialReference* sr, CString& proj)
 		return false;
 	}
 
-	char* s = NULL;
-	OGRErr err = sr->exportToWkt(&s);
+	char* s = nullptr;
+	const OGRErr err = sr->exportToWkt(&s);
 
 	proj = s;
-	
+
+	if (s) {
+		CPLFree(s);
+	}
+
+	return err;
+}
+
+// ***************************************************************
+//		ExportFromWktEx()
+//  Starting with GDAL 3.0, the OGRSpatialReference::exportToWkt() method accepts options
+// ***************************************************************
+OGRErr ProjectionHelper::ExportToWktEx(OGRSpatialReference* sr, CString& proj)
+{
+	if (!sr) {
+		return false;
+	}
+
+	char* s = nullptr;
+	const char* apszOptions[3] = { "FORMAT=WKT2_2019", "MULTILINE=YES", nullptr };
+	const OGRErr err = sr->exportToWkt(&s, apszOptions);
+
+	proj = s;
+
 	if (s) {
 		CPLFree(s);
 	}
@@ -160,6 +210,7 @@ bool ProjectionHelper::SupportsWorldWideTransform(IGeoProjection* mapProjection,
 			return true;
 		}
 	}
-	
+
 	return false;
 }
+

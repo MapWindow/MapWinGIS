@@ -73,7 +73,7 @@ private:
 	std::vector<long> _parts;
 
 public:
-	ShapeWrapperType get_WrapperType() { return swtCom; }
+	ShapeWrapperType get_WrapperType() { return ShapeWrapperType::swtCom; }
 
 	int get_PointCount(){ return _points.size(); }
 	int get_PartCount(){ return _parts.size(); }
@@ -90,38 +90,38 @@ public:
 	bool get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax, 
 					double& zMin, double& zMax, double& mMin, double& mMax);
 	
-	void get_XYFast(int PointIndex, double& x, double& y);
-	bool get_PointXY(int PointIndex, double& x, double& y);
-	bool put_PointXY(int PointIndex, double x, double y);
-	bool get_PointZ(int PointIndex, double& z);
-	bool get_PointM(int PointIndex, double& m);
-	bool put_PointZ(int PointIndex, double z);
-	bool put_PointM(int PointIndex, double m);
+	void get_XYFast(int pointIndex, double& x, double& y);
+	bool get_PointXY(int pointIndex, double& x, double& y);
+	bool put_PointXY(int pointIndex, double x, double y);
+	bool get_PointZ(int pointIndex, double& z);
+	bool get_PointM(int pointIndex, double& m);
+	bool put_PointZ(int pointIndex, double z);
+	bool put_PointM(int pointIndex, double m);
 	bool get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m);
 	
 	// COM points
-	IPoint* get_Point(long Index);
-	bool put_Point(long Index, IPoint* pnt);
+	IPoint* get_Point(long index);
+	bool put_Point(long index, IPoint* pnt);
 
 	// changing size
 	void Clear();
-	bool InsertPoint(int PointIndex, IPoint* pnt);
-	bool InsertPointXY(int PointIndex, double x, double y);
-	bool InsertPointXYZM(int PointIndex, double x, double y, double z, double m);
-	bool DeletePoint(int Pointindex);
+	bool InsertPoint(int pointIndex, IPoint* point);
+	bool InsertPointXY(int pointIndex, double x, double y);
+	bool InsertPointXYZM(int pointIndex, double x, double y, double z, double m);
+	bool DeletePoint(int pointIndex);
 	
 	// parts
-	bool InsertPart(int PartIndex, int PointIndex);
-	bool DeletePart(int PartIndex);
-	int get_PartStartPoint(int PartIndex);
-	int get_PartEndPoint(int PartIndex);
-	bool put_PartStartPoint(long PartIndex, long newVal);
+	bool InsertPart(int partIndex, int pointIndex);
+	bool DeletePart(int partIndex);
+	int get_PartStartPoint(int partIndex);
+	int get_PartEndPoint(int partIndex);
+	bool put_PartStartPoint(long partIndex, long newVal);
 	
 	bool PointInRing(int partIndex, double pointX, double pointY);
 	void ReversePoints(long startIndex, long endIndex);
 
 	int* get_RawData();
-	bool put_RawData(char* shapeData, int length);
+	bool put_RawData(char* shapeData, int recordLength);
 
 	int get_LastErrorCode()
 	{

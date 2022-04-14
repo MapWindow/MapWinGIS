@@ -2,7 +2,7 @@
 #include "map.h"
 #include "GeoPoint.h"
 #include "TileHelper.h"
-#include "ProjectionHelper.h"
+#include "Projections.h"
 #include "Tiles.h"
 #include "WmsHelper.h"
 
@@ -150,7 +150,8 @@ bool CMapView::get_TileProviderBounds(BaseProvider* provider, Extent& retVal)
 		// - add a method to API to set bounds of map projection/tiles;
 		// - store and update built-in database of bounds for different coordinate systems
 		// and identify projection on setting it to map;
-		bool supportsWorldWideTransform = ProjectionHelper::SupportsWorldWideTransform(_projection, _wgsProjection);
+		ProjectionTools* pt = new ProjectionTools();
+		bool supportsWorldWideTransform = pt->SupportsWorldWideTransform(_projection, _wgsProjection);
 
 		if (proj->IsWorldWide() && !supportsWorldWideTransform) // server projection is world wide, map projection - not
 		{
@@ -233,16 +234,16 @@ void CMapView::StartTmsProjectionTransform(TileProjectionState state)
 	if (_transformationMode != tmNotDefined && (state == ProjectionDoTransform || state == ProjectionCompatible))
 	{
 		VARIANT_BOOL vb;
-		
-		if (!ProjectionHelper::IsEmpty(_tileProjection))
+		// if not Empty
+		if (_tileProjection->get_IsEmpty(&vb) == S_OK && vb == VARIANT_FALSE)
 		{
 			_tileProjection->StartTransform(_projection, &vb);
 			if (!vb) {
 				CallbackHelper::ErrorMsg("Failed to start tiles to map transformation.");
 			}
 		}
-
-		if (!ProjectionHelper::IsEmpty(_tileReverseProjection))
+		// if not Empty
+		if (_tileReverseProjection->get_IsEmpty(&vb) == S_OK && vb == VARIANT_FALSE)
 		{
 			_tileReverseProjection->StartTransform(_tileProjection, &vb);
 			if (!vb) {
@@ -257,12 +258,13 @@ void CMapView::StartTmsProjectionTransform(TileProjectionState state)
 // ****************************************************************
 TileProjectionState CMapView::GetTmsProjectionState()
 {
-	if (ProjectionHelper::IsEmpty(_projection))
+	VARIANT_BOOL vb;
+	// if Empty
+	if (_projection->get_IsEmpty(&vb) == S_OK && vb == VARIANT_TRUE)
 	{
 		return ProjectionDoTransform;
 	}
 
-	VARIANT_BOOL vb;
 	_tileProjection->get_IsSame(_projection, &vb);
 	TileProjectionState state = vb ? ProjectionMatch : ProjectionDoTransform;
 

@@ -23,7 +23,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "ShapeFileStream.h"
 
 //namespace IndexSearching
@@ -33,283 +33,283 @@
 	**
 	**
 	** ************************************************************************* */
-	IData* ShapeFileStream::getNextShapeRecord()
-	  {
-	  if (m_pShpNext == 0)
-		return 0;
+IData* ShapeFileStream::GetNextShapeRecord()
+{
+	if (m_pShpNext == nullptr)
+		return nullptr;
 
-	  RTree::Data* ret = m_pShpNext;
-	  m_pShpNext = 0;
+	// TODO: VS2019 says ret is unused. Is this correct?
+	RTree::Data* ret = m_pShpNext;
+	m_pShpNext = nullptr;
 
-	  return 0;
-	  }
+	return nullptr;
+}
 
-	/* ************************************************************************* **
-	**
-	**
-	**
-	** ************************************************************************* */
-	IData* ShapeFileStream::getNext()
-	  {
+/* ************************************************************************* **
+**
+**
+**
+** ************************************************************************* */
+IData* ShapeFileStream::getNext()
+{
 
-	  if (m_pShpNext == 0)
-		return 0;
+	if (m_pShpNext == nullptr)
+		return nullptr;
 
-	  RTree::Data* ret = m_pShpNext;
-	  m_pShpNext = 0;
+	RTree::Data* ret = m_pShpNext;
+	m_pShpNext = nullptr;
 
-	  readSHXFile(idxID++);
+	ReadShxFile(idxID++);
 
-	  return ret;
-	  }
-	/* ************************************************************************* **
-	**
-	**
-	**
-	** ************************************************************************* */
-	IData* ShapeFileStream::getExact(int index)
-	  {
-	  int intBuffer = 0;
-	  intBuffer = 100 + ((index - 1) * 8);
-	  m_ShpIdx.seekg(intBuffer);
-	  m_ShpIdx.read((char *)&intBuffer,sizeof(int));
-	  if (m_ShpIdx.eof() || m_ShpIdx.bad() )
-		{
+	return ret;
+}
+/* ************************************************************************* **
+**
+**
+**
+** ************************************************************************* */
+IData* ShapeFileStream::GetExact(int index)
+{
+	int intBuffer = 0;
+	intBuffer = 100 + ((index - 1) * 8);
+	m_ShpIdx.seekg(intBuffer);
+	m_ShpIdx.read((char*)&intBuffer, sizeof(int));
+	if (m_ShpIdx.eof() || m_ShpIdx.bad())
+	{
 		cerr << "got end of file or error" << endl;
-		return NULL;
-		}
-		swapEndian((char*)&intBuffer,sizeof(int));
-	  idxOffset = intBuffer;
-	  // Record Length
-	  m_ShpIdx.read((char *)&intBuffer,sizeof(int));
-		swapEndian((char*)&intBuffer,sizeof(int));
-	  idxLength = intBuffer;   
+		return nullptr;
+	}
+	SwapEndian((char*)&intBuffer, sizeof(int));
+	idxOffset = intBuffer;
+	// Record Length
+	m_ShpIdx.read((char*)&intBuffer, sizeof(int));
+	SwapEndian((char*)&intBuffer, sizeof(int));
+	idxLength = intBuffer;
 
-	  readSHPFile();
-	  RTree::Data* ret = m_pShpNext;
+	ReadShpFile();
+	RTree::Data* ret = m_pShpNext;
 
-	  return ret;
-	  }
-	/* ************************************************************************* **
-	**
-	**
-	**
-	** ************************************************************************* */
-	void ShapeFileStream::readSHPFile()
-	  {
-	  int    intBuffer = 0;
-	  double low[2], high[2];
-	  
-	  streamoff i = m_ShpFile.tellg();
-	  m_ShpFile.seekg(idxOffset * 2);
-	  if (!m_ShpFile.good())
-		{
+	return ret;
+}
+/* ************************************************************************* **
+**
+**
+**
+** ************************************************************************* */
+void ShapeFileStream::ReadShpFile()
+{
+	int    intBuffer = 0;
+	double low[2], high[2];
+
+	streamoff i = m_ShpFile.tellg();
+	m_ShpFile.seekg(idxOffset * 2);
+	if (!m_ShpFile.good())
+	{
 		return;
-		}
-		
-	  m_ShpFile.read((char *)&intBuffer,sizeof(int));
-		swapEndian((char*)&intBuffer,sizeof(int));
-	  int recNum = intBuffer;
-	  // read shape rec length
-	  m_ShpFile.read((char *)&intBuffer,sizeof(int));
-		swapEndian((char*)&intBuffer,sizeof(int));
-	  int recLen = intBuffer;
+	}
 
-	  // read shape type
-	  m_ShpFile.read((char *)&intBuffer,sizeof(int));
-		int shpType  = intBuffer;
-	  
-	  switch (shpType)
-		{
-		case 0: // NULL Shape
-		  break;
-		case ShpfileType::SHP_POINT:
-		case ShpfileType::SHP_POINTM:
-		case ShpfileType::SHP_POINTZ: // Point types
-		  m_ShpFile.read((char *)&low[0],sizeof(double));
-		  m_ShpFile.read((char *)&low[1],sizeof(double));
-		  high[0] = low[0];
-		  high[1] = low[1];
-		  break;
-		default:
-		  // Bounding Box 
-		  m_ShpFile.read((char *)&low[0],sizeof(double));
-		  m_ShpFile.read((char *)&low[1],sizeof(double));
-		  m_ShpFile.read((char *)&high[0],sizeof(double));
-		  m_ShpFile.read((char *)&high[1],sizeof(double));
-		  break;
-		}
+	m_ShpFile.read((char*)&intBuffer, sizeof(int));
+	SwapEndian((char*)&intBuffer, sizeof(int));
+	int recNum = intBuffer;
+	// read shape rec length
+	m_ShpFile.read((char*)&intBuffer, sizeof(int));
+	SwapEndian((char*)&intBuffer, sizeof(int));
+	int recLen = intBuffer;
 
-		Region r = Region(low, high, 2);
-	  m_pShpNext = new RTree::Data(0, 0, r, recNum);
+	// read shape type
+	m_ShpFile.read((char*)&intBuffer, sizeof(int));
+	int shpType = intBuffer;
 
-	  }
-	/* ************************************************************************* **
-	**
-	**
-	**
-	** ************************************************************************* */
-	void ShapeFileStream::readSHXFile(int recordID)
-	  {
-	  int intBuffer = 0;
-	  
-	  if (m_ShpIdx.eof() || m_ShpIdx.bad() )
-		{
+	switch (shpType)
+	{
+	case 0: // NULL Shape
+		break;
+	case ShpfileType::SHP_POINT:
+	case ShpfileType::SHP_POINTM:
+	case ShpfileType::SHP_POINTZ: // Point types
+		m_ShpFile.read((char*)&low[0], sizeof(double));
+		m_ShpFile.read((char*)&low[1], sizeof(double));
+		high[0] = low[0];
+		high[1] = low[1];
+		break;
+	default:
+		// Bounding Box 
+		m_ShpFile.read((char*)&low[0], sizeof(double));
+		m_ShpFile.read((char*)&low[1], sizeof(double));
+		m_ShpFile.read((char*)&high[0], sizeof(double));
+		m_ShpFile.read((char*)&high[1], sizeof(double));
+		break;
+	}
+
+	auto r = Region(low, high, 2);
+	m_pShpNext = new RTree::Data(0, nullptr, r, recNum);
+
+}
+/* ************************************************************************* **
+**
+**
+**
+** ************************************************************************* */
+void ShapeFileStream::ReadShxFile(int recordId)
+{
+	int intBuffer = 0;
+
+	if (m_ShpIdx.eof() || m_ShpIdx.bad())
+	{
 		return;
-		}
-	  streamoff i = m_ShpIdx.tellg();
+	}
+	streamoff i = m_ShpIdx.tellg();
 
-	  if (recordID == -1)
-		readSHXFileHeader();
-	  else
-		{
-		idxID = recordID;
+	if (recordId == -1)
+		ReadShxFileHeader();
+	else
+	{
+		idxID = recordId;
 		// Offset
-		m_ShpIdx.read((char *)&intBuffer,sizeof(int));
-		if (m_ShpIdx.eof() || m_ShpIdx.bad() )
-		  {
-	//      cerr << "got end of file or error" << endl;
-		  return;
-		  }
-		  swapEndian((char*)&intBuffer,sizeof(int));
+		m_ShpIdx.read((char*)&intBuffer, sizeof(int));
+		if (m_ShpIdx.eof() || m_ShpIdx.bad())
+		{
+			//      cerr << "got end of file or error" << endl;
+			return;
+		}
+		SwapEndian((char*)&intBuffer, sizeof(int));
 		idxOffset = intBuffer;
 		// Record Length
-		m_ShpIdx.read((char *)&intBuffer,sizeof(int));
-		  swapEndian((char*)&intBuffer,sizeof(int));
-		idxLength = intBuffer;   
+		m_ShpIdx.read((char*)&intBuffer, sizeof(int));
+		SwapEndian((char*)&intBuffer, sizeof(int));
+		idxLength = intBuffer;
 
-		readSHPFile();
-		}
-	  }
-	/* ************************************************************************* **
-	**
-	**  Read shapefile index header.
-	**
-	** ************************************************************************* */
-	void ShapeFileStream::readSHXFileHeader()
-	  {
-	  int intBuffer = 0;
+		ReadShpFile();
+	}
+}
+/* ************************************************************************* **
+**
+**  Read shapefile index header.
+**
+** ************************************************************************* */
+void ShapeFileStream::ReadShxFileHeader()
+{
+	int intBuffer = 0;
 
-	  ShapeFileStream::m_ShpIdx.seekg(-1, ios_base::end );
-	  ShapeFileStream::SHXIdxLen = m_ShpIdx.tellg();
-	  ShapeFileStream::SHXIdxLen++;
-	  ShapeFileStream::m_ShpIdx.seekg(0,ios_base::beg);
+	ShapeFileStream::m_ShpIdx.seekg(-1, ios_base::end);
+	ShapeFileStream::SHXIdxLen = m_ShpIdx.tellg();
+	ShapeFileStream::SHXIdxLen++;
+	ShapeFileStream::m_ShpIdx.seekg(0, ios_base::beg);
 
-	  // Validate file code
-	  m_ShpIdx.read((char *)&intBuffer,sizeof(int));
-		swapEndian((char*)&intBuffer,sizeof(int));
-		if( intBuffer != FILE_CODE )
-			return;	
-		
-	  // Skip unused
-	  int unused = UNUSEDVAL;
-		for(int i = 0; i < UNUSEDSIZE; i++)
-		  {	
-		m_ShpIdx.read((char *)&intBuffer,sizeof(int));
-			swapEndian((char*)&intBuffer,sizeof(int));
-			if( intBuffer != unused )
-				return;
-		  }
+	// Validate file code
+	m_ShpIdx.read((char*)&intBuffer, sizeof(int));
+	SwapEndian((char*)&intBuffer, sizeof(int));
+	if (intBuffer != FILE_CODE)
+		return;
 
-		// read filelength
-	  m_ShpIdx.read((char *)&intBuffer,sizeof(int));
-		swapEndian((char*)&intBuffer,sizeof(int));
-		int filelength = intBuffer;
+	// Skip unused
+	constexpr int unused = UNUSEDVAL;
+	for (int i = 0; i < UNUSEDSIZE; i++)
+	{
+		m_ShpIdx.read((char*)&intBuffer, sizeof(int));
+		SwapEndian((char*)&intBuffer, sizeof(int));
+		if (intBuffer != unused)
+			return;
+	}
+
+	// read filelength
+	m_ShpIdx.read((char*)&intBuffer, sizeof(int));
+	SwapEndian((char*)&intBuffer, sizeof(int));
+	int filelength = intBuffer;
 	//  cerr << "filelength=" << filelength <<  endl;
-		
+
 		// Validate version
-	  m_ShpIdx.read((char *)&intBuffer,sizeof(int));
-		if( intBuffer != VERSION )
+	m_ShpIdx.read((char*)&intBuffer, sizeof(int));
+	if (intBuffer != VERSION)
+		return;
+
+	// read shapefile type
+	m_ShpIdx.read((char*)&intBuffer, sizeof(int));
+	int shpfiletype = intBuffer;
+
+	// read bounding region
+	double minX, minY, maxX, maxY, minZ, maxZ, minM, maxM;
+
+	m_ShpIdx.read((char*)&minX, sizeof(double));
+	m_ShpIdx.read((char*)&minY, sizeof(double));
+	m_ShpIdx.read((char*)&maxX, sizeof(double));
+	m_ShpIdx.read((char*)&maxY, sizeof(double));
+	m_ShpIdx.read((char*)&minZ, sizeof(double));
+	m_ShpIdx.read((char*)&maxZ, sizeof(double));
+	m_ShpIdx.read((char*)&minM, sizeof(double));
+	m_ShpIdx.read((char*)&maxM, sizeof(double));
+
+
+	ReadShpFileHeader();
+	//Read First Index
+	ReadShxFile(0);
+}
+/* ************************************************************************* **
+**
+**  Read shapefile header.
+**
+** ************************************************************************* */
+void ShapeFileStream::ReadShpFileHeader()
+{
+	int intBuffer = 0;
+
+	ShapeFileStream::m_ShpFile.seekg(0, ios_base::beg);
+
+	// Validate file code
+	m_ShpFile.read((char*)&intBuffer, sizeof(int));
+	SwapEndian((char*)&intBuffer, sizeof(int));
+	if (intBuffer != FILE_CODE)
+		return;
+
+	// Skip unused
+	int unused = UNUSEDVAL;
+	for (int i = 0; i < UNUSEDSIZE; i++)
+	{
+		m_ShpFile.read((char*)&intBuffer, sizeof(int));
+		SwapEndian((char*)&intBuffer, sizeof(int));
+		if (intBuffer != unused)
 			return;
+	}
 
-		// read shapefile type
-	  m_ShpIdx.read((char *)&intBuffer,sizeof(int));
-		int shpfiletype  = intBuffer;
-		
-		// read bounding region
-	  double minX, minY, maxX, maxY, minZ, maxZ, minM, maxM;
+	// read filelength
+	m_ShpFile.read((char*)&intBuffer, sizeof(int));
+	SwapEndian((char*)&intBuffer, sizeof(int));
+	int filelength = intBuffer;
 
-	  m_ShpIdx.read((char *)&minX,sizeof(double));
-	  m_ShpIdx.read((char *)&minY,sizeof(double));
-	  m_ShpIdx.read((char *)&maxX,sizeof(double));
-	  m_ShpIdx.read((char *)&maxY,sizeof(double));
-	  m_ShpIdx.read((char *)&minZ,sizeof(double));
-	  m_ShpIdx.read((char *)&maxZ,sizeof(double));
-	  m_ShpIdx.read((char *)&minM,sizeof(double));
-	  m_ShpIdx.read((char *)&maxM,sizeof(double));
+	// Validate version
+	m_ShpFile.read((char*)&intBuffer, sizeof(int));
+	if (intBuffer != VERSION)
+		return;
 
+	// read shapefile type
+	m_ShpFile.read((char*)&intBuffer, sizeof(int));
+	int shpfiletype = intBuffer;
 
-	  readSHPFileHeader();
-	  //Read First Index
-	  readSHXFile(0);
-	  }
-	/* ************************************************************************* **
-	**
-	**  Read shapefile header.
-	**
-	** ************************************************************************* */
-	void ShapeFileStream::readSHPFileHeader()
-	  {
-	  int intBuffer = 0;
+	// read bounding region
+	double minX, minY, maxX, maxY, minZ, maxZ, minM, maxM;
 
-	  ShapeFileStream::m_ShpFile.seekg(0,ios_base::beg);
+	m_ShpFile.read((char*)&minX, sizeof(double));
+	m_ShpFile.read((char*)&minY, sizeof(double));
+	m_ShpFile.read((char*)&maxX, sizeof(double));
+	m_ShpFile.read((char*)&maxY, sizeof(double));
+	m_ShpFile.read((char*)&minZ, sizeof(double));
+	m_ShpFile.read((char*)&maxZ, sizeof(double));
+	m_ShpFile.read((char*)&minM, sizeof(double));
+	m_ShpFile.read((char*)&maxM, sizeof(double));
 
-	  // Validate file code
-	  m_ShpFile.read((char *)&intBuffer,sizeof(int));
-		swapEndian((char*)&intBuffer,sizeof(int));
-		if( intBuffer != FILE_CODE )
-			return;	
-		
-	  // Skip unused
-	  int unused = UNUSEDVAL;
-		for(int i = 0; i < UNUSEDSIZE; i++)
-		  {	
-		m_ShpFile.read((char *)&intBuffer,sizeof(int));
-			swapEndian((char*)&intBuffer,sizeof(int));
-			if( intBuffer != unused )
-				return;
-		  }
-
-		// read filelength
-	  m_ShpFile.read((char *)&intBuffer,sizeof(int));
-		swapEndian((char*)&intBuffer,sizeof(int));
-		int filelength = intBuffer;
-		
-		// Validate version
-	  m_ShpFile.read((char *)&intBuffer,sizeof(int));
-		if( intBuffer != VERSION )
-			return;
-
-		// read shapefile type
-	  m_ShpFile.read((char *)&intBuffer,sizeof(int));
-		int shpfiletype  = intBuffer;
-		
-		// read bounding region
-	  double minX, minY, maxX, maxY, minZ, maxZ, minM, maxM;
-
-	  m_ShpFile.read((char *)&minX,sizeof(double));
-	  m_ShpFile.read((char *)&minY,sizeof(double));
-	  m_ShpFile.read((char *)&maxX,sizeof(double));
-	  m_ShpFile.read((char *)&maxY,sizeof(double));
-	  m_ShpFile.read((char *)&minZ,sizeof(double));
-	  m_ShpFile.read((char *)&maxZ,sizeof(double));
-	  m_ShpFile.read((char *)&minM,sizeof(double));
-	  m_ShpFile.read((char *)&maxM,sizeof(double));
-
-	  }
-	/* ************************************************************************* **
-	**
-	**  
-	**
-	** ************************************************************************* */
-	inline void ShapeFileStream::swapEndian(char* a,int size) 
-	  {
-		char hold;
-		for(int i = 0; i < size*.5; i++)
-		  {	
-		hold = a[i];
-			a[i] = a[size-i-1];
-			a[size-i-1] = hold;
-		  }
-	  }
+}
+/* ************************************************************************* **
+**
+**
+**
+** ************************************************************************* */
+inline void ShapeFileStream::SwapEndian(char* a, int size)
+{
+	for (int i = 0; i < size * .5; i++)
+	{
+		const char hold = a[i];
+		a[i] = a[size - i - 1];
+		a[size - i - 1] = hold;
+	}
+}
 //}

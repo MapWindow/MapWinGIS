@@ -1,7 +1,7 @@
 
 #CFLAGS	=	/DSHPAPI_CALL=__stdcall
 # 4100: 'identifier' : unreferenced formal parameter
-CFLAGS =	/nologo /Ox /MD /W4 /wd4100 /D_CRT_SECURE_NO_DEPRECATE /DSHAPELIB_DLLEXPORT /Z7
+CFLAGS =	/nologo /Ox /MD /W4 /wd4100 /D_CRT_SECURE_NO_DEPRECATE /DSHAPELIB_DLLEXPORT
 
 IMPORT_LIB	= shapelib_i.lib
 STATIC_LIB	= shapelib.lib
@@ -62,7 +62,7 @@ shptest.exe:	shptest.c $(LINK_LIB)
 	if exist $@.manifest mt -manifest $@.manifest -outputresource:$@;1
 
 shputils.exe:	shputils.c $(LINK_LIB)
-	$(CC) $(CFLAGS) shputils.c $(LINK_LIB) $(LINKOPT) 
+	$(CC) $(CFLAGS) shputils.c $(LINK_LIB) $(LINKOPT)
 	if exist $@.manifest mt -manifest $@.manifest -outputresource:$@;1
 
 shptreedump.exe:	shptreedump.c $(LINK_LIB)
@@ -74,7 +74,7 @@ shpdiff.exe:	shpdiff.c $(LINK_LIB)
 	if exist $@.manifest mt -manifest $@.manifest -outputresource:$@;1
 
 clean:
-	-del *.obj 
+	-del *.obj
 	-del *.exe
 	-del *.lib
 	-del *.dll

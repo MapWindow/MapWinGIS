@@ -22,9 +22,9 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
  #pragma once
-#include "ShapeUtility.h"
+//#include "ShapeUtility.h"
 
-enum ShapeWrapperType
+enum class ShapeWrapperType
 {
 	swtEmpty,
 	swtPoint,
@@ -46,12 +46,12 @@ public:
 	virtual int get_LastErrorCode()= 0;
 	virtual bool get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax)= 0;
 	virtual bool put_RawData(char* shapeData, int length)= 0;
-	virtual int get_PartStartPoint(int PartIndex)= 0;
-	virtual int get_PartEndPoint(int PartIndex)= 0;
+	virtual int get_PartStartPoint(int partIndex)= 0;
+	virtual int get_PartEndPoint(int partIndex)= 0;
 	virtual double* get_PointsXY()= 0;
-	virtual bool get_PointXY(int PointIndex, double& x, double& y)= 0;
+	virtual bool get_PointXY(int pointIndex, double& x, double& y)= 0;
 	virtual bool PointInRing(int partIndex, double pointX, double pointY)= 0;
-	virtual void get_XYFast(int PointIndex, double& x, double& y) = 0;
+	virtual void get_XYFast(int pointIndex, double& x, double& y) = 0;
 //EndInterface
 };
 
@@ -75,8 +75,8 @@ public:
 	virtual int get_LastErrorCode()= 0;
 	
 	// shape type
-	virtual ShpfileType get_ShapeType(void)  = 0;
-	virtual ShpfileType get_ShapeType2D(void) = 0;
+	virtual ShpfileType get_ShapeType()  = 0;
+	virtual ShpfileType get_ShapeType2D() = 0;
 	virtual bool put_ShapeType(ShpfileType shpType) = 0;
 	
 	// bounds
@@ -86,32 +86,32 @@ public:
 	virtual bool get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax, double& zMin, double& zMax, double& mMin, double& mMax) = 0;
 	
 	// COM points
-	virtual IPoint* get_Point(long Index) = 0;
-	virtual bool put_Point(long Index, IPoint* pnt) = 0;
+	virtual IPoint* get_Point(long index) = 0;
+	virtual bool put_Point(long index, IPoint* pnt) = 0;
 
 	// point values
-	virtual bool get_PointXY(int PointIndex, double& x, double& y) = 0;
-	virtual bool put_PointXY(int PointIndex, double x, double y) = 0;
-	virtual bool get_PointZ(int PointIndex, double& z) = 0;
-	virtual bool get_PointM(int PointIndex, double& m) = 0;
-	virtual bool put_PointZ(int PointIndex, double z) = 0;
-	virtual bool put_PointM(int PointIndex, double m) = 0;
-	virtual void get_XYFast(int PointIndex, double& x, double& y) = 0;
+	virtual bool get_PointXY(int pointIndex, double& x, double& y) = 0;
+	virtual bool put_PointXY(int pointIndex, double x, double y) = 0;
+	virtual bool get_PointZ(int pointIndex, double& z) = 0;
+	virtual bool get_PointM(int pointIndex, double& m) = 0;
+	virtual bool put_PointZ(int pointIndex, double z) = 0;
+	virtual bool put_PointM(int pointIndex, double m) = 0;
+	virtual void get_XYFast(int pointIndex, double& x, double& y) = 0;
 	virtual bool get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m) = 0;
 
 	// changing size
 	virtual void Clear() = 0;
-	virtual bool InsertPoint(int PointIndex, IPoint* pnt) = 0;
-	virtual bool InsertPointXY(int PointIndex, double x, double y) = 0;
-	virtual bool InsertPointXYZM(int PointIndex, double x, double y, double z, double m) = 0;
-	virtual bool DeletePoint(int Pointindex) = 0;
+	virtual bool InsertPoint(int pointIndex, IPoint* pnt) = 0;
+	virtual bool InsertPointXY(int pointIndex, double x, double y) = 0;
+	virtual bool InsertPointXYZM(int pointIndex, double x, double y, double z, double m) = 0;
+	virtual bool DeletePoint(int pointindex) = 0;
 
 	// parts
-	virtual bool InsertPart(int PartIndex, int PointIndex) = 0;
-	virtual bool DeletePart(int PartIndex) = 0;
-	virtual int get_PartStartPoint(int PartIndex) = 0;
-	virtual int get_PartEndPoint(int PartIndex) = 0;
-	virtual bool put_PartStartPoint(long PartIndex, long newVal) = 0;
+	virtual bool InsertPart(int partIndex, int pointIndex) = 0;
+	virtual bool DeletePart(int partIndex) = 0;
+	virtual int get_PartStartPoint(int partIndex) = 0;
+	virtual int get_PartEndPoint(int partIndex) = 0;
+	virtual bool put_PartStartPoint(long partIndex, long newVal) = 0;
 
 	virtual void ReversePoints(long startIndex, long endIndex) = 0;
 

@@ -44,7 +44,7 @@ namespace MapWinGISTests
             for (var i = 0; i < numShapesInput; i++)
             {
                 var shape = sfLineInput.Shape[i];
-                var numPoints = shape.numPoints;
+                var numPoints = shape.NumPoints;
                 const int distance = 20;
 
                 // Skip the first point:

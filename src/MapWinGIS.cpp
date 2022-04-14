@@ -31,7 +31,7 @@ static char THIS_FILE[] = __FILE__;
 
 const GUID CDECL BASED_CODE _tlid = { 0xc368d713, 0xcc5f, 0x40ed, { 0x9f, 0x53, 0xf8, 0x4f, 0xe1, 0x97, 0xb9, 0x6a } };
 const WORD _wVerMajor = 5;
-const WORD _wVerMinor = 3;
+const WORD _wVerMinor = 4;
 
 CMapWinGISApp NEAR theApp;
 CMapWinGISModule _AtlModule;    // this one is from ATL7 (used by all ATL co-classes)

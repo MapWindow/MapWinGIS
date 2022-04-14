@@ -20,14 +20,18 @@
 //										shifted area, length, perimeter properties from CUtils;
 //06-aug-2009 lsu - added OGR/GEOS geoprocessing functions;
 //********************************************************************************************************
-#include "stdafx.h"
+#include <StdAfx.h>
 #include "Shape.h"
+
+#include <gsl/pointers>
+#include <gsl/span_ext>
+
 #include "GeometryHelper.h"
 #include "Templates.h"
 #include "GeosHelper.h"
-#include <algorithm>
 #include "GeosConverter.h"
 #include "LabelsHelper.h"
+#include "OgrConverter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -39,18 +43,22 @@ static char THIS_FILE[] = __FILE__;
 //		Constructor
 // **********************************************
 CShape::CShape()
-{	
-	_pUnkMarshaler = NULL;
-	
-	USES_CONVERSION;
+{
+	_pUnkMarshaler = nullptr;
+
 	_key = A2BSTR("");
-	_globalCallback = NULL;
+	_globalCallback = nullptr;
 	_lastErrorCode = tkNO_ERROR;
 	_isValidReason = "";
-	
+
 	_useFastMode = m_globalSettings.shapefileFastMode;
 
 	_shp = ShapeUtility::CreateEmptyWrapper(!_useFastMode);
+
+	// Missing initializer:
+	_labelX = 0;
+	_labelY = 0;
+	_labelRotation = 0;
 
 	gReferenceCounter.AddRef(tkInterface::idShape);
 }
@@ -60,18 +68,18 @@ CShape::CShape()
 // **********************************************
 CShape::~CShape()
 {
-	::SysFreeString(_key);			
-		
+	SysFreeString(_key);
+
 	if (_shp) {
 		delete _shp;
-		_shp = NULL;
+		_shp = nullptr;
 	}
 
 	if (_globalCallback) {
-		_globalCallback->Release();
+		_globalCallback->Release(); // TODO: Fix compile warning
 	}
 
-	gReferenceCounter.Release(tkInterface::idShape);
+	gReferenceCounter.Release(tkInterface::idShape); // TODO: Fix compile warning
 }
 
 #pragma region DataConversions
@@ -79,20 +87,18 @@ CShape::~CShape()
 // **********************************************
 //   put_RawData()
 // **********************************************
-bool CShape::put_RawData(char* data, int recordLength)
+bool CShape::put_RawData(char* data, const int recordLength)
 {
-	if (data == NULL) return false;
+	if (data == nullptr) return false;
 
 	IShapeWrapper* wrapper = ShapeUtility::CreateWrapper(data, recordLength, !_useFastMode);
 	if (!wrapper) {
 		return false;
 	}
 
-	if (_shp) {
-		delete _shp;
-	}
-
+	delete _shp;
 	_shp = wrapper;
+
 	ClearLabelPositionCache();
 	return true;
 }
@@ -100,11 +106,11 @@ bool CShape::put_RawData(char* data, int recordLength)
 // **********************************************
 //		put_FastMode
 // **********************************************
-void CShape::put_FastMode(bool newValue)
+void CShape::put_FastMode(const bool newValue)
 {
-	if (newValue != _useFastMode )
+	if (newValue != _useFastMode)
 	{
-		ShpfileType shpType = _shp->get_ShapeType();
+		const ShpfileType shpType = _shp->get_ShapeType();
 
 		// for M and Z types the same COM point-based wrapper is used
 		if (!ShapeUtility::IsM(shpType) && !ShapeUtility::IsZ(shpType))
@@ -126,10 +132,10 @@ void CShape::put_FastMode(bool newValue)
 // *************************************************************
 //		get_LastErrorCode
 // *************************************************************
-STDMETHODIMP CShape::get_LastErrorCode(long *pVal)
+STDMETHODIMP CShape::get_LastErrorCode(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
 
@@ -139,12 +145,11 @@ STDMETHODIMP CShape::get_LastErrorCode(long *pVal)
 // *************************************************************
 //		get_ErrorMsg
 // *************************************************************
-STDMETHODIMP CShape::get_ErrorMsg(long ErrorCode, BSTR *pVal)
+STDMETHODIMP CShape::get_ErrorMsg(const long errorCode, BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	USES_CONVERSION;
-	*pVal = A2BSTR(ErrorMsg(ErrorCode));
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = A2BSTR(ErrorMsg(errorCode));
 
 	return S_OK;
 }
@@ -152,36 +157,39 @@ STDMETHODIMP CShape::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 // *************************************************************
 //		get/put_globalCallback
 // *************************************************************
-STDMETHODIMP CShape::get_GlobalCallback(ICallback **pVal)
+STDMETHODIMP CShape::get_GlobalCallback(ICallback** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*pVal = _globalCallback;
-	if( _globalCallback != NULL )
+	if (_globalCallback != nullptr)
 		_globalCallback->AddRef();
+
 	return S_OK;
 }
-STDMETHODIMP CShape::put_GlobalCallback(ICallback *newVal)
+STDMETHODIMP CShape::put_GlobalCallback(ICallback* newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	ComHelper::SetRef(newVal, reinterpret_cast<IDispatch**>(&_globalCallback));
 	return S_OK;
 }
 
 // *************************************************************
 //		get/put__key
 // *************************************************************
-STDMETHODIMP CShape::get_Key(BSTR *pVal)
+STDMETHODIMP CShape::get_Key(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 STDMETHODIMP CShape::put_Key(BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	::SysFreeString(_key);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	SysFreeString(_key);
 	_key = OLE2BSTR(newVal);
 	return S_OK;
 }
@@ -189,37 +197,38 @@ STDMETHODIMP CShape::put_Key(BSTR newVal)
 //***************************************************************
 //		ErrorMessage()								           
 //***************************************************************
-inline void CShape::ErrorMessage(long ErrorCode)
+inline void CShape::ErrorMessage(const long errorCode)
 {
-	_lastErrorCode = ErrorCode;
+	_lastErrorCode = errorCode;
 	CallbackHelper::ErrorMsg("Shape", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // *************************************************************
 //		Create
 // *************************************************************
-STDMETHODIMP CShape::Create(ShpfileType ShpType, VARIANT_BOOL *retval)
+STDMETHODIMP CShape::Create(const ShpfileType shpType, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retval = VARIANT_FALSE;
 
-	if(	ShpType == SHP_MULTIPATCH )
-	{	
+	if (shpType == SHP_MULTIPATCH)
+	{
 		ErrorMessage(tkUNSUPPORTED_SHAPEFILE_TYPE);
 		*retval = VARIANT_FALSE;
+		// TODO: Shouldn't we exit: return S_OK;  ??
 	}
 
 	// we shall create a new instance of wrapper each and every time
 	// old data is expected to be cleared all the same
-	IShapeWrapper* wrapper = ShapeUtility::CreateWrapper(ShpType, !_useFastMode);
+	IShapeWrapper* wrapper = ShapeUtility::CreateWrapper(shpType, !_useFastMode);
 	if (!wrapper) {
-		return false;
+		return S_OK;
 	}
 
 	if (_shp) {
 		_shp->Clear();
 		delete _shp;
-		_shp = NULL;
+		_shp = nullptr;
 	}
 
 	_shp = wrapper;
@@ -232,9 +241,10 @@ STDMETHODIMP CShape::Create(ShpfileType ShpType, VARIANT_BOOL *retval)
 // **********************************************************
 //		get_ShapeType
 // **********************************************************
-STDMETHODIMP CShape::get_ShapeType(ShpfileType *pVal)
+STDMETHODIMP CShape::get_ShapeType(ShpfileType* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*pVal = _shp->get_ShapeType();
 	return S_OK;
 }
@@ -242,28 +252,28 @@ STDMETHODIMP CShape::get_ShapeType(ShpfileType *pVal)
 // *************************************************************
 //		put_ShapeType
 // *************************************************************
-STDMETHODIMP CShape::put_ShapeType(ShpfileType newVal)
-{	
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+STDMETHODIMP CShape::put_ShapeType(const ShpfileType newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ShapeWrapperType type = _shp->get_WrapperType();
-	ShapeWrapperType newType = ShapeUtility::GetShapeWrapperType(newVal, !_useFastMode);
+	const ShapeWrapperType type = _shp->get_WrapperType();
+	const ShapeWrapperType newType = ShapeUtility::GetShapeWrapperType(newVal, !_useFastMode);
 
-	if (type == newType) 
+	if (type == newType)
 	{
-		if (!_shp->put_ShapeType(newVal))
-		{
+		if (!_shp->put_ShapeType(newVal)) {
 			ErrorMessage(_shp->get_LastErrorCode());
 		}
-		else
+		else {
 			ClearLabelPositionCache();
+		}
 	}
-	else 
+	else
 	{
 		// change wrapper type if needed
 		IShapeWrapper* shpNew = ShapeUtility::CreateWrapper(newVal, !_useFastMode);
-		
-		if (!shpNew->put_ShapeType(newVal))	{
+
+		if (!shpNew->put_ShapeType(newVal)) {
 			ErrorMessage(shpNew->get_LastErrorCode());
 		}
 		else {
@@ -284,18 +294,18 @@ bool CShape::ValidateBasics(ShapeValidityCheck& failedCheck, CString& errMsg)
 	if (_shp->get_PointCount() == 0)
 	{
 		errMsg = "Shape hasn't got points";
-		failedCheck = NoPoints;
+		failedCheck = ShapeValidityCheck::NoPoints;
 		return false;
 	}
 
-	ShpfileType shptype = ShapeUtility::Convert2D(_shp->get_ShapeType());
+	const ShpfileType shptype = ShapeUtility::Convert2D(_shp->get_ShapeType());
 
 	if (shptype == SHP_POLYGON || shptype == SHP_POLYLINE)
 	{
 		if (_shp->get_PartCount() == 0)
 		{
 			errMsg = "Shape hasn't got parts";
-			failedCheck = NoParts;
+			failedCheck = ShapeValidityCheck::NoParts;
 			return false;
 		}
 	}
@@ -306,23 +316,21 @@ bool CShape::ValidateBasics(ShapeValidityCheck& failedCheck, CString& errMsg)
 
 	if (shptype == SHP_POLYLINE || shptype == SHP_POLYGON)
 	{
-		if (_shp->get_PointCount() < minPointCount) 
+		if (_shp->get_PointCount() < minPointCount)
 		{
 			errMsg = "Shape doesn't have enough points for its type.";
-			failedCheck = NotEnoughPoints;
+			failedCheck = ShapeValidityCheck::NotEnoughPoints;
 			return false;
 		}
-		// the same check for parts
-		int beg_part, end_part;
 		for (long i = 0; i < _shp->get_PartCount(); i++)
 		{
-			beg_part = _shp->get_PartStartPoint(i);
-			end_part = _shp->get_PartEndPoint(i);
-			int count = end_part - beg_part + 1;
-			if (count < minPointCount) 
+			const int begPart = _shp->get_PartStartPoint(i);
+			const int endPart = _shp->get_PartEndPoint(i);
+			const int count = endPart - begPart + 1;
+			if (count < minPointCount)
 			{
 				errMsg = "A part doesn't have enough points for a given shape type.";
-				failedCheck = EmptyParts;
+				failedCheck = ShapeValidityCheck::EmptyParts;
 				return false;
 			}
 		}
@@ -330,21 +338,20 @@ bool CShape::ValidateBasics(ShapeValidityCheck& failedCheck, CString& errMsg)
 
 	if (shptype == SHP_POLYGON)
 	{
-		int beg_part, end_part;
 		double x1, x2, y1, y2;
 
 		for (long i = 0; i < _shp->get_PartCount(); i++)
 		{
-			beg_part = _shp->get_PartStartPoint(i);
-			end_part = _shp->get_PartEndPoint(i);
+			const int begPart = _shp->get_PartStartPoint(i);
+			const int endPart = _shp->get_PartEndPoint(i);
 
-			_shp->get_PointXY(beg_part, x1, y1);
-			_shp->get_PointXY(end_part, x2, y2);
+			_shp->get_PointXY(begPart, x1, y1);
+			_shp->get_PointXY(endPart, x2, y2);
 
 			if (x1 != x2 || y1 != y2)
 			{
 				errMsg = "The first and the last point of the polygon part must be the same";
-				failedCheck = FirstAndLastPointOfPartMatch;
+				failedCheck = ShapeValidityCheck::FirstAndLastPointOfPartMatch;
 				return false;
 			}
 		}
@@ -354,7 +361,7 @@ bool CShape::ValidateBasics(ShapeValidityCheck& failedCheck, CString& errMsg)
 	if (shptype == SHP_POLYGON)
 	{
 		VARIANT_BOOL isClockwise;
-		int partCount = _shp->get_PartCount();
+		const int partCount = _shp->get_PartCount();
 		if (partCount == 1)
 		{
 			this->get_PartIsClockWise(0, &isClockwise);
@@ -364,7 +371,7 @@ bool CShape::ValidateBasics(ShapeValidityCheck& failedCheck, CString& errMsg)
 				double x, y;
 				this->get_XY(0, &x, &y, &ret);
 				errMsg.Format("Polygon must be clockwise [%f %f]", x, y);
-				failedCheck = DirectionOfPolyRings;
+				failedCheck = ShapeValidityCheck::DirectionOfPolyRings;
 				return false;
 			}
 		}
@@ -378,9 +385,9 @@ bool CShape::ValidateBasics(ShapeValidityCheck& failedCheck, CString& errMsg)
 // Checking validity of the geometry
 STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retval = VARIANT_FALSE;
-		
+
 	ShapeValidityCheck validityCheck;
 	if (!ValidateBasics(validityCheck, _isValidReason)) {
 		return S_OK;
@@ -389,14 +396,14 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 	// -----------------------------------------------
 	//  check through GEOS (common for both modes)
 	// -----------------------------------------------
-    GEOSGeom hGeosGeom = GeosConverter::ShapeToGeom(this);
-	if (hGeosGeom == NULL)
+	const GEOSGeom hGeosGeom = GeosConverter::ShapeToGeom(this);
+	if (hGeosGeom == nullptr)
 	{
 		_isValidReason = "Failed to convert to GEOS geometry";
 		return S_OK;
 	}
 
-	if (!GeosHelper::IsValid(hGeosGeom ))
+	if (!GeosHelper::IsValid(hGeosGeom))
 	{
 		char* buffer = GeosHelper::IsValidReason(hGeosGeom);
 		_isValidReason = buffer;
@@ -407,7 +414,7 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 		*retval = VARIANT_TRUE;
 	}
 	GeosHelper::DestroyGeometry(hGeosGeom);
-	
+
 	return S_OK;
 }
 #pragma endregion
@@ -416,9 +423,10 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 // **********************************************************
 //		get_NumParts
 // **********************************************************
-STDMETHODIMP CShape::get_NumParts(long *pVal)
+STDMETHODIMP CShape::get_NumParts(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*pVal = _shp->get_PartCount();
 	return S_OK;
 }
@@ -426,10 +434,11 @@ STDMETHODIMP CShape::get_NumParts(long *pVal)
 // *************************************************************
 //		get_Part
 // *************************************************************
-STDMETHODIMP CShape::get_Part(long PartIndex, long* pVal)
+STDMETHODIMP CShape::get_Part(const long partIndex, long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _shp->get_PartStartPoint(PartIndex);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _shp->get_PartStartPoint(partIndex);
 	if (*pVal == -1)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -440,28 +449,28 @@ STDMETHODIMP CShape::get_Part(long PartIndex, long* pVal)
 // *************************************************************
 //		put_Part
 // *************************************************************
-STDMETHODIMP CShape::put_Part(long PartIndex, long newVal)
+STDMETHODIMP CShape::put_Part(const long partIndex, const long newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	
-	if (!_shp->put_PartStartPoint(PartIndex, newVal))
-	{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!_shp->put_PartStartPoint(partIndex, newVal)) {
 		ErrorMessage(_shp->get_LastErrorCode());
 	}
-	else
+	else {
 		ClearLabelPositionCache();
+	}
 	return S_OK;
 }
 
-/***********************************************************************/
-/*		get_EndOfPart()
-/***********************************************************************/
+//***********************************************************************
+//*		get_EndOfPart()
+//***********************************************************************
 //  Returns last point of the part
-STDMETHODIMP CShape::get_EndOfPart(long PartIndex, long* retval)
+STDMETHODIMP CShape::get_EndOfPart(const long partIndex, long* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retval = _shp->get_PartEndPoint(PartIndex);
+
+	*retval = _shp->get_PartEndPoint(partIndex);
 	if (*retval == VARIANT_FALSE)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -472,11 +481,11 @@ STDMETHODIMP CShape::get_EndOfPart(long PartIndex, long* retval)
 // *************************************************************
 //		InsertPart
 // *************************************************************
-STDMETHODIMP CShape::InsertPart(long PointIndex, long *PartIndex, VARIANT_BOOL *retval)
+STDMETHODIMP CShape::InsertPart(const long pointIndex, long* partIndex, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	*retval = (VARIANT_BOOL)_shp->InsertPart(*PartIndex , PointIndex);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retval = static_cast<VARIANT_BOOL>(_shp->InsertPart(*partIndex, pointIndex));
 	if (*retval == VARIANT_FALSE)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -484,15 +493,15 @@ STDMETHODIMP CShape::InsertPart(long PointIndex, long *PartIndex, VARIANT_BOOL *
 	ClearLabelPositionCache();
 	return S_OK;
 }
-	
+
 // *************************************************************
 //		DeletePart
 // *************************************************************
-STDMETHODIMP CShape::DeletePart(long PartIndex, VARIANT_BOOL *retval)
+STDMETHODIMP CShape::DeletePart(const long partIndex, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	*retval = (VARIANT_BOOL)_shp->DeletePart(PartIndex);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retval = static_cast<VARIANT_BOOL>(_shp->DeletePart(partIndex));
 	if (*retval == VARIANT_FALSE)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -506,42 +515,42 @@ STDMETHODIMP CShape::DeletePart(long PartIndex, VARIANT_BOOL *retval)
 //*********************************************************************
 //  Returns true if points of shape's part are in clockwise direction
 //  and false otherwise
-STDMETHODIMP CShape::get_PartIsClockWise(long PartIndex, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::get_PartIsClockWise(const long partIndex, VARIANT_BOOL* retval)
 {
 	*retval = VARIANT_FALSE;
-	
+
 	long numParts, numPoints;
 	this->get_NumParts(&numParts);
 
-	if ((PartIndex >= numParts) || (PartIndex < 0))
+	if (partIndex >= numParts || partIndex < 0)
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
-	
-	long beg_part, end_part;
+
+	long begPart, endPart;
 	this->get_NumPoints(&numPoints);
-	this->get_Part(PartIndex,&beg_part);
-	
-	if( numParts - 1 > PartIndex )	
-		this->get_Part(PartIndex+1, &end_part);
-	else							
-		end_part = numPoints;
-	
+	this->get_Part(partIndex, &begPart);
+
+	if (numParts - 1 > partIndex)
+		this->get_Part(partIndex + 1, &endPart);
+	else
+		endPart = numPoints;
+
 	//lsu: we need to calcuate area of part to determine clockwiseness
 	double x1, x2, y1, y2;
 	VARIANT_BOOL vbretval;
 	double area = 0;
 
-	for(long i = beg_part; i < end_part - 1; i++)
+	for (long i = begPart; i < endPart - 1; i++)
 	{
 		this->get_XY(i, &x1, &y1, &vbretval);
 		this->get_XY(i + 1, &x2, &y2, &vbretval);
 		area += (x1 * y2) - (x2 * y1);
 	}
-    
-    if (area < 0) *retval = VARIANT_TRUE;
-	
+
+	if (area < 0) *retval = VARIANT_TRUE;
+
 	return S_OK;
 }
 
@@ -549,33 +558,33 @@ STDMETHODIMP CShape::get_PartIsClockWise(long PartIndex, VARIANT_BOOL* retval)
 //		CShape::ReversePointsOrder()
 //***********************************************************************/
 //  Changes the order of points for shape's part
-STDMETHODIMP CShape::ReversePointsOrder(long PartIndex, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::ReversePointsOrder(const long partIndex, VARIANT_BOOL* retval)
 {
 	*retval = VARIANT_FALSE;
-	
+
 	long numParts, numPoints;
 	this->get_NumParts(&numParts);
 
-	if ((PartIndex >= numParts) || (PartIndex < 0))
+	if (partIndex >= numParts || partIndex < 0)
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
-	
-	long beg_part, end_part;
+
+	long begPart, endPart;
 	this->get_NumPoints(&numPoints);
-	this->get_Part(PartIndex,&beg_part);
-	
-	if( numParts - 1 > PartIndex )	
+	this->get_Part(partIndex, &begPart);
+
+	if (numParts - 1 > partIndex)
 	{
-		this->get_Part(PartIndex+1, &end_part);
+		this->get_Part(partIndex + 1, &endPart);
 	}
-	else							
+	else
 	{
-		end_part = numPoints;
+		endPart = numPoints;
 	}
 
-	_shp->ReversePoints(beg_part, end_part);
+	_shp->ReversePoints(begPart, endPart);
 
 	*retval = VARIANT_TRUE;
 	ClearLabelPositionCache();
@@ -586,34 +595,34 @@ STDMETHODIMP CShape::ReversePointsOrder(long PartIndex, VARIANT_BOOL* retval)
 //		PartAsShape()
 // ***************************************************************
 //  Returns part of the shape as new shape; new points are created
-STDMETHODIMP CShape::get_PartAsShape(long PartIndex, IShape **pVal)
+STDMETHODIMP CShape::get_PartAsShape(const long partIndex, IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	long beg_part, end_part;
-	this->get_Part(PartIndex, &beg_part);
-	this->get_EndOfPart(PartIndex, &end_part);
-	
-	if (beg_part == -1 || end_part == -1) 
+
+	long begPart, endPart;
+	this->get_Part(partIndex, &begPart);
+	this->get_EndOfPart(partIndex, &endPart);
+
+	if (begPart == -1 || endPart == -1)
 	{
-		*pVal = NULL; 
+		*retval = nullptr;
 		return S_OK;
 	}
-	
-	IShape * shp = NULL;
+
+	IShape* shp;
 	ComHelper::CreateShape(&shp);
-	
-	ShpfileType shptype = _shp->get_ShapeType();
+
+	const ShpfileType shptype = _shp->get_ShapeType();
 	shp->put_ShapeType(shptype);
 
-	long part  = 0; 
+	long part = 0;
 	VARIANT_BOOL vbretval;
 	shp->InsertPart(0, &part, &vbretval);
-	
+
 	long cnt = 0;
-	IPoint* pntOld = NULL;
-	IPoint* pntNew = NULL;
-	for (int i = beg_part; i <=end_part; i++)
+	IPoint* pntOld;
+	IPoint* pntNew;
+	for (int i = begPart; i <= endPart; i++)
 	{
 		this->get_Point(i, &pntOld);
 		pntOld->Clone(&pntNew);
@@ -622,7 +631,7 @@ STDMETHODIMP CShape::get_PartAsShape(long PartIndex, IShape **pVal)
 		pntNew->Release();
 		cnt++;
 	}
-	*pVal = shp;
+	*retval = shp;
 	return S_OK;
 }
 
@@ -632,9 +641,10 @@ STDMETHODIMP CShape::get_PartAsShape(long PartIndex, IShape **pVal)
 // **********************************************************
 //		get_NumPoints
 // **********************************************************
-STDMETHODIMP CShape::get_NumPoints(long *pVal)
+STDMETHODIMP CShape::get_NumPoints(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*pVal = _shp->get_PointCount();
 	return S_OK;
 }
@@ -642,11 +652,12 @@ STDMETHODIMP CShape::get_NumPoints(long *pVal)
 // *************************************************************
 //		get_Point
 // *************************************************************
-STDMETHODIMP CShape::get_Point(long PointIndex, IPoint **pVal)
+STDMETHODIMP CShape::get_Point(const long pointIndex, IPoint** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _shp->get_Point(PointIndex);
-	if ((*pVal) == NULL)
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _shp->get_Point(pointIndex);
+	if (*pVal == nullptr)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
 	}
@@ -656,25 +667,25 @@ STDMETHODIMP CShape::get_Point(long PointIndex, IPoint **pVal)
 // *************************************************************
 //		put_Point
 // *************************************************************
-STDMETHODIMP CShape::put_Point(long PointIndex, IPoint *newVal)
+STDMETHODIMP CShape::put_Point(const long pointIndex, IPoint* newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( newVal == NULL )
-	{	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal == nullptr)
+	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 	}
 	else
 	{
-		double x, y;	
+		double x, y;
 		newVal->get_X(&x);
 		newVal->get_Y(&y);
 		newVal->Release();
-		if (!_shp->put_PointXY(PointIndex, x, y))
+		if (!_shp->put_PointXY(pointIndex, x, y))
 		{
 			ErrorMessage(_shp->get_LastErrorCode());
 		}
-		else
-			ClearLabelPositionCache();
+		ClearLabelPositionCache();
 	}
 	return S_OK;
 }
@@ -682,11 +693,11 @@ STDMETHODIMP CShape::put_Point(long PointIndex, IPoint *newVal)
 // *************************************************************
 //		InsertPoint
 // *************************************************************
-STDMETHODIMP CShape::InsertPoint(IPoint *NewPoint, long *PointIndex, VARIANT_BOOL *retval)
+STDMETHODIMP CShape::InsertPoint(IPoint* newPoint, long* pointIndex, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retval = (VARIANT_BOOL)_shp->InsertPoint(*PointIndex, NewPoint);
+	*retval = static_cast<VARIANT_BOOL>(_shp->InsertPoint(*pointIndex, newPoint));
 	if (*retval == VARIANT_FALSE)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -698,11 +709,11 @@ STDMETHODIMP CShape::InsertPoint(IPoint *NewPoint, long *PointIndex, VARIANT_BOO
 // *************************************************************
 //		DeletePoint
 // *************************************************************
-STDMETHODIMP CShape::DeletePoint(long PointIndex, VARIANT_BOOL *retval)
+STDMETHODIMP CShape::DeletePoint(const long pointIndex, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	*retval = (VARIANT_BOOL)_shp->DeletePoint(PointIndex);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retval = static_cast<VARIANT_BOOL>(_shp->DeletePoint(pointIndex));
 	if (*retval == VARIANT_FALSE)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
@@ -714,78 +725,84 @@ STDMETHODIMP CShape::DeletePoint(long PointIndex, VARIANT_BOOL *retval)
 // *************************************************************
 //		get_XY
 // *************************************************************
-STDMETHODIMP CShape::get_XY(long PointIndex, double* x, double* y, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::get_XY(const long pointIndex, double* x, double* y, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = get_XY(PointIndex, x, y) ? VARIANT_TRUE : VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retval = get_XY(pointIndex, x, y) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
 // **********************************************
 //   put_XY()
 // **********************************************
-STDMETHODIMP CShape::put_XY(LONG pointIndex, double x, double y, VARIANT_BOOL* retVal)
+STDMETHODIMP CShape::put_XY(const LONG pointIndex, const double x, const double y, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*retVal = _shp->put_PointXY(pointIndex, x, y) ? VARIANT_TRUE : VARIANT_FALSE;
 	if (*retVal == VARIANT_FALSE)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
 	}
-	else
-		ClearLabelPositionCache();
+	//else
+	ClearLabelPositionCache();
 	return S_OK;
 }
 
 // **********************************************
 //   put_M()
 // **********************************************
-STDMETHODIMP CShape::put_M(LONG pointIndex, double m, VARIANT_BOOL* retVal)
+STDMETHODIMP CShape::put_M(const LONG pointIndex, const double m, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*retVal = _shp->put_PointM(pointIndex, m) ? VARIANT_TRUE : VARIANT_FALSE;
-	if (!(*retVal))
+	if (!*retVal)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
 	}
-	else
-		ClearLabelPositionCache();
+	//else
+	ClearLabelPositionCache();
 	return S_OK;
 }
 
 // **********************************************
 //   put_Z()
 // **********************************************
-STDMETHODIMP CShape::put_Z(LONG pointIndex, double z, VARIANT_BOOL* retVal)
+STDMETHODIMP CShape::put_Z(const LONG pointIndex, const double z, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*retVal = _shp->put_PointZ(pointIndex, z) ? VARIANT_TRUE : VARIANT_FALSE;
-	if (!(*retVal))
+	if (!*retVal)
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
 	}
-	else
-		ClearLabelPositionCache();
+	//else
+	ClearLabelPositionCache();
 	return S_OK;
 }
 
 // *************************************************************
 //		get_Z
 // *************************************************************
-STDMETHODIMP CShape::get_Z(long PointIndex, double* z, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::get_Z(const long pointIndex, double* z, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = get_Z(PointIndex, z) ? VARIANT_TRUE : VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = get_Z(pointIndex, z) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
 // *************************************************************
 //		get_M
 // *************************************************************
-STDMETHODIMP CShape::get_M(long PointIndex, double* m, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::get_M(const long pointIndex, double* m, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = get_M(PointIndex, m) ? VARIANT_TRUE : VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = get_M(pointIndex, m) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -797,42 +814,43 @@ STDMETHODIMP CShape::get_M(long PointIndex, double* m, VARIANT_BOOL* retval)
 //			get_Center()
 // *****************************************************************
 //  Returns center of shape (crossing of diagonals of bounding box)
-STDMETHODIMP CShape::get_Center(IPoint **pVal)
+STDMETHODIMP CShape::get_Center(IPoint** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	double xMin, xMax, yMin, yMax;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	double xMin = 0, xMax = 0, yMin = 0, yMax = 0;
 	double x, y;
-	
+
 	//CShapeWrapper* shp = (CShapeWrapper*)_shp;
 	//std::vector<pointEx>* points = &shp->_points;
 
-	for( int i = 0; i < (int)_shp->get_PointCount(); i++ )
-	{	
+	const int pointCount = _shp->get_PointCount();
+	for (int i = 0; i < pointCount; i++)
+	{
 		_shp->get_PointXY(i, x, y);
 
-		if( i == 0 )
-		{	
+		if (i == 0)
+		{
 			xMin = x; xMax = x;
 			yMin = y; yMax = y;
 		}
 		else
-		{	
-			if		(x < xMin)	xMin = x;
-			else if (x > xMax)	xMax = x;
-			if		(y < yMin)	yMin = y;
-			else if (y > yMax)	yMax = y;
+		{
+			if (x < xMin) xMin = x;
+			else if (x > xMax) xMax = x;
+			if (y < yMin) yMin = y;
+			else if (y > yMax) yMax = y;
 		}
-	}	
-	
-	x = xMin + (xMax - xMin)/2;
-	y = yMin + (yMax - yMin)/2;
+	}
 
-	IPoint * pnt = NULL;
-	CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&pnt );
-	pnt->put_X(x);pnt->put_Y(y);
+	x = xMin + (xMax - xMin) / 2;
+	y = yMin + (yMax - yMin) / 2;
+
+	IPoint* pnt = nullptr;
+	CoCreateInstance(CLSID_Point, nullptr, CLSCTX_INPROC_SERVER, IID_IPoint, reinterpret_cast<void**>(&pnt));
+	pnt->put_X(x); pnt->put_Y(y);
 	*pVal = pnt;
-	
+
 	return S_OK;
 }
 
@@ -840,15 +858,15 @@ STDMETHODIMP CShape::get_Center(IPoint **pVal)
 //		get_Length
 // *************************************************************
 // TODO: it's possible to optimize it for fast mode
-STDMETHODIMP CShape::get_Length(double *pVal)
+STDMETHODIMP CShape::get_Length(double* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	ShpfileType shptype;
 	this->get_ShapeType(&shptype);
 
-	if( shptype != SHP_POLYLINE && shptype != SHP_POLYLINEZ && shptype != SHP_POLYLINEM )
-	{	
+	if (shptype != SHP_POLYLINE && shptype != SHP_POLYLINEZ && shptype != SHP_POLYLINEM)
+	{
 		*pVal = 0.0;
 		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
 		return S_OK;
@@ -858,33 +876,33 @@ STDMETHODIMP CShape::get_Length(double *pVal)
 	long numParts = 0, numPoints = 0;
 	this->get_NumParts(&numParts);
 	this->get_NumPoints(&numPoints);
-	
-	long beg_part = 0;
-	long end_part = 0;
-	for( int j = 0; j < numParts; j++ )
-	{	
-		this->get_Part(j,&beg_part);
-		if( numParts - 1 > j )
+
+	long begPart = 0;
+	long endPart = 0;
+	for (int j = 0; j < numParts; j++)
+	{
+		this->get_Part(j, &begPart);
+		if (numParts - 1 > j)
 		{
-			this->get_Part(j+1,&end_part);
+			this->get_Part(j + 1, &endPart);
 		}
 		else
 		{
-			end_part = numPoints;
+			endPart = numPoints;
 		}
 
 		double oneX, oneY;
 		double twoX, twoY;
 		VARIANT_BOOL vbretval;
 
-		for( int i = beg_part; i < end_part-1; i++ )
-		{	
+		for (int i = begPart; i < endPart - 1; i++)
+		{
 			this->get_XY(i, &oneX, &oneY, &vbretval);
 			this->get_XY(i + 1, &twoX, &twoY, &vbretval);
-			length += sqrt( pow( twoX - oneX, 2 ) + pow( twoY - oneY, 2 ) );
+			length += sqrt(pow(twoX - oneX, 2) + pow(twoY - oneY, 2));
 		}
 	}
-	
+
 	*pVal = length;
 	return S_OK;
 }
@@ -893,15 +911,15 @@ STDMETHODIMP CShape::get_Length(double *pVal)
 //		get_Perimeter
 // *************************************************************
 // TODO: it's possible to optimize it for fast mode
-STDMETHODIMP CShape::get_Perimeter(double *pVal)
+STDMETHODIMP CShape::get_Perimeter(double* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	ShpfileType shptype;
 	this->get_ShapeType(&shptype);
 
-	if( shptype != SHP_POLYGON && shptype != SHP_POLYGONZ && shptype != SHP_POLYGONM )
-	{	
+	if (shptype != SHP_POLYGON && shptype != SHP_POLYGONZ && shptype != SHP_POLYGONM)
+	{
 		*pVal = 0.0;
 		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
 		return S_OK;
@@ -912,25 +930,24 @@ STDMETHODIMP CShape::get_Perimeter(double *pVal)
 	this->get_NumParts(&numParts);
 	this->get_NumPoints(&numPoints);
 
-	long beg_part = 0;
-	long end_part = 0;
-	for( int j = 0; j < numParts; j++ )
-	{	
-		this->get_Part(j,&beg_part);
-		if( numParts - 1 > j )
-			this->get_Part(j+1,&end_part);
+	long begPart = 0;
+	long endPart = 0;
+	for (int j = 0; j < numParts; j++)
+	{
+		this->get_Part(j, &begPart);
+		if (numParts - 1 > j)
+			this->get_Part(j + 1, &endPart);
 		else
-			end_part = numPoints;
-		
+			endPart = numPoints;
+
 		double px1, py1, px2, py2;
 		VARIANT_BOOL vbretval;
-		for( int i = beg_part; i < end_part-1; i++ )
-		{	
+		for (int i = begPart; i < endPart - 1; i++)
+		{
 			this->get_XY(i, &px1, &py1, &vbretval);
 			this->get_XY(i + 1, &px2, &py2, &vbretval);
-			perimeter += sqrt( pow(px2 - px1, 2) + pow(py2 - py1,2));
+			perimeter += sqrt(pow(px2 - px1, 2) + pow(py2 - py1, 2));
 		}
-		
 	}
 
 	*pVal = perimeter;
@@ -940,15 +957,15 @@ STDMETHODIMP CShape::get_Perimeter(double *pVal)
 // *************************************************************
 //		get_Extents
 // *************************************************************
-STDMETHODIMP CShape::get_Extents(IExtents **pVal)
+STDMETHODIMP CShape::get_Extents(IExtents** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	double xMin = 0.0, xMax = 0.0,
-		   yMin = 0.0, yMax = 0.0,
-		   zMin = 0.0, zMax = 0.0,
-		   mMin = 0.0, mMax = 0.0;
-		
+		yMin = 0.0, yMax = 0.0,
+		zMin = 0.0, zMax = 0.0,
+		mMin = 0.0, mMax = 0.0;
+
 	if (_shp->get_ShapeType2D() == SHP_POINT)
 	{
 		_shp->get_PointXY(0, xMin, yMin);
@@ -959,10 +976,10 @@ STDMETHODIMP CShape::get_Extents(IExtents **pVal)
 		_shp->get_Bounds(xMin, xMax, yMin, yMax, zMin, zMax, mMin, mMax);
 	}
 
-	IExtents * bBox = NULL;
+	IExtents* bBox;
 	ComHelper::CreateExtents(&bBox);
-	bBox->SetBounds(xMin,yMin,zMin,xMax,yMax,zMax);
-	bBox->SetMeasureBounds(mMin,mMax);
+	bBox->SetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
+	bBox->SetMeasureBounds(mMin, mMax);
 	*pVal = bBox;
 	return S_OK;
 }
@@ -971,90 +988,95 @@ STDMETHODIMP CShape::get_Extents(IExtents **pVal)
 //		get_Area
 // *************************************************************
 // TODO: it's possible to optimize it for fast mode
-STDMETHODIMP CShape::get_Area(double *pVal)
+STDMETHODIMP CShape::get_Area(double* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	ShpfileType shptype;
 	this->get_ShapeType(&shptype);
 
-	if( shptype != SHP_POLYGON && shptype != SHP_POLYGONZ && shptype != SHP_POLYGONM )
-	{	
+	if (shptype != SHP_POLYGON && shptype != SHP_POLYGONZ && shptype != SHP_POLYGONM)
+	{
 		*pVal = 0.0;
 		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
 		return S_OK;
 	}
 
-	double total_area = 0.0;
-	double indiv_area = 0.0;
+	double totalArea = 0.0;
 
 	long numParts = 0, numPoints = 0;
 	this->get_NumParts(&numParts);
 	this->get_NumPoints(&numPoints);
-	
-	if(numParts > 1)
+
+	if (numParts > 1)
 	{
 		//Create new polygons from the different parts (simplified on 2/10/06 by Angela Hillier)
-		std::deque<Poly> all_polygons;
+		std::deque<Poly> allPolygons;
 
-		long beg_part = 0;
-		long end_part = 0;
-		for( int j = 0; j < numParts; j++ )
-		{	
-			this->get_Part(j, &beg_part);
-			if( numParts - 1 > j )
-				this->get_Part(j+1, &end_part);
+		long begPart = 0;
+		long endPart = 0;
+		for (int j = 0; j < numParts; j++)
+		{
+			this->get_Part(j, &begPart);
+			if (numParts - 1 > j)
+				this->get_Part(j + 1, &endPart);
 			else
-				end_part = numPoints;
-			
+				endPart = numPoints;
+
 			double px, py;
 			Poly polygon;
-			for( int i = beg_part; i < end_part; i++ )
-			{	
+			for (int i = begPart; i < endPart; i++)
+			{
 				VARIANT_BOOL vbretval;
 				this->get_XY(i, &px, &py, &vbretval);
 				polygon.polyX.push_back(px);
-				polygon.polyY.push_back(py);			
+				polygon.polyY.push_back(py);
 			}
-			all_polygons.push_back( polygon );		
+			allPolygons.push_back(polygon);
 		}
-		
-		for( int p = 0; p < (int)all_polygons.size(); p++ )
-		{	
-			indiv_area = 0.0;
+
+		const int allPolygonsSize = gsl::narrow_cast<int>(allPolygons.size());
+		for (int p = 0; p < allPolygonsSize; p++)
+		{
+			double indivArea = 0.0;
 
 			//Calculate individual area of each part
-			for( int a = 0; a < (int)all_polygons[p].polyX.size() - 1; a++)
-			{	
-				double oneX = all_polygons[p].polyX[a];
-				double oneY = all_polygons[p].polyY[a];
-				double twoX = all_polygons[p].polyX[a+1];		
-				double twoY = all_polygons[p].polyY[a+1];
-			
-				double trap_area = ((oneX * twoY) - (twoX * oneY));
-				indiv_area += trap_area;
-			}		
-			
-			total_area += indiv_area;
+			const int polyXSize = gsl::narrow_cast<int>(gsl::at(allPolygons, p).polyX.size());
+			for (int a = 0; a < polyXSize - 1; a++)
+			{
+				//const double oneX = allPolygons[p].polyX[a];
+				//const double oneY = allPolygons[p].polyY[a];
+				//const double twoX = allPolygons[p].polyX[a + 1];
+				//const double twoY = allPolygons[p].polyY[a + 1];
+				const double oneX = gsl::at(allPolygons[p].polyX, a);
+				const double oneY = gsl::at(allPolygons[p].polyY, a);
+				const double twoX = gsl::at(allPolygons[p].polyX, static_cast<gsl::index>(a) + 1);
+				const double twoY = gsl::at(allPolygons[p].polyY, static_cast<gsl::index>(a) + 1);
+
+				const double trapArea = (oneX * twoY) - (twoX * oneY);
+				indivArea += trapArea;
+			}
+
+			totalArea += indivArea;
 		}
-		total_area = fabs(total_area) * .5;
-		all_polygons.clear();
+		totalArea = fabs(totalArea) * .5;
+		allPolygons.clear();
 	}
 	else
 	{
 		double oneX, oneY, twoX, twoY;
 		VARIANT_BOOL vbretval;
-		for(int i= 0; i <= numPoints-2; i++)
+		for (int i = 0; i <= numPoints - 2; i++)
 		{
 			this->get_XY(i, &oneX, &oneY, &vbretval);
 			this->get_XY(i + 1, &twoX, &twoY, &vbretval);
-			double trap_area = ((oneX * twoY) - (twoX * oneY));
-			total_area += trap_area;
+			const double trapArea = (oneX * twoY) - (twoX * oneY);
+			totalArea += trapArea;
 		}
-		total_area = fabs(total_area) * .5;
+		totalArea = fabs(totalArea) * .5;
 	}
 
-	*pVal = total_area;
+	*pVal = totalArea;
 	return S_OK;
 }
 
@@ -1065,85 +1087,84 @@ STDMETHODIMP CShape::get_Area(double *pVal)
 STDMETHODIMP CShape::get_Centroid(IPoint** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	ShpfileType shptype = _shp->get_ShapeType();
-	if( shptype != SHP_POLYGON && shptype != SHP_POLYGONZ && shptype != SHP_POLYGONM )
-	{	
+
+	const ShpfileType shptype = _shp->get_ShapeType();
+	if (shptype != SHP_POLYGON && shptype != SHP_POLYGONZ && shptype != SHP_POLYGONM)
+	{
 		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
 		return S_OK;
 	}
-	
+
 	long numPoints, numParts;
-	long beg_part, end_part;
+	long begPart, endPart;
 	double totalArea = 0.0;
-    double area;
 	double xSum, ySum;
-	double XShift = 0.0;
-	double YShift = 0.0; 
-	double xPart, yPart;	// centroid of part
+	double xShift = 0.0;
+	double yShift = 0.0;
+	double xPart = 0, yPart = 0;	// centroid of part
 	double x = 0.0;			// final centroid
 	double y = 0.0;
-	
+
 	double xMin, xMax, yMin, yMax;
 	this->get_ExtentsXY(xMin, yMin, xMax, yMax);
-	if (xMin < 0 && xMax > 0) XShift = xMax - xMin;
-	if (yMin < 0 && yMax > 0) YShift = yMax - yMin;
+	if (xMin < 0 && xMax > 0) xShift = xMax - xMin;
+	if (yMin < 0 && yMax > 0) yShift = yMax - yMin;
 
 	this->get_NumPoints(&numPoints);
 	this->get_NumParts(&numParts);
-	
-	for( int j = 0; j < numParts; j++ )
-	{	
-		area = xSum = ySum = 0.0;
-		
-		this->get_Part(j, &beg_part);
-		if( numParts - 1 > j )
-			this->get_Part(j+1, &end_part);
+
+	for (int j = 0; j < numParts; j++)
+	{
+		double area = xSum = ySum = 0.0;
+
+		this->get_Part(j, &begPart);
+		if (numParts - 1 > j)
+			this->get_Part(j + 1, &endPart);
 		else
-			end_part = numPoints;
+			endPart = numPoints;
 
 		double oneX, oneY, twoX, twoY;
 		VARIANT_BOOL vbretval;
-		for (int i = beg_part; i < end_part -1; i++)
+		for (int i = begPart; i < endPart - 1; i++)
 		{
 			this->get_XY(i, &oneX, &oneY, &vbretval);
 			this->get_XY(i + 1, &twoX, &twoY, &vbretval);
 
-			double cProduct = ((oneX + XShift) * (twoY + YShift)) - ((twoX + XShift) * (oneY + YShift));
-			xSum += ((oneX + XShift) + (twoX + XShift)) * cProduct;
-			ySum += ((oneY + YShift) + (twoY + YShift)) * cProduct;
-			
+			const double cProduct = (oneX + xShift) * (twoY + yShift) - (twoX + xShift) * (oneY + yShift);
+			xSum += ((oneX + xShift) + (twoX + xShift)) * cProduct;
+			ySum += ((oneY + yShift) + (twoY + yShift)) * cProduct;
+
 			area += (oneX * twoY) - (twoX * oneY);
 		}
 
 		area = fabs(area) * .5;
-		if (area!=0)
-		{	
+		if (area != 0)
+		{
 			xPart = xSum / (6 * area);
 			yPart = ySum / (6 * area);
 		}
 
 		// corrects for shapes in quadrants other than 1 or clockwise/counter-clocwise sign errors
-		if (xMax + XShift < 0 && xPart > 0)  xPart = -1 * xPart;
-		if (xMin + XShift > 0 && xPart < 0)  xPart = -1 * xPart;
-		if (yMax + YShift < 0 && yPart > 0)  yPart = -1 * yPart;
-		if (yMin + YShift > 0 && yPart < 0)  yPart = -1 * yPart;
-	    
+		if (xMax + xShift < 0 && xPart > 0)  xPart = -1 * xPart;
+		if (xMin + xShift > 0 && xPart < 0)  xPart = -1 * xPart;
+		if (yMax + yShift < 0 && yPart > 0)  yPart = -1 * yPart;
+		if (yMin + yShift > 0 && yPart < 0)  yPart = -1 * yPart;
+
 		// Adjust centroid if we calculated it using an X or Y shift
-		xPart -= XShift;
-		yPart -= YShift;
+		xPart -= xShift;
+		yPart -= yShift;
 
 		x += xPart * area;
-        y += yPart * area;
+		y += yPart * area;
 		totalArea += area;
 	}
 	if (totalArea != 0)
-	{	
+	{
 		x = x / totalArea;
 		y = y / totalArea;
 	}
-	
-	IPoint* pnt = NULL;
+
+	IPoint* pnt;
 	ComHelper::CreatePoint(&pnt);
 
 	pnt->put_X(x);
@@ -1158,190 +1179,195 @@ STDMETHODIMP CShape::get_Centroid(IPoint** pVal)
 // *************************************************************
 //		Relates()
 // *************************************************************
-STDMETHODIMP CShape::Relates(IShape* Shape, tkSpatialRelation Relation, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Relates(IShape* shape, const tkSpatialRelation relation, VARIANT_BOOL* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retval = VARIANT_FALSE;	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retval = VARIANT_FALSE;
 
-	if( Shape == NULL)
-	{	
+	if (shape == nullptr)
+	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
-	} 
-	
+	}
+
 	// if extents don't cross, no need to seek further
-	if (!(Relation == srDisjoint))	
-	{	
-		if (GeometryHelper::RelateExtents(this, Shape) == erNone)
+	if (!(relation == srDisjoint))
+	{
+		if (GeometryHelper::RelateExtents(this, shape) == tkExtentsRelation::erNone)
 			return S_OK;
 	}
 
-	OGRGeometry* oGeom1 = NULL;
-	OGRGeometry* oGeom2 = NULL;
-	
-	oGeom1 = OgrConverter::ShapeToGeometry(this);
-	if (oGeom1 == NULL) return S_OK;
+	OGRGeometry* oGeom1 = OgrConverter::ShapeToGeometry(this);
+	if (oGeom1 == nullptr) return S_OK;
 
-	oGeom2 = OgrConverter::ShapeToGeometry(Shape);
-	if (oGeom2 == NULL) 
-	{	
+	OGRGeometry* oGeom2 = OgrConverter::ShapeToGeometry(shape);
+	if (oGeom2 == nullptr)
+	{
 		OGRGeometryFactory::destroyGeometry(oGeom1);
 		return S_OK;
 	}
-	
+
 	OGRBoolean res = 0;
-	
-	switch (Relation)
+
+	switch (relation)
 	{
-		case srContains:	res = oGeom1->Contains(oGeom2); break;
-		case srCrosses:		res = oGeom1->Crosses(oGeom2); break;
-		case srDisjoint:	res = oGeom1->Disjoint(oGeom2); break;
-		case srEquals:		res = oGeom1->Equals(oGeom2); break;
-		case srIntersects:	res = oGeom1->Intersects(oGeom2); break;
-		case srOverlaps:	res = oGeom1->Overlaps(oGeom2); break;
-		case srTouches:		res = oGeom1->Touches(oGeom2); break;
-		case srWithin:		res = oGeom1->Within(oGeom2); break;
+	case srContains:	res = oGeom1->Contains(oGeom2); break;
+	case srCrosses:		res = oGeom1->Crosses(oGeom2); break;
+	case srDisjoint:	res = oGeom1->Disjoint(oGeom2); break;
+	case srEquals:		res = oGeom1->Equals(oGeom2); break;
+	case srIntersects:	res = oGeom1->Intersects(oGeom2); break;
+	case srOverlaps:	res = oGeom1->Overlaps(oGeom2); break;
+	case srTouches:		res = oGeom1->Touches(oGeom2); break;
+	case srWithin:		res = oGeom1->Within(oGeom2); break;
+	case srCovers: break; // TODO: Implement (MWGIS-307)
+	case srCoveredBy: break; // TODO: Implement (MWGIS-308)
 	}
-	
+
 	OGRGeometryFactory::destroyGeometry(oGeom1);
 	OGRGeometryFactory::destroyGeometry(oGeom2);
 
-	*retval = (res == 0) ? VARIANT_FALSE : VARIANT_TRUE;
+	*retval = res == 0 ? VARIANT_FALSE : VARIANT_TRUE;
 	return S_OK;
 }
 
 // *************************************************************
 //		Relations
 // *************************************************************
-STDMETHODIMP CShape::Contains(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Contains(IShape* shape, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	this->Relates(Shape, srContains, retval);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srContains, retval);
 	return S_OK;
 }
-STDMETHODIMP CShape::Crosses(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Crosses(IShape* shape, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	this->Relates(Shape, srCrosses, retval);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srCrosses, retval);
 	return S_OK;
 }
-STDMETHODIMP CShape::Disjoint(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Disjoint(IShape* shape, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	this->Relates(Shape, srDisjoint, retval);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srDisjoint, retval);
 	return S_OK;
 }
-STDMETHODIMP CShape::Equals(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Equals(IShape* shape, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	this->Relates(Shape, srEquals, retval);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srEquals, retval);
 	return S_OK;
 }
-STDMETHODIMP CShape::Intersects(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Intersects(IShape* shape, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	this->Relates(Shape, srIntersects, retval);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srIntersects, retval);
 	return S_OK;
 }
-STDMETHODIMP CShape::Overlaps(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Overlaps(IShape* shape, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	this->Relates(Shape, srOverlaps, retval);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srOverlaps, retval);
 	return S_OK;
 }
-STDMETHODIMP CShape::Touches(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Touches(IShape* shape, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	this->Relates(Shape, srTouches, retval);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srTouches, retval);
 	return S_OK;
 }
-STDMETHODIMP CShape::Within(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Within(IShape* shape, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	this->Relates(Shape, srWithin, retval);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srWithin, retval);
 	return S_OK;
 }
-STDMETHODIMP CShape::Covers(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Covers(IShape* shape, VARIANT_BOOL* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    this->Relates(Shape, srCovers, retval);
-    return S_OK;
+	// TODO: MWGIS-307
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srCovers, retval);
+	return S_OK;
 }
-STDMETHODIMP CShape::CoveredBy(IShape* Shape, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::CoveredBy(IShape* shape, VARIANT_BOOL* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    this->Relates(Shape, srCoveredBy, retval);
-    return S_OK;
+	// TODO: MWGIS-308
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	this->Relates(shape, srCoveredBy, retval);
+	return S_OK;
 }
 
 // *************************************************************
 //		Clip
 // *************************************************************
-STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** retval)
+STDMETHODIMP CShape::Clip(IShape* shape, const tkClipOperation operation, IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retval = nullptr;
 
-	if( Shape == nullptr)
-	{	
+	if (shape == nullptr)
+	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
-	} 
-	
-	if (Operation == clClip || Operation == clIntersection)
+	}
+
+	if (operation == clClip || operation == clIntersection)
 	{
-		if (GeometryHelper::RelateExtents(this, Shape) == erNone)
+		if (GeometryHelper::RelateExtents(this, shape) == tkExtentsRelation::erNone)
 			return S_OK;
 	}
 
-	OGRGeometry* oGeom1 = nullptr;
-	OGRGeometry* oGeom2 = nullptr;
-
-	oGeom1 = OgrConverter::ShapeToGeometry(this);
-	if (oGeom1 == nullptr) 
+	OGRGeometry* oGeom1 = OgrConverter::ShapeToGeometry(this);
+	if (oGeom1 == nullptr)
 		return S_OK;
 
-	OGRwkbGeometryType oReturnType = oGeom1->getGeometryType();
-	
-	oGeom2 = OgrConverter::ShapeToGeometry(Shape);
-	if (oGeom2 == nullptr) 
-	{	
+	const OGRwkbGeometryType oReturnType = oGeom1->getGeometryType();
+
+	OGRGeometry* oGeom2 = OgrConverter::ShapeToGeometry(shape);
+	if (oGeom2 == nullptr)
+	{
 		OGRGeometryFactory::destroyGeometry(oGeom1);
 		return S_OK;
 	}
-	
+
 	OGRGeometry* oGeom3 = nullptr;
 
-	switch (Operation)
+	switch (operation)
 	{
-		case clUnion:			
-			oGeom3 = oGeom1->Union(oGeom2);
-			break;
-		case clDifference:
-			oGeom3 = oGeom1->Difference(oGeom2);
-			break;
-		case clIntersection:
-		case clClip:
-			oGeom3 = oGeom1->Intersection(oGeom2);
-			break;
-		case clSymDifference:
-			oGeom3 = oGeom1->SymDifference(oGeom2);
-			break;
-		default:
-			break;
+	case clUnion:
+		oGeom3 = oGeom1->Union(oGeom2);
+		break;
+	case clDifference:
+		oGeom3 = oGeom1->Difference(oGeom2);
+		break;
+	case clIntersection:
+	case clClip:
+		oGeom3 = oGeom1->Intersection(oGeom2);
+		break;
+	case clSymDifference:
+		oGeom3 = oGeom1->SymDifference(oGeom2);
+		break;
 	}
-	
+
 	OGRGeometryFactory::destroyGeometry(oGeom1);
 	OGRGeometryFactory::destroyGeometry(oGeom2);
-	
-	if (oGeom3 == NULL) 
+
+	if (oGeom3 == nullptr)
 		return S_OK;
 
-	IShape* shp;
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
-	shp = OgrConverter::GeometryToShape(oGeom3, ShapeUtility::IsM(shpType), oReturnType);
-	
+	IShape* shp = OgrConverter::GeometryToShape(oGeom3, ShapeUtility::IsM(shpType), oReturnType);
+
 	OGRGeometryFactory::destroyGeometry(oGeom3);
 
 	*retval = shp;
@@ -1351,94 +1377,88 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 // *************************************************************
 //		Distance
 // *************************************************************
-STDMETHODIMP CShape::Distance(IShape* Shape, double* retval)
+STDMETHODIMP CShape::Distance(IShape* shape, double* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
 	*retval = 0.0;
 
-	if( Shape == NULL)
-	{	
+	if (shape == nullptr)
+	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
-	} 
-	
-	OGRGeometry* oGeom1 = NULL;
-	OGRGeometry* oGeom2 = NULL;
-	
-	oGeom1 = OgrConverter::ShapeToGeometry(this);
-	if (oGeom1 == NULL) return S_OK;
+	}
 
-	oGeom2 = OgrConverter::ShapeToGeometry(Shape);
-	if (oGeom2 == NULL) 
-	{	
+	OGRGeometry* oGeom1 = OgrConverter::ShapeToGeometry(this);
+	if (oGeom1 == nullptr) return S_OK;
+
+	OGRGeometry* oGeom2 = OgrConverter::ShapeToGeometry(shape);
+	if (oGeom2 == nullptr)
+	{
 		OGRGeometryFactory::destroyGeometry(oGeom1);
 		return S_OK;
 	}
 
 	*retval = oGeom1->Distance(oGeom2);
-	
+
 
 	OGRGeometryFactory::destroyGeometry(oGeom1);
 	OGRGeometryFactory::destroyGeometry(oGeom2);
 	return S_OK;
 }
 
-OGRGeometry* DoBuffer(DOUBLE Distance, long nQuadSegments, OGRGeometry* geomSource)
+OGRGeometry* DoBuffer(const DOUBLE distance, const long nQuadSegments, const gsl::not_null<OGRGeometry*> geomSource)
 {
+	// TODO: Fix compile warnings:
 	__try
 	{
-		return geomSource->Buffer(Distance, nQuadSegments);
+		return geomSource->Buffer(distance, nQuadSegments);
 	}
-	__except(1)
+	__except (1)
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 
 // *************************************************************
 //		Buffer
 // *************************************************************
-STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval)
+STDMETHODIMP CShape::Buffer(const DOUBLE distance, const long nQuadSegments, IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retval = NULL;
+	*retval = nullptr;
 
-	OGRGeometry* oGeom1 = NULL;
-	OGRGeometry* oGeom2 = NULL;
+	OGRGeometry* oGeom1 = OgrConverter::ShapeToGeometry(this);
+	if (oGeom1 == nullptr) return S_OK;
 
-	oGeom1 = OgrConverter::ShapeToGeometry(this);
-	if (oGeom1 == NULL) return S_OK;
-		
-	oGeom2 = DoBuffer(Distance, nQuadSegments, oGeom1);
+	OGRGeometry* oGeom2 = DoBuffer(distance, nQuadSegments, oGeom1);
 
 	OGRGeometryFactory::destroyGeometry(oGeom1);
-	if (oGeom2 == NULL)	return S_OK;
-	
+	if (oGeom2 == nullptr)	return S_OK;
+
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
 
-	IShape* shp;
-	shp = OgrConverter::GeometryToShape(oGeom2, ShapeUtility::IsM(shpType));
+	IShape* shp = OgrConverter::GeometryToShape(oGeom2, ShapeUtility::IsM(shpType));
 
 	*retval = shp;
 	OGRGeometryFactory::destroyGeometry(oGeom2);
-	
+
 	return S_OK;
 }
 
 // *************************************************************
 //		BufferWithParams
 // *************************************************************
-STDMETHODIMP CShape::BufferWithParams(DOUBLE Ditances, LONG numSegments, VARIANT_BOOL singleSided, 
-	tkBufferCap capStyle, tkBufferJoin joinStyle, DOUBLE mitreLimit, IShape** retVal)
+STDMETHODIMP CShape::BufferWithParams(const DOUBLE distance, const LONG numSegments, const VARIANT_BOOL singleSided,
+	const tkBufferCap capStyle, const tkBufferJoin joinStyle, const DOUBLE mitreLimit, IShape** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = NULL;
+	*retVal = nullptr;
 
-	GEOSGeom gs = GeosConverter::ShapeToGeom(this);
-	if (!gs) 
+	const GEOSGeom gs = GeosConverter::ShapeToGeom(this);
+	if (!gs)
 	{
 		ErrorMessage(tkCANT_CONVERT_SHAPE_GEOS);
 		return S_OK;
@@ -1450,19 +1470,19 @@ STDMETHODIMP CShape::BufferWithParams(DOUBLE Ditances, LONG numSegments, VARIANT
 		ErrorMessage(tkFAILED_CREATE_BUFFER_PARAMS);
 		return S_OK;
 	}
-		
+
 	GeosHelper::BufferParams_setQuadrantSegments(params, numSegments);
 	GeosHelper::BufferParams_setMitreLimit(params, mitreLimit);
 	GeosHelper::BufferParams_setEndCapStyle(params, capStyle);
 	GeosHelper::BufferParams_setJoinStyle(params, joinStyle);
 	GeosHelper::BufferParams_setSingleSided(params, singleSided ? true : false);
-		
-	GEOSGeometry* gsNew = GeosHelper::BufferWithParams(gs, params, Ditances);
-	
+
+	GEOSGeometry* gsNew = GeosHelper::BufferWithParams(gs, params, distance);
+
 	GeosHelper::DestroyGeometry(gs);
 	GeosHelper::BufferParams_destroy(params);
 
-	if (gsNew) 
+	if (gsNew)
 	{
 		ShpfileType shpType;
 		get_ShapeType(&shpType);
@@ -1470,10 +1490,11 @@ STDMETHODIMP CShape::BufferWithParams(DOUBLE Ditances, LONG numSegments, VARIANT
 		vector<IShape*> shapes;
 		if (GeosConverter::GeomToShapes(gsNew, &shapes, ShapeUtility::IsM(shpType)))
 		{
-			if (shapes.size() > 0) {
-				*retVal = shapes[0];
-				for (size_t i = 1; i < shapes.size(); i++) {
-					shapes[i]->Release();
+			if (!shapes.empty()) {
+				*retVal = gsl::at(shapes, 0);
+				const int numShapes = shapes.size();
+				for (size_t i = 1; i < numShapes; i++) {
+					gsl::at(shapes, i)->Release();
 				}
 			}
 		}
@@ -1489,28 +1510,24 @@ STDMETHODIMP CShape::Boundary(IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retval = NULL;
+	*retval = nullptr;
 
-	OGRGeometry* oGeom1 = NULL;
-	OGRGeometry* oGeom2 = NULL;
+	OGRGeometry* oGeom1 = OgrConverter::ShapeToGeometry(this);
+	if (oGeom1 == nullptr) return S_OK;
 
-	oGeom1 = OgrConverter::ShapeToGeometry(this);
-	if (oGeom1 == NULL) return S_OK;
-	
-	oGeom2 = oGeom1->getBoundary();
+	OGRGeometry* oGeom2 = oGeom1->Boundary();
 	OGRGeometryFactory::destroyGeometry(oGeom1);
 
-	if (oGeom2 == NULL)	return S_OK;
-	
+	if (oGeom2 == nullptr)	return S_OK;
+
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
 
-	IShape* shp;
-	shp = OgrConverter::GeometryToShape(oGeom2, ShapeUtility::IsM(shpType));
+	IShape* shp = OgrConverter::GeometryToShape(oGeom2, ShapeUtility::IsM(shpType));
 
 	*retval = shp;
 	OGRGeometryFactory::destroyGeometry(oGeom2);
-	
+
 	return S_OK;
 }
 
@@ -1521,28 +1538,24 @@ STDMETHODIMP CShape::ConvexHull(IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retval = NULL;
+	*retval = nullptr;
 
-	OGRGeometry* oGeom1 = NULL;
-	OGRGeometry* oGeom2 = NULL;
+	OGRGeometry* oGeom1 = OgrConverter::ShapeToGeometry(this);
+	if (oGeom1 == nullptr) return S_OK;
 
-	oGeom1 = OgrConverter::ShapeToGeometry(this);
-	if (oGeom1 == NULL) return S_OK;
-	
-	oGeom2 = oGeom1->ConvexHull();
+	OGRGeometry* oGeom2 = oGeom1->ConvexHull();
 	OGRGeometryFactory::destroyGeometry(oGeom1);
 
-	if (oGeom2 == NULL)	return S_OK;
-	
+	if (oGeom2 == nullptr)	return S_OK;
+
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
 
-	IShape* shp;
-	shp = OgrConverter::GeometryToShape(oGeom2, ShapeUtility::IsM(shpType));
+	IShape* shp = OgrConverter::GeometryToShape(oGeom2, ShapeUtility::IsM(shpType));
 
 	*retval = shp;
 	OGRGeometryFactory::destroyGeometry(oGeom2);
-	
+
 	return S_OK;
 }
 
@@ -1558,53 +1571,51 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 
 /***********************************************************************/
 /*		CShape::GetIntersection()
+ *      Returns intersection of 2 shapes as an safearray of shapes
 /***********************************************************************/
-//  Returns intersection of 2 shapes as an safearray of shapes
- STDMETHODIMP CShape::GetIntersection(IShape* Shape, VARIANT* Results, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::GetIntersection(IShape* shape, VARIANT* results, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retval = VARIANT_FALSE;
 
-	if( Shape == NULL)
-	{	
+	if (shape == nullptr)
+	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
-	} 
-	
-	if (GeometryHelper::RelateExtents(this, Shape) == erNone)
+	}
+
+	if (GeometryHelper::RelateExtents(this, shape) == tkExtentsRelation::erNone)
 		return S_OK;
 
-	OGRGeometry* oGeom1 = NULL;
-	OGRGeometry* oGeom2 = NULL;
+	OGRGeometry* oGeom1 = OgrConverter::ShapeToGeometry(this);
+	if (oGeom1 == nullptr) return S_OK;
 
-	oGeom1 = OgrConverter::ShapeToGeometry(this);
-	if (oGeom1 == NULL) return S_OK;
-	
-	oGeom2 = OgrConverter::ShapeToGeometry(Shape);
-	if (oGeom2 == NULL) 
-	{	
+	OGRGeometry* oGeom2 = OgrConverter::ShapeToGeometry(shape);
+	if (oGeom2 == nullptr)
+	{
 		OGRGeometryFactory::destroyGeometry(oGeom1);
 		return S_OK;
 	}
-	
-	OGRGeometry* oGeom3 = NULL;
-	oGeom3 = oGeom1->Intersection(oGeom2);
+
+	OGRGeometry* oGeom3 = oGeom1->Intersection(oGeom2);
 
 	OGRGeometryFactory::destroyGeometry(oGeom1);
 	OGRGeometryFactory::destroyGeometry(oGeom2);
-	
-	if (oGeom3 == NULL) return S_OK;
-	
+
+	if (oGeom3 == nullptr) return S_OK;
+
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
 
 	std::vector<IShape*> vShapes;
-	if (!OgrConverter::GeometryToShapes(oGeom3, &vShapes, ShapeUtility::IsM(shpType)))return S_OK;
+	if (!OgrConverter::GeometryToShapes(oGeom3, &vShapes, ShapeUtility::IsM(shpType)))
+		return S_OK;  // TODO Should oGeom3 not be destroyed?
+
 	OGRGeometryFactory::destroyGeometry(oGeom3);
 
-	if (vShapes.size()!=0) 
+	if (!vShapes.empty())
 	{
-		if (Templates::Vector2SafeArray(&vShapes, Results))
+		if (Templates::Vector2SafeArray(&vShapes, results))
 			*retval = VARIANT_TRUE;
 		vShapes.clear();
 	}
@@ -1618,87 +1629,86 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 // through vertical center of the shapes extents.
 STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 {
-	*retval = NULL;
+	*retval = nullptr;
 
 	double xMin, xMax, yMin, yMax;
 	this->get_ExtentsXY(xMin, yMin, xMax, yMax);
-	
+
 	OGRGeometry* oGeom = OgrConverter::ShapeToGeometry(this);
-	if (oGeom == NULL)
+	if (oGeom == nullptr)
 	{
 		ErrorMessage(tkCANT_CONVERT_SHAPE_GEOS);
 		return S_OK;
 	}
 
-	OGRLineString* oLine = (OGRLineString*)OGRGeometryFactory::createGeometry(wkbLineString);
-	oLine->addPoint(xMin,(yMax + yMin)/2);
-	oLine->addPoint(xMax,(yMax + yMin)/2);
-	
+	const auto oLine = static_cast<OGRLineString*>(OGRGeometryFactory::createGeometry(wkbLineString));
+	oLine->addPoint(xMin, (yMax + yMin) / 2);
+	oLine->addPoint(xMax, (yMax + yMin) / 2);
+
 	OGRGeometry* oResult = oGeom->Intersection(oLine);
-	if (oResult == NULL)
+	if (oResult == nullptr)
 	{
 		ErrorMessage(tkSPATIAL_OPERATION_FAILED);
-		OGRGeometryFactory::destroyGeometry(oLine); 
+		OGRGeometryFactory::destroyGeometry(oLine);
 		return S_OK;
 	}
-	
+
 	// Intersection can be line or point; for polygons we are interested
 	//   in the longest line, and for polylines - in point which is the closest
 	//   to the center of extents
 	double x = DBL_MIN;
 	double y = DBL_MIN;
-	
-	ShpfileType shptype = ShapeUtility::Convert2D(_shp->get_ShapeType());
 
-	if( shptype == SHP_POLYLINE)
+	const ShpfileType shptype = ShapeUtility::Convert2D(_shp->get_ShapeType());
+
+	if (shptype == SHP_POLYLINE)
 	{
 		ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
 	}
-	if( shptype == SHP_POLYGON)
+	if (shptype == SHP_POLYGON)
 	{
-		OGRwkbGeometryType oType = oResult->getGeometryType();
+		const OGRwkbGeometryType oType = oResult->getGeometryType();
 		if (oType == wkbLineString || oType == wkbLineString25D)
 		{
-			OGRLineString* oSubLine = (OGRLineString*) oResult;
-			x = (oSubLine->getX(0) + oSubLine->getX(1))/2;
-			y = (oSubLine->getY(0) + oSubLine->getY(1))/2;
+			const OGRLineString* oSubLine = static_cast<OGRLineString*>(oResult);
+			x = (oSubLine->getX(0) + oSubLine->getX(1)) / 2;
+			y = (oSubLine->getY(0) + oSubLine->getY(1)) / 2;
 		}
 		else if (oType == wkbGeometryCollection || oType == wkbGeometryCollection25D ||
-				 oType == wkbMultiLineString || oType == wkbMultiLineString25D)
+			oType == wkbMultiLineString || oType == wkbMultiLineString25D)
 		{
 			double maxLength = -1;
 
-			OGRGeometryCollection* oColl = (OGRGeometryCollection *) oResult;
-			for (long i=0; i < oColl->getNumGeometries(); i++)
-			{	
+			const auto oColl = static_cast<OGRGeometryCollection*>(oResult);
+			for (long i = 0; i < oColl->getNumGeometries(); i++)
+			{
 				OGRGeometry* oPart = oColl->getGeometryRef(i);
 				if (oPart->getGeometryType() == wkbLineString || oPart->getGeometryType() == wkbLineString25D)
 				{
-					
-					OGRLineString* oSubLine = (OGRLineString*)oPart;
-					double length = oSubLine->get_Length();
+					const auto oSubLine = static_cast<OGRLineString*>(oPart);
+					const double length = oSubLine->get_Length();
 					if (length > maxLength)
 					{
-						x = (oSubLine->getX(0) + oSubLine->getX(1))/2;
-						y = (oSubLine->getY(0) + oSubLine->getY(1))/2;
+						x = (oSubLine->getX(0) + oSubLine->getX(1)) / 2;
+						y = (oSubLine->getY(0) + oSubLine->getY(1)) / 2;
 						maxLength = length;
 					}
 				}
 			}
 		}
 	}
-	
-	if (x != 0 || y !=0 )
+
+	if (x != 0 || y != 0)
 	{
-		CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)retval );
+		CoCreateInstance(CLSID_Point, nullptr, CLSCTX_INPROC_SERVER, IID_IPoint, reinterpret_cast<void**>(retval));
 		(*retval)->put_X(x);
 		(*retval)->put_Y(y);
 	}
-	
+
 	// cleaning
-	if (oLine)	OGRGeometryFactory::destroyGeometry(oLine); 
-	if (oGeom)	OGRGeometryFactory::destroyGeometry(oGeom); 
-	if (oResult)OGRGeometryFactory::destroyGeometry(oResult);
+	if (oLine)	 OGRGeometryFactory::destroyGeometry(oLine);
+	if (oGeom)	 OGRGeometryFactory::destroyGeometry(oGeom);
+	if (oResult) OGRGeometryFactory::destroyGeometry(oResult);
 	return S_OK;
 }
 #pragma endregion
@@ -1707,124 +1717,123 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 // *************************************************************
 //		SerializeToString
 // *************************************************************
-STDMETHODIMP CShape::SerializeToString(BSTR * Serialized)
+STDMETHODIMP CShape::SerializeToString(BSTR* serialized)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	//	fast editing mode
-	ShpfileType shptype = _shp->get_ShapeType();
+	const ShpfileType shptype = _shp->get_ShapeType();
 
 	CString builder = "";
 	char cbuf[20];
 	double dbuf;
 	double dbuf1;
-	_itoa(shptype, cbuf, 10);
+	_itoa(shptype, cbuf, 10); // TODO: Fix compile warning
 	builder.Append(cbuf);
 	builder.Append(";");
 
-	for(int i = 0; i < (int)_shp->get_PartCount(); i++ )
+	const int numParts = _shp->get_PartCount();
+	for (int i = 0; i < numParts; i++)
 	{
-		sprintf(cbuf, "%d;", _shp->get_PartStartPoint(i));
+		sprintf(cbuf, "%d;", _shp->get_PartStartPoint(i));  // TODO: Fix compile warning
 		builder.Append(cbuf);
 	}
-	
-	for(int i = 0; i < (int)_shp->get_PointCount(); i++ )
-	{	
+
+	const int numPoints = _shp->get_PointCount();
+	for (int i = 0; i < numPoints; i++)
+	{
 		_shp->get_PointXY(i, dbuf, dbuf1);
-		
-		sprintf(cbuf, "%f|", dbuf);
+
+		sprintf(cbuf, "%f|", dbuf); // TODO: Fix compile warning
 		builder.Append(cbuf);
 
-		sprintf(cbuf, "%f|", dbuf1);
+		sprintf(cbuf, "%f|", dbuf1); // TODO: Fix compile warning
 		builder.Append(cbuf);
 
-		if (shptype == SHP_MULTIPOINTM || shptype == SHP_POLYGONM || shptype == SHP_POLYLINEM || 
+		if (shptype == SHP_MULTIPOINTM || shptype == SHP_POLYGONM || shptype == SHP_POLYLINEM ||
 			shptype == SHP_MULTIPOINTZ || shptype == SHP_POLYGONZ || shptype == SHP_POLYLINEZ)
 		{
 			_shp->get_PointZ(i, dbuf);
-			sprintf(cbuf, "%f|", dbuf);
+			sprintf(cbuf, "%f|", dbuf); // TODO: Fix compile warning
 			builder.Append(cbuf);
 		}
 		if (shptype == SHP_MULTIPOINTM || shptype == SHP_POLYGONM || shptype == SHP_POLYLINEM)
 		{
 			_shp->get_PointM(i, dbuf);
-			sprintf(cbuf, "%f|", dbuf);
+			sprintf(cbuf, "%f|", dbuf); // TODO: Fix compile warning
 			builder.Append(cbuf);
 		}
 	}
-	*Serialized = builder.AllocSysString();
-	
+	*serialized = builder.AllocSysString();
+
 	return S_OK;
 }
 
 // *************************************************************
 //		CreateFromString
 // *************************************************************
-STDMETHODIMP CShape::CreateFromString(BSTR Serialized, VARIANT_BOOL *retval)
+STDMETHODIMP CShape::CreateFromString(BSTR serialized, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	
-	VARIANT_BOOL rt;
-	CString ser = OLE2A(Serialized);
-	CString next;
-	next = ser.Mid(ser.Find(";")+1);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ShpfileType newShpType = (ShpfileType)atoi(ser.Left(ser.Find(";")));
+	VARIANT_BOOL rt;
+	// convert BSTR to CString
+	const CString ser(serialized);
+	CString next = ser.Mid(ser.Find(";") + 1);
+
+	const auto newShpType = static_cast<ShpfileType>(atoi(ser.Left(ser.Find(";")))); // TODO: Fix compile warning
 
 	//Test the ShpType
-	if(	newShpType == SHP_MULTIPATCH )
-	{	
+	if (newShpType == SHP_MULTIPATCH)
+	{
 		ErrorMessage(tkUNSUPPORTED_SHAPEFILE_TYPE);
 		*retval = VARIANT_FALSE;
+		return S_OK;
 	}
-	else
+
+	//Discard the old shape information
+	_shp->Clear();
+
+	_shp->put_ShapeType(newShpType);
+
+	while (next.Find(";") != -1)
 	{
-		//Discard the old shape information
-		_shp->Clear();
-	
-		_shp->put_ShapeType(newShpType);
-
-		while (next.Find(";") != -1)
-		{
-			long nextID = _shp->get_PartCount();
-			this->InsertPart(atol(next.Left(next.Find(";"))), &nextID, &rt);
-			next = next.Mid(next.Find(";")+1);
-		}
-		
-		double x,y,z,m;
-		while (next.Find("|") != -1)
-		{
-			x = Utility::atof_custom(next.Left(next.Find("|")));
-			next = next.Mid(next.Find("|")+1);
-			y = Utility::atof_custom(next.Left(next.Find("|")));
-			
-			long nextID = _shp->get_PointCount();
-			_shp->InsertPointXY(nextID, x, y);
-			
-			ShpfileType shptype = _shp->get_ShapeType();
-
-			// Z
-			if (shptype == SHP_MULTIPOINTM || shptype == SHP_POLYGONM || shptype == SHP_POLYLINEM || shptype == SHP_MULTIPOINTZ || shptype == SHP_POLYGONZ || shptype == SHP_POLYLINEZ)
-			{
-				next = next.Mid(next.Find("|")+1);
-				z = Utility::atof_custom(next.Left(next.Find("|")));
-				_shp->put_PointZ(nextID, z);
-			}
-			// M
-			if (shptype == SHP_MULTIPOINTM || shptype == SHP_POLYGONM || shptype == SHP_POLYLINEM)
-			{
-				next = next.Mid(next.Find("|")+1);
-				m = Utility::atof_custom(next.Left(next.Find("|")));
-				_shp->put_PointM(nextID, m);
-			}
-
-			next = next.Mid(next.Find("|")+1);
-		}
-
-		ClearLabelPositionCache();
-		*retval = VARIANT_TRUE;
+		long nextId = _shp->get_PartCount();
+		this->InsertPart(atol(next.Left(next.Find(";"))), &nextId, &rt);
+		next = next.Mid(next.Find(";") + 1);
 	}
+
+	while (next.Find("|") != -1)
+	{
+		const double x = Utility::atof_custom(next.Left(next.Find("|")));
+		next = next.Mid(next.Find("|") + 1);
+		const double y = Utility::atof_custom(next.Left(next.Find("|")));
+
+		const long nextID = _shp->get_PointCount();
+		_shp->InsertPointXY(nextID, x, y);
+
+		const ShpfileType shptype = _shp->get_ShapeType();
+
+		// Z
+		if (shptype == SHP_MULTIPOINTM || shptype == SHP_POLYGONM || shptype == SHP_POLYLINEM || shptype == SHP_MULTIPOINTZ || shptype == SHP_POLYGONZ || shptype == SHP_POLYLINEZ)
+		{
+			next = next.Mid(next.Find("|") + 1);
+			const double z = Utility::atof_custom(next.Left(next.Find("|")));
+			_shp->put_PointZ(nextID, z);
+		}
+		// M
+		if (shptype == SHP_MULTIPOINTM || shptype == SHP_POLYGONM || shptype == SHP_POLYLINEM)
+		{
+			next = next.Mid(next.Find("|") + 1);
+			const double m = Utility::atof_custom(next.Left(next.Find("|")));
+			_shp->put_PointM(nextID, m);
+		}
+
+		next = next.Mid(next.Find("|") + 1);
+	}
+
+	ClearLabelPositionCache();
+	*retval = VARIANT_TRUE;
 	return S_OK;
 }
 #pragma endregion
@@ -1832,10 +1841,10 @@ STDMETHODIMP CShape::CreateFromString(BSTR Serialized, VARIANT_BOOL *retval)
 // *****************************************************************
 //		PointInThisPoly()
 // *****************************************************************
-STDMETHODIMP CShape::PointInThisPoly(IPoint * pt, VARIANT_BOOL *retval)
+STDMETHODIMP CShape::PointInThisPoly(IPoint* pt, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	GetUtils()->PointInPolygon(this, pt, retval);
 
 	return S_OK;
@@ -1845,20 +1854,20 @@ STDMETHODIMP CShape::PointInThisPoly(IPoint * pt, VARIANT_BOOL *retval)
 //		Get_SegmentAngle()
 //*******************************************************************
 // returns angle in degrees
-double CShape::get_SegmentAngle( long segementIndex)
+double CShape::get_SegmentAngle(const long segmentIndex)
 {
-	double x1, y1, x2, y2, dx, dy;
+	double x1, y1, x2, y2;
 	VARIANT_BOOL vbretval;
 	long numPoints;
 	this->get_NumPoints(&numPoints);
-	if (segementIndex > numPoints - 2)
+	if (segmentIndex > numPoints - 2)
 	{
 		return 0.0;
 	}
-	
-	this->get_XY(segementIndex, &x1, &y1, &vbretval);
-	this->get_XY(segementIndex + 1, &x2, &y2, &vbretval);
-	dx = x2 -x1; dy = y2 - y1;
+
+	this->get_XY(segmentIndex, &x1, &y1, &vbretval);
+	this->get_XY(segmentIndex + 1, &x2, &y2, &vbretval);
+	double dx = x2 - x1; double dy = y2 - y1;
 	return GeometryHelper::GetPointAngle(dx, dy) / pi_ * 180.0;
 }
 
@@ -1867,11 +1876,10 @@ double CShape::get_SegmentAngle( long segementIndex)
 // **********************************************
 STDMETHODIMP CShape::Clone(IShape** retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	(*retval) = NULL;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retval = nullptr;
 
-	IShape* shp = NULL;
+	IShape* shp = nullptr;
 	ComHelper::CreateShape(&shp);
 	if (shp)
 	{
@@ -1879,7 +1887,7 @@ STDMETHODIMP CShape::Clone(IShape** retval)
 		ShpfileType shpType;
 		this->get_ShapeType(&shpType);
 		shp->Create(shpType, &vbretval);
-		
+
 		// we shall do all the work through interface; some optimizations for the fast mode - later
 		long numParts;
 		long numPoints;
@@ -1897,15 +1905,15 @@ STDMETHODIMP CShape::Clone(IShape** retval)
 		// copying points
 		for (long i = 0; i < numPoints; i++)
 		{
-			CComPtr<IPoint> pnt = NULL;
+			CComPtr<IPoint> pnt = nullptr;
 			this->get_Point(i, &pnt);
-			CComPtr<IPoint> pntNew = NULL;
+			CComPtr<IPoint> pntNew = nullptr;
 			pnt->Clone(&pntNew);
 			shp->InsertPoint(pntNew, &i, &vbretval);
 		}
-		
+
 		//shp->put_Key(_key);
-		(*retval) = shp;
+		*retval = shp;
 	}
 	return S_OK;
 }
@@ -1913,56 +1921,56 @@ STDMETHODIMP CShape::Clone(IShape** retval)
 //*****************************************************************
 //*		CopyFrom()
 //*****************************************************************
-STDMETHODIMP CShape::CopyFrom(IShape* source, VARIANT_BOOL* retVal)   
-{	
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+STDMETHODIMP CShape::CopyFrom(IShape* source, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	if (!source)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		*retVal = VARIANT_FALSE;
+		return S_OK;
 	}
-	else
+
+	IShape* target = this; // TODO: Fix compile warning
+	ShpfileType shpType;
+	source->get_ShapeType(&shpType);
+	VARIANT_BOOL vb;
+	target->Create(shpType, &vb);
+
+	long numParts;
+	source->get_NumParts(&numParts);
+	for (int i = 0; i < numParts; i++)
 	{
-		IShape* target = this;
-		ShpfileType shpType;
-		source->get_ShapeType(&shpType);
-		VARIANT_BOOL vb;
-		target->Create(shpType, &vb);
-		
-		long numParts;
-		source->get_NumParts(&numParts);
-		for(int i = 0; i < numParts; i++ )
-		{
-			long part, newIndex;
-			source->get_Part(i, &part);
-			target->InsertPart(part, &newIndex, &vb);
-		}
-
-		bool hasM = shpType == SHP_POLYGONM || shpType == SHP_POLYGONZ;
-		bool hasZ = shpType == SHP_POLYGONZ;
-
-		long numPoints;
-		source->get_NumPoints(&numPoints);
-		double x, y, m, z;
-		long pointIndex;
-		for(int i = 0; i < numPoints; i++ )
-		{
-			source->get_XY(i, &x, &y, &vb);
-			target->AddPoint(x, y, &pointIndex);
-			if (hasM)
-			{
-				source->get_M(i, &m, &vb);
-				target->put_M(i, m, &vb);
-			}
-			else if (hasZ)
-			{
-				source->get_Z(i, &z, &vb);
-				target->put_Z(i, z, &vb);
-			}
-		}
-		ClearLabelPositionCache();
-		*retVal = VARIANT_TRUE;
+		long part, newIndex;
+		source->get_Part(i, &part);
+		target->InsertPart(part, &newIndex, &vb);
 	}
+
+	const bool hasM = shpType == SHP_POLYGONM || shpType == SHP_POLYGONZ;
+	const bool hasZ = shpType == SHP_POLYGONZ;
+
+	long numPoints;
+	source->get_NumPoints(&numPoints);
+	double x, y, m, z;
+	long pointIndex;
+	for (int i = 0; i < numPoints; i++)
+	{
+		source->get_XY(i, &x, &y, &vb);
+		target->AddPoint(x, y, &pointIndex);
+		if (hasM)
+		{
+			source->get_M(i, &m, &vb);
+			target->put_M(i, m, &vb);
+		}
+		else if (hasZ)
+		{
+			source->get_Z(i, &z, &vb);
+			target->put_Z(i, z, &vb);
+		}
+	}
+	ClearLabelPositionCache();
+	*retVal = VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -1970,16 +1978,16 @@ STDMETHODIMP CShape::CopyFrom(IShape* source, VARIANT_BOOL* retVal)
 //   Explode()
 // **********************************************
 // Splits multi-part shapes in the single part ones
-STDMETHODIMP CShape::Explode(VARIANT* Results, VARIANT_BOOL* retval)
+STDMETHODIMP CShape::Explode(VARIANT* results, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retval = VARIANT_FALSE;
-	
+
 	std::vector<IShape*> vShapes;
 	if (ExplodeCore(vShapes))
 	{
 		// no need to release objects as we return them to the caller
-		if (Templates::Vector2SafeArray(&vShapes, Results))
+		if (Templates::Vector2SafeArray(&vShapes, results))
 			*retval = VARIANT_TRUE;
 	}
 	return S_OK;
@@ -1991,7 +1999,7 @@ STDMETHODIMP CShape::Explode(VARIANT* Results, VARIANT_BOOL* retval)
 bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 {
 	vShapes.clear();
-	
+
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
 
@@ -1999,7 +2007,7 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 	this->get_NumParts(&numParts);
 	if (numParts <= 1)
 	{
-		IShape* shp = NULL;
+		IShape* shp = nullptr;
 		this->Clone(&shp);
 		vShapes.push_back(shp);
 	}
@@ -2008,31 +2016,29 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 		// for every feature except polygons we just return the parts of shapes
 		for (long i = 0; i < numParts; i++)
 		{
-			IShape* part = NULL;
+			IShape* part = nullptr;
 			this->get_PartAsShape(i, &part);
 			vShapes.push_back(part);
 		}
 	}
 	else
 	{
-		bool isM = ShapeUtility::IsM(shpType);
-		
+		const bool isM = ShapeUtility::IsM(shpType);
+
 		// for polygons holes should be treated, the main problem here is to determine 
 		// to which part the hole belong; OGR will be used for this
-		OGRGeometry* geom = OgrConverter::ShapeToGeometry(this);
-		if (geom)
+		if (OGRGeometry* geom = OgrConverter::ShapeToGeometry(this))
 		{
-			OGRwkbGeometryType type = geom->getGeometryType();
+			const OGRwkbGeometryType type = geom->getGeometryType();
 			if (type == wkbMultiPolygon || type == wkbMultiPolygon25D)
 			{
 				std::vector<OGRGeometry*> polygons;		// polygons shouldn't be deleted as they are only 
 														// references to the parts of init multipolygon
 				if (OgrConverter::MultiPolygon2Polygons(geom, &polygons))
 				{
-					for (unsigned int i = 0; i < polygons.size(); i++)
+					for (const auto& polygon : polygons)
 					{
-						IShape* poly = OgrConverter::GeometryToShape(polygons[i], isM);
-						if (poly)
+						if (IShape* poly = OgrConverter::GeometryToShape(polygon, isM))
 						{
 							vShapes.push_back(poly);
 						}
@@ -2041,8 +2047,7 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 			}
 			else
 			{
-				IShape* shp = OgrConverter::GeometryToShape(geom, isM);
-				if (shp)
+				if (IShape* shp = OgrConverter::GeometryToShape(geom, isM))
 				{
 					vShapes.push_back(shp);
 				}
@@ -2050,13 +2055,13 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 			OGRGeometryFactory::destroyGeometry(geom);
 		}
 	}
-	return vShapes.size() > 0;
+	return !vShapes.empty();
 }
 
-/***********************************************************************/
-/*			get_LabelPositionAutoChooseMethod()
-/***********************************************************************/
-void CShape::get_LabelPositionAuto(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation)
+//***********************************************************************
+//*			get_LabelPositionAutoChooseMethod()
+//***********************************************************************
+void CShape::get_LabelPositionAuto(tkLabelPositioning method, double& x, double& y, double& rotation, const tkLineLabelOrientation orientation)
 {
 	if (method == lpNone)
 	{
@@ -2068,37 +2073,37 @@ void CShape::get_LabelPositionAuto(tkLabelPositioning method, double& x, double&
 	get_LabelPosition(method, x, y, rotation, orientation);
 }
 
-/***********************************************************************/
-/*			get_LabelPosition()
-/***********************************************************************/
+//***********************************************************************
+//*			get_LabelPosition()
+//***********************************************************************
 // sub-function for GenerateLabels
 // returns coordinates of label and angle of segment rotation for polylines
-void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation)
+void CShape::get_LabelPosition(const tkLabelPositioning method, double& x, double& y, double& rotation, const tkLineLabelOrientation orientation)
 {
 	x = y = rotation = 0.0;
 	if (method == lpNone)
 		return;
 
 	// If previous call was cached, return those values
-	if (method == labelPositioning && orientation == labelOrientation)
+	if (method == _labelPositioning && orientation == _labelOrientation)
 	{
-		x = labelX;
-		y = labelY;
-		rotation = labelRotation;
+		x = _labelX;
+		y = _labelY;
+		rotation = _labelRotation;
 		return;
 	}
 
-	IPoint* pnt = NULL;
+	IPoint* pnt = nullptr;
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
 	VARIANT_BOOL vbretval;
 	int segmentIndex = -1;	// for polylines
 
 	shpType = ShapeUtility::Convert2D(shpType);
-	
+
 	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 	{
-		VARIANT_BOOL vbretval;
+		//VARIANT_BOOL vbretval;
 		this->get_XY(0, &x, &y, &vbretval);
 	}
 	if (shpType == SHP_POLYGON)
@@ -2107,11 +2112,11 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 		else if (method == lpCentroid)		this->get_Centroid(&pnt);
 		else if (method == lpInteriorPoint)	this->get_InteriorPoint(&pnt);
 		else
-		{	
-			ErrorMessage(tkINVALID_PARAMETER_VALUE); 
+		{
+			ErrorMessage(tkINVALID_PARAMETER_VALUE);
 			return;
 		}
-		
+
 		if (!pnt && method == lpInteriorPoint)
 		{
 			// let's calculate centroid instead
@@ -2122,7 +2127,8 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 		{
 			pnt->get_X(&x);
 			pnt->get_Y(&y);
-			pnt->Release(); pnt = NULL;
+			pnt->Release();
+			pnt = nullptr;
 		}
 	}
 	else if (shpType == SHP_POLYLINE)
@@ -2133,7 +2139,7 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 
 		double x1, y1, x2, y2;
 
-		if	(method == lpFirstSegment)
+		if (method == lpFirstSegment)
 		{
 			this->get_XY(0, &x, &y, &vbretval);
 			segmentIndex = 0;
@@ -2146,21 +2152,21 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 		else if (method == lpMiddleSegment)
 		{
 			double length = 0.0;
-			double halfLength, delta;
+			double halfLength;
 			this->get_Length(&halfLength);
 			halfLength /= 2.0;
-			
+
 			long i;
-			for (i =0; i < numPoints; i++)
+			for (i = 0; i < numPoints; i++)
 			{
 				this->get_XY(i, &x1, &y1, &vbretval);
 				this->get_XY(i + 1, &x2, &y2, &vbretval);
-				delta = sqrt(pow(x1 - x2, 2.0) + pow(y1 - y2, 2.0));
+				const double delta = sqrt(pow(x1 - x2, 2.0) + pow(y1 - y2, 2.0));
 				if (length + delta < halfLength)
 					length += delta;
 				else if (length + delta > halfLength)
 				{
-					double ratio = (halfLength - length)/ (delta);
+					const double ratio = (halfLength - length) / (delta);
 					x = x1 + (x2 - x1) * ratio;
 					y = y1 + (y2 - y1) * ratio;
 					break;
@@ -2175,12 +2181,11 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 		else if (method == lpLongestSegement)
 		{
 			double maxLength = 0;
-			double length;
-			for (long i =0; i < numPoints - 1; i++)	
+			for (long i = 0; i < numPoints - 1; i++)
 			{
 				this->get_XY(i, &x1, &y1, &vbretval);
 				this->get_XY(i + 1, &x2, &y2, &vbretval);
-				length = sqrt(pow(x1 - x2, 2.0) + pow(y1 - y2, 2.0));
+				const double length = sqrt(pow(x1 - x2, 2.0) + pow(y1 - y2, 2.0));
 				if (length > maxLength)
 				{
 					maxLength = length;
@@ -2192,8 +2197,8 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 				this->get_XY(segmentIndex, &x1, &y1, &vbretval);
 				this->get_XY(segmentIndex + 1, &x2, &y2, &vbretval);
 			}
-			x = (x1 + x2)/2.0;
-			y = (y1 + y2)/2.0;
+			x = (x1 + x2) / 2.0;
+			y = (y1 + y2) / 2.0;
 		}
 		else
 		{	// the method is unsupported
@@ -2227,13 +2232,11 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 	}
 
 	// Cache values:
-	labelPositioning = method;
-	labelOrientation = orientation;
-	labelX = x;
-	labelY = y;
-	labelRotation = rotation;
-
-	return;
+	_labelPositioning = method;
+	_labelOrientation = orientation;
+	_labelX = x;
+	_labelY = y;
+	_labelRotation = rotation;
 }
 
 
@@ -2242,14 +2245,14 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 // ********************************************************************
 void CShape::ClearLabelPositionCache()
 {
-	if (labelPositioning == tkLabelPositioning::lpNone)
+	if (_labelPositioning == tkLabelPositioning::lpNone)
 		return;
 
-	labelPositioning = tkLabelPositioning::lpNone;
-	labelOrientation = tkLineLabelOrientation::lorParallel;
-	labelX = 0;
-	labelY = 0;
-	labelRotation = 0;
+	_labelPositioning = tkLabelPositioning::lpNone;
+	_labelOrientation = tkLineLabelOrientation::lorParallel;
+	_labelX = 0;
+	_labelY = 0;
+	_labelRotation = 0;
 }
 
 // ********************************************************************
@@ -2257,28 +2260,29 @@ void CShape::ClearLabelPositionCache()
 // ********************************************************************
 //  Creates safe array with numbers of shapes as long values
 //  Returns true when created safe array has elements, and false otherwise
-bool Bytes2SafeArray(unsigned char* data, int size, VARIANT* arr)
+bool Bytes2SafeArray(const unsigned char* data, const int size, VARIANT* arr)
 {
-	SAFEARRAY FAR* psa = NULL;
-	SAFEARRAYBOUND rgsabound[1];
-	rgsabound[0].lLbound = 0;	
+	SAFEARRAY FAR* psa;
+	SAFEARRAYBOUND rgsabound[1]{};
+	rgsabound[0].lLbound = 0;
 
-	if( size > 0 )
+	if (size > 0)
 	{
 		rgsabound[0].cElements = size;
-		psa = SafeArrayCreate( VT_UI1, 1, rgsabound);
-    			
-		if( psa )
+		psa = SafeArrayCreate(VT_UI1, 1, rgsabound); // TODO: Fix compile warning
+
+		if (psa)
 		{
-			unsigned char* pchar = NULL;
-			SafeArrayAccessData(psa,(void HUGEP* FAR*)(&pchar));
-			
+			unsigned char* pchar = nullptr;
+			//SafeArrayAccessData(psa, (void HUGEP * FAR*)(&pchar));
+			SafeArrayAccessData(psa, reinterpret_cast<void**>(&pchar));
+
 			if (pchar)
-				memcpy(pchar,&(data[0]),sizeof(unsigned char)*size);
-			
+				memcpy(pchar, &data[0], sizeof(unsigned char) * size);
+
 			SafeArrayUnaccessData(psa);
-			
-			arr->vt = VT_ARRAY|VT_UI1;
+
+			arr->vt = VT_ARRAY | VT_UI1;
 			arr->parray = psa;
 			return true;
 		}
@@ -2286,32 +2290,33 @@ bool Bytes2SafeArray(unsigned char* data, int size, VARIANT* arr)
 	else
 	{
 		rgsabound[0].cElements = 0;
-		psa = SafeArrayCreate( VT_UI1, 1, rgsabound);
-		arr->vt = VT_ARRAY|VT_UI1;
+		psa = SafeArrayCreate(VT_UI1, 1, rgsabound); // TODO: Fix compile warning
+		arr->vt = VT_ARRAY | VT_UI1;
 		arr->parray = psa;
 	}
 	return false;
 }
 
-/***********************************************************************/
-/*			ExportToBinary()
-/***********************************************************************/
+//***********************************************************************
+//			ExportToBinary()
+//***********************************************************************
 STDMETHODIMP CShape::ExportToBinary(VARIANT* bytesArray, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	int* data = _shp->get_RawData();
-	int contentLength = _shp->get_ContentLength();
+	const int contentLength = _shp->get_ContentLength();
 
 	if (data)
 	{
-		unsigned char* buffer = reinterpret_cast<unsigned char*>(data);
-		*retVal = Bytes2SafeArray(buffer, contentLength, bytesArray);
-		delete[] data;
+		const auto buffer = (unsigned char*)data;  // TODO: Fix compile warning
+		// *retVal = Bytes2SafeArray(buffer, contentLength, bytesArray);
+		Bytes2SafeArray(buffer, contentLength, bytesArray) ? *retVal = VARIANT_TRUE : *retVal = VARIANT_FALSE;
+		delete[] data;  // TODO: Fix compile warning
 	}
 	else
 	{
-		*retVal = NULL;
+		*retVal = NULL;  // TODO: Should this be NULL?
 	}
 
 	return S_OK;
@@ -2320,23 +2325,24 @@ STDMETHODIMP CShape::ExportToBinary(VARIANT* bytesArray, VARIANT_BOOL* retVal)
 //********************************************************************
 //*		ImportFromBinary()
 //********************************************************************
-STDMETHODIMP CShape::ImportFromBinary(VARIANT bytesArray, VARIANT_BOOL* retVal)
+STDMETHODIMP CShape::ImportFromBinary(const VARIANT bytesArray, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
-	
-	if (bytesArray.vt != (VT_ARRAY|VT_UI1))
-		return S_OK;
-	
-	unsigned char* p = NULL;
-	SafeArrayAccessData(bytesArray.parray,(void HUGEP* FAR*)(&p));
 
-	char* data = reinterpret_cast<char*>(p);
-	
-	int recordLength = static_cast<int>(bytesArray.parray->cbElements);
-	bool result = _shp->put_RawData(data, recordLength);
-	
+	if (bytesArray.vt != (VT_ARRAY | VT_UI1))
+		return S_OK;
+
+	unsigned char* p = nullptr;
+	//SafeArrayAccessData(bytesArray.parray, (void HUGEP * FAR*)(&p));
+	SafeArrayAccessData(bytesArray.parray, reinterpret_cast<void**>(&p));
+
+	auto data = (char*)p; // TODO: Fix compile warning
+
+	const int recordLength = gsl::narrow_cast<int>(bytesArray.parray->cbElements);
+	const bool result = _shp->put_RawData(data, recordLength);
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
+
 	SafeArrayUnaccessData(bytesArray.parray);
 	ClearLabelPositionCache();
 	return S_OK;
@@ -2345,69 +2351,68 @@ STDMETHODIMP CShape::ImportFromBinary(VARIANT bytesArray, VARIANT_BOOL* retVal)
 //*****************************************************************
 //*		FixupShapeCore()
 //*****************************************************************
-bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck)
+bool CShape::FixupShapeCore(const ShapeValidityCheck validityCheck)
 {
 	VARIANT_BOOL vb;
 
-	switch(validityCheck)	
+	switch (validityCheck)
 	{
-		case NoParts:
+	case ShapeValidityCheck::NoParts:
+	{
+		long partIndex = 0;
+		InsertPart(0, &partIndex, &vb);
+		return vb ? true : false;
+	}
+	case ShapeValidityCheck::DirectionOfPolyRings:
+	{
+		ReversePointsOrder(0, &vb);
+		return vb ? true : false;
+	}
+	case ShapeValidityCheck::FirstAndLastPointOfPartMatch:
+	{
+		const bool hasM = _shp->get_ShapeType() == SHP_POLYGONM || _shp->get_ShapeType() == SHP_POLYGONZ;
+		const bool hasZ = _shp->get_ShapeType() == SHP_POLYGONZ;
+
+		const ShpfileType shptype = ShapeUtility::Convert2D(_shp->get_ShapeType());
+		if (shptype == SHP_POLYGON)
 		{
-			long PartIndex = 0;
-			InsertPart(0, &PartIndex, &vb);
-			return vb ? true : false;
-		}
-		case DirectionOfPolyRings:
-		{
-			ReversePointsOrder(0, &vb);
-			return vb ? true : false;
-		}
-		case FirstAndLastPointOfPartMatch:
+			double x1, x2, y1, y2, m;
+
+			for (long i = 0; i < _shp->get_PartCount(); i++)
 			{
-				bool hasM = _shp->get_ShapeType() == SHP_POLYGONM || _shp->get_ShapeType() == SHP_POLYGONZ;
-				bool hasZ = _shp->get_ShapeType() == SHP_POLYGONZ;
+				const int begPart = _shp->get_PartStartPoint(i);
+				const int endPart = _shp->get_PartEndPoint(i);
 
-				ShpfileType shptype = ShapeUtility::Convert2D(_shp->get_ShapeType());
-				if (shptype == SHP_POLYGON)
+				_shp->get_PointXY(begPart, x1, y1);
+				_shp->get_PointXY(endPart, x2, y2);
+				if (x1 != x2 || y1 != y2)
 				{
-					int beg_part, end_part;
-					double x1, x2, y1, y2, m;
+					_shp->InsertPointXY(endPart + 1, x1, y1);
 
-					for(long i = 0; i < _shp->get_PartCount(); i++)
+					if (hasM)
 					{
-						beg_part = _shp->get_PartStartPoint(i);
-						end_part = _shp->get_PartEndPoint(i);
-						
-						_shp->get_PointXY(beg_part, x1, y1);
-						_shp->get_PointXY(end_part, x2, y2);
-						if (x1 != x2 || y1 != y2)
-						{
-							_shp->InsertPointXY(end_part + 1, x1, y1);
-							
-							if (hasM)
-							{
-								_shp->get_PointM(beg_part, m);
-								_shp->put_PointM(end_part + 1, m);
-							}
-							if (hasZ)
-							{
-								_shp->get_PointZ(beg_part, m);
-								_shp->put_PointZ(end_part + 1, m);
-							}
-							
-							// the next parts should be moved a step forward
-							for(long part = i + 1; part < _shp->get_PartCount(); part++)
-							{
-								_shp->put_PartStartPoint(part, _shp->get_PartStartPoint(part));
-							}
-						}
+						_shp->get_PointM(begPart, m);
+						_shp->put_PointM(endPart + 1, m);
+					}
+					if (hasZ)
+					{
+						_shp->get_PointZ(begPart, m);
+						_shp->put_PointZ(endPart + 1, m);
+					}
+
+					// the next parts should be moved a step forward
+					for (long part = i + 1; part < _shp->get_PartCount(); part++)
+					{
+						_shp->put_PartStartPoint(part, _shp->get_PartStartPoint(part));
 					}
 				}
 			}
-			ClearLabelPositionCache();
-			return true;
-		default: 
-			return false;		// not implemented
+		}
+	}
+	ClearLabelPositionCache();
+	return true;
+	default:
+		return false;		// not implemented
 	}
 }
 
@@ -2417,7 +2422,7 @@ bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck)
 STDMETHODIMP CShape::FixUp(IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
 	FixUp2(umMeters, retval);
 
 	return S_OK;
@@ -2426,11 +2431,11 @@ STDMETHODIMP CShape::FixUp(IShape** retval)
 //*****************************************************************
 //*		FixUp2()
 //*****************************************************************
-STDMETHODIMP CShape::FixUp2(tkUnitsOfMeasure units, IShape** retVal)
+STDMETHODIMP CShape::FixUp2(const tkUnitsOfMeasure units, IShape** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = NULL;
+	*retVal = nullptr;
 
 	// no points? nothing we can do.
 	if (_shp->get_PointCount() <= 0)
@@ -2444,20 +2449,20 @@ STDMETHODIMP CShape::FixUp2(tkUnitsOfMeasure units, IShape** retVal)
 	{
 		switch (validityCheck)
 		{
-			case FirstAndLastPointOfPartMatch:
-			case DirectionOfPolyRings:
-			case NoParts:
-				IShape* shp = NULL;
-				this->Clone(&shp);
+		case ShapeValidityCheck::FirstAndLastPointOfPartMatch:
+		case ShapeValidityCheck::DirectionOfPolyRings:
+		case ShapeValidityCheck::NoParts:
+			IShape* shp = nullptr;
+			this->Clone(&shp);
 
-				// try some basic fixing
-				((CShape*)shp)->FixupShapeCore(validityCheck);
+			// try some basic fixing
+			static_cast<CShape*>(shp)->FixupShapeCore(validityCheck);
 
-				// run the core routine
-				*retVal = ((CShape*)shp)->FixupByBuffer(units);
+			// run the core routine
+			*retVal = static_cast<CShape*>(shp)->FixupByBuffer(units);
 
-				shp->Release();
-				return S_OK;
+			shp->Release();
+			return S_OK;
 		}
 	}
 
@@ -2473,7 +2478,7 @@ IShape* CShape::FixupByBuffer(tkUnitsOfMeasure units)
 {
 	VARIANT_BOOL vb = VARIANT_FALSE;
 
-	IShape* result = NULL;
+	IShape* result = nullptr;
 
 	// valid shape? just copy it.
 	this->get_IsValid(&vb);
@@ -2495,7 +2500,7 @@ IShape* CShape::FixupByBuffer(tkUnitsOfMeasure units)
 		result->get_IsValid(&vb);
 		if (!vb) {
 			result->Release();
-			result = NULL;
+			result = nullptr;
 		}
 	}
 
@@ -2505,10 +2510,11 @@ IShape* CShape::FixupByBuffer(tkUnitsOfMeasure units)
 //*****************************************************************
 //*		AddPoint()
 //*****************************************************************
-STDMETHODIMP CShape::AddPoint(double x, double y, long* pointIndex)
+STDMETHODIMP CShape::AddPoint(const double x, const double y, long* pointIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	bool success = _shp->InsertPointXY(_shp->get_PointCount(), x, y);
+
+	const bool success = _shp->InsertPointXY(_shp->get_PointCount(), x, y);
 	*pointIndex = success ? _shp->get_PointCount() - 1 : -1;
 	ClearLabelPositionCache();
 	return S_OK;
@@ -2517,73 +2523,69 @@ STDMETHODIMP CShape::AddPoint(double x, double y, long* pointIndex)
 #pragma region Get point
 
 // XY coordinates
-bool CShape::get_XY(long PointIndex, double* x, double* y)
+bool CShape::get_XY(const long pointIndex, double* x, double* y)
 {
-	if(!_shp->get_PointXY(PointIndex, *x, *y))
+	if (!_shp->get_PointXY(pointIndex, *x, *y))
 	{
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
 	}
-	else
-		return true;
+	return true;
 }
 
-bool CShape::get_Z(long PointIndex, double* z)
+bool CShape::get_Z(const long pointIndex, double* z)
 {
-	if(!_shp->get_PointZ(PointIndex, *z))
+	if (!_shp->get_PointZ(pointIndex, *z))
 	{
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
 	}
-	else
-		return true;
+	return true;
 }
 
-bool CShape::get_M(long PointIndex, double* m)
+bool CShape::get_M(const long pointIndex, double* m)
 {
-	if(!_shp->get_PointM(PointIndex, *m))
+	if (!_shp->get_PointM(pointIndex, *m))
 	{
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
 	}
-	else
-		return true;
+	return true;
 }
 
 // XYZ coordinates
-bool CShape::get_XYM(long PointIndex, double* x, double* y, double* m)
+bool CShape::get_XYM(const long pointIndex, double* x, double* y, double* m)
 {
-	if(!_shp->get_PointXY(PointIndex, *x, *y) ||
-	   !_shp->get_PointM(PointIndex, *m))
+	if (!_shp->get_PointXY(pointIndex, *x, *y) ||
+		!_shp->get_PointM(pointIndex, *m))
 	{
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
 	}
-	else
-		return true;
+	return true;
 }
 
-bool CShape::get_XYZ(long PointIndex, double* x, double* y, double* z)
+bool CShape::get_XYZ(const long pointIndex, double* x, double* y, double* z)
 {
-	if(!_shp->get_PointXY(PointIndex, *x, *y))
+	if (!_shp->get_PointXY(pointIndex, *x, *y))
 	{
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
 	}
-	_shp->get_PointZ(PointIndex, *z);   // ignore possible error for 2D type
+	_shp->get_PointZ(pointIndex, *z);   // ignore possible error for 2D type
 	return true;
 }
 
 // XYZM coordinates
-bool CShape::get_XYZM(long PointIndex, double& x, double& y, double& z, double& m)
+bool CShape::get_XYZM(const long pointIndex, double& x, double& y, double& z, double& m)
 {
-	if(!_shp->get_PointXY(PointIndex, x, y))
+	if (!_shp->get_PointXY(pointIndex, x, y))
 	{
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
 	}
-	_shp->get_PointZ(PointIndex, z);   // ignore possible error for 2D type
-	_shp->get_PointM(PointIndex, m);
+	_shp->get_PointZ(pointIndex, z);   // ignore possible error for 2D type
+	_shp->get_PointM(pointIndex, m);
 	return true;
 }
 
@@ -2608,7 +2610,7 @@ bool CShape::get_ExtentsXYZM(double& xMin, double& yMin, double& xMax, double& y
 	if (_shp->get_ShapeType2D() == SHP_POINT)
 	{
 		this->get_XYZM(0, xMin, yMin, zMin, mMin);
-		xMax = xMin; yMax = yMin; 
+		xMax = xMin; yMax = yMin;
 		zMax = zMin; mMax = mMin;
 	}
 	else
@@ -2622,22 +2624,23 @@ bool CShape::get_ExtentsXYZM(double& xMin, double& yMin, double& xMax, double& y
 //*****************************************************************
 //*		ExportToWKT()
 //*****************************************************************
-STDMETHODIMP CShape::ExportToWKT(BSTR * retVal)
+STDMETHODIMP CShape::ExportToWKT(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
+
 	OGRGeometry* geom = OgrConverter::ShapeToGeometry(this);
-	if (geom != NULL) 
+	if (geom != nullptr)
 	{
 		char* s;
 		geom->exportToWkt(&s, OGRwkbVariant::wkbVariantIso);
 		(*retVal) = A2BSTR(s);
 		OGRGeometryFactory::destroyGeometry(geom);
-        // allocated in GDAL; free using CPLFree
-        CPLFree(s);
-    }
-	else {
-		(*retVal) = A2BSTR("");
+		// allocated in GDAL; free using CPLFree
+		CPLFree(s);
+	}
+	else
+	{
+		*retVal = A2BSTR("");
 	}
 	return S_OK;
 }
@@ -2645,48 +2648,49 @@ STDMETHODIMP CShape::ExportToWKT(BSTR * retVal)
 //*****************************************************************
 //*		ImportFromWKT()
 //*****************************************************************
-STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
+STDMETHODIMP CShape::ImportFromWKT(BSTR serialized, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
-	USES_CONVERSION;
-	CString ser = OLE2A(Serialized);
+	// convert BSTR to CString
+	CString ser(serialized);
+	// get char* buffer from CString
+	const char* buffer = ser.GetBuffer();
 
-	OGRGeometry* oGeom = NULL;
-	char* buffer = ser.GetBuffer();
-	OGRErr err = OGRGeometryFactory::createFromWkt(&buffer, NULL, &oGeom);
+	OGRGeometry* oGeom = nullptr;
+	const OGRErr err = OGRGeometryFactory::createFromWkt(&buffer, nullptr, &oGeom);
 	if (err != OGRERR_NONE || !oGeom)
 	{
 		ErrorMessage(tkINVALID_SHAPE);
+		return S_OK;
+	}
+
+	// if there is a geometry collection only the first shape will be taken
+	std::vector<IShape*> shapes;
+	// in case geometry is both measured and 3D, let 3D govern
+	if (OgrConverter::GeometryToShapes(oGeom, &shapes, oGeom->IsMeasured() && !oGeom->Is3D()))
+	{
+		if (!shapes.empty() && gsl::at(shapes, 0))
+		{
+			IShape* result = gsl::at(shapes, 0);
+
+			// it was an impression that polygons are imported as non-closed
+			//((CShape*)result)->FixupShapeCore(ShapeValidityCheck::FirstAndLastPointOfPartMatch);
+
+			VARIANT_BOOL vb;
+			this->CopyFrom(result, &vb);
+			*retVal = VARIANT_TRUE;
+		}
+
+		for (const auto& shape : shapes)
+		{
+			if (shape) shape->Release();
+		}
 	}
 	else
 	{
-		// if there is a geometry collection only the first shape will be taken
-		std::vector<IShape*> shapes;
-		// in case geometry is both measured and 3D, let 3D govern
-		if (OgrConverter::GeometryToShapes(oGeom, &shapes, oGeom->IsMeasured() && !oGeom->Is3D()))
-		{
-			if (shapes.size() > 0 && shapes[0])
-			{
-				IShape* result = shapes[0];
-				
-				// it was an impression that polygons are imported as non-closed
-				//((CShape*)result)->FixupShapeCore(ShapeValidityCheck::FirstAndLastPointOfPartMatch);
-
-				VARIANT_BOOL vb;
-				this->CopyFrom(result, &vb);
-				*retVal = VARIANT_TRUE;	
-			}
-			for(size_t i = 0; i < shapes.size(); i++)
-			{
-				if (shapes[i]) shapes[i]->Release();
-			}
-		}
-		else
-		{
-			ErrorMessage(tkINVALID_SHAPE);
-		}
+		ErrorMessage(tkINVALID_SHAPE);
 	}
 	return S_OK;
 }
@@ -2697,7 +2701,7 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 STDMETHODIMP CShape::ClosestPoints(IShape* shape2, IShape** result)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
 	GEOSGeometry* g1 = GeosConverter::ShapeToGeom(this);
 	GEOSGeometry* g2 = GeosConverter::ShapeToGeom(shape2);
 	if (g1 && g2)
@@ -2705,30 +2709,33 @@ STDMETHODIMP CShape::ClosestPoints(IShape* shape2, IShape** result)
 		GEOSCoordSequence* coords = GeosHelper::ClosestPoints(g1, g2);
 		if (coords)
 		{
-			int size = GeosHelper::CoordinateSequenceSize(coords);
+			const int size = GeosHelper::CoordinateSequenceSize(coords);
 			if (size > 0)
 			{
 				std::vector<Point2D> points;
 				double x, y;
 				for (int i = 0; i < size; i++) {
 					if (GeosHelper::CoordinateSequenceGetXY(coords, i, x, y))
-						points.push_back(Point2D(x, y));
+					{
+						// points.push_back(Point2D(x, y));
+						points.emplace_back(x, y);
+					}
 				}
-				if (points.size() > 1) 
+				if (points.size() > 1)
 				{
 					VARIANT_BOOL vb;
 					ComHelper::CreateShape(result);
 					(*result)->Create(ShpfileType::SHP_POLYLINE, &vb);
 					long pointIndex;
-					for(size_t i = 0; i < points.size(); i++)
+					for (const auto& point : points)
 					{
-						(*result)->AddPoint(points[i].x, points[i].y, &pointIndex);
+						(*result)->AddPoint(point.x, point.y, &pointIndex);
 					}
 				}
 			}
 			GeosHelper::DestroyCoordinateSequence(coords);
 		}
-		if (!(*result))
+		if (!*result)
 		{
 			// TODO: report GEOS error code
 		}
@@ -2737,6 +2744,7 @@ STDMETHODIMP CShape::ClosestPoints(IShape* shape2, IShape** result)
 	{
 		ErrorMessage(tkCANT_CONVERT_SHAPE_GEOS);
 	}
+
 	if (g1)	GeosHelper::DestroyGeometry(g1);
 	if (g2) GeosHelper::DestroyGeometry(g2);
 	return S_OK;
@@ -2745,15 +2753,16 @@ STDMETHODIMP CShape::ClosestPoints(IShape* shape2, IShape** result)
 //*****************************************************************
 //*		Move()
 //*****************************************************************
-STDMETHODIMP CShape::Move(DOUBLE xProjOffset, DOUBLE yProjOffset)
+STDMETHODIMP CShape::Move(const DOUBLE xProjOffset, const DOUBLE yProjOffset)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	long numPoints;
 	get_NumPoints(&numPoints);
 
 	VARIANT_BOOL vb;
 	double x, y;
-	for (long i = 0; i < numPoints; i++) 
+	for (long i = 0; i < numPoints; i++)
 	{
 		if (get_XY(i, &x, &y)) {
 			put_XY(i, x + xProjOffset, y + yProjOffset, &vb);
@@ -2766,26 +2775,27 @@ STDMETHODIMP CShape::Move(DOUBLE xProjOffset, DOUBLE yProjOffset)
 //*****************************************************************
 //*		Rotate()
 //*****************************************************************
-STDMETHODIMP CShape::Rotate(DOUBLE originX, DOUBLE originY, DOUBLE angle)
+STDMETHODIMP CShape::Rotate(const DOUBLE originX, const DOUBLE originY, DOUBLE angle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	if (angle == 0.0) return S_OK;
 
 	angle *= -1;
-	double angleRad = angle / 180.0 * pi_;
-	double sine = sin(angleRad);
-	double cosine = cos(angleRad);
+	const double angleRad = angle / 180.0 * pi_;
+	const double sine = sin(angleRad);
+	const double cosine = cos(angleRad);
 
 	VARIANT_BOOL vb;
-	double x, y, dx, dy;
+	double x, y;
 	long numPoints;
 	get_NumPoints(&numPoints);
 	for (long i = 0; i < numPoints; i++)
 	{
-		if (get_XY(i, &x, &y)) 
+		if (get_XY(i, &x, &y))
 		{
-			dx = x - originX;
-			dy = y - originY;
+			const double dx = x - originX;
+			const double dy = y - originY;
 			x = originX + cosine * dx - sine * dy;
 			y = originY + sine * dx + cosine * dy;
 			put_XY(i, x, y, &vb);
@@ -2817,10 +2827,9 @@ STDMETHODIMP CShape::SplitByPolyline(IShape* polyline, VARIANT* results, VARIANT
 	if (!SplitByPolylineCore(polyline, shapes))
 		return S_OK;
 
-	if (shapes.size() != 0)
+	if (!shapes.empty() && Templates::Vector2SafeArray(&shapes, results))
 	{
-		if (Templates::Vector2SafeArray(&shapes, results))
-			*retVal = VARIANT_TRUE;
+		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
 }
@@ -2829,22 +2838,22 @@ STDMETHODIMP CShape::SplitByPolyline(IShape* polyline, VARIANT* results, VARIANT
 //*		SplitByPolyline()
 //*****************************************************************
 // Based on QGis implementation: https_://github.com/qgis/QGIS/blob/master/src/core/qgsgeometry.cpp
-bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes )
+bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes)
 {
-	if (shapes.size() > 0) return false;
+	if (!shapes.empty()) return false;
 
 	ShpfileType shpType;
 	get_ShapeType2D(&shpType);
 	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 	{
 		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
-		return S_OK;
+		return true;
 	}
 
 	int numSourceGeom = 0;
 	vector<GEOSGeometry*> results;
 
-	GEOSGeometry* result = NULL;
+	GEOSGeometry* result = nullptr;
 	GEOSGeometry* line = GeosConverter::ShapeToGeom(polyline);
 	GEOSGeometry* s = GeosConverter::ShapeToGeom(this);
 	if (s && line)
@@ -2853,11 +2862,9 @@ bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes )
 		{
 			if (shpType == SHP_POLYGON)
 			{
-				GEOSGeometry* b = GeosHelper::Boundary(s);
-				if (b)
+				if (GEOSGeometry* b = GeosHelper::Boundary(s))
 				{
-					GEOSGeometry* un = GeosHelper::Union(line, b);
-					if (un) {
+					if (GEOSGeometry* un = GeosHelper::Union(line, b)) {
 						result = GeosHelper::Polygonize(un);
 						GeosHelper::DestroyGeometry(un);
 					}
@@ -2865,20 +2872,20 @@ bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes )
 				}
 			}
 			else {
-				int linearIntersect = GeosHelper::RelatePattern(s, line, "1********");
+				const int linearIntersect = GeosHelper::RelatePattern(s, line, "1********");
 				if (linearIntersect > 0) {
 					ErrorMessage(tkSPLIT_LINEAR_INTERSECTION);
-					goto cleaning;		
+					goto cleaning; // TODO: Fix compile warning
 				}
 				result = GeosHelper::Difference(s, line);
 			}
 		}
 		numSourceGeom = GeosHelper::GetNumGeometries(s);
 	}
-	
-	if (!result) goto cleaning;
-	
-	int numGeoms = GeosHelper::GetNumGeometries(result);
+
+	if (!result) goto cleaning; // TODO: Fix compile warning
+
+	const int numGeoms = GeosHelper::GetNumGeometries(result);
 	if (numGeoms > 1)
 	{
 		GeosConverter::NormalizeSplitResults(result, s, shpType, results);
@@ -2889,24 +2896,25 @@ bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes )
 	}
 
 	// we expect to have more parts then initially
-	if ((int)results.size() > numSourceGeom) 
+	if (static_cast<int>(results.size()) > numSourceGeom)
 	{
-		for (size_t i = 0; i < results.size(); i++)
+		for (const auto& value : results)
 		{
 			vector<IShape*> shapesTemp;
-			GeosConverter::GeomToShapes(results[i], &shapesTemp, false);
+			GeosConverter::GeomToShapes(value, &shapesTemp, false);
 			shapes.insert(shapes.end(), shapesTemp.begin(), shapesTemp.end());
 		}
 	}
 
 cleaning:
-	for (size_t i = 0; i < results.size(); i++)	{
-		GeosHelper::DestroyGeometry(results[i]);
+	for (const auto& value : results)
+	{
+		GeosHelper::DestroyGeometry(value);
 	}
 	if (s)	GeosHelper::DestroyGeometry(s);
 	if (line) GeosHelper::DestroyGeometry(line);
 
-	return shapes.size() > 0;
+	return !shapes.empty();
 }
 
 //*****************************************************************
@@ -2915,7 +2923,8 @@ cleaning:
 STDMETHODIMP CShape::get_IsEmpty(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _shp->get_PointCount() == 0? VARIANT_TRUE : VARIANT_FALSE;
+
+	*pVal = _shp->get_PointCount() == 0 ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -2928,14 +2937,13 @@ STDMETHODIMP CShape::Clear()
 
 	_shp->Clear();
 	ClearLabelPositionCache();
-
 	return S_OK;
 }
 
 //*****************************************************************
 //*		InterpolatePoint()
 //*****************************************************************
-STDMETHODIMP CShape::InterpolatePoint(IPoint* startPoint, double distance, VARIANT_BOOL normalized, IPoint **retVal)
+STDMETHODIMP CShape::InterpolatePoint(IPoint* startPoint, const double distance, const VARIANT_BOOL normalized, IPoint** retVal)
 {
 	// simply call Utility function
 	return GetUtils()->LineInterpolatePoint(this, startPoint, distance, normalized, retVal);

@@ -1,3 +1,4 @@
+// ReSharper disable CppInconsistentNaming
 # ifndef TKERROR_CODES
 /*
 0 = tkNO_ERROR
@@ -14,7 +15,7 @@
 5001- = UserDefined
 */
 
-const char * ErrorMsg( long ErrorCode );
+const char* ErrorMsg(long errorCode);
 
 // 0 = tkNO_ERROR
 # define tkNO_ERROR 0
@@ -106,6 +107,10 @@ const char * ErrorMsg( long ErrorCode );
 # define tkNO_INTERACTIVE_EDITING 246
 # define tkEXPRESSION_NO_SHAPEFILE 247
 # define tkAPPEND_MODE_NO_FILE 248
+# define tkUSE_SPATIALINDEX_IS_FALSE 249
+# define tkHAS_NO_SPATIALINDEX 250
+# define tkEXCEEDS_SPATIALINDEXMAXAREAPERCENT 251
+# define tkCANNOT_APPLY_UNICODE_TO_SPATIALINDEX 252
 
 //301-400 = OGR layers
 # define tkFAILED_TO_OPEN_OGR_LAYER 301
@@ -263,6 +268,7 @@ const char * ErrorMsg( long ErrorCode );
 #define tkFAILED_TRANSFORM_WGS84_TO_MAP 1819
 #define tkFAILED_TRANSFORM_MAP_TO_WGS84 1820
 #define tkREPROJECTION_TOO_MUCH_SHAPES 1821
+#define tkOGR_NON_EXISTING_FEATURE 1822
 
 //2001-2200 = tiles
 #define tkINVALID_PROVIDER_ID 2001

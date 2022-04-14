@@ -156,9 +156,6 @@
     <ClCompile Include="ComHelpers\LabelsHelper.cpp">
       <Filter>ComHelpers</Filter>
     </ClCompile>
-    <ClCompile Include="ComHelpers\ProjectionHelper.cpp">
-      <Filter>ComHelpers</Filter>
-    </ClCompile>
     <ClCompile Include="ComHelpers\RasterBandHelper.cpp">
       <Filter>ComHelpers</Filter>
     </ClCompile>
@@ -1131,6 +1128,8 @@
     <ClCompile Include="Tiles\Projections\CustomProjection.cpp">
       <Filter>Tiles\Projections</Filter>
     </ClCompile>
+    <ClCompile Include="MapWinGIS.cpp" />
+    <ClCompile Include="StdAfx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h">
@@ -1200,9 +1199,6 @@
       <Filter>ComHelpers</Filter>
     </ClInclude>
     <ClInclude Include="ComHelpers\LabelsHelper.h">
-      <Filter>ComHelpers</Filter>
-    </ClInclude>
-    <ClInclude Include="ComHelpers\ProjectionHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
     <ClInclude Include="ComHelpers\RasterBandHelper.h">
@@ -1958,9 +1954,17 @@
     <ClInclude Include="Tiles\Projections\MercatorProjection.h">
       <Filter>Tiles\Projections</Filter>
     </ClInclude>
+    <ClInclude Include="MapWinGIS.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="_ITableEvents_CP.H" />
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup />
+  <ItemGroup>
+    <ResourceCompile Include="MapWinGIS.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="MapWinGIS.idl" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
       <Filter>COM classes</Filter>
@@ -2175,5 +2179,8 @@
     <None Include="Resource\zoom_in_16_2.ico">
       <Filter>Resource</Filter>
     </None>
+    <None Include="MapWinGIS.def" />
+    <None Include="MapWinGIS.rgs" />
+    <None Include="ReadMe.txt" />
   </ItemGroup>
 </Project>

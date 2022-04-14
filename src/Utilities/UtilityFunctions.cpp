@@ -64,11 +64,11 @@ namespace Utility
 	//		SYS2A
 	// ********************************************************
 	//ConservesStackMemory
-	char * Utility::SYS2A(BSTR str)
+	char* Utility::SYS2A(BSTR str)
 	{
 		USES_CONVERSION;
-		char * result = nullptr;
-		char * stackVersion = OLE2A(str);
+		char* result = nullptr;
+		char* stackVersion = OLE2A(str);
 		if (stackVersion)
 		{
 			result = new char[_tcslen(stackVersion) + 1];
@@ -100,7 +100,7 @@ namespace Utility
 
 			if (pszOut)
 			{
-				memset(pszOut, 0x00, sizeof(char)*nOutputStrLen);
+				memset(pszOut, 0x00, sizeof(char) * nOutputStrLen);
 				WideCharToMultiByte(codePage, 0, bstrIn, nInputStrLen, pszOut, nOutputStrLen, nullptr, nullptr);
 			}
 		}
@@ -177,7 +177,7 @@ namespace Utility
 		if (filename.GetLength() <= 0)
 			return FALSE;
 
-		FILE * file = fopen(filename, "rb");
+		FILE* file = fopen(filename, "rb");
 
 		if (file == nullptr)
 			return FALSE;
@@ -196,7 +196,7 @@ namespace Utility
 		if (filename.GetLength() <= 0)
 			return FALSE;
 
-		FILE * file = _wfopen(filename, L"rb");
+		FILE* file = _wfopen(filename, L"rb");
 
 		long size = 0;
 		if (file)
@@ -228,7 +228,7 @@ namespace Utility
 		if (filename.GetLength() <= 0)
 			return FALSE;
 
-		FILE * file = _wfopen(filename, L"rb");
+		FILE* file = _wfopen(filename, L"rb");
 
 		if (file == nullptr)
 		{
@@ -531,8 +531,8 @@ namespace Utility
 	// ********************************************************
 	CString Utility::GetTempFilename(CString extensionWithLeadingPoint)
 	{
-		char * tmpfname = new char[MAX_BUFFER];
-		char * tmppath = new char[MAX_PATH + MAX_BUFFER + 1];
+		char* tmpfname = new char[MAX_BUFFER];
+		char* tmppath = new char[MAX_PATH + MAX_BUFFER + 1];
 
 		GetTempPath(MAX_PATH, tmppath);
 
@@ -614,9 +614,9 @@ namespace Utility
 	//			get_ConversionFactor()
 	// **********************************************************
 	/// Returns the conversion factor between the map units and inches
-	double Utility::GetConversionFactor(tkUnitsOfMeasure Units)
+	double Utility::GetConversionFactor(tkUnitsOfMeasure units)
 	{
-		switch (Units)
+		switch (units)
 		{
 			// calculated considering sphere with radius 6378137 km, i.e. the one used WGS84/Google Mercator projection
 			// http://spatialreference.org/ref/sr-org/7483/html/
@@ -641,17 +641,15 @@ namespace Utility
 	bool Utility::ConvertDistance(tkUnitsOfMeasure source, tkUnitsOfMeasure target, double& value)
 	{
 		value *= Utility::GetConversionFactor(source);	// in inches
-		double factor = Utility::GetConversionFactor(target);
+		const double factor = Utility::GetConversionFactor(target);
 		if (factor != 0.0)
 		{
 			value /= factor;
 			return true;
 		}
-		else
-		{
-			value = 0.0;
-			return false;
-		}
+
+		value = 0.0;
+		return false;
 	}
 
 #pragma endregion
@@ -857,7 +855,7 @@ namespace Utility
 		return doComplete5i / pow(doBase, (double)nPrecision);
 	}
 
-	bool FloatsEqual(const float &a, const float &b)
+	bool FloatsEqual(const float& a, const float& b)
 	{
 		return (fabs(a - b) <= 1.0e-20f);
 	}
@@ -914,7 +912,7 @@ namespace Utility
 	void Utility::ClosePointer(Gdiplus::Bitmap** ptr)
 	{
 		if (*ptr) {
-			delete *ptr;
+			delete* ptr;
 			*ptr = nullptr;
 		}
 	}
@@ -922,7 +920,7 @@ namespace Utility
 	void Utility::ClosePointer(Gdiplus::Font** ptr)
 	{
 		if (*ptr) {
-			delete *ptr;
+			delete* ptr;
 			*ptr = nullptr;
 		}
 	}
@@ -984,7 +982,7 @@ namespace Utility
 		return (status == Gdiplus::Ok);
 	}
 
-	DWORD* Utility::cvtUCharToDword(long inp, int &num)
+	DWORD* Utility::cvtUCharToDword(long inp, int& num)
 	{   /* Chris Michaelis and Michelle Hospodarsky 2-11-2004 */
 		/* this function creates a DWORD[] from a long : used to create the custom pen for a custom stipple*/
 		/* the first digit in inp is the multiplier for the remainder of the digits	*/
@@ -1001,7 +999,7 @@ namespace Utility
 		}
 
 		int size = temp.size();
-		DWORD * output = new DWORD[size];
+		DWORD* output = new DWORD[size];
 
 		//get the multiplier
 		multiplier = atoi((char*)&temp[0]);
@@ -1066,7 +1064,7 @@ namespace Utility
 	// ********************************************************
 	//     CPLCreateXMLAttributeAndValue()
 	// ********************************************************
-	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, CStringW valueW)
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode* psParent, const char* pszName, CStringW valueW)
 	{
 		CStringA valueA = Utility::ConvertToUtf8(valueW);
 		CPLXMLNode* psNode = CPLCreateXMLNode(psParent, CXT_Attribute, pszName);
@@ -1074,21 +1072,21 @@ namespace Utility
 		return psNode;
 	}
 
-	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, const char *pszValue)
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode* psParent, const char* pszName, const char* pszValue)
 	{
 		CPLXMLNode* psNode = CPLCreateXMLNode(psParent, CXT_Attribute, pszName);
 		CPLCreateXMLNode(psNode, CXT_Text, pszValue);
 		return psNode;
 	}
 
-	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, int nValue)
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode* psParent, const char* pszName, int nValue)
 	{
 		CString temp;
 		temp.Format("%d", nValue);
 		return CPLCreateXMLAttributeAndValue(psParent, pszName, temp);
 	}
 
-	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, double rValue)
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode* psParent, const char* pszName, double rValue)
 	{
 		CString temp;
 		temp.Format("%f", rValue);
@@ -1098,7 +1096,7 @@ namespace Utility
 	// ********************************************************
 	//     CPLXMLChildrentCount()
 	// ********************************************************
-	int Utility::CPLXMLChildrentCount(CPLXMLNode *psParent)
+	int Utility::CPLXMLChildrentCount(CPLXMLNode* psParent)
 	{
 		if (!psParent) {
 			return 0;
@@ -1123,7 +1121,7 @@ namespace Utility
 	int GetCurrentYear()
 	{
 		const time_t curTime = time(nullptr);
-		struct tm *tmData = localtime(&curTime);
+		struct tm* tmData = localtime(&curTime);
 		return tmData->tm_year + 1900;
 	}
 
@@ -1180,11 +1178,11 @@ namespace Utility
 
 			if (GetFileVersionInfoW(path, verHandle, verSize, verData))
 			{
-				if (VerQueryValue(verData, "\\", (VOID FAR* FAR*)&lpBuffer, &size))
+				if (VerQueryValue(verData, "\\", (VOID FAR * FAR*) & lpBuffer, &size))
 				{
 					if (size)
 					{
-						VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
+						VS_FIXEDFILEINFO* verInfo = (VS_FIXEDFILEINFO*)lpBuffer;
 						if (verInfo->dwSignature == 0xfeef04bd)
 						{
 							int major = HIWORD(verInfo->dwFileVersionMS);
@@ -1311,7 +1309,7 @@ namespace Utility
 		return pathW;
 	}
 
-	inline BYTE toHex(const BYTE &x)
+	inline BYTE toHex(const BYTE& x)
 	{
 		return x > 9 ? x + 55 : x + 48;
 	}
@@ -1390,7 +1388,7 @@ namespace Utility
 	}
 
 	// https://ideone.com/1RCZM8
-	size_t split(const std::string &txt, std::vector<std::string> &strs, const char splittingChar)
+	size_t split(const std::string& txt, std::vector<std::string>& strs, const char splittingChar)
 	{
 		std::string::size_type pos = txt.find(splittingChar);
 		size_t initialPos = 0;

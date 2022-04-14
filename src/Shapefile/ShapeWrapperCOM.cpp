@@ -1,13 +1,13 @@
 /**************************************************************************************
  * File name: ShapeWrapperCOM.cpp
  *
- * Project: MapWindow Open Source (MapWinGis ActiveX control) 
+ * Project: MapWindow Open Source (MapWinGis ActiveX control)
  * Description: Implementation of CShapeWrapperCOM class
  *
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/ 
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at http://www.mozilla.org/mpl/
  * See the License for the specific language governing rights and limitations
  * under the License.
  *
@@ -18,67 +18,66 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
+ **************************************************************************************
+ * Contributor(s):
  * (Open source contributors should list themselves and their modifications here). */
- #include "stdafx.h"
+#include "stdafx.h"
 #include "ShapeWrapperCOM.h"
+
+#include <gsl/util>
 
 #pragma region ShapeType
 
-// ***************************************************************
-//	   put_ShapeType()
-// ***************************************************************
-bool CShapeWrapperCOM::put_ShapeType(ShpfileType shpType)
+ // ***************************************************************
+ //	   put_ShapeType()
+ // ***************************************************************
+bool CShapeWrapperCOM::put_ShapeType(const ShpfileType shpType)
 {
-	if( shpType == SHP_MULTIPATCH )
-	{	
+	if (shpType == SHP_MULTIPATCH)
+	{
 		_lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
 		return false;
 	}
-	else
-	{	
-		_shapeType = shpType;
-		
-		if( _shapeType == SHP_NULLSHAPE )
-		{	
-			for( unsigned int i = 0; i < _points.size(); i++ )
-			{	
-				_points[i]->Release();
-				_points[i] = NULL;
-			}
-			_points.clear();
-			_parts.clear();
+	_shapeType = shpType;
+
+	if (_shapeType == SHP_NULLSHAPE)
+	{
+		for (auto& point : _points)
+		{
+			point->Release();
+			point = nullptr;
 		}
-		else if( _shapeType == SHP_POINT || _shapeType == SHP_POINTZ || _shapeType == SHP_POINTM )
-		{	
-			for( unsigned int i = 1; i < _points.size(); i++ )
-			{	
-				_points[i]->Release();
-				_points[i] = NULL;
-			}
-			_parts.clear();
-		}
-		else if( _shapeType == SHP_POLYLINE || _shapeType == SHP_POLYLINEZ || _shapeType == SHP_POLYLINEM )
-		{	
-			if( _parts.size() <= 0 )
-			{
-				_parts.push_back(0);
-			}
-		}	
-		else if( _shapeType == SHP_POLYGON || _shapeType == SHP_POLYGONZ || _shapeType == SHP_POLYGONM )
-		{	
-			if( _parts.size() <= 0 )
-			{
-				_parts.push_back(0);
-			}
-		}
-		else if( _shapeType == SHP_MULTIPOINT || _shapeType == SHP_MULTIPOINTZ || _shapeType == SHP_MULTIPOINTM )
-		{	
-			_parts.clear();
-		}
-		return true;
+		_points.clear();
+		_parts.clear();
 	}
+	else if (_shapeType == SHP_POINT || _shapeType == SHP_POINTZ || _shapeType == SHP_POINTM)
+	{
+		for (auto& point : _points)
+		{
+			point->Release();
+			point = nullptr;
+		}
+		_parts.clear();
+	}
+	else if (_shapeType == SHP_POLYLINE || _shapeType == SHP_POLYLINEZ || _shapeType == SHP_POLYLINEM)
+	{
+		if (_parts.empty())
+		{
+			_parts.push_back(0);
+		}
+	}
+	else if (_shapeType == SHP_POLYGON || _shapeType == SHP_POLYGONZ || _shapeType == SHP_POLYGONM)
+	{
+		if (_parts.empty())
+		{
+			_parts.push_back(0);
+		}
+	}
+	else if (_shapeType == SHP_MULTIPOINT || _shapeType == SHP_MULTIPOINTZ || _shapeType == SHP_MULTIPOINTM)
+	{
+		_parts.clear();
+	}
+	return true;
 }
 
 #pragma endregion
@@ -92,7 +91,7 @@ void CShapeWrapperCOM::RefreshBoundsXY()
 {
 	if (!_boundsChanged) return;
 
-	ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
+	const ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
 
 	if (shpType2D == SHP_NULLSHAPE)
 	{
@@ -100,27 +99,27 @@ void CShapeWrapperCOM::RefreshBoundsXY()
 	}
 	else if (shpType2D == SHP_POINT)
 	{
-		_points[0]->get_X(&_xMin);
-		_points[0]->get_Y(&_yMin);
+		gsl::at(_points, 0)->get_X(&_xMin);
+		gsl::at(_points, 0)->get_Y(&_yMin);
 		_xMax = _xMin;
 		_yMax = _yMin;
 	}
 	else
 	{
 		double x, y;
-		for (int i = 0; i < (int)_points.size(); i++)
+		for (int i = 0; i < gsl::narrow_cast<int>(_points.size()); i++)
 		{
 			if (i == 0)
 			{
-				_points[0]->get_X(&_xMin);
-				_points[0]->get_Y(&_yMin);
+				gsl::at(_points, 0)->get_X(&_xMin);
+				gsl::at(_points, 0)->get_Y(&_yMin);
 				_xMax = _xMin;
 				_yMax = _yMin;
 			}
 			else
 			{
-				_points[i]->get_X(&x);
-				_points[i]->get_Y(&y);
+				gsl::at(_points, i)->get_X(&x);
+				gsl::at(_points, i)->get_Y(&y);
 
 				if (x < _xMin)	_xMin = x;
 				else if (x > _xMax)	_xMax = x;
@@ -156,18 +155,18 @@ bool CShapeWrapperCOM::get_BoundsXY(double& xMin, double& xMax, double& yMin, do
 // **********************************************************
 void CShapeWrapperCOM::RefreshBounds()
 {
-	ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
+	const ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
 
-	if (shpType2D == SHP_NULLSHAPE || _points.size() == 0)
+	if (shpType2D == SHP_NULLSHAPE || _points.empty())
 	{
-		_xMin = _xMax = _yMin = _yMax =	_zMin = _zMax = _mMin = _mMax = 0.0;
+		_xMin = _xMax = _yMin = _yMax = _zMin = _zMax = _mMin = _mMax = 0.0;
 	}
 	else if (shpType2D == SHP_POINT)
 	{
-		_points[0]->get_X(&_xMin);
-		_points[0]->get_Y(&_yMin);
-		_points[0]->get_Z(&_zMin);
-		_points[0]->get_M(&_mMin);
+		gsl::at(_points, 0)->get_X(&_xMin);
+		gsl::at(_points, 0)->get_Y(&_yMin);
+		gsl::at(_points, 0)->get_Z(&_zMin);
+		gsl::at(_points, 0)->get_M(&_mMin);
 		_xMax = _xMin;
 		_yMax = _yMin;
 		_zMax = _zMin;
@@ -176,34 +175,35 @@ void CShapeWrapperCOM::RefreshBounds()
 	else
 	{
 		double x, y, z, m;
-		for( unsigned int i = 0; i < _points.size(); i++ )
-		{	
-			if( i == 0 )
-			{	
-				_points[0]->get_X(&_xMin);
-				_points[0]->get_Y(&_yMin);
-				_points[0]->get_Z(&_zMin);
-				_points[0]->get_M(&_mMin);
+		const int pointSize = gsl::narrow_cast<int>(_points.size());
+		for (int i = 0; i < pointSize; i++)
+		{
+			if (i == 0)
+			{
+				gsl::at(_points, 0)->get_X(&_xMin);
+				gsl::at(_points, 0)->get_Y(&_yMin);
+				gsl::at(_points, 0)->get_Z(&_zMin);
+				gsl::at(_points, 0)->get_M(&_mMin);
 				_xMax = _xMin;
 				_yMax = _yMin;
 				_zMax = _zMin;
 				_mMax = _mMin;
 			}
 			else
-			{	
-				_points[i]->get_X(&x);
-				_points[i]->get_Y(&y);
-				_points[i]->get_Z(&z);
-				_points[i]->get_M(&m);
+			{
+				gsl::at(_points, i)->get_X(&x);
+				gsl::at(_points, i)->get_Y(&y);
+				gsl::at(_points, i)->get_Z(&z);
+				gsl::at(_points, i)->get_M(&m);
 
-				if		( x < _xMin )	_xMin = x;
-				else if ( x > _xMax )	_xMax = x;
-				if		( y < _yMin )	_yMin = y;
-				else if	( y > _yMax )	_yMax = y;
-				if		( z < _zMin )	_zMin = z;
-				else if ( z > _zMax )	_zMax = z;
-				if		( m < _mMin )	_mMin = m;
-				else if	( m > _mMax )	_mMax = m;
+				if (x < _xMin)	_xMin = x;
+				else if (x > _xMax)	_xMax = x;
+				if (y < _yMin)	_yMin = y;
+				else if (y > _yMax)	_yMax = y;
+				if (z < _zMin)	_zMin = z;
+				else if (z > _zMax)	_zMax = z;
+				if (m < _mMin)	_mMin = m;
+				else if (m > _mMax)	_mMax = m;
 			}
 		}
 	}
@@ -214,14 +214,14 @@ void CShapeWrapperCOM::RefreshBounds()
 // **********************************************************
 //		get_Bounds()
 // **********************************************************
-bool CShapeWrapperCOM::get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax, 
-								  double& zMin, double& zMax, double& mMin, double& mMax)
+bool CShapeWrapperCOM::get_Bounds(double& xMin, double& xMax, double& yMin, double& yMax,
+	double& zMin, double& zMax, double& mMin, double& mMax)
 {
 	if (_boundsChanged)
 	{
 		RefreshBounds();
 	}
-		
+
 	xMin = _xMin;
 	xMax = _xMax;
 	yMin = _yMin;
@@ -230,7 +230,7 @@ bool CShapeWrapperCOM::get_Bounds(double& xMin, double& xMax, double& yMin, doub
 	zMax = _zMax;
 	mMin = _mMin;
 	mMax = _mMax;
-		
+
 	return true;
 }
 #pragma endregion
@@ -240,169 +240,143 @@ bool CShapeWrapperCOM::get_Bounds(double& xMin, double& xMax, double& yMin, doub
 // ********************************************************
 //		get_PointsXY ()
 // ********************************************************
-bool CShapeWrapperCOM::get_PointXY(int PointIndex, double& x, double& y)
+bool CShapeWrapperCOM::get_PointXY(const int pointIndex, double& x, double& y)
 {
-	if( PointIndex < 0 || PointIndex >= (int)_points.size() )
-	{	
+	if (pointIndex < 0 || pointIndex >= gsl::narrow_cast<int>(_points.size()))
+	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{	
-		_points[PointIndex]->get_X(&x);
-		_points[PointIndex]->get_Y(&y);
-		return true;
-	}
+	gsl::at(_points, pointIndex)->get_X(&x);
+	gsl::at(_points, pointIndex)->get_Y(&y);
+	return true;
 }
 
 // ********************************************************
 //		get_PointXYZM ()
 // ********************************************************
-bool CShapeWrapperCOM::get_PointXYZM(int pointIndex, double& x, double& y, double& z, double& m)
+bool CShapeWrapperCOM::get_PointXYZM(const int pointIndex, double& x, double& y, double& z, double& m)
 {
-	if (pointIndex < 0 || pointIndex >= (int)_points.size())
+	if (pointIndex < 0 || pointIndex >= gsl::narrow_cast<int>(_points.size()))
 	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{
-		_points[pointIndex]->get_X(&x);
-		_points[pointIndex]->get_Y(&y);
-		_points[pointIndex]->get_Z(&z);
-		_points[pointIndex]->get_M(&m);
-		return true;
-	}
+	gsl::at(_points, pointIndex)->get_X(&x);
+	gsl::at(_points, pointIndex)->get_Y(&y);
+	gsl::at(_points, pointIndex)->get_Z(&z);
+	gsl::at(_points, pointIndex)->get_M(&m);
+	return true;
 }
 
 // ********************************************************
 //		get_PointsXY ()
 // ********************************************************
-void CShapeWrapperCOM::get_XYFast(int PointIndex, double& x, double& y)
+void CShapeWrapperCOM::get_XYFast(const int pointIndex, double& x, double& y)
 {
-	_points[PointIndex]->get_X(&x);
-	_points[PointIndex]->get_Y(&y);
+	gsl::at(_points, pointIndex)->get_X(&x);
+	gsl::at(_points, pointIndex)->get_Y(&y);
 }
 
 // ********************************************************
 //		put_PointXY()
 // ********************************************************
-bool CShapeWrapperCOM::put_PointXY(int PointIndex, double x, double y)
+bool CShapeWrapperCOM::put_PointXY(const int pointIndex, const double x, const double y)
 {
-	if( PointIndex < 0 || PointIndex >= (int)_points.size() )
-	{	
+	if (pointIndex < 0 || pointIndex >= gsl::narrow_cast<int>(_points.size()))
+	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{	
-		_points[PointIndex]->put_X(x);
-		_points[PointIndex]->put_Y(y);
-		_boundsChanged = true;
-		return true;
-	}
+	gsl::at(_points, pointIndex)->put_X(x);
+	gsl::at(_points, pointIndex)->put_Y(y);
+	_boundsChanged = true;
+	return true;
 }
 
 // ********************************************************
 //		get_PointZ()
 // ********************************************************
-bool CShapeWrapperCOM::get_PointZ(int PointIndex, double& z)
+bool CShapeWrapperCOM::get_PointZ(const int pointIndex, double& z)
 {
-	if( PointIndex < 0 || PointIndex >= (int)_points.size() )
+	if (pointIndex < 0 || pointIndex >= gsl::narrow_cast<int>(_points.size()))
 	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{
-		_points[PointIndex]->get_Z(&z);
-		return true;
-	}
+	gsl::at(_points, pointIndex)->get_Z(&z);
+	return true;
 }
 
 // ********************************************************
 //		put_PointZ()
 // ********************************************************
-bool CShapeWrapperCOM::put_PointZ(int PointIndex, double z)
+bool CShapeWrapperCOM::put_PointZ(const int pointIndex, const double z)
 {
-	if( PointIndex < 0 || PointIndex >= (int)_points.size() )
-	{	
+	if (pointIndex < 0 || pointIndex >= gsl::narrow_cast<int>(_points.size()))
+	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{	
-		_points[PointIndex]->put_Z(z);
-		return true;
-	}
+	gsl::at(_points, pointIndex)->put_Z(z);
+	return true;
 }
 
 // ********************************************************
 //		get_PointM()
 // ********************************************************
-bool CShapeWrapperCOM::get_PointM(int PointIndex, double& m)
+bool CShapeWrapperCOM::get_PointM(const int pointIndex, double& m)
 {
-	if( PointIndex < 0 || PointIndex >= (int)_points.size() )
+	if (pointIndex < 0 || pointIndex >= gsl::narrow_cast<int>(_points.size()))
 	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{
-		_points[PointIndex]->get_M(&m);
-		return true;
-	}
+	gsl::at(_points, pointIndex)->get_M(&m);
+	return true;
 }
 
 // ********************************************************
 //		put_PointM()
 // ********************************************************
-bool CShapeWrapperCOM::put_PointM(int PointIndex, double m)
+bool CShapeWrapperCOM::put_PointM(const int pointIndex, const double m)
 {
-	if( PointIndex < 0 || PointIndex >= (int)_points.size() )
-	{	
+	if (pointIndex < 0 || pointIndex >= gsl::narrow_cast<int>(_points.size()))
+	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{	
-		_points[PointIndex]->put_M(m);
-		return true;
-	}
+	gsl::at(_points, pointIndex)->put_M(m);
+	return true;
 }
 
 // ********************************************************
 //		get_Point()
 // ********************************************************
-IPoint* CShapeWrapperCOM::get_Point(long Index)
+IPoint* CShapeWrapperCOM::get_Point(const long index)
 {
-	if( Index < 0 || Index >= (long)_points.size() )
-	{	
+	if (index < 0 || index >= gsl::narrow_cast<int>(_points.size()))
+	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		return NULL;
+		return nullptr;
 	}
-	else
-	{	
-		_points[Index]->AddRef();
-		return _points[Index];
-	}
+	_points[index]->AddRef();
+	return _points[index];
 }
 
 // ********************************************************
 //		put_Point()
 // ********************************************************
-bool CShapeWrapperCOM::put_Point(long Index, IPoint* pnt)
+bool CShapeWrapperCOM::put_Point(const long index, IPoint* pnt)
 {
-	if( Index < 0 || Index >= (long)_points.size() )
-	{	
+	if (index < 0 || index >= gsl::narrow_cast<long>(_points.size()))
+	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{	_points[Index]->Release();
-		_points[Index] = pnt;			
-		return true;
-	}
+	_points[index]->Release();
+	_points[index] = pnt;
+	return true;
 }
 #pragma endregion
 
@@ -412,11 +386,12 @@ bool CShapeWrapperCOM::put_Point(long Index, IPoint* pnt)
 // ******************************************************
 void CShapeWrapperCOM::Clear()
 {
-	for( unsigned int i = 0; i < (int)_points.size(); i++ )
-	{	
-		_points[i]->Release();
+	const auto pointsSize = gsl::narrow_cast<unsigned int>(_points.size());
+	for (unsigned int i = 0; i < pointsSize; i++)
+	{
+		gsl::at(_points, i)->Release();
 	}
-	_points.clear();		
+	_points.clear();
 	_parts.clear();
 	_boundsChanged = true;
 }
@@ -424,75 +399,66 @@ void CShapeWrapperCOM::Clear()
 // ******************************************************
 //		InsertPoint()
 // ******************************************************
-bool CShapeWrapperCOM::InsertPoint(int PointIndex, IPoint* point)
+bool CShapeWrapperCOM::InsertPoint(int pointIndex, IPoint* point)
 {
-	if( _shapeType == SHP_NULLSHAPE )
-	{	
+	if (_shapeType == SHP_NULLSHAPE)
+	{
 		return false;
 	}
-	else
-	{	
-		if( PointIndex < 0 )
-		{
-			PointIndex = 0;
-		}
-		else if( PointIndex > (int)_points.size() )
-		{
-			PointIndex = _points.size();
-		}
 
-		if( _shapeType == SHP_POINT)
-		{	
-			if( _points.size() != 0)
-			{	
-				return false;
-			}
-			else
-			{
-				point->AddRef();
-				_points.push_back(point);
-				_boundsChanged = true;
-				return true;
-			}
-		}
-		else //(_ShapeType  == SHP_POLYLINE || _ShapeType == SHP_POLYGON || _ShapeType == SHP_MULTIPOINT)
-		{	
-			point->AddRef();
-			_points.insert( _points.begin() + PointIndex, point );			
-			_boundsChanged = true;
-			return true;
-		}
+	if (pointIndex < 0)
+	{
+		pointIndex = 0;
 	}
+	else if (pointIndex > gsl::narrow_cast<int>(_points.size()))
+	{
+		pointIndex = gsl::narrow_cast<int>(_points.size());
+	}
+
+	if (_shapeType == SHP_POINT)
+	{
+		if (!_points.empty())
+		{
+			return false;
+		}
+		point->AddRef();
+		_points.push_back(point);
+		_boundsChanged = true;
+		return true;
+	}
+
+	// else (_ShapeType  == SHP_POLYLINE || _ShapeType == SHP_POLYGON || _ShapeType == SHP_MULTIPOINT)
+	point->AddRef();
+	_points.insert(_points.begin() + pointIndex, point);
+	_boundsChanged = true;
+	return true;
 }
 
 // ******************************************************
 //		InsertPointXY()
 // ******************************************************
-bool CShapeWrapperCOM::InsertPointXY(int PointIndex, double x, double y)
+bool CShapeWrapperCOM::InsertPointXY(const int pointIndex, const double x, const double y)
 {
-	IPoint* pnt = NULL;
-	
+	IPoint* pnt = nullptr;
+
 	ComHelper::CreatePoint(&pnt);
 	if (pnt)
 	{
 		pnt->put_X(x);
 		pnt->put_Y(y);
-		bool result = this->InsertPoint(PointIndex, pnt);
+		const bool result = this->InsertPoint(pointIndex, pnt);
 		pnt->Release();
 		return result;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 // ******************************************************
 //		InsertPointXYZM()
 // ******************************************************
-bool CShapeWrapperCOM::InsertPointXYZM(int PointIndex, double x, double y, double z, double m)
+bool CShapeWrapperCOM::InsertPointXYZM(const int pointIndex, const double x, const double y, const double z, const double m)
 {
-	IPoint* pnt = NULL;
+	IPoint* pnt = nullptr;
 	ComHelper::CreatePoint(&pnt);
 	if (pnt)
 	{
@@ -500,31 +466,25 @@ bool CShapeWrapperCOM::InsertPointXYZM(int PointIndex, double x, double y, doubl
 		pnt->put_Y(y);
 		pnt->put_Z(z);
 		pnt->put_M(m);
-		return this->InsertPoint(PointIndex, pnt);
+		return this->InsertPoint(pointIndex, pnt);
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 // ********************************************************
 //		DeletePoint()
 // ********************************************************
-bool CShapeWrapperCOM::DeletePoint(int PointIndex)
+bool CShapeWrapperCOM::DeletePoint(const int pointIndex)
 {
-	if( PointIndex < 0 || PointIndex >= (int)_points.size() )
-	{	
+	if (pointIndex < 0 || pointIndex >= gsl::narrow_cast<int>(_points.size()))
+	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{	
-		_points[PointIndex]->Release();
-		_points.erase( _points.begin() + PointIndex );
-		_boundsChanged = true;
-		return true;
-	}
+	_points[pointIndex]->Release();
+	_points.erase(_points.begin() + pointIndex);
+	_boundsChanged = true;
+	return true;
 }
 #pragma endregion
 
@@ -533,132 +493,115 @@ bool CShapeWrapperCOM::DeletePoint(int PointIndex)
 // **********************************************************
 //		InsertPart()
 // **********************************************************
-bool CShapeWrapperCOM::InsertPart(int PartIndex, int PointIndex)
+bool CShapeWrapperCOM::InsertPart(int partIndex, const int pointIndex)
 {
-	if( _shapeType != SHP_POLYLINE &&
+	if (_shapeType != SHP_POLYLINE &&
 		_shapeType != SHP_POLYLINEZ &&
 		_shapeType != SHP_POLYLINEM &&
 		_shapeType != SHP_POLYGON &&
 		_shapeType != SHP_POLYGONZ &&
-		_shapeType != SHP_POLYGONM )
-	{	
-		return false;
-	}	
-	else
+		_shapeType != SHP_POLYGONM)
 	{
-		if( PartIndex < 0 )
-		{
-			PartIndex = 0;
-		}
-		else if( PartIndex > (int)_parts.size() )
-		{
-			PartIndex = _parts.size();
-		}
-		
-		// this part already exists
-		for (unsigned int i = 0; i < _parts.size(); i++)
-		{
-			if (_parts[i] == PointIndex)
-			{
-				return true;	// returning true to preserve compatibility
-			}
-		}
-
-		_parts.insert( _parts.begin() + PartIndex, PointIndex );
-		return true;
+		return false;
 	}
+	if (partIndex < 0)
+	{
+		partIndex = 0;
+	}
+	else if (partIndex > gsl::narrow_cast<int>(_parts.size()))
+	{
+		partIndex = gsl::narrow_cast<int>(_parts.size());
+	}
+
+	// this part already exists
+	for (const long part : _parts)
+	{
+		if (part == pointIndex)
+		{
+			return true;	// returning true to preserve compatibility
+		}
+	}
+
+	_parts.insert(_parts.begin() + partIndex, pointIndex);
+	return true;
 }
 
 // **************************************************************
 //		DeletePart()
 // **************************************************************
-bool CShapeWrapperCOM::DeletePart(int PartIndex)
+bool CShapeWrapperCOM::DeletePart(const int partIndex)
 {
-	if( _shapeType != SHP_POLYLINE &&
+	if (_shapeType != SHP_POLYLINE &&
 		_shapeType != SHP_POLYLINEZ &&
 		_shapeType != SHP_POLYLINEM &&
 		_shapeType != SHP_POLYGON &&
 		_shapeType != SHP_POLYGONZ &&
-		_shapeType != SHP_POLYGONM )
-	{	
-		return false;		
+		_shapeType != SHP_POLYGONM)
+	{
+		return false;
 	}
-	else if( PartIndex < 0 || PartIndex >= (int)_parts.size() )
-	{	
+
+	if (partIndex < 0 || partIndex >= gsl::narrow_cast<int>(_parts.size()))
+	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{	
-		_parts.erase( _parts.begin() + PartIndex );
-		return true;
-	}
+	_parts.erase(_parts.begin() + partIndex);
+	return true;
 }
 
 // **********************************************************
 //		get_allPartstartPoint()
 // **********************************************************
-int CShapeWrapperCOM::get_PartStartPoint(int PartIndex)
+int CShapeWrapperCOM::get_PartStartPoint(const int partIndex)
 {
-	if( PartIndex < 0 || PartIndex >= (int)_parts.size())
+	if (partIndex < 0 || partIndex >= gsl::narrow_cast<int>(_parts.size()))
 	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return -1;
 	}
-	else
-	{
-		return _parts[PartIndex];
-	}
+	return _parts[partIndex];
 }
 
 // **********************************************************
 //		get_PartEndPoint()
 // **********************************************************
-int CShapeWrapperCOM::get_PartEndPoint(int PartIndex)
+int CShapeWrapperCOM::get_PartEndPoint(const int partIndex)
 {
-	if( PartIndex < 0 || PartIndex >= (int)_parts.size())
+	if (partIndex < 0 || partIndex >= gsl::narrow_cast<int>(_parts.size()))
 	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return -1;
 	}
-	else
+	if (partIndex == gsl::narrow_cast<int>(_parts.size()) - 1)
 	{
-		if (PartIndex == _parts.size() - 1)
-		{
-			return _points.size() - 1;
-		}
-		else
-		{
-			return _parts[PartIndex + 1] - 1;
-		}
+		return gsl::narrow_cast<int>(_points.size()) - 1;
 	}
+	return _parts[partIndex + 1] - 1;
 }
 
 // **********************************************************
 //		put_PartStartPoint()
 // **********************************************************
-bool CShapeWrapperCOM::put_PartStartPoint(long PartIndex, long newVal)
+bool CShapeWrapperCOM::put_PartStartPoint(const long partIndex, const long newVal)
 {
-	if( PartIndex < 0 || PartIndex >= (long)_parts.size() )
+	if (partIndex < 0 || partIndex >= gsl::narrow_cast<long>(_parts.size()))
 	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	else
-	{
-		_parts[PartIndex] = newVal;
-		return true;
-	}
+	_parts[partIndex] = newVal;
+	return true;
 }
 #pragma endregion
 
 // **************************************************************
 //		ReversePoints()
 // **************************************************************
-void CShapeWrapperCOM::ReversePoints(long startIndex, long endIndex)
+void CShapeWrapperCOM::ReversePoints(const long startIndex, const long endIndex)
 {
-	vector<IPoint *>::iterator iter1 = _points.begin();
-	vector<IPoint *>::iterator iter2 = _points.begin();
+	auto iter1 = _points.begin();
+	auto iter2 = _points.begin();
 	iter1 += startIndex;
 	iter2 += endIndex;
 	reverse(iter1, iter2);
@@ -667,183 +610,192 @@ void CShapeWrapperCOM::ReversePoints(long startIndex, long endIndex)
 // **************************************************************
 //		put_RawData 
 // **************************************************************
-bool CShapeWrapperCOM::put_RawData(char* shapeData, int recordLength)
+bool CShapeWrapperCOM::put_RawData(char* shapeData, const int recordLength)
 {
 	_points.clear();
 	_parts.clear();
 
-	_shapeType = (ShpfileType)*(int*)shapeData;
-	ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
-	bool is25d = _shapeType != shpType2D;
+	_shapeType = (ShpfileType) * (int*)shapeData; // TODO: Fix compile warning
+	const ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
+	const bool is25d = _shapeType != shpType2D;
 
 	_boundsChanged = true;
 
-	int numPoints = 0;
-	int numParts = 0;
+	int numPoints;
 
 	if (shpType2D == SHP_NULLSHAPE)
 	{
 		// do nothing;
+		return true;
 	}
-	else if (shpType2D == SHP_POINT)
-	{
-		numPoints = 1;
-		double* ddata = (double*)(shapeData + 4);
 
-		IPoint* pnt = NULL;
+	if (shpType2D == SHP_POINT)
+	{
+		double* ddata = (double*)(shapeData + 4); // TODO: Fix compile warning
+
+		IPoint* pnt;
 		ComHelper::CreatePoint(&pnt);
+		// TODO: Fix compile warnings:
 		pnt->put_X(ddata[0]);
 		pnt->put_Y(ddata[1]);
 
 		if (_shapeType == SHP_POINTM)
 		{
-			pnt->put_M(ddata[2]);
+			pnt->put_M(ddata[2]); // TODO: Fix compile warning
 		}
 		else if (_shapeType == SHP_POINTZ)
 		{
-			pnt->put_Z(ddata[2]);
+			pnt->put_Z(ddata[2]); // TODO: Fix compile warning
 
 			if (recordLength > 28)  // 4 (shpType) + 3 * 8 (X, Y, Z) 
 			{
-				pnt->put_M(ddata[3]);
+				pnt->put_M(ddata[3]); // TODO: Fix compile warning
 			}
 		}
 
 		_points.push_back(pnt);
+
+		return true;
 	}
-	else if (shpType2D == SHP_MULTIPOINT)
+
+	if (shpType2D == SHP_MULTIPOINT)
 	{
+		// TODO: Fix compile warnings:
 		double* bounds = (double*)(shapeData + 4);
 		_xMin = bounds[0];					// 12
 		_yMin = bounds[1];					// 20
 		_xMax = bounds[2];					// 28
 		_yMax = bounds[3];					// 36
 
-		numPoints = *(int*)(shapeData + 36);
+		numPoints = *(int*)(shapeData + 36); // TODO: Fix compile warning
 
 		int readCount = 40;
-		double* points = (double*)(shapeData + readCount);
+		double* points = (double*)(shapeData + readCount); // TODO: Fix compile warning
 
 		// points
 		_points.resize(numPoints);
-		for (int i = 0; i < numPoints; i++) 
+		for (int i = 0; i < numPoints; i++)
 		{
-			IPoint* pnt = NULL;
+			IPoint* pnt;
 			ComHelper::CreatePoint(&pnt);
+			// TODO: Fix compile warnings
 			pnt->put_X(points[i * 2]);
 			pnt->put_Y(points[i * 2 + 1]);
-			_points[i] = pnt;
+			gsl::at(_points, i) = pnt;
 		}
 
-		points += numPoints * 2;   // X, Y
+		points += numPoints * 2;   // X, Y  // TODO: Fix compile warning
 		readCount += numPoints * 2 * 8;
 
 		if (is25d)
 		{
 			if (_shapeType == SHP_MULTIPOINTZ)
 			{
-				_zMin = *(points);
-				_zMax = *(points + 1);
+				_zMin = *points;
+				_zMax = *(points + 1);  // TODO: Fix compile warning
 
-				points += 2;
+				points += 2; // TODO: Fix compile warning
 				readCount += 2 * 8;
 
 				for (int i = 0; i < numPoints; i++) {
-					_points[i]->put_Z(points[i]);
+					gsl::at(_points, i)->put_Z(points[i]);
 				}
 
-				points += numPoints;
-				readCount += numPoints * 8;
-			}
-
-			// M values (only if record length is long enough)
-			if (readCount +  (2 + numPoints) * 8 <= recordLength)
-			{
-				_mMin = *(points);
-				_mMax = *(points + 1);
-
-				points += 2;
-
-				for (int i = 0; i < numPoints; i++) {
-					_points[i]->put_M(points[i]);
-				}
-			}
-		}
-	}
-
-	else if (shpType2D == SHP_POLYLINE || shpType2D == SHP_POLYGON)
-	{
-		double* bounds = (double*)(shapeData + 4);
-		_xMin = bounds[0];					// 12
-		_yMin = bounds[1];					// 20
-		_xMax = bounds[2];					// 28
-		_yMax = bounds[3];					// 36
-
-		numParts = *(int*)(shapeData + 36);
-		numPoints = *(int*)(shapeData + 40);
-
-		// parts
-		int* parts = (int*)(shapeData + 44);
-		if (numParts > 0)
-		{
-			_parts.resize(numParts);
-			memcpy(&_parts[0], parts, sizeof(int) * numParts);
-		}
-
-		// points
-		int readCount = 44 + sizeof(int) * numParts;
-		double* points = (double*)(shapeData + readCount);
-
-		if (numPoints > 0)
-		{
-			_points.resize(numPoints);
-			for (int i = 0; i < numPoints; i++)
-			{
-				IPoint* pnt = NULL;
-				ComHelper::CreatePoint(&pnt);
-				pnt->put_X(points[i * 2]);
-				pnt->put_Y(points[i * 2 + 1]);
-				_points[i] = pnt;
-			}
-		}
-
-		points += numPoints * 2;  // X and Y
-		readCount += numPoints * 2 * 8;
-
-		if (is25d)
-		{
-			if (_shapeType == SHP_POLYLINEZ || _shapeType == SHP_POLYGONZ)
-			{
-				_zMin = *(points);
-				_zMax = *(points + 1);
-
-				points += 2;
-				readCount += 2 * 8;
-				
-				for (int i = 0; i < numPoints; i++) {
-					_points[i]->put_Z(points[i]);
-				}
-
-				points += numPoints;
+				points += numPoints; // TODO: Fix compile warning
 				readCount += numPoints * 8;
 			}
 
 			// M values (only if record length is long enough)
 			if (readCount + (2 + numPoints) * 8 <= recordLength)
 			{
-				_mMin = *(points);
-				_mMax = *(points + 1);
-				points += 2;
+				_mMin = *points;
+				_mMax = *(points + 1); // TODO: Fix compile warning
+
+				points += 2;  // TODO: Fix compile warning
+
+				for (int i = 0; i < numPoints; i++) {
+					gsl::at(_points, i)->put_M(points[i]);
+				}
+			}
+		}
+		return true;
+	}
+
+	if (shpType2D == SHP_POLYLINE || shpType2D == SHP_POLYGON)
+	{
+		// TODO: Fix compile warnings:
+		double* bounds = (double*)(shapeData + 4);
+		_xMin = bounds[0];					// 12
+		_yMin = bounds[1];					// 20
+		_xMax = bounds[2];					// 28
+		_yMax = bounds[3];					// 36
+
+		const int numParts = *(int*)(shapeData + 36); // TODO: Fix compile warning
+		numPoints = *(int*)(shapeData + 40); // TODO: Fix compile warning
+
+		// parts
+		const int* parts = (int*)(shapeData + 44);  // TODO: Fix compile warning
+		if (numParts > 0)
+		{
+			_parts.resize(numParts);
+			memcpy(&gsl::at(_parts, 0), parts, sizeof(int) * numParts);
+		}
+
+		// points
+		int readCount = 44 + sizeof(int) * numParts;
+		auto points = (double*)(shapeData + readCount);  // TODO: Fix compile warning
+
+		if (numPoints > 0)
+		{
+			_points.resize(numPoints);
+			for (int i = 0; i < numPoints; i++)
+			{
+				IPoint* pnt;
+				ComHelper::CreatePoint(&pnt);
+				pnt->put_X(points[i * 2]);   // TODO: Fix compile warning
+				pnt->put_Y(points[i * 2 + 1]); // TODO: Fix compile warning
+				gsl::at(_points, i) = pnt;
+			}
+		}
+
+		points += numPoints * 2;  // X and Y  // TODO: Fix compile warning
+		readCount += numPoints * 2 * 8;
+
+		if (is25d)
+		{
+			if (_shapeType == SHP_POLYLINEZ || _shapeType == SHP_POLYGONZ)
+			{
+				_zMin = *points;
+				_zMax = *(points + 1);  // TODO: Fix compile warning
+
+				points += 2;  // TODO: Fix compile warning
+				readCount += 2 * 8;
+
+				for (int i = 0; i < numPoints; i++) {
+					gsl::at(_points, i)->put_Z(points[i]);
+				}
+
+				points += numPoints;   // TODO: Fix compile warning
+				readCount += numPoints * 8;
+			}
+
+			// M values (only if record length is long enough)
+			if (readCount + (2 + numPoints) * 8 <= recordLength)
+			{
+				_mMin = *points;
+				_mMax = *(points + 1);  // TODO: Fix compile warning
+				points += 2;  // TODO: Fix compile warning
 
 				if (numPoints > 0)
 				{
 					for (int i = 0; i < numPoints; i++) {
-						_points[i]->put_M(points[i]);
+						gsl::at(_points, i)->put_M(points[i]);
 					}
 				}
 			}
 		}
 	}
+
 	return true;
 }
 
@@ -853,49 +805,55 @@ bool CShapeWrapperCOM::put_RawData(char* shapeData, int recordLength)
 // Forming the data to write to the disk. Should be optimized as far as possible.
 int* CShapeWrapperCOM::get_RawData()
 {
-	int numPoints = _points.size();
-	int numParts = _parts.size();
+	const int numPoints = gsl::narrow_cast<int>(_points.size());
+	const int numParts = gsl::narrow_cast<int>(_parts.size());
 
-	int length = ShapeUtility::get_ContentLength(_shapeType, numPoints, numParts);
+	const int length = ShapeUtility::get_ContentLength(_shapeType, numPoints, numParts);
+	// TODO: Fix compile warnings:
 	int* intdata = new int[length / 4];
 	intdata[0] = (int)_shapeType;
 
-	double* ddata;
+	double* ddata;  // TODO: Fix compile warning
 
-	ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
+	const ShpfileType shpType2D = ShapeUtility::Convert2D(_shapeType);
 
-	bool is25d = shpType2D != _shapeType;
+	const bool is25d = shpType2D != _shapeType;
 
 	if (shpType2D == SHP_NULLSHAPE)
 	{
 		// do nothing;
+		return intdata;
 	}
-	else if (shpType2D == SHP_POINT)
+
+	if (shpType2D == SHP_POINT)
 	{
-		if (_points.size() == 0)
+		if (_points.empty())
 		{
-			intdata[0] = (int)SHP_NULLSHAPE;
+			intdata[0] = static_cast<int>(SHP_NULLSHAPE);
 		}
 		else
 		{
-			ddata = (double*)&intdata[1];
-			
-			_points[0]->get_X(&ddata[0]);
-			_points[0]->get_Y(&ddata[1]);
+			ddata = (double*)&intdata[1];  // TODO: Fix compile warning
+
+			gsl::at(_points, 0)->get_X(&ddata[0]);
+			gsl::at(_points, 0)->get_Y(&ddata[1]);
 
 			if (_shapeType == SHP_POINTM)
 			{
-				_points[0]->get_M(&ddata[2]);
+				gsl::at(_points, 0)->get_M(&ddata[2]);
 			}
 			else if (_shapeType == SHP_POINTZ)
 			{
-				_points[0]->get_M(&ddata[2]);
-				_points[0]->get_Z(&ddata[3]);
+				gsl::at(_points, 0)->get_M(&ddata[2]);
+				gsl::at(_points, 0)->get_Z(&ddata[3]);
 			}
 		}
+		return intdata;
 	}
-	else if (shpType2D == SHP_MULTIPOINT)
+
+	if (shpType2D == SHP_MULTIPOINT)
 	{
+		// TODO: Fix compile warnings:
 		ddata = (double*)&intdata[1];
 		ddata[0] = _xMin;
 		ddata[1] = _yMin;
@@ -903,47 +861,51 @@ int* CShapeWrapperCOM::get_RawData()
 		ddata[3] = _yMax;
 
 		// points
-		intdata[9] = numPoints;
-		ddata = (double*)&intdata[10];
+		intdata[9] = numPoints;  // TODO: Fix compile warning
+		ddata = (double*)&intdata[10]; // TODO: Fix compile warning
 
 		for (int i = 0; i < numPoints; i++)
 		{
-			_points[i]->get_X(&ddata[i * 2]);
-			_points[i]->get_Y(&ddata[i * 2 + 1]);
+			gsl::at(_points, i)->get_X(&ddata[i * 2]);
+			gsl::at(_points, i)->get_Y(&ddata[i * 2 + 1]);
 		}
 
 		// z values
 		if (is25d)
 		{
-			ddata += numPoints * 2;
+			ddata += numPoints * 2;  // TODO: Fix compile warning
 
 			if (_shapeType == SHP_MULTIPOINTZ)
 			{
+				// TODO: Fix compile warnings:
 				ddata[0] = _zMin;
 				ddata[1] = _zMax;
 				ddata += 2;
 
 				for (int i = 0; i < numPoints; i++)
 				{
-					_points[i]->get_Z(&ddata[i]);
+					gsl::at(_points, i)->get_Z(&ddata[i]);
 				}
 
-				ddata += numPoints;
+				ddata += numPoints; // TODO: Fix compile warning
 			}
 
+			// TODO: Fix compile warnings:
 			ddata[0] = _mMin;
 			ddata[1] = _mMax;
 			ddata += 2;
 
 			for (int i = 0; i < numPoints; i++)
 			{
-				_points[i]->get_M(&ddata[i]);
+				gsl::at(_points, i)->get_M(&ddata[i]);
 			}
 		}
+		return intdata;
 	}
 
-	else if (shpType2D == SHP_POLYLINE || shpType2D == SHP_POLYGON)
+	if (shpType2D == SHP_POLYLINE || shpType2D == SHP_POLYGON)
 	{
+		// TODO: Fix compile warnings:
 		ddata = (double*)&intdata[1];
 		ddata[0] = _xMin;
 		ddata[1] = _yMin;
@@ -951,49 +913,51 @@ int* CShapeWrapperCOM::get_RawData()
 		ddata[3] = _yMax;
 
 		// points
-		intdata[9] = numParts;
-		intdata[10] = numPoints;
+		intdata[9] = numParts;  // TODO: Fix compile warning
+		intdata[10] = numPoints; // TODO: Fix compile warning
 
 		// parts
-		int* parts = &intdata[11];
-		memcpy(parts, &_parts[0], sizeof(int) * numParts);
+		int* parts = &intdata[11];  // TODO: Fix compile warning
+		memcpy(parts, &gsl::at(_parts, 0), sizeof(int) * numParts);
 
 		// points
-		ddata = (double*)&intdata[11 + numParts];
+		ddata = (double*)&intdata[11 + numParts]; // TODO: Fix compile warning
 		if (numPoints > 0)
 		{
 			for (int i = 0; i < numPoints; i++)
 			{
-				_points[i]->get_X(&ddata[i * 2]);
-				_points[i]->get_Y(&ddata[i * 2 + 1]);
+				gsl::at(_points, i)->get_X(&ddata[i * 2]);
+				gsl::at(_points, i)->get_Y(&ddata[i * 2 + 1]);
 			}
 
 			// z values
 			if (is25d)
 			{
-				ddata += numPoints * 2;
+				ddata += numPoints * 2; // TODO: Fix compile warning
 
 				if (_shapeType == SHP_POLYLINEZ || _shapeType == SHP_POLYGONZ)
 				{
+					// TODO: Fix compile warnings:
 					ddata[0] = _zMin;
 					ddata[1] = _zMax;
 					ddata += 2;
 
 					for (int i = 0; i < numPoints; i++)
 					{
-						_points[i]->get_Z(&ddata[i]);
+						gsl::at(_points, i)->get_Z(&ddata[i]);
 					}
 
-					ddata += numPoints;
-				}
+					ddata += numPoints; // TODO: Fix compile warning
+				} 
 
+				// TODO: Fix compile warnings:
 				ddata[0] = _mMin;
 				ddata[1] = _mMax;
 				ddata += 2;
 
 				for (int i = 0; i < numPoints; i++)
 				{
-					_points[i]->get_M(&ddata[i]);
+					gsl::at(_points, i)->get_M(&ddata[i]);
 				}
 			}
 		}
@@ -1001,4 +965,3 @@ int* CShapeWrapperCOM::get_RawData()
 
 	return intdata;
 }
-

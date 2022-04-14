@@ -22,6 +22,9 @@
 #include "StdAfx.h"
 //#include "Wininet.h"
 #include "BaseProvider.h"
+
+#include <gsl/util>
+
 #include "SecureHttpClient.h"
 
 CString BaseProvider::_proxyUsername = "";
@@ -35,11 +38,11 @@ const CString filePrefix = "file:///";
 // ************************************************************
 TileCore* BaseProvider::GetTileImage(CPoint& pos, const int zoom)
 {
-    auto* tile = new TileCore(this->Id, zoom, pos, this->_projection);
+    auto* tile = new TileCore(this->Id, zoom, pos, this->_projection);  // TODO: Fix compile warning
 
     for (size_t i = 0; i < _subProviders.size(); i++)
     {
-        CMemoryBitmap* bmp = _subProviders[i]->DownloadBitmap(pos, zoom);
+        CMemoryBitmap* bmp = gsl::at(_subProviders, i)->DownloadBitmap(pos, zoom);
         if (bmp)
         {
             tile->AddOverlay(bmp);
@@ -56,7 +59,7 @@ TileCore* BaseProvider::GetTileImage(CPoint& pos, const int zoom)
 // ************************************************************
 //		GetTileHttpData()
 // ************************************************************
-CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool recursive)
+CMemoryBitmap* BaseProvider::GetTileHttpData(const CString url, const CString shortUrl, const bool recursive)
 {
     // single-file access to the tile load
     // MWGIS-207; allow multiple thread access
@@ -78,7 +81,7 @@ CMemoryBitmap* BaseProvider::GetTileHttpData(CString url, CString shortUrl, bool
         return nullptr;
     }
 
-    CMemoryBitmap* bmp = ProcessHttpRequest(reinterpret_cast<void*>(&client), url, shortUrl, success);
+    CMemoryBitmap* bmp = ProcessHttpRequest(&client, url, shortUrl, success);
 
     // this is a leftover from the Atl Http code; it remains to be seen if it is necessary
     if (!success && !recursive && client.GetStatus() == -1)
@@ -101,12 +104,12 @@ CMemoryBitmap* BaseProvider::GetTileFileData(CString url)
 	url.Replace("|", ":");
 	url.Replace("/", "\\");
 
-	std::ifstream fl = std::ifstream(url.GetBuffer(), std::ofstream::binary);
+	auto fl = std::ifstream(url.GetBuffer(), std::ofstream::binary);
 	if (!fl)
 		return nullptr;
 
 	fl.seekg(0, std::ios::end);
-	int sz = fl.tellg();
+	const int sz = fl.tellg();
 	if (sz == 0)
 		return nullptr;
 
@@ -123,7 +126,7 @@ CMemoryBitmap* BaseProvider::GetTileFileData(CString url)
 // ************************************************************
 //		DownloadBitmap()
 // ************************************************************
-CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
+CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, const int zoom)
 {
     const CString url = MakeTileImageUrl(pos, zoom);
     CString shortUrl;
@@ -132,17 +135,17 @@ CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint& pos, int zoom)
 
 	if (url.Find(filePrefix) == 0)
 		return GetTileFileData(url);
-	else
-		return GetTileHttpData(url, shortUrl);
+
+	return GetTileHttpData(url, shortUrl);
 }
 
 // ************************************************************
 //		ProcessResults()
 // ************************************************************
 CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, const CString& url, const CString& shortUrl,
-                                                bool success)
+                                                const bool success)
 {
-    auto* client = reinterpret_cast<SecureHttpClient*>(secureHttpClient);
+    auto* client = static_cast<SecureHttpClient*>(secureHttpClient);
 
     if (_isStopped) return nullptr;
 
@@ -163,10 +166,10 @@ CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, const CS
     CMemoryBitmap* bmp = nullptr;
     switch (contentType)
     {
-    case httpImage:
+    case TileHttpContentType::httpImage:
         bmp = ReadBitmap(body, length);
         break;
-    case httpXml:
+    case TileHttpContentType::httpXml:
         if (IsWms())
         {
             const CString s(body);
@@ -195,8 +198,8 @@ void BaseProvider::ParseServerException(const CString& s) const
             CPLXMLNode* nodeException = CPLGetXMLNode(node, "ServiceException");
             if (nodeException)
             {
-                const CString msg = CPLGetXMLValue(nodeException, "", "");
-                CallbackHelper::ErrorMsg(Debug::Format("WMS Server exception (%s): %s", Name, msg));
+                CString msg = CPLGetXMLValue(nodeException, "", "");
+                CallbackHelper::ErrorMsg(Debug::Format("WMS Server exception (%s): %s", Name, msg)); // TODO: Fix compile warning
             }
             node = node->psNext;
         }
@@ -222,7 +225,7 @@ void BaseProvider::PreventParallelExecution()
 // *************************************************************
 //			ReadBitmap()
 // *************************************************************
-CMemoryBitmap* BaseProvider::ReadBitmap(char* body, int bodyLen) const
+CMemoryBitmap* BaseProvider::ReadBitmap(const char* body, const int bodyLen) const
 {
     auto* bmp = new CMemoryBitmap();
     bmp->LoadFromRawData(body, bodyLen);

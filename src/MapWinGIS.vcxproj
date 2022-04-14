@@ -30,7 +30,7 @@
     <ProjectGuid>{1AB93398-2DE6-4043-BF6D-D438A794FB86}</ProjectGuid>
     <RootNamespace>MapWinGIS</RootNamespace>
     <Keyword>MFCProj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -38,7 +38,7 @@
     <UseOfMfc>false</UseOfMfc>
     <UseOfAtl>false</UseOfAtl>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -50,8 +50,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
-    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -61,14 +61,32 @@
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
     <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgManifestInstall>false</VcpkgManifestInstall>
   </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>
     <PreBuildEvent>
-      <Message>Copying executables...</Message>
-      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\bin\$(Platform) $(TargetDir)</Command>
+      <Message>Copying dlls ...</Message>
+      <Command>if $(PlatformName) == Win32 (
+  echo "Copying spatialindex-32.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-32.dll $(TargetDir))
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-32.dll $(TargetDir))
+)
+if $(PlatformName) == x64 (
+  echo "Copying spatialindex-64.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-64.dll $(TargetDir))
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-64.dll $(TargetDir))
+)
+
+$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\bin\$(Platform) $(TargetDir)</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Message>
@@ -97,7 +115,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Support\include;$(ProjectDir)..\Support\include\atlhttp;$(ProjectDir)..\support\include\ShapeLib;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\ComHelpers;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Tiles\Caching;$(ProjectDir)\Tiles\Loaders;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\Tiles\Http;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform);$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform)\curl;$(ProjectDir)\Ogr;$(ProjectDir)\Editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Support\include;$(ProjectDir)..\Support\include\atlhttp;$(ProjectDir)..\support\include\ShapeLib;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\ComHelpers;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Tiles\Caching;$(ProjectDir)\Tiles\Loaders;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\Tiles\Http;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform);$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform)\curl;$(ProjectDir)\Ogr;$(ProjectDir)\Editor;$(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\include;$(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -133,11 +151,11 @@
       </Version>
       <RegisterOutput>true</RegisterOutput>
       <AdditionalOptions>/ignore:4099 /Ignore:4254  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>cqlib.lib;GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex-mw.lib;geos_c.lib;libtiff_i.lib;ShapeLib.lib;libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;geos_c.lib;tiff.lib;libcurl_imp.lib;cqlib.lib;ShapeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)..\Support\lib\$(PlatformToolset)\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)..\Support\lib\$(PlatformToolset)\$(Platform)\Release;$(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\lib;$(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>
@@ -159,7 +177,8 @@
     </Bscmake>
     <PostBuildEvent>
       <Command>if $(PlatformName) == Win32 setx  MapWinGISBin32 $(OutputPath)
-if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
+if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)
+setx PROJ_LIB $(OutputPath)proj7\share</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Win32 platform definitions -->
@@ -170,10 +189,13 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</MultiProcessorCompilation>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdc11</LanguageStandard_C>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>spatialindex-32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <!-- x64 platform definitions -->
@@ -183,16 +205,23 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     </Midl>
     <ClCompile>
       <PreprocessorDefinitions>WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdc11</LanguageStandard_C>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalDependencies>spatialindex-64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <!-- Visual Leak Detector config -->
   <ItemDefinitionGroup Condition="'$(Configuration)'=='VLD'">
     <ClCompile>
       <PreprocessorDefinitions>VLD_FORCE_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">stdc11</LanguageStandard_C>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">stdc11</LanguageStandard_C>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">stdcpp14</LanguageStandard>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <RegisterOutput>false</RegisterOutput>
@@ -205,6 +234,10 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <PreprocessorDefinitions>RELEASE_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</MultiProcessorCompilation>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdcpp14</LanguageStandard>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdc11</LanguageStandard_C>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp14</LanguageStandard>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdc11</LanguageStandard_C>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -235,7 +268,6 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClInclude Include="ComHelpers\FieldHelper.h" />
     <ClInclude Include="ComHelpers\ImageHelper.h" />
     <ClInclude Include="ComHelpers\LabelsHelper.h" />
-    <ClInclude Include="ComHelpers\ProjectionHelper.h" />
     <ClInclude Include="ComHelpers\RasterBandHelper.h" />
     <ClInclude Include="ComHelpers\SelectionHelper.h" />
     <ClInclude Include="ComHelpers\SelectionListHelper.h" />
@@ -519,7 +551,6 @@ if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     <ClCompile Include="ComHelpers\FieldHelper.cpp" />
     <ClCompile Include="ComHelpers\ImageHelper.cpp" />
     <ClCompile Include="ComHelpers\LabelsHelper.cpp" />
-    <ClCompile Include="ComHelpers\ProjectionHelper.cpp" />
     <ClCompile Include="ComHelpers\RasterBandHelper.cpp" />
     <ClCompile Include="ComHelpers\SelectionHelper.cpp" />
     <ClCompile Include="ComHelpers\SelectionListHelper.cpp" />

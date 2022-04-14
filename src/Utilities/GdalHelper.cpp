@@ -25,35 +25,40 @@
 
 #include "StdAfx.h"
 #include "GdalHelper.h"
+
+#include <gsl/pointers>
+#include <gsl/util>
+
 #include "ogrsf_frmts.h"
 #include "CallbackHelper.h"
 #include "Windows.h"
 #include "GdalDriverHelper.h"
 #include "RasterBandHelper.h"
 
+// ReSharper disable once CppInconsistentNaming
 map<CStringA, GDALDataset*> GdalHelper::m_ogrDatasets;
 
 // **************************************************************
 //		OpenOgrDatasetA
 // **************************************************************
-GDALDataset* GdalHelper::OpenOgrDatasetA(char* filenameUtf8, bool forUpdate)
+GDALDataset* GdalHelper::OpenOgrDatasetA(const char* filenameUtf8, const bool forUpdate)
 {
 	m_globalSettings.SetGdalUtf8(true);
 
 	GDALAllRegister();
-	auto method = GDAL_OF_VECTOR;
+	int method = GDAL_OF_VECTOR;
 
-	const auto forceUpdate = m_globalSettings.ogrLayerForceUpdateMode;
+	const bool forceUpdate = m_globalSettings.ogrLayerForceUpdateMode;
 	if (forUpdate || forceUpdate)
 		method |= GDAL_OF_UPDATE;
 
-	auto dt = static_cast<GDALDataset *>(GDALOpenEx(filenameUtf8, method, nullptr, nullptr, nullptr));
+	auto dt = static_cast<GDALDataset*>(GDALOpenEx(filenameUtf8, method, nullptr, nullptr, nullptr));
 
 	if (!dt && forceUpdate)
 	{
 		// let's try again without the update flag
 		method = GDAL_OF_VECTOR;
-		dt = static_cast<GDALDataset *>(GDALOpenEx(filenameUtf8, method, nullptr, nullptr, nullptr));
+		dt = static_cast<GDALDataset*>(GDALOpenEx(filenameUtf8, method, nullptr, nullptr, nullptr));
 	}
 
 	m_globalSettings.SetGdalUtf8(false);
@@ -63,30 +68,30 @@ GDALDataset* GdalHelper::OpenOgrDatasetA(char* filenameUtf8, bool forUpdate)
 // **************************************************************
 //		OpenOgrDatasetW
 // **************************************************************
-GDALDataset* GdalHelper::OpenOgrDatasetW(const CStringW& filenameW, bool forUpdate, bool allowShared)
+GDALDataset* GdalHelper::OpenOgrDatasetW(const CStringW& filenameW, const bool forUpdate, const bool allowShared)
 {
-	auto filenameA = Utility::ConvertToUtf8(filenameW);
+	CStringA filenameA = Utility::ConvertToUtf8(filenameW);
 
 	if (allowShared && m_globalSettings.ogrShareConnection)
 	{
-		auto key = filenameA;
+		CStringA key = filenameA;
 		key += forUpdate ? "1" : "0";
 
-		if (m_ogrDatasets.find(key) != m_ogrDatasets.end())
+		if (m_ogrDatasets.find(key) != m_ogrDatasets.end()) // TODO: Fix compile warning
 		{
 			// it is opened already, try to reuse
-			auto ds = m_ogrDatasets[key];
+			const gsl::not_null<GDALDataset*> ds = m_ogrDatasets[key];
 
 			ds->Reference();
 			//Debug::WriteLine("Referencing shared datasource: %d", count);
 			return ds;
 		}
 
-		const auto ds = OpenOgrDatasetA(filenameA.GetBuffer(), forUpdate);
+		GDALDataset* ds = OpenOgrDatasetA(filenameA.GetBuffer(), forUpdate);
 		if (ds)
 		{
 			// let's cache it for further reuse of connection
-			if (m_ogrDatasets.find(key) == m_ogrDatasets.end())
+			if (m_ogrDatasets.find(key) == m_ogrDatasets.end()) // TODO: Fix compile warning
 			{
 				m_ogrDatasets[key] = ds;
 			}
@@ -105,7 +110,7 @@ int GdalHelper::CloseSharedOgrDataset(GDALDataset* ds)
 {
 	if (m_globalSettings.ogrShareConnection)
 	{
-		const auto count = ds->Dereference();
+		const int count = ds->Dereference();
 		if (count == 0)
 		{
 			//Debug::WriteLine("Shared datasource is closed.");
@@ -147,14 +152,14 @@ void GdalHelper::RemoveCachedOgrDataset(GDALDataset* ds)
 // **************************************************************
 bool GdalHelper::CanOpenAsOgrDataset(const CStringW& filename)
 {
-	const auto forceUpdate = m_globalSettings.ogrLayerForceUpdateMode;
+	const bool forceUpdate = m_globalSettings.ogrLayerForceUpdateMode;
 	m_globalSettings.ogrLayerForceUpdateMode = false;
 
 	const auto dt = OpenOgrDatasetW(filename, false, true);
 
 	m_globalSettings.ogrLayerForceUpdateMode = forceUpdate;
 
-	const auto success = dt != nullptr;
+	const bool success = dt != nullptr;
 	if (dt)
 	{
 		CloseDataset(dt);
@@ -165,7 +170,7 @@ bool GdalHelper::CanOpenAsOgrDataset(const CStringW& filename)
 // **************************************************************
 //		OpenRasterDatasetA
 // **************************************************************
-GDALDataset* GdalHelper::OpenRasterDatasetA(char* filenameUtf8)
+GDALDataset* GdalHelper::OpenRasterDatasetA(const char* filenameUtf8)
 {
 	m_globalSettings.SetGdalUtf8(true);
 
@@ -177,24 +182,24 @@ GDALDataset* GdalHelper::OpenRasterDatasetA(char* filenameUtf8)
 	GDALDataset* dt = nullptr;
 
 	if (!m_globalSettings.forceReadOnlyModeForGdalRasters)
-		dt = static_cast<GDALDataset *>(GDALOpen(filenameUtf8, GA_Update));
+		dt = static_cast<GDALDataset*>(GDALOpen(filenameUtf8, GA_Update));
 
 	m_globalSettings.suppressGdalErrors = false;
 
 	if (dt == nullptr)
-		dt = static_cast<GDALDataset *>(GDALOpen(filenameUtf8, GA_ReadOnly));
+		dt = static_cast<GDALDataset*>(GDALOpen(filenameUtf8, GA_ReadOnly));
 
 	m_globalSettings.SetGdalUtf8(false);
 
 	return dt;
 }
 
-GDALDataset* GdalHelper::OpenRasterDatasetA(char* filenameUtf8, GDALAccess accessType)
+GDALDataset* GdalHelper::OpenRasterDatasetA(const char* filenameUtf8, const GDALAccess accessType)
 {
 	m_globalSettings.SetGdalUtf8(true);
 
 	GDALAllRegister();
-	const auto dt = static_cast<GDALDataset *>(GDALOpen(filenameUtf8, accessType));
+	const auto dt = static_cast<GDALDataset*>(GDALOpen(filenameUtf8, accessType));
 
 	m_globalSettings.SetGdalUtf8(false);
 
@@ -206,7 +211,7 @@ GDALDataset* GdalHelper::OpenRasterDatasetA(CStringA& filenameUtf8)
 	return OpenRasterDatasetA(filenameUtf8.GetBuffer());
 }
 
-GDALDataset* GdalHelper::OpenRasterDatasetA(CStringA& filenameUtf8, GDALAccess accessType)
+GDALDataset* GdalHelper::OpenRasterDatasetA(CStringA& filenameUtf8, const GDALAccess accessType)
 {
 	return OpenRasterDatasetA(filenameUtf8.GetBuffer(), accessType);
 }
@@ -214,15 +219,15 @@ GDALDataset* GdalHelper::OpenRasterDatasetA(CStringA& filenameUtf8, GDALAccess a
 // **************************************************************
 //		OpenRasterDatasetW
 // **************************************************************
-GDALDataset* GdalHelper::OpenRasterDatasetW(const CStringW& filenameW, GDALAccess accessType)
+GDALDataset* GdalHelper::OpenRasterDatasetW(const CStringW& filenameW, const GDALAccess accessType)
 {
-	auto filenameA = Utility::ConvertToUtf8(filenameW);
+	CStringA filenameA = Utility::ConvertToUtf8(filenameW);
 	return OpenRasterDatasetA(filenameA.GetBuffer(), accessType);
 }
 
 GDALDataset* GdalHelper::OpenRasterDatasetW(const CStringW& filenameW)
 {
-	auto filenameA = Utility::ConvertToUtf8(filenameW);
+	CStringA filenameA = Utility::ConvertToUtf8(filenameW);
 	return OpenRasterDatasetA(filenameA.GetBuffer());
 }
 
@@ -231,18 +236,18 @@ GDALDataset* GdalHelper::OpenRasterDatasetW(const CStringW& filenameW)
 // **************************************************************
 bool GdalHelper::IsRgb(GDALDataset* dt)
 {
-	auto isRgb = false;
+	bool isRgb = false;
 	if (dt)
 	{
 		bool g, b;
-		auto r = (g = b = false);
-		const auto numBands = dt->GetRasterCount();
-		for (auto i = 1; i <= numBands; i++)
+		bool r = g = b = false;
+		const int numBands = dt->GetRasterCount();
+		// PM, march 2022: Do we start at 1?
+		for (int i = 1; i <= numBands; i++)
 		{
-			auto band = dt->GetRasterBand(i);
-			if (band)
+			if (GDALRasterBand* band = dt->GetRasterBand(i))
 			{
-				const auto ci = band->GetColorInterpretation();
+				const GDALColorInterp ci = band->GetColorInterpretation();
 				if (ci == GCI_RedBand) r = true;
 				if (ci == GCI_GreenBand) g = true;
 				if (ci == GCI_BlueBand) b = true;
@@ -258,9 +263,9 @@ bool GdalHelper::IsRgb(GDALDataset* dt)
 // **************************************************************
 CPLXMLNode* GdalHelper::ParseXMLFile(const CStringW& filename)
 {
-	const auto nameA = Utility::ConvertToUtf8(filename);
+	const CStringA nameA = Utility::ConvertToUtf8(filename);
 	m_globalSettings.SetGdalUtf8(true);
-	const auto node = CPLParseXMLFile(nameA);
+	CPLXMLNode* node = CPLParseXMLFile(nameA);
 	m_globalSettings.SetGdalUtf8(false);
 	return node;
 }
@@ -268,11 +273,11 @@ CPLXMLNode* GdalHelper::ParseXMLFile(const CStringW& filename)
 // **************************************************************
 //		SerializeXMLTreeToFile
 // **************************************************************
-int GdalHelper::SerializeXMLTreeToFile(CPLXMLNode* psTree, const CStringW& filename)
+int GdalHelper::SerializeXMLTreeToFile(const CPLXMLNode* psTree, const CStringW& filename)
 {
-	const auto nameA = Utility::ConvertToUtf8(filename);
+	const CStringA nameA = Utility::ConvertToUtf8(filename);
 	m_globalSettings.SetGdalUtf8(true);
-	const auto val = CPLSerializeXMLTreeToFile(psTree, nameA);
+	const int val = CPLSerializeXMLTreeToFile(psTree, nameA);
 	m_globalSettings.SetGdalUtf8(false);
 	return val;
 }
@@ -284,8 +289,8 @@ void GdalHelper::CloseDataset(GDALDataset* dt)
 {
 	if (dt)
 	{
-		const auto count = dt->GetRefCount();
-
+		// ReSharper disable once CppTooWideScopeInitStatement
+		const int count = dt->GetRefCount();
 		if (count > 0)
 		{
 			Debug::WriteLine("References remain on closing dataset: %d", count);
@@ -300,8 +305,8 @@ void GdalHelper::CloseDataset(GDALDataset* dt)
 // **************************************************************
 bool GdalHelper::CanOpenAsGdalRaster(const CStringW& filename)
 {
-	const auto dt = OpenRasterDatasetW(filename, GA_ReadOnly);
-	const auto gdalFormat = dt != nullptr;
+	GDALDataset* dt = OpenRasterDatasetW(filename, GA_ReadOnly);
+	const bool gdalFormat = dt != nullptr;
 	if (dt)
 	{
 		CloseDataset(dt);
@@ -318,8 +323,7 @@ bool GdalHelper::ClearOverviews(GDALDataset* dt, ICallback* cb)
 
 	m_globalSettings.SetGdalUtf8(true);
 
-	const auto success = dt->BuildOverviews("NONE", 0, nullptr, 0, nullptr,
-	                                  static_cast<GDALProgressFunc>(GDALProgressCallback), &params) == CE_None;
+	const bool success = dt->BuildOverviews("NONE", 0, nullptr, 0, nullptr, GDALProgressCallback, &params) == CE_None;
 
 	m_globalSettings.SetGdalUtf8(false);
 
@@ -332,9 +336,8 @@ bool GdalHelper::ClearOverviews(GDALDataset* dt, ICallback* cb)
 bool GdalHelper::SupportsOverviews(const CStringW& filename, ICallback* callback)
 {
 	GDALAllRegister();
-	auto supports = false;
-	const auto dt = OpenRasterDatasetW(filename, GA_ReadOnly);
-	if (dt)
+	bool supports = false;
+	if (GDALDataset* dt = OpenRasterDatasetW(filename, GA_ReadOnly))
 	{
 		supports = HasOverviews(dt);
 		if (!supports)
@@ -354,12 +357,12 @@ bool GdalHelper::SupportsOverviews(const CStringW& filename, ICallback* callback
 // **************************************************************
 GdalSupport GdalHelper::TryOpenWithGdal(const CStringW& filename)
 {
-	const auto dt = OpenRasterDatasetW(filename, GA_ReadOnly);
+	GDALDataset* dt = OpenRasterDatasetW(filename, GA_ReadOnly);
 	if (!dt)
 	{
 		return GdalSupportNone;
 	}
-	const auto isRgb = IsRgb(dt);
+	const bool isRgb = IsRgb(dt);
 	CloseDataset(dt);
 	return isRgb ? GdalSupportRgb : GdalSupportGrid;
 }
@@ -371,10 +374,9 @@ bool GdalHelper::HasOverviews(GDALDataset* dt)
 {
 	if (dt)
 	{
-		const auto band = dt->GetRasterBand(1);
-		if (band)
+		if (GDALRasterBand* band = dt->GetRasterBand(1))
 		{
-			const auto count = RasterBandHelper::GetOverviewCount(band);
+			const int count = RasterBandHelper::GetOverviewCount(band);
 			return count > 0;
 		}
 	}
@@ -386,10 +388,9 @@ bool GdalHelper::HasOverviews(GDALDataset* dt)
 // *******************************************************
 bool GdalHelper::RemoveOverviews(const CStringW& filename)
 {
-	const auto dt = OpenRasterDatasetW(filename, GA_ReadOnly);
-	if (dt)
+	if (GDALDataset* dt = OpenRasterDatasetW(filename, GA_ReadOnly))
 	{
-		const auto result = ClearOverviews(dt, nullptr);
+		const bool result = ClearOverviews(dt, nullptr);
 		CloseDataset(dt);
 		return result;
 	}
@@ -401,10 +402,9 @@ bool GdalHelper::RemoveOverviews(const CStringW& filename)
 // *******************************************************
 bool GdalHelper::HasOverviews(const CStringW& filename)
 {
-	const auto dt = OpenRasterDatasetW(filename, GA_ReadOnly);
-	if (dt)
+	if (GDALDataset* dt = OpenRasterDatasetW(filename, GA_ReadOnly))
 	{
-		const auto hasOverviews = HasOverviews(dt);
+		const bool hasOverviews = HasOverviews(dt);
 		CloseDataset(dt);
 		return hasOverviews;
 	}
@@ -418,8 +418,8 @@ bool GdalHelper::NeedsOverviews(GDALDataset* dt)
 {
 	if (dt)
 	{
-		const auto w = dt->GetRasterXSize();
-		const auto h = dt->GetRasterYSize();
+		const int w = dt->GetRasterXSize();
+		const int h = dt->GetRasterYSize();
 		return w > m_globalSettings.minOverviewWidth || h > m_globalSettings.minOverviewWidth;
 	}
 	return false;
@@ -428,17 +428,16 @@ bool GdalHelper::NeedsOverviews(GDALDataset* dt)
 // *******************************************************
 //		BuildOverviewsIfNeeded()
 // *******************************************************
-bool GdalHelper::BuildOverviewsIfNeeded(const CStringW& filename, bool external, ICallback* callback)
+bool GdalHelper::BuildOverviewsIfNeeded(const CStringW& filename, const bool external, ICallback* callback)
 {
 	//if (!external)
 	//CPLSetConfigOption( "COMPRESS_OVERVIEW", m_globalSettings.GetTiffCompression());
 
 	// dataset must be opened in read-only mode, so that overviews are written in external ovr file
-	const auto accessMode = external ? GA_ReadOnly : GA_Update;
-	const auto dt = OpenRasterDatasetW(filename, accessMode);
-	if (dt)
+	const GDALAccess accessMode = external ? GA_ReadOnly : GA_Update;
+	if (GDALDataset* dt = OpenRasterDatasetW(filename, accessMode))
 	{
-		const auto result = BuildOverviewsIfNeeded(dt, callback);
+		const bool result = BuildOverviewsIfNeeded(dt, callback);
 		CloseDataset(dt);
 		return result;
 	}
@@ -450,16 +449,16 @@ bool GdalHelper::BuildOverviewsIfNeeded(const CStringW& filename, bool external,
 // *******************************************************
 bool GdalHelper::BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback)
 {
-	auto result = false;
+	bool result = false;
 	if (m_globalSettings.rasterOverviewCreation == rocAuto ||
 		m_globalSettings.rasterOverviewCreation == rocYes)
 	{
 		if (dt && !HasOverviews(dt) && NeedsOverviews(dt))
 		{
-			auto w = dt->GetRasterXSize() / 2;
-			auto h = dt->GetRasterYSize() / 2;
+			int w = dt->GetRasterXSize() / 2;
+			int h = dt->GetRasterYSize() / 2;
 
-			auto ratio = 2;
+			int ratio = 2;
 			std::vector<int> overviews;
 			while (w > m_globalSettings.minOverviewWidth || h > m_globalSettings.minOverviewWidth)
 			{
@@ -469,8 +468,8 @@ bool GdalHelper::BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback)
 				ratio *= 2;
 			}
 
-			result = BuildOverviewsCore(dt, m_globalSettings.rasterOverviewResampling, &(overviews[0]),
-			                            overviews.size(), callback);
+			result = BuildOverviewsCore(dt, m_globalSettings.rasterOverviewResampling, &overviews[0],
+				gsl::narrow_cast<int>(overviews.size()), callback);
 		}
 	}
 	return result;
@@ -480,7 +479,7 @@ bool GdalHelper::BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback)
 //		BuildOverviewsCore()
 // *******************************************************
 bool GdalHelper::BuildOverviewsCore(GDALDataset* dt, const tkGDALResamplingMethod resamplingMethod, int* overviewList,
-                                    const int numOverviews, ICallback* callback)
+	const int numOverviews, ICallback* callback)
 {
 	// TODO: Similar function in GdalUtils::GdalBuildOverviews
 	if (!dt) return false;
@@ -491,14 +490,14 @@ bool GdalHelper::BuildOverviewsCore(GDALDataset* dt, const tkGDALResamplingMetho
 		return false;
 	}
 
-	const auto pszResampling = GetResamplingAlgorithm(resamplingMethod);
+	const char* pszResampling = GetResamplingAlgorithm(resamplingMethod);
 
 	CallbackParams params(callback, "Building overviews");
 
 	m_globalSettings.SetGdalUtf8(true);
 
-	const auto result = dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, nullptr,
-	                                       static_cast<GDALProgressFunc>(GDALProgressCallback), &params) == CE_None;
+	const bool result = dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, nullptr, GDALProgressCallback,
+		&params) == CE_None;
 
 	m_globalSettings.SetGdalUtf8(false);
 
@@ -532,7 +531,7 @@ const char* GdalHelper::GetResamplingAlgorithm(const tkGDALResamplingMethod resa
 // *******************************************************
 //		GetMetadataNameString()
 // *******************************************************
-CStringA GdalHelper::GetMetadataNameString(tkGdalDriverMetadata metadata)
+CStringA GdalHelper::GetMetadataNameString(const tkGdalDriverMetadata metadata)
 {
 	switch (metadata)
 	{
@@ -600,21 +599,21 @@ tkGdalDriverMetadata GdalHelper::GetMetadataType(CStringA tag)
 void GdalHelper::DumpDriverInfo()
 {
 	GDALAllRegister();
-	auto manager = GetGDALDriverManager();
-	manager->AutoLoadDrivers();
-	const auto count = manager->GetDriverCount();
-	for (auto i = 0; i < count; i++)
+	GDALDriverManager* manager = GetGDALDriverManager();
+	GDALDriverManager::AutoLoadDrivers();
+	const int count = manager->GetDriverCount();
+	for (int i = 0; i < count; i++)
 	{
-		const auto driver = manager->GetDriver(i);
-		const auto ogrDriver = dynamic_cast<OGRSFDriver*>(driver);
+		GDALDriver* driver = manager->GetDriver(i);
+		const OGRSFDriver* ogrDriver = dynamic_cast<OGRSFDriver*>(driver);
 		const CString description = driver->GetDescription();
 		if (ogrDriver != nullptr)
 		{
-			Debug::WriteLine("OGR Driver: %s", description);
+			Debug::WriteLine("OGR Driver: %s", description); // TODO: Fix compile warning
 		}
 		else
 		{
-			Debug::WriteLine("GDAL Driver: %s", description);
+			Debug::WriteLine("GDAL Driver: %s", description); // TODO: Fix compile warning
 		}
 		//GetMetaData(driver);
 	}
@@ -628,9 +627,9 @@ void GdalHelper::DumpMetadata(GDALDriver* driver)
 	if (driver)
 	{
 		Debug::WriteLine("Dumping metadata domain list:");
-		auto list = driver->GetMetadataDomainList();
-		auto count = CSLCount(list);
-		for (auto i = 0; i < count; i++)
+		char** list = driver->GetMetadataDomainList();
+		int count = CSLCount(list);
+		for (int i = 0; i < count; i++)
 		{
 			Debug::WriteLine(CSLGetField(list, i));
 		}
@@ -638,7 +637,7 @@ void GdalHelper::DumpMetadata(GDALDriver* driver)
 		Debug::WriteLine("Dumping metadata:");
 		list = driver->GetMetadata();
 		count = CSLCount(list);
-		for (auto i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
 		{
 			Debug::WriteLine(CSLGetField(list, i));
 		}
@@ -650,11 +649,11 @@ void GdalHelper::DumpMetadata(GDALDriver* driver)
 // ****************************************************************
 void GdalHelper::GetProjection(const CStringW& filename, CString& projection)
 {
-	auto rasterDataset = OpenRasterDatasetW(filename);
+	GDALDataset* rasterDataset = OpenRasterDatasetW(filename);
 
 	if (!rasterDataset) return;
 
-	const auto wkt = rasterDataset->GetProjectionRef();
+	const char* wkt = rasterDataset->GetProjectionRef();
 	projection = wkt;
 	CloseDataset(rasterDataset);
 }
@@ -664,9 +663,9 @@ void GdalHelper::GetProjection(const CStringW& filename, CString& projection)
 // ****************************************************************
 char** GdalHelper::ReadFile(const CStringW& filename)
 {
-	const auto utf8filename = Utility::ConvertToUtf8(filename);
+	const CStringA utf8Filename = Utility::ConvertToUtf8(filename);
 	m_globalSettings.SetGdalUtf8(true);
-	const auto papszPrj = CSLLoad(utf8filename);
+	char** papszPrj = CSLLoad(utf8Filename);
 	m_globalSettings.SetGdalUtf8(false);
 	return papszPrj;
 }
@@ -694,12 +693,11 @@ char** GdalHelper::SetCompressionRasterOptions(GDALDataset* dataset, char** opti
 // ****************************************************************
 //		CopyDataset
 // ****************************************************************
-bool GdalHelper::CopyDataset(GDALDataset* dataset, const CStringW& newName, ICallback* localCallback,
-                             const bool createWorldFile)
+bool GdalHelper::CopyDataset(GDALDataset* dataset, const CStringW& newName, ICallback* localCallback, const bool createWorldFile)
 {
 	if (!dataset) return false;
 
-	auto drv = dataset->GetDriver();
+	GDALDriver* drv = dataset->GetDriver();
 	if (!drv) return false;
 
 	CallbackParams params(localCallback, "Copying dataset");
@@ -711,9 +709,8 @@ bool GdalHelper::CopyDataset(GDALDataset* dataset, const CStringW& newName, ICal
 		papszOptions = CSLSetNameValue(papszOptions, "WORLDFILE", "YES");
 
 	m_globalSettings.SetGdalUtf8(true);
-	const auto nameUtf8 = Utility::ConvertToUtf8(newName);
-	const auto dst = drv->CreateCopy(nameUtf8, dataset, 0, papszOptions,
-	                                 static_cast<GDALProgressFunc>(GDALProgressCallback), &params);
+	const CStringA nameUtf8 = Utility::ConvertToUtf8(newName);
+	GDALDataset* dst = drv->CreateCopy(nameUtf8, dataset, 0, papszOptions, GDALProgressCallback, &params);
 	m_globalSettings.SetGdalUtf8(false);
 
 	CSLDestroy(papszOptions);
@@ -729,7 +726,7 @@ bool GdalHelper::CopyDataset(GDALDataset* dataset, const CStringW& newName, ICal
 // ****************************************************************
 //		GetDefaultConfigPath
 // ****************************************************************
-CStringW GdalHelper::GetDefaultConfigPath(GdalPath option)
+CStringW GdalHelper::GetDefaultConfigPath(const GdalPath option)
 {
 	auto path = Utility::GetFolderFromPath(Utility::GetMapWinGISPath());
 	switch (option)
@@ -740,6 +737,9 @@ CStringW GdalHelper::GetDefaultConfigPath(GdalPath option)
 	case PathGdalPlugins:
 		path += L"\\gdalplugins\\";
 		break;
+	case PathProjLib:
+		path += L"\\proj7\\share\\";
+		break;
 	}
 	return path;
 }
@@ -747,7 +747,7 @@ CStringW GdalHelper::GetDefaultConfigPath(GdalPath option)
 // ****************************************************************
 //		GetConfigPathString
 // ****************************************************************
-CString GdalHelper::GetConfigPathString(GdalPath option)
+CString GdalHelper::GetConfigPathString(const GdalPath option)
 {
 	switch (option)
 	{
@@ -755,6 +755,8 @@ CString GdalHelper::GetConfigPathString(GdalPath option)
 		return "GDAL_DATA";
 	case PathGdalPlugins:
 		return "GDAL_DRIVER_PATH";
+	case PathProjLib:
+		return "PROJ_LIB";
 	}
 	return "";
 }
@@ -762,12 +764,12 @@ CString GdalHelper::GetConfigPathString(GdalPath option)
 // ****************************************************************
 //		SetConfigPath
 // ****************************************************************
-void GdalHelper::SetConfigPath(GdalPath option, const CStringW& newPath)
+void GdalHelper::SetConfigPath(const GdalPath option, const CStringW& newPath)
 {
-	const auto optionName = GetConfigPathString(option);
+	const CString optionName = GetConfigPathString(option);
 
 	m_globalSettings.SetGdalUtf8(true);
-	const auto pathA = Utility::ConvertToUtf8(newPath);
+	const CStringA pathA = Utility::ConvertToUtf8(newPath);
 
 	CPLSetConfigOption(optionName, pathA);
 
@@ -776,26 +778,24 @@ void GdalHelper::SetConfigPath(GdalPath option, const CStringW& newPath)
 	if (option == PathGdalPlugins)
 	{
 		SetDllDirectoryW(L"");
-		const auto ocxPath = Utility::GetFolderFromPath(Utility::GetMapWinGISPath());
+		const CStringW ocxPath = Utility::GetFolderFromPath(Utility::GetMapWinGISPath());
 		SetDllDirectoryW(ocxPath);
 	}
 
 	if (!Utility::DirExists(newPath))
 	{
-		USES_CONVERSION;
-		CallbackHelper::ErrorMsg(Debug::Format("The specified folder doesn't exist: %s", W2A(newPath)));
+		CallbackHelper::ErrorMsg(Debug::Format("The specified folder doesn't exist: %s", CString(newPath))); // TODO: Fix compile warning
 	}
 
-	USES_CONVERSION;
-	Debug::WriteLine("GDAL Config is set: %s = %s", optionName, W2A(newPath));
+	Debug::WriteLine("GDAL Config is set: %s = %s", CString(optionName), CString(newPath)); // TODO: Fix compile warning
 }
 
 // ****************************************************************
 //		GetConfigPath
 // ****************************************************************
-CStringW GdalHelper::GetConfigPath(GdalPath option)
+CStringW GdalHelper::GetConfigPath(const GdalPath option)
 {
-	const auto optionName = GetConfigPathString(option);
+	const CString optionName = GetConfigPathString(option);
 
 	m_globalSettings.SetGdalUtf8(true);
 	const CStringA pathA = CPLGetConfigOption(optionName, "");
@@ -809,19 +809,20 @@ CStringW GdalHelper::GetConfigPath(GdalPath option)
 // ****************************************************************
 void GdalHelper::SetDefaultConfigPaths()
 {
-	GdalPath options[] = {PathGdalData, PathGdalPlugins};
+	// ReSharper disable once CppTooWideScopeInitStatement
+	constexpr GdalPath options[] = { PathGdalData, PathGdalPlugins, PathProjLib };
 
-	for (auto i = 0; i < 2; i++)
+	for (auto& option : options)
 	{
-		const auto path = GetDefaultConfigPath(options[i]);
-		SetConfigPath(options[i], path);
+		const auto path = GetDefaultConfigPath(option);
+		SetConfigPath(option, path);
 	}
 }
 
 // ****************************************************************
 //		GetDriverMetadata
 // ****************************************************************
-CString GdalHelper::GetDriverMetadata(GDALDataset* ds, tkGdalDriverMetadata metadata)
+CString GdalHelper::GetDriverMetadata(GDALDataset* ds, const tkGdalDriverMetadata metadata)
 {
 	if (!ds) return "";
 	return GdalDriverHelper::GetMetadata(ds->GetDriver(), metadata);
@@ -840,7 +841,7 @@ int GdalHelper::get_DriverMetadataCount(GDALDataset* ds)
 // *************************************************************
 //		get_DriverMetadataItem()
 // *************************************************************
-CString GdalHelper::get_DriverMetadataItem(GDALDataset* ds, int metadataIndex)
+CString GdalHelper::get_DriverMetadataItem(GDALDataset* ds, const int metadataIndex)
 {
 	if (!ds) return "";
 
@@ -852,32 +853,53 @@ CString GdalHelper::get_DriverMetadataItem(GDALDataset* ds, int metadataIndex)
 // *************************************************************
 tkTiffCompression GdalHelper::ParseTiffCompression(const CString& option)
 {
-	if (_stricmp(option, "LZW") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "PACKBITS") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "DEFLATE") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "CCITTRLE") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "CCITTFAX3") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "CCITTFAX4") == 0)
-		return tkmLZW;
-
-	if (_stricmp(option, "LZW") == 0)
-		return tkmLZW;
-
 	if (_stricmp(option, "AUTO") == 0)
 		return tkmAUTO;
 
 	if (_stricmp(option, "JPEG") == 0)
 		return tkmJPEG;
+
+	if (_stricmp(option, "LZW") == 0)
+		return tkmLZW;
+
+	if (_stricmp(option, "PACKBITS") == 0)
+		return tkmPACKBITS;
+
+	if (_stricmp(option, "DEFLATE") == 0)
+		return tkmDEFLATE;
+
+	if (_stricmp(option, "CCITTRLE") == 0)
+		return tkmCCITTRLE;
+
+	if (_stricmp(option, "CCITTFAX3") == 0)
+		return tkmCCITTFAX3;
+
+	if (_stricmp(option, "CCITTFAX4") == 0)
+		return tkmCCITTFAX4;
+
+	if (_stricmp(option, "NONE") == 0)
+		return tkmNONE;
+
+	if (_stricmp(option, "LZMA") == 0)
+		return tkmLZMA;
+
+	if (_stricmp(option, "ZSTD") == 0)
+		return tkmZSTD;
+
+	if (_stricmp(option, "LERC") == 0)
+		return tkmLERC;
+
+	if (_stricmp(option, "LERC_DEFLATE") == 0)
+		return tkmLERC_DEFLATE;
+
+	if (_stricmp(option, "LERC_ZSTD") == 0)
+		return tkmLERC_ZSTD;
+
+	if (_stricmp(option, "WEBP") == 0)
+		return tkmWEBP;
+
+	if (_stricmp(option, "JXL") == 0)
+		return tkmJXL;
 
 	return tkmAUTO;
 }
@@ -885,8 +907,11 @@ tkTiffCompression GdalHelper::ParseTiffCompression(const CString& option)
 // *************************************************************
 //		TiffCompressionToString()
 // *************************************************************
-CString GdalHelper::TiffCompressionToString(tkTiffCompression compression)
+CString GdalHelper::TiffCompressionToString(const tkTiffCompression compression)
 {
+	// https://gdal.org/drivers/raster/gtiff.html#creation-options
+	// JPEG/LZW/PACKBITS/DEFLATE/CCITTRLE/CCITTFAX3/CCITTFAX4/LZMA/ZSTD/LERC/LERC_DEFLATE/LERC_ZSTD/WEBP/JXL/NONE
+	// In GDAL NONE is the default.
 	switch (compression)
 	{
 	case tkmLZW:
@@ -901,11 +926,25 @@ CString GdalHelper::TiffCompressionToString(tkTiffCompression compression)
 		return "CCITTFAX3";
 	case tkmCCITTFAX4:
 		return "CCITTFAX4";
+	case tkmLZMA:
+		return "LZMA";
+	case tkmZSTD:
+		return "ZSTD";
+	case tkmLERC:
+		return "LERC";
+	case tkmLERC_DEFLATE:
+		return "LERC_DEFLATE";
+	case tkmLERC_ZSTD:
+		return "LERC_ZSTD";
+	case tkmWEBP:
+		return "WEBP";
+	case tkmJXL:
+		return "JXL";
 	case tkmNONE:
 		return "NONE";
 	case tkmAUTO:
 	case tkmJPEG:
-	default:
 		return "JPEG";
 	}
+	return "NONE";
 }

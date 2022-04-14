@@ -19,38 +19,39 @@
 // -------------------------------------------------------------------------------------------------------
 // lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
 
-#include "stdafx.h"
+#include <StdAfx.h>
 #include <afxmt.h>				// for CMutex
-#include "Shapefile.h"
-#include "Templates.h"
-#include "ShapeHelper.h"
-#include "SelectionHelper.h"
+#include <gsl/span_ext>
+
 #include "ExtentsHelper.h"
-#include "ShapefileHelper.h"
 #include "GeosConverter.h"
 #include "GeosHelper.h"
+#include "Shapefile.h"
+#include "ShapeHelper.h"
+#include "Templates.h"
 
 #pragma region SelectShapes
 // ******************************************************************
 //		SelectShapes()
 // ******************************************************************
 CMutex selectShapesMutex(FALSE);
-STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, SelectMode SelectMode, VARIANT *Result, VARIANT_BOOL *retval)
+STDMETHODIMP CShapefile::SelectShapes(IExtents* boundBox, const double tolerance, const SelectMode selectMode, VARIANT* result, VARIANT_BOOL* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    *retval = VARIANT_FALSE;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retval = VARIANT_FALSE;
 
 	selectShapesMutex.Lock();
-	
-	double b_minX, b_maxX, b_minY, b_maxY, b_minZ, b_maxZ;
-	BoundBox->GetBounds(&b_minX,&b_minY,&b_minZ,&b_maxX,&b_maxY,&b_maxZ);
-	
+
+	double bMinX, bMaxX, bMinY, bMaxY, bMinZ, bMaxZ;
+	boundBox->GetBounds(&bMinX, &bMinY, &bMinZ, &bMaxX, &bMaxY, &bMaxZ);
+
 	// the core routine
 	std::vector<long> selectResult;
-	Extent box(b_minX, b_maxX, b_minY, b_maxY);
-	this->SelectShapesCore(box, Tolerance, SelectMode, selectResult, false);
+	Extent box(bMinX, bMaxX, bMinY, bMaxY);
+	this->SelectShapesCore(box, tolerance, selectMode, selectResult, false);
 
-	*retval  = Templates::Vector2SafeArray(&selectResult, VT_I4, Result) ? VARIANT_TRUE : VARIANT_FALSE;
+	*retval = Templates::Vector2SafeArray(&selectResult, VT_I4, result) ? VARIANT_TRUE : VARIANT_FALSE;
 
 	selectShapesMutex.Unlock();
 	return S_OK;
@@ -59,119 +60,117 @@ STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, Sele
 // ****************************************************************
 //		SelectShapesCore()
 // ****************************************************************
-bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult, bool renderedOnly)
+bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const SelectMode selectMode, std::vector<long>& selectResult, bool renderedOnly)
 {
-	double b_minX = extents.left;
-	double b_maxX = extents.right;
-	double b_minY = extents.bottom;
-	double b_maxY = extents.top;
-	
-	double s_minX, s_maxX, s_minY, s_maxY;
-	std::vector<double> xPts;
-	std::vector<double> yPts;
-	std::vector<long> parts;
-	ShpfileType ShapeType;
+	double bMinX = extents.left;
+	double bMaxX = extents.right;
+	double bMinY = extents.bottom;
+	double bMaxY = extents.top;
 
-	if( Tolerance > 0.0 )
-	{	
-		double halfTolerance = Tolerance*.5;
-		b_minX -= halfTolerance;
-		b_minY -= halfTolerance;
-		b_maxX += halfTolerance;
-		b_maxY += halfTolerance;				
+	double sMinX, sMaxX, sMinY, sMaxY;
+
+	if (tolerance > 0.0)
+	{
+		const double halfTolerance = tolerance * .5;
+		bMinX -= halfTolerance;
+		bMinY -= halfTolerance;
+		bMaxX += halfTolerance;
+		bMaxY += halfTolerance;
 	}
 
-    // build GEOSGeom for comparison
-    IShape* shpExt = NULL;
-    ComHelper::CreateShape(&shpExt);
+	// build GEOSGeom for comparison
+	IShape* shpExt = nullptr;
+	ComHelper::CreateShape(&shpExt);
 
-    bool bPtSelection = b_minX == b_maxX && b_minY == b_maxY;
-	int local_numShapes = _shapeData.size();
+	const bool bPtSelection = bMinX == bMaxX && bMinY == bMaxY;
+	int localNumShapes = static_cast<int>(_shapeData.size());
 
-	IndexSearching::CIndexSearching *res;
+	IndexSearching::CIndexSearching* res = nullptr;
 	vector<int> qtreeResult;
 	bool useSpatialIndexResults = false;
 	bool useQTreeResults = false;
 
 	VARIANT_BOOL useSpatialIndex;
-	CComPtr<IExtents> box = NULL;
+	CComPtr<IExtents> box = nullptr;
 	box.Attach(ExtentsHelper::Populate(extents));
 	this->get_CanUseSpatialIndex(box, &useSpatialIndex);
-	
+
 	if (useSpatialIndex)
 	{
-		double lowVals[2], highVals[2];
-		IndexSearching::QueryTypeFlags qType;
+		double lowVals[2]{};
+		double highVals[2]{};
 
-		lowVals[0] = b_minX;
-		lowVals[1] = b_minY;
-		highVals[0] = b_maxX;
-		highVals[1] = b_maxY;
+		lowVals[0] = bMinX;
+		lowVals[1] = bMinY;
+		highVals[0] = bMaxX;
+		highVals[1] = bMaxY;
 
-		qType = (SelectMode == INTERSECTION) ? IndexSearching::intersection : IndexSearching::contained;
-		res = new IndexSearching::CIndexSearching();
+		const IndexSearching::QueryTypeFlags qType = (selectMode == INTERSECTION)
+			? IndexSearching::QueryTypeFlags::intersection
+			: IndexSearching::QueryTypeFlags::contained;
+		res = new IndexSearching::CIndexSearching();  // TODO: Fix compile warning
 
-		int ret = selectShapesFromIndex(_spatialIndexID, lowVals, highVals, qType, res);
+		const int ret = SelectShapesFromIndex(_spatialIndexID, lowVals, highVals, qType, res); // TODO: Fix compile warning
 		if (ret != 0)
 		{
 			_hasSpatialIndex = false;
 			_spatialIndexLoaded = false;
-			IndexSearching::unloadSpatialIndex(_spatialIndexID);
+			IndexSearching::UnloadSpatialIndex(_spatialIndexID);
 			delete res;		//TODO throw error
 		}
 		else
 		{
-			local_numShapes = res->getLength();
+			localNumShapes = res->GetLength();
 			useSpatialIndexResults = true;
 		}
 	}
-	else if(_isEditingShapes && _useQTree)
+	else if (_isEditingShapes && _useQTree)
 	{
-        if (!_qtree)
-            GenerateQTree();
+		if (!_qtree)
+			GenerateQTree();
 
-		if(bPtSelection )
+		if (bPtSelection)
 		{
-			qtreeResult = _qtree->GetNodes(QTreeExtent(b_minX,b_minX +1,b_minY + 1,b_minY));
+			qtreeResult = _qtree->GetNodes(QTreeExtent(bMinX, bMinX + 1, bMinY + 1, bMinY));
 		}
 		else
 		{
-			qtreeResult = _qtree->GetNodes(QTreeExtent(b_minX,b_maxX,b_maxY,b_minY));
+			qtreeResult = _qtree->GetNodes(QTreeExtent(bMinX, bMaxX, bMaxY, bMinY));
 		}
 
-		local_numShapes = qtreeResult.size();	
+		localNumShapes = qtreeResult.size();
 		useQTreeResults = true;
 	}
 
 	int shapeVal;
-	int i, j;
-	long numpoints;
-	
-	ShpfileType shpType2D = ShapeUtility::Convert2D(_shpfiletype);;
+	int i;
+
+	const ShpfileType shpType2D = ShapeUtility::Convert2D(_shpfiletype);
 
 	// --------------------------------------------------
 	//	Point Selection
 	// --------------------------------------------------
-	if( b_minX == b_maxX && b_minY == b_maxY )
+	if (bMinX == bMaxX && bMinY == bMaxY)  // TODO: Fix compile warning
 	{
-        VARIANT_BOOL ret;
-        shpExt->Create(ShpfileType::SHP_POINT, &ret);
-        long idx;
-        shpExt->AddPoint(b_minX, b_minY, &idx);
-        // convert input point to GEOS
-        GEOSGeom geosPoint = GeosConverter::ShapeToGeom(shpExt);
+		VARIANT_BOOL ret;
+		shpExt->Create(ShpfileType::SHP_POINT, &ret);
+		long idx;
+		shpExt->AddPoint(bMinX, bMinY, &idx);
+		// convert input point to GEOS
+		GEOSGeom geosPoint = GeosConverter::ShapeToGeom(shpExt); // TODO: Fix compile warning
 
-        if( shpType2D == SHP_POLYGON )
-		{	
-			for(i=0;i<local_numShapes;i++)
+		if (shpType2D == SHP_POLYGON)
+		{
+			for (i = 0; i < localNumShapes; i++)
 			{
-				if (useSpatialIndexResults) 
+				if (useSpatialIndexResults)
 				{
-					shapeVal = (res->getValue(i)) - 1;
+					shapeVal = (res->GetValue(i)) - 1;
 				}
 				else if (useQTreeResults)
 				{
-					shapeVal = qtreeResult[i];
+					//shapeVal = qtreeResult[i];
+					shapeVal = gsl::at(qtreeResult, i);
 				}
 				else
 				{
@@ -182,53 +181,60 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 				CComPtr<IShape> shape = nullptr;
 				get_Shape(shapeVal, &shape);
 				// convert querying shape to GEOS
-                GEOSGeom geosShape = GeosConverter::ShapeToGeom(shape);
+				GEOSGeom geosShape = GeosConverter::ShapeToGeom(shape); // TODO: Fix compile warning
 				if (geosShape == nullptr)
 					continue;
-                // check for containment
-                if (GeosHelper::Contains(geosShape, geosPoint))
-                {
-                    selectResult.push_back(shapeVal);
-                    GeosHelper::DestroyGeometry(geosShape);
-                    continue;
-                }
-                GeosHelper::DestroyGeometry(geosShape);
+
+				// check for containment
+				if (GeosHelper::Contains(geosShape, geosPoint))
+				{
+					selectResult.push_back(shapeVal);
+					GeosHelper::DestroyGeometry(geosShape);
+					continue;
+				}
+				GeosHelper::DestroyGeometry(geosShape);
 			}
 		}
 
-        GeosHelper::DestroyGeometry(geosPoint);
+		GeosHelper::DestroyGeometry(geosPoint);
 	}
 	//	Rectangle selection
 	else
-	{	
-        VARIANT_BOOL ret;
-        // set up polygon extent
-        shpExt->Create(ShpfileType::SHP_POLYGON, &ret);
-        long idx;
-        shpExt->AddPoint(b_minX, b_minY, &idx);
-        shpExt->AddPoint(b_minX, b_maxY, &idx);
-        shpExt->AddPoint(b_maxX, b_maxY, &idx);
-        shpExt->AddPoint(b_maxX, b_minY, &idx);
-        shpExt->AddPoint(b_minX, b_minY, &idx);
-        // convert extent to GEOS
-        GEOSGeom geosExtent = GeosConverter::ShapeToGeom(shpExt);
-        
-        for(i=0;i<local_numShapes;i++)
-		{	
-			if (useSpatialIndexResults) 
+	{
+		std::vector<long> parts;
+		std::vector<double> yPts;
+		std::vector<double> xPts;
+		ShpfileType shapeType;
+		VARIANT_BOOL ret;
+		// set up polygon extent
+		shpExt->Create(ShpfileType::SHP_POLYGON, &ret);
+		long idx;
+		shpExt->AddPoint(bMinX, bMinY, &idx);
+		shpExt->AddPoint(bMinX, bMaxY, &idx);
+		shpExt->AddPoint(bMaxX, bMaxY, &idx);
+		shpExt->AddPoint(bMaxX, bMinY, &idx);
+		shpExt->AddPoint(bMinX, bMinY, &idx);
+		// convert extent to GEOS
+		GEOSGeom geosExtent = GeosConverter::ShapeToGeom(shpExt); // TODO: Fix compile warning
+
+		for (i = 0; i < localNumShapes; i++)
+		{
+			if (useSpatialIndexResults)
 			{
-				shapeVal = (res->getValue(i)) - 1;
+				shapeVal = (res->GetValue(i)) - 1;
 			}
 			else if (useQTreeResults)
 			{
-				shapeVal = qtreeResult[i];
+				//shapeVal = qtreeResult[i];
+				shapeVal = gsl::at(qtreeResult, i);
 			}
 			else
 			{
 				shapeVal = i;
 			}
 
-			if (shapeVal < 0 || shapeVal >= (int)_shapeData.size()) continue;
+			//if (shapeVal < 0 || shapeVal >= static_cast<int>(_shapeData.size())) continue;
+			if (shapeVal < 0 || shapeVal >= gsl::narrow_cast<int>(_shapeData.size())) continue;
 
 			// ***********************************************************************************
 			// jfaust: This test is not valid here; the wasRendered flag is initially set for each
@@ -237,80 +243,83 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 			// TODO: Re-evaluate need for wasRendered test; it is not done for Polygon features...
 			//if (renderedOnly && !_shapeData[shapeVal]->wasRendered())
 			//	continue;
-            // NOTE: may be resolved now as a result of MWGIS-137, but should still evaluate
+			// NOTE: may be resolved now as a result of MWGIS-137, but should still evaluate
 			// ***********************************************************************************
-            
+
 			// bounds
-			if (this->QuickExtentsCore(shapeVal, &s_minX, &s_minY, &s_maxX, &s_maxY))
+			if (this->QuickExtentsCore(shapeVal, &sMinX, &sMinY, &sMaxX, &sMaxY))
 			{
 				// check bounds (maybe they don't touch at all)
-				if( s_maxX < b_minX || 
-					s_minX > b_maxX ||							
-					s_maxY < b_minY || 
-					s_minY > b_maxY )
+				if (sMaxX < bMinX ||
+					sMinX > bMaxX ||
+					sMaxY < bMinY ||
+					sMinY > bMaxY)
 				{
-						continue;
+					continue;
 				}
-				
+
 				// inclusion (works for every shape type)
-				if( s_minX >= b_minX && s_minX <= b_maxX &&
-					s_maxX >= b_minX && s_maxX <= b_maxX &&
-					s_minY >= b_minY && s_minY <= b_maxY &&
-					s_maxY >= b_minY && s_maxY <= b_maxY )
-					{	
-						selectResult.push_back( shapeVal );
-						continue;
-					}
+				if (sMinX >= bMinX && sMinX <= bMaxX &&
+					sMaxX >= bMinX && sMaxX <= bMaxX &&
+					sMinY >= bMinY && sMinY <= bMaxY &&
+					sMaxY >= bMinY && sMaxY <= bMaxY)
+				{
+					selectResult.push_back(shapeVal);
+					continue;
+				}
 			}
 
-			if( shpType2D == SHP_POLYLINE && SelectMode == INTERSECTION)
+			if (shpType2D == SHP_POLYLINE && selectMode == INTERSECTION)
 			{
 				// get current shape
 				CComPtr<IShape> shape = nullptr;
 				get_Shape(shapeVal, &shape);
 				// convert shape to GEOS
-                GEOSGeom geos = GeosConverter::ShapeToGeom(shape);
-                // see if shape intersects polygon extent
-                if (GeosHelper::Intersects(geosExtent, geos))
-                {
-                    selectResult.push_back(shapeVal);
-                }
-                GeosHelper::DestroyGeometry(geos);
-    //            if( DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
-				//{
-				//	if (SelectionHelper::PolylineIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
-				//		selectResult.push_back( shapeVal );
-				//}		
+				GEOSGeom geos = GeosConverter::ShapeToGeom(shape); // TODO: Fix compile warning
+				// see if shape intersects polygon extent
+				if (GeosHelper::Intersects(geosExtent, geos))
+				{
+					selectResult.push_back(shapeVal);
+				}
+				GeosHelper::DestroyGeometry(geos);
+
+				//            if( DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
+							//{
+							//	if (SelectionHelper::PolylineIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
+							//		selectResult.push_back( shapeVal );
+							//}		
 			}
-			else if( shpType2D == SHP_POLYGON && SelectMode == INTERSECTION)
+			else if (shpType2D == SHP_POLYGON && selectMode == INTERSECTION)
 			{
 				// get current shape
 				CComPtr<IShape> shape = nullptr;
 				get_Shape(shapeVal, &shape);
 				// convert shape to GEOS
-                GEOSGeom geos = GeosConverter::ShapeToGeom(shape); // need to call GEOSGeom_destroy
-                // see if shape intersects polygon extent
-                if (GeosHelper::Intersects(geosExtent, geos))
-                {
-                    selectResult.push_back(shapeVal);
-                }
-                GeosHelper::DestroyGeometry(geos);
+				GEOSGeom geos = GeosConverter::ShapeToGeom(shape); // TODO: Fix compile warning
+				// see if shape intersects polygon extent
+				if (GeosHelper::Intersects(geosExtent, geos))
+				{
+					selectResult.push_back(shapeVal);
+				}
+				GeosHelper::DestroyGeometry(geos);
 			}
-			else if( shpType2D == SHP_MULTIPOINT && SelectMode == INTERSECTION)
-			{	
-				if( this->DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
-				{	
-					numpoints=xPts.size();
+			else if (shpType2D == SHP_MULTIPOINT && selectMode == INTERSECTION)
+			{
+				if (this->DefineShapePoints(shapeVal, shapeType, parts, xPts, yPts) != FALSE)
+				{
+					const long numpoints = xPts.size();
 					bool addShape = false;
-					for(j=0;j<numpoints;j++ )
+					for (int j = 0; j < numpoints; j++)
 					{
-						double px = xPts[j];
-						double py = yPts[j];
+						//const double px = xPts[j];
+						const double px = gsl::at(xPts, j);
+						//const double py = yPts[j];
+						const double py = gsl::at(yPts, j);
 
-						if( px >= b_minX && px <= b_maxX )
-						{	
-							if( py >= b_minY && py <= b_maxY )
-							{	
+						if (px >= bMinX && px <= bMaxX)
+						{
+							if (py >= bMinY && py <= bMaxY)
+							{
 								addShape = true;
 								break;
 							}
@@ -318,25 +327,25 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 					}
 					if (addShape)
 					{
-						selectResult.push_back( shapeVal );
+						selectResult.push_back(shapeVal);
 						continue;
 					}
 				}
 			}
 		}
-        GeosHelper::DestroyGeometry(geosExtent);
+		GeosHelper::DestroyGeometry(geosExtent);
 	}
 
 	if (useSpatialIndexResults)
 	{
 		delete res;
 	}
-	else if( _useQTree && _isEditingShapes != FALSE)
+	else if (_useQTree && _isEditingShapes != FALSE)
 	{
 		qtreeResult.clear();
 	}
-    // return true if any selected...
-	return (selectResult.size() > 0);
+	// return true if any selected...
+	return !selectResult.empty();
 }
 #pragma endregion
 
@@ -345,29 +354,31 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 /*		ShapeSelected()
 /***********************************************************************/
 //  Returns and sets the selection state for a shape.
-STDMETHODIMP CShapefile::get_ShapeSelected(long ShapeIndex, VARIANT_BOOL* pVal)
+STDMETHODIMP CShapefile::get_ShapeSelected(const long shapeIndex, VARIANT_BOOL* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
-	{	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
+	{
 		*pVal = VARIANT_FALSE;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	else {
-		*pVal = (_shapeData[ShapeIndex]->selected() == true) ? VARIANT_TRUE : VARIANT_FALSE;
+		*pVal = (_shapeData[shapeIndex]->selected() == true) ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 
 	return S_OK;
 }
-STDMETHODIMP CShapefile::put_ShapeSelected(long ShapeIndex, VARIANT_BOOL newVal)
+STDMETHODIMP CShapefile::put_ShapeSelected(const long shapeIndex, const VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
-	{	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
+	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	else {
-		_shapeData[ShapeIndex]->selected(newVal == VARIANT_TRUE?true:false);
+		_shapeData[shapeIndex]->selected(newVal == VARIANT_TRUE ? true : false);
 	}
 	return S_OK;
 }
@@ -376,17 +387,17 @@ STDMETHODIMP CShapefile::put_ShapeSelected(long ShapeIndex, VARIANT_BOOL newVal)
 // *************************************************************
 //		get_NumSelected
 // *************************************************************
-STDMETHODIMP CShapefile::get_NumSelected(long *pVal)
+STDMETHODIMP CShapefile::get_NumSelected(long* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	long count = 0;
-	for(int i =0; i < (int)_shapeData.size(); i++)
+	for (const auto& i : _shapeData)
 	{
-		if ( _shapeData[i]->selected() )
+		if (i->selected())
 			count++;
 	}
-	*pVal = count;	
+	*pVal = count;
 	return S_OK;
 }
 
@@ -395,10 +406,11 @@ STDMETHODIMP CShapefile::get_NumSelected(long *pVal)
 // *************************************************************
 STDMETHODIMP CShapefile::SelectAll()
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	for (int i = 0; i < (int)_shapeData.size(); i++) {
-		_shapeData[i]->selected(true);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	for (const auto& i : _shapeData)
+	{
+		i->selected(true);
 	}
 
 	return S_OK;
@@ -409,10 +421,11 @@ STDMETHODIMP CShapefile::SelectAll()
 // *************************************************************
 STDMETHODIMP CShapefile::SelectNone()
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	for (int i = 0; i < (int)_shapeData.size(); i++) {
-		_shapeData[i]->selected(false);
+	for (const auto& i : _shapeData)
+	{
+		i->selected(false);
 	}
 
 	return S_OK;
@@ -423,10 +436,11 @@ STDMETHODIMP CShapefile::SelectNone()
 // *************************************************************
 STDMETHODIMP CShapefile::InvertSelection()
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	for (int i = 0; i < (int)_shapeData.size(); i++) {
-		_shapeData[i]->selected(!_shapeData[i]->selected());
+	for (const auto& i : _shapeData)
+	{
+		i->selected(!i->selected());
 	}
 
 	return S_OK;
@@ -437,151 +451,144 @@ STDMETHODIMP CShapefile::InvertSelection()
 //		DefineShapePoints
 // **************************************************************
 // A fast method to retrieve bounds of the given shape
-BOOL CShapefile::DefineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std::vector<long> & parts, std::vector<double> & xPts, std::vector<double> & yPts )
-{	
-	long numPoints;
-	long numParts;
-
+BOOL CShapefile::DefineShapePoints(const long shapeIndex, ShpfileType& shapeType, std::vector<long>& parts, std::vector<double>& xPts, std::vector<double>& yPts)
+{
 	parts.clear();
 	xPts.clear();
 	yPts.clear();
 
-	if( _isEditingShapes != FALSE )
-	{	
-		IShape * shape = NULL;
-		shape = _shapeData[ShapeIndex]->shape;
-		return ShapeHelper::get_MemShapePoints(shape, ShapeType, parts, xPts, yPts);
+	if (_isEditingShapes != FALSE)
+	{
+		IShape* shape = _shapeData[shapeIndex]->shape;
+		return ShapeHelper::get_MemShapePoints(shape, shapeType, parts, xPts, yPts);
 	}
-	else		// not editing
-	{	
-		CSingleLock lock(&_readLock, TRUE);
 
-		//Get the Info from the disk
-		fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
+	// not editing
+	CSingleLock lock(&_readLock, TRUE);
 
-		int intbuf;
-		fread(&intbuf,sizeof(int),1,_shpfile);
-		ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
+	//Get the Info from the disk
+	fseek(_shpfile, _shpOffsets[shapeIndex], SEEK_SET);
 
-		// shape records are 1 based
-		if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
-		{	
-			ErrorMessage(tkINVALID_SHP_FILE);
+	int intbuf;
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int)); // TODO: Fix compile warning
+
+	// shape records are 1 based
+	if (intbuf != shapeIndex + 1 && intbuf != shapeIndex)
+	{
+		ErrorMessage(tkINVALID_SHP_FILE);
+		return FALSE;
+	}
+
+	long numParts;
+	long numPoints;
+	fread(&intbuf, sizeof(int), 1, _shpfile);
+	ShapeUtility::SwapEndian((char*)&intbuf, sizeof(int)); // TODO: Fix compile warning
+	const int contentLength = intbuf * 2;			//(16 to 32 bit words)
+
+	if (contentLength <= 0)
+		return FALSE;
+
+	auto cdata = new char[contentLength];
+	fread(cdata, sizeof(char), contentLength, _shpfile);
+	const auto intdata = (int*)cdata; // TODO: Fix compile warning
+	const auto shapetype = static_cast<ShpfileType>(intdata[0]);
+
+	lock.Unlock();
+
+	if (shapetype == SHP_NULLSHAPE)
+	{
+		shapeType = shapetype;
+		return FALSE;
+	}
+	else if (shapetype == SHP_POINT || shapetype == SHP_POINTZ || shapetype == SHP_POINTM)
+	{
+		int* begOfPts = &intdata[1];
+		const auto pntdata = (double*)begOfPts; // TODO: Fix compile warning
+		xPts.push_back(pntdata[0]);
+		yPts.push_back(pntdata[1]);
+		shapeType = shapetype;
+	}
+	else if (shapetype == SHP_POLYLINE || shapetype == SHP_POLYLINEZ || shapetype == SHP_POLYLINEM)
+	{
+		numParts = intdata[9];
+		numPoints = intdata[10];
+
+		if (numPoints < 2)
 			return FALSE;
+
+		// fill up parts: polyline must have at least 1 part			
+		if (numParts > 0)
+		{
+			for (int p = 0; p < numParts; p++)
+				parts.push_back(intdata[11 + p]);
 		}
 		else
-		{	
-			fread(&intbuf,sizeof(int),1,_shpfile);
-			ShapeUtility::SwapEndian((char*)&intbuf,sizeof(int));
-			int contentLength = intbuf*2;			//(16 to 32 bit words)
+			parts.push_back(0);
 
-			if( contentLength <= 0 )
-				return FALSE;
-
-			char * cdata = new char[contentLength];
-			fread(cdata,sizeof(char),contentLength,_shpfile);
-			int * intdata = (int*)cdata;						
-			ShpfileType shapetype = (ShpfileType)intdata[0];
-			double * pntdata;
-
-			lock.Unlock();
-
-			if( shapetype == SHP_NULLSHAPE )
-			{	
-				ShapeType = shapetype;
-				return FALSE;
-			}
-			else if( shapetype == SHP_POINT || shapetype == SHP_POINTZ || shapetype == SHP_POINTM )
-			{	
-				int * begOfPts = &(intdata[1]);
-				pntdata=(double*)begOfPts;				
-				xPts.push_back(pntdata[0]);
-				yPts.push_back(pntdata[1]);
-				ShapeType = shapetype;
-			}
-			else if( shapetype == SHP_POLYLINE || shapetype == SHP_POLYLINEZ || shapetype == SHP_POLYLINEM )
-			{					
-				numParts=intdata[9];
-				numPoints=intdata[10];
-
-				if( numPoints < 2 )
-					return FALSE;
-
-				// fill up parts: polyline must have at least 1 part			
-				if( numParts > 0 )
-				{	
-					for( int p = 0; p < numParts; p++ )
-						parts.push_back(intdata[11+p]);					
-				}
-				else
-					parts.push_back(0);
-
-				// fill up xPts and yPts
-				int * begOfPts = &(intdata[11+numParts]);
-				double * pntdata = (double*)begOfPts;
-				int idx=0;
-				for( int i = 0; i < numPoints; i++ )
-				{	
-					idx=2*i;
-					xPts.push_back(pntdata[idx]);
-					yPts.push_back(pntdata[idx+1]);
-				}
-				ShapeType = shapetype;
-			}
-			else if( shapetype == SHP_POLYGON || shapetype == SHP_POLYGONZ || shapetype == SHP_POLYGONM )
-			{
-				numParts=intdata[9];
-				numPoints=intdata[10];
-
-				if( numPoints < 2 )
-					return FALSE;
-
-				// fill up parts: polygon must have at least 1 part			
-				if( numParts > 0 )
-				{	
-					for( int p = 0; p < numParts; p++ )
-						parts.push_back(intdata[11+p]);								
-				}
-				else
-					parts.push_back(0);
-
-				// fill up xPts and yPts
-				int * begOfPts = &(intdata[11+numParts]);
-				double * pntdata = (double*)begOfPts;
-				int idx=0;
-				for( int i = 0; i < numPoints; i++ )
-				{	idx=i*2;
-				xPts.push_back(pntdata[idx]);
-				yPts.push_back(pntdata[idx+1]);
-				}
-
-				ShapeType = shapetype;
-			}
-			else if( shapetype == SHP_MULTIPOINT || shapetype == SHP_MULTIPOINTZ || shapetype == SHP_MULTIPOINTM )
-			{	
-				numPoints=intdata[9];
-
-				if( numPoints < 1 )
-					return FALSE;
-
-				// fill up xPts and yPts
-				int * begOfPts = &(intdata[10]);
-				double * pntdata = (double*)begOfPts;
-				int idx=0;
-				for( int i = 0; i < numPoints; i++ )
-				{	idx=i*2;
-				xPts.push_back(pntdata[idx]);
-				yPts.push_back(pntdata[idx+1]);
-				}
-				ShapeType = shapetype;
-			}
-			else
-				return FALSE;
-
-			delete [] cdata;
-			cdata = NULL;
+		// fill up xPts and yPts
+		int* begOfPts = &(intdata[11 + numParts]);
+		const auto pntdata = (double*)begOfPts;  // TODO: Fix compile warning
+		for (int i = 0; i < numPoints; i++)
+		{
+			const int idx = 2 * i;
+			xPts.push_back(pntdata[idx]);
+			yPts.push_back(pntdata[idx + 1]);
 		}
+		shapeType = shapetype;
 	}
+	else if (shapetype == SHP_POLYGON || shapetype == SHP_POLYGONZ || shapetype == SHP_POLYGONM)
+	{
+		numParts = intdata[9];
+		numPoints = intdata[10];
+
+		if (numPoints < 2)
+			return FALSE;
+
+		// fill up parts: polygon must have at least 1 part			
+		if (numParts > 0)
+		{
+			for (int p = 0; p < numParts; p++)
+				parts.push_back(intdata[11 + p]);
+		}
+		else
+			parts.push_back(0);
+
+		// fill up xPts and yPts
+		int* begOfPts = &(intdata[11 + numParts]);
+		const auto pntdata = (double*)begOfPts;
+		for (int i = 0; i < numPoints; i++)
+		{
+			const int idx = i * 2;
+			xPts.push_back(pntdata[idx]);
+			yPts.push_back(pntdata[idx + 1]);
+		}
+
+		shapeType = shapetype;
+	}
+	else if (shapetype == SHP_MULTIPOINT || shapetype == SHP_MULTIPOINTZ || shapetype == SHP_MULTIPOINTM)
+	{
+		numPoints = intdata[9];
+
+		if (numPoints < 1)
+			return FALSE;
+
+		// fill up xPts and yPts
+		int* begOfPts = &(intdata[10]);
+		const auto pntdata = (double*)begOfPts; // TODO: Fix compile warning
+		for (int i = 0; i < numPoints; i++)
+		{
+			const int idx = i * 2;
+			xPts.push_back(pntdata[idx]);
+			yPts.push_back(pntdata[idx + 1]);
+		}
+		shapeType = shapetype;
+	}
+	else
+		return FALSE;
+
+	delete[] cdata;
+	cdata = nullptr;
 
 	return TRUE;
 }

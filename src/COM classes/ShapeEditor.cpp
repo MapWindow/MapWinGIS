@@ -234,7 +234,7 @@ STDMETHODIMP CShapeEditor::put_PointXY(long pointIndex, double x, double y, VARI
 // *******************************************************
 //		get_PointCount()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_numPoints(long* retVal)
+STDMETHODIMP CShapeEditor::get_NumPoints(long* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = _activeShape->GetPointCount();
@@ -1103,7 +1103,7 @@ bool CShapeEditor::Validate(IShape** shp)
 	CString errMsg;
 	if (!((CShape*)(*shp))->ValidateBasics(validityCheck, errMsg))
 	{
-		if (validityCheck == DirectionOfPolyRings) 
+		if (validityCheck == ShapeValidityCheck::DirectionOfPolyRings) 
 		{
 			(*shp)->ReversePointsOrder(0, &vb);
 		}

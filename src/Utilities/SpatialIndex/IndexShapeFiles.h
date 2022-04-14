@@ -26,9 +26,7 @@
 #include "spatialindex/SpatialIndex.h"
 #include "IndexSearching.h"
 #include <string>
-#include <list>
 #include <queue>
-#include <ios>
 
 //Shapefile File Info
 #define HEADER_BYTES_16 50
@@ -40,63 +38,71 @@
 #define RECORD_HEADER_LENGTH_32 8
 #define RECORD_SHAPE_TYPE_32 8
 
-using namespace std;
-using namespace SpatialIndex;
+using namespace SpatialIndex; // TODO: Where to move to?
 
+// ReSharper disable once CppInconsistentNaming
 namespace IndexSearching
 {
-	class ShapeIdxVisitor : public IVisitor
-	  {
-	  private:
+	class ShapeIdxVisitor final : public IVisitor
+	{
+	private:
 
-	  public:
-		  size_t m_indexIO;
-		  size_t m_leafIO;
-		queue<SpatialIndex::id_type> ids;
+	public:
+		// ReSharper disable once CppInconsistentNaming
+		size_t m_indexIO;
+		// ReSharper disable once CppInconsistentNaming
+		size_t m_leafIO;
+		queue<id_type> ids;
 
-	  public:
-		~ShapeIdxVisitor()
-		  {
-		  }
-		  ShapeIdxVisitor() : m_indexIO(0), m_leafIO(0) {}
+	public:
+		~ShapeIdxVisitor() override
+		{
+		}
+		ShapeIdxVisitor() : m_indexIO(0), m_leafIO(0) {}
 
-		void ShapeIdxVisitor::visitData(const IData& d);
+		void visitData(const IData& d) override;
 
-		  void visitNode(const INode& n);
+		void visitNode(const INode& n) override;
 
-		void visitData(std::vector<const IData*>& v){};
-	  };
+		void visitData(std::vector<const IData*>& v) override {}
+	};
 
-	class CSpatialIndexCache 
-	  {
-	  public:
+	class CSpatialIndexCache
+	{
+	public:
 		static CSpatialIndexCache& Instance();
-		ISpatialIndex* getSpatialIndexByID(CSpatialIndexID spatialIndexID);
-		CSpatialIndexID cacheSpatialIndex(ISpatialIndex* tree, IStorageManager* diskfile, StorageManager::IBuffer* file);
-		void uncacheSpatialIndex(CSpatialIndexID spatialIndexID, bool releaseAll);
-	  private:
+		ISpatialIndex* GetSpatialIndexById(CSpatialIndexID spatialIndexId);
+		CSpatialIndexID CacheSpatialIndex(ISpatialIndex* tree, IStorageManager* diskfile, StorageManager::IBuffer* file);
+		void UncacheSpatialIndex(CSpatialIndexID spatialIndexId, bool releaseAll);
+	private:
 		struct CacheItem
-		  {
-		  public:
-			IStorageManager         *m_diskfile;
-			StorageManager::IBuffer *m_file;
-			ISpatialIndex           *m_tree;
-	      
-			CacheItem() : m_diskfile(NULL), m_file(NULL), m_tree(NULL) {}
-			CacheItem(IStorageManager* diskfile, StorageManager::IBuffer* file, ISpatialIndex* tree) : m_diskfile(diskfile), m_file(file), m_tree(tree){}
-			void releaseAll();
-		  };
+		{
+		public:
+			// ReSharper disable once CppInconsistentNaming
+			IStorageManager* m_diskfile;
+			// ReSharper disable once CppInconsistentNaming
+			StorageManager::IBuffer* m_file;
+			// ReSharper disable once CppInconsistentNaming
+			ISpatialIndex* m_tree;
+
+			CacheItem() : m_diskfile(nullptr), m_file(nullptr), m_tree(nullptr) {}
+			CacheItem(IStorageManager* diskfile, StorageManager::IBuffer* file, ISpatialIndex* tree)
+				: m_diskfile(diskfile), m_file(file), m_tree(tree) {}
+			void ReleaseAll();
+		};
 
 		CSpatialIndexCache() : m_nextSpatialIndexID(1) {}
 		CSpatialIndexCache(const CSpatialIndexCache&);                 // Prevent copy-construction
 		CSpatialIndexCache& operator=(const CSpatialIndexCache&);	   // Prevent assignment
 
+		// ReSharper disable once CppInconsistentNaming
 		map<CSpatialIndexID, CacheItem> m_cache;
+		// ReSharper disable once CppInconsistentNaming
 		CSpatialIndexID m_nextSpatialIndexID;
-	  };
+	};
 
-	bool createIndexFile(double utilization, int capacity, std::string baseName);
-	bool isValidIndexFile(string baseName, int bufferSize);
-	void queryIndexFile(ISpatialIndex *spatialIndex, SpatialIndex::Region queryRegion, int bufferSize, QueryTypeFlags queryType, ShapeIdxVisitor *vis);
-	int  selectShapesFromIndex(ISpatialIndex *spatialIndex, double *lowVals, double *hiVals, QueryTypeFlags queryType, CIndexSearching *resulSet);
+	bool CreateIndexFile(double utilization, int capacity, std::string baseName);
+	bool IsValidIndexFile(string baseName, int bufferSize);
+	void QueryIndexFile(ISpatialIndex* spatialIndex, Region queryRegion, int bufferSize, QueryTypeFlags queryType, ShapeIdxVisitor* vis);
+	int  SelectShapesFromIndex(ISpatialIndex* spatialIndex, double* lowVals, double* hiVals, QueryTypeFlags queryType, CIndexSearching* resulSet);
 }

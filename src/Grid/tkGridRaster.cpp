@@ -1633,6 +1633,7 @@ void tkGridRaster::ReadBGDHeader( CString filename, FILE * in, DATA_TYPE &bgdDat
 		try
 		{
 			char * newProj = NULL;
+			// TODO: Should we use GeoPorjection instead?
 			ProjectionTools * p = new ProjectionTools();
 			CString prjFilename = filename.Left(filename.GetLength() - 3) + "prj";
 			p->GetProj4FromPRJFile(prjFilename.GetBuffer(), &newProj);

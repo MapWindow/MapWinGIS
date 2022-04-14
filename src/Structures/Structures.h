@@ -4,30 +4,30 @@
 #include "TableRow.h"
 
 struct Poly
-{	
+{
 public:
-	Poly(){}
+	Poly() {}
 	std::vector<double> polyX;
 	std::vector<double> polyY;
 };
 
 struct TileBuffer
 {
-	bool Initialized;  
+	bool Initialized;
 	int Provider;	// id of provider in buffer
 	int Zoom;		// zoom at which current tile buffer was drawn
-	Extent Extents;	
+	Extent Extents;
 };
 
 class TimedPoint
 {
-public:	
+public:
 	int x;
 	int y;
 	DWORD time;
 
-	TimedPoint(int x, int y, DWORD time) :
-	x(x), y(y), time(time)	{}
+	TimedPoint(const int x, const int y, const DWORD time) :
+		x(x), y(y), time(time) {}
 };
 
 // some classes as well but never mind
@@ -39,12 +39,12 @@ public:
 	CRect Handle;
 	CRect Bar;
 
-	ZoombarParts(): 
-	PlusButton(0, 0, 0, 0), MinusButton(0, 0, 0, 0), Handle(0, 0, 0, 0), Bar(0, 0, 0, 0){ }
+	ZoombarParts() :
+		PlusButton(0, 0, 0, 0), MinusButton(0, 0, 0, 0), Handle(0, 0, 0, 0), Bar(0, 0, 0, 0) { }
 
-	double GetRelativeZoomFromClick(int y)
+	double GetRelativeZoomFromClick(const int y)
 	{
-		double val = (y - Bar.top) /(double)(Bar.bottom - Bar.top);
+		double val = (y - Bar.top) / static_cast<double>(Bar.bottom - Bar.top);
 		if (val < 0.0) val = 0.0;
 		if (val > 1.0) val = 1.0;
 		return 1 - val;
@@ -69,7 +69,7 @@ struct OgrUpdateError
 {
 	int ShapeIndex;
 	CStringW ErrorMsg;
-	OgrUpdateError(int shapeIndex, CStringW msg) : ShapeIndex(shapeIndex), ErrorMsg(msg) {}
+	OgrUpdateError(const int shapeIndex, const CStringW msg) : ShapeIndex(shapeIndex), ErrorMsg(msg) {}
 };
 
 struct ShapeRecordData
@@ -85,8 +85,7 @@ struct ShapeRecordData
 	~ShapeRecordData()
 	{
 		VariantClear(&Shape);
-		if (Row)
-			delete Row;
+		delete Row;
 	}
 };
 
@@ -107,7 +106,7 @@ struct LayerShape
 	long LayerHandle;
 	long ShapeIndex;
 	LayerShape() : LayerHandle(-1), ShapeIndex(-1) {}
-	LayerShape(long layerHandle, long shapeIndex) : LayerHandle(layerHandle), ShapeIndex(shapeIndex){}
+	LayerShape(const long layerHandle, const long shapeIndex) : LayerHandle(layerHandle), ShapeIndex(shapeIndex) {}
 	bool IsEmpty() {
 		return LayerHandle == -1 || ShapeIndex == -1;
 	}
@@ -115,14 +114,14 @@ struct LayerShape
 
 struct CallbackParams
 {
-	ICallback *cBack;
-	const char *sMsg;
+	ICallback* cBack;
+	const char* sMsg;
 
-	CallbackParams() : cBack(NULL), sMsg(NULL) {}
-	
-	CallbackParams(const char * message);
-	
-	CallbackParams(ICallback* localCallback, const char * message);
+	CallbackParams() : cBack(nullptr), sMsg(nullptr) {}
+
+	CallbackParams(const char* message);
+
+	CallbackParams(ICallback* localCallback, const char* message);
 
 };
 
@@ -136,17 +135,17 @@ struct ImageSpecs
 	int height;
 
 	double GetXtrCorner() {
-		return xllCorner + (double)width * dx;
+		return xllCorner + static_cast<double>(width) * dx;
 	}
 
 	double GetYtrCorner() {
-		return yllCorner + (double)height * dy;
+		return yllCorner + static_cast<double>(height) * dy;
 	}
 };
 
 struct pointEx
 {
-	pointEx(){}
+	pointEx() {}
 	pointEx(double& x, double& y)
 	{
 		X = x;

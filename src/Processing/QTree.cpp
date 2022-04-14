@@ -12,81 +12,79 @@
 // The original Author is Neio(neio.zhou@gmail.com) and released as public domain in July 2009 to be a part of MapWinGIS.
 // The contributors should list themselves and their modifications here.
 //////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "QTree.h"
 
 QTree::QTree(QTreeExtent extent)
 	:extent(extent)
 {
-	LT = NULL;
-	RT = NULL;
-	LB = NULL;
-	RB = NULL;
+	LT = nullptr;
+	RT = nullptr;
+	LB = nullptr;
+	RB = nullptr;
 	isFull = false;
 	regenerating = false;
 }
 
 QTree::~QTree(void)
 {
-	for(unsigned int i = 0;i<nodes.size(); i++)
+	for (const auto& node : nodes)
 	{
-		delete nodes[i];
+		delete node;
 	}
 	nodes.clear();
+
 	//clear four corners
-	if(LT!=NULL)delete LT;
-	if(RT!=NULL)delete RT;
-	if(LB!=NULL)delete LB;
-	if(RB!=NULL)delete RB;
+	delete LT;
+	delete RT;
+	delete LB;
+	delete RB;
 }
 
 void QTree::Regenerate()
 {
-	unsigned int nodeNumber = nodes.size();
-	double middleX = (this->extent.left + this->extent.right) /2;
-	double middleY = (this->extent.top + this->extent.bottom) /2;
-	
+	const unsigned int nodeNumber = nodes.size();
+	const double middleX = (this->extent.left + this->extent.right) / 2;
+	const double middleY = (this->extent.top + this->extent.bottom) / 2;
+
 	///vector<QTreeNode*> nodesCross(MAX_LEAF_NODES);//Crossed Shapes
-	
-	for(int i = nodeNumber-1 ; i >=0; i--)
+
+	for (int i = nodeNumber - 1; i >= 0; i--)
 	{
 		//not exist in any two areas
-		if( ! ( nodes[i]->Extent.left <= middleX 
+		if (!(nodes[i]->Extent.left <= middleX
 			&& nodes[i]->Extent.right > middleX
-			|| 
-			nodes[i]->Extent.top > middleY 
+			||
+			nodes[i]->Extent.top > middleY
 			&& nodes[i]->Extent.bottom <= middleY))
 		{
 			//nodesCross.push_back(new QTreeNode(Node));
-			QTreeNode* node = nodes[i];
+			const QTreeNode* node = nodes[i];
 			nodes.erase(nodes.begin() + i);
 			this->AddNode(*node);
 			//just move away one element
 			break;
-			
 		}
 	}
 }
 
-void QTree::AddNode(const QTreeNode& Node)
+void QTree::AddNode(const QTreeNode& node)
 {
 	//if the Node overflow the extent of QuadTree
-	if( ! this->extent.Contain(Node.Extent))
+	if (!this->extent.Contain(node.Extent))
 	{
 		//if the old qtree is empty
-		if(this->extent.left == 0 &&
-			this->extent.right == 0 && 
+		if (this->extent.left == 0 &&
+			this->extent.right == 0 &&
 			this->extent.top == 0 &&
 			this->extent.bottom == 0)
 		{
-			this->extent = Node.Extent;
+			this->extent = node.Extent;
 		}
 		else
 		{
-			QTree* oldQtree = new QTree(
-				QTreeExtent(this->extent.left,
-				this->extent.right,this->extent.top,this->extent.bottom));
-			oldQtree->LT  = this->LT;
+			const auto oldQtree = new QTree(QTreeExtent(this->extent.left, this->extent.right, this->extent.top, this->extent.bottom));
+			oldQtree->LT = this->LT;
 			oldQtree->RT = this->RT;
 			oldQtree->LB = this->LB;
 			oldQtree->RB = this->RB;
@@ -94,15 +92,15 @@ void QTree::AddNode(const QTreeNode& Node)
 			oldQtree->isFull = this->isFull;
 			oldQtree->regenerating = this->regenerating;
 
-			this->LT = NULL;
-			this->RT = NULL;
-			this->LB = NULL;
-			this->RB = NULL;
+			this->LT = nullptr;
+			this->RT = nullptr;
+			this->LB = nullptr;
+			this->RB = nullptr;
 
-			if(Node.Extent.left < this->extent.left )
+			if (node.Extent.left < this->extent.left)
 			{
 				this->extent.left -= (this->extent.right - this->extent.left);
-				if(Node.Extent.top > this->extent.top)
+				if (node.Extent.top > this->extent.top)
 				{
 					//put this qtre as new qtree's RB
 					this->RB = oldQtree;
@@ -114,22 +112,21 @@ void QTree::AddNode(const QTreeNode& Node)
 					this->RT = oldQtree;
 					this->extent.bottom -= (this->extent.top - this->extent.bottom);
 				}
-				
 			}
-			else if(Node.Extent.right > this->extent.right || Node.Extent.top > this->extent.top || Node.Extent.bottom < this->extent.bottom)
+			else if (node.Extent.right > this->extent.right || node.Extent.top > this->extent.top || node.Extent.bottom < this->extent.bottom)
 			{
 
 				this->extent.right += (this->extent.right - this->extent.left);
-				if(Node.Extent.top > this->extent.top)
+				if (node.Extent.top > this->extent.top)
 				{
 					this->LB = oldQtree;
-					
+
 					this->extent.top += (this->extent.top - this->extent.bottom);
 				}
 				else
 				{
 					this->LT = oldQtree;
-					
+
 					this->extent.bottom -= (this->extent.top - this->extent.bottom);
 				}
 			}
@@ -137,21 +134,21 @@ void QTree::AddNode(const QTreeNode& Node)
 			this->nodes.clear();
 			this->isFull = false;
 			this->regenerating = false;
-			AddNode(Node);
-			return ;
+			AddNode(node);
+			return;
 		}
 	}
 
 	//Count the nodes of this leaf
-	
-	if(nodes.size() < MAX_LEAF_NODES && isFull == false)
+
+	if (nodes.size() < MAX_LEAF_NODES && isFull == false)
 	{
-		
+
 		//add node into this leaf
-		nodes.push_back(new QTreeNode(Node));
-		
+		nodes.push_back(new QTreeNode(node));
+
 	}
-	else if(nodes.size() == MAX_LEAF_NODES && isFull == false)
+	else if (nodes.size() == MAX_LEAF_NODES && isFull == false)
 	{
 		//need to regenerate
 
@@ -160,159 +157,159 @@ void QTree::AddNode(const QTreeNode& Node)
 
 		//after regenerated the tree
 		//continue to add node
-		this->AddNode(Node);
+		this->AddNode(node);
 	}
 	else
 	{
-		double middleX = (this->extent.left + this->extent.right) /2;
-		double middleY = (this->extent.top + this->extent.bottom) /2;
-		
+		const double middleX = (this->extent.left + this->extent.right) / 2;
+		const double middleY = (this->extent.top + this->extent.bottom) / 2;
+
 		//Exist in any two areas
-		if( Node.Extent.left <= middleX && Node.Extent.right > middleX
-			|| 
-			Node.Extent.top > middleY && Node.Extent.bottom <= middleY)
+		if (node.Extent.left <= middleX && node.Extent.right > middleX
+			||
+			node.Extent.top > middleY && node.Extent.bottom <= middleY)
 		{
-			nodes.push_back(new QTreeNode(Node));
+			nodes.push_back(new QTreeNode(node));
 		}
-		else if( Node.Extent.right <= middleX && Node.Extent.bottom > middleY)
+		else if (node.Extent.right <= middleX && node.Extent.bottom > middleY)
 		{
 			//LT
-			if(LT ==NULL)
+			if (LT == nullptr)
 			{
 				LT = new QTree(QTreeExtent(this->extent.left
-					,middleX, this->extent.top, middleY));
-				
+					, middleX, this->extent.top, middleY));
+
 			}
-			LT->AddNode(Node);
+			LT->AddNode(node);
 		}
-		else if( Node.Extent.left > middleX && Node.Extent.bottom > middleY)
+		else if (node.Extent.left > middleX && node.Extent.bottom > middleY)
 		{
 			//RT
-			if(RT == NULL)
+			if (RT == nullptr)
 			{
-				RT = new QTree(QTreeExtent(middleX,this->extent.right,
+				RT = new QTree(QTreeExtent(middleX, this->extent.right,
 					this->extent.top, middleY));
-				
+
 			}
-			RT->AddNode(Node);
+			RT->AddNode(node);
 		}
-		else if( Node.Extent.right <= middleX && Node.Extent.top < middleY)
+		else if (node.Extent.right <= middleX && node.Extent.top < middleY)
 		{
 			//LB
-			if(LB == NULL)
+			if (LB == nullptr)
 			{
-				LB = new QTree(QTreeExtent(this->extent.left,middleX,
-					middleY,this->extent.bottom));
-				
+				LB = new QTree(QTreeExtent(this->extent.left, middleX,
+					middleY, this->extent.bottom));
+
 			}
-			LB->AddNode(Node);
+			LB->AddNode(node);
 		}
 		else //if(Node.Extent.left > middleY && Node.Extent.top < middleY)
 		{
 			//RB
-			if(RB == NULL)
+			if (RB == nullptr)
 			{
 				RB = new QTree(QTreeExtent(middleX, this->extent.right,
 					middleY, this->extent.bottom));
-				
+
 			}
-			RB->AddNode(Node);
+			RB->AddNode(node);
 		}
 	}
-		
+
 }
 
 bool QTree::RemoveNode(int index)
 {
-	for(int i = nodes.size() -1 ; i >=0; i--)
+	for (int i = nodes.size() - 1; i >= 0; i--)
 	{
-		if(nodes[i]->index == index)
+		if (nodes[i]->index == index)
 		{
 			//found in this leaf
 			delete nodes[i];
 			nodes.erase(nodes.begin() + i);
 			return true;
 		}
-		
+
 	}
-	if(LT != NULL && LT->RemoveNode(index))
+	if (LT != nullptr && LT->RemoveNode(index))
 	{
 		return true;
 	}
-	else if(RT != NULL && RT->RemoveNode(index))
+	if (RT != nullptr && RT->RemoveNode(index))
 	{
 		return true;
 	}
-	else if(LB != NULL && LB->RemoveNode(index))
+	if (LB != nullptr && LB->RemoveNode(index))
 	{
 		return true;
 	}
-	else if(RB != NULL && RB->RemoveNode(index))
+	if (RB != nullptr && RB->RemoveNode(index))
 	{
 		return true;
 	}
-	else
-		return false;
+	return false;
 }
 
-vector<int> QTree::GetNodes(QTreeExtent QueryExtent)
+vector<int> QTree::GetNodes(QTreeExtent queryExtent)
 {
 	vector<int> result;
-	if(!this->extent.IntersectIn(QueryExtent))
-	/*if(QueryExtent.right <= this->extent.left 
-		|| QueryExtent.left >= this->extent.right
-		|| QueryExtent.top <= this->extent.bottom
-		|| QueryExtent.bottom >= this->extent.top)*/
+	if (!this->extent.IntersectIn(queryExtent))
+		/*if(QueryExtent.right <= this->extent.left
+			|| QueryExtent.left >= this->extent.right
+			|| QueryExtent.top <= this->extent.bottom
+			|| QueryExtent.bottom >= this->extent.top)*/
 	{
 		return result;
 	}
-	
-	unsigned int nodeNumber = nodes.size();
-	double middleX = (this->extent.left + this->extent.right) /2;
-	double middleY = (this->extent.top + this->extent.bottom) /2;
-	
-	if(LT != NULL)
+
+	//unsigned int nodeNumber = nodes.size();
+	//double middleX = (this->extent.left + this->extent.right) / 2;
+	//double middleY = (this->extent.top + this->extent.bottom) / 2;
+
+	if (LT != nullptr)
 	{
-		vector<int> lt = LT->GetNodes(QueryExtent);
-		if(lt.size()>0)
+		const vector<int> lt = LT->GetNodes(queryExtent);
+		if (!lt.empty())
 		{
-			for(unsigned int i = 0; i< lt.size(); i++)
-				result.push_back(lt[i]);
+			for (int i : lt)
+				result.push_back(i);
 		}
 	}
-	if(RT != NULL)
+	if (RT != nullptr)
 	{
-		vector<int> rt = RT->GetNodes(QueryExtent);
-		if(rt.size()>0)
+		const vector<int> rt = RT->GetNodes(queryExtent);
+		if (!rt.empty())
 		{
-			for(unsigned int i = 0; i< rt.size(); i++)
-				result.push_back(rt[i]);
+			for (int i : rt)
+				result.push_back(i);
 		}
 	}
-	if(LB != NULL)
+	if (LB != nullptr)
 	{
-		vector<int> lb = LB->GetNodes(QueryExtent);
-		if(lb.size()>0)
+		const vector<int> lb = LB->GetNodes(queryExtent);
+		if (!lb.empty())
 		{
-			for(unsigned int i = 0; i< lb.size(); i++)
-				result.push_back(lb[i]);
+			for (int i : lb)
+				result.push_back(i);
 		}
 	}
 
-	if(RB != NULL)
+	if (RB != nullptr)
 	{
-		vector<int> rb = RB->GetNodes(QueryExtent);
-		if(rb.size()>0)
+		const vector<int> rb = RB->GetNodes(queryExtent);
+		if (!rb.empty())
 		{
-			for(unsigned int i = 0; i< rb.size(); i++)
-				result.push_back(rb[i]);
+			for (int i : rb)
+			{
+				result.push_back(i);
+			}
 		}
 	}
-	for(int i = nodes.size()-1; i>=0; i--)
+	for (int i = nodes.size() - 1; i >= 0; i--)
 	{
-		if(nodes[i]->Extent.IntersectIn(QueryExtent))
+		if (nodes[i]->Extent.IntersectIn(queryExtent))
 			result.push_back(nodes[i]->index);
 	}
 	return result;
-
 }

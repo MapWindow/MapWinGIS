@@ -23,6 +23,61 @@ namespace MapWinGISTests
         }
 
         [TestMethod]
+        public void OpenShapefile()
+        {
+            Helper.OpenShapefile(@"D:\dev\MapWindow\MapWinGIS\git\MapWinGisTests-net6\TestData\Issue-216.shp", this);
+        }
+
+        [TestMethod]
+        public void SpatialIndexTest()
+        {
+            // Create shapefile:
+            var sfPolygon = new Shapefile();
+            Assert.IsNotNull(sfPolygon, "Could not initialize Shapefile object");
+            var retVal = sfPolygon.CreateNewWithShapeID("", ShpfileType.SHP_POLYGON);
+            Assert.IsTrue(retVal, "sf.CreateNewWithShapeID() failed");
+
+            // Add shape to shapefile:
+            var shp = new Shape();
+            retVal = shp.ImportFromWKT("POLYGON((330695.973322992 5914896.16305817, 330711.986129861 5914867.19586245, 330713.350435287 5914867.56644015, 330716.510827627 5914862.28973662, 330715.632568651 5914860.60107999, 330652.234582712 5914803.80510632, 330553.749382483 5914715.80328169, 330551.979355848 5914714.83347535, 330549.911988583 5914715.86502807, 330545.027807355 5914724.05916443, 330544.592985976 5914725.93531509, 330544.30963704 5914726.72754692, 330543.612620707 5914726.14904553, 330543.271515787 5914727.06633931, 330542.234090059 5914729.85597723, 330542.959654761 5914730.50411962, 330530.319252794 5914765.86064153, 330505.294840402 5914836.7930124, 330471.411812074 5914931.61558331, 330486.074748666 5914941.33795239, 330585.983154737 5915010.32749106, 330618.427962455 5915031.20447119, 330653.234601917 5914970.37328093, 330695.973322992 5914896.16305817))");
+            Assert.IsTrue(retVal, "shp.ImportFromWKT() failed");
+            // Add shape to shapefile:
+            sfPolygon.EditAddShape(shp);
+
+            // Test, shoud return false and error:
+            retVal = sfPolygon.RemoveSpatialIndex();
+            Assert.IsFalse(retVal);
+            Assert.AreEqual("The method isn't applicable to the in-memory object", sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+
+            // Save shapefile:
+            var sfFileLocation = Path.ChangeExtension(Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName())), ".shp");
+            sfPolygon.SaveAsEx(sfFileLocation, true, false);
+            Console.WriteLine(sfFileLocation);
+
+            // Test, shoud return false and error:
+            retVal = sfPolygon.RemoveSpatialIndex();
+            Assert.IsFalse(retVal);
+            Assert.AreEqual("The method isn't applicable to the in-memory object", sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+
+            // Create index::
+            retVal = sfPolygon.CreateSpatialIndex();
+            Assert.IsTrue(retVal, "CreateSpatialIndex failed");
+
+            // Test, shoud return false and error:
+            retVal = sfPolygon.RemoveSpatialIndex();
+            Assert.IsTrue(retVal, "RemoveSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+
+
+            // Test again with larger extent, should return true:
+            //sfPolygon.Extents.GetBounds(out var xMin, out var yMin, out var zMin, out var xMax, out var yMax, out var zMax);
+            //var enlargedExtent = new Extents();
+            //const int enlargeValue = -100;
+            //enlargedExtent.SetBounds(xMin - enlargeValue, yMin - enlargeValue, zMin, xMax + enlargeValue, yMax + enlargeValue, zMax);
+            //retVal = sfPolygon.CanUseSpatialIndex[enlargedExtent];
+            //Assert.IsTrue(retVal,"CanUseSpatialIndex failed: " + sfPolygon.ErrorMsg[sfPolygon.LastErrorCode]);
+        }
+
+        [TestMethod]
         public void SaveShapefileTest()
         {
             var tempFolder = Path.GetTempPath();
@@ -104,7 +159,7 @@ namespace MapWinGISTests
                     y = 200
                 };
                 // Add point:
-                var pointIndex = shp.numPoints;
+                var pointIndex = shp.NumPoints;
                 result = shp.InsertPoint(pnt, ref pointIndex);
                 Assert.IsTrue(result, "Could not insert point");
                 var shapeIndex = sf.NumShapes;
@@ -304,7 +359,7 @@ namespace MapWinGISTests
                     y = 200
                 };
                 // Add point:
-                var pointIndex = shp.numPoints;
+                var pointIndex = shp.NumPoints;
                 result = shp.InsertPoint(pnt, ref pointIndex);
                 Assert.IsTrue(result, "Could not insert point");
                 var shapeIndex = sf.NumShapes;
@@ -486,7 +541,7 @@ namespace MapWinGISTests
             // Make shape from map extents:
             var clipShape = _axMap1.Extents.ToShape();
             Assert.IsNotNull(clipShape, "Could not make shape from map extents");
-            Debug.WriteLine(clipShape.numPoints);
+            Debug.WriteLine(clipShape.NumPoints);
             // Make in-memory shapefile from shape:
             var sfClip = new Shapefile();
             if (!sfClip.CreateNewWithShapeID("", ShpfileType.SHP_POLYGON))
@@ -954,7 +1009,7 @@ namespace MapWinGISTests
                 throw new Exception("Cannot StartEditingShapes: " + sf.ErrorMsg[sf.LastErrorCode]);
 
             var shp = sf.Shape[0];
-            var numPoints = shp.numPoints;
+            var numPoints = shp.NumPoints;
             for (var i = 0; i < numPoints; i++)
             {
                 // Add the index as Z value
@@ -1284,7 +1339,7 @@ namespace MapWinGISTests
             {
                 var shp = sfInput.Shape[i];
                 var line = new List<Point>();
-                for (var j = 0; j < shp.numPoints; j++)
+                for (var j = 0; j < shp.NumPoints; j++)
                 {
                     line.Add(shp.Point[j]);
                 }
@@ -1425,5 +1480,6 @@ namespace MapWinGISTests
         {
             Assert.Fail("Found error: " + ErrorMsg);
         }
+
     }
 }

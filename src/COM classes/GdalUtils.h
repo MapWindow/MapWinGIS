@@ -83,6 +83,7 @@ public:
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal) override;
 	STDMETHOD(GdalRasterWarp)(/*[in]*/ BSTR sourceFilename, /*[in]*/ BSTR destinationFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
 	STDMETHOD(GdalRasterTranslate)(/*[in]*/ BSTR sourceFilename, /*[in]*/ BSTR destinationFilename, /*[in]*/ SAFEARRAY* options, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
+	STDMETHOD(GdalVectorReproject)(/*[in]*/ BSTR sourceFilename, /*[in]*/ BSTR destinationFilename, /*[in]*/ int sourceEpsgCode, /*[in]*/ int destinationEpsgCode, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
 	STDMETHOD(GdalVectorTranslate)(/*[in]*/ BSTR sourceFilename, /*[in]*/ BSTR destinationFilename, /*[in]*/ SAFEARRAY* options, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
 	STDMETHOD(ClipVectorWithVector)(/*[in]*/ BSTR subjectFilename, /*[in]*/ BSTR overlayFilename, /*[in]*/ BSTR destinationFilename, /*[in, optional, defaultvalue(TRUE)]*/ VARIANT_BOOL useSharedConnection, /*[out, retval]*/ VARIANT_BOOL* retVal) override;
 	STDMETHOD(GdalBuildOverviews)(BSTR sourceFilename, tkGDALResamplingMethod resamplingMethod, SAFEARRAY* overviewList, SAFEARRAY* bandList, SAFEARRAY* configOptions, VARIANT_BOOL* retVal) override;

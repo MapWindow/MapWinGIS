@@ -1,4 +1,6 @@
-﻿namespace interopCreator
+﻿using MapWinGIS;
+
+namespace interopCreator
 {
     partial class Form1
     {
@@ -45,15 +47,17 @@
             this.button9 = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
             this.btnPrefetchTiles = new System.Windows.Forms.Button();
-            this.axMap1 = new AxMapWinGIS.AxMap();
             this.button12 = new System.Windows.Forms.Button();
+            this.BtnOpenGeoPackage = new System.Windows.Forms.Button();
+            this.BtnClearMap = new System.Windows.Forms.Button();
+            this.axMap1 = new AxMapWinGIS.AxMap();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(686, 12);
+            this.button1.Location = new System.Drawing.Point(726, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(136, 23);
             this.button1.TabIndex = 1;
@@ -64,7 +68,7 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(686, 38);
+            this.button2.Location = new System.Drawing.Point(726, 38);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(136, 23);
             this.button2.TabIndex = 2;
@@ -75,7 +79,7 @@
             // button3
             // 
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button3.Location = new System.Drawing.Point(686, 64);
+            this.button3.Location = new System.Drawing.Point(726, 64);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(136, 23);
             this.button3.TabIndex = 3;
@@ -86,7 +90,7 @@
             // btn_ogrinfo
             // 
             this.btn_ogrinfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_ogrinfo.Location = new System.Drawing.Point(686, 90);
+            this.btn_ogrinfo.Location = new System.Drawing.Point(726, 90);
             this.btn_ogrinfo.Name = "btn_ogrinfo";
             this.btn_ogrinfo.Size = new System.Drawing.Size(136, 23);
             this.btn_ogrinfo.TabIndex = 4;
@@ -97,7 +101,7 @@
             // txtResults
             // 
             this.txtResults.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtResults.Location = new System.Drawing.Point(686, 431);
+            this.txtResults.Location = new System.Drawing.Point(726, 472);
             this.txtResults.Multiline = true;
             this.txtResults.Name = "txtResults";
             this.txtResults.Size = new System.Drawing.Size(136, 264);
@@ -107,7 +111,7 @@
             // btnOgr2Ogr
             // 
             this.btnOgr2Ogr.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOgr2Ogr.Location = new System.Drawing.Point(686, 116);
+            this.btnOgr2Ogr.Location = new System.Drawing.Point(726, 116);
             this.btnOgr2Ogr.Name = "btnOgr2Ogr";
             this.btnOgr2Ogr.Size = new System.Drawing.Size(136, 23);
             this.btnOgr2Ogr.TabIndex = 6;
@@ -118,7 +122,7 @@
             // btnGdalInfo
             // 
             this.btnGdalInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnGdalInfo.Location = new System.Drawing.Point(686, 142);
+            this.btnGdalInfo.Location = new System.Drawing.Point(726, 142);
             this.btnGdalInfo.Name = "btnGdalInfo";
             this.btnGdalInfo.Size = new System.Drawing.Size(136, 23);
             this.btnGdalInfo.TabIndex = 7;
@@ -129,7 +133,7 @@
             // btnGdalTranslate
             // 
             this.btnGdalTranslate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnGdalTranslate.Location = new System.Drawing.Point(686, 168);
+            this.btnGdalTranslate.Location = new System.Drawing.Point(726, 168);
             this.btnGdalTranslate.Name = "btnGdalTranslate";
             this.btnGdalTranslate.Size = new System.Drawing.Size(136, 23);
             this.btnGdalTranslate.TabIndex = 8;
@@ -139,7 +143,7 @@
             // button4
             // 
             this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button4.Location = new System.Drawing.Point(686, 194);
+            this.button4.Location = new System.Drawing.Point(726, 194);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(136, 23);
             this.button4.TabIndex = 9;
@@ -150,7 +154,7 @@
             // button5
             // 
             this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button5.Location = new System.Drawing.Point(686, 220);
+            this.button5.Location = new System.Drawing.Point(726, 220);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(136, 23);
             this.button5.TabIndex = 10;
@@ -161,7 +165,7 @@
             // button6
             // 
             this.button6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button6.Location = new System.Drawing.Point(686, 246);
+            this.button6.Location = new System.Drawing.Point(726, 246);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(136, 23);
             this.button6.TabIndex = 11;
@@ -172,7 +176,7 @@
             // button7
             // 
             this.button7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button7.Location = new System.Drawing.Point(686, 272);
+            this.button7.Location = new System.Drawing.Point(726, 272);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(136, 23);
             this.button7.TabIndex = 12;
@@ -183,7 +187,7 @@
             // button8
             // 
             this.button8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button8.Location = new System.Drawing.Point(686, 298);
+            this.button8.Location = new System.Drawing.Point(726, 298);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(136, 23);
             this.button8.TabIndex = 13;
@@ -194,7 +198,7 @@
             // button9
             // 
             this.button9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button9.Location = new System.Drawing.Point(686, 324);
+            this.button9.Location = new System.Drawing.Point(726, 324);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(136, 23);
             this.button9.TabIndex = 14;
@@ -205,7 +209,7 @@
             // button10
             // 
             this.button10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button10.Location = new System.Drawing.Point(686, 350);
+            this.button10.Location = new System.Drawing.Point(726, 350);
             this.button10.Name = "button10";
             this.button10.Size = new System.Drawing.Size(136, 23);
             this.button10.TabIndex = 15;
@@ -216,13 +220,46 @@
             // btnPrefetchTiles
             // 
             this.btnPrefetchTiles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnPrefetchTiles.Location = new System.Drawing.Point(686, 376);
+            this.btnPrefetchTiles.Location = new System.Drawing.Point(726, 376);
             this.btnPrefetchTiles.Name = "btnPrefetchTiles";
             this.btnPrefetchTiles.Size = new System.Drawing.Size(136, 23);
             this.btnPrefetchTiles.TabIndex = 16;
             this.btnPrefetchTiles.Text = "Prefetch Tiles";
             this.btnPrefetchTiles.UseVisualStyleBackColor = true;
             this.btnPrefetchTiles.Click += new System.EventHandler(this.btnPrefetchTiles_Click);
+            // 
+            // button12
+            // 
+            this.button12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button12.Location = new System.Drawing.Point(726, 402);
+            this.button12.Name = "button12";
+            this.button12.Size = new System.Drawing.Size(136, 23);
+            this.button12.TabIndex = 17;
+            this.button12.Text = "Zoom in";
+            this.button12.UseVisualStyleBackColor = true;
+            this.button12.Click += new System.EventHandler(this.button12_Click);
+            // 
+            // BtnOpenGeoPackage
+            // 
+            this.BtnOpenGeoPackage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.BtnOpenGeoPackage.Location = new System.Drawing.Point(726, 431);
+            this.BtnOpenGeoPackage.Name = "BtnOpenGeoPackage";
+            this.BtnOpenGeoPackage.Size = new System.Drawing.Size(136, 23);
+            this.BtnOpenGeoPackage.TabIndex = 18;
+            this.BtnOpenGeoPackage.Text = "GeoPackage";
+            this.BtnOpenGeoPackage.UseVisualStyleBackColor = true;
+            this.BtnOpenGeoPackage.Click += new System.EventHandler(this.BtnOpenGeoPackage_Click);
+            // 
+            // BtnClearMap
+            // 
+            this.BtnClearMap.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.BtnClearMap.Location = new System.Drawing.Point(726, 461);
+            this.BtnClearMap.Name = "BtnClearMap";
+            this.BtnClearMap.Size = new System.Drawing.Size(136, 23);
+            this.BtnClearMap.TabIndex = 18;
+            this.BtnClearMap.Text = "Clear map";
+            this.BtnClearMap.UseVisualStyleBackColor = true;
+            this.BtnClearMap.Click += new System.EventHandler(this.BtnClearMap_Click);
             // 
             // axMap1
             // 
@@ -233,27 +270,18 @@
             this.axMap1.Location = new System.Drawing.Point(2, 2);
             this.axMap1.Name = "axMap1";
             this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
-            this.axMap1.Size = new System.Drawing.Size(677, 694);
+            this.axMap1.Size = new System.Drawing.Size(717, 735);
             this.axMap1.TabIndex = 0;
             this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.axMap1_FileDropped);
             this.axMap1.ShapeIdentified += new AxMapWinGIS._DMapEvents_ShapeIdentifiedEventHandler(this.axMap1_ShapeIdentified);
-            // 
-            // button12
-            // 
-            this.button12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button12.Location = new System.Drawing.Point(686, 402);
-            this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(136, 23);
-            this.button12.TabIndex = 17;
-            this.button12.Text = "Zoom in";
-            this.button12.UseVisualStyleBackColor = true;
-            this.button12.Click += new System.EventHandler(this.button12_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(831, 699);
+            this.ClientSize = new System.Drawing.Size(871, 740);
+            this.Controls.Add(this.BtnClearMap);
+            this.Controls.Add(this.BtnOpenGeoPackage);
             this.Controls.Add(this.button12);
             this.Controls.Add(this.btnPrefetchTiles);
             this.Controls.Add(this.button10);
@@ -300,6 +328,8 @@
         private System.Windows.Forms.Button button10;
         private System.Windows.Forms.Button btnPrefetchTiles;
         private System.Windows.Forms.Button button12;
+        private System.Windows.Forms.Button BtnOpenGeoPackage;
+        private System.Windows.Forms.Button BtnClearMap;
     }
 }
 

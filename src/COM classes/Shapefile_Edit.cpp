@@ -32,7 +32,7 @@
 // ************************************************************
 //		StartEditingShapes()
 // ************************************************************
-STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallback *cBack, VARIANT_BOOL *retval)
+STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL startEditTable, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
@@ -112,7 +112,7 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 	// ------------------------------------------
 	// reading table into memory
 	// ------------------------------------------
-	if(StartEditTable != VARIANT_FALSE)
+	if(startEditTable != VARIANT_FALSE)
 	{
 		StartEditingTable(_globalCallback, retval);
 	}
@@ -140,7 +140,7 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 // ********************************************************
 //		StopEditingShapes()
 // ********************************************************
-STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BOOL StopEditTable, ICallback *cBack, VARIANT_BOOL *retval)
+STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL applyChanges, VARIANT_BOOL stopEditTable, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
@@ -174,9 +174,9 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 			{
 				_isEditingShapes = VARIANT_FALSE;
 
-				if (StopEditTable)
+				if (stopEditTable)
 				{
-					StopEditingTable(ApplyChanges, cBack, retval);
+					StopEditingTable(applyChanges, cBack, retval);
 				}
 			}
 		}
@@ -186,7 +186,7 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 	
 	USES_CONVERSION;
 
-	if( ApplyChanges )
+	if( applyChanges )
 	{	
 		_writing = true;
 			
@@ -248,8 +248,8 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 					ReleaseMemoryShapes();
 					*retval = VARIANT_TRUE;
 
-					if(StopEditTable != VARIANT_FALSE)
-						StopEditingTable(ApplyChanges,cBack,retval);
+					if(stopEditTable != VARIANT_FALSE)
+						StopEditingTable(applyChanges,cBack,retval);
 
 					// remove disk-based index, it's no longer valid
 					VARIANT_BOOL spatialIndex;
@@ -276,9 +276,9 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 		// reload the shx file
 		this->ReadShx();
 
-		if(StopEditTable != VARIANT_FALSE)
+		if(stopEditTable != VARIANT_FALSE)
 		{
-			StopEditingTable(ApplyChanges,cBack,retval);
+			StopEditingTable(applyChanges,cBack,retval);
 		}
 
 		RestoreShapeRecordsMapping();
@@ -333,12 +333,12 @@ void CShapefile::RestoreShapeRecordsMapping()
 //		RegisterNewShape()
 // ***********************************************************
 // Must be called after inserting or swapping shape in shape vector
-void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
+void CShapefile::RegisterNewShape(IShape* shape, long shapeIndex)
 {
 	// shape must have correct underlying data structure
-	if ((_fastMode ? true : false) != ((CShape*)Shape)->get_fastMode())
+	if ((_fastMode ? true : false) != ((CShape*)shape)->get_FastMode())
 	{
-		((CShape*)Shape)->put_FastMode(_fastMode ? true : false);
+		((CShape*)shape)->put_FastMode(_fastMode ? true : false);
 	}
 
 	// updating labels and charts
@@ -360,7 +360,7 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 			tkLineLabelOrientation orientation;
 			_labels->get_LineOrientation(&orientation);
 			
-			((CShape*)Shape)->get_LabelPosition(positioning, x, y, rotation, orientation);
+			((CShape*)shape)->get_LabelPosition(positioning, x, y, rotation, orientation);
 		}
 		
 		if (bSynchronized)
@@ -369,24 +369,24 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 
             _labels->get_OffsetXField(&offsetXField);
             if (offsetXField >= 0)
-                GetLabelOffset(offsetXField, ShapeIndex, &offsetX);
+                GetLabelOffset(offsetXField, shapeIndex, &offsetX);
 
             _labels->get_OffsetYField(&offsetYField);
             if (offsetYField >= 0)
-                GetLabelOffset(offsetYField, ShapeIndex, &offsetX);
+                GetLabelOffset(offsetYField, shapeIndex, &offsetX);
 
 			// it doesn't make sense to recalculate expression as DBF cells are empty all the same
 			CComBSTR bstrText("");
-			_labels->InsertLabel(ShapeIndex, bstrText, x, y, rotation, -1, offsetX, offsetY, &vbretval);
+			_labels->InsertLabel(shapeIndex, bstrText, x, y, rotation, -1, offsetX, offsetY, &vbretval);
 		}
 
 		if (chartsExist)
 		{
-			if (!_shapeData[ShapeIndex]->chart)
+			if (!_shapeData[shapeIndex]->chart)
 			{
-				_shapeData[ShapeIndex]->chart = new CChartInfo();
-				_shapeData[ShapeIndex]->chart->x = x;
-				_shapeData[ShapeIndex]->chart->y = y;
+				_shapeData[shapeIndex]->chart = new CChartInfo();
+				_shapeData[shapeIndex]->chart->x = x;
+				_shapeData[shapeIndex]->chart->y = y;
 			}
 		}
 	}
@@ -395,10 +395,10 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 
 	// extending the bounds of the shapefile we don't care if the bounds became less
 	// it's necessary to call RefreshExtents in this case, for zoom to layer working right
-	if (!ShapeHelper::IsEmpty(Shape))
+	if (!ShapeHelper::IsEmpty(shape))
 	{
 		CComPtr<IExtents> box = NULL;
-		Shape->get_Extents(&box);
+		shape->get_Extents(&box);
 		double xm, ym, zm, xM, yM, zM;
 		box->GetBounds(&xm, &ym, &zm, &xM, &yM, &zM);
 		
@@ -424,7 +424,7 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 		if (_useQTree)
 		{
 			QTreeNode node;
-			node.index = ShapeIndex;
+			node.index = shapeIndex;
 			node.Extent.left = xm;
 			node.Extent.right = xM;
 			node.Extent.top = yM;
@@ -498,7 +498,7 @@ void CShapefile::ReregisterShape(int shapeIndex)
 	IShape* shp = _shapeData[shapeIndex]->shape;
 	
 	bool fastMode = _fastMode ? true : false;
-	if (fastMode != ((CShape*)shp)->get_fastMode())
+	if (fastMode != ((CShape*)shp)->get_FastMode())
 	{
 		((CShape*)shp)->put_FastMode(fastMode);
 	}
@@ -545,7 +545,7 @@ void CShapefile::ReregisterShape(int shapeIndex)
 // ***********************************************************
 //		EditInsertShape()
 // ***********************************************************
-STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIANT_BOOL *retval)
+STDMETHODIMP CShapefile::EditInsertShape(IShape *shape, long *shapeIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
@@ -556,7 +556,7 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 		return S_OK;
 	}
 
-	bool canAppend = _appendMode && (*ShapeIndex) >= (long)_shapeData.size();
+	bool canAppend = _appendMode && (*shapeIndex) >= (long)_shapeData.size();
 
 	if (!_isEditingShapes && !canAppend)
 	{
@@ -573,13 +573,13 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 		return S_OK;
 	}
 		
-	if (Shape == NULL)
+	if (shape == NULL)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
 			
-    if (!IsShapeCompatible(Shape))
+    if (!IsShapeCompatible(shape))
     {
         ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
         return S_OK;
@@ -590,16 +590,16 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 	}
 
 	// wrong index will be corrected
-	if( *ShapeIndex < 0 )
+	if( *shapeIndex < 0 )
 	{
-		*ShapeIndex = 0;
+		*shapeIndex = 0;
 	}
-	else if( *ShapeIndex > (int)_shapeData.size() )
+	else if( *shapeIndex > (int)_shapeData.size() )
 	{
-		*ShapeIndex = _shapeData.size();
+		*shapeIndex = _shapeData.size();
 	}
 
-	_table->EditInsertRow( ShapeIndex, retval );
+	_table->EditInsertRow( shapeIndex, retval );
 					
 	if( *retval == VARIANT_FALSE )
 	{	
@@ -609,20 +609,20 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 	else
 	{	
 		ShapeRecord* data = new ShapeRecord();
-		Shape->AddRef();
-		data->shape = Shape;
+		shape->AddRef();
+		data->shape = shape;
 		data->modified(true);
-		_shapeData.insert(_shapeData.begin() + *ShapeIndex, data);
+		_shapeData.insert(_shapeData.begin() + *shapeIndex, data);
 		
 		if (_useQTree && !_qtree)
 			GenerateQTree();
 
-		RegisterNewShape(Shape, *ShapeIndex);
+		RegisterNewShape(shape, *shapeIndex);
 						
 		*retval = VARIANT_TRUE;
 	}
 					
-	((CTableClass*)_table)->set_IndexValue(*ShapeIndex);
+	((CTableClass*)_table)->set_IndexValue(*shapeIndex);
 
 	return S_OK;
 }
@@ -663,7 +663,7 @@ bool CShapefile::WriteAppendedShape()
 // *********************************************************************
 //		EditDeleteShape()
 // *********************************************************************
-STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
+STDMETHODIMP CShapefile::EditDeleteShape(long shapeIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
@@ -685,14 +685,14 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 		{
 			ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		}
-		else if( ShapeIndex < 0 || ShapeIndex >= (int)_shapeData.size() )
+		else if( shapeIndex < 0 || shapeIndex >= (int)_shapeData.size() )
 		{	
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		}
 		else
 		{
 			VARIANT_BOOL vbretval;
-			_table->EditDeleteRow( ShapeIndex, &vbretval);
+			_table->EditDeleteRow( shapeIndex, &vbretval);
 			
 			if(!vbretval)
 			{	
@@ -704,10 +704,10 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 				VARIANT_BOOL bSynchronized;
 				_labels->get_Synchronized(&bSynchronized);
 				if (bSynchronized)
-					_labels->RemoveLabel(ShapeIndex, &vbretval);
+					_labels->RemoveLabel(shapeIndex, &vbretval);
 				
-				delete _shapeData[ShapeIndex];
-				_shapeData.erase( _shapeData.begin() + ShapeIndex );
+				delete _shapeData[shapeIndex];
+				_shapeData.erase( _shapeData.begin() + shapeIndex );
 
                 // if we're mapping Ogr FIDs to Shape indices, we have to do a downward-shift
                 if (_hasOgrFidMapping)
@@ -717,7 +717,7 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
                     while (iter != _ogrFid2ShapeIndex.end())
                     {
                         // see if this value is the current Shape index
-                        if (iter->second == ShapeIndex)
+                        if (iter->second == shapeIndex)
                         {
                             // found it, erase it, and exit
                             _ogrFid2ShapeIndex.erase(iter->first);
@@ -730,7 +730,7 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
                     while (iter != _ogrFid2ShapeIndex.end())
                     {
                         // any Shape IDs greater-than the deleted ID must be decremented
-                        if (iter->second > ShapeIndex) _ogrFid2ShapeIndex[iter->first] = iter->second - 1;
+                        if (iter->second > shapeIndex) _ogrFid2ShapeIndex[iter->first] = iter->second - 1;
                         iter++;
                     }
                 }
@@ -884,7 +884,7 @@ STDMETHODIMP CShapefile::RefreshExtents(VARIANT_BOOL *retval)
 // ********************************************************************
 //		RefreshShapeExtents()
 // ********************************************************************
-STDMETHODIMP CShapefile::RefreshShapeExtents(LONG ShapeId, VARIANT_BOOL *retval)
+STDMETHODIMP CShapefile::RefreshShapeExtents(LONG shapeId, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	// The method is no longer used
