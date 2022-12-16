@@ -600,7 +600,9 @@ void GdalHelper::DumpDriverInfo()
 {
 	GDALAllRegister();
 	GDALDriverManager* manager = GetGDALDriverManager();
-	GDALDriverManager::AutoLoadDrivers();
+	//GDALDriverManager::AutoLoadDrivers();
+	manager -> AutoLoadDrivers();
+
 	const int count = manager->GetDriverCount();
 	for (int i = 0; i < count; i++)
 	{

@@ -284,7 +284,7 @@ namespace MapWinGISTests
 
                 double x = 0d, y = 0d;
                 double z, m;
-                if (!shp.XY[0, ref x, ref y])
+                if (!shp.get_XY(0, ref x, ref y))
                     throw new Exception("Cannot get XY from shape: " + shp.ErrorMsg[shp.LastErrorCode]);
                 Console.WriteLine("First point X: " + x);
                 Console.WriteLine("First point Y: " + y);

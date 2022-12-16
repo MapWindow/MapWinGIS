@@ -7,9 +7,6 @@
     <Filter Include="ComHelpers">
       <UniqueIdentifier>{35e117d5-8cdd-4b3a-9785-e9026b587aa9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Control">
-      <UniqueIdentifier>{671fa684-f267-4c74-a685-d6f802c140b4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Drawing">
       <UniqueIdentifier>{07a8bea1-a415-4aae-835b-33929c206ff4}</UniqueIdentifier>
     </Filter>
@@ -81,6 +78,9 @@
     </Filter>
     <Filter Include="Resource">
       <UniqueIdentifier>{cf29ab65-388d-49dd-8560-83618e35ff8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MapControl">
+      <UniqueIdentifier>{671fa684-f267-4c74-a685-d6f802c140b4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -180,11 +180,11 @@
     <ClCompile Include="ComHelpers\WmsHelper.cpp">
       <Filter>ComHelpers</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Dynamic.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Dynamic.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Edit.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Edit.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
     <ClCompile Include="COM classes\Chart.cpp">
       <Filter>COM classes</Filter>
@@ -333,11 +333,11 @@
     <ClCompile Include="COM classes\Vector.cpp">
       <Filter>COM classes</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Identifier.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Identifier.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Tiles.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Tiles.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
     <ClCompile Include="Drawing\BaseDrawer.cpp">
       <Filter>Drawing</Filter>
@@ -441,68 +441,68 @@
     <ClCompile Include="Image\GdalRaster.cpp">
       <Filter>Image</Filter>
     </ClCompile>
-    <ClCompile Include="Control\ErrorCodes.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\ErrorCodes.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\GlobalVars.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\GlobalVars.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Core.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Core.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Cursors.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Cursors.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_DispatchMap.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_DispatchMap.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Drawing.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Drawing.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_DrawingLayer.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_DrawingLayer.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Events.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Events.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_ImageGrouping.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_ImageGrouping.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Labels.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Labels.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Layer.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Layer.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Obsolete.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Obsolete.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Projection.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Projection.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Properties.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Properties.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Scale.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Scale.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Scalebar.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Scalebar.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Serialization.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Serialization.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Shapefile.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Shapefile.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Map_Snapshot.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\Map_Snapshot.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\MapPpg.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\MapPpg.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
     <ClCompile Include="Ogr\GeosConverter.cpp">
       <Filter>Ogr</Filter>
@@ -585,8 +585,8 @@
     <ClCompile Include="Shapefile\ShapeWrapperPoint.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
-    <ClCompile Include="Control\ToolTipEx.cpp">
-      <Filter>Control</Filter>
+    <ClCompile Include="MapControl\ToolTipEx.cpp">
+      <Filter>MapControl</Filter>
     </ClCompile>
     <ClCompile Include="Structures\Layer.cpp">
       <Filter>Structures</Filter>
@@ -1225,8 +1225,8 @@
     <ClInclude Include="ComHelpers\WmsHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
-    <ClInclude Include="Control\MapViewCallback.h">
-      <Filter>Control</Filter>
+    <ClInclude Include="MapControl\MapViewCallback.h">
+      <Filter>MapControl</Filter>
     </ClInclude>
     <ClInclude Include="Drawing\BaseDrawer.h">
       <Filter>Drawing</Filter>
@@ -1570,35 +1570,32 @@
     <ClInclude Include="Image\GdalRaster.h">
       <Filter>Image</Filter>
     </ClInclude>
-    <ClInclude Include="Control\DispIds.h">
-      <Filter>Control</Filter>
+    <ClInclude Include="MapControl\Enumerations.h">
+      <Filter>MapControl</Filter>
     </ClInclude>
-    <ClInclude Include="Control\Enumerations.h">
-      <Filter>Control</Filter>
+    <ClInclude Include="MapControl\ErrorCodes.h">
+      <Filter>MapControl</Filter>
     </ClInclude>
-    <ClInclude Include="Control\ErrorCodes.h">
-      <Filter>Control</Filter>
+    <ClInclude Include="MapControl\GlobalSettingsInfo.h">
+      <Filter>MapControl</Filter>
     </ClInclude>
-    <ClInclude Include="Control\GlobalSettingsInfo.h">
-      <Filter>Control</Filter>
+    <ClInclude Include="MapControl\GlobalVars.h">
+      <Filter>MapControl</Filter>
     </ClInclude>
-    <ClInclude Include="Control\GlobalVars.h">
-      <Filter>Control</Filter>
+    <ClInclude Include="MapControl\macros.h">
+      <Filter>MapControl</Filter>
     </ClInclude>
-    <ClInclude Include="Control\macros.h">
-      <Filter>Control</Filter>
+    <ClInclude Include="MapControl\Map.h">
+      <Filter>MapControl</Filter>
     </ClInclude>
-    <ClInclude Include="Control\Map.h">
-      <Filter>Control</Filter>
-    </ClInclude>
-    <ClInclude Include="Control\MapPpg.h">
-      <Filter>Control</Filter>
+    <ClInclude Include="MapControl\MapPpg.h">
+      <Filter>MapControl</Filter>
     </ClInclude>
     <ClInclude Include="Processing\MapRotate.h">
       <Filter>Processing</Filter>
     </ClInclude>
-    <ClInclude Include="Control\ToolTipEx.h">
-      <Filter>Control</Filter>
+    <ClInclude Include="MapControl\ToolTipEx.h">
+      <Filter>MapControl</Filter>
     </ClInclude>
     <ClInclude Include="Tiles\Caching\DiskCache.h">
       <Filter>Tiles\Caching</Filter>
@@ -1958,6 +1955,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="_ITableEvents_CP.H" />
+    <ClInclude Include="Control\DispIds.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MapWinGIS.rc" />

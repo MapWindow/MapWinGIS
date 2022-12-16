@@ -62,37 +62,56 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
-    <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
+    <PreLinkEventUseInBuild>true</PreLinkEventUseInBuild>
+    <MultiProcMIDL>true</MultiProcMIDL>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <CustomBuildAfterTargets>VcpkgCheckManifestRoot</CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>VcpkgCheckManifestRoot</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
-    <VcpkgManifestInstall>false</VcpkgManifestInstall>
+    <VcpkgManifestInstall>true</VcpkgManifestInstall>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
+    <VcpkgHostTriplet>x64-windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <VcpkgTriplet>x86-windows</VcpkgTriplet>
+    <VcpkgHostTriplet>x86-windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
+    <VcpkgHostTriplet>x64-windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
+    <VcpkgHostTriplet>x64-windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <VcpkgTriplet>x86-windows</VcpkgTriplet>
+    <VcpkgHostTriplet>x86-windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">
+    <VcpkgTriplet>x86-windows</VcpkgTriplet>
+    <VcpkgHostTriplet>x86-windows</VcpkgHostTriplet>
   </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>
     <PreBuildEvent>
-      <Message>Copying dlls ...</Message>
-      <Command>if $(PlatformName) == Win32 (
-  echo "Copying spatialindex-32.dll"
-  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-32.dll $(TargetDir))
-  IF EXIST $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-32.dll $(TargetDir))
-)
-if $(PlatformName) == x64 (
-  echo "Copying spatialindex-64.dll"
-  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\bin\spatialindex-64.dll $(TargetDir))
-  IF EXIST $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\bin\spatialindex-64.dll $(TargetDir))
-)
+      <Message>Copying GDAL dlls, libs and header files</Message>
+      <Command>echo "In Pre-Build event"
 
 $(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\bin\$(Platform) $(TargetDir)</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Message>
       </Message>
-      <Command>
-      </Command>
+      <Command>echo In before $(CustomBuildBeforeTargets)
+echo in after $(CustomBuildAfterTargets)</Command>
       <Outputs>%(Outputs)</Outputs>
     </CustomBuildStep>
     <!-- type library options -->
@@ -115,7 +134,7 @@ $(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformTools
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Support\include;$(ProjectDir)..\Support\include\atlhttp;$(ProjectDir)..\support\include\ShapeLib;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\ComHelpers;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Tiles\Caching;$(ProjectDir)\Tiles\Loaders;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\Tiles\Http;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform);$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform)\curl;$(ProjectDir)\Ogr;$(ProjectDir)\Editor;$(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\include;$(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Support\include;$(ProjectDir)..\Support\include\atlhttp;$(ProjectDir)..\support\include\ShapeLib;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\ComHelpers;$(ProjectDir)\MapControl;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Tiles\Caching;$(ProjectDir)\Tiles\Loaders;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\Tiles\Http;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform);$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include\$(Platform)\curl;$(ProjectDir)\Ogr;$(ProjectDir)\Editor;$(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -155,7 +174,7 @@ $(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformTools
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)..\Support\lib\$(PlatformToolset)\$(Platform)\Release;$(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\lib;$(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)..\Support\lib\$(PlatformToolset)\$(Platform)\Release;$(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\lib;$(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>
@@ -176,8 +195,15 @@ $(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformTools
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>if $(PlatformName) == Win32 setx  MapWinGISBin32 $(OutputPath)
-if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)
+      <Command>echo "In Post-Build event"
+
+if $(PlatformName) == Win32 (
+  setx  MapWinGISBin32 $(OutputPath)
+)
+if $(PlatformName) == x64 (
+  setx  MapWinGISBin64 $(OutputPath)
+)
+
 setx PROJ_LIB $(OutputPath)proj7\share</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -197,6 +223,17 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>spatialindex-32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreLinkEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">echo "In Pre-Link event"
+if $(PlatformName) == Win32 (
+  echo "Copying spatialindex-32.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll $(TargetDir))
+)
+if $(PlatformName) == x64 (
+  echo "Copying spatialindex-64.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll $(TargetDir))
+)</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <!-- x64 platform definitions -->
   <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
@@ -207,12 +244,24 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
       <PreprocessorDefinitions>WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdc11</LanguageStandard_C>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp14</LanguageStandard>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalDependencies>spatialindex-64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreLinkEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">echo "In Pre-Link event"
+if $(PlatformName) == Win32 (
+  echo "Copying spatialindex-32.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll $(TargetDir))
+)
+if $(PlatformName) == x64 (
+  echo "Copying spatialindex-64.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll $(TargetDir))
+)</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <!-- Visual Leak Detector config -->
   <ItemDefinitionGroup Condition="'$(Configuration)'=='VLD'">
@@ -222,10 +271,33 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">stdc11</LanguageStandard_C>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">stdcpp14</LanguageStandard>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">stdcpp14</LanguageStandard>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <RegisterOutput>false</RegisterOutput>
     </Link>
+    <PreLinkEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='VLD|Win32'">echo "In Pre-Link event"
+if $(PlatformName) == Win32 (
+  echo "Copying spatialindex-32.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll $(TargetDir))
+)
+if $(PlatformName) == x64 (
+  echo "Copying spatialindex-64.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll $(TargetDir))
+)</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='VLD|x64'">echo "In Pre-Link event"
+if $(PlatformName) == Win32 (
+  echo "Copying spatialindex-32.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll $(TargetDir))
+)
+if $(PlatformName) == x64 (
+  echo "Copying spatialindex-64.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll $(TargetDir))
+)</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <!-- Release config -->
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -238,10 +310,33 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdc11</LanguageStandard_C>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp14</LanguageStandard>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdc11</LanguageStandard_C>
+      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
+    <PreLinkEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">echo "In Pre-Link event"
+if $(PlatformName) == Win32 (
+  echo "Copying spatialindex-32.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll $(TargetDir))
+)
+if $(PlatformName) == x64 (
+  echo "Copying spatialindex-64.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll $(TargetDir))
+)</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">echo "In Pre-Link event"
+if $(PlatformName) == Win32 (
+  echo "Copying spatialindex-32.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-32.dll $(TargetDir))
+)
+if $(PlatformName) == x64 (
+  echo "Copying spatialindex-64.dll"
+  IF EXIST $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll (COPY $(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\bin\spatialindex-64.dll $(TargetDir))
+)</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <!-- headers -->
   <ItemGroup>
@@ -276,7 +371,7 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <ClInclude Include="ComHelpers\ShapeStyleHelper.h" />
     <ClInclude Include="ComHelpers\TableHelper.h" />
     <ClInclude Include="ComHelpers\WmsHelper.h" />
-    <ClInclude Include="Control\MapViewCallback.h" />
+    <ClInclude Include="MapControl\MapViewCallback.h" />
     <ClInclude Include="Drawing\BaseDrawer.h" />
     <ClInclude Include="Drawing\ChartDrawing.h" />
     <ClInclude Include="Drawing\CollisionList.h" />
@@ -392,18 +487,18 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <ClInclude Include="Image\tkBitmap.h" />
     <ClInclude Include="Image\GdalRaster.h" />
     <ClInclude Include="Control\DispIds.h" />
-    <ClInclude Include="Control\Enumerations.h" />
-    <ClInclude Include="Control\ErrorCodes.h" />
-    <ClInclude Include="Control\GlobalSettingsInfo.h" />
-    <ClInclude Include="Control\GlobalVars.h" />
-    <ClInclude Include="Control\macros.h" />
-    <ClInclude Include="Control\Map.h" />
-    <ClInclude Include="Control\MapPpg.h" />
+    <ClInclude Include="MapControl\Enumerations.h" />
+    <ClInclude Include="MapControl\ErrorCodes.h" />
+    <ClInclude Include="MapControl\GlobalSettingsInfo.h" />
+    <ClInclude Include="MapControl\GlobalVars.h" />
+    <ClInclude Include="MapControl\macros.h" />
+    <ClInclude Include="MapControl\Map.h" />
+    <ClInclude Include="MapControl\MapPpg.h" />
     <ClInclude Include="Processing\MapRotate.h" />
     <ClInclude Include="MapWinGIS.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
-    <ClInclude Include="Control\ToolTipEx.h" />
+    <ClInclude Include="MapControl\ToolTipEx.h" />
     <ClInclude Include="Tiles\Caching\DiskCache.h" />
     <ClInclude Include="Tiles\Caching\ITileCache.h" />
     <ClInclude Include="Tiles\Caching\PrefetchManager.h" />
@@ -559,8 +654,8 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <ClCompile Include="ComHelpers\ShapeStyleHelper.cpp" />
     <ClCompile Include="ComHelpers\TableHelper.cpp" />
     <ClCompile Include="ComHelpers\WmsHelper.cpp" />
-    <ClCompile Include="Control\Map_Dynamic.cpp" />
-    <ClCompile Include="Control\Map_Edit.cpp" />
+    <ClCompile Include="MapControl\Map_Dynamic.cpp" />
+    <ClCompile Include="MapControl\Map_Edit.cpp" />
     <ClCompile Include="COM classes\Chart.cpp" />
     <ClCompile Include="COM classes\ChartField.cpp" />
     <ClCompile Include="COM classes\Charts.cpp" />
@@ -610,8 +705,8 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <ClCompile Include="COM classes\Utils_GridToImage.cpp" />
     <ClCompile Include="COM classes\Utils_OGR.cpp" />
     <ClCompile Include="COM classes\Vector.cpp" />
-    <ClCompile Include="Control\Map_Identifier.cpp" />
-    <ClCompile Include="Control\Map_Tiles.cpp" />
+    <ClCompile Include="MapControl\Map_Identifier.cpp" />
+    <ClCompile Include="MapControl\Map_Tiles.cpp" />
     <ClCompile Include="Drawing\BaseDrawer.cpp" />
     <ClCompile Include="Drawing\ChartDrawing.cpp" />
     <ClCompile Include="Drawing\CollisionList.cpp" />
@@ -646,27 +741,27 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <ClCompile Include="Image\RasterMatrix.cpp" />
     <ClCompile Include="Image\tkBitmap.cpp" />
     <ClCompile Include="Image\GdalRaster.cpp" />
-    <ClCompile Include="Control\ErrorCodes.cpp" />
-    <ClCompile Include="Control\GlobalVars.cpp" />
-    <ClCompile Include="Control\Map.cpp" />
-    <ClCompile Include="Control\Map_Core.cpp" />
-    <ClCompile Include="Control\Map_Cursors.cpp" />
-    <ClCompile Include="Control\Map_DispatchMap.cpp" />
-    <ClCompile Include="Control\Map_Drawing.cpp" />
-    <ClCompile Include="Control\Map_DrawingLayer.cpp" />
-    <ClCompile Include="Control\Map_Events.cpp" />
-    <ClCompile Include="Control\Map_ImageGrouping.cpp" />
-    <ClCompile Include="Control\Map_Labels.cpp" />
-    <ClCompile Include="Control\Map_Layer.cpp" />
-    <ClCompile Include="Control\Map_Obsolete.cpp" />
-    <ClCompile Include="Control\Map_Projection.cpp" />
-    <ClCompile Include="Control\Map_Properties.cpp" />
-    <ClCompile Include="Control\Map_Scale.cpp" />
-    <ClCompile Include="Control\Map_Scalebar.cpp" />
-    <ClCompile Include="Control\Map_Serialization.cpp" />
-    <ClCompile Include="Control\Map_Shapefile.cpp" />
-    <ClCompile Include="Control\Map_Snapshot.cpp" />
-    <ClCompile Include="Control\MapPpg.cpp" />
+    <ClCompile Include="MapControl\ErrorCodes.cpp" />
+    <ClCompile Include="MapControl\GlobalVars.cpp" />
+    <ClCompile Include="MapControl\Map.cpp" />
+    <ClCompile Include="MapControl\Map_Core.cpp" />
+    <ClCompile Include="MapControl\Map_Cursors.cpp" />
+    <ClCompile Include="MapControl\Map_DispatchMap.cpp" />
+    <ClCompile Include="MapControl\Map_Drawing.cpp" />
+    <ClCompile Include="MapControl\Map_DrawingLayer.cpp" />
+    <ClCompile Include="MapControl\Map_Events.cpp" />
+    <ClCompile Include="MapControl\Map_ImageGrouping.cpp" />
+    <ClCompile Include="MapControl\Map_Labels.cpp" />
+    <ClCompile Include="MapControl\Map_Layer.cpp" />
+    <ClCompile Include="MapControl\Map_Obsolete.cpp" />
+    <ClCompile Include="MapControl\Map_Projection.cpp" />
+    <ClCompile Include="MapControl\Map_Properties.cpp" />
+    <ClCompile Include="MapControl\Map_Scale.cpp" />
+    <ClCompile Include="MapControl\Map_Scalebar.cpp" />
+    <ClCompile Include="MapControl\Map_Serialization.cpp" />
+    <ClCompile Include="MapControl\Map_Shapefile.cpp" />
+    <ClCompile Include="MapControl\Map_Snapshot.cpp" />
+    <ClCompile Include="MapControl\MapPpg.cpp" />
     <ClCompile Include="Ogr\GeosConverter.cpp" />
     <ClCompile Include="Ogr\GeosHelper.cpp" />
     <ClCompile Include="Ogr\Ogr2RawData.cpp" />
@@ -698,7 +793,7 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Control\ToolTipEx.cpp" />
+    <ClCompile Include="MapControl\ToolTipEx.cpp" />
     <ClCompile Include="Structures\Layer.cpp" />
     <ClCompile Include="Structures\Structures.cpp" />
     <ClCompile Include="Tiles\Caching\DiskCache.cpp" />

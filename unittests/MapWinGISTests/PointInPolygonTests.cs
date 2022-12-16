@@ -35,7 +35,7 @@ namespace MapWinGISTests
                 {
                     var x = 0d;
                     var y = 0d;
-                    retVal = shape.XY[j, ref x, ref y];
+                    retVal = shape.get_XY(j, ref x, ref y);
                     Assert.IsTrue(retVal, "Cannot get XY: " + shape.ErrorMsg[shape.LastErrorCode]);
                     Debug.WriteLine($"X: {x} Y: {y}");
                 }
@@ -73,7 +73,7 @@ namespace MapWinGISTests
             {
                 var x = 0d;
                 var y = 0d;
-                retVal = shape.XY[j, ref x, ref y];
+                retVal = shape.get_XY(j, ref x, ref y);
                 Assert.IsTrue(retVal, "Cannot get XY: " + shape.ErrorMsg[shape.LastErrorCode]);
                 var selectedShape = sfPolygon.PointInShapefile(x, y);
                 Debug.WriteLine($"point (X: {x} Y: {y}) is in shape {selectedShape}");
