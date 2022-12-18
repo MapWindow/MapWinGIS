@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using AxMapWinGIS;
 using MapWinGIS;
 
 namespace WinFormsApp1;
@@ -146,5 +147,34 @@ public sealed partial class Form1
         LogProgress("Issue-216.shp has EPSG code: " + epgCode);
         LogProgress("Done with OpenShapefile");
         AddShapefileToMap(sf);
+    }
+
+    private void SetGeographicExtents()
+    {
+        var epsgCode = GetMapProjectionAsEpsgCode();
+        LogProgress($"Map has EPSG code: {epsgCode}");
+        LogProgress($"Is current map projection geographic?: {axMap1.GeoProjection.IsGeographic}");
+        
+        axMap1.ZoomToMaxExtents();
+        var extents = axMap1.Extents; 
+        LogProgress($"Max entents: {extents.ToDebugString()}");
+        Application.DoEvents();
+
+        // Zoom in to see some changes
+        axMap1.ZoomIn(4);
+        var extentsAfterZoom = axMap1.Extents;
+        LogProgress($"Extents after zoom: {extentsAfterZoom.ToDebugString()}");
+        Debug.Assert(!extents.ToDebugString().Equals(extentsAfterZoom.ToDebugString()), "Map extent is not correctly set after zoom.");
+        Application.DoEvents();
+        Task.Delay(2000);
+        
+
+        // Reset extent
+        var retVal = axMap1.SetGeographicExtents(extents);
+        Debug.Assert(retVal, "SetGeographicExtents failed");
+        Application.DoEvents();
+        LogProgress($"Extents after SetGeographicExtents: {axMap1.Extents.ToDebugString()}");
+        Debug.Assert(extents.ToDebugString().Equals(axMap1.Extents.ToDebugString()), "Map extent is not correctly set after SetGeographicExtents.");
+        LogProgress("SetGeographicExtents test is finished");
     }
 }
