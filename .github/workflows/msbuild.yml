@@ -17,7 +17,7 @@ env:
   SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs.sln
   MAPWINGIS_SOLUTION_FILE_PATH: ./src/MapWinGIS.sln
   UNITTESTS_SOLUTION_FILE_PATH: ./MapWinGisTests-net6/MapWinGisTests-net6.sln
-  VCPKG_INSTALLED_DIR: ${{ github.workspace }}\src\vcpkg_installed\
+  VCPKG_INSTALLED_DIR: ${{ github.workspace }}\src\vcpkg_installed\${{env.VcpkgTriplet}}
 
   # Configuration type to build.
   BUILD_CONFIGURATION: Debug
@@ -64,7 +64,7 @@ jobs:
     - name: run-vcpkg    
       # You may pin to the exact commit or the version.
       # uses: lukka/run-vcpkg@c5ce6a7de6e5ce834a25f7d55b6c250a275a6732
-      uses: lukka/run-vcpkg@v10.1
+      uses: lukka/run-vcpkg@v10
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
