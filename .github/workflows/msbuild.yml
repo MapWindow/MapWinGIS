@@ -1,8 +1,8 @@
-name: MSBuild MapWinGIS+Gdal3
+name: $(date:yyyy.MM.dd)$(rev:.r)-$(Build.SourceBranchName)
 on:
   push:
     branches:
-      - feature/GDAL3-VS2019
+      - develop
     paths-ignore:
       - '**.md'
       #- '**.yml'
@@ -47,11 +47,7 @@ jobs:
       if: ${{matrix.platform == 'Win32' }}
       with:
         msbuild-architecture: x86
-
-    # VCPCK install fails when a folder names Control exists, so rename it first:
-    - name: Rename Control folder
-      run: ren ${{ github.workspace }}\src\Control ${{ github.workspace }}\src\Control_    
-     
+   
     - name: Set VcpkgTriplet-x86
       if: ${{matrix.platform == 'Win32' }}
       run: |
@@ -90,10 +86,6 @@ jobs:
         errorActionPreference: Stop
         # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
         failOnStandardError: true
-
-    # VCPCK install fails when a folder names Control exists, so rename it first:
-    - name: Rename Control folder back
-      run: ren ${{ github.workspace }}\src\Control_ ${{ github.workspace }}\src\Control  
    
     # Download GisInternals zips
     - name: Download GisInternals zips
@@ -101,10 +93,10 @@ jobs:
       with:
         # Specify the Az PowerShell script here.
         inlineScript: |
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1928-gdal-3.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-gdal-3-libs.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-x64-gdal-3.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-x64-gdal-3-libs.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3-5-mapserver-8-0.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1928-gdal-3-5-mapserver-8-0.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3-5-mapserver-8-0-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-gdal-3-5-mapserver-8-0-libs.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3-5-mapserver-8-0.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-x64-gdal-3-5-mapserver-8-0.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3-5-mapserver-8-0-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-x64-gdal-3-5-mapserver-8-0-libs.zip"
           ls .\Support\
         # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
         azPSVersion: "latest"
@@ -117,7 +109,7 @@ jobs:
     - name: Unzip
       working-directory: ./Support/
       shell: pwsh
-      run: .\unpackVS2019GISInternals.ps1
+      run: .\unpackGdal3-Toolset142-GISInternals.ps1
              
     # Build support libs
     - name: Build SupportLibs ${{matrix.platform}}
@@ -156,10 +148,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       
-    - name: Setup dotnet
+    - name: Setup dotnet 6
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.x'
+
+    - name: Setup dotnet 7
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.x'        
      
     - name: Download MapWinGIS (${{matrix.platform}}) binaries
       uses: actions/download-artifact@v2
