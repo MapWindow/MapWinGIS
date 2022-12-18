@@ -52,6 +52,7 @@ jobs:
     # Setup vcpkg
     - name: vcpkg integrate install
       run: |
+        mkdir D:\a\MapWinGIS\MapWinGIS\vcpkg
         cd vcpkg && ./vcpkg.exe integrate install
               
     # Download GisInternals zips
