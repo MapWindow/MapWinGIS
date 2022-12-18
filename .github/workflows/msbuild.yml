@@ -17,7 +17,7 @@ env:
   SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs.sln
   MAPWINGIS_SOLUTION_FILE_PATH: ./src/MapWinGIS.sln
   UNITTESTS_SOLUTION_FILE_PATH: ./MapWinGisTests-net6/MapWinGisTests-net6.sln
-  VCPKG_INSTALLED_DIR: ${{ github.workspace }}\src\vcpkg_installed\${{env.VcpkgTriplet}}
+  VCPKG_INSTALLED_DIR: ${{ github.workspace }}\src\vcpkg_installed\
 
   # Configuration type to build.
   BUILD_CONFIGURATION: Debug
@@ -68,7 +68,7 @@ jobs:
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
-        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--triplet`, `${{env.VcpkgTriplet}}`]"
+        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]${{env.VcpkgTriplet}}\\`, `--triplet`, `${{env.VcpkgTriplet}}`]"
  
     - name: List downloaded VCPCK files
       uses: Azure/powershell@v1
