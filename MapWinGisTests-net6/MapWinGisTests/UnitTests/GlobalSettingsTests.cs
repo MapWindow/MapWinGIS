@@ -79,7 +79,7 @@ public class GlobalSettingsTests : ICallback
         var gdalVersion = _gs.GdalVersion;
         _testOutputHelper.WriteLine(gdalVersion);
         gdalVersion.ShouldNotBeNullOrEmpty("GdalVersion is not set");
-        gdalVersion.StartsWith("GDAL 3.4").ShouldBeTrue();
+        gdalVersion.StartsWith("GDAL 3.5").ShouldBeTrue();
         // Change:
         // GdalVersion is read-only
     }

@@ -71,18 +71,18 @@ public sealed partial class Form1 : Form, ICallback
 
     private void RunTestButtonClick(object? sender, EventArgs e)
     {
-        //LogProgress(@"Running GlobalSettingsCompressOverviewsTest");
-        //GlobalSettingsCompressOverviewsTest();
+        LogProgress(@"Running GlobalSettingsCompressOverviewsTest");
+        GlobalSettingsCompressOverviewsTest();
         
-        //LogProgress(@"Running GdalRasterWarpTest");
-        //GdalRasterWarpTest();   
+        LogProgress(@"Running GdalRasterWarpTest");
+        GdalRasterWarpTest();   
         
         // TODO: Test still fails:
         //LogProgress(@"Running GdalRasterTranslateTest");
         //GdalRasterTranslateTest();
 
-        //LogProgress(@"Running CreateSpatialIndexUnicodeTest");
-        //CreateSpatialIndexUnicodeTest();
+        LogProgress(@"Running CreateSpatialIndexUnicodeTest");
+        CreateSpatialIndexUnicodeTest();
 
         LogProgress(@"Running OpenShapefile");
         OpenShapefile();

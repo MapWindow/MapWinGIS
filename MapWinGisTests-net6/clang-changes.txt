@@ -1,0 +1,129 @@
+gsl::narrow_cast<int>(_parts.size())
+gsl::narrow_cast<int>(_points.size())
+
+const auto pointsSize = gsl::narrow_cast<int>(_points.size());
+
+_lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
+
+gsl::at(_points, 0)
+gsl::at(_points, i)   
+gsl::at(_parts, 0) 
+gsl::at(_points, pointIndex)
+
+const gsl::not_null<GDALDataset*> ds =
+
+m_globalSettings.forceHideLabels = newVal == VARIANT_FALSE ? false : true;
+
+// TODO: Fix compile warning
+
+const string baseName = GetFileNameFromPath(_shpfileName);
+
+-    m_globalSettings.shortUnitStrings[unit] = OLE2W(localizedString);
++    m_globalSettings.shortUnitStrings[unit] = CStringW(localizedString);
+
+-    const CStringW path = OLE2W(filename);
++    const CStringW path(filename);
+
+-        CallbackHelper::ErrorMsg(Debug::Format("The specified folder doesn't exist: %s", W2A(newPath))); // TODO: Fix compile warning
++        CallbackHelper::ErrorMsg(Debug::Format("The specified folder doesn't exist: %s", CString(newPath)));
+
+			CString s;
+			s.Format("Failed to fix shape: %d", i);
+			CallbackHelper::ErrorMsg("Shapefile", nullptr, "", s);
+
+	CString f;
+	f.Format("Unrecognized linear units: %s", s);
+	Debug::WriteLine("Unrecognized linear units: %s", f);
+	
+
+-    CString sourceEpsgCodeBuilder = "EPSG:";
+-    char cbuf[20];
+-    _itoa(sourceEpsgCode, cbuf, 10);
+-    sourceEpsgCodeBuilder.Append(cbuf);
++    CString sourceEpsgCodeBuilder;
++    sourceEpsgCodeBuilder.Format("EPSG:%d", sourceEpsgCode);
+
+-        *retVal = A2BSTR(proj);
++        *retVal = A2BSTR((LPCSTR)proj);
+
+-    ~CGeoProjection()
++    ~CGeoProjection() noexcept(false)
+
+-    void SetIsFrozen(bool frozen) { _isFrozen = frozen; }
++    void SetIsFrozen(bool frozen) noexcept { _isFrozen = frozen; }
+
+// Read:
+// Change:
+// Check:
+// Reset:
+
+
+// Read-onky unit test:
+        // Read:
+        var gdalVersion = _gs.GdalVersion;
+        _testOutputHelper.WriteLine(gdalVersion);
+        gdalVersion.ShouldNotBeNullOrEmpty("GdalVersion is not set");
+        gdalVersion.StartsWith("GDAL 3.4").ShouldBeTrue();
+        // Change:
+        // GdalVersion is read-only
+
+// String unit test
+        // Read:
+        var value = _gs.LocalizedString[tkLocalizedStrings.lsKilometers];
+        _testOutputHelper.WriteLine(value);
+        value.ShouldNotBeNullOrEmpty("LocalizedString is not set");
+        value.ShouldBe("km");
+        // Change:
+        const string newValue = "??????";
+        _gs.LocalizedString[tkLocalizedStrings.lsKilometers] = newValue;
+        // Check:
+        _gs.LocalizedString[tkLocalizedStrings.lsKilometers].ShouldBe(newValue);
+        // Reset:
+        _gs.LocalizedString[tkLocalizedStrings.lsKilometers] = value;
+        _gs.LocalizedString[tkLocalizedStrings.lsKilometers].ShouldBe(value);
+        
+// Double unit test:
+        // Read:
+        var value = _gs.ClipperGcsMultiplicationFactor;
+        _testOutputHelper.WriteLine(value.ToString(CultureInfo.InvariantCulture));
+        value.ShouldBe(100000);
+        // Change:
+        _gs.ClipperGcsMultiplicationFactor = value * 2.5;
+        // Check:
+        _gs.ClipperGcsMultiplicationFactor.ShouldBe(value * 2.5);
+        // Reset:
+        _gs.ClipperGcsMultiplicationFactor = value;
+        _gs.ClipperGcsMultiplicationFactor.ShouldBe(value);
+        
+// Boolean unit test:
+        // Read:
+        var value = _gs.ShapefileFastUnion;
+        _testOutputHelper.WriteLine(value.ToString(CultureInfo.InvariantCulture));
+        value.ShouldBeTrue();
+        // Change:
+        _gs.ShapefileFastUnion = !value;
+        // Check:
+        _gs.ShapefileFastUnion.ShouldBe(!value);
+        // Reset:
+        _gs.ShapefileFastUnion = value;
+        _gs.ShapefileFastUnion.ShouldBe(value);
+		
+// Enum unit test:
+        // Read:
+        var value = _gs.LabelsSmoothingMode;
+        _testOutputHelper.WriteLine(value.ToString());
+        value.ShouldBe(tkSmoothingMode.HighQualityMode);
+        // Loop:
+        foreach (tkSmoothingMode enumValue in Enum.GetValues(typeof(tkSmoothingMode)))
+        {
+            _testOutputHelper.WriteLine(enumValue.ToString());
+            // Change:
+            _gs.LabelsSmoothingMode = enumValue;
+            // Check:
+            _gs.LabelsSmoothingMode.ShouldBe(enumValue);
+        }
+        // Reset:
+        _gs.LabelsSmoothingMode = value;
+        _gs.LabelsSmoothingMode.ShouldBe(value);
+		
+				        
