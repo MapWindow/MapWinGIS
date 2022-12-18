@@ -1,4 +1,4 @@
-name: $(date:yyyy.MM.dd)$(rev:.r)-$(Build.SourceBranchName)
+name: Build MapWinGIS -Develop branch
 on:
   push:
     branches:
