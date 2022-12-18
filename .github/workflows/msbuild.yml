@@ -17,7 +17,7 @@ env:
   SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs.sln
   MAPWINGIS_SOLUTION_FILE_PATH: ./src/MapWinGIS.sln
   UNITTESTS_SOLUTION_FILE_PATH: ./MapWinGisTests-net6/MapWinGisTests-net6.sln
-  VCPKG_INSTALLED_DIR: ${{ github.workspace }}\src\vcpkg_installed\
+  VCPKG_INSTALLED_DIR: ./src/vcpkg_installed/
 
   # Configuration type to build.
   BUILD_CONFIGURATION: Debug
