@@ -483,8 +483,8 @@ public:
 	afx_msg void ZoomToMaxVisibleExtents();
 	afx_msg void ZoomToLayer(long LayerHandle);
 	afx_msg void ZoomToShape(long LayerHandle, long Shape);
-	afx_msg void ZoomIn(double Percent);
-	afx_msg void ZoomOut(double Percent);
+	afx_msg void ZoomIn(double percent);
+	afx_msg void ZoomOut(double percent);
 	afx_msg long ZoomToPrev();
 	afx_msg long ZoomToNext();
 

@@ -10,7 +10,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommand>$(MSBuildProjectDirectory)\..\unittests\TestExecutor\bin\$(Platform)\Debug\ConsoleApplication1.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>$(MSBuildProjectDirectory)\..\MapWinGisTests-net6\WinFormsApp1\bin\$(Platform)\Debug\net6.0-windows\WinFormsApp1.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

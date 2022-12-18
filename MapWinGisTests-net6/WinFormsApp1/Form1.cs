@@ -86,5 +86,8 @@ public sealed partial class Form1 : Form, ICallback
 
         LogProgress(@"Running OpenShapefile");
         OpenShapefile();
+        
+        LogProgress(@"Running SetGeographicExtents");
+        SetGeographicExtents();
     }
 }

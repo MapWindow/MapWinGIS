@@ -137,7 +137,7 @@ void CMapView::UpdateMapTranformation()
 	VARIANT_BOOL isEmpty;
 	_projection->get_IsEmpty(&isEmpty);
 
-	IGeoProjection* gp = nullptr;
+	// IGeoProjection* gp = nullptr;
 
 	_wgsProjection->StopTransform();
 

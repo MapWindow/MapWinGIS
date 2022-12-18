@@ -491,6 +491,8 @@ const char* ErrorMsg(const long errorCode)
 		return "Projection file with such name already exists.";
 	case tkTRANSFORMATION_NOT_INITIALIZED:
 		return "Transformation isn't initialized.";
+	case tkTRANSFORMATIONMODE_NOT_DEFINED:
+		return "Transformation mode isn't defined.";
 	case tkFAILED_TO_COPY_PROJECTION:
 		return "Failed to copy projection.";
 	case tkPROJECTION_IS_FROZEN:
