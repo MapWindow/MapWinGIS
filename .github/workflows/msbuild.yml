@@ -53,14 +53,16 @@ jobs:
       run: |
            chcp 65001 #set code page to utf-8
            echo ("VcpkgTriplet=x86-windows") >> $env:GITHUB_ENV
-           echo ("VCPKG_INSTALLED_DIR=./src/vcpkg_installed/x86-windows/") >> $env:GITHUB_ENV
+           echo ("VCPKG_INSTALLED_DIR=${{ github.workspace }}/src/vcpkg_installed/x86-windows/") >> $env:GITHUB_ENV
+           mkdir $[env.VCPKG_INSTALLED_DIR]
       
     - name: Set VcpkgTriplet-x64
       if: ${{matrix.platform == 'x64' }}
       run: |
            chcp 65001 #set code page to utf-8
            echo ("VcpkgTriplet=x64-windows") >> $env:GITHUB_ENV
-           echo ("VCPKG_INSTALLED_DIR=./src/vcpkg_installed/x64-windows/") >> $env:GITHUB_ENV
+           echo ("VCPKG_INSTALLED_DIR=${{ github.workspace }}/src/vcpkg_installed/x64-windows/") >> $env:GITHUB_ENV
+           mkdir $[env.VCPKG_INSTALLED_DIR]
                    
     # Install VCPCK
     - name: run-vcpkg    
