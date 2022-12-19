@@ -29,8 +29,8 @@ jobs:
 
     strategy:
       matrix:
-        platform: ['Win32', 'x64']
-        # platform: ['Win32']
+        # platform: ['Win32', 'x64']
+        platform: ['Win32']
 
     steps:
     - uses: actions/checkout@v3
@@ -56,6 +56,18 @@ jobs:
         dir
         vcpkg.exe integrate install
               
+    - name: Set VcpkgTriplet-x86
+      if: ${{matrix.platform == 'Win32' }}
+      run: |
+           chcp 65001 #set code page to utf-8
+           echo ("VcpkgTriplet=x86-windows") >> $env:GITHUB_ENV
+      
+    - name: Set VcpkgTriplet-x64
+      if: ${{matrix.platform == 'x64' }}
+      run: |
+           chcp 65001 #set code page to utf-8
+           echo ("VcpkgTriplet=x64-windows") >> $env:GITHUB_ENV
+                    
     # Download GisInternals zips
     - name: Download GisInternals zips
       uses: Azure/powershell@v1
