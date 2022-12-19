@@ -52,9 +52,9 @@ jobs:
     # Setup vcpkg
     - name: vcpkg integrate install
       run: |
-        echo ${{ github.workspace }}
-        mkdir D:\a\MapWinGIS\MapWinGIS\vcpkg
-        cd ./src/vcpkg && ./vcpkg.exe integrate install
+        cd ./src/vcpkg 
+        dir
+        vcpkg.exe integrate install
               
     # Download GisInternals zips
     - name: Download GisInternals zips
