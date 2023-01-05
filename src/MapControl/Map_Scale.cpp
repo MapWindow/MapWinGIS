@@ -1829,7 +1829,7 @@ void CMapView::SetCurrentZoomCore(int zoom, bool forceUpdate)
     }
     else
     {
-        ErrorMessage(tkMAP_PROJECTION_NOT_SET, cvAll);
+        ErrorMessage(tkTRANSFORMATIONMODE_NOT_DEFINED, cvAll);
     }
 }
 
@@ -1961,7 +1961,7 @@ void CMapView::SetKnownExtentsCore(tkKnownExtents extents)
         }
     }
     else {
-        ErrorMessage(tkMAP_PROJECTION_NOT_SET, cvAll);
+        ErrorMessage(tkTRANSFORMATIONMODE_NOT_DEFINED, cvAll);
     }
 }
 
