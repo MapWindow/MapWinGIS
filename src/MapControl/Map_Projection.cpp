@@ -141,7 +141,7 @@ void CMapView::UpdateMapTranformation()
 
 	_wgsProjection->StopTransform();
 
-	if (isEmpty)
+	if (!isEmpty)
 	{
 		VARIANT_BOOL isSame, vb;
 		CComPtr<IExtents> box = nullptr;
