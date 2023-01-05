@@ -105,7 +105,7 @@ int CMapView::ChooseZoom(void* provider, double scalingRatio, bool limitByProvid
 	if (!provider) return -1;
 
 	Extent bounds;
-	if (GetGeographicExtentsInternal(false, NULL, bounds))
+	if (GetGeographicExtentsInternal(false, nullptr, bounds))
 	{
 		return ChooseZoom((BaseProvider*)provider, bounds, scalingRatio, limitByProvider);
 	}
@@ -211,7 +211,7 @@ void CMapView::InitTmsProjection()
 	_tileProjection->Clear(&vb);
 	_tileReverseProjection->Clear(&vb);
 
-	IGeoProjection* gp = NULL;
+	IGeoProjection* gp = nullptr;
 	_tiles->get_ServerProjection(&gp);
 
 	if (gp) {
@@ -359,7 +359,7 @@ void CMapView::ResizeWmsLayerBuffers(int cx, int cy)
 			continue;
 		}
 
-		CComPtr<IWmsLayer> wms = NULL;
+		CComPtr<IWmsLayer> wms = nullptr;
 		layer->QueryWmsLayer(&wms);
 
 		WmsHelper::Cast(wms)->ResizeBuffer(cx, cy);
@@ -386,7 +386,7 @@ void CMapView::ReloadWmsLayers(bool snapshot, CString key)
 			continue;
 		}
 
-		CComPtr<IWmsLayer> wms = NULL;
+		CComPtr<IWmsLayer> wms = nullptr;
 		layer->QueryWmsLayer(&wms);
 
 		WmsHelper::Cast(wms)->Load(this, snapshot, key);

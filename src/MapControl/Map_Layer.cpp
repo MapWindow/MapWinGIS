@@ -780,7 +780,7 @@ bool CMapView::CheckLayerProjection(Layer* layer, int layerHandle)
 		// if there is valid map projection we shall be able to do transformation
 		if (_transformationMode == tmNotDefined)
 		{
-			CallbackHelper::ErrorMsg("Can't add WMS layer: map projection if empty or doesn't support required transformation.");
+			CallbackHelper::ErrorMsg("Can't add WMS layer: map projection is empty or doesn't support required transformation.");
 			return false;
 		}
 	}
