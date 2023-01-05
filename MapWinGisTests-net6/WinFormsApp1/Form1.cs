@@ -13,7 +13,7 @@ public sealed partial class Form1 : Form, ICallback
             ApplicationCallback = this,
             CallbackVerbosity = tkCallbackVerbosity.cvAll
         };
-        
+
         LoadOsm();
 
         GetMapWinGisVersion();
@@ -26,6 +26,8 @@ public sealed partial class Form1 : Form, ICallback
         if (axMap1.GeoProjection.TryAutoDetectEpsg(out var epsgCode))
         {
             TxtProgress.Text += $@"Map projection: EPSG:{epsgCode}{Environment.NewLine}";
+            axMap1.TileProvider = tkTileProvider.OpenStreetMap;
+            axMap1.CurrentZoom = 2;
         }
         else
         {
@@ -41,6 +43,7 @@ public sealed partial class Form1 : Form, ICallback
         axMap1.GeoProjection = geoProjection;
         axMap1.TileProvider = tkTileProvider.OpenStreetMap;
         axMap1.CurrentZoom = 2;
+        axMap1.KnownExtents = tkKnownExtents.keNetherlands;
     }
 
     private void LogProgress(string msg)
@@ -73,10 +76,10 @@ public sealed partial class Form1 : Form, ICallback
     {
         LogProgress(@"Running GlobalSettingsCompressOverviewsTest");
         GlobalSettingsCompressOverviewsTest();
-        
+
         LogProgress(@"Running GdalRasterWarpTest");
-        GdalRasterWarpTest();   
-        
+        GdalRasterWarpTest();
+
         // TODO: Test still fails:
         //LogProgress(@"Running GdalRasterTranslateTest");
         //GdalRasterTranslateTest();
@@ -86,7 +89,7 @@ public sealed partial class Form1 : Form, ICallback
 
         LogProgress(@"Running OpenShapefile");
         OpenShapefile();
-        
+
         LogProgress(@"Running SetGeographicExtents");
         SetGeographicExtents();
     }
