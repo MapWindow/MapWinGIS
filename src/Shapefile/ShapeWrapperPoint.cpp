@@ -223,8 +223,8 @@ bool CShapeWrapperPoint::put_RawData(char* shapeData, int recordLength)
 	}
 	else if (shpType == SHP_POINTZ)
 	{
-		_m = ddata[2];
-		_z = ddata[3];
+		_z = ddata[2];
+		_m = ddata[3];
 	}
 
 	_initialized = true;
@@ -252,8 +252,8 @@ int* CShapeWrapperPoint::get_RawData()
 	}
 	else if (_shpType == SHP_POINTZ)
 	{
-		ddata[2] = _m;
-		ddata[3] = _z;
+		ddata[2] = _z;
+		ddata[3] = _m;
 	}
 
 	return intdata;
