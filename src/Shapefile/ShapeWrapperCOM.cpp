@@ -844,8 +844,8 @@ int* CShapeWrapperCOM::get_RawData()
 			}
 			else if (_shapeType == SHP_POINTZ)
 			{
-				gsl::at(_points, 0)->get_M(&ddata[2]);
-				gsl::at(_points, 0)->get_Z(&ddata[3]);
+				gsl::at(_points, 0)->get_Z(&ddata[2]);
+				gsl::at(_points, 0)->get_M(&ddata[3]);
 			}
 		}
 		return intdata;

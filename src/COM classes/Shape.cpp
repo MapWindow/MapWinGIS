@@ -2339,7 +2339,7 @@ STDMETHODIMP CShape::ImportFromBinary(const VARIANT bytesArray, VARIANT_BOOL* re
 
 	auto data = (char*)p; // TODO: Fix compile warning
 
-	const int recordLength = gsl::narrow_cast<int>(bytesArray.parray->cbElements);
+	const int recordLength = gsl::narrow_cast<int>(bytesArray.parray->rgsabound->cElements);
 	const bool result = _shp->put_RawData(data, recordLength);
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
 
