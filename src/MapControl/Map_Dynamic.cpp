@@ -145,7 +145,7 @@ void CMapView::DrawShapeEditor( Gdiplus::Graphics* g, bool dynamicBuffer )
 // ****************************************************************
 void CMapView::DrawZoombox(Gdiplus::Graphics* g)
 {
-	bool zooming = m_cursorMode == cmZoomIn && _dragging.Operation == DragZoombox;
+	bool zooming = (m_cursorMode == cmZoomIn || m_cursorMode == cmZoomOut ) && _dragging.Operation == DragZoombox;
 	bool selection = m_cursorMode == cmSelection && _dragging.Operation == DragSelectionBox;
 
 	bool drawZoombox =  _leftButtonDown && _dragging.Start != _dragging.Move && (zooming || selection);
@@ -153,7 +153,7 @@ void CMapView::DrawZoombox(Gdiplus::Graphics* g)
 	{
 		CRect r = _dragging.GetRectangle();
 		Gdiplus::Rect rect(r.left, r.top, r.right - r.left, r.bottom - r.top);
-		
+
 		g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
 		if (selection)
 		{

@@ -294,6 +294,32 @@ void CMapView::SetNewExtentsWithForcedZooming(Extent ext, bool zoomIn)
 }
 
 // ****************************************************
+//	   SetNewExtentsWithZoomOut()
+// ****************************************************
+// Sets new extents by zooming out using given extent (drawn rectangle)
+void CMapView::SetNewExtentsWithZoomOut(Extent ext)
+{
+    auto extent = GetExtents();
+    if (extent == NULL) return;
+
+    double width, height;
+    extent->get_Width(&width);
+    extent->get_Height(&height);
+
+    auto const pt = ext.GetCenter();
+    auto const widthFactor = width / ext.Width();
+    auto const heightFactor = height / ext.Height();
+    width  *= widthFactor;
+    height *= heightFactor;
+
+    double zMin, zMax;
+    extent->get_zMin(&zMin);
+    extent->get_zMax(&zMax);
+    extent->SetBounds(pt.x - width / 2, pt.y - height / 2, zMin, pt.x + width / 2, pt.y + height / 2, zMax);
+    SetExtents(extent);
+}
+
+// ****************************************************
 //	   SetExtentsCore()
 // ****************************************************
 // adjustZoom - when we use discrete zoom levels the extents should be adjusted
@@ -466,7 +492,9 @@ VARIANT_BOOL CMapView::SetGeographicExtents(IExtents* extents)
 
     if (_transformationMode == tmNotDefined)
     {
+#if RELEASE_MODE
         this->ErrorMessage(tkTRANSFORMATIONMODE_NOT_DEFINED);
+#endif
         return VARIANT_FALSE;
     }
 
@@ -556,6 +584,11 @@ IExtents* CMapView::GetGeographicExtents()
 // ***************************************************************
 bool CMapView::GetGeographicExtentsInternal(bool clipForTiles, Extent* clipExtents, Extent& result)
 {
+    if (clipExtents != nullptr)
+    {
+        ::OutputDebugStringA(clipExtents->ToString());
+        ::OutputDebugStringA("\r\n");
+    }
     // we don't want to have coordinates outside world bounds, as it breaks tiles loading
     IExtents* ext = GetGeographicExtentsCore(clipForTiles, clipExtents);
     if (!ext) return false;
@@ -564,6 +597,8 @@ bool CMapView::GetGeographicExtentsInternal(bool clipForTiles, Extent* clipExten
     ext->Release();
 
     result = bounds;
+    ::OutputDebugStringA(result.ToString());
+    ::OutputDebugStringA("\r\n");
 
     return true;
 }
@@ -855,7 +890,8 @@ void CMapView::ZoomToMaxVisibleExtents(void)
         {
             const double xrange = l->extents.right - l->extents.left;
             const double yrange = l->extents.top - l->extents.bottom;
-            if (xrange == 0 && yrange == 0 && l->extents.right == 0 && l->extents.top == 0)
+            if ((xrange == 0 && yrange == 0 && l->extents.right == 0 && l->extents.top == 0) ||
+                std::isinf(xrange) || std::isinf(yrange) || std::isinf(l->extents.right) || std::isinf(l->extents.top))
                 continue;
 
             if (extentsSet == false)
@@ -971,6 +1007,10 @@ void CMapView::CalculateVisibleExtents(Extent e, bool MapSizeChanged)
     double right = MAX(e.left, e.right);
     double bottom = MIN(e.bottom, e.top);
     double top = MAX(e.bottom, e.top);
+
+	CString sOutput;
+	sOutput.AppendFormat("CalculateVisibleExtents() left: %.2f, right: %.2f, bottom: %.2f, top: : %.2f\r\n", left, right, bottom, top);
+	::OutputDebugStringA(sOutput.GetBuffer());
 
     if (left == right)	// lsu 26 jul 2009 for zooming to single point
     {
