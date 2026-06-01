@@ -80,7 +80,14 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 
 	// build GEOSGeom for comparison
 	IShape* shpExt = nullptr;
+#if DEBUG_ALLOCATED_OBJECTS
+	auto currentBrake = ComHelper::GetBreak();
+	ComHelper::SetBreak(false);
+#endif
 	ComHelper::CreateShape(&shpExt);
+#if DEBUG_ALLOCATED_OBJECTS
+	ComHelper::SetBreak(currentBrake);
+#endif
 
 	const bool bPtSelection = bMinX == bMaxX && bMinY == bMaxY;
 	int localNumShapes = static_cast<int>(_shapeData.size());
@@ -158,6 +165,8 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 		shpExt->AddPoint(bMinX, bMinY, &idx);
 		// convert input point to GEOS
 		GEOSGeom geosPoint = GeosConverter::ShapeToGeom(shpExt); // TODO: Fix compile warning
+		shpExt->Release();
+		shpExt = nullptr;
 
 		if (shpType2D == SHP_POLYGON)
 		{
@@ -216,6 +225,8 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 		shpExt->AddPoint(bMinX, bMinY, &idx);
 		// convert extent to GEOS
 		GEOSGeom geosExtent = GeosConverter::ShapeToGeom(shpExt); // TODO: Fix compile warning
+		shpExt->Release();
+		shpExt = nullptr;
 
 		for (i = 0; i < localNumShapes; i++)
 		{
