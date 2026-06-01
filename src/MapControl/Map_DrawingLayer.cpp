@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "Map.h"
 #include "LabelDrawing.h"
+#include "Labels.h"
 
 // ***************************************************************
 //		IsValidDrawList()
@@ -1005,6 +1006,85 @@ void CMapView::SetDrawingLabels(long DrawingLayerIndex, ILabels* newVal)
 	else
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
 }
+
+// ***************************************************************
+//	PlaceAllMapLabels
+// ***************************************************************
+IPlacedLabels* CMapView::PlaceAllMapLabels(long layerHandle)
+{
+	::OutputDebugStringA("PlaceAllMapLabels");
+	auto currentScale = this->GetCurrentScale();
+	CCollisionList collisionListLabels;
+	CCollisionList* chosenListLabels = m_globalSettings.commonCollisionListForLabels ? (&_collisionList) : (&collisionListLabels);
+
+	Gdiplus::Graphics* graphics = Gdiplus::Graphics::FromImage(_layerBitmap);
+	graphics->Clear(Gdiplus::Color::Transparent);
+	graphics->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
+
+	auto maxExtents = GetMaxExtents();
+	auto extents = new Extent(maxExtents);
+	CLabelDrawer lblDrawer(graphics, extents, _pixelPerProjectionX, _pixelPerProjectionY, currentScale, _currentZoom, chosenListLabels, _rotateAngle, _isSnapshot);
+
+	Layer* layer = _allLayers[layerHandle];
+	auto labels = layer->get_Labels();
+	auto array = lblDrawer.PlaceAllMapLabels(labels);
+
+	IPlacedLabels* placedLabels;
+	ComHelper::CreateInstance(idPlacedLabels, (IDispatch**)&placedLabels);
+
+	auto indexes = array.data();
+	placedLabels->SetVector(indexes, array.size());
+
+	return placedLabels;
+}
+
+// ***************************************************************
+//	GetLabelExtents
+// ***************************************************************
+IExtents* CMapView::GetDrawingLabelExtents(VARIANT* variant) //long layerHandle, long index)
+{
+	SAFEARRAY* sar = *variant->pparray;
+	auto values = static_cast<long*>(sar->pvData);
+	auto layerHandle = values[0];
+	auto index = values[1];
+	auto currentScale = this->GetCurrentScale();
+	CCollisionList collisionListLabels;
+	CCollisionList* chosenListLabels = m_globalSettings.commonCollisionListForLabels ? (&_collisionList) : (&collisionListLabels);
+
+	Gdiplus::Graphics* graphics = Gdiplus::Graphics::FromImage(_layerBitmap);
+	graphics->Clear(Gdiplus::Color::Transparent);
+	graphics->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
+
+	auto maxExtents = GetMaxExtents();
+	auto extents = new Extent(maxExtents);
+	CLabelDrawer lblDrawer(graphics, extents, _pixelPerProjectionX, _pixelPerProjectionY, currentScale, _currentZoom, chosenListLabels, _rotateAngle, _isSnapshot);
+
+	IExtents* box;
+	ComHelper::CreateExtents(&box);
+	ILabels* labels = nullptr;
+	if(IsValidDrawList(layerHandle))
+	{
+		_allDrawLists[layerHandle]->m_labels->AddRef();
+		labels = _allDrawLists[layerHandle]->m_labels;
+
+		auto rect = lblDrawer.GetLabelExtents(labels, index);
+		box->SetBounds(rect.left, rect.bottom, 0.0, rect.right, rect.top, 0.0);
+	}
+
+	/*CLabels* lbs = static_cast<CLabels*>(labels);
+	vector<vector<CLabelInfo*>*>* labelData = lbs->get_LabelData();
+	vector<CLabelInfo*>* parts = (*labelData)[index];
+	CLabelInfo* lbl = (*parts)[0]; */
+
+	/*ILabel* pLabel;
+	ComHelper::CreateInstance(idLabel, reinterpret_cast<IDispatch**>(&pLabel));
+	labels->get_Label(index, 0, &pLabel);
+	*pLabel-> */
+
+
+	//box->SetBounds(layer->extents.left, layer->extents.bottom, 0.0, layer->extents.right, layer->extents.top, 0.0);
+
+	return box;
+}
+
 #pragma endregion
-
-

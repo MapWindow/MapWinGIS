@@ -124,8 +124,13 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		// passing main buffer to client for custom drawing		
 		FireOnDrawbackBufferCore(g, _isSnapshot ? NULL : _bufferBitmap);
 	}
-	
+#if DEBUG_ALLOCATED_OBJECTS
+	ComHelper::SetBreak(false);
+#endif
 	RedrawTools(g, rcBounds);
+#if DEBUG_ALLOCATED_OBJECTS
+	ComHelper::SetBreak(false);
+#endif
 
 	// redraw time and logo
 	DWORD endTick = GetTickCount();
@@ -335,6 +340,8 @@ void CMapView::RedrawWmsLayers(Gdiplus::Graphics* g)
 				{
 					gWms->Clear(Gdiplus::Color::Transparent);
 				}
+
+				//manager->VerifyLayers();
 
 				TilesDrawer drawer(gWms, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, PixelsPerMapUnit(), GetWgs84ToMapTransform());
 
@@ -1047,7 +1054,11 @@ void CMapView::DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics
 				iimg->get_OriginalWidth(&width);
 				iimg->get_OriginalHeight(&height);
 
+#if BIG_TILE_SIZE
+				if ((width == 512 && height == 512) || _isSnapshot)
+#else
 				if ((width == 256 && height == 256) || _isSnapshot)
+#endif
 				{
 					// it's tiles, I don't want to cache bitmap here to avoid seams
 					// the same thing with Snapshot calls
@@ -1477,7 +1488,155 @@ void CloseMapRotation()
 	// TODO: implement
 }
 
+// ******************************************************************
+//		PlaceLabels()
+// ******************************************************************
+int* CMapView::PlaceLabels(const CRect& rcBounds, Gdiplus::Graphics* graphics, bool layerBuffer)
+{
+	if (_lockCount > 0 && !_isSnapshot)
+		return nullptr;
 
+	// clear extents of drawn labels and charts
+	this->ClearLabelFrames();
+
+	long endcondition = _activeLayers.size();
+	//	nothing to draw
+	if (endcondition == 0)
+		return nullptr;
+
+	register int i;
+	long startcondition = 0;
+
+	// prepare for placing
+
+	// ------------------------------------------------------------------
+	//	Check whether some layers are completely concealed by images 
+	//	no need to draw them then
+	// ------------------------------------------------------------------
+	bool* isConcealed = new bool[endcondition];
+	memset(isConcealed, 0, endcondition * sizeof(bool));
+
+	double scale = GetCurrentScale();
+	int zoom;
+	_tiles->get_CurrentZoom(&zoom);
+
+	if (layerBuffer)
+		CheckForConcealedImages(isConcealed, startcondition, endcondition, scale, zoom);
+
+	double currentScale = this->GetCurrentScale();
+
+	// collision avoidance
+	_collisionList.Clear();
+	CCollisionList collisionListLabels;
+	CCollisionList collisionListCharts;
+
+	CCollisionList* chosenListLabels = m_globalSettings.commonCollisionListForLabels ? (&_collisionList) : (&collisionListLabels);;
+	CCollisionList* chosenListCharts = m_globalSettings.commonCollisionListForCharts ? (&_collisionList) : (&collisionListCharts);;
+
+	// initializing classes for drawing
+	bool forceGdiplus = this->_rotateAngle != 0.0f || _isSnapshot;
+
+	CShapefileDrawer sfDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, this->GetCurrentScale(), this->GetCurrentZoom(), forceGdiplus);
+	CLabelDrawer lblDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, currentScale, _currentZoom, chosenListLabels, _rotateAngle, _isSnapshot);
+
+	// mark all shapes as not drawn
+	for (int i = startcondition; i < endcondition; i++)
+	{
+		Layer* l = _allLayers[_activeLayers[i]];
+		if (l->IsShapefile() && l->wasRendered)		// if it's hidden don't clear every time
+		{
+			CComPtr<IShapefile> sf = NULL;
+			// don't mark as 'undrawn' if we're not going to redraw it
+			if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) != layerBuffer)
+			{
+				ShapefileHelper::Cast(sf)->MarkUndrawn();
+			}
+		}
+	}
+
+	//	run drawing
+	int shapeCount = 0;
+	for (int i = startcondition; i < endcondition; i++)
+	{
+		long layerHandle = _activeLayers[i];
+		Layer* l = _allLayers[layerHandle];
+		if (!l || !l->get_Object()) continue;
+
+		bool visible = l->IsVisible(scale, zoom) && !isConcealed[i];
+		l->wasRendered = visible;
+
+		if (visible)
+		{
+			if (l->IsImage())
+			{
+				if (!layerBuffer) continue;
+
+				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
+			}
+			else if (l->IsShapefile() || l->IsDynamicOgrLayer())
+			{
+
+				CComPtr<IShapefile> sf = NULL;
+				if (l->IsDynamicOgrLayer())
+				{
+					// Try to get the data loaded so far & update labels & categories
+					l->UpdateShapefile();
+
+					// Get the shapefile
+					l->QueryShapefile(&sf);
+				}
+				else
+				{
+					// grab extents from shapefile in case they changed
+					l->UpdateExtentsFromDatasource();
+
+					if (!l->extents.Intersects(_extents))
+						continue;
+
+					// Update labels & categories
+					l->UpdateShapefile();
+				}
+
+				// layerBuffer == true indicates we're drawing the non-Volatile layers
+				if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
+					continue;
+
+				//LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
+				auto ret = LayerDrawer::PlaceLabels(l, lblDrawer, vpAboveParentLayer);
+			}
+		}
+	}
+
+	shapeCount = sfDrawer.GetShapeCount();
+
+	if (layerBuffer)
+		_shapeCountInView = shapeCount;
+
+	if (!layerBuffer && shapeCount > _shapeCountInView)
+		_shapeCountInView = shapeCount;
+
+	// drawing labels and charts above the layers
+	for (i = 0; i < (int)_activeLayers.size(); i++)
+	{
+		Layer* l = _allLayers[_activeLayers[i]];
+
+		if (!l || !l->get_Object()) continue;
+
+		if (!l->IsVisible(scale, zoom))	continue;
+
+		CComPtr<IShapefile> sf = NULL;
+		if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
+			continue;
+
+		//LayerDrawer::DrawLabels(l, lblDrawer, vpAboveAllLayers);
+		auto ret = LayerDrawer::PlaceLabels(l, lblDrawer, vpAboveAllLayers);
+
+		//LayerDrawer::DrawCharts(l, chartDrawer, vpAboveAllLayers);
+	}
+
+	if (isConcealed)
+		delete[] isConcealed;
+}
 
 
 

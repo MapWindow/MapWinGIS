@@ -838,6 +838,44 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 
 	return S_OK;
 };
+// *****************************************************************
+//		SelectNotDrawn()
+// *****************************************************************
+// Selection of not drawn labels which fall in the given bounding box
+STDMETHODIMP CLabels::SelectNotDrawn(IExtents* BoundingBox, VARIANT* LabelIndices, VARIANT* PartIndices, VARIANT_BOOL* retval)
+{
+	*retval = VARIANT_FALSE;
+	if (!BoundingBox) return S_OK;
+	double xMin, yMin, zMin, xMax, yMax, zMax;
+	BoundingBox->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+
+	vector<long> indices;
+	vector<long> parts;
+
+	for (unsigned long i = 0; i < _labels.size(); i++)
+	{
+		vector<CLabelInfo*>* labelParts = _labels[i];
+		for (unsigned long j = 0; j < labelParts->size(); j++)
+		{
+			CLabelInfo* lbl = labelParts->at(j);
+			if (lbl->horizontalFrame == nullptr && lbl->rotatedFrame == nullptr)
+			{
+				auto isInside = GeometryHelper::PointInExtent(xMin, yMin, xMax, yMax, lbl->x, lbl->y);
+				if (isInside)
+				{
+					indices.push_back(i);
+					parts.push_back(j);
+				}
+			}
+		}
+	}
+
+	bool result = Templates::Vector2SafeArray(&indices, VT_I4, LabelIndices);
+	*retval = Templates::Vector2SafeArray(&parts, VT_I4, PartIndices);
+	*retval = *retval && result;
+
+	return S_OK;
+}
 
 // *******************************************************************
 //		put_ParentShapefile()
@@ -2907,5 +2945,31 @@ STDMETHODIMP CLabels::UpdateSizeField()
 	_fontSizeChanged = true;
 
 	return S_OK;
+}
+
+
+
+// *************************************************************
+//		get_LabelDrawnInMap()
+// *************************************************************
+STDMETHODIMP CLabels::get_LabelDrawnInMap(long index, VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	auto match = _drawnInMap.find(index);
+	*pVal = match != _drawnInMap.end();
+
+	return S_OK;
+}
+
+// *************************************************************
+//		AddDrawnLabel()
+// *************************************************************
+void CLabels::AddDrawnLabel(long index)
+{
+	if (index == -1) // Reset
+		_drawnInMap.clear();
+	else
+		_drawnInMap.insert(index);
 }
 

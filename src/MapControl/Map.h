@@ -632,6 +632,9 @@ public:
 	afx_msg VARIANT_BOOL GetRecenterMapOnZoom();
 	afx_msg void SetShowCoordinatesBackground(VARIANT_BOOL nNewValue);
 	afx_msg VARIANT_BOOL GetShowCoordinatesBackground();
+	afx_msg IPlacedLabels* PlaceAllMapLabels(long layerHandle);
+	afx_msg IExtents* GetDrawingLabelExtents(VARIANT* values); // long layerHandle, long index
+
 #pragma endregion
 
 	//}}AFX_DISPATCH
@@ -707,9 +710,13 @@ public:
 	{
 		FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_DISPATCH VTS_PI4), LayerHandle, Shape, Cancel);
 	}
-	void FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY)
+	void FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY, long selectedVertex)
 	{
-		FireEvent(eventidBeforeVertexDigitized, EVENT_PARAM(VTS_PR8 VTS_PR8), pointX, pointY);
+		FireEvent(eventidBeforeVertexDigitized, EVENT_PARAM(VTS_PR8 VTS_PR8 VTS_I4), pointX, pointY, selectedVertex);
+	}
+	void FireVertexAdded(DOUBLE* pointX, DOUBLE* pointY)
+	{
+		FireEvent(eventidFireVertexAdded, EVENT_PARAM(VTS_PR8 VTS_PR8), pointX, pointY);
 	}
 	void FireSnapPointRequested(DOUBLE pointX, DOUBLE pointY, DOUBLE* snappedX, DOUBLE* snappedY, tkMwBoolean* isFound, tkMwBoolean* isFinal)
 	{
@@ -1052,6 +1059,7 @@ public:
 	CString Crypt(CString str);
 	bool VerifySerial(CString str);
 	void DrawLayers(const CRect& rcBounds, Gdiplus::Graphics* graphics, bool layerBuffer = true);
+	int* PlaceLabels(const CRect& rcBounds, Gdiplus::Graphics* graphics, bool layerBuffer);
 	bool HasImages();
 	bool HasHotTracking();
 	bool HasVolatileShapefiles();
@@ -1158,6 +1166,7 @@ private:
 	void SetTempExtents(double left, double right, double top, double bottom, long Width, long Height);
 	void RestoreExtents();
 	void SetNewExtentsWithForcedZooming(Extent ext, bool zoomIn);
+	void SetNewExtentsWithZoomOut(Extent ext);
 	IExtents* GetMaxExtents();
 	DOUBLE DegreesPerMapUnit();
 	double UnitsPerPixel();
@@ -1360,7 +1369,8 @@ public:
 	virtual void _FireValidateShape(const LONG layerHandle, IDispatch* shape, tkMwBoolean* cancel) { FireValidateShape(layerHandle, shape, cancel); }
 	virtual void _FireAfterShapeEdit(const tkUndoOperation newShape, const LONG layerHandle, const LONG shapeIndex) { FireAfterShapeEdit(newShape, layerHandle, shapeIndex); }
 	virtual void _FireShapeValidationFailed(const LPCTSTR errorMessage) { FireShapeValidationFailed(errorMessage); }
-	virtual void _FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY) { FireBeforeVertexDigitized(pointX, pointY); }
+	virtual void _FireBeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY, long selectedVertex) { FireBeforeVertexDigitized(pointX, pointY, selectedVertex); }
+	virtual void _FireVertexAdded(DOUBLE* pointX, DOUBLE* pointY) { FireVertexAdded(pointX, pointY); }
 	virtual void _ZoomToEditor() { ZoomToEditor(); }
 	virtual void _SetMapCursor(const tkCursorMode mode, bool clearEditor) { UpdateCursor(mode, false); }
 	virtual void _Redraw(const tkRedrawType redrawType, const bool updateTiles, const bool atOnce) { RedrawCore(redrawType, atOnce, updateTiles); };

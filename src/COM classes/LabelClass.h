@@ -105,6 +105,10 @@ public:
 
 	STDMETHOD(get_ScreenExtents)(IExtents** retval);
 
+	STDMETHOD(get_MapExtents)(double inversePixelPerProjection, IExtents** retVal);
+
+	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR* pVal);
+	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
 private:
 	CLabelInfo* _label;
 	bool _canDelete;		// CLabelInfo can be allocated locally, then we need to delete it

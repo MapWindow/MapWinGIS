@@ -3,6 +3,8 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	// NOTE: ClassWizard will add and remove enumeration elements here
 	//    DO NOT EDIT what you see in these blocks of generated code !
 	// **ClassWizard is a thing of the past... feel free to edit this code.
+	dispidGetDrawingLabelExtents = 270L,
+	dispidPlaceAllMapLabels = 269L,
     dispidShowCoordinatesBackground = 268L,
 	dispidSetLatitudeLongitude = 267L,
 	dispidStartNewBoundShapeEx = 266L,
@@ -19,7 +21,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	dispidZoomToNext = 255L,
 	dispidShowCoordinatesFormat = 254L,
 	dispidLayerExtents = 253L,
-	dispidCustomDrawingFlags = 252L,	
+	dispidCustomDrawingFlags = 252L,
 	dispidFocusRectangle = 251L,
 	dispidIdentifiedShapes = 250L,
 	
@@ -303,6 +305,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidLayerReprojectedIncomplete = 39L,
 	eventidBeforeVertexDigitized = 40L,
     eventidSnapPointRequested = 41L,
-    eventidSnapPointFound = 42L
+    eventidSnapPointFound = 42L,
+    eventidFireVertexAdded = 43L
 	//}}AFX_DISP_ID
 };

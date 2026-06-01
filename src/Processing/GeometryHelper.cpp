@@ -237,6 +237,21 @@ tkExtentsRelation GeometryHelper::RelateExtents(CRect& r1, CRect& r2)
 }
 
 //**************************************************************************
+//		PointInSegment()													
+//**************************************************************************
+bool GeometryHelper::PointInExtent(double xMin, double yMin, double xMax, double yMax, double ptX, double ptY)
+{
+	//xMin, yMin, xMax, yMax
+
+	if ((ptX < xMin && ptX < xMax) || (ptX > xMin && ptX > xMax) ||
+		(ptY < yMin && ptY < yMax) || (ptY > yMin && ptY > yMax))
+	{
+		return false;
+	}
+	return (xMin <= ptX && xMax >= ptX && xMax >= ptX && yMax >= ptY);
+}
+
+//**************************************************************************
 //		PointOnSegment()													
 //**************************************************************************
 bool GeometryHelper::PointOnSegment(double x1, double y1, double x2, double y2, double pntX, double pntY)

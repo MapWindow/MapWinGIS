@@ -242,6 +242,9 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idGdalUtils:
 			result = CoCreateInstance(CLSID_GdalUtils, NULL, CLSCTX_INPROC_SERVER, IID_IGdalUtils, (void**)&val);
 			break;
+		case tkInterface::idPlacedLabels:
+			result = CoCreateInstance(CLSID_PlacedLabels, NULL, CLSCTX_INPROC_SERVER, IID_IPlacedLabels, (void**)&val);
+			break;
 	}
 	*retVal = val ? (IDispatch*)val : NULL;
 	return result;

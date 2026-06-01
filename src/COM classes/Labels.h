@@ -26,6 +26,7 @@
 #pragma once
 #include "LabelOptions.h"
 #include "LabelCategory.h"
+#include <set>
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -163,6 +164,8 @@ public:
 
 	// selection
 	STDMETHOD(Select)(IExtents* BoundingBox, long Tolerance, SelectMode SelectMode, VARIANT* LabelIndices, VARIANT* PartIndices, VARIANT_BOOL* retval);
+
+	STDMETHOD(SelectNotDrawn)(IExtents* BoundingBox, VARIANT* LabelIndices, VARIANT* PartIndices, VARIANT_BOOL* retval);
 
 	// ------------------------------------------------------
 	// Class-specific properties
@@ -388,7 +391,8 @@ public:
 	STDMETHOD(get_LogScaleForSize)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_LogScaleForSize)(VARIANT_BOOL newVal);
 	STDMETHOD(UpdateSizeField)();
-	
+	STDMETHOD(get_LabelDrawnInMap)(long index, VARIANT_BOOL* pVal);
+
 private:
 	int _sourceField;
 
@@ -454,6 +458,7 @@ private:
 
 	tkTextRenderingHint _textRenderingHint;
 	VARIANT_BOOL _synchronized;
+	std::set<long> _drawnInMap;
 
 private:
 	inline void ErrorMessage(long errorCode);
@@ -489,7 +494,8 @@ public:
 	void LoadLblOptions(CPLXMLNode* node);
 
 	bool RecalculateFontSize();
-    
+
+	void AddDrawnLabel(long index);
 	
 };
 

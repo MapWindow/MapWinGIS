@@ -69,6 +69,7 @@ interface IFunction;
 interface IExpression;
 interface IWmsLayer;
 interface IGdalUtils;
+interface IPlacedLabels;
 
 /************************** tkWmsVersion Enumeration **********************/
 typedef
@@ -97,6 +98,21 @@ enum tkWmsBoundingBoxOrder
 	bboLongLat = 1,
 	bboLatLong = 2,
 } 	tkWmsBoundingBoxOrder;
+
+
+/************************** tkWmsTileSize Enumeration **********************/
+typedef
+[
+	uuid(5A91B5E6-A6BE-45F5-B2A1-B0ACC8F152BA),
+	helpstring("tkWmsTileSize"),
+]
+enum tkWmsTileSize
+{
+	sizeFullScreen = -100,
+	size256x256 = 256,
+	size512x512 = 512,
+	size1024x1024 = 1024,
+} 	tkWmsTileSize;
 
 /************************** tkCallbackVerbosity Enumeration **********************/
 typedef
@@ -621,6 +637,7 @@ enum tkAreaDisplayMode
 	admMetric = 0,
 	admHectars = 1,
 	admAmerican = 2,
+	admMetricMeters = 3,
 } tkAreaDisplayMode;
 
 /************************** tkCustomState Enumeration **********************/
@@ -1193,7 +1210,9 @@ enum tkInterface
 	idFunction = 50,
 	idExpression = 51,
 	idWmsLayer = 52,
-	idGdalUtils = 53
+	idGdalUtils = 53,
+	idPlacedLabels = 54
+
 } tkInterface;
 
 typedef
@@ -3717,6 +3736,10 @@ interface IShapeEditor : IDispatch {
 	[id(62)] HRESULT AddPoint([in] IPoint* newPoint, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(63)] HRESULT SnapMode([out, retval] tkSnapMode* pVal);
 	[propput, id(63)] HRESULT SnapMode([in] tkSnapMode newVal);
+	[propget, id(64)] HRESULT EnableInsertVertex([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(64)] HRESULT EnableInsertVertex([in] VARIANT_BOOL newVal);
+	[propget, id(65)] HRESULT AllowSaveInvalidGeometry([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(65)] HRESULT AllowSaveInvalidGeometry([in] VARIANT_BOOL newVal);
 };
 
 
@@ -5054,6 +5077,12 @@ interface ILabel : IDispatch {
 
 	[propget, id(10), helpstring("property OffsetY")] HRESULT OffsetY([out, retval] double* retval);
 	[propput, id(10), helpstring("property OffsetY")] HRESULT OffsetY([in] double newVal);
+
+	[propget, id(11), helpstring("property MapExtents")] HRESULT MapExtents(double inversePixelPerProjection, [out, retval] IExtents** retval);
+
+	[propget, id(12)] HRESULT Key([out, retval]BSTR* retVal);
+	[propput, id(12)] HRESULT Key([in]BSTR newVal);
+
 };
 
 // ***********************************  Labels Interface  ******************************* 
@@ -5329,6 +5358,15 @@ interface ILabels : IDispatch {
 	[propget, id(107), helpstring("property OffsetYField")] HRESULT OffsetYField([out, retval] long* retval);
 	[propput, id(107), helpstring("property OffsetYField")] HRESULT OffsetYField([in] long newVal);
 	[id(108)] HRESULT ApplyLabelExpression();
+	[propget, id(109), helpstring("property LabelDrawnInMap")] HRESULT LabelDrawnInMap([in]long Index, [out, retval] VARIANT_BOOL* pVal);
+
+	midl_pragma warning(disable:2402)
+		// function effectively requires the LabelIndices and PartIndices parameters, 
+		// they were made optional only because they follow other optional parameters, 
+		// and cannot reasonably be changed without breaking the interface.
+		// this pragma disables the warning only for this (and similar) functions.
+		[id(110), helpstring("method SelectNotDrawn")] HRESULT SelectNotDrawn([in]IExtents* BoundingBox, [in, optional, out]VARIANT* LabelIndices, [in, optional, out]VARIANT* PartIndices, [out, retval]VARIANT_BOOL* retval);
+	midl_pragma warning(enable:2402)
 };
 
 // *******************************  LabelCategory Interface  *****************************
@@ -6725,6 +6763,10 @@ interface IWmsLayer : IDispatch {
 	[propput, id(27)] HRESULT Version([in] tkWmsVersion newVal);
 	[propget, id(28)] HRESULT Styles([out, retval] BSTR* pVal);
 	[propput, id(28)] HRESULT Styles([in] BSTR newVal);
+	[propget, id(29)] HRESULT BoundingBoxOrder([out, retval] tkWmsBoundingBoxOrder* pVal);
+	[propput, id(29)] HRESULT BoundingBoxOrder([in] tkWmsBoundingBoxOrder newVal);
+	[propget, id(30)] HRESULT TileSize([out, retval] LONG* pVal);
+	[propput, id(30)] HRESULT TileSize([in] LONG newVal);
 };
 
 /****************************  Gdal Utils Interface ***********************/
@@ -6752,7 +6794,20 @@ interface IGdalUtils : IDispatch {
 }
 
 [
-	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(5.4),
+	object,
+	uuid(399E8B54-795C-4C7F-84CF-4B127DD4DF5B),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IPlacedLabels : IDispatch {
+	[propget, id(1), helpstring("property NumIndex")] HRESULT NumIndex([out, retval] long* pVal);
+	[id(2), helpstring("method GetIndexes")] HRESULT GetIndexes([out, retval] SAFEARRAY(long)* retval);
+	[id(3), helpstring("method SetVector")] HRESULT SetVector([in] int* indexes, int length);
+};
+
+[
+	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(5.5),
 	helpfile("MapWinGIS.chm"),
 	helpstring("MapWinGIS Components"),
 	control
@@ -6774,7 +6829,7 @@ library MapWinGIS
 	//  Primary dispatch interface for CMap
 
 	[uuid(1D077739-E866-46A0-B256-8AECC04F2312),
-		helpstring("Dispatch interface for MapWinGIS Map Control"), version(5.4), hidden
+		helpstring("Dispatch interface for MapWinGIS Map Control"), version(5.5), hidden
 	]
 	dispinterface _DMap
 	{
@@ -6839,13 +6894,16 @@ library MapWinGIS
 			//[id(17), propput, nonbrowsable] void Extents(IExtents* nNewValue);
 			//[id(17), propget, nonbrowsable] IExtents* Extents();
 
-#define REDRAW_API		
-#ifdef REDRAW_API	
+#define REDRAW_API
+#ifdef REDRAW_API
 			[id(21)] void Redraw();
 			[id(42)] void LockWindow(tkLockMode LockMode);
 			[id(220)] void Redraw2(tkRedrawType redrawType);
 			[id(260)] void Redraw3(tkRedrawType redrawType, VARIANT_BOOL reloadTiles);
-#endif			
+			[id(269)] IPlacedLabels* PlaceAllMapLabels(long LayerHandle);
+			[id(270)] IExtents* GetDrawingLabelExtents(VARIANT* values);
+				//long LayerHandle, long index);
+#endif
 
 #define COORDINATES_API
 #ifdef COORDINATES_API
@@ -7297,9 +7355,10 @@ library MapWinGIS
 			[id(37)] void BeforeLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
 			[id(38)] void AfterLayers(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
 			[id(39)] void LayerReprojectedIncomplete(LONG LayerHandle, Long NumReprojected, Long NumShapes);
-			[id(40)] void BeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY);
+			[id(40)] void BeforeVertexDigitized(DOUBLE* pointX, DOUBLE* pointY, LONG selectedVertex);
 			[id(41)] void SnapPointRequested(DOUBLE pointX, DOUBLE pointY, DOUBLE* snappedX, DOUBLE* snappedY, tkMwBoolean* isFound, tkMwBoolean* isFinal);
 			[id(42)] void SnapPointFound(DOUBLE pointX, DOUBLE pointY, DOUBLE* snappedX, DOUBLE* snappedY);
+			[id(43)] void VertexAdded(DOUBLE pointX, DOUBLE pointY);
 			//}}AFX_ODL_EVENT
 
 	};
@@ -7706,6 +7765,7 @@ library MapWinGIS
 	{
 		[default] interface IIdentifier;
 	};
+
 	[
 		uuid(85EA46DF-FCB8-44A2-BFB0-2F5B0162768D)
 	]
@@ -7784,5 +7844,13 @@ library MapWinGIS
 	coclass GdalUtils
 	{
 		[default] interface IGdalUtils;
+	};
+
+	[
+		uuid(92A8E8D4-617E-47A4-8180-82E24AD3C984)
+	]
+	coclass PlacedLabels
+	{
+		[default] interface IPlacedLabels;
 	};
 };

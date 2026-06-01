@@ -93,3 +93,62 @@ STDMETHODIMP CLabelClass::get_ScreenExtents(IExtents** retval)
 	}
 	return S_OK;
 }
+
+
+// ***********************************************************
+//		MapExtents
+// ***********************************************************
+STDMETHODIMP CLabelClass::get_MapExtents(double inversePixelPerProjection, IExtents** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	IExtents* ext = nullptr;
+	if(_label->horizontalFrame)
+	{
+		ComHelper::CreateExtents(&ext);
+
+		auto width2 = (_label->horizontalFrame->right - _label->horizontalFrame->left) * inversePixelPerProjection / 2.0;
+		auto height2 = (_label->horizontalFrame->bottom - _label->horizontalFrame->top) * inversePixelPerProjection / 2.0;
+		ext->SetBounds(_label->x - width2,
+					   _label->y - height2,
+					   0.0,
+					   _label->x + width2,
+					   _label->y + height2,
+					   0.0);
+		*retVal = ext;
+	}
+	else if(_label->rotatedFrame)
+	{
+		ComHelper::CreateExtents(&ext);
+		CRect* rect = _label->rotatedFrame->BoundingBox();
+		auto width2 = (rect->right - rect->left) * inversePixelPerProjection / 2.0;
+		auto height2 = (rect->bottom - rect->top) * inversePixelPerProjection / 2.0;
+		ext->SetBounds(_label->x - width2,
+			_label->y - height2,
+			0.0,
+			_label->x + width2,
+			_label->y + height2,
+			0.0);
+		*retVal = ext;
+	}
+	else
+		*retVal = nullptr;
+	return S_OK;
+}
+
+// ************************************************************
+//		get/put_Key()
+// ************************************************************
+STDMETHODIMP CLabelClass::get_Key(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = OLE2BSTR(_label->key);
+	return S_OK;
+}
+
+STDMETHODIMP CLabelClass::put_Key(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	SysFreeString(_label->key);
+	_label->key = OLE2BSTR(newVal);
+	return S_OK;
+}

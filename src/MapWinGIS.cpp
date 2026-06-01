@@ -31,12 +31,15 @@ static char THIS_FILE[] = __FILE__;
 
 const GUID CDECL BASED_CODE _tlid = { 0xc368d713, 0xcc5f, 0x40ed, { 0x9f, 0x53, 0xf8, 0x4f, 0xe1, 0x97, 0xb9, 0x6a } };
 const WORD _wVerMajor = 5;
-const WORD _wVerMinor = 4;
+const WORD _wVerMinor = 5;
 
 CMapWinGISApp NEAR theApp;
 CMapWinGISModule _AtlModule;    // this one is from ATL7 (used by all ATL co-classes)
 CComModule _Module;				// this one is from ATL3 (used for ShapefileColorScheme and ShapefileColorBreak)
 GlobalClassFactory m_factory;	// make sure that this one is initialized after the _Module above
+#if DEBUG_ALLOCATED_OBJECTS
+bool _break;
+#endif
 
 // ******************************************************
 // CMapWinGISApp::InitInstance - DLL initialization

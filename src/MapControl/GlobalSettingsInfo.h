@@ -108,7 +108,7 @@ struct GlobalSettingsInfo
         cacheDbfRecords = true;
         overrideLocalCallback = true;
         proxyAuthentication = asBasic;
-		httpUserAgent = "MapWinGIS/5.4"; // TODO Use VERSION Macros
+		httpUserAgent = "MapWinGIS/5.5"; // TODO Use VERSION Macros
         hereAppId = "";
         hereAppCode = "";
         bingApiKey = "";
@@ -180,7 +180,7 @@ struct GlobalSettingsInfo
         shortUnitStrings[lsMeters] = L"m";
         shortUnitStrings[lsKilometers] = L"km";
         shortUnitStrings[lsSquareKilometers] = L"sq.km";
-        shortUnitStrings[lsSquareMeters] = L"sq.m";
+        shortUnitStrings[lsSquareMeters] = L"m²";
         shortUnitStrings[lsMapUnits] = L"mu";
         shortUnitStrings[lsSquareMapUnits] = L"sq.mu";
         shortUnitStrings[lsMiles] = L"mi";

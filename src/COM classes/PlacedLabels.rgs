@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.PlacedLabels.1 = s 'PlacedLabels Class'
+	{
+		CLSID = s '{92A8E8D4-617E-47A4-8180-82E24AD3C984}'
+	}
+	MapWinGIS.PlacedLabels = s 'PlacedLabels Class'
+	{
+		CLSID = s '{92A8E8D4-617E-47A4-8180-82E24AD3C984}'
+		CurVer = s 'MapWinGIS.PlacedLabels.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {92A8E8D4-617E-47A4-8180-82E24AD3C984} = s 'PlacedLabels Class'
+		{
+			ProgID = s 'MapWinGIS.PlacedLabels.1'
+			VersionIndependentProgID = s 'MapWinGIS.PlacedLabels'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

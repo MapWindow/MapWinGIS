@@ -11,7 +11,7 @@
 #include "GlobalClassFactory.h"
 
 #define VERSION_MAJOR 5
-#define VERSION_MINOR 4
+#define VERSION_MINOR 5
 
 extern const GUID CDECL _tlid;
 extern const WORD _wVerMajor;
@@ -31,6 +31,9 @@ private:
 };
 
 extern GlobalClassFactory m_factory;
+#if DEBUG_ALLOCATED_OBJECTS
+extern bool _break;
+#endif
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
