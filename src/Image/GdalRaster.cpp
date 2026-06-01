@@ -362,6 +362,19 @@ bool GdalRaster::ReadGeoTransform()
 	double adfGeoTransform[6];
 	bool success = _dataset->GetGeoTransform(adfGeoTransform) == CE_None;
 
+	if (!success) {
+		// IK-82, try to convert from GCP to GeoTransform, with looser tolerances (ApproxOK = True) (if we have GCP)
+		auto count = _dataset->GetGCPCount();
+		if (count > 0)
+		{
+			auto gcps = _dataset->GetGCPs();
+			success = CPL_TO_BOOL(GDALGCPsToGeoTransform(count, gcps, adfGeoTransform, TRUE));
+			CString sOutput;
+			sOutput.AppendFormat("GDALGCPsToGeoTransform(%d,..,TRUE): return: %s\r\n", count, success ? "true" : "false");
+			::OutputDebugStringA(sOutput.GetBuffer());
+		}
+	}
+
 	m_globalSettings.SetGdalUtf8(false);
 
 	if (!success) return false;

@@ -120,7 +120,7 @@ OGRGeometry* OgrConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryType for
 	long beg_part, end_part;
 	ShpfileType shptype;
 	double x,y,z,m;
-	
+
 	shp->get_ShapeType(&shptype);
 	shp->get_NumParts(&numParts);
 	shp->get_NumPoints(&numPoints);
