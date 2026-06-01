@@ -9,5 +9,6 @@ class LayerDrawer
 public:
 	static void DrawCharts(Layer* layer, CChartDrawer& drawer, tkVerticalPosition position);
 	static void DrawLabels(Layer* layer, CLabelDrawer& drawer, tkVerticalPosition position);
+	static int* PlaceLabels(Layer* layer, CLabelDrawer& drawer, tkVerticalPosition position);
 };
 

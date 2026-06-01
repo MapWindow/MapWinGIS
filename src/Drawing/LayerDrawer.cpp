@@ -45,3 +45,24 @@ void LayerDrawer::DrawLabels(Layer* layer, CLabelDrawer& drawer, tkVerticalPosit
 	}
 }
 
+// ****************************************************************
+//		PlaceLabels()
+// ****************************************************************
+int* LayerDrawer::PlaceLabels(Layer* layer, CLabelDrawer& drawer, tkVerticalPosition position)
+{
+	if (!layer) return NULL;
+	int* ret = NULL;
+	ILabels* labels = layer->get_Labels();
+	if (labels != NULL)
+	{
+		tkVerticalPosition vertPos;
+		labels->get_VerticalPosition(&vertPos);
+		if (vertPos == position)
+		{
+			ret = drawer.PlaceLabels(labels);
+		}
+		labels->Release();
+		labels = NULL;
+	}
+	return ret;
+}
