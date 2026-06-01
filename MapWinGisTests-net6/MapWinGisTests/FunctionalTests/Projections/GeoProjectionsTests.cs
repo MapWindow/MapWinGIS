@@ -72,8 +72,10 @@ public class GeoProjectionsTests
     [Fact]
     public void IsSameTest()
     {
-        // Setup:
-        var geoProjection3857 = new GeoProjection();
+	    System.Diagnostics.Debug.WriteLine("IsSameTest() start");
+
+		// Setup:
+		var geoProjection3857 = new GeoProjection();
         geoProjection3857.ShouldNotBeNull();
 
         var geoProjection28992 = new GeoProjection();
@@ -113,7 +115,9 @@ public class GeoProjectionsTests
         geoProjection3857.IsSame[geoProjectionPrj].ShouldBeFalse("GeoProjections should not be the same.");
         geoProjection28992.IsSame[geoProjectionPrj].ShouldBeTrue("GeoProjections should be the same.");
         geoProjectionPrj.IsSame[geoProjection28992].ShouldBeTrue("GeoProjections should be the same.");
-    }
+
+        System.Diagnostics.Debug.WriteLine("IsSameTest() end");
+	}
 
     [Fact]
     public void ImportFromAutoDetectTest()

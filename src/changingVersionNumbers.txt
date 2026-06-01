@@ -1,5 +1,5 @@
 When releasing a new version version numbers need to be updated on several locations:
-MapWinGIS.rc lines: 115, 116, 134, 140  						 [5.4.0.0]
+MapWinGIS.rc lines: 115, 116, 134, 140  						 [5.4.0.4]
 MapWinGIS.cpp lines: 33, 34             						 [5.4]
 MapWinGIS.idl line: 6742 (helpfile("MapWinGIS.chm"))                                     [5.4]
                   , 6764 (helpstring("Dispatch interface for Map Control"))              [5.4]

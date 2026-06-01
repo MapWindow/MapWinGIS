@@ -13,12 +13,13 @@ public class UtilsProjectionTests
     [Fact]
     public void UtilsReprojectShapefileTest()
     {
-        // RD (Amersfoort, The Neterlands) to WGS84:
-        // https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=a325
-        // "centroide_rd": "POINT(187816.756 433912.801)",
-        // "centroide_ll": "POINT(5.86394184 51.89276528)"
+	    System.Diagnostics.Debug.WriteLine("UtilsReprojectShapefileTest() start");
+		// RD (Amersfoort, The Neterlands) to WGS84:
+		// https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=a325
+		// "centroide_rd": "POINT(187816.756 433912.801)",
+		// "centroide_ll": "POINT(5.86394184 51.89276528)"
 
-        UtilsReprojectPointShapefile(187816.756, 433912.801, 5.86394184, 51.89276528, 0.0000001, 28992, 4326);
+		UtilsReprojectPointShapefile(187816.756, 433912.801, 5.86394184, 51.89276528, 0.0000001, 28992, 4326);
         // The other way round:
         UtilsReprojectPointShapefile(5.86394184, 51.89276528, 187816.756, 433912.801, 0.05, 4326, 28992);
 
@@ -26,6 +27,7 @@ public class UtilsProjectionTests
         UtilsReprojectPointShapefile(4.5703125, 51.944265, 4.5706292, 51.945227, 0.000001, 4258, 4289);
         // Swap:
         UtilsReprojectPointShapefile(4.5706292, 51.945227, 4.5703125, 51.944265, 0.000001, 4289, 4258);
+        System.Diagnostics.Debug.WriteLine("UtilsReprojectShapefileTest() end");
     }
 
     private void UtilsReprojectPointShapefile(double srcX, double srcY, double dstX, double dstY, double tolerance, int srcEpsgCode, int dstEpsgCode)

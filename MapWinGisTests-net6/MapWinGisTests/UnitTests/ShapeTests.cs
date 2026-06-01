@@ -1,4 +1,7 @@
-﻿namespace MapWinGisTests.UnitTests;
+﻿using System.Management;
+using Shouldly;
+
+namespace MapWinGisTests.UnitTests;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
 public class ShapeTests
@@ -99,80 +102,403 @@ public class ShapeTests
     [Fact(Skip = "Unit test is not yet implemented")]
     public void ShapeGlobalCallbackTest() { }
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeExtentsTest() { }
+	[Fact]
+	public void ShapeExtentsTest()
+    {
+	    _firstShapePoint.ShouldNotBeNull();
+		var ext = _firstShapePoint.Extents;
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeCentroidTest() { }
+	    var xMin = double.MaxValue;
+        var xMax = double.MinValue;
+        var yMin = double.MaxValue;
+        var yMax = double.MinValue;
+	    for(var i = 0; i < _firstShapePoint.NumPoints; i++)
+	    {
+		    var pt = _firstShapePoint.Point[i];
+            if(pt.x < xMin)
+                xMin = pt.x;
+            if(pt.x > xMax)
+                xMax = pt.x;
+            if(pt.y < yMin)
+                yMin = pt.y;
+            if(pt.y > yMax)
+                yMax = pt.y;
+	    }
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeLengthTest() { }
+        ext.xMin.ShouldBe(xMin);
+        ext.xMax.ShouldBe(xMax);
+        ext.yMin.ShouldBe(yMin);
+        ext.yMax.ShouldBe(yMax);
+	}
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapePerimeterTest() { }
+    [Fact]
+	public void ShapeCentroidTest()
+	{
+		var sfPolygon = Helpers.CreateTestPolygonShapefile();
+		sfPolygon.ShouldNotBeNull();
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeAreaTest() { }
+		var shape = sfPolygon.Shape[0];
+		var centroid = shape.Centroid;
+		centroid.ShouldNotBeNull();
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeIsValidTest() { }
+		var centroidShp = Helpers.MakeShape(centroid);
+		shape.Contains(centroidShp).ShouldBeTrue();
+	}
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeXyTest() { }
+    [Fact]
+	public void ShapeLengthTest()
+	{
+		var sfPolyline = Helpers.CreateTestPolylineShapefile();
+		sfPolyline.ShouldNotBeNull();
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapePartIsClockWiseTest() { }
+		var expectedLength = 828.9983624899301;
+		var shape = sfPolyline.Shape[0];
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeCenterTest() { }
+		((shape.Length - expectedLength) < 0.000001).ShouldBeTrue();
+	}
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeEndOfPartTest() { }
+	[Fact]
+	public void ShapePerimeterTest()
+	{
+		var sfPolygon = Helpers.CreateTestPolygonShapefile();
+		sfPolygon.ShouldNotBeNull();
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapePartAsShapeTest() { }
+		var expectedPerimeter = 828.9983624899301;
+		var shape = sfPolygon.Shape[0];
+		((shape.Perimeter - expectedPerimeter) < 0.000001).ShouldBeTrue();
+	}
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeIsValidReasonTest() { }
+    [Fact]
+	public void ShapeAreaTest()
+	{
+		var sfPolygon = Helpers.CreateTestPolygonShapefile();
+		sfPolygon.ShouldNotBeNull();
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeInteriorPointTest() { }
+		var expectedArea = 41521.544653236866;
+		var shape = sfPolygon.Shape[0];
+        var diff = Math.Abs(shape.Area - expectedArea);
+        diff.ShouldBeLessThan(0.0001);
+	}
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeShapeType2DTest() { }
+	[Fact]
+	public void ShapeIsValidTest()
+	{
+		var sfPolygon = Helpers.CreateTestPolygonShapefile();
+		sfPolygon.ShouldNotBeNull();
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeIsEmptyTest() { }
+		var shape = sfPolygon.Shape[0];
+        shape.IsValid.ShouldBeTrue();
+	}
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapePut_ZTest() { }
+	[Fact]
+	public void ShapeXyTest()
+	{
+		var sfPolygon = Helpers.CreateTestPolygonShapefile();
+		sfPolygon.ShouldNotBeNull();
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeMTest() { }
+		var shape = sfPolygon.Shape[0];
+		var pt = shape.Point[0];
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeZTest() { }
+		double x = 0, y = 0;
+		shape.get_XY(0, ref x, ref y);
+		x.ShouldBe(pt.x);
+		y.ShouldBe(pt.y);
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeBufferWithParamsTest() { }
+		x += 15;
+		y += 10;
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeMoveTest() { }
+		shape.put_XY(0, x, y);
+		pt = shape.Point[0];
+		x.ShouldBe(pt.x);
+		y.ShouldBe(pt.y);
+	}
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeRotateTest() { }
+    [Fact]
+	public void ShapePartIsClockWiseTest()
+	{
+		var sfPolygon = Helpers.CreateTestPolygonShapefile();
+		sfPolygon.ShouldNotBeNull();
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeSplitByPolylineTest() { }
+		var shape = sfPolygon.Shape[0];
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeClearTest() { }
+		shape.PartIsClockWise[0].ShouldBeTrue();
+	}
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeFixUp2Test() { }
+    [Fact]
+    public void ShapeCenterTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeInterpolatePointTest() { }
+	    var shape = sfPolygon.Shape[0];
+
+	    var center = shape.Center;
+		center.ShouldNotBeNull();
+
+		var centerShp = Helpers.MakeShape(center);
+		shape.Contains(centerShp).ShouldBeTrue();
+	}
+
+    [Fact]
+    public void ShapeEndOfPartTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+        shape.EndOfPart[0].ShouldBeGreaterThan(0);
+	}
+
+    [Fact]
+    public void ShapePartAsShapeTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+	    var partShape = shape.PartAsShape[0];
+        partShape.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ShapeIsValidReasonTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+	    shape.DeletePoint(shape.NumPoints - 1);
+        shape.IsValid.ShouldBeFalse();
+        if(!shape.IsValid)
+	        shape.IsValidReason.ShouldNotBeEmpty();
+	}
+
+    [Fact]
+    public void ShapeInteriorPointTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+	    var x = (shape.Extents.xMax - shape.Extents.xMin) / 2.0 + shape.Extents.xMin;
+        var y = (shape.Extents.yMax - shape.Extents.yMin) / 2.0 + shape.Extents.yMin;
+
+        var interiorPoint = shape.InteriorPoint;
+        interiorPoint.ShouldNotBeNull();
+        (Math.Abs(interiorPoint.x - x) < 10).ShouldBeTrue();
+        (Math.Abs(interiorPoint.y - y) < 10).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void ShapeShapeType2DTest()
+    {
+	    var shape = Helpers.MakeShape(ShpfileType.SHP_POLYLINEZ);
+        shape.ShapeType2D.ShouldBe(ShpfileType.SHP_POLYLINE);
+
+        shape = Helpers.MakeShape(ShpfileType.SHP_POLYGONZ);
+        shape.ShapeType2D.ShouldBe(ShpfileType.SHP_POLYGON);
+
+        shape = Helpers.MakeShape(ShpfileType.SHP_POINTZ);
+        shape.ShapeType2D.ShouldBe(ShpfileType.SHP_POINT);
+	}
+
+    [Fact]
+    public void ShapeIsEmptyTest()
+    {
+	    var shp = Helpers.MakeShapefile(ShpfileType.SHP_POLYLINEZ);
+        shp.ShouldNotBeNull();
+
+        var shape = Helpers.MakeShape(ShpfileType.SHP_POLYLINEZ);
+		shape.IsEmpty.ShouldBeTrue();
+
+        var sfPolygon = Helpers.CreateTestPolygonShapefile();
+        sfPolygon.ShouldNotBeNull();
+        shape = sfPolygon.Shape[0];
+        shape.IsEmpty.ShouldBeFalse();
+	}
+
+    [Fact]
+    public void ShapePut_ZTest()
+    {
+		Shape shape = new ShapeClass();
+		shape.ShapeType = ShpfileType.SHP_POINTZ;
+		shape.AddPoint(100, 100);
+
+		var z = 3.14;
+		shape.put_Z(0, z).ShouldBeTrue();
+
+		shape.get_Z(0, out var zValue);
+		zValue.ShouldBe(z);
+    }
+
+    [Fact]
+    public void ShapeMTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+
+	    var m = 3.1415;
+	    shape.put_M(0, m).ShouldBeTrue();
+        shape.get_M(0, out var mValue).ShouldBeTrue();
+        mValue.ShouldBe(m);
+    }
+
+    [Fact]
+    public void ShapeZTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+
+	    var z = 3.1415;
+	    shape.put_Z(0, z).ShouldBeTrue();
+	    shape.get_Z(0, out var zValue).ShouldBeTrue();
+	    zValue.ShouldBe(z);
+	}
+
+    [Fact]
+    public void ShapeBufferWithParamsTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+	    var dist = 10.0;
+	    var newShape = shape.BufferWithParams(dist, 30, false, tkBufferCap.bcROUND, tkBufferJoin.bjROUND, 5.0);
+        newShape.ShouldNotBeNull();
+        (shape.Area < newShape.Area).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void ShapeMoveTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+	    var xCenter = shape.Center.x;
+        var yCenter = shape.Center.y;
+
+	    var xOffset = 15;
+	    var yOffset = 20;
+        shape.Move(xOffset, yOffset);
+
+        var center = shape.Center;
+        var xDiff = center.x - xCenter;
+        var yDiff = center.y - yCenter;
+        xDiff.ShouldBe(xOffset);
+        yDiff.ShouldBe(yOffset);
+	}
+
+    [Fact]
+    public void ShapeRotateTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+	    var orgShape = shape.Clone();
+
+	    var center = shape.Center;
+        shape.Rotate(center.x, center.y, 360);
+
+        shape.Area.ShouldBe(orgShape.Area);
+        shape.NumPoints.ShouldBe(orgShape.NumPoints);
+
+		for (var i = 0; i < shape.NumPoints; i++)
+        {
+			var pt0 = orgShape.Point[i];
+			var pt1 = shape.Point[i];
+			pt0.ShouldNotBeNull();
+			pt1.ShouldNotBeNull();
+			pt0.x.ShouldBe(pt1.x);
+			pt0.y.ShouldBe(pt1.y);
+		}
+	}
+
+    [Fact]
+    public void ShapeSplitByPolylineTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+
+	    var polyline = Helpers.MakeShape(ShpfileType.SHP_POLYLINE);
+        polyline.ShouldNotBeNull();
+        var wkt = "LineString (330431.80617637105751783 5914860.0969890458509326, 330766.5170847776462324 5914971.03695115447044373, 330766.5170847776462324 5914971.03695115447044373)";
+        polyline.ImportFromWKT(wkt).ShouldBeTrue();
+
+		object result = null;
+		shape.SplitByPolyline(polyline, ref result).ShouldBeTrue();
+
+        result.ShouldBeOfType(typeof(object[]));
+        var array = result as object[];
+        array.ShouldNotBeNull();
+        array.Length.ShouldBe(2);
+
+		IShape shape0 = array[0] as Shape;
+		shape0.ShouldNotBeNull();
+        shape0.IsValid.ShouldBeTrue();
+
+		IShape shape1 = array[1] as Shape;
+		shape1.ShouldNotBeNull();
+		shape1.IsValid.ShouldBeTrue();
+
+		var diff = Math.Abs((shape0.Area + shape1.Area) - shape.Area);
+        diff.ShouldBeLessThan(0.001);
+    }
+
+    [Fact]
+    public void ShapeClearTest()
+    {
+	    var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    sfPolygon.ShouldNotBeNull();
+
+	    var shape = sfPolygon.Shape[0];
+        shape.ShouldNotBeNull();
+        shape.IsEmpty.ShouldBeFalse();
+
+        shape.Clear();
+        shape.IsEmpty.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ShapeFixUp2Test()
+	{
+		var sfPolygon = Helpers.CreateTestPolygonShapefile();
+		sfPolygon.ShouldNotBeNull();
+
+		var shape = sfPolygon.Shape[0];
+		var newShape = shape.FixUp2(tkUnitsOfMeasure.umMeters);
+		newShape.ShouldNotBeNull();
+
+		shape.DeletePoint(shape.NumPoints - 1);
+		shape.IsValid.ShouldBeFalse();
+
+		newShape = shape.FixUp2(tkUnitsOfMeasure.umMeters);
+		newShape.ShouldNotBeNull();
+		newShape.IsValid.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void ShapeInterpolatePointTest()
+	{
+		var sfPolyline = Helpers.CreateTestPolylineShapefile();
+		sfPolyline.ShouldNotBeNull();
+
+		var shape = sfPolyline.Shape[0];
+		var pt = shape.InterpolatePoint(shape.Point[0], 0.5);
+		pt.ShouldNotBeNull();
+
+		var expectedX = 330696.21521950705;
+		var expectedY = 5914895.72546695;
+		ShouldBeExtensions.ShouldBeEqualWithin(pt.x, expectedX, 0.0001);
+		ShouldBeExtensions.ShouldBeEqualWithin(pt.y, expectedY, 0.0001);
+	}
 
     [Fact(Skip = "Unit test is not yet implemented")]
     public void ShapeProjectDistanceToTest() { }

@@ -2,6 +2,7 @@
 //File name: Utils_OGR.cpp
 //Description: Implementation of CUtils.
 //********************************************************************************************************
+#include "stdafx.h"
 #include <comdef.h>
 #include <stdafx.h>
 #include "cpl_conv.h"
@@ -16,6 +17,7 @@
 #include "vrtdataset.h"
 
 #pragma warning(disable:4996)
+#define DISABLE_OGR2OGR 1
 
 int CPL_STDCALL GDALProgressCallback(double dfComplete, const char* pszMessage, void* pData);
 
@@ -47,6 +49,7 @@ typedef struct
 } AssociatedLayers;
 
 
+#if GDAL_VERSION_MAJOR >= 3
 static int TranslateLayer(TargetLayerInfo* psInfo,
 	GDALDataset* poSrcDS,
 	OGRLayer* poSrcLayer,
@@ -54,9 +57,9 @@ static int TranslateLayer(TargetLayerInfo* psInfo,
 	int bTransform,
 	int bWrapDateline,
 	const char* pszDateLineOffset,
-	OGRSpatialReference* poOutputSRS,
+	const OGRSpatialReference* poOutputSRS,
 	int bNullifyOutputSRS,
-	OGRSpatialReference* poUserSourceSRS,
+	const OGRSpatialReference* poUserSourceSRS,
 	OGRCoordinateTransformation* poGCPCoordTrans,
 	int eGType,
 	int bPromoteToMulti,
@@ -71,7 +74,7 @@ static int TranslateLayer(TargetLayerInfo* psInfo,
 	GIntBig* pnReadFeatureCount,
 	GDALProgressFunc pfnProgress,
 	void* pProgressArg);
-
+#endif
 
 /* -------------------------------------------------------------------- */
 /*                  CheckDestDataSourceNameConsistency()                */
@@ -802,10 +805,10 @@ public:
 			poSRS->Dereference();
 	}
 
-	OGRSpatialReference* GetSourceCS() override { return poSRS; }
-	OGRSpatialReference* GetTargetCS() override { return poSRS; }
+	const OGRSpatialReference* GetSourceCS() const { return poSRS; }
+	const OGRSpatialReference* GetTargetCS() const { return poSRS; }
 
-	int Transform(int nCount,
+	int Transform(size_t nCount,
 		double* x, double* y, double* z,
 		double* /* t */,
 		int* pabSuccess) override
@@ -887,8 +890,8 @@ public:
 			poSRS->Dereference();
 	}
 
-	virtual OGRSpatialReference* GetSourceCS() { return poSRS; }
-	virtual OGRSpatialReference* GetTargetCS() { return poSRS; }
+	virtual const OGRSpatialReference* GetSourceCS() { return poSRS; }
+	virtual const OGRSpatialReference* GetTargetCS() { return poSRS; }
 
 	virtual int Transform(int nCount,
 		double* x, double* y, double* z) override
@@ -1053,8 +1056,8 @@ static TargetLayerInfo* SetupTargetLayer(CPL_UNUSED GDALDataset* poSrcDS,
 		}
 	}
 
-	OGRSpatialReference* poOutputSRS = poOutputSRSIn;
-	if (poOutputSRS == NULL && !bNullifyOutputSRS)
+	const OGRSpatialReference* poOutputSRS = poOutputSRSIn;
+	if (poOutputSRS == nullptr && !bNullifyOutputSRS)
 	{
 		if (nSrcGeomFieldCount == 1 || anRequestedGeomFields.size() == 0)
 			poOutputSRS = poSrcLayer->GetSpatialRef();
@@ -1572,6 +1575,7 @@ __declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalVector
 STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	BSTR bstrOptions, ICallback* cBack, VARIANT_BOOL* retval)
 {
+#if !DISABLE_OGR2OGR
 	USES_CONVERSION;
 
 	struct CallbackParams params(GetCallback(), "Converting");
@@ -3062,6 +3066,10 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	* retval = nRetCode == 0 ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return ResetConfigOptions(tkNO_ERROR);
+#else
+	*retval = VARIANT_FALSE;
+	return 0;
+#endif
 }
 
 /************************************************************************/
@@ -3165,19 +3173,19 @@ public:
 		return new CompositeCT(*this);
 	}
 
-	OGRSpatialReference* GetSourceCS() override
+	const OGRSpatialReference* GetSourceCS() const override
 	{
 		return poCT1 ? poCT1->GetSourceCS() :
 			poCT2 ? poCT2->GetSourceCS() : nullptr;
 	}
 
-	OGRSpatialReference* GetTargetCS() override
+	const OGRSpatialReference* GetTargetCS() const override
 	{
 		return poCT2 ? poCT2->GetTargetCS() :
 			poCT1 ? poCT1->GetTargetCS() : nullptr;
 	}
 
-	int Transform(int nCount,
+	int Transform(size_t nCount,
 		double* x, double* y, double* z,
 		double* t,
 		int* pabSuccess) override
@@ -3215,7 +3223,7 @@ public:
 	}
 
 
-	virtual OGRSpatialReference* GetSourceCS()
+	virtual const OGRSpatialReference* GetSourceCS()
 	{
 		return poCT1 ? poCT1->GetSourceCS() :
 			poCT2 ? poCT2->GetSourceCS() : NULL;
@@ -3261,9 +3269,9 @@ static int SetupCT(TargetLayerInfo* psInfo,
 	int bTransform,
 	int bWrapDateline,
 	const char* pszDateLineOffset,
-	OGRSpatialReference* poUserSourceSRS,
+	const OGRSpatialReference* poUserSourceSRS,
 	OGRFeature* poFeature,
-	OGRSpatialReference* poOutputSRS,
+	const OGRSpatialReference* poOutputSRS,
 	OGRCoordinateTransformation* poGCPCoordTrans)
 {
 	OGRLayer* poDstLayer = psInfo->poDstLayer;
@@ -3273,9 +3281,9 @@ static int SetupCT(TargetLayerInfo* psInfo,
 		/* -------------------------------------------------------------------- */
 		/*      Setup coordinate transformation if we need it.                  */
 		/* -------------------------------------------------------------------- */
-		OGRSpatialReference* poSourceSRS = NULL;
-		OGRCoordinateTransformation* poCT = NULL;
-		char** papszTransformOptions = NULL;
+		const OGRSpatialReference* poSourceSRS = nullptr;
+		OGRCoordinateTransformation* poCT = nullptr;
+		char** papszTransformOptions = nullptr;
 
 		int iSrcGeomField;
 		if (psInfo->iRequestedSrcGeomField >= 0)
@@ -3301,7 +3309,7 @@ static int SetupCT(TargetLayerInfo* psInfo,
 			if (psInfo->nFeaturesRead == 0)
 			{
 				poSourceSRS = poUserSourceSRS;
-				if (poSourceSRS == NULL)
+				if (poSourceSRS == nullptr)
 				{
 					if (iSrcGeomField > 0)
 						poSourceSRS = poSrcLayer->GetLayerDefn()->
@@ -3310,7 +3318,7 @@ static int SetupCT(TargetLayerInfo* psInfo,
 						poSourceSRS = poSrcLayer->GetSpatialRef();
 				}
 			}
-			if (poSourceSRS == NULL)
+			if (poSourceSRS == nullptr)
 			{
 				OGRGeometry* poSrcGeometry =
 					poFeature->GetGeomFieldRef(iSrcGeomField);
@@ -3422,7 +3430,7 @@ static int TranslateLayer(TargetLayerInfo* psInfo,
 	int bTransform,
 	int bWrapDateline,
 	const char* pszDateLineOffset,
-	OGRSpatialReference* poOutputSRS,
+	const OGRSpatialReference* poOutputSRS,
 	int bNullifyOutputSRS,
 	OGRSpatialReference* poUserSourceSRS,
 	OGRCoordinateTransformation* poGCPCoordTrans,

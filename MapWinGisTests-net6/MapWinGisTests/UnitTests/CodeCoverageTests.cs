@@ -12,7 +12,7 @@ public class CodeCoverageTests
         _testOutputHelper = testOutputHelper;
     }
 
-    [Fact(Skip = "Unit test is not yet implemented")]
+    //[Fact(Skip = "Unit test is not yet implemented")]
     public void CheckShapefileClass()
     {
         CheckTests(typeof(ShapefileClass), "Shapefile");

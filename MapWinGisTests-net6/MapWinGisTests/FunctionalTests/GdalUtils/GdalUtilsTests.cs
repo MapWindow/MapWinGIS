@@ -90,8 +90,12 @@ public class GdalUtilsTests : ICallback
 
     public void Error(string keyOfSender, string errorMsg)
     {
-        _testOutputHelper.WriteLine($"Error of {keyOfSender}: {errorMsg}");
-    }
+	    try {
+		    _testOutputHelper.WriteLine($"Error of {keyOfSender}: {errorMsg}");
+		} catch {
+		    // ignore
+	    }
+	}
 #pragma warning restore xUnit1013
     #endregion
 }

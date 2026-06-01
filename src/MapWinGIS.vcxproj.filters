@@ -1130,6 +1130,9 @@
     </ClCompile>
     <ClCompile Include="MapWinGIS.cpp" />
     <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="COM classes\PlacedLabels.cpp">
+      <Filter>COM classes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h">
@@ -1956,6 +1959,9 @@
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="_ITableEvents_CP.H" />
     <ClInclude Include="Control\DispIds.h" />
+    <ClInclude Include="COM classes\PlacedLabels.h">
+      <Filter>COM classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MapWinGIS.rc" />
@@ -2180,5 +2186,8 @@
     <None Include="MapWinGIS.def" />
     <None Include="MapWinGIS.rgs" />
     <None Include="ReadMe.txt" />
+    <None Include="COM classes\PlacedLabels.rgs">
+      <Filter>COM classes</Filter>
+    </None>
   </ItemGroup>
 </Project>
