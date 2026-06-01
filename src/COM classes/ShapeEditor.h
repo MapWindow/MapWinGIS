@@ -162,6 +162,7 @@ private:
 	double _snapTolerance;
 	tkLayerSelection _snapBehavior;
 	EditorBase* _activeShape;
+	bool _startedEditOnInvalidShape;
 	long _layerHandle;
 	long _shapeIndex;
 	long _lastErrorCode;
@@ -256,5 +257,10 @@ public:
 	STDMETHOD(put_ShowLength)(VARIANT_BOOL newVal);
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR state, VARIANT_BOOL* retVal);
+	STDMETHOD(get_EnableInsertVertex)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_EnableInsertVertex)(VARIANT_BOOL newVal);
+	STDMETHOD(get_AllowSaveInvalidGeometry)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_AllowSaveInvalidGeometry)(VARIANT_BOOL newVal);
+
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

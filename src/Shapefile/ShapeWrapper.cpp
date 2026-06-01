@@ -304,7 +304,7 @@ int CShapeWrapper::get_PartEndPoint(const int partIndex)
 	}
 	if (partIndex == gsl::narrow_cast<int>(_parts.size()) - 1)
 	{
-		return gsl::narrow_cast<int>(_parts.size()) - 1;
+		return gsl::narrow_cast<int>(_points.size()) - 1;
 	}
 	return _parts[partIndex + 1] - 1;
 }

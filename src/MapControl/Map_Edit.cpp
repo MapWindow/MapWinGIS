@@ -32,6 +32,9 @@ bool CMapView::HandleLButtonUpDragVertexOrShape(UINT nFlags)
 		bool shift = (nFlags & MK_SHIFT) != 0;
 		bool alt = GetKeyState(VK_MENU) < 0 ? true : false;
 
+		// dhe
+		alt = true;
+
 		if (SnappingIsOn(shift))
 		{
 			VARIANT_BOOL result = this->FindSnapPointCore(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
@@ -39,8 +42,11 @@ bool CMapView::HandleLButtonUpDragVertexOrShape(UINT nFlags)
 				return true;		// can't proceed without snapping in this mode
 		}
 
+		int selectedVertex;
+		auto ret = _shapeEditor->get_SelectedVertex(&selectedVertex);
+
 		if (alt) { // user wants to intercept coordinates and possibly modify them
-			this->FireBeforeVertexDigitized(&x2, &y2);
+			this->FireBeforeVertexDigitized(&x2, &y2, selectedVertex);
 		}
 
 		GetEditorBase()->MoveVertex(x2, y2);		// don't save state; it's already saved at the beginning of operation
@@ -88,8 +94,18 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 	// get Snap setting
 	_shapeEditor->get_SnapBehavior(&snapBehavior);
 
+#if DEBUG_ALLOCATED_OBJECTS
+	ComHelper::SetBreak(false);
+	auto preCount = gReferenceCounter.GetReferenceCount();
+#endif
 	double projX, projY;
 	VARIANT_BOOL snapped = FindSnapPointCore(x, y, &projX, &projY);
+#if DEBUG_ALLOCATED_OBJECTS
+	auto postCount = gReferenceCounter.GetReferenceCount();
+	if (preCount < postCount)
+		::OutputDebugStringA("Increased!");
+	ComHelper::SetBreak(false);
+#endif
 	if (!snapped) {
 		PixelToProjection(x, y, projX, projY);
 		GetEditorBase()->ClearSnapPoint();

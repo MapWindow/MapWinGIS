@@ -677,7 +677,7 @@ bool ActiveShape::HandlePointAdd(const double screenX, const double screenY, con
 		PixelToProj(screenX, screenY, projX, projY);
 	}
 
-	AddPoint(projX, projY, screenX, screenY);
+	AddPoint(projX, projY, 0.0, 0.0, screenX, screenY);
 
 	UpdatePolyCloseState(true, closePointIndex);
 
@@ -687,7 +687,7 @@ bool ActiveShape::HandlePointAdd(const double screenX, const double screenY, con
 // *******************************************************
 //		AddPoint()
 // *******************************************************
-void ActiveShape::AddPoint(const double xProj, const double yProj, const double xScreen, const double yScreen, const PointPart part)
+void ActiveShape::AddPoint(const double xProj, const double yProj, const double z, const double m, const double xScreen, const double yScreen, const PointPart part)
 {
 	ClearIfStopped();
 
@@ -697,6 +697,8 @@ void ActiveShape::AddPoint(const double xProj, const double yProj, const double 
 	MeasurePoint* pnt = new MeasurePoint();  // TODO: Fix compile warning
 	pnt->Proj.x = xProj;
 	pnt->Proj.y = yProj;
+	pnt->z = z;
+	pnt->m = m;
 	pnt->Part = part;
 	_points.push_back(pnt);
 
@@ -712,7 +714,7 @@ void ActiveShape::AddPoint(const double xProj, const double yProj)
 {
 	double xScreen, yScreen;
 	ProjToPixel(xProj, yProj, xScreen, yScreen);
-	AddPoint(xProj, yProj, xScreen, yScreen);
+	AddPoint(xProj, yProj, 0.0, 0.0, xScreen, yScreen);
 }
 
 // **************************************************************

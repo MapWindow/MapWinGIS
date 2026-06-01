@@ -53,6 +53,7 @@ public:
 		ShowLength = true;
 		ShowTotalLength = true;
 		ShowArea = true;
+		EnableInsertVertex = true;
 	};
 
 	virtual ~ActiveShape() {
@@ -117,6 +118,8 @@ public:
 	tkAreaDisplayMode AreaDisplayMode;
 	tkBearingType BearingType;
 	tkAngleFormat AngleFormat;
+	bool EnableInsertVertex;
+	bool AllowSaveInvalidGeometry;
 
 	OLE_COLOR FillColor;
 	OLE_COLOR LineColor;
@@ -155,7 +158,7 @@ public:
 	virtual bool UndoPoint();
 	virtual bool GetPartStartAndEnd(int partIndex, MixedShapePart whichPoints, int& startIndex, int& endIndex);
 	ShapeInputMode GetInputMode() const { return _inputMode; }
-	void AddPoint(double xProj, double yProj, double xScreen, double yScreen, PointPart part = PartNone);
+	void AddPoint(double xProj, double yProj, const double z, const double m, double xScreen, double yScreen, PointPart part = PartNone);
 	void AddPoint(double xProj, double yProj);
 	bool HandlePointAdd(double screenX, double screenY, bool ctrl);
 	int GetPointCount() const { return gsl::narrow_cast<int>(_points.size()); }
