@@ -99,8 +99,12 @@ public:
 	STDMETHOD(put_Version)(tkWmsVersion newVal);
 	STDMETHOD(get_Styles)(BSTR* pVal);
 	STDMETHOD(put_Styles)(BSTR newVal);
+	STDMETHOD(get_BoundingBoxOrder)(tkWmsBoundingBoxOrder* pVal);
+	STDMETHOD(put_BoundingBoxOrder)(tkWmsBoundingBoxOrder newVal);
+	STDMETHOD(get_TileSize)(LONG* pVal);
+	STDMETHOD(put_TileSize)(LONG newVal);
 
-private:	
+private:
 	BSTR _key;
 	long _lastErrorCode;
 	WmsCustomProvider* _provider;

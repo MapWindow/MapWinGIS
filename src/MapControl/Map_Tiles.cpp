@@ -86,7 +86,15 @@ int CMapView::ChooseZoom(BaseProvider* provider, Extent ext, double scalingRatio
 
 		tileSize *= PixelsPerMapUnit();
 
+#if BIG_TILE_SIZE
+		auto tileImageSize = 512;
+		auto customProvider = reinterpret_cast<WmsCustomProvider*>(provider);
+		if (customProvider != nullptr)
+			tileImageSize = static_cast<int>(customProvider->get_TileSize());
+		int minSize = (int)(tileImageSize * scalingRatio * ratio);
+#else
 		int minSize = (int)(256 * scalingRatio  * ratio);
+#endif
 		if (tileSize < minSize) {
 			break;
 		}

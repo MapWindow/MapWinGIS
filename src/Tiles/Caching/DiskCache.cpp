@@ -100,7 +100,12 @@ void DiskCache::AddTile(TileCore* tile)
 	}
 
 	// TODO: better to get it from provider (as tile size is not necessarily 256 by 256 pixels)
+#if BIG_TILE_SIZE
+	auto  tileImageSize = static_cast<int>(tile->get_TileSize());
+	Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(tileImageSize, tileImageSize);
+#else
 	Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(256, 256);
+#endif
 	Gdiplus::Graphics* g = Gdiplus::Graphics::FromImage(bmp);
 
 	for (size_t i = 0; i < tile->Overlays.size(); i++)

@@ -33,6 +33,8 @@ CString WmsProviderBase::GetBoundingBox(CPoint &pos, int zoom, tkWmsVersion vers
 	pos.x++;
 	pos.y++;
 	_projection->FromXYToProj(pos, zoom, pnt2);
+	pos.x--;
+	pos.y--;
 
 	CString s;
 
@@ -50,7 +52,6 @@ CString WmsProviderBase::GetBoundingBox(CPoint &pos, int zoom, tkWmsVersion vers
 		case wv111:
 		default:
 			bbo = tkWmsBoundingBoxOrder::bboLongLat;
-
 		}
 	}
 

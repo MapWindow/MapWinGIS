@@ -823,3 +823,46 @@ STDMETHODIMP CWmsLayer::put_Styles(BSTR newVal)
 
 	return S_OK;
 }
+
+// ********************************************************
+//     BoundingBoxOrder()
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_BoundingBoxOrder(tkWmsBoundingBoxOrder* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _provider->get_BoundingBoxOrder();
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_BoundingBoxOrder(tkWmsBoundingBoxOrder newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_provider->set_BoundingBoxOrder(newVal);
+
+	return S_OK;
+}
+
+
+// ********************************************************
+//     TileSize()
+// ********************************************************
+STDMETHODIMP CWmsLayer::get_TileSize(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _provider->get_TileSize();
+
+	return S_OK;
+}
+
+STDMETHODIMP CWmsLayer::put_TileSize(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_provider->set_TileSize(newVal);
+
+	return S_OK;
+}

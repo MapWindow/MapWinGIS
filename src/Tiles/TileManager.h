@@ -61,6 +61,7 @@ private:
     // can be wrapped in a separate class
     CCriticalSection _tilesBufferLock;
     vector<TileCore*> _tiles;
+    CString _lastLayers;
 
     Extent _projExtents; // extents of the world under current projection; in WGS84 it'll be (-180, 180, -90, 90)
     bool _projExtentsNeedUpdate; // do we need to update bounds in m_projExtents on the next request?

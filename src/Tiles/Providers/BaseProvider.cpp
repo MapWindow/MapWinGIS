@@ -26,6 +26,7 @@
 #include <gsl/util>
 
 #include "SecureHttpClient.h"
+#include "WmsCustomProvider.h"
 
 CString BaseProvider::_proxyUsername = "";
 CString BaseProvider::_proxyPassword = "";
@@ -39,6 +40,18 @@ const CString filePrefix = "file:///";
 TileCore* BaseProvider::GetTileImage(CPoint& pos, const int zoom)
 {
     auto* tile = new TileCore(this->Id, zoom, pos, this->_projection);  // TODO: Fix compile warning
+	auto* customProvider = dynamic_cast<WmsCustomProvider*>(this);
+
+	if (tile->tileX() == 234 && tile->tileY() == 28)
+		::OutputDebugStringA("\r\n");
+
+    if (customProvider != nullptr)
+    {
+        auto bbOrder = customProvider->get_BoundingBoxOrder();
+		tile->set_BoundingBoxOrder(bbOrder);
+        auto tileSize = customProvider->get_TileSize();
+        tile->set_TileSize(tileSize);
+    }
 
     for (size_t i = 0; i < _subProviders.size(); i++)
     {
@@ -172,6 +185,10 @@ CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, const CS
     case TileHttpContentType::httpXml:
         if (IsWms())
         {
+            auto status = client->GetStatus();
+            CString sOutput;
+            sOutput.AppendFormat("WMS server response status: %d", status);
+            ::OutputDebugStringA(sOutput.GetBuffer());
             const CString s(body);
             ParseServerException(s);
         }

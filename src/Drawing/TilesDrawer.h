@@ -21,6 +21,8 @@
 #include "basedrawer.h"
 #include "TileManager.h"
 
+static int _tileDrawCount;
+
 class TilesDrawer : public CBaseDrawer
 {
 public:
@@ -29,6 +31,10 @@ public:
 		: _graphics(g), _transfomation(transform)
 	{
 		_dc = NULL;
+#if LOG_TILE_DRAWING
+		_pTileLog = nullptr;
+#endif
+		_tileDrawCount = 0;
 		_extents = extents;
 		_pixelPerProjectionX = pixelPerProjectionX;
 		_pixelPerProjectionY = pixelPerProjectionY;
@@ -41,16 +47,23 @@ private:
 	Gdiplus::Graphics* _graphics;
 	IGeoProjection* _transfomation;
 	double _pixelPerMapUnit;
-
+#if LOG_TILE_DRAWING
+	std::ofstream* _pTileLog;
+#endif
 public:
 	// properties
 	IGeoProjection* get_Transform() { return _transfomation; }		// WGS84 to map transformation
+	int GetTileDrawCount() { return _tileDrawCount++; }
 
 private:
 	bool IsSameProjection(IGeoProjection* mapProjection, BaseProvider* provider);
 	bool UpdateTileBounds(TileCore* tile, bool isSameProjection, int projectionChangeCount);
 	void DrawGrid(TileCore* tile, Gdiplus::RectF& screenRect);
+#if SQUARE_TILES
+	void DrawOverlays(TileCore* tile, int minTileY, int maxTileY, Gdiplus::RectF screenBounds, Gdiplus::ImageAttributes& attr);
+#else
 	void DrawOverlays(TileCore* tile, Gdiplus::RectF screenBounds, Gdiplus::ImageAttributes& attr);
+#endif
 	bool CalculateScreenBounds(TileCore* tile, Gdiplus::RectF& screenBounds);
 	void DrawGridText(TileCore* tile, Gdiplus::RectF& screenRect);
 	void InitImageAttributes(TileManager* manager, Gdiplus::ImageAttributes& attr);

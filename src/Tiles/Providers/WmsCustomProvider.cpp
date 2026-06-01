@@ -28,20 +28,36 @@ CString WmsCustomProvider::MakeTileImageUrl(CPoint &pos, int zoom)
 {
 	CString s = _urlFormat;
 
+	auto crsKey = "srs";
+	if(_version >= wv13)
+		crsKey = "crs";
+
 	s += "?request=GetMap&service=WMS";
 	s += "&layers=" + _layers;
 
 	CString temp;
-	temp.Format("&crs=EPSG:%d", get_CustomProjection()->get_Epsg());
+	temp.Format("&%s=EPSG:%d", crsKey, get_CustomProjection()->get_Epsg());
 	s += temp;
 
 	s += "&bbox=" + GetBoundingBox(pos, zoom, _version, _bbo);
 	s += "&format=" + _format;
+#if BIG_TILE_SIZE
+	auto  tileImageSize = get_TileSize();
+	CString tmp;
+	tmp.Format("&width=%d", tileImageSize);
+	s += tmp;
+	tmp.Format("&height=%d", tileImageSize);
+	s += tmp;
+	//s += "&width=512";
+	//s += "&height=512";
+#else
 	s += "&width=256";
 	s += "&height=256";
+#endif
 	s += get_VersionString();
 	s += "&styles=" + get_Styles();
 
+	::OutputDebugStringA(s.GetBuffer());
 	return s;
 }
 
@@ -50,14 +66,17 @@ CString WmsCustomProvider::MakeTileImageUrl(CPoint &pos, int zoom)
 // ******************************************************
 CString WmsCustomProvider::get_VersionString()
 {
-	switch (_version)
+	auto version = _version;
+	if ( version == wvAuto )
+		version = wv13;	// Auto fall back to version 1.3
+
+	switch (version)
 	{
 	case wvEmpty:
 		return "";
 	case wv100:
 		return "&version=1.0.0";
 	case wv110:
-	case wvAuto:
 		return "&version=1.1.1";
 	case wv111:
 		return "&version=1.1.1";

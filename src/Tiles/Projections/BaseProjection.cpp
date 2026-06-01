@@ -84,10 +84,15 @@ void BaseProjection::GetTileSizeLatLon(CPoint point, int zoom, SizeLatLng &ret)
 
 	PointLatLng pnt2;
 	this->FromXYToLatLng(newPoint, zoom, pnt2);
-    
+
 	// size
 	ret.WidthLng = fabs( pnt2.Lng - pnt1.Lng);
 	ret.HeightLat = fabs(pnt2.Lat - pnt1.Lat);
+
+	if (ret.WidthLng < ret.HeightLat)
+		ret.WidthLng = ret.HeightLat;
+	else if (ret.HeightLat < ret.WidthLng)
+		ret.HeightLat = ret.WidthLng;
 }
 
 // *******************************************************
@@ -137,6 +142,7 @@ void BaseProjection::getTileRectXY(Extent extentsWgs84, int zoom, CRect &rect)
 {
 	CPoint p1, p2;
 
+	::OutputDebugStringA(Debug::Format("tile extentsWgs84: %s\r\n", extentsWgs84.ToString()));
 	FromLatLngToXY(PointLatLng(extentsWgs84.top, extentsWgs84.left), zoom, p1);
 	FromLatLngToXY(PointLatLng(extentsWgs84.bottom, extentsWgs84.right), zoom, p2);
 

@@ -20,6 +20,7 @@
 // Paul Meems August 2018: Modernized the code as suggested by CLang and ReSharper
 
 #include "StdAfx.h"
+#include <algorithm>
 #include "ITileLoader.h"
 #include "ILoadingTask.h"
 

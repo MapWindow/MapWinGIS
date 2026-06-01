@@ -88,6 +88,7 @@ public:
         _toDelete = false;
         _inBuffer = false;
         _geogBounds = projection->CalculateGeogBounds(pnt, zoom);
+        _bbo = bboAuto;
     }
 
     virtual ~TileCore()
@@ -115,6 +116,8 @@ private:
     bool _inBuffer;
     // it's currently displayed or scheduled to be displayed; it must not be destroyed while cleaning the cache
     int _providerId;
+    tkWmsBoundingBoxOrder _bbo;
+    int _tileSize;
 
 public:
     // a tile may be comprised of several semi-transparent bitmaps (e.g. satellite image and labels above it)
@@ -144,6 +147,10 @@ public:
     void isDrawn(bool value) { _drawn = value; }
     bool toDelete() { return _toDelete; }
     void toDelete(bool value) { _toDelete = value; }
+    tkWmsBoundingBoxOrder get_BoundingBoxOrder() const { return _bbo; }
+    void set_BoundingBoxOrder(tkWmsBoundingBoxOrder bbo) { _bbo = bbo; }
+    int get_TileSize() const { return _tileSize; }
+    void set_TileSize(int tileSize) { _tileSize = tileSize; }
 
 public:
     //methods

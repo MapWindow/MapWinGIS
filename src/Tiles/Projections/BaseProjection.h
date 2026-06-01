@@ -30,7 +30,11 @@ public:
 		: _minLat(0), _maxLat(0), _minLng(0), _maxLng(0), _yMin(0.0), _yMax(0.0), _xMin(0.0), _xMax(0.0),
 		_mapBounds(0.0, 0.0, 0.0, 0.0)
 	{
+#if BIG_TILE_SIZE
+		_tileSize = CSize(512, 512);
+#else
 		_tileSize = CSize(256, 256);
+#endif
 		_yInverse = false;
 		_earthRadius = 6378137.0;
 		_worldWide = true;
@@ -68,6 +72,7 @@ protected:
 
 public:
 	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint& ret) = 0;
+	
 	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng& ret) = 0;
 	virtual void FromXYToProj(CPoint pnt, int zoom, PointLatLng& ret) = 0;
 	virtual double GetWidth() = 0;

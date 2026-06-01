@@ -32,6 +32,7 @@ public:
 	{
 		_version = wvAuto;
 		_bbo = bboAuto;
+		_tileSize = 512;
 		_projection = new CustomProjection();
 		_subProviders.push_back(this);
 	}
@@ -44,6 +45,7 @@ private:
 	CString _styles;
 	tkWmsVersion _version;
 	tkWmsBoundingBoxOrder _bbo;
+	int _tileSize;
 
 public:
 	// properties
@@ -55,8 +57,10 @@ public:
 	void set_Format(CString value) { _format = value; }
 	tkWmsVersion get_Version() { return _version; }
 	void set_Version(tkWmsVersion value) { _version = value; }
-	tkWmsBoundingBoxOrder get_BoundingBoxOrder() { return _bbo; }
+	tkWmsBoundingBoxOrder get_BoundingBoxOrder() const { return _bbo; }
 	void set_BoundingBoxOrder(tkWmsBoundingBoxOrder bbo) { _bbo = bbo; }
+	int get_TileSize() const { return _tileSize; }
+	void set_TileSize(int tileSize) { _tileSize = tileSize; }
 	CString get_Styles() { return _styles; }
 	void set_Styles(CString value) { _styles = value; }
 

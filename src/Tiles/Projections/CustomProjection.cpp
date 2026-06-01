@@ -19,6 +19,7 @@
  * (Open source contributors should list themselves and their modifications here). */
   
 #include "stdafx.h"
+#include <algorithm>
 #include "CustomProjection.h"
 
 // *******************************************************
@@ -29,7 +30,14 @@ void CustomProjection::FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 {
 	double lat = pnt.Lat;
 	double lng = pnt.Lng;
-	
+
+#if DEBUG
+	CComBSTR bstr;
+	CString proj;
+	_projWGS84->ExportToWktEx(&bstr);
+	proj = bstr;
+#endif
+
 	VARIANT_BOOL vb;
 	_projWGS84->Transform(&lng, &lat, &vb);
 	
@@ -45,9 +53,17 @@ void CustomProjection::FromProjToXY(double lat, double lng, int zoom, CPoint &re
 	lat = Clip(lat, _yMin, _yMax);
 	lng = Clip(lng, _xMin, _xMax);
 
+	auto width = _xMax - _xMin;
+	auto height = _yMax - _yMin;
+	auto maxSize = max(width, height);
+#if SQUARE_TILES
+	double y = (lat - _yMin) / maxSize;
+	double x = (lng - _xMin) / maxSize;
+#else
 	double y = (lat - _yMin)/(_yMax - _yMin);
 	double x = (lng - _xMin)/(_xMax - _xMin);
-	
+#endif
+
 	CSize s;
 	GetTileMatrixSizeXY(zoom, s);
 	int mapSizeX = s.cx;
@@ -88,8 +104,16 @@ void CustomProjection::FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret)
 	double x = Clip(pnt.x, 0, mapSizeX) / mapSizeX;
 	double y = Clip(pnt.y, 0, mapSizeY) / mapSizeY;
 
+#if SQUARE_TILES
+	auto width = _xMax - _xMin;
+	auto height = _yMax - _yMin;
+	auto maxSize = max(width, height);
+	x = _xMin + x * (maxSize);
+	y = _yMin + y * (maxSize);
+#else
 	x = _xMin + x * (_xMax - _xMin);
 	y = _yMin + y * (_yMax - _yMin);
+#endif
 
 	ret.Lat = y;
 	ret.Lng = x;
@@ -102,8 +126,15 @@ void CustomProjection::GetTileSizeProj(int zoom, SizeLatLng &size)
 {
 	CSize sizeInt;
 	GetTileMatrixSizeXY(zoom, sizeInt);
-	size.WidthLng = (_xMax - _xMin) / (double)sizeInt.cx;
-	size.HeightLat = (_yMax - _yMin) / (double)sizeInt.cy;
+	size.WidthLng = (_xMax - _xMin) / static_cast<double>(sizeInt.cx);
+	size.HeightLat = (_yMax - _yMin) / static_cast<double>(sizeInt.cy);
+
+#if SQUARE_TILES
+	if (size.WidthLng < size.HeightLat)
+		size.WidthLng = size.HeightLat; // make square tiles
+	else if (size.WidthLng > size.HeightLat)
+		size.HeightLat = size.WidthLng;
+#endif
 }
 
 // ******************************************************
