@@ -782,7 +782,9 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 			}
 		}
 
-		DBFAddField(newdbfHandle, OLE2CA(fname), (DBFFieldType)type, width, precision);
+		int ret = DBFAddField(newdbfHandle, OLE2CA(fname), (DBFFieldType)type, width, precision);
+		if (ret == -1)
+			ErrorMessage(tkDBF_CANT_ADD_DBF_FIELD);
 		field->Release();
 	}
 
@@ -821,6 +823,15 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 	//Flush all of the records
 	if (!updateFileInPlace)
 		DBFClose(newdbfHandle);
+
+	// Set byte 29 to 0x00 in the .dbf file  (Codepage mark)
+	FILE* dbfFile = _wfopen(dbfFilename, L"r+");
+	if (dbfFile != NULL) {
+		fseek(dbfFile, 29, SEEK_SET);
+		fputc('\0', dbfFile);
+		fflush(dbfFile);
+		fclose(dbfFile);
+	}
 
 	return true;
 }
@@ -863,6 +874,9 @@ STDMETHODIMP CTableClass::SaveAs(BSTR dbfFilename, ICallback *cBack, VARIANT_BOO
 // **************************************************************
 void CTableClass::ClearFields()
 {
+	//if(_triggerDebug)
+		//DebugBreak();
+
 	for (int i = 0; i < FieldCount(); i++)
 	{
 		if (_fields[i]->field != NULL)
@@ -883,6 +897,9 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 		*retval = VARIANT_TRUE;
+
+	//if(_triggerDebug)
+		//DebugBreak();
 
 	StopAllJoins();
 
@@ -1474,7 +1491,9 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 			if (val.vt == VT_BSTR)
 			{
 				nonstackString = Utility::ConvertBSTRToLPSTR(val.bstrVal, (isUTF8 ? CP_UTF8 : CP_ACP)); // ((LPCSTR)Utility::ConvertToUtf8(val.bstrVal)); // Utility::SYS2A(val.bstrVal);
+				int fieldCount = DBFGetFieldCount(dbfHandle);
 				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, nonstackString);
+				//::OutputDebugString("DBFWriteStringAttribute() done!");
 				delete[] nonstackString;
 				nonstackString = NULL;
 			}
@@ -1764,7 +1783,7 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 
 	// Darrel Brown, 10/16/2003 Added support for null cell values
 	// jf, 2/17/2018, added support for Dates and Booleans
-	if (newVal.vt != VT_I4 && newVal.vt != VT_R8 && newVal.vt != VT_BSTR && newVal.vt != VT_DATE && newVal.vt != VT_BOOL && newVal.vt != VT_NULL)
+	if (newVal.vt != VT_I4 && newVal.vt != VT_R8 && newVal.vt != VT_BSTR && newVal.vt != VT_DATE && newVal.vt != VT_BOOL && newVal.vt != VT_NULL && newVal.vt != VT_EMPTY)
 	{
 		ErrorMessage(tkINCORRECT_VARIANT_TYPE);
 		return S_OK;
@@ -3296,7 +3315,7 @@ STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 STDMETHODIMP CTableClass::get_IsJoined(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	for (size_t i = _fields.size() - 1; i >= 0; i--)
+	for (size_t i = _fields.size() - 1; i >= 0 && _fields.size() > i; i--)
 	{
 		if (_fields[i]->Joined()) {
 			*retVal = VARIANT_TRUE;
