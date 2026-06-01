@@ -35,6 +35,7 @@
 #include "LabelsHelper.h"
 #include "ShapeStyleHelper.h"
 #include "TableClass.h"
+#include <regex>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -137,6 +138,7 @@ CShapefile::CShapefile()
 	ComHelper::CreateInstance(idUndoList, (IDispatch**)&_undoList);
 
 	gReferenceCounter.AddRef(tkInterface::idShapefile);
+	//gReferenceCounter.AddRef(this);
 }
 
 CShapefile::~CShapefile()
@@ -183,6 +185,7 @@ CShapefile::~CShapefile()
 		_undoList->Release();
 	}
 	gReferenceCounter.Release(tkInterface::idShapefile);
+	//gReferenceCounter.Release(this);
 }
 
 std::vector<ShapeRecord*>* CShapefile::get_ShapeVector()
@@ -1035,7 +1038,11 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL* retval)
 		_categories->Clear();
 	}
 	*retval = VARIANT_TRUE;
-
+#if DEBUG
+	CString sError;
+	sError.AppendFormat("CShapefile::Close() returned: {0}\r\n", *retval);
+	::OutputDebugStringA(sError.GetBuffer());
+#endif
 	return S_OK;
 }
 
@@ -2280,6 +2287,8 @@ CPLXMLNode* CShapefile::SerializeCore(const VARIANT_BOOL saveSelection, CString 
 		if (s != "")
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "VisibilityExpression", s);
 
+		if (_sourceType == sstUninitialized)
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "SourceType", "Uninitialized");
 
 		if (_useQTree != FALSE)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "UseQTree", CPLString().Printf("%d", _useQTree));
@@ -2315,6 +2324,10 @@ CPLXMLNode* CShapefile::SerializeCore(const VARIANT_BOOL saveSelection, CString 
 		if (_sortAscending != VARIANT_FALSE)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "SortAscending",
 				CPLString().Printf("%d", static_cast<int>(_sortAscending)));
+
+		s = CString(_key);
+		if (s != "")
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", s);
 
 		// drawing options
 		CPLXMLNode* node = static_cast<CShapeDrawingOptions*>(_defaultDrawOpt)->SerializeCore("DefaultDrawingOptions");
@@ -2764,6 +2777,23 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 	m_globalSettings.gdalErrorMessage = "";
 	OGRSpatialReference* projSource = static_cast<CGeoProjection*>(_geoProjection)->get_SpatialReference();
 	OGRSpatialReference* projTarget = static_cast<CGeoProjection*>(newProjection)->get_SpatialReference();
+
+	char* pszWKT;
+	projSource->exportToPrettyWkt(&pszWKT);
+	auto srcWkt = CGeoProjection::CorrectAxisOrder(pszWKT);
+	auto ret1 = projSource->importFromWkt(srcWkt.c_str());
+	/*
+	::OutputDebugStringA("\r\nprojSource:\r\n\r\n");
+	::OutputDebugStringA(pszWKT); */
+
+	projTarget->exportToPrettyWkt(&pszWKT);
+	auto dstWkt = CGeoProjection::CorrectAxisOrder(pszWKT);
+	auto ret2 = projTarget->importFromWkt(dstWkt.c_str());
+	/*
+	::OutputDebugStringA("\r\nprojTarget:\r\n");
+	::OutputDebugStringA(pszWKT);
+	::OutputDebugStringA("\r\n"); */
+
 
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation(projSource, projTarget);
 	if (!transf)

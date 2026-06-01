@@ -197,6 +197,7 @@ STDMETHODIMP CShapefile::get_CanUseSpatialIndex(IExtents* pArea, VARIANT_BOOL* p
 
 	if (_shpfileName.GetLength() <= 3)
 	{
+		// dhe, Noisy error?
 		ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
 		return S_OK;
 	}

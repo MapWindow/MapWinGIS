@@ -415,6 +415,7 @@ STDMETHODIMP CGeoProjection::ImportFromWKT(const BSTR proj, VARIANT_BOOL* retVal
 	else
 	{
 		CString strProj(proj);
+		strProj = CorrectAxisOrder(strProj).c_str();
 
 		OGRErr result = OGRERR_NONE;
 		// use newer method importFromWkt(const char*)
@@ -449,6 +450,8 @@ STDMETHODIMP CGeoProjection::ImportFromAutoDetect(BSTR proj, VARIANT_BOOL* retVa
 	{
 		const CString s(proj);
 		*retVal = VARIANT_FALSE;
+		if(s.GetLength() == 0)
+			return S_OK;
 
 		const OGRErr err = _projection->SetFromUserInput(s);
 
@@ -526,6 +529,38 @@ STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal
 	if (vb || vb2 )
 	{
 		ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
+		return S_OK;
+	}
+
+	CComBSTR name1;
+	CComBSTR name2;
+	this->get_Name(&name1);
+	proj->get_Name(&name2);
+	if (name1 == name2)
+	{
+		*pVal = VARIANT_TRUE;
+		return S_OK;
+	}
+
+	CComBSTR projName1;
+	CComBSTR projName2;
+	this->get_ProjectionName(&projName1);
+	proj->get_ProjectionName(&projName2);
+	if (projName1 == projName2)
+	{
+		*pVal = VARIANT_TRUE;
+		return S_OK;
+	}
+
+	std::wstring pn1(projName1, SysStringLen(projName1));
+	std::wstring pn2(projName2, SysStringLen(projName2));
+	std::replace(pn1.begin(), pn1.end(), '-', ' ');
+	std::replace(pn2.begin(), pn2.end(), '-', ' ');
+	pn1.erase(std::remove(pn1.begin(), pn1.end(), '.'), pn1.end());
+	pn2.erase(std::remove(pn2.begin(), pn2.end(), '.'), pn2.end());
+	if (pn1 == pn2)
+	{
+		*pVal = VARIANT_TRUE;
 		return S_OK;
 	}
 
@@ -898,16 +933,20 @@ bool CGeoProjection::ReadFromFileCore(CStringW filename, bool esri)
 		// determine file length
 		fseek(prjFile, 0L, SEEK_END);
 		const int fileLen = ftell(prjFile);
-		fseek(prjFile, 0L, SEEK_SET);
-		// allocate buffer for file
-		vector<char> pszWKT = vector<char>(fileLen, 0);
-		// read the file
-		fread(pszWKT.data(), sizeof(char), fileLen, prjFile);
-		fclose(prjFile);
-		// do the import
-		err = _projection->SetFromUserInput(pszWKT.data());
-		// clean up
-		//delete pszWKT;
+		if (fileLen > 0) {
+			fseek(prjFile, 0L, SEEK_SET);
+			// allocate buffer for file
+			vector<char> pszWKT = vector<char>(fileLen, 0);
+			// read the file
+			fread(pszWKT.data(), sizeof(char), fileLen, prjFile);
+			fclose(prjFile);
+			// do the import
+			err = _projection->SetFromUserInput(pszWKT.data());
+			// clean up
+			//delete pszWKT;
+		}
+		else
+			err = OGRERR_NOT_ENOUGH_DATA;
 	}
 
 	if (err != OGRERR_NONE)
@@ -955,11 +994,6 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 	if (filename.CompareNoCase(L"") == 0)
 		return false;
 
-	FILE* prjFile = _wfopen(filename, L"wb");
-	if (!prjFile) {
-		return false;
-	}
-
 	CString proj;
 	CComBSTR bstr;
 	if (esri)
@@ -976,12 +1010,16 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 
 	if (proj.GetLength() != 0)
 	{
+		FILE* prjFile = _wfopen(filename, L"wb");
+		if (!prjFile) {
+			return false;
+		}
+
 		fputs((LPCSTR)proj, prjFile);
 		//fprintf(prjFile, "%s", (LPCSTR)proj);
+		fclose(prjFile);
+		prjFile = nullptr;
 	}
-
-	fclose(prjFile);
-	prjFile = nullptr;
 
 	return true;
 }
@@ -1457,4 +1495,94 @@ bool CGeoProjection::ParseLinearUnits(CString s, tkUnitsOfMeasure& units)
 
 	Debug::WriteLine("Unrecognized linear units: %s", s);
 	return false;
+}
+
+std::string CGeoProjection::CorrectAxisOrder(CString wkt)
+{
+	std::string result;
+
+	std::vector<std::string> dual_value;
+	dual_value.emplace_back("AUTHORITY");
+	dual_value.emplace_back("AXIS");
+	dual_value.emplace_back("PARAMETER");
+	dual_value.emplace_back("PRIMEM");
+	dual_value.emplace_back("UNIT");
+	std::string tripple_value = "SPHEROID";
+
+	std::vector<std::string> lines;
+	std::string currentLine;
+	int openCount = 0; // [
+	int commaCount = 0;
+	for (size_t i = 0; i < wkt.GetLength(); i++)
+	{
+		auto ch = wkt[i];
+		if (ch == '\r' || ch == '\n')
+			continue;
+		else if (ch == '[')
+			openCount++;
+		else if (ch == ']')
+			openCount--;
+		else if (ch == ',')
+		{
+			currentLine += ch;
+			commaCount++;
+			auto len = currentLine.find('[');
+			auto tag = currentLine.substr(0, len);
+			// Trim left
+			tag.erase(tag.begin(), std::find_if(tag.begin(), tag.end(), [](unsigned char ch) {
+				return !std::isspace(ch);
+			}));
+
+			//tag = "AXIS";
+			std::vector<std::string> match_array;
+			match_array.emplace_back(tag);
+
+			if (std::find_first_of(dual_value.begin(), dual_value.end(), match_array.begin(), match_array.end()) != dual_value.end())
+			{
+				if (commaCount < 2)
+					continue;
+			}
+
+			if (tripple_value == tag)
+			{
+				if (commaCount < 3)
+					continue;
+			}
+
+			lines.emplace_back(currentLine.c_str());
+			currentLine.clear();
+			commaCount = 0;
+			continue;
+		}
+
+		currentLine += ch;
+	}
+	lines.emplace_back(currentLine.c_str());
+
+	int position1 = -1;
+	int position2 = -1;
+	int pos = 0;
+	for (auto line : lines)
+	{
+		auto f1 = line.find("AXIS[\"Northing\"") != std::string::npos;
+		auto f2 = line.find("AXIS[\"Easting\"") != std::string::npos;
+		if (position1 == -1 && line.find("AXIS[\"Northing\"") != std::string::npos)
+			position1 = pos;
+		else if (position2 == -1 && line.find("AXIS[\"Easting\"") != std::string::npos)
+			position2 = pos;
+		pos++;
+	}
+
+	if (position1 < position2)
+		std::swap(lines[position1], lines[position2]);
+
+	for (auto line : lines)
+	{
+		if (line[0] == '\n')
+			line = line.substr(1, line.length() - 1);
+		result += line;
+		result += "\r\n";
+	}
+
+	return result;
 }
