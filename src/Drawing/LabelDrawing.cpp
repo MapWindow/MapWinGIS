@@ -54,7 +54,7 @@ void CLabelDrawer::InitSettings(LabelSettings& settings, ILabels* labels, IShape
 
 	settings.scaleFactor = GetScaleFactor(labels);
 
-	settings.autoOffset = GetAutoOffset(labels, sf);
+	settings.autoOffset = sf != nullptr ? GetAutoOffset(labels, sf) : false;
 
 	settings.numLabels = LabelsHelper::GetCount(labels);
 
@@ -121,6 +121,8 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 		gdi.InitDc(_graphics);
 	}
 
+	lbs->AddDrawnLabel(-1); // Reset collection
+
 	// ---------------------------------------------------------------
 	//	 drawing categories - we'll start from the categories 
 	//   with the higher priority, therefore reverse order
@@ -173,7 +175,7 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 
 				if ((lbl->category == categoryIndex) || (categoryIndex == -1 && (lbl->category < 0 || lbl->category >= settings.numCategories)))	{}
 				else continue;	/* Wrong category */
-				
+
 				// blocking the labels with the text already displayed
 				if (settings.removeDuplicates)
 				{
@@ -221,6 +223,7 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 					continue;
 				}
 
+				lbs->AddDrawnLabel(k);
 				// actual drawing
 				if (useGdiPlus) {
 					gdiPlus.DrawLabel(options, rect, piX, piY, angle);
@@ -247,6 +250,401 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 		gdi.ReleaseDc();
 	}
 }
+
+int* CLabelDrawer::PlaceLabels(ILabels* labels)
+{
+	if (!CheckVisibility(labels))
+		return NULL;
+
+	CLabels* lbs = static_cast<CLabels*>(labels);
+	vector<vector<CLabelInfo*>*>* labelData = lbs->get_LabelData();
+
+	IShapefile* sf = lbs->get_ParentShapefile();
+	std::vector<ShapeRecord*>* shapeData = NULL;
+	if (sf) {
+		shapeData = ((CShapefile*)sf)->get_ShapeVector();
+	}
+
+	// ---------------------------------
+	//  settings, filter and sorting
+	// ---------------------------------
+	LabelSettings settings;
+	InitSettings(settings, labels, sf);
+
+	vector<bool> visibilityMask(settings.numLabels, false);
+	GetVisibilityMask(labels, sf, shapeData, visibilityMask);
+
+	// sort them if sort field is specified
+	vector<long>* indices = NULL;
+	if (sf) {
+		((CShapefile*)sf)->GetSorting(&indices);
+	}
+
+	if (indices && indices->size() != settings.numLabels) {
+		indices = NULL;
+	}
+
+	// ---------------------------------
+	// preparing to (not) draw
+	// ---------------------------------
+	GdiLabelDrawer gdi;
+	GdiPlusLabelDrawer gdiPlus;
+	CRect rect(0, 0, 0, 0);
+	std::set<CStringW> uniqueValues;
+
+	bool useGdiPlus = GetUseGdiPlus(labels);
+	if (useGdiPlus) {
+		gdiPlus.InitGraphics(_graphics, labels);
+	}
+	else {
+		gdi.InitDc(_graphics);
+	}
+
+	// ---------------------------------------------------------------
+	//	 drawing categories - we'll start from the categories 
+	//   with the higher priority, therefore reverse order
+	// ---------------------------------------------------------------
+	for (int categoryIndex = settings.numCategories - 1; categoryIndex >= -1; categoryIndex--)
+	{
+		CLabelOptions* options = GetCategoryOptions(labels, categoryIndex);
+
+		if (!options || !options->visible) continue;
+
+
+		// ---------------------------------------------------------------
+		//	 place labels
+		// ---------------------------------------------------------------
+		for (long k = 0; k < settings.numLabels; k++)
+		{
+			long i = indices ? (*indices)[k] : k;
+
+			if (!visibilityMask[i]) {
+				continue;
+			}
+
+			vector<CLabelInfo*>* parts = (*labelData)[i];
+			for (int j = 0; j < (int)parts->size(); j++)
+			{
+				CLabelInfo* lbl = (*parts)[j];
+
+				if (lbl->x < _extents->left)   continue;
+				if (lbl->x > _extents->right)  continue;
+				if (lbl->y < _extents->bottom) continue;
+				if (lbl->y > _extents->top)	 continue;
+				if (lbl->text.GetLength() <= 0) continue;
+
+				if ((lbl->category == categoryIndex) || (categoryIndex == -1 && (lbl->category < 0 || lbl->category >= settings.numCategories))) {}
+				else continue;	/* Wrong category */
+
+				// blocking the labels with the text already displayed
+				if (settings.removeDuplicates)
+				{
+					if (uniqueValues.find(lbl->text) != uniqueValues.end())
+						continue;
+					else
+						uniqueValues.insert(lbl->text);
+				}
+
+				// measuring label
+				if (useGdiPlus) {
+					gdiPlus.MeasureString(lbl, rect);
+				}
+				else {
+					gdi.MeasureString(lbl, rect);
+				}
+
+				// rotation angle
+				double angle, angleRad;
+				LabelDrawingHelper::CalcRotation(lbl, _mapRotation, angle);
+				angleRad = AngleHelper::ToRad(angle);
+
+				// calculating screen rectangle
+				double piX, piY;
+
+				// Fix for MWGIS-79:
+				int shapeSize = 0;
+				if (sf)
+					shapeSize = (*shapeData)[i]->size;
+				CalcScreenRectangle(options, lbl, settings.autoOffset, shapeSize, rect, piX, piY);
+
+				// do we have overlaps?
+				if (!TryAvoidCollisions(lbl, settings.avoidCollisions, rect, piX, piY, settings.buffer, angleRad)) {
+					continue;
+				}
+
+				lbs->AddDrawnLabel(k);
+				// actual drawing
+				if (useGdiPlus) {
+					gdiPlus.DrawLabel(options, rect, piX, piY, angle);
+				}
+				else {
+					gdi.DrawLabel(options, lbl, rect, angleRad, piX, piY);
+				}
+			}
+		} // label
+	}
+}
+
+CRect CLabelDrawer::GetLabelExtents(ILabels* labels, long index)
+{
+	auto lbs = static_cast<CLabels*>(labels);
+	//CLabels* lbs = static_cast<CLabels*>(labels);
+	vector<vector<CLabelInfo*>*>* labelData = lbs->get_LabelData();
+
+	vector<CLabelInfo*>* parts = (*labelData)[index];
+	CLabelInfo* lbl = (*parts)[0];
+
+	CLabelOptions* options = GetCategoryOptions(labels, index);
+
+	//CRect rect(0, 0, 0, 0);
+	//double piX, piY;
+	//CalcScreenRectangle(options, lbl, false, 0, rect, piX, piY);
+
+
+	LabelSettings settings;
+	InitSettings(settings, labels, nullptr);
+
+	// ---------------------------------
+	// preparing to draw
+	// ---------------------------------
+	GdiLabelDrawer gdi;
+	GdiPlusLabelDrawer gdiPlus;
+	CRect rect(0, 0, 0, 0);
+	std::set<CStringW> uniqueValues;
+
+	bool useGdiPlus = GetUseGdiPlus(labels);
+	if(useGdiPlus)
+		gdiPlus.InitGraphics(_graphics, labels);
+	else
+		gdi.InitDc(_graphics);
+
+	if(useGdiPlus)
+	{
+		// we create separate pens/brushes for each drawing method
+		gdiPlus.InitFromCategory(options, settings.hasRotation);
+
+		// choosing appropriate font
+		gdiPlus.SelectFont(options, lbl, settings.scaleFactor);
+
+		// measuring label
+		gdiPlus.MeasureString(lbl, rect);
+
+		gdiPlus.ReleaseForCategory(settings.useVariableFontSize);
+	}
+	else
+	{
+		// we create separate pens/brushes for each drawing method
+		gdi.InitFromCategory(options);
+
+		// choosing appropriate font
+		gdi.SelectFont(options, lbl, settings.scaleFactor);
+
+		// measuring label
+		gdi.MeasureString(lbl, rect);
+
+		gdi.ReleaseForCategory(settings.useVariableFontSize);
+	}
+
+	double piX, piY;
+	if(_spatiallyReferenced)
+		ProjectionToPixel(lbl->x, lbl->y, piX, piY);
+	else
+	{
+		piX = lbl->x;
+		piY = lbl->y;
+	}
+
+	rect.left += static_cast<long>(piX);
+	rect.right += static_cast<long>(piX);
+	rect.bottom += static_cast<long>(piY);
+	rect.top += static_cast<long>(piY);
+
+	return rect;
+}
+
+// *********************************************************************
+// 			PlaceAllMapLabels()
+// *********************************************************************
+vector<int> CLabelDrawer::PlaceAllMapLabels(ILabels* labels)
+{
+	std:vector<int> indexes;
+
+	if (!CheckVisibility(labels))
+		return indexes;
+
+	auto lbs = static_cast<CLabels*>(labels);
+	vector<vector<CLabelInfo*>*>* labelData = lbs->get_LabelData();
+
+	IShapefile* sf = lbs->get_ParentShapefile();
+	std::vector<ShapeRecord*>* shapeData = nullptr;
+	if (sf) {
+		shapeData = ((CShapefile*)sf)->get_ShapeVector();
+	}
+
+	// ---------------------------------
+	//  settings, filter and sorting
+	// ---------------------------------
+	LabelSettings settings;
+	InitSettings(settings, labels, sf);
+
+	vector<bool> visibilityMask(settings.numLabels, false);
+	GetVisibilityMask(labels, sf, shapeData, visibilityMask);
+
+	// sort them if sort field is specified
+	vector<long>* indices = nullptr;
+	if (sf) {
+		((CShapefile*)sf)->GetSorting(&indices);
+	}
+
+	if (indices && indices->size() != settings.numLabels) {
+		indices = nullptr;
+	}
+
+	// ---------------------------------
+	// preparing to draw
+	// ---------------------------------
+	GdiLabelDrawer gdi;
+	GdiPlusLabelDrawer gdiPlus;
+	CRect rect(0, 0, 0, 0);
+	std::set<CStringW> uniqueValues;
+
+	bool useGdiPlus = GetUseGdiPlus(labels);
+	if (useGdiPlus) {
+		gdiPlus.InitGraphics(_graphics, labels);
+	}
+	else {
+		gdi.InitDc(_graphics);
+	}
+
+
+	// ---------------------------------------------------------------
+	//	 drawing categories - we'll start from the categories 
+	//   with the higher priority, therefore reverse order
+	// ---------------------------------------------------------------
+	for (int categoryIndex = settings.numCategories - 1; categoryIndex >= -1; categoryIndex--)
+	{
+		CLabelOptions* options = GetCategoryOptions(labels, categoryIndex);
+		if (!options || !options->visible) continue;
+
+		// we create separate pens/brushes for each drawing method
+		if (useGdiPlus)
+			gdiPlus.InitFromCategory(options, settings.hasRotation);
+		else
+			gdi.InitFromCategory(options);
+
+		if (!settings.useVariableFontSize)
+		{
+			if (useGdiPlus)
+				gdiPlus.SelectFont(options, options->fontSize, settings.scaleFactor);
+			else
+				gdi.SelectFont(options, options->fontSize, settings.scaleFactor);
+		}
+
+		// ---------------------------------------------------------------
+		//	 drawing labels within category
+		// ---------------------------------------------------------------
+		for (long k = 0; k < settings.numLabels; k++)
+		{
+			long i = indices ? (*indices)[k] : k;
+
+			if (!visibilityMask[i]) {
+				continue;
+			}
+
+			vector<CLabelInfo*>* parts = (*labelData)[i];
+			for (int j = 0; j < static_cast<int>(parts->size()); j++)
+			{
+				CLabelInfo* lbl = (*parts)[j];
+
+				if (lbl->x < _extents->left)   continue;
+				if (lbl->x > _extents->right)  continue;
+				if (lbl->y < _extents->bottom) continue;
+				if (lbl->y > _extents->top)	 continue;
+				if (lbl->text.GetLength() <= 0) continue;
+
+				if ((lbl->category == categoryIndex) || (categoryIndex == -1 && (lbl->category < 0 || lbl->category >= settings.numCategories))) {}
+				else continue;	/* Wrong category */
+
+				// blocking the labels with the text already displayed
+				if (settings.removeDuplicates)
+				{
+					if (uniqueValues.find(lbl->text) != uniqueValues.end())
+						continue;
+
+					uniqueValues.insert(lbl->text);
+				}
+
+				// choosing appropriate font
+				if (settings.useVariableFontSize)
+				{
+					if (useGdiPlus) {
+						gdiPlus.SelectFont(options, lbl, settings.scaleFactor);
+					}
+					else {
+						gdi.SelectFont(options, lbl, settings.scaleFactor);
+					}
+				}
+
+				// measuring label
+				if (useGdiPlus) {
+					gdiPlus.MeasureString(lbl, rect);
+				}
+				else {
+					gdi.MeasureString(lbl, rect);
+				}
+
+				// rotation angle
+				double angle, angleRad;
+				LabelDrawingHelper::CalcRotation(lbl, _mapRotation, angle);
+				angleRad = AngleHelper::ToRad(angle);
+
+				// calculating screen rectangle
+				double piX, piY;
+
+				// Fix for MWGIS-79:
+				int shapeSize = 0;
+				if (sf)
+					shapeSize = (*shapeData)[i]->size;
+				CalcScreenRectangle(options, lbl, settings.autoOffset, shapeSize, rect, piX, piY);
+
+				// do we have overlaps?
+				if (!TryAvoidCollisions(lbl, settings.avoidCollisions, rect, piX, piY, settings.buffer, angleRad))
+					continue;
+
+				indexes.push_back(k);
+				/*lbs->AddDrawnLabel(k);
+				// actual drawing
+				if (useGdiPlus) {
+					gdiPlus.DrawLabel(options, rect, piX, piY, angle);
+				}
+				else {
+					gdi.DrawLabel(options, lbl, rect, angleRad, piX, piY);
+				} */
+			}
+		} // label
+
+		if (useGdiPlus) {
+			gdiPlus.ReleaseForCategory(settings.useVariableFontSize);
+		}
+		else {
+			gdi.ReleaseForCategory(settings.useVariableFontSize);
+		}
+	} // category
+
+	// restoring rendering options
+	if (useGdiPlus) {
+		gdiPlus.RestoreGraphics();
+	}
+	else {
+		gdi.ReleaseDc();
+	}
+
+	return indexes;
+	/*auto pArray = new int[indexes.size()];
+	copy(indexes.begin(), indexes.end(), pArray);
+	return pArray;*/
+}
+
 
 // *********************************************************************
 // 			GetCategoryOptions()										

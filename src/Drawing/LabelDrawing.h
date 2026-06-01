@@ -67,7 +67,7 @@ public:
 		_graphics = graphics;
 	}
 
-	~CLabelDrawer(void){};
+	~CLabelDrawer(void){}
 
 private:
 	struct LabelSettings {
@@ -82,7 +82,7 @@ private:
 		bool useVariableFontSize;
 	};
 
-private:	
+private:
 	HDC _hdc;
 	double _currentScale;
 	int _currentZoom;
@@ -90,7 +90,7 @@ private:
 	CCollisionList* _collisionList;
 	bool _spatiallyReferenced;
 	bool _printing;
-	
+
 private:
 	void InitSettings(LabelSettings& settings, ILabels* labels, IShapefile* sf);
 	bool HaveCollision(CRotatedRectangle& rect);
@@ -108,5 +108,8 @@ private:
 
 public:
 	void DrawLabels(ILabels* LabelsClass);
+	int* PlaceLabels(ILabels* LabelsClass);
+	vector<int> PlaceAllMapLabels(ILabels* labels);
+	CRect GetLabelExtents(ILabels* labels, long index);
 
 };

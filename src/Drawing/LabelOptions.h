@@ -211,6 +211,7 @@ public:
 		rotatedFrame = NULL;
 		horizontalFrame = NULL;
 		isDrawn = VARIANT_FALSE;
+		key = SysAllocString(L"");
 	}
 	~CLabelInfo()
 	{
@@ -232,5 +233,6 @@ public:
 	long category;
 	VARIANT_BOOL isDrawn;
 	short fontSize;
+	BSTR key;
 };
 
