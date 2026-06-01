@@ -1164,7 +1164,7 @@ STDMETHODIMP CShapeDrawingOptions::put_LineWidth (float newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal < 1) newVal = 1;
 	if (newVal > 20) newVal = 20;
-	_options.lineWidth = newVal;		
+	_options.lineWidth = newVal;
 	return S_OK;
 }
 

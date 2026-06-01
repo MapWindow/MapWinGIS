@@ -47,11 +47,13 @@ public:
 		_isLineDecoration = false;
         _pointRotationExpression = SysAllocString(L"");
 		gReferenceCounter.AddRef(tkInterface::idShapeDrawingOptions);
+		//gReferenceCounter.AddRef(this);
 	}
 	~CShapeDrawingOptions()
 	{			
         ::SysFreeString(_pointRotationExpression);
 		gReferenceCounter.Release(tkInterface::idShapeDrawingOptions);
+		//gReferenceCounter.Release(this);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEDRAWINGOPTIONS)

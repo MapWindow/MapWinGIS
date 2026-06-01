@@ -131,7 +131,7 @@ public:
 		top = yCent + dy;
 	}
 
-	Point2D GetCenter () 
+	Point2D GetCenter ()
 	{
 		return Point2D((left + right) / 2.0, (top + bottom) / 2.0);
 	}
@@ -143,7 +143,9 @@ public:
 
 	CString ToString()
 	{
-		return Debug::Format("x: %f; y: %f; w: %f; h: %f", left, top, Width(), Height());
+		auto width = Width();
+		auto height = Height();
+		return Debug::Format("x: %f; y: %f; w: %f; h: %f", left, top, width, height);
 	}
 	
 };

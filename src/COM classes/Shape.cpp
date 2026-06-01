@@ -61,6 +61,11 @@ CShape::CShape()
 	_labelRotation = 0;
 
 	gReferenceCounter.AddRef(tkInterface::idShape);
+#if DEBUG_ALLOCATED_OBJECTS
+	gReferenceCounter.AddRef(this);
+	if (ComHelper::GetBreak())
+		::OutputDebugStringA("Break!");
+#endif
 }
 
 // **********************************************
@@ -80,6 +85,11 @@ CShape::~CShape()
 	}
 
 	gReferenceCounter.Release(tkInterface::idShape); // TODO: Fix compile warning
+#if DEBUG_ALLOCATED_OBJECTS
+	gReferenceCounter.Release(this);
+	if (ComHelper::GetBreak())
+		::OutputDebugStringA("Break!");
+#endif
 }
 
 #pragma region DataConversions
@@ -258,6 +268,13 @@ STDMETHODIMP CShape::put_ShapeType(const ShpfileType newVal)
 
 	const ShapeWrapperType type = _shp->get_WrapperType();
 	const ShapeWrapperType newType = ShapeUtility::GetShapeWrapperType(newVal, !_useFastMode);
+
+	/*if ((newVal == SHP_POINT || newVal == SHP_POINTM || newVal == SHP_POINTZ) && ComHelper::GetBreak()) {
+		CString str;
+		str.Format("0x%016llx  SHP_POINT", this);
+		const CComBSTR bstr(str);
+		put_Key(bstr);
+	} */
 
 	if (type == newType)
 	{

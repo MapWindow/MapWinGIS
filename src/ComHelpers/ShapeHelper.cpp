@@ -428,3 +428,108 @@ int ShapeHelper::GetContentLength(IShape* shp)
 	return ShapeUtility::get_ContentLength(shpType, numPoints, numParts);
 }
 
+
+// *************************************************************
+//		DebugDump()
+// *************************************************************
+void ShapeHelper::DebugDump(IShape* shp)
+{
+	long numPoints, numParts;
+	ShpfileType shpType;
+
+	shp->get_NumPoints(&numPoints);
+	shp->get_NumParts(&numParts);
+	shp->get_ShapeType(&shpType);
+
+	if (numParts > 1) {
+		::OutputDebugStringA("Not support NumParts > 1");
+		return;
+	}
+
+	if (numPoints <= 10 || numPoints > 15)
+		return;
+
+	HRESULT hr;
+	IPoint* pnt = nullptr;
+	CString sOutput;
+	double x, y, z, m;
+	switch (shpType)
+	{
+		case SHP_NULLSHAPE:
+			::OutputDebugStringA("ShapeHelper::DebugDump(): NULLSHAPE");
+			break;
+
+		case SHP_POINT:
+		case SHP_POINTZ:
+			hr = shp->get_Point(0, &pnt);
+			if (FAILED(hr)) {
+				CString sError;
+				sError.AppendFormat("ShapeHelper::DebugDump() Failed in get_Point(1, ..)\r\n");
+				::OutputDebugStringA(sError.GetBuffer());
+				return;
+			}
+			pnt->get_X(&x);
+			pnt->get_Y(&y);
+
+			if (shpType == SHP_POINT)
+				sOutput.AppendFormat("Point N: %f  E: %f\r\n", y, x);
+			else {
+				pnt->get_Z(&z);
+				pnt->get_M(&m);
+				sOutput.AppendFormat("Point N: %f  E: %f  Z: %f  M: %f\r\n", y, x, z, m);
+			}
+			break;
+
+
+		case SHP_POLYLINE:
+		case SHP_POLYLINEZ:
+			for (int i = 0; i < numPoints; i++) {
+				hr = shp->get_Point(i, &pnt);
+				if (FAILED(hr)) {
+					CString sError;
+					sError.AppendFormat("ShapeHelper::DebugDump() Failed in get_Point(%d, ..)\r\n", i);
+					::OutputDebugStringA(sError.GetBuffer());
+					return;
+				}
+				pnt->get_X(&x);
+				pnt->get_Y(&y);
+				if (shpType == SHP_POLYLINE)
+					sOutput.AppendFormat("Point# %d X: %f  Y: %f\r\n", i, x, y);
+				else {
+					pnt->get_Z(&z);
+					pnt->get_M(&m);
+					sOutput.AppendFormat("Point# %d N: %f  E: %f  Z: %f  M: %f\r\n", i, y, x, z, m);
+				}
+			}
+			break;
+
+		case SHP_POLYGON:
+		case SHP_POLYGONZ:
+			for (int i = 0; i < numPoints; i++) {
+				hr = shp->get_Point(i, &pnt);
+				if (FAILED(hr)) {
+					CString sError;
+					sError.AppendFormat("ShapeHelper::DebugDump() Failed in get_Point(%d, ..)\r\n", i);
+					::OutputDebugStringA(sError.GetBuffer());
+					return;
+				}
+				pnt->get_X(&x);
+				pnt->get_Y(&y);
+				if (shpType == SHP_POLYGON)
+					sOutput.AppendFormat("Point# %d X: %f  Y: %f\r\n", i, x, y);
+				else {
+					pnt->get_Z(&z);
+					pnt->get_M(&m);
+					sOutput.AppendFormat("Point# %d N: %f  E: %f  Z: %f  M: %f\r\n", i, y, x, z, m);
+				}
+			}
+			break;
+
+		default:
+			::OutputDebugStringA("ShapeHelper::DebugDump(): Shape Type: Unknown");
+			break;
+	}
+	sOutput.Append("\r\n");
+	::OutputDebugStringA(sOutput.GetBuffer());
+}
+

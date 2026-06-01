@@ -212,7 +212,13 @@ void SQLiteCache::AddTile(TileCore* tile)
 					
 					if (val != SQLITE_OK)
 					{
-						CallbackHelper::ErrorMsg("SQLiteCache::DoCaching: Failed to prepare statement.");
+						auto sqlite3_error = sqlite3_errmsg(_conn);
+						auto errorCode = sqlite3_extended_errcode(_conn);
+						//std:string errorMessage("SQLiteCache::DoCaching: Failed to prepare statement: ");
+						//errorMessage += sqlite3_error ? sqlite3_error : "Unknown error";
+						//CallbackHelper::ErrorMsg(errorMessage.c_str());
+						CallbackHelper::ErrorMsg(Debug::Format("SQLiteCache::DoCaching: Failed to prepare statement errorNo: %d Message: %s", errorCode, sqlite3_error));
+						//CallbackHelper::ErrorMsg("SQLiteCache::DoCaching: Failed to prepare statement.");
 					}
 					else
 					{

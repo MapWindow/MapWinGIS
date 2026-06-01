@@ -85,6 +85,7 @@
 #define IDC_SELECT2_CURSOR              220
 #define IDC_IDENTIFY_CURSOR             221
 #define IDC_PAN_ALTERNATE               222
+#define IDR_PLACEDLABELS                223
 
 // Next default values for new objects
 // 
