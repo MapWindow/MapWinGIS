@@ -237,6 +237,7 @@ STDMETHODIMP CField::Clone(/*[out, retval]*/ IField** retVal)
 	fld->put_Precision(_precision);
 	fld->put_Type(_type);
 	fld->put_Name(_name);
+	fld->put_Alias(_alias);
 	fld->put_Width(_width);
 	*retVal = fld;
 	return S_OK;
