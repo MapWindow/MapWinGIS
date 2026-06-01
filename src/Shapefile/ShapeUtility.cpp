@@ -29,6 +29,17 @@ bool ShapeUtility::IsZ(const ShpfileType shpType)
 }
 
 // **************************************************************
+//		HaveM()
+// **************************************************************
+bool ShapeUtility::HaveM(const ShpfileType shpType)
+{
+	return shpType == SHP_POINTM || shpType == SHP_POINTZ
+		|| shpType == SHP_MULTIPOINTM || shpType == SHP_MULTIPOINTZ
+		|| shpType == SHP_POLYLINEM || shpType == SHP_POLYLINEZ
+		|| shpType == SHP_POLYGONM || shpType == SHP_POLYGONZ;
+}
+
+// **************************************************************
 //		Convert2D()
 // **************************************************************
 ShpfileType ShapeUtility::Convert2D(const ShpfileType shpType)
