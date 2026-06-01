@@ -122,6 +122,7 @@ void CallbackHelper::ErrorMsg(const CString className, ICallback* localCback, BS
 	if (callback || Debug::IsDebugMode())
 	{
 		if (strcmp(message, "No Error") == 0) return;
+		if (strcmp(message, "The method isn't applicable to the in-memory object") == 0) return;
 
 		TCHAR buffer[1024];
 		va_list args;
