@@ -12,7 +12,7 @@
 
 DBFHandle SHPAPI_CALL DBFOpen_MW( CStringW pszFilename, const char * pszAccess )
 {
-	CStringA nameA = Utility::ConvertToUtf8(pszFilename);
+	CStringA nameA = Utility::ConvertToAnsi1252(pszFilename);
 	m_globalSettings.SetGdalUtf8(true);
 	DBFHandle handle = DBFOpen(nameA, pszAccess);
 	m_globalSettings.SetGdalUtf8(false);
@@ -21,7 +21,7 @@ DBFHandle SHPAPI_CALL DBFOpen_MW( CStringW pszFilename, const char * pszAccess )
 
 DBFHandle SHPAPI_CALL DBFCreate_MW( CStringW nameW )
 {
-	CStringA nameA = Utility::ConvertToUtf8(nameW);
+	CStringA nameA = Utility::ConvertToAnsi1252(nameW);
 	m_globalSettings.SetGdalUtf8(true);
 	DBFHandle handle = DBFCreate(nameA);
 	m_globalSettings.SetGdalUtf8(false);

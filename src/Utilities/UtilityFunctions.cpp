@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+﻿#include "StdAfx.h"
 #include <iterator>
 #include <fstream>
 #include "macros.h"
@@ -37,6 +37,15 @@ namespace Utility
 		USES_CONVERSION;
 		CStringA utf8 = CW2A(unicode, CP_UTF8);
 		return utf8;
+	}
+
+	// ********************************************************
+	//    ConvertToAnsi1252()
+	// ********************************************************
+	CStringA ConvertToAnsi1252(CStringW unicode) {
+		USES_CONVERSION;
+		CStringA acp = CW2A(unicode, CP_ACP);
+		return acp;
 	}
 
 	// ********************************************************
@@ -705,6 +714,9 @@ namespace Utility
 				}
 				break;
 			}
+			case admMetricMeters:
+				localizedUnits = lsSquareMeters;
+				break;
 			case admHectars:
 			{
 				area /= 10000.0;
