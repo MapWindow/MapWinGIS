@@ -171,27 +171,40 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
             {
                 shp->Create(shpType, &vb);
                 shp->ImportFromBinary(data[i]->Shape, &vb);
-                _shapefile->EditInsertShape(shp, &count, &vb);
 
-                tbl->UpdateTableRow(data[i]->Row, count);
+				ShpfileType shapeType;
+				shp->get_ShapeType(&shapeType);
+            	auto compatible = shapeType == shpType
+									|| ShapeUtility::Convert2D(shapeType) == ShapeUtility::Convert2D(shpType);
+				// Ignore incompatible shapes
+				if (compatible)
+				{
+					_shapefile->EditInsertShape(shp, &count, &vb);
+
+					tbl->UpdateTableRow(data[i]->Row, count);
+				}
                 data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
 
-                // Preserve selection accross reloads:
-                CComVariant pVal;
-                tbl->get_CellValue(0, count, &pVal);
-                bool wasSelected = false;
-                for (size_t i = 0; i < selectedOgrFIDs.size(); i++)
-                {
-                    if (selectedOgrFIDs[i] == pVal) {
-                        wasSelected = true;
-                        break;
-                    }
-                }
-                if (wasSelected)
-                    _shapefile->put_ShapeSelected(count, VARIANT_TRUE);
+				if (compatible)
+				{
+	                // Preserve selection accross reloads:
+	                CComVariant pVal;
+	                tbl->get_CellValue(0, count, &pVal);
+	                bool wasSelected = false;
+	                for (size_t i = 0; i < selectedOgrFIDs.size(); i++)
+	                {
+	                    if (selectedOgrFIDs[i] == pVal) {
+	                        wasSelected = true;
+	                        break;
+	                    }
+	                }
+	                if (wasSelected)
+	                    _shapefile->put_ShapeSelected(count, VARIANT_TRUE);
 
-				if (hasFid)
-					((CShapefile*)_shapefile)->MapOgrFid2ShapeIndex(pVal.lVal, count);
+					if (hasFid)
+						((CShapefile*)_shapefile)->MapOgrFid2ShapeIndex(pVal.lVal, count);					
+				}
+
 
                 count++;
             }
