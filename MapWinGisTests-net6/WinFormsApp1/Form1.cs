@@ -14,7 +14,7 @@ public sealed partial class Form1 : Form, ICallback
             CallbackVerbosity = tkCallbackVerbosity.cvAll
         };
 
-        LoadOsm();
+        this.Shown += (s, e) => LoadOsm(); // This need to be done after the form is shown.
 
         GetMapWinGisVersion();
     }
