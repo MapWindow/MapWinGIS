@@ -18,15 +18,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<COMReference Include="MapWinGIS">
-			<WrapperTool>tlbimp</WrapperTool>
-			<VersionMinor>5</VersionMinor>
-			<VersionMajor>5</VersionMajor>
-			<Guid>c368d713-cc5f-40ed-9f53-f84fe197b96a</Guid>
-			<Lcid>0</Lcid>
-			<Isolated>false</Isolated>
-			<EmbedInteropTypes>False</EmbedInteropTypes>
-		</COMReference>
+	  <COMReference Include="MapWinGIS">
+	    <WrapperTool>tlbimp</WrapperTool>
+	    <VersionMinor>5</VersionMinor>
+	    <VersionMajor>5</VersionMajor>
+	    <Guid>c368d713-cc5f-40ed-9f53-f84fe197b96a</Guid>
+	    <Lcid>0</Lcid>
+	    <Isolated>false</Isolated>
+	    <EmbedInteropTypes>true</EmbedInteropTypes>
+	  </COMReference>
 	</ItemGroup>
 
 	<ItemGroup>

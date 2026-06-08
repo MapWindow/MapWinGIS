@@ -12,28 +12,28 @@ public class CodeCoverageTests
         _testOutputHelper = testOutputHelper;
     }
 
-    //[Fact(Skip = "Unit test is not yet implemented")]
-    public void CheckShapefileClass()
+	[Fact]
+	public void CheckShapefileClass()
     {
-        CheckTests(typeof(ShapefileClass), "Shapefile");
+        CheckTests(typeof(Shapefile), "Shapefile");
     }
 
     [Fact]
     public void CheckShapeClass()
     {
-        CheckTests(typeof(ShapeClass), "Shape");
+        CheckTests(typeof(Shape), "Shape");
     }
 
     [Fact]
     public void CheckGlobalSettingsClass()
     {
-        CheckTests(typeof(GlobalSettingsClass), "GlobalSettings");
+        CheckTests(typeof(GlobalSettings), "GlobalSettings");
     }
 
     [Fact]
     public void CheckGdalUtilsClass()
     {
-        CheckTests(typeof(GdalUtilsClass), "GdalUtils");
+        CheckTests(typeof(GdalUtils), "GdalUtils");
     }
 
     private void CheckTests(Type myType, string className, bool scaffoldUnitTests = false)

@@ -320,7 +320,7 @@ public class ShapeTests
     [Fact]
     public void ShapePut_ZTest()
     {
-		Shape shape = new ShapeClass();
+		Shape shape = new Shape();
 		shape.ShapeType = ShpfileType.SHP_POINTZ;
 		shape.AddPoint(100, 100);
 
