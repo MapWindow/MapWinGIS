@@ -353,7 +353,7 @@ void TileManager::ClearBuffer()
 bool TileManager::IsNewRequest(Extent& mapExtents, CRect indices, int providerId, int zoom)
 {
     auto layersSelectionChanged = false;
-    auto customProvider = reinterpret_cast<WmsCustomProvider*>(_provider);
+    auto customProvider = dynamic_cast<WmsCustomProvider*>(_provider);
     if (customProvider != nullptr) {
         auto layers = customProvider->get_Layers();
         layersSelectionChanged = _lastLayers != layers;
