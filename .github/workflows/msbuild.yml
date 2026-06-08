@@ -31,18 +31,18 @@ jobs:
         platform: ['x64']
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
     # Setup MSBuild
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1   
+      uses: microsoft/setup-msbuild@v2   
       if: ${{matrix.platform == 'x64' }}
       with:
         msbuild-architecture: x64
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1 
+      uses: microsoft/setup-msbuild@v2 
       if: ${{matrix.platform == 'Win32' }}
       with:
         msbuild-architecture: x86
@@ -63,11 +63,9 @@ jobs:
            echo ("VCPKG_INSTALLED_DIR=${{ github.workspace }}/src/vcpkg_installed/x64-windows/") >> $env:GITHUB_ENV
            mkdir $[env.VCPKG_INSTALLED_DIR]
                    
-    # Install VCPCK
+    # Install VCPKG
     - name: run-vcpkg    
-      # You may pin to the exact commit or the version.
-      # uses: lukka/run-vcpkg@c5ce6a7de6e5ce834a25f7d55b6c250a275a6732
-      uses: lukka/run-vcpkg@v10
+      uses: lukka/run-vcpkg@v11
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
@@ -145,10 +143,10 @@ jobs:
         platform: ['x64']
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup dotnet 8
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.x'
      
@@ -188,12 +186,12 @@ jobs:
         
     # Build test solution
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
       if: ${{matrix.platform == 'x64' }}
       with:
         msbuild-architecture: x64
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
       if: ${{matrix.platform == 'Win32' }}
       with:
         msbuild-architecture: x86
