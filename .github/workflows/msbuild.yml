@@ -14,7 +14,7 @@ on:
       - 'docs/**'
 env:
   # Path to the solution files relative to the root of the project.
-  SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs.sln
+  SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs-toolset143.sln
   MAPWINGIS_SOLUTION_FILE_PATH: ./src/MapWinGIS.sln
   UNITTESTS_SOLUTION_FILE_PATH: ./MapWinGisTests-net6/MapWinGisTests-net6.sln
 
