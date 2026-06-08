@@ -180,6 +180,8 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL applyChanges, VARIANT_BO
 				}
 			}
 		}
+		else
+			_isEditingShapes = VARIANT_FALSE;
 		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
