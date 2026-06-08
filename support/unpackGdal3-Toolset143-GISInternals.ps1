@@ -9,8 +9,7 @@ Set-Location $PSScriptRoot
 #
 # This script expects GDAL3+ binaries and copies the content to the v142 subfolder
 #
-# The script expects 4 zip files. 2 for Win32 and 2 for x64
-# If you only need 1 set of 2 zip files you can comment the call
+# The script expects 2 zip files for x64
 # to UnpackGisInternalsZips at the bottom of this script
 #
 ###################################################################
@@ -18,17 +17,15 @@ Set-Location $PSScriptRoot
 Function UnpackGisInternalsZips{
     Param ([boolean]$Is64Bit, [string]$ToolsetVersion)
 
-    # The names and filters for the Win32 zip files:
-    $regExZipfileNames = "release-1928-gdal-3*.zip"
-    $regExZipfileLibName = "release-1928-gdal-3*-libs.zip"
-    $subFolderName = "win32"
-
-    if($Is64Bit) {
-        # The names and filters for the x64 zip files:
-        $regExZipfileNames = "release-1930-x64-gdal-3*.zip"
-        $regExZipfileLibName = "release-1930-x64-gdal-3*-libs.zip"
-        $subFolderName = "x64"
+    if(!$Is64Bit) {
+        Write-Host "Only 64-bit is supported."
+        Exit
     }
+
+    # The names and filters for the x64 zip files:
+    $regExZipfileNames = "release-1930-x64-gdal-3*.zip"
+    $regExZipfileLibName = "release-1930-x64-gdal-3*-libs.zip"
+    $subFolderName = "x64"
 
     Write-Host "Checking files (x64: $($Is64Bit))..."
     $zipCount = (Get-ChildItem -Filter $regExZipfileNames).count
@@ -65,7 +62,7 @@ Function UnpackGisInternalsZips{
     MoveFiles .\temp\include\* .\GDAL_SDK\$($ToolsetVersion)\include\$($subFolderName)\
     MoveFiles .\temp\lib\* .\GDAL_SDK\$($ToolsetVersion)\lib\$($subFolderName)\
 
-    Write-Host "Successfully copied the GisInternals files (x64: $($Is64Bit)) to subfolder $($ToolsetVersion)"    
+    Write-Host "Successfully copied the GisInternals files (x64: $($Is64Bit)) to subfolder $($ToolsetVersion)"
 }
 
 Function CreateDirIfNeeded{
@@ -103,9 +100,6 @@ Function MoveFiles{
 
 Write-Host "Current directory: $(Get-Location)"
 Write-Host "Script directory: $PSScriptRoot"
-
-# Unzip the 2 Win32 zip files:
-#UnpackGisInternalsZips -Is64Bit $False -ToolsetVersion "v143"
 
 # Unzip the 2 x64 zip files:
 UnpackGisInternalsZips -Is64Bit $True -ToolsetVersion "v143"
