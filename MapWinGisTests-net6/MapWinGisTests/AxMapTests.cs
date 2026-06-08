@@ -19,7 +19,7 @@ public class AxMapTests
         var version = form.GetMapWinGisVersion();
         version.ShouldNotBeNull();
         version.Major.ShouldBe(5);
-        version.Minor.ShouldBe(4);
+        version.Minor.ShouldBe(5);
         version.Build.ShouldBeGreaterThanOrEqualTo(0);
         _testOutputHelper.WriteLine("Version: {0}", version);
     }
@@ -28,6 +28,7 @@ public class AxMapTests
     public void MapProjectionTest()
     {
         using var form = new WinFormsApp1.Form1();
+        form.Show(); // We need to show the form to have a valid map control
         form.ShouldNotBeNull();
 
         var sfLocation = Helpers.GetTestFilePath("UnitedStates-3857.shp");
@@ -69,7 +70,8 @@ public class AxMapTests
         // AS mentioned at https://mapwindow.discourse.group/t/key-property-of-shape-object-not-work/1250
 
         using var form = new WinFormsApp1.Form1();
-        form.ShouldNotBeNull();
+        form.Show(); // We need to show the form to have a valid map control
+		form.ShouldNotBeNull();
 
         // Create shapefile:
         var sfPolygon = Helpers.CreateTestPolygonShapefile();
