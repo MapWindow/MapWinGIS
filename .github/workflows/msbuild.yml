@@ -66,6 +66,8 @@ jobs:
     # Install VCPKG
     - name: run-vcpkg    
       uses: lukka/run-vcpkg@v11
+      env:
+        VCPKG_BINARY_SOURCES: clear
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
