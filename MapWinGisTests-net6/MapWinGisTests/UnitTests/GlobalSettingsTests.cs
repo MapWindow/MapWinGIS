@@ -60,7 +60,7 @@ public class GlobalSettingsTests : ICallback
         var projPath = _gs.ProjPath;
         _testOutputHelper.WriteLine("projPath: " + projPath);
         projPath.ShouldNotBeNullOrEmpty("ProjPath is not set");
-        projPath.EndsWith("\\proj7\\share\\").ShouldBeTrue();
+        projPath.EndsWith("\\proj9\\share\\").ShouldBeTrue();
         // Change:
         var newpath = Path.Combine(Path.GetTempPath(), "new-proj-Воздух");
         _testOutputHelper.WriteLine(newpath);
@@ -79,7 +79,7 @@ public class GlobalSettingsTests : ICallback
         var gdalVersion = _gs.GdalVersion;
         _testOutputHelper.WriteLine(gdalVersion);
         gdalVersion.ShouldNotBeNullOrEmpty("GdalVersion is not set");
-        gdalVersion.StartsWith("GDAL 3.5").ShouldBeTrue();
+        gdalVersion.StartsWith("GDAL 3.10").ShouldBeTrue();
         // Change:
         // GdalVersion is read-only
     }
