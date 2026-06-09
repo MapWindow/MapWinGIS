@@ -174,7 +174,7 @@ echo in after $(CustomBuildAfterTargets)</Command>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)..\Support\lib\$(PlatformToolset)\$(Platform)\Release;$(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\lib;$(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\lib;$(ProjectDir)vcpkg\vcpkg\buildtrees\libgeotiff\x64-windows-rel\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)..\Support\lib\$(PlatformToolset)\$(Platform)\Release;$(ProjectDir)\vcpkg_installed\$(VcpkgTriplet)\$(VcpkgHostTriplet)\lib;$(ProjectDir)\vcpkg_installed\$(VCPKG_DEFAULT_TRIPLET)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>
@@ -249,7 +249,7 @@ if $(PlatformName) == x64 (
     <Link>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>spatialindex-64.lib;ShapeLib.lib;xtiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>spatialindex-64.lib;ShapeLib.lib;geotiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <PerUserRedirection Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PerUserRedirection>
     </Link>
     <PreLinkEvent>
