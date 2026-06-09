@@ -249,7 +249,7 @@ if $(PlatformName) == x64 (
     <Link>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalDependencies>spatialindex-64.lib;ShapeLib-toolset142.lib;xtiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>spatialindex-64.lib;ShapeLib.lib;xtiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <PerUserRedirection Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PerUserRedirection>
     </Link>
     <PreLinkEvent>
