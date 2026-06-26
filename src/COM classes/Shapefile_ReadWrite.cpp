@@ -114,6 +114,9 @@ IShape* CShapefile::ReadFastModeShape(long shapeIndex)
 // ************************************************************
 IShape* CShapefile::ReadComShape(long shapeIndex)
 {
+	if (_shpOffsets.empty())
+		return nullptr;
+
 	// read the shp from disk
 	fseek(_shpfile, _shpOffsets[shapeIndex], SEEK_SET);
 

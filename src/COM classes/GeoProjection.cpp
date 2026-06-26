@@ -1368,6 +1368,9 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 			{
 				_projection->Release();
 				_projection = static_cast<OGRSpatialReference*>(spahSrs[0]);
+				// free the remaining (unused) matches, then the array itself
+				for (int i = 1; i < nEntries; i++)
+					OSRDestroySpatialReference(spahSrs[i]);
 				CPLFree(pahSrs);
 			}
 			else
@@ -1562,10 +1565,8 @@ std::string CGeoProjection::CorrectAxisOrder(CString wkt)
 	int position1 = -1;
 	int position2 = -1;
 	int pos = 0;
-	for (auto line : lines)
+	for (const auto& line : lines)
 	{
-		auto f1 = line.find("AXIS[\"Northing\"") != std::string::npos;
-		auto f2 = line.find("AXIS[\"Easting\"") != std::string::npos;
 		if (position1 == -1 && line.find("AXIS[\"Northing\"") != std::string::npos)
 			position1 = pos;
 		else if (position2 == -1 && line.find("AXIS[\"Easting\"") != std::string::npos)
@@ -1573,7 +1574,7 @@ std::string CGeoProjection::CorrectAxisOrder(CString wkt)
 		pos++;
 	}
 
-	if (position1 < position2)
+	if (position1 != -1 && position2 != -1 && position1 < position2)
 		std::swap(lines[position1], lines[position2]);
 
 	for (auto line : lines)
