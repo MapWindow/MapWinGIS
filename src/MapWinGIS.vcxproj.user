@@ -10,11 +10,11 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommand>"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\dotnet\net8.0\runtime\dotnet.exe"</LocalDebuggerCommand>
+    <LocalDebuggerCommand>"C:\Projects\Arkeologerna_Intrasis4\Intrasis\Applications\IntrasisApp\bin\x64\Debug\net10.0-windows8.0\Intrasis.exe"</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>test MapWinGisTests.csproj --no-build --configuration Release -p:Platform=x64</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>C:\Intrasis\Database\KHM2018_Dilling216873_220314\KHM2018_Dilling216873_220314.idf admin admin</LocalDebuggerCommandArguments>
     <LocalDebuggerDebuggerType>NativeWithManagedCore</LocalDebuggerDebuggerType>
-    <LocalDebuggerWorkingDirectory>C:\Projects\Lib\Sweco_MapWinGIS\MapWinGisTests-net6\MapWinGisTests</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>C:\Intrasis\Database\KHM2018_Dilling216873_220314\</LocalDebuggerWorkingDirectory>
     <LocalDebuggerAttach>false</LocalDebuggerAttach>
   </PropertyGroup>
 </Project>
