@@ -112,7 +112,7 @@ jobs:
     - name: Unzip
       working-directory: ./Support/
       shell: pwsh
-      run: .\unpackGdal3-Toolset142-GISInternals.ps1
+      run: .\unpackGdal3-Toolset143-GISInternals.ps1
 
     # Build support libs
     - name: Build SupportLibs ${{matrix.platform}}
