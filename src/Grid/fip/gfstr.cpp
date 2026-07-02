@@ -82,7 +82,8 @@
 *****************************************************************************/ 
 #include "stc123.h"
 
-int g123fstr(FILE *fp,char *buf_str,long str_len)
+#if OLD_VERSION
+int g123fstr_old(FILE *fp,char *buf_str,long str_len)
 {
    /* LOCAL VARIABLES */
    char *tmpcptr;
@@ -137,4 +138,37 @@ int g123fstr(FILE *fp,char *buf_str,long str_len)
    
    /*RETURN SUCCESS */
    return(1);
+}
+#endif
+
+int g123fstr(FILE* fp, char* buf_str, long str_len)
+{
+    /* LOCAL VARIABLES */
+    char* tmpcptr;
+    long remaining;
+
+    /* BASIC VALIDATION */
+    if (fp == NULL || buf_str == NULL || str_len < 0) return(0);
+
+    /* INITIALIZE POINTERS */
+    tmpcptr = buf_str;
+    remaining = str_len;
+
+    /* READ THE FULL STRING IN CHUNKS */
+    while (remaining > 0) {
+
+        size_t chunk = (remaining > MAXINT) ? (size_t)MAXINT : (size_t)remaining;
+        size_t read_len = fread(tmpcptr, sizeof(char), chunk, fp);
+
+        if (read_len != chunk) return(0);
+
+        tmpcptr += read_len;
+        remaining -= (long)read_len;
+    }
+
+    /* APPEND NULL CHARACTER ONCE, AT THE END */
+    *tmpcptr = NC;
+
+    /* RETURN SUCCESS */
+    return(1);
 }
