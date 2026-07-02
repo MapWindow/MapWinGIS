@@ -1,0 +1,33 @@
+INFO: Open of `D:\dev\MapWindow\MapWinGIS\git\unittest-net6\TestData\Issue-216.shp'
+      using driver `ESRI Shapefile' successful.
+
+Layer name: Issue-216
+Geometry: Line String
+Feature Count: 13424
+Extent: (108.722071, 34.149021) - (109.139842, 34.457816)
+Layer SRS WKT:
+GEOGCRS["WGS 84",
+    DATUM["World Geodetic System 1984",
+        ELLIPSOID["WGS 84",6378137,298.257223563,
+            LENGTHUNIT["metre",1]]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433]],
+    CS[ellipsoidal,2],
+        AXIS["latitude",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["longitude",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]],
+    ID["EPSG",4326]]
+Data axis to CRS axis mapping: 2,1
+osm_id: String (10.0)
+code: Integer (5.0)
+fclass: String (28.0)
+name: String (100.0)
+ref: String (20.0)
+oneway: String (1.0)
+maxspeed: Integer (5.0)
+layer: Real (19.11)
+bridge: String (1.0)
+tunnel: String (1.0)

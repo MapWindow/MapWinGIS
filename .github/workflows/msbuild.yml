@@ -16,7 +16,7 @@ env:
   # Path to the solution files relative to the root of the project.
   SUPPORTLIBS_SOLUTION_FILE_PATH: ./Support/SupportLibs.sln
   MAPWINGIS_SOLUTION_FILE_PATH: ./src/MapWinGIS.sln
-  UNITTESTS_SOLUTION_FILE_PATH: ./MapWinGisTests-net6/MapWinGisTests-net6.sln
+  UNITTESTS_SOLUTION_FILE_PATH: ./MapWinGisTests-net/MapWinGisTests-net.sln
 
   # Configuration type to build.
   BUILD_CONFIGURATION: Debug
@@ -24,7 +24,7 @@ env:
 jobs:
   build:
     name: Build MapWinGIS
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     strategy:
       matrix:
@@ -32,22 +32,22 @@ jobs:
         # platform: ['Win32']
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
     # Setup MSBuild
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1   
+      uses: microsoft/setup-msbuild@v2
       if: ${{matrix.platform == 'x64' }}
       with:
         msbuild-architecture: x64
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1 
+      uses: microsoft/setup-msbuild@v2
       if: ${{matrix.platform == 'Win32' }}
       with:
         msbuild-architecture: x86
-      
+
     - name: Set VcpkgTriplet-x86
       if: ${{matrix.platform == 'Win32' }}
       run: |
@@ -55,7 +55,7 @@ jobs:
            echo ("VcpkgTriplet=x86-windows") >> $env:GITHUB_ENV
            echo ("VCPKG_INSTALLED_DIR=${{ github.workspace }}/src/vcpkg_installed/x86-windows/") >> $env:GITHUB_ENV
            mkdir $[env.VCPKG_INSTALLED_DIR]
-      
+
     - name: Set VcpkgTriplet-x64
       if: ${{matrix.platform == 'x64' }}
       run: |
@@ -63,12 +63,12 @@ jobs:
            echo ("VcpkgTriplet=x64-windows") >> $env:GITHUB_ENV
            echo ("VCPKG_INSTALLED_DIR=${{ github.workspace }}/src/vcpkg_installed/x64-windows/") >> $env:GITHUB_ENV
            mkdir $[env.VCPKG_INSTALLED_DIR]
-                   
+
     # Install VCPCK
-    - name: run-vcpkg    
+    - name: run-vcpkg
       # You may pin to the exact commit or the version.
       # uses: lukka/run-vcpkg@c5ce6a7de6e5ce834a25f7d55b6c250a275a6732
-      uses: lukka/run-vcpkg@v10
+      uses: lukka/run-vcpkg@v11
       with:
         runVcpkgInstall: true
         vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
@@ -96,10 +96,10 @@ jobs:
       with:
         # Specify the Az PowerShell script here.
         inlineScript: |
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3-5-mapserver-8-0.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1928-gdal-3-5-mapserver-8-0.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-gdal-3-5-mapserver-8-0-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-gdal-3-5-mapserver-8-0-libs.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3-5-mapserver-8-0.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-x64-gdal-3-5-mapserver-8-0.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1928-x64-gdal-3-5-mapserver-8-0-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1928-x64-gdal-3-5-mapserver-8-0-libs.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-gdal-3-10-3-mapserver-8-2-2.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1930-gdal-3-10-3-mapserver-8-2-2.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-gdal-3-10-3-mapserver-8-2-2-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1930-gdal-3-10-3-mapserver-8-2-2-libs.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-x64-gdal-3-10-3-mapserver-8-2-2.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1930-x64-gdal-3-10-3-mapserver-8-2-2.zip"
+          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-x64-gdal-3-10-3-mapserver-8-2-2-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1930-x64-gdal-3-10-3-mapserver-8-2-2-libs.zip"
           ls .\Support\
         # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
         azPSVersion: "latest"
@@ -107,13 +107,13 @@ jobs:
         errorActionPreference: Stop
         # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
         failOnStandardError: true
-    
+
     # Unzip zips by calling powershell script
     - name: Unzip
       working-directory: ./Support/
       shell: pwsh
       run: .\unpackGdal3-Toolset142-GISInternals.ps1
-             
+
     # Build support libs
     - name: Build SupportLibs ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -121,7 +121,7 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       run: msbuild /m /p:Configuration=Release /p:Platform=${{matrix.platform}} ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
-      
+
     # Build MapWinGIS
     - name: Build MapWinGIS ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -132,41 +132,36 @@ jobs:
 
     # Save artifacts:
     - name: Archive production artifacts
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v4
       with:
         name: binaries-${{matrix.platform}}
         path: .\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\**\*
-        
+
   unit-tests:
     name: Unit Testing
     needs: build
     runs-on: windows-2022
-    
+
     strategy:
       max-parallel: 1
       matrix:
         platform: ['x64', 'Win32']
         # platform: ['Win32']
-        
-    steps:
-    - uses: actions/checkout@v3
-      
-    - name: Setup dotnet 6
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.x'
 
-    - name: Setup dotnet 7
-      uses: actions/setup-dotnet@v1
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup dotnet 10
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '6.x'        
-     
+        dotnet-version: '10.x'
+
     - name: Download MapWinGIS (${{matrix.platform}}) binaries
       uses: actions/download-artifact@v2
       with:
         name: binaries-${{matrix.platform}}
         path: .\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\
-        
+
     - name: Register MapWinGIS.ocx (${{matrix.platform}})
       uses: Azure/powershell@v1
       with:
@@ -179,9 +174,9 @@ jobs:
             3 = "FAIL_LOAD - LoadLibrary Failed";
             4 = "FAIL_ENTRY - GetProcAddress failed";
             5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
-          }        
+          }
           $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s ${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\MapWinGIS.ocx" -PassThru
-          
+
           $regsvrp.WaitForExit(5000) # Wait (up to) 5 seconds
           if($regsvrp.ExitCode -ne 0)
           {
@@ -194,10 +189,10 @@ jobs:
         errorActionPreference: Stop
         # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
         failOnStandardError: true
-        
+
     # Build test solution
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1   
+      uses: microsoft/setup-msbuild@v1.1
       if: ${{matrix.platform == 'x64' }}
       with:
         msbuild-architecture: x64
@@ -206,23 +201,23 @@ jobs:
       if: ${{matrix.platform == 'Win32' }}
       with:
         msbuild-architecture: x86
-        
+
     - name: Build test solution ${{matrix.platform}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}      
-      
+      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}
+
     # Run unit tests
     - name: Setup VSTest.console.exe
-      uses: darenm/Setup-VSTest@v1  
+      uses: darenm/Setup-VSTest@v1
     - name: Unit Testing x86
       if: ${{matrix.platform == 'Win32' }}
-      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x86 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32\proj7\share\" .\MapWinGisTests-net6\MapWinGisTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\MapWinGisTests.dll
+      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x86 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32\proj7\share\" .\MapWinGisTests-net\MapWinGisTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net10.0-windows8.0\MapWinGisTests.dll
     - name: Unit Testing x64
       if: ${{matrix.platform == 'x64' }}
-      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x64 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64\proj7\share\" .\MapWinGisTests-net6\MapWinGisTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net6.0-windows8.0\MapWinGisTests.dll
-     
-   # TODO: Create installer using innosetup   
-   # TODO: Publish installer to GitHub Releases      
+      run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x64 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64\proj7\share\" .\MapWinGisTests-net\MapWinGisTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net10.0-windows8.0\MapWinGisTests.dll
+
+   # TODO: Create installer using innosetup
+   # TODO: Publish installer to GitHub Releases

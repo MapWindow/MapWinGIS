@@ -29,5 +29,8 @@
     <ClCompile Include="shpopen.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="safileio.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -38,7 +38,7 @@
     <UseOfMfc>false</UseOfMfc>
     <UseOfAtl>false</UseOfAtl>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -170,7 +170,7 @@ echo in after $(CustomBuildAfterTargets)</Command>
       </Version>
       <RegisterOutput>true</RegisterOutput>
       <AdditionalOptions>/ignore:4099 /Ignore:4254  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;geos_c.lib;tiff.lib;libcurl_imp.lib;cqlib.lib;ShapeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;geos_c.lib;ShapeLib.lib;tiff.lib;geotiff.lib;libcurl_imp.lib;cqlib.lib;ShapeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>

@@ -175,6 +175,7 @@ support/GDAL_SDK/**/*.pc
 support/temp/
 support/GDAL_SDK/lib/
 support/GDAL_SDK/v142/
+support/GDAL_SDK/v143/
 
 # vcpkg
 src/vcpkg_installed/
