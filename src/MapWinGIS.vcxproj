@@ -169,6 +169,7 @@ echo in after $(CustomBuildAfterTargets)</Command>
       <Version>
       </Version>
       <RegisterOutput>true</RegisterOutput>
+      <PerUserRedirection>true</PerUserRedirection>
       <AdditionalOptions>/ignore:4099 /Ignore:4254  %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;geos_c.lib;ShapeLib.lib;tiff.lib;geotiff.lib;libcurl_imp.lib;cqlib.lib;ShapeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
