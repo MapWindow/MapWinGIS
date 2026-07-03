@@ -936,7 +936,7 @@ bool CGeoProjection::ReadFromFileCore(CStringW filename, bool esri)
 		if (fileLen > 0) {
 			fseek(prjFile, 0L, SEEK_SET);
 			// allocate buffer for file
-			vector<char> pszWKT = vector<char>(fileLen, 0);
+			auto pszWKT = vector<char>(fileLen + 1, 0);
 			// read the file
 			fread(pszWKT.data(), sizeof(char), fileLen, prjFile);
 			fclose(prjFile);
