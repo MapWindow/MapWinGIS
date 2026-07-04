@@ -58,6 +58,7 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <TargetExt>.ocx</TargetExt>
+    <EnableComRegistration Condition="'$(EnableComRegistration)'==''">true</EnableComRegistration>
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -168,7 +169,7 @@ echo in after $(CustomBuildAfterTargets)</Command>
     <Link>
       <Version>
       </Version>
-      <RegisterOutput>true</RegisterOutput>
+      <RegisterOutput>$(EnableComRegistration)</RegisterOutput>
       <PerUserRedirection>true</PerUserRedirection>
       <AdditionalOptions>/ignore:4099 /Ignore:4254  %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;geos_c.lib;ShapeLib.lib;tiff.lib;geotiff.lib;libcurl_imp.lib;cqlib.lib;ShapeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>

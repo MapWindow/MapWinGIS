@@ -128,7 +128,7 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /p:RegisterOutput=false /p:VcpkgEnabled=true /p:VcpkgEnableManifest=true /p:VcpkgTriplet=${{env.VcpkgTriplet}} /p:VcpkgHostTriplet=${{env.VcpkgTriplet}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /p:EnableComRegistration=false /p:RegisterOutput=false /p:VcpkgEnabled=true /p:VcpkgEnableManifest=true /p:VcpkgTriplet=${{env.VcpkgTriplet}} /p:VcpkgHostTriplet=${{env.VcpkgTriplet}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
 
     # Save artifacts:
     - name: Archive production artifacts
