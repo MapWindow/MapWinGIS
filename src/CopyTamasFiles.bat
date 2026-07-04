@@ -10,7 +10,7 @@ REM * Paul Meems, update for ecw dll, June 2015                 *
 REM * Paul Meems, update for ecw dll to v5.3, Aug 2017          *
 REM * Paul Meems, update for xerces and lti_dsdk dll, Aug 2018  *
 REM * Paul Meems, update for GDAL v3+, Jan 2022                 *
-REM * Daniel Hedén, update for GDAL v3.10.3, proj9              *
+REM * Daniel Hedén, update for GDAL v3.10.3 and proj9           *
 REM * Usage to test:                                            *
 REM * CopyTamasFiles.bat D:\dev\MapwinGIS\GitHub\support\GDAL_SDK\v140\bin\win32 D:\dev\MapwinGIS\GitHub\src\bin\Win32\
 REM *************************************************************
