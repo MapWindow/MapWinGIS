@@ -112,7 +112,7 @@ jobs:
     - name: Unzip
       working-directory: ./Support/
       shell: pwsh
-      run: .\unpackGdal3-Toolset142-GISInternals.ps1
+      run: .\unpackGdal3-Toolset143-GISInternals.ps1
 
     # Build support libs
     - name: Build SupportLibs ${{matrix.platform}}
@@ -128,7 +128,7 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /p:VcpkgEnabled=true /p:VcpkgEnableManifest=true /p:VcpkgTriplet=${{env.VcpkgTriplet}} /p:VcpkgHostTriplet=${{env.VcpkgTriplet}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /p:RegisterOutput=false /p:VcpkgEnabled=true /p:VcpkgEnableManifest=true /p:VcpkgTriplet=${{env.VcpkgTriplet}} /p:VcpkgHostTriplet=${{env.VcpkgTriplet}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
 
     # Save artifacts:
     - name: Archive production artifacts
@@ -162,11 +162,12 @@ jobs:
         name: binaries-${{matrix.platform}}
         path: .\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\
 
-    - name: Register MapWinGIS.ocx (${{matrix.platform}})
+    - name: Register MapWinGIS.ocx (Win32)
+      if: ${{matrix.platform == 'Win32' }}
       uses: Azure/powershell@v1
       with:
         # Specify the Az PowerShell script here.
-        inlineScript: | 
+        inlineScript: |
           $ExitCodes = @{
             0 = "SUCCESS";
             1 = "FAIL_ARGS - Invalid Argument";
@@ -175,19 +176,56 @@ jobs:
             4 = "FAIL_ENTRY - GetProcAddress failed";
             5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
           }
-          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s ${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\MapWinGIS.ocx" -PassThru
+          $ocxPath = "${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32\MapWinGIS.ocx"
+          if (!(Test-Path $ocxPath)) {
+            Write-Error "MapWinGIS.ocx was not found at $ocxPath"
+          }
+          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s $ocxPath" -PassThru
 
-          $regsvrp.WaitForExit(5000) # Wait (up to) 5 seconds
+          $regsvrp.WaitForExit(15000) # Wait (up to) 15 seconds
           if($regsvrp.ExitCode -ne 0)
           {
-              Write-Host "RegSrv32 for ${{matrix.platform}} failed"
+              Write-Host "RegSrv32 for Win32 failed"
               Write-Error $ExitCodes[$regsvrp.ExitCode]
           }
-        # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
+        # Azure PS version to be used to execute the script.
         azPSVersion: "latest"
-        # Select the value of the ErrorActionPreference variable for executing the script. Options: stop, continue, silentlyContinue. Default is Stop.
+        # Select the value of the ErrorActionPreference variable for executing the script.
         errorActionPreference: Stop
-        # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
+        # If this is true, this task will fail if any errors are written to the error pipeline.
+        failOnStandardError: true
+
+    - name: Register MapWinGIS.ocx (x64)
+      if: ${{matrix.platform == 'x64' }}
+      uses: Azure/powershell@v1
+      with:
+        # Specify the Az PowerShell script here.
+        inlineScript: |
+          $ExitCodes = @{
+            0 = "SUCCESS";
+            1 = "FAIL_ARGS - Invalid Argument";
+            2 = "FAIL_OLE - OleInitialize Failed";
+            3 = "FAIL_LOAD - LoadLibrary Failed";
+            4 = "FAIL_ENTRY - GetProcAddress failed";
+            5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
+          }
+          $ocxPath = "${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64\MapWinGIS.ocx"
+          if (!(Test-Path $ocxPath)) {
+            Write-Error "MapWinGIS.ocx was not found at $ocxPath"
+          }
+          $regsvrp = Start-Process C:\Windows\System32\regsvr32.exe -ArgumentList "/s $ocxPath" -PassThru
+
+          $regsvrp.WaitForExit(15000) # Wait (up to) 15 seconds
+          if($regsvrp.ExitCode -ne 0)
+          {
+              Write-Host "RegSrv32 for x64 failed"
+              Write-Error $ExitCodes[$regsvrp.ExitCode]
+          }
+        # Azure PS version to be used to execute the script.
+        azPSVersion: "latest"
+        # Select the value of the ErrorActionPreference variable for executing the script.
+        errorActionPreference: Stop
+        # If this is true, this task will fail if any errors are written to the error pipeline.
         failOnStandardError: true
 
     # Build test solution
