@@ -37,9 +37,6 @@ REM Copy PROJ4 data:
 xcopy /v /c /r /y %_from_dir%\gdal-data\*.* %_to_dir%gdal-data\
 REM xcopy /v /c /r /y %_from_dir%\proj\SHARE\*.* %_to_dir%..\PROJ_NAD\
 
-REM Copy Proj7 data. TODO: Check if copied to correct location:
-rem xcopy /v /c /r /y %_from_dir%\proj7\share\*.* %_to_dir%proj7\share\
-
 REM Copy Proj9 data. TODO: Check if copied to correct location:
 xcopy /v /c /r /y %_from_dir%\proj9\share\*.* %_to_dir%proj9\share\
 

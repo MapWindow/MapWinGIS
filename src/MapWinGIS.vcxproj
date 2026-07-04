@@ -206,7 +206,7 @@ if $(PlatformName) == x64 (
   setx  MapWinGISBin64 $(OutputPath)
 )
 
-setx PROJ_LIB $(OutputPath)proj7\share</Command>
+setx PROJ_LIB $(OutputPath)proj9\share</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Win32 platform definitions -->

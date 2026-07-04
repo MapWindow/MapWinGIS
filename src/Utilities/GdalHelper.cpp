@@ -740,7 +740,7 @@ CStringW GdalHelper::GetDefaultConfigPath(const GdalPath option)
 		path += L"\\gdalplugins\\";
 		break;
 	case PathProjLib:
-		path += L"\\proj7\\share\\";
+		path += L"\\proj9\\share\\";
 		break;
 	}
 	return path;
