@@ -50,9 +50,9 @@ REM Copy gdal plugins-external
 xcopy /v /c /r /y %_from_dir%\gdal\plugins-optional\*.* %_to_dir%gdal\plugins-optional\
 
 REM Copy needed Tamas binaries:
-FOR %%G IN (cfitsio.dll freexl.dll geos.dll geos_c.dll hdf.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcrypto-1_1.dll libcrypto-1_1-x64.dll libcrypto-3-x64.dll
+FOR %%G IN (cfitsio.dll freexl.dll geos.dll geos_c.dll hdf.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcrypto-3.dll libcrypto-1_1.dll libcrypto-1_1-x64.dll libcrypto-3-x64.dll
 			libcurl.dll libexpat.dll tiff.dll tiffxx.dll ogdi.dll mfhdf.dll pcre.dll
-            iconv-2.dll libmysql.dll libpng16.dll libpq.dll libssl-1_1.dll libssl-1_1-x64.dll libssl-3-x64.dll libxml2.dll lti_lidar_dsdk_1.1.dll netcdf.dll   
+            iconv-2.dll libmysql.dll libpng16.dll libpq.dll libssl-1_1.dll libssl-1_1-x64.dll libssl-3.dll libssl-3-x64.dll libxml2.dll lti_lidar_dsdk_1.1.dll netcdf.dll   
             openjp2.dll proj_9.dll spatialite.dll sqlite3.dll szip.dll tbb.dll xdr.dll zlib.dll zstd.dll
             NCSEcw.dll) DO (
 	IF EXIST %_from_dir%\%%G (
