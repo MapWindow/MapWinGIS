@@ -151,10 +151,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup dotnet 10
-      uses: actions/setup-dotnet@v4
+    - name: Setup dotnet 10 (x64)
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '10.x'
+        architecture: x64
+
+    - name: Setup dotnet 10 (x86)
+      if: ${{matrix.platform == 'Win32' }}
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: '10.x'
+        architecture: x86
 
     - name: Download MapWinGIS (${{matrix.platform}}) binaries
       uses: actions/download-artifact@v4
