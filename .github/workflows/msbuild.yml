@@ -253,7 +253,7 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}
+      run: dotnet msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}
 
     # Run unit tests
     - name: Setup VSTest.console.exe
