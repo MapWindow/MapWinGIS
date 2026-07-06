@@ -226,7 +226,7 @@ size_t TExpandableBuffer<T>::Expand(size_t newSize)
    {
       T *pNewBuffer = new T[newSize];
 
-      for (size_t i = 0; i < newSize; i++)
+      for (size_t i = 0; i < m_size; i++)
       {
          pNewBuffer[i] = m_pBuffer[i];
       }
