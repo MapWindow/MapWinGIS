@@ -14,7 +14,14 @@ public sealed partial class Form1 : Form, ICallback
             CallbackVerbosity = tkCallbackVerbosity.cvAll
         };
 
-        Shown += (s, e) => LoadOsm(); // This need to be done after the form is shown.
+        if (Environment.Is64BitProcess)
+        {
+            Shown += (s, e) => LoadOsm(); // This need to be done after the form is shown (x64)
+		}
+        else
+        {
+            LoadOsm();
+        }
 
         GetMapWinGisVersion();
     }
