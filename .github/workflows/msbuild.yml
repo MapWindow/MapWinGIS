@@ -270,7 +270,12 @@ jobs:
 
     - name: Unit Testing x86
       if: ${{matrix.platform == 'Win32' }}
+      env:
+        DOTNET_ROOT: C:\Program Files\dotnet\x86
+        DOTNET_MULTILEVEL_LOOKUP: 0
+        "DOTNET_ROOT(x86)": C:\Program Files\dotnet\x86
       run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x86 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32\proj9\share\" .\MapWinGisTests-net\MapWinGisTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net10.0-windows8.0\MapWinGisTests.dll
+
     - name: Unit Testing x64
       if: ${{matrix.platform == 'x64' }}
       run: vstest.console.exe /Blame /Diag:logs\log.txt /Platform:x64 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64\proj9\share\" .\MapWinGisTests-net\MapWinGisTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net10.0-windows8.0\MapWinGisTests.dll
