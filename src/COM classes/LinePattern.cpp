@@ -236,7 +236,7 @@ STDMETHODIMP CLinePattern::InsertMarker(int Index, tkDefaultPointSymbol marker, 
 STDMETHODIMP CLinePattern::RemoveItem(int Index, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if(Index < 0 && Index >= (int)_lines.size())
+	if(Index < 0 || Index >= static_cast<int>(_lines.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
