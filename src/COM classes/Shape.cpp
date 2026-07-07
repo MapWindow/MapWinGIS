@@ -2302,7 +2302,7 @@ bool Bytes2SafeArray(const unsigned char* data, const int size, VARIANT* arr)
 //***********************************************************************
 STDMETHODIMP CShape::ExportToBinary(VARIANT* bytesArray, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	int* data = _shp->get_RawData();
 	const int contentLength = _shp->get_ContentLength();
@@ -2327,7 +2327,7 @@ STDMETHODIMP CShape::ExportToBinary(VARIANT* bytesArray, VARIANT_BOOL* retVal)
 //********************************************************************
 STDMETHODIMP CShape::ImportFromBinary(const VARIANT bytesArray, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 
 	if (bytesArray.vt != (VT_ARRAY | VT_UI1))

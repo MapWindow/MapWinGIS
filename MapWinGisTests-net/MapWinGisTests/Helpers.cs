@@ -181,6 +181,7 @@ internal static class Helpers
         shapeIndex.ShouldNotBe(-1, "EditAddShape failed");
         return shapeIndex;
     }
+
     #endregion
 
 

@@ -3,7 +3,7 @@
 [Collection(nameof(NotThreadSafeResourceCollection))]
 public class ShapeTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
+	private readonly ITestOutputHelper _testOutputHelper;
     private readonly Shape _firstShapePoint;
 
     private readonly Extents _sfPointExtents;
@@ -264,11 +264,42 @@ public class ShapeTests
     [Fact(Skip = "Unit test is not yet implemented")]
     public void Shapeput_XYTest() { }
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeExportToBinaryTest() { }
+	[Fact]
+	public void ShapeExportToBinaryTest()
+    {
+		var mPartPolyWktFileName = Path.Combine(Helpers.GetTestDataLocation(), "MultiPartPolygon.wkt");
+        File.Exists(mPartPolyWktFileName).ShouldBeTrue("TestData file: MultiPartPolygon.wkt is missing!");
+        var mPartPolyWkt = File.ReadAllText(mPartPolyWktFileName);
 
-    [Fact(Skip = "Unit test is not yet implemented")]
-    public void ShapeImportFromBinaryTest() { }
+        var shape1 = new ShapeClass();
+        var impOk = shape1.ImportFromWKT(mPartPolyWkt);
+        impOk.ShouldBeTrue();
+
+        var bytesArray = new object();
+        var ret = shape1.ExportToBinary(ref bytesArray);
+        ret.ShouldBeTrue();
+        var shape2 = new ShapeClass();
+        var impBinOk = shape2.ImportFromBinary(bytesArray);
+        impBinOk.ShouldBeTrue();
+		CompareShapes(shape1, shape2).ShouldBeTrue();
+	}
+
+    [Fact]
+    public void ShapeImportFromBinaryTest()
+    {
+	    var polyShpDataFileName = Path.Combine(Helpers.GetTestDataLocation(), "polyShapeData.bin");
+        File.Exists(polyShpDataFileName).ShouldBeTrue("TestData file: polyShapeData.bin is missing!");
+	    var polyShpData = File.ReadAllBytes(polyShpDataFileName);
+
+	    var shape1 = new ShapeClass();
+	    shape1.ImportFromBinary(polyShpData);
+	    var wkt = shape1.ExportToWKT();
+
+		var sfPolygon = Helpers.CreateTestPolygonShapefile();
+	    var shape2 = sfPolygon.Shape[0];
+
+		CompareShapes(shape1, shape2).ShouldBeTrue();
+	}
 
     [Fact(Skip = "Unit test is not yet implemented")]
     public void ShapeFixUpTest() { }
@@ -290,4 +321,47 @@ public class ShapeTests
 
     [Fact(Skip = "Unit test is not yet implemented")]
     public void ShapePut_MTest() { }
+
+
+
+    internal static bool CompareShapes(IShape shp1, IShape shp2, int decimals = 8)
+    {
+        if(shp1.ShapeType != shp2.ShapeType) return false;
+        if(shp1.ShapeType2D != shp2.ShapeType2D) return false;
+        if(shp1.NumParts != shp2.NumParts) return false;
+		if(shp1.NumPoints != shp2.NumPoints) return false;
+
+		for(var i = 0;i < shp1.NumParts;++i)
+		{
+			var pt1 = shp1.Point[i];
+			var pt2 = shp2.Point[i];
+
+			if(Math.Abs(pt1.x - pt2.x) > Math.Pow(10, -decimals)) return false;
+			if(Math.Abs(pt1.y - pt2.y) > Math.Pow(10, -decimals)) return false;
+
+			if(HaveZ(shp1.ShapeType))
+			{
+				if(Math.Abs(pt1.Z - pt2.Z) > Math.Pow(10, -decimals)) return false;
+			}
+
+			if(HaveM(shp1.ShapeType))
+			{
+				if(Math.Abs(pt1.M - pt2.M) > Math.Pow(10, -decimals)) return false;
+			}
+		}
+		return true;
+    }
+
+ 
+    private static bool HaveZ(ShpfileType shpType)
+    {
+		return shpType is ShpfileType.SHP_POINTZ or ShpfileType.SHP_MULTIPOINTZ or ShpfileType.SHP_POLYLINEZ or ShpfileType.SHP_POLYGONZ;
+	}
+
+    private static bool HaveM(ShpfileType shpType)
+    {
+	    return shpType is ShpfileType.SHP_POINTM or ShpfileType.SHP_POINTZ or ShpfileType.SHP_MULTIPOINTM or ShpfileType.SHP_MULTIPOINTZ
+		    or ShpfileType.SHP_POLYLINEM or ShpfileType.SHP_POLYLINEZ or ShpfileType.SHP_POLYGONM or ShpfileType.SHP_POLYGONZ;
+	}
+
 }
