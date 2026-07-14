@@ -173,6 +173,10 @@ STDMETHODIMP CShapeEditor::get_ValidatedShape(IShape** retVal)
 // *******************************************************
 void CShapeEditor::CopyData(int firstIndex, int lastIndex, IShape* target )
 {
+	ShpfileType shpType;
+	target->get_ShapeType(&shpType);
+	bool haveZ = ShapeUtility::IsZ(shpType);
+	bool haveM = ShapeUtility::HaveM(shpType);
 	long index, partCount = 0;
 	VARIANT_BOOL vb;
 	for(int i = firstIndex; i < lastIndex; i++)
@@ -180,6 +184,12 @@ void CShapeEditor::CopyData(int firstIndex, int lastIndex, IShape* target )
 		MeasurePoint* pnt = _activeShape->GetPoint(i);
 		if (pnt) {
 			target->AddPoint(pnt->Proj.x, pnt->Proj.y, &index);
+			IPoint* pt;
+			target->get_Point(index, &pt);
+			if (haveZ)
+				pt->put_Z(pnt->z);
+			if (haveM)
+				pt->put_M(pnt->m);
 			if (pnt->Part == PartBegin) {
 				target->InsertPart(i, &partCount, &vb);
 				partCount++;
@@ -391,9 +401,12 @@ STDMETHODIMP CShapeEditor::SetShape( IShape* shp )
 	}
 
 	VARIANT_BOOL vb;
-	double x, y;
+	double x, y, z, m;
 	shp->get_NumPoints(&numPoints);
-	
+
+	bool haveZ = ShapeUtility::IsZ(shpType);
+	bool haveM = ShapeUtility::HaveM(shpType);
+
 	for(long i = 0; i < numPoints; i++) 
 	{
 		PointPart part = PartNone;
@@ -401,7 +414,15 @@ STDMETHODIMP CShapeEditor::SetShape( IShape* shp )
 		if (endParts.find(i) != endParts.end()) part = PartEnd;
 
 		shp->get_XY(i, &x, &y, &vb);
-		_activeShape->AddPoint(x, y, -1, -1, part);
+		if(haveZ)
+			shp->get_Z(i, &z, &vb);
+		else
+			z = 0.0;
+		if(haveM)
+			shp->get_M(i, &m, &vb);
+		else
+			m = 0.0;
+		_activeShape->AddPoint(x, y, z, m, -1, -1, part);
 	}
 	return S_OK;
 }
@@ -717,11 +738,13 @@ STDMETHODIMP CShapeEditor::AddPoint(IPoint *newPoint, VARIANT_BOOL* retVal)
 		get_IsDigitizing(&digitizing);
 		tkCursorMode cursor = _mapCallback->_GetCursorMode();
 		if (digitizing) {
-			double x, y;
+			double x, y, z, m;
 			newPoint->get_X(&x);
 			newPoint->get_Y(&y);
+			newPoint->get_Z(&z);
+			newPoint->get_M(&m);
 			newPoint->Release();
-			_activeShape->AddPoint(x, y, -1, -1, PartBegin);
+			_activeShape->AddPoint(x, y, z, m, -1, -1, PartBegin);
 			*retVal = VARIANT_TRUE;
 			return S_OK;
 		}
@@ -1277,7 +1300,7 @@ void CShapeEditor::HandleProjPointAdd(double projX, double projY)
 {
 	double pixelX, pixelY;
 	_mapCallback->_ProjectionToPixel(projX, projY, &pixelX, &pixelY);
-	_activeShape->AddPoint(projX, projY, pixelX, pixelY);
+	_activeShape->AddPoint(projX, projY, 0.0, 0.0, pixelX, pixelY);
 	_activeShape->ClearSnapPoint();
 }
 

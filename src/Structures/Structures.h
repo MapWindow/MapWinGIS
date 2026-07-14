@@ -57,12 +57,22 @@ struct MeasurePoint
 	Point2D Proj;
 	double x;		// in decimal degrees
 	double y;
+	double z;
+	double m;
 	void CopyTo(MeasurePoint& pnt2) {
 		pnt2.x = x;
 		pnt2.y = y;
+		pnt2.z = z;
+		pnt2.m = m;
 		pnt2.Proj = Proj;
 	}
-	MeasurePoint() : Part(PartNone) {}
+	MeasurePoint() : Part(PartNone)
+	{
+		x = 0.0;
+		y = 0.0;
+		z = 0.0;
+		m = 0.0;
+	}
 };
 
 struct OgrUpdateError

@@ -568,6 +568,8 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		case cmEditShape:
 			{
+				if (m_sendMouseDown == TRUE)
+					this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl, shift))
 				{
 					long layerHandle, shapeIndex;
@@ -631,7 +633,9 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			break;
 		case cmZoomOut:
 			{
-				ZoomToCursorPosition(false);
+				//ZoomToCursorPosition(false);
+				this->SetCapture();
+				_dragging.Operation = DragZoombox;
 				break;
 			}
 		case cmPan:

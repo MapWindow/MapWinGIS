@@ -77,7 +77,7 @@ void MeasuringBase::HandleProjPointAdd(double projX, double projY)
 {
 	double pixelX, pixelY;
 	_mapCallback->_ProjectionToPixel(projX, projY, &pixelX, &pixelY);
-	AddPoint(projX, projY, pixelX, pixelY);
+	AddPoint(projX, projY, 0.0, 0.0, pixelX, pixelY);
 }
 
 // *******************************************************
