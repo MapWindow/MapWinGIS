@@ -23,6 +23,7 @@
  * (Open source contributors should list themselves and their modifications here). */
 #include "stdafx.h"
 #include "ShapeWrapperCOM.h"
+#include "UtilityFunctions.h"
 
 #include <gsl/util>
 
@@ -476,16 +477,34 @@ bool CShapeWrapperCOM::InsertPointXYZM(const int pointIndex, const double x, con
 // ********************************************************
 bool CShapeWrapperCOM::DeletePoint(const int pointIndex)
 {
-	if (pointIndex < 0 || pointIndex >= gsl::narrow_cast<int>(_points.size()))
+	auto pointCount = gsl::narrow_cast<int>(_points.size());
+	if (pointIndex < 0 || pointIndex >= pointCount)
 	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
+	const auto needToReClose = pointIndex == 0 && Utility::PointIsXYEqual(_points[pointCount - 1], _points[0]);
 	_points[pointIndex]->Release();
 	_points.erase(_points.begin() + pointIndex);
+	if (needToReClose)
+	{	// First point is the last point (to close)
+		pointCount = gsl::narrow_cast<int>(_points.size());
+		IPoint* pt;
+		auto hr = _points[0]->Clone(&pt);
+		if (FAILED(hr)) {
+			_lastErrorCode = tkINVALID_SHAPE;
+			return false;
+		}
+		auto replaceIndex = pointCount - 1;
+		_points[replaceIndex]->Release();
+		_points.erase(_points.begin() + replaceIndex);
+		pt->AddRef();
+		_points.insert(_points.begin() + replaceIndex, pt);
+	}
 	_boundsChanged = true;
 	return true;
 }
+
 #pragma endregion
 
 #pragma region Parts

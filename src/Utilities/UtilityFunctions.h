@@ -95,4 +95,6 @@ namespace Utility
 	int GetCurrentYear();
 
 	size_t split(const std::string &txt, std::vector<std::string> &strs, const char splittingChar);
+
+	bool PointIsXYEqual(IPoint* p1, IPoint* p2, const double maxDiff = 0.00001);
 }

@@ -1407,6 +1407,16 @@ namespace Utility
 
 		return strs.size();
 	}
+
+	bool PointIsXYEqual(IPoint* p1, IPoint* p2, const double maxDiff)
+	{
+		double x1, x2, y1, y2;
+		p1->get_X(&x1);
+		p1->get_Y(&y1);
+		p2->get_X(&x2);
+		p2->get_Y(&y2);
+		return abs(x1 - x2) <= 0.00001 && abs(y1 - y2) <= maxDiff;
+	}
 }
 
 // ReSharper restore CppUseAuto
