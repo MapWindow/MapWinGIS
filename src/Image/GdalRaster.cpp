@@ -362,6 +362,18 @@ bool GdalRaster::ReadGeoTransform()
 	double adfGeoTransform[6];
 	bool success = _dataset->GetGeoTransform(adfGeoTransform) == CE_None;
 
+	if (!success)
+	{
+		auto count = _dataset->GetGCPCount();
+		if (count > 0)
+		{
+			// If normal GetGeoTransform failed, fallback generate GeoTransform from GCP using GDALGCPsToGeoTransform
+			// using bApproxOK: True to not requare exact fit (within 0.25 pixel) for all GCPs.
+			auto gcps = _dataset->GetGCPs();
+			success = CPL_TO_BOOL(GDALGCPsToGeoTransform(count, gcps, adfGeoTransform, TRUE));
+		}
+	}
+
 	m_globalSettings.SetGdalUtf8(false);
 
 	if (!success) return false;
