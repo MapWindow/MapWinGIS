@@ -197,11 +197,11 @@ OGRGeometry* OgrConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryType for
 		oGeom = oMPnt;
 	}
 	else if (shptype == SHP_POLYLINE || shptype == SHP_POLYLINEM || shptype == SHP_POLYLINEZ)
-	{	
+	{
 		bool multiLineString = (forceGeometryType == wkbMultiLineString || forceGeometryType == wkbMultiLineString25D);
 
 		if (numParts <= 1 && !multiLineString)
-		{	
+		{
 			// create empty shape
 			OGRLineString *oLine = (OGRLineString*)OGRGeometryFactory::createGeometry(wkbLineString);
 			if (numPoints > 0)
@@ -229,12 +229,12 @@ OGRGeometry* OgrConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryType for
 			oGeom = oMLine;
 		}
 	}
-		
+
 	else if (shptype == SHP_POLYGON || shptype == SHP_POLYGONM || shptype == SHP_POLYGONZ)
-	{	
+	{
 		bool multiPolygon = (forceGeometryType == wkbMultiPolygon || forceGeometryType == wkbMultiPolygon25D);
 		if (numParts <= 1 && !multiPolygon)
-		{	
+		{
 			// create empty shape
 			OGRPolygon* oPoly;
 			if (shptype == SHP_POLYGONZ)
@@ -251,7 +251,7 @@ OGRGeometry* OgrConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryType for
 			oGeom = oPoly;
 		}
 		else
-		{	
+		{
 			// if parts are present, add them
 			if (numPoints > 0)
 			{
@@ -289,9 +289,9 @@ OGRGeometry* OgrConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryType for
 	}
 	else
 		return NULL;	//	other types aren't supported
-	
+
 	if (oGeom != NULL)
-	{		
+	{
 		if (shptype == SHP_POINT || shptype == SHP_MULTIPOINT || shptype == SHP_POLYLINE || shptype == SHP_POLYGON)
 			oGeom->setCoordinateDimension(2);
 		else
@@ -654,7 +654,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 			{
 				oPoly = (OGRPolygon *) oMPoly->getGeometryRef(iGeom);
 				
-				if (oPoly->getGeometryType() == wkbPolygon || oPoly->getGeometryType() == wkbPolygon25D  || oPoly->getGeometryType() == wkbPolygonM || oPoly->getGeometryType() == wkbPolygonZM)
+				if (oPoly->getGeometryType() == wkbPolygon || oPoly->getGeometryType() == wkbPolygon25D || oPoly->getGeometryType() == wkbPolygonM || oPoly->getGeometryType() == wkbPolygonZM)
 				{					
 					if( oPoly->getExteriorRing() == NULL)		continue;
 					if (oPoly->getExteriorRing()->IsEmpty())	continue;

@@ -405,7 +405,7 @@ STDMETHODIMP CShapeEditor::SetShape( IShape* shp )
 	VARIANT_BOOL vb;
 	double x, y, z, m;
 	shp->get_NumPoints(&numPoints);
-	
+
 	bool haveZ = ShapeUtility::IsZ(shpType);
 	bool haveM = ShapeUtility::HaveM(shpType);
 
@@ -744,7 +744,7 @@ STDMETHODIMP CShapeEditor::AddPoint(IPoint *newPoint, VARIANT_BOOL* retVal)
 			newPoint->get_X(&x);
 			newPoint->get_Y(&y);
 			newPoint->get_Z(&z);
-			newPoint->get_Z(&m);
+			newPoint->get_M(&m);
 			newPoint->Release();
 			_activeShape->AddPoint(x, y, z, m, -1, -1, PartBegin);
 			*retVal = VARIANT_TRUE;
