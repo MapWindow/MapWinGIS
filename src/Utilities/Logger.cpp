@@ -31,7 +31,7 @@ namespace Debug
 	{
 		if (IsOpened() || Debug::IsDebugMode())
 		{
-			TCHAR buffer[1024];
+			TCHAR buffer[4096];
 			va_list args;
 			va_start( args, format);
 			vsprintf( buffer, format, args );

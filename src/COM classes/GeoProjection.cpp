@@ -529,6 +529,39 @@ STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal
 		return S_OK;
 	}
 
+	// Because layers loaed from diffrent sources (with the same GeoProjection) can fail test: _projection->IsSame(sr)
+	CComBSTR name1;
+	CComBSTR name2;
+	this->get_Name(&name1);
+	proj->get_Name(&name2);
+	auto nameIsEqual = name1 == name2;
+
+	CComBSTR projName1;
+	CComBSTR projName2;
+	this->get_ProjectionName(&projName1);
+	proj->get_ProjectionName(&projName2);
+	auto projNameIsEqual = projName1 == projName2;
+
+	if (!projNameIsEqual)
+	{
+		// Compare ProjectionName after filter out '.' and replacing all '-' with space.
+		// This is so that  "WGS-84" and "WGS 84" is seen as the same
+		std::wstring pn1(projName1, SysStringLen(projName1));
+		std::wstring pn2(projName2, SysStringLen(projName2));
+		std::replace(pn1.begin(), pn1.end(), '-', ' ');
+		std::replace(pn2.begin(), pn2.end(), '-', ' ');
+		pn1.erase(std::remove(pn1.begin(), pn1.end(), '.'), pn1.end());
+		pn2.erase(std::remove(pn2.begin(), pn2.end(), '.'), pn2.end());
+		projNameIsEqual = pn1 == pn2;
+	}
+
+	// We test if Name and ProjectionName are the same on both we call that the same.
+	if (nameIsEqual && projNameIsEqual)
+	{
+		*pVal = VARIANT_TRUE;
+		return S_OK;
+	}
+
 	const OGRSpatialReference* const sr = dynamic_cast<CGeoProjection*>(proj)->get_SpatialReference();
 	// use OGRSpatialReference to test same-ness
 	*pVal = (_projection->IsSame(sr) == 0) ? VARIANT_FALSE : VARIANT_TRUE;
