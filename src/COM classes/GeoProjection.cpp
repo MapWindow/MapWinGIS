@@ -449,6 +449,8 @@ STDMETHODIMP CGeoProjection::ImportFromAutoDetect(BSTR proj, VARIANT_BOOL* retVa
 	{
 		const CString s(proj);
 		*retVal = VARIANT_FALSE;
+		if(s.GetLength() == 0)
+			return S_OK;
 
 		const OGRErr err = _projection->SetFromUserInput(s);
 
@@ -931,16 +933,20 @@ bool CGeoProjection::ReadFromFileCore(CStringW filename, bool esri)
 		// determine file length
 		fseek(prjFile, 0L, SEEK_END);
 		const int fileLen = ftell(prjFile);
-		fseek(prjFile, 0L, SEEK_SET);
-		// allocate buffer for file
-		vector<char> pszWKT = vector<char>(fileLen, 0);
-		// read the file
-		fread(pszWKT.data(), sizeof(char), fileLen, prjFile);
-		fclose(prjFile);
-		// do the import
-		err = _projection->SetFromUserInput(pszWKT.data());
-		// clean up
-		//delete pszWKT;
+		if (fileLen > 0) {
+			fseek(prjFile, 0L, SEEK_SET);
+			// allocate buffer for file
+			auto pszWKT = vector<char>(fileLen + 1, 0);
+			// read the file
+			fread(pszWKT.data(), sizeof(char), fileLen, prjFile);
+			fclose(prjFile);
+			// do the import
+			err = _projection->SetFromUserInput(pszWKT.data());
+			// clean up
+			//delete pszWKT;
+		}
+		else
+			err = OGRERR_NOT_ENOUGH_DATA;
 	}
 
 	if (err != OGRERR_NONE)
@@ -988,11 +994,6 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 	if (filename.CompareNoCase(L"") == 0)
 		return false;
 
-	FILE* prjFile = _wfopen(filename, L"wb");
-	if (!prjFile) {
-		return false;
-	}
-
 	CString proj;
 	CComBSTR bstr;
 	if (esri)
@@ -1009,12 +1010,16 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 
 	if (proj.GetLength() != 0)
 	{
+		FILE* prjFile = _wfopen(filename, L"wb");
+		if (!prjFile) {
+			return false;
+		}
+
 		fputs((LPCSTR)proj, prjFile);
 		//fprintf(prjFile, "%s", (LPCSTR)proj);
+		fclose(prjFile);
+		prjFile = nullptr;
 	}
-
-	fclose(prjFile);
-	prjFile = nullptr;
 
 	return true;
 }
@@ -1363,6 +1368,9 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 			{
 				_projection->Release();
 				_projection = static_cast<OGRSpatialReference*>(spahSrs[0]);
+				// free the remaining (unused) matches, then the array itself
+				for (int i = 1; i < nEntries; i++)
+					OSRDestroySpatialReference(spahSrs[i]);
 				CPLFree(pahSrs);
 			}
 			else
