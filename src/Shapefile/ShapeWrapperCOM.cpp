@@ -23,6 +23,7 @@
  * (Open source contributors should list themselves and their modifications here). */
 #include "stdafx.h"
 #include "ShapeWrapperCOM.h"
+#include "UtilityFunctions.h"
 
 #include <gsl/util>
 
@@ -471,40 +472,30 @@ bool CShapeWrapperCOM::InsertPointXYZM(const int pointIndex, const double x, con
 	return false;
 }
 
-bool PointIsXYEqual(IPoint* p1, IPoint* p2)
-{
-	double x1, x2, y1, y2;
-	p1->get_X(&x1);
-	p2->get_X(&x2);
-	p1->get_Y(&y1);
-	p2->get_Y(&y2);
-	return abs(x1 - x2) < 0.00001 && abs(y1 - y2) < 0.00001;
-}
-
 // ********************************************************
 //		DeletePoint()
 // ********************************************************
 bool CShapeWrapperCOM::DeletePoint(const int pointIndex)
 {
-	auto count = gsl::narrow_cast<int>(_points.size());
-	if (pointIndex < 0 || pointIndex >= count)
+	auto pointCount = gsl::narrow_cast<int>(_points.size());
+	if (pointIndex < 0 || pointIndex >= pointCount)
 	{
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		return false;
 	}
-	const auto needToReClose = pointIndex == 0 && PointIsXYEqual(_points[count - 1], _points[0]);
+	const auto needToReClose = pointIndex == 0 && Utility::PointIsXYEqual(_points[pointCount - 1], _points[0]);
 	_points[pointIndex]->Release();
 	_points.erase(_points.begin() + pointIndex);
 	if (needToReClose)
 	{	// First point is the last point (to close)
-		count = gsl::narrow_cast<int>(_points.size());
+		pointCount = gsl::narrow_cast<int>(_points.size());
 		IPoint* pt;
 		auto hr = _points[0]->Clone(&pt);
 		if (FAILED(hr)) {
 			_lastErrorCode = tkINVALID_SHAPE;
 			return false;
 		}
-		auto replaceIndex = count - 1;
+		auto replaceIndex = pointCount - 1;
 		_points[replaceIndex]->Release();
 		_points.erase(_points.begin() + replaceIndex);
 		pt->AddRef();

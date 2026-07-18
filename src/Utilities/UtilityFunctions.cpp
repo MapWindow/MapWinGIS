@@ -40,15 +40,6 @@ namespace Utility
 	}
 
 	// ********************************************************
-	//    ConvertToAnsi1252()
-	// ********************************************************
-	CStringA ConvertToAnsi1252(CStringW unicode) {
-		USES_CONVERSION;
-		CStringA acp = CW2A(unicode, CP_ACP);
-		return acp;
-	}
-
-	// ********************************************************
 	//    ConvertFromUtf8()
 	// ********************************************************
 	CStringW ConvertFromUtf8(CStringA utf8) {
@@ -1418,6 +1409,16 @@ namespace Utility
 		strs.push_back(txt.substr(initialPos, (((pos) < (txt.size())) ? (pos) : (txt.size())) - initialPos + 1));
 
 		return strs.size();
+	}
+
+	bool PointIsXYEqual(IPoint* p1, IPoint* p2, const double maxDiff)
+	{
+		double x1, x2, y1, y2;
+		p1->get_X(&x1);
+		p1->get_Y(&y1);
+		p2->get_X(&x2);
+		p2->get_Y(&y2);
+		return abs(x1 - x2) <= 0.00001 && abs(y1 - y2) <= maxDiff;
 	}
 }
 

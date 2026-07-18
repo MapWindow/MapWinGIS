@@ -151,8 +151,6 @@ bool TileManager::GetTileIndices(BaseProvider* provider, CRect& indices, int& zo
         return false;
     }
 
-    //VerifyLayers();
-
     if (!_map->_GetTilesForMap(provider, _scalingRatio, indices, zoom))
     {
         Clear();
