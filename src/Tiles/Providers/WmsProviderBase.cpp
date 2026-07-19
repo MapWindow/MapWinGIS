@@ -50,7 +50,6 @@ CString WmsProviderBase::GetBoundingBox(CPoint &pos, int zoom, tkWmsVersion vers
 		case wv111:
 		default:
 			bbo = tkWmsBoundingBoxOrder::bboLongLat;
-
 		}
 	}
 

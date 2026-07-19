@@ -18,7 +18,7 @@ namespace Utility
 	
 	CString UrlEncode(CString s);
 	CStringW XmlFilenameToUnicode(CStringA s, bool utf8);
-	CStringA ConvertToUtf8(CStringW unicode); 
+	CStringA ConvertToUtf8(CStringW unicode);
 	CStringW ConvertFromUtf8(CStringA utf8);
 	CString GetSocketErrorMessage(DWORD socketError);
 
