@@ -1,4 +1,6 @@
-﻿namespace MapWinGisTests.FunctionalTests.Shapefile;
+﻿using Xunit.Abstractions;
+
+namespace MapWinGisTests.FunctionalTests.Shapefile;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
 public class ShapefileTests

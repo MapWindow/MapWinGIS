@@ -1,3 +1,5 @@
+using Xunit.Abstractions;
+
 namespace MapWinGisTests;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]

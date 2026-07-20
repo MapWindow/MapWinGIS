@@ -1,4 +1,6 @@
-﻿namespace MapWinGisTests.FunctionalTests.Projections;
+﻿using Xunit.Abstractions;
+
+namespace MapWinGisTests.FunctionalTests.Projections;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
 public class UtilsProjectionTests

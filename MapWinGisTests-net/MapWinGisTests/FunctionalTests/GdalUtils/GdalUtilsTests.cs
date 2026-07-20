@@ -1,4 +1,6 @@
-﻿namespace MapWinGisTests.FunctionalTests.GdalUtils;
+﻿using Xunit.Abstractions;
+
+namespace MapWinGisTests.FunctionalTests.GdalUtils;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
 public class GdalUtilsTests : ICallback

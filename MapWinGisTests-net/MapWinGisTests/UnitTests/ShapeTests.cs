@@ -1,4 +1,6 @@
-﻿namespace MapWinGisTests.UnitTests;
+﻿using Xunit.Abstractions;
+
+namespace MapWinGisTests.UnitTests;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
 public class ShapeTests
