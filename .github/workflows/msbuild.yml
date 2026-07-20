@@ -231,12 +231,12 @@ jobs:
 
     # Build test solution
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
       if: ${{matrix.platform == 'x64' }}
       with:
         msbuild-architecture: x64
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v1.1 
+      uses: microsoft/setup-msbuild@v2
       if: ${{matrix.platform == 'Win32' }}
       with:
         msbuild-architecture: x86
