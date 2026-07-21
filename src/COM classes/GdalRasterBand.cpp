@@ -88,6 +88,7 @@ STDMETHODIMP CGdalRasterBand::get_Maximum(DOUBLE* pVal)
 	if (!success)
 	{
 		ErrorMessage("Failed to retrieve maximum.");
+		*pVal = 255; // Default to 255 as get_Minimum defaults to 0.0
 	}
 
 	return S_OK;

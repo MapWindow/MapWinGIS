@@ -209,10 +209,16 @@ void SQLiteCache::AddTile(TileCore* tile)
 				{
 					CString s = "REPLACE INTO Tiles VALUES (?, ?, ?, ?, ?, ?, ?)";
 					int val = sqlite3_prepare_v2(_conn, s, s.GetLength()+1, &stmt, &tail);
-					
+
 					if (val != SQLITE_OK)
 					{
+#ifdef DEBUG_LOG
+						auto sqlite3_error = sqlite3_errmsg(_conn);
+						auto errorCode = sqlite3_extended_errcode(_conn);
+						CallbackHelper::ErrorMsg(Debug::Format("SQLiteCache::DoCaching: Failed to prepare statement errorNo: %d Message: %s", errorCode, sqlite3_error));
+#else
 						CallbackHelper::ErrorMsg("SQLiteCache::DoCaching: Failed to prepare statement.");
+#endif
 					}
 					else
 					{
