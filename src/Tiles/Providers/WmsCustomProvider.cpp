@@ -66,11 +66,7 @@ CString WmsCustomProvider::MakeTileImageUrl(CPoint &pos, int zoom)
 // ******************************************************
 CString WmsCustomProvider::get_VersionString()
 {
-	auto version = _version;
-	if ( version == wvAuto )
-		version = wv13;	// Auto fall back to version 1.3
-
-	switch (version)
+	switch (_version)
 	{
 	case wvEmpty:
 		return "";
@@ -81,6 +77,7 @@ CString WmsCustomProvider::get_VersionString()
 	case wv111:
 		return "&version=1.1.1";
 	case wv13:
+	case wvAuto: // Auto fall back to version: 1.3
 		return "&version=1.3.0";
 	default:
 		return "";

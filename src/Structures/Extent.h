@@ -143,9 +143,7 @@ public:
 
 	CString ToString()
 	{
-		auto width = Width();
-		auto height = Height();
-		return Debug::Format("x: %f; y: %f; w: %f; h: %f", left, top, width, height);
+		return Debug::Format("x: %f; y: %f; w: %f; h: %f", left, top, Width(), Height());
 	}
 	
 };

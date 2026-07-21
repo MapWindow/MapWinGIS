@@ -65,7 +65,6 @@ STDMETHODIMP CGdalRasterBand::get_Minimum(DOUBLE* pVal)
 
 	if (!success)
 	{
-		// Not an error, the band has no minimum value
 		ErrorMessage("Failed to retrieve minimum.");
 	}
 
@@ -88,9 +87,8 @@ STDMETHODIMP CGdalRasterBand::get_Maximum(DOUBLE* pVal)
 
 	if (!success)
 	{
-		// Not an error, the band has no maximum value
 		ErrorMessage("Failed to retrieve maximum.");
-		*pVal = 255;
+		*pVal = 255; // Default to 255 as get_Minimum defaults to 0.0
 	}
 
 	return S_OK;
