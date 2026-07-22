@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <algorithm>
 #include "SelectionHelper.h"
 #include "Shapefile.h"
 #include "ShapeHelper.h"
@@ -209,20 +210,37 @@ bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, long& shape
 {
     return SelectSingleShape(sf, box, SelectMode::INTERSECTION, shapeIndex);
 }
+
 bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, SelectMode mode, long& shapeIndex)
 {
     vector<long> results;
-    if (SelectShapes(sf, box, mode, results))
+    if (!SelectShapes(sf, box, mode, results))
+        return false;
+
+    const auto center = box.GetCenter();
+    const double tolerance = (std::max)(box.Width(), box.Height());
+
+    // top-most first
+    for (int i = static_cast<int>(results.size()) - 1; i >= 0; i--)
     {
-        for (int i = results.size() - 1; i >= 0; i--)
+        VARIANT_BOOL visible = VARIANT_FALSE;
+        sf->get_ShapeRendered(results[i], &visible);
+        if (!visible)
+            continue;
+
+        IShape* shp = nullptr;
+        sf->get_Shape(results[i], &shp);
+        if (!shp)
+            continue;
+
+        // Real geometry match (handles polygon holes correctly).
+        const bool isMatch = ShapeHelper::PointWithinShape(shp, center.x, center.y, tolerance);
+        shp->Release();
+
+        if (isMatch)
         {
-            VARIANT_BOOL visible;
-            sf->get_ShapeRendered(results[i], &visible);
-            if (visible)
-            {
-                shapeIndex = results[i];
-                return true;
-            }
+            shapeIndex = results[i];
+            return true;
         }
     }
     return false;
