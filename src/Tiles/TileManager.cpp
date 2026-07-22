@@ -22,6 +22,7 @@
 #include "StdAfx.h"
 #include "TileManager.h"
 #include "TileCacheManager.h"
+#include "WmsCustomProvider.h"
 
 // ************************************************************
 //		set_MapCallback()
@@ -349,9 +350,20 @@ void TileManager::ClearBuffer()
 // *********************************************************
 bool TileManager::IsNewRequest(Extent& mapExtents, CRect indices, int providerId, int zoom)
 {
+    auto layersSelectionChanged = false;
+    auto customProvider = dynamic_cast<WmsCustomProvider*>(_provider);
+    if (customProvider != nullptr) {
+        auto layers = customProvider->get_Layers();
+        layersSelectionChanged = _lastLayers != layers;
+        if (layersSelectionChanged)
+            _tiles.clear();
+        _lastLayers = layers;
+    }
+
     if (indices == _lastTileExtents &&
         _lastProvider == providerId &&
-        _lastZoom == zoom)
+        _lastZoom == zoom &&
+        !layersSelectionChanged)
     {
         // map extents has changed but the list of tiles to be displayed is the same
         tilesLogger.WriteLine("The same list of tiles can be used.");
@@ -542,7 +554,8 @@ void TileManager::UpdateScreenBuffer()
 {
     if (_isBackground)
     {
-        _map->_MarkTileBufferChanged();
+        if( _map !=  nullptr )
+            _map->_MarkTileBufferChanged();
     }
     else
     {
