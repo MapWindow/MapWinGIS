@@ -341,8 +341,6 @@ void CMapView::RedrawWmsLayers(Gdiplus::Graphics* g)
 					gWms->Clear(Gdiplus::Color::Transparent);
 				}
 
-				//manager->VerifyLayers();
-
 				TilesDrawer drawer(gWms, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, PixelsPerMapUnit(), GetWgs84ToMapTransform());
 
 				drawer.DrawTiles(manager, GetMapProjection(), _isSnapshot, _projectionChangeCount);

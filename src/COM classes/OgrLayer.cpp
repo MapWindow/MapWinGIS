@@ -174,7 +174,7 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
 
 				ShpfileType shapeType;
 				shp->get_ShapeType(&shapeType);
-            	auto compatible = shapeType == shpType
+				auto compatible = shapeType == shpType
 									|| ShapeUtility::Convert2D(shapeType) == ShapeUtility::Convert2D(shpType);
 				// Ignore incompatible shapes
 				if (compatible)
@@ -204,7 +204,6 @@ void COgrLayer::UpdateShapefileFromOGRLoader()
 					if (hasFid)
 						((CShapefile*)_shapefile)->MapOgrFid2ShapeIndex(pVal.lVal, count);					
 				}
-
 
                 count++;
             }

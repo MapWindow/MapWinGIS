@@ -269,13 +269,6 @@ STDMETHODIMP CShape::put_ShapeType(const ShpfileType newVal)
 	const ShapeWrapperType type = _shp->get_WrapperType();
 	const ShapeWrapperType newType = ShapeUtility::GetShapeWrapperType(newVal, !_useFastMode);
 
-	/*if ((newVal == SHP_POINT || newVal == SHP_POINTM || newVal == SHP_POINTZ) && ComHelper::GetBreak()) {
-		CString str;
-		str.Format("0x%016llx  SHP_POINT", this);
-		const CComBSTR bstr(str);
-		put_Key(bstr);
-	} */
-
 	if (type == newType)
 	{
 		if (!_shp->put_ShapeType(newVal)) {
@@ -1509,7 +1502,7 @@ STDMETHODIMP CShape::BufferWithParams(const DOUBLE distance, const LONG numSegme
 		{
 			if (!shapes.empty()) {
 				*retVal = gsl::at(shapes, 0);
-				const int numShapes = shapes.size();
+				const auto numShapes = shapes.size();
 				for (size_t i = 1; i < numShapes; i++) {
 					gsl::at(shapes, i)->Release();
 				}
@@ -1736,7 +1729,7 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 // *************************************************************
 STDMETHODIMP CShape::SerializeToString(BSTR* serialized)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	//	fast editing mode
 	const ShpfileType shpType = _shp->get_ShapeType();
@@ -2319,7 +2312,7 @@ bool Bytes2SafeArray(const unsigned char* data, const int size, VARIANT* arr)
 //***********************************************************************
 STDMETHODIMP CShape::ExportToBinary(VARIANT* bytesArray, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	int* data = _shp->get_RawData();
 	const int contentLength = _shp->get_ContentLength();
@@ -2344,7 +2337,7 @@ STDMETHODIMP CShape::ExportToBinary(VARIANT* bytesArray, VARIANT_BOOL* retVal)
 //********************************************************************
 STDMETHODIMP CShape::ImportFromBinary(const VARIANT bytesArray, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 
 	if (bytesArray.vt != (VT_ARRAY | VT_UI1))

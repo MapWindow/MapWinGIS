@@ -824,7 +824,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 	if (!updateFileInPlace)
 		DBFClose(newdbfHandle);
 
-	// Set byte 29 to 0x00 in the .dbf file  (Codepage mark)
+	// Set byte 29 to 0x00 in the .dbf file  (Codepage mark) to make ReadRecord() treat text as UTF-8.
 	FILE* dbfFile = _wfopen(dbfFilename, L"r+");
 	if (dbfFile != NULL) {
 		fseek(dbfFile, 29, SEEK_SET);
@@ -874,9 +874,6 @@ STDMETHODIMP CTableClass::SaveAs(BSTR dbfFilename, ICallback *cBack, VARIANT_BOO
 // **************************************************************
 void CTableClass::ClearFields()
 {
-	//if(_triggerDebug)
-		//DebugBreak();
-
 	for (int i = 0; i < FieldCount(); i++)
 	{
 		if (_fields[i]->field != NULL)
@@ -897,9 +894,6 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 		*retval = VARIANT_TRUE;
-
-	//if(_triggerDebug)
-		//DebugBreak();
 
 	StopAllJoins();
 
@@ -1491,9 +1485,7 @@ bool CTableClass::WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowI
 			if (val.vt == VT_BSTR)
 			{
 				nonstackString = Utility::ConvertBSTRToLPSTR(val.bstrVal, (isUTF8 ? CP_UTF8 : CP_ACP)); // ((LPCSTR)Utility::ConvertToUtf8(val.bstrVal)); // Utility::SYS2A(val.bstrVal);
-				int fieldCount = DBFGetFieldCount(dbfHandle);
 				DBFWriteStringAttribute(dbfHandle, toRowIndex, i, nonstackString);
-				//::OutputDebugString("DBFWriteStringAttribute() done!");
 				delete[] nonstackString;
 				nonstackString = NULL;
 			}
@@ -3314,8 +3306,8 @@ STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 // *****************************************************
 STDMETHODIMP CTableClass::get_IsJoined(VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	for (size_t i = _fields.size() - 1; i >= 0 && _fields.size() > i; i--)
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	for (size_t i = _fields.size(); i-- > 0;)
 	{
 		if (_fields[i]->Joined()) {
 			*retVal = VARIANT_TRUE;

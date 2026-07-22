@@ -80,14 +80,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 
 	// build GEOSGeom for comparison
 	IShape* shpExt = nullptr;
-#if DEBUG_ALLOCATED_OBJECTS
-	auto currentBrake = ComHelper::GetBreak();
-	ComHelper::SetBreak(false);
-#endif
 	ComHelper::CreateShape(&shpExt);
-#if DEBUG_ALLOCATED_OBJECTS
-	ComHelper::SetBreak(currentBrake);
-#endif
 
 	const bool bPtSelection = bMinX == bMaxX && bMinY == bMaxY;
 	int localNumShapes = static_cast<int>(_shapeData.size());

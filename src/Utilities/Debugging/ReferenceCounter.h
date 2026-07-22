@@ -33,7 +33,6 @@ public:
 		int* val = &referenceCounts[(int)type];
 		(*val)--;
 	}
-
 	void WriteReport(bool unreleasedOnly);
 	CString GetReport(bool unreleasedOnly);
 

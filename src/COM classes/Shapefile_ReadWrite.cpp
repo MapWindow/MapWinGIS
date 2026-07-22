@@ -1110,7 +1110,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 
 		long percent = static_cast<long>(static_cast<double>(i + 1) / size * 100);
 
-		if (percent % 10 == 0)
+		if (i == 0 || percent % 10 == 0)
 			CallbackHelper::Progress(callback, i, size, "Writing .shx file", _key, percent);
 	}
 

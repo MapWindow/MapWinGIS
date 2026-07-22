@@ -46,7 +46,6 @@ public:
 		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
 		_lastRecordIndex = -1;
-		_triggerDebug = false;
 		gReferenceCounter.AddRef(tkInterface::idTable);
 	}
 
@@ -195,7 +194,6 @@ private:
 	int _lastRecordIndex;    // last index accessed with get_CellValue
 	bool _appendMode;
 	int _appendStartShapeCount;
-	bool _triggerDebug;
 
 public:
 	bool m_needToSaveAsNewFile;
