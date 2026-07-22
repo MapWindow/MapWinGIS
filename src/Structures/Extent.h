@@ -131,7 +131,7 @@ public:
 		top = yCent + dy;
 	}
 
-	Point2D GetCenter () 
+	Point2D GetCenter ()
 	{
 		return Point2D((left + right) / 2.0, (top + bottom) / 2.0);
 	}

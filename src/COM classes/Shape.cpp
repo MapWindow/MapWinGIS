@@ -1492,7 +1492,7 @@ STDMETHODIMP CShape::BufferWithParams(const DOUBLE distance, const LONG numSegme
 		{
 			if (!shapes.empty()) {
 				*retVal = gsl::at(shapes, 0);
-				const int numShapes = shapes.size();
+				const auto numShapes = shapes.size();
 				for (size_t i = 1; i < numShapes; i++) {
 					gsl::at(shapes, i)->Release();
 				}
@@ -1719,24 +1719,24 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 // *************************************************************
 STDMETHODIMP CShape::SerializeToString(BSTR* serialized)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	//	fast editing mode
-	const ShpfileType shptype = _shp->get_ShapeType();
+	const ShpfileType shpType = _shp->get_ShapeType();
 
 	CString builder = "";
-	char cbuf[20];
+	CString chunk;
 	double dbuf;
 	double dbuf1;
-	_itoa(shptype, cbuf, 10); // TODO: Fix compile warning
-	builder.Append(cbuf);
-	builder.Append(";");
+
+	chunk.Format("%d;", shpType);
+	builder.Append(chunk);
 
 	const int numParts = _shp->get_PartCount();
 	for (int i = 0; i < numParts; i++)
 	{
-		sprintf(cbuf, "%d;", _shp->get_PartStartPoint(i));  // TODO: Fix compile warning
-		builder.Append(cbuf);
+		chunk.Format("%d;", _shp->get_PartStartPoint(i));
+		builder.Append(chunk);
 	}
 
 	const int numPoints = _shp->get_PointCount();
@@ -1744,24 +1744,24 @@ STDMETHODIMP CShape::SerializeToString(BSTR* serialized)
 	{
 		_shp->get_PointXY(i, dbuf, dbuf1);
 
-		sprintf(cbuf, "%f|", dbuf); // TODO: Fix compile warning
-		builder.Append(cbuf);
+		chunk.Format("%f|", dbuf);
+		builder.Append(chunk);
 
-		sprintf(cbuf, "%f|", dbuf1); // TODO: Fix compile warning
-		builder.Append(cbuf);
+		chunk.Format("%f|", dbuf1);
+		builder.Append(chunk);
 
-		if (shptype == SHP_MULTIPOINTM || shptype == SHP_POLYGONM || shptype == SHP_POLYLINEM ||
-			shptype == SHP_MULTIPOINTZ || shptype == SHP_POLYGONZ || shptype == SHP_POLYLINEZ)
+		if (shpType == SHP_MULTIPOINTM || shpType == SHP_POLYGONM || shpType == SHP_POLYLINEM ||
+			shpType == SHP_MULTIPOINTZ || shpType == SHP_POLYGONZ || shpType == SHP_POLYLINEZ)
 		{
 			_shp->get_PointZ(i, dbuf);
-			sprintf(cbuf, "%f|", dbuf); // TODO: Fix compile warning
-			builder.Append(cbuf);
+			chunk.Format("%f|", dbuf);
+			builder.Append(chunk);
 		}
-		if (shptype == SHP_MULTIPOINTM || shptype == SHP_POLYGONM || shptype == SHP_POLYLINEM)
+		if (shpType == SHP_MULTIPOINTM || shpType == SHP_POLYGONM || shpType == SHP_POLYLINEM)
 		{
 			_shp->get_PointM(i, dbuf);
-			sprintf(cbuf, "%f|", dbuf); // TODO: Fix compile warning
-			builder.Append(cbuf);
+			chunk.Format("%f|", dbuf);
+			builder.Append(chunk);
 		}
 	}
 	*serialized = builder.AllocSysString();

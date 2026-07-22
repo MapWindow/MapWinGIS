@@ -158,6 +158,8 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 		shpExt->AddPoint(bMinX, bMinY, &idx);
 		// convert input point to GEOS
 		GEOSGeom geosPoint = GeosConverter::ShapeToGeom(shpExt); // TODO: Fix compile warning
+		shpExt->Release();
+		shpExt = nullptr;
 
 		if (shpType2D == SHP_POLYGON)
 		{
@@ -216,6 +218,8 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 		shpExt->AddPoint(bMinX, bMinY, &idx);
 		// convert extent to GEOS
 		GEOSGeom geosExtent = GeosConverter::ShapeToGeom(shpExt); // TODO: Fix compile warning
+		shpExt->Release();
+		shpExt = nullptr;
 
 		for (i = 0; i < localNumShapes; i++)
 		{
