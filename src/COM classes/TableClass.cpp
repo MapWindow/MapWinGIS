@@ -782,7 +782,9 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 			}
 		}
 
-		DBFAddField(newdbfHandle, OLE2CA(fname), (DBFFieldType)type, width, precision);
+		int ret = DBFAddField(newdbfHandle, OLE2CA(fname), (DBFFieldType)type, width, precision);
+		if (ret == -1)
+			ErrorMessage(tkDBF_CANT_ADD_DBF_FIELD);
 		field->Release();
 	}
 
@@ -821,6 +823,15 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 	//Flush all of the records
 	if (!updateFileInPlace)
 		DBFClose(newdbfHandle);
+
+	// Set byte 29 to 0x00 in the .dbf file  (Codepage mark) to make ReadRecord() treat text as UTF-8.
+	FILE* dbfFile = _wfopen(dbfFilename, L"r+");
+	if (dbfFile != NULL) {
+		fseek(dbfFile, 29, SEEK_SET);
+		fputc('\0', dbfFile);
+		fflush(dbfFile);
+		fclose(dbfFile);
+	}
 
 	return true;
 }
@@ -1764,7 +1775,7 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 
 	// Darrel Brown, 10/16/2003 Added support for null cell values
 	// jf, 2/17/2018, added support for Dates and Booleans
-	if (newVal.vt != VT_I4 && newVal.vt != VT_R8 && newVal.vt != VT_BSTR && newVal.vt != VT_DATE && newVal.vt != VT_BOOL && newVal.vt != VT_NULL)
+	if (newVal.vt != VT_I4 && newVal.vt != VT_R8 && newVal.vt != VT_BSTR && newVal.vt != VT_DATE && newVal.vt != VT_BOOL && newVal.vt != VT_NULL && newVal.vt != VT_EMPTY)
 	{
 		ErrorMessage(tkINCORRECT_VARIANT_TYPE);
 		return S_OK;
@@ -3295,8 +3306,8 @@ STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 // *****************************************************
 STDMETHODIMP CTableClass::get_IsJoined(VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	for (size_t i = _fields.size() - 1; i >= 0; i--)
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	for (size_t i = _fields.size(); i-- > 0;)
 	{
 		if (_fields[i]->Joined()) {
 			*retVal = VARIANT_TRUE;
