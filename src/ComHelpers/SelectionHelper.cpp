@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <algorithm>
 #include "SelectionHelper.h"
 #include "Shapefile.h"
 #include "ShapeHelper.h"
@@ -213,56 +214,36 @@ bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, long& shape
 bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, SelectMode mode, long& shapeIndex)
 {
     vector<long> results;
-	bool foundMatch = false;
-	double minDistance = (std::numeric_limits<double>::max)();
-    if (SelectShapes(sf, box, mode, results))
+    if (!SelectShapes(sf, box, mode, results))
+        return false;
+
+    const auto center = box.GetCenter();
+    const double tolerance = (std::max)(box.Width(), box.Height());
+
+    // top-most first
+    for (int i = static_cast<int>(results.size()) - 1; i >= 0; i--)
     {
-		auto center = box.GetCenter();
-		IShape* ptShp = nullptr;
-		ComHelper::CreateShape(&ptShp);
-		ptShp->put_ShapeType(SHP_POINT);
-		IPoint* pnt;
-		ComHelper::CreatePoint(&pnt);
-		pnt->put_X(center.x);
-		pnt->put_Y(center.y);
-		VARIANT_BOOL retVal;
-		long pointIndex = 0;
-		ptShp->InsertPoint(pnt, &pointIndex, &retVal);
-		pnt->Release();
-        for (int i = static_cast<int>(results.size()) - 1; i >= 0; i--)
+        VARIANT_BOOL visible = VARIANT_FALSE;
+        sf->get_ShapeRendered(results[i], &visible);
+        if (!visible)
+            continue;
+
+        IShape* shp = nullptr;
+        sf->get_Shape(results[i], &shp);
+        if (!shp)
+            continue;
+
+        // Real geometry match (handles polygon holes correctly).
+        const bool isMatch = ShapeHelper::PointWithinShape(shp, center.x, center.y, tolerance);
+        shp->Release();
+
+        if (isMatch)
         {
-            VARIANT_BOOL visible;
-            sf->get_ShapeRendered(results[i], &visible);
-            if (visible)
-            {
-				IShape* shp;
-				sf->get_Shape(results[i], &shp);
-				ShpfileType shpfileType;
-				shp->get_ShapeType(&shpfileType);
-				double distance;
-				if (shpfileType == SHP_POLYGON || shpfileType == SHP_POLYGONZ || shpfileType == SHP_POLYGONM)
-				{
-					// Measure distance to polygons boundary to allow selection of inner shape, (IK-384)
-					IShape* boundary;
-					shp->Boundary(&boundary);
-					boundary->Distance(ptShp, &distance);
-					boundary->Release();
-				}
-				else
-					shp->Distance(ptShp, &distance);
-
-
-				if (minDistance > distance)
-				{
-					minDistance = distance;
-					shapeIndex = results[i];
-					foundMatch = true;
-				}
-            }
+            shapeIndex = results[i];
+            return true;
         }
-        ptShp->Release();
     }
-    return foundMatch;
+    return false;
 }
 
 /***********************************************************************/
