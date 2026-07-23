@@ -19,5 +19,8 @@ public:
 	static void AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, tkLabelPositioning method, tkLineLabelOrientation orientation, double offsetX, double offsetY);
 	static IShape* CenterAsShape(IShape* shp);
 	static int GetContentLength(IShape* shp);
+#if DEBUG_LOG
+	static void DebugDump(IShape* shp);
+#endif
 };
 

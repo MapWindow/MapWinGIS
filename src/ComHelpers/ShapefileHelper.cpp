@@ -403,13 +403,13 @@ bool tryGetCloserPointForShape(IShape* shp, IShape* ptShp, double& minDist, doub
 		// Get the distance
 		double distance;
 		resShp->get_Length(&distance);
+		resShp->Release();
 
 		// Check if this is allowed and/or smaller than the previous found point:
 		if (distance < minDist && distance < maxDistance) {
 			fx = xPnt;
 			fy = yPnt;
 			minDist = distance;
-			resShp->Release();
 			return true;
 		}
 	}
