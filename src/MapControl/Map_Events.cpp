@@ -551,7 +551,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		if (m_cursorMode == cmAddShape) {
 			if (StartNewBoundShape(projX, projY) != VARIANT_TRUE) return;
 		}
-		
+
 		if (alt) { // user wants to intercept coordinates and possibly modify them
 			this->FireBeforeVertexDigitized(&projX, &projY);
 		}
@@ -559,7 +559,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		if (Digitizer::OnMouseDown(_shapeEditor, projX, projY, ctrl)) {
 			UpdateShapeEditor();
 		}
-			
+
 		return;
 	}
 
@@ -618,7 +618,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				HandleOnLButtonMoveOrRotate(x, y);
 				break;
 			}
-		
 		case cmZoomIn:
 			{
 				this->SetCapture();
@@ -633,9 +632,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			break;
 		case cmZoomOut:
 			{
-				//ZoomToCursorPosition(false);
-				this->SetCapture();
-				_dragging.Operation = DragZoombox;
+				ZoomToCursorPosition(false);
 				break;
 			}
 		case cmPan:
@@ -958,6 +955,9 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 		{
 			case cmZoomIn:
 				ZoomToCursorPosition(true);
+				break;
+			case cmZoomOut:
+				ZoomToCursorPosition(false);
 				break;
 			case cmSelection:
 				if (sf || selectingSelectable)

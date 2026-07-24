@@ -415,6 +415,7 @@ STDMETHODIMP CGeoProjection::ImportFromWKT(const BSTR proj, VARIANT_BOOL* retVal
 	else
 	{
 		CString strProj(proj);
+		strProj = CorrectAxisOrder(strProj).c_str();
 
 		OGRErr result = OGRERR_NONE;
 		// use newer method importFromWkt(const char*)
@@ -1498,4 +1499,92 @@ bool CGeoProjection::ParseLinearUnits(CString s, tkUnitsOfMeasure& units)
 
 	Debug::WriteLine("Unrecognized linear units: %s", s);
 	return false;
+}
+
+std::string CGeoProjection::CorrectAxisOrder(CString wkt)
+{
+	std::string result;
+
+	std::vector<std::string> dual_value;
+	dual_value.emplace_back("AUTHORITY");
+	dual_value.emplace_back("AXIS");
+	dual_value.emplace_back("PARAMETER");
+	dual_value.emplace_back("PRIMEM");
+	dual_value.emplace_back("UNIT");
+	std::string tripple_value = "SPHEROID";
+
+	std::vector<std::string> lines;
+	std::string currentLine;
+	int openCount = 0; // [
+	int commaCount = 0;
+	for (size_t i = 0; i < wkt.GetLength(); i++)
+	{
+		auto ch = wkt[i];
+		if (ch == '\r' || ch == '\n')
+			continue;
+		else if (ch == '[')
+			openCount++;
+		else if (ch == ']')
+			openCount--;
+		else if (ch == ',')
+		{
+			currentLine += ch;
+			commaCount++;
+			auto len = currentLine.find('[');
+			auto tag = currentLine.substr(0, len);
+			// Trim left
+			tag.erase(tag.begin(), std::find_if(tag.begin(), tag.end(), [](unsigned char ch) {
+				return !std::isspace(ch);
+			}));
+
+			//tag = "AXIS";
+			std::vector<std::string> match_array;
+			match_array.emplace_back(tag);
+
+			if (std::find_first_of(dual_value.begin(), dual_value.end(), match_array.begin(), match_array.end()) != dual_value.end())
+			{
+				if (commaCount < 2)
+					continue;
+			}
+
+			if (tripple_value == tag)
+			{
+				if (commaCount < 3)
+					continue;
+			}
+
+			lines.emplace_back(currentLine.c_str());
+			currentLine.clear();
+			commaCount = 0;
+			continue;
+		}
+
+		currentLine += ch;
+	}
+	lines.emplace_back(currentLine.c_str());
+
+	int position1 = -1;
+	int position2 = -1;
+	int pos = 0;
+	for (const auto& line : lines)
+	{
+		if (position1 == -1 && line.find("AXIS[\"Northing\"") != std::string::npos)
+			position1 = pos;
+		else if (position2 == -1 && line.find("AXIS[\"Easting\"") != std::string::npos)
+			position2 = pos;
+		pos++;
+	}
+
+	if (position1 != -1 && position2 != -1 && position1 < position2)
+		std::swap(lines[position1], lines[position2]);
+
+	for (auto line : lines)
+	{
+		if (line[0] == '\n')
+			line = line.substr(1, line.length() - 1);
+		result += line;
+		result += "\r\n";
+	}
+
+	return result;
 }

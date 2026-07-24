@@ -113,7 +113,7 @@ int GdalHelper::CloseSharedOgrDataset(GDALDataset* ds)
 		const int count = ds->Dereference();
 		if (count == 0)
 		{
-			//Debug::WriteLine("Shared datasource is closed.");
+			//Debug::WriteLine("Shared datasource(%s) is closed.", ds->GetDescription());
 			RemoveCachedOgrDataset(ds);
 			GDALClose(ds);
 		}
@@ -139,6 +139,7 @@ void GdalHelper::RemoveCachedOgrDataset(GDALDataset* ds)
 	{
 		if (it->second == ds)
 		{
+			//Debug::WriteLine("RemoveCachedOgrDataset(ds: %s)", it->first.GetString());
 			m_ogrDatasets.erase(it->first);
 			break;
 		}

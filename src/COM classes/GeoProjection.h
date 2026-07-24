@@ -164,6 +164,7 @@ public:
 	OGRSpatialReference* get_SpatialReference() noexcept { return _projection; }
 	void SetIsFrozen(bool frozen) noexcept { _isFrozen = frozen; }
 	void InjectSpatialReference(const gsl::not_null<OGRSpatialReference*> sr);
+	static std::string CorrectAxisOrder(CString wkt);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GeoProjection), CGeoProjection)

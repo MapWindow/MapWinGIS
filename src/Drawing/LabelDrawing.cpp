@@ -173,7 +173,7 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 
 				if ((lbl->category == categoryIndex) || (categoryIndex == -1 && (lbl->category < 0 || lbl->category >= settings.numCategories)))	{}
 				else continue;	/* Wrong category */
-				
+
 				// blocking the labels with the text already displayed
 				if (settings.removeDuplicates)
 				{
