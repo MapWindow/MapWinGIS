@@ -429,6 +429,7 @@ int ShapeHelper::GetContentLength(IShape* shp)
 }
 
 
+#if DEBUG_LOG
 // *************************************************************
 //		DebugDump()
 // *************************************************************
@@ -442,7 +443,7 @@ void ShapeHelper::DebugDump(IShape* shp)
 	shp->get_ShapeType(&shpType);
 
 	if (numParts > 1) {
-		::OutputDebugStringA("Not support NumParts > 1");
+		::OutputDebugStringA("Not supported, NumParts > 1");
 		return;
 	}
 
@@ -532,4 +533,4 @@ void ShapeHelper::DebugDump(IShape* shp)
 	sOutput.Append("\r\n");
 	::OutputDebugStringA(sOutput.GetBuffer());
 }
-
+#endif

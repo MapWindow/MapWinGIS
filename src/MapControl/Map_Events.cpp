@@ -551,6 +551,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		if (m_cursorMode == cmAddShape) {
 			if (StartNewBoundShape(projX, projY) != VARIANT_TRUE) return;
 		}
+
 		if (alt) { // user wants to intercept coordinates and possibly modify them
 			this->FireBeforeVertexDigitized(&projX, &projY, -1);
 		}
@@ -568,29 +569,15 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		case cmEditShape:
 			{
-				if( m_sendMouseDown == TRUE )
+				if (m_sendMouseDown == TRUE)
 					this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl, shift))
 				{
-#if DEBUG_ALLOCATED_OBJECTS
-					ComHelper::SetBreak(true);
-					auto preCount = gReferenceCounter.GetReferenceCount();
-#endif
 					long layerHandle, shapeIndex;
 					if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) 
 					{
 						VertexEditor::StartEdit(_shapeEditor, layerHandle, shapeIndex);
 					}
-#if DEBUG_ALLOCATED_OBJECTS
-					auto postCount = gReferenceCounter.GetReferenceCount();
-					if (preCount < postCount)
-					{
-						::OutputDebugStringA("Increased!");
-						auto report = gReferenceCounter.GetReferenceReport();
-						::OutputDebugStringA(report.GetBuffer());
-					}
-					ComHelper::SetBreak(false);
-#endif
 				}
 				UpdateShapeEditor();
 			}
@@ -805,13 +792,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 		case DragZoombox:
 		case DragSelectionBox:
 			{
-#if DEBUG_ALLOCATED_OBJECTS
-				ComHelper::SetBreak(false);
-#endif
 				HandleLButtonUpZoomBox(vbflags, point.x, point.y);
-#if DEBUG_ALLOCATED_OBJECTS
-				ComHelper::SetBreak(false);
-#endif
 			}
 			break;
 	}
@@ -1448,9 +1429,6 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	if (updateHotTracking && _dragging.Operation == DragNone)
 	{
 		LayerShape info;
-#if DEBUG_ALLOCATED_OBJECTS
-		ComHelper::SetBreak(false);
-#endif
 		HotTrackingResult result = RecalcHotTracking(point, info);
 		switch (result)
 		{
@@ -1467,9 +1445,6 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 				// do nothing
 				break;
 		}
-#if DEBUG_ALLOCATED_OBJECTS
-		ComHelper::SetBreak(false);
-#endif
 	}
 
 	if (_showCoordinates != cdmNone) {
@@ -1552,14 +1527,8 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
-#if DEBUG_ALLOCATED_OBJECTS
-	ComHelper::SetBreak(false);
-#endif
 	if( m_sendMouseDown == TRUE )
 		this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y );
-#if DEBUG_ALLOCATED_OBJECTS
-	ComHelper::SetBreak(false);
-#endif
 
 	if (_doTrapRMouseDown)
 	{

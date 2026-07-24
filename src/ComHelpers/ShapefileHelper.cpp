@@ -405,7 +405,7 @@ bool tryGetCloserPointForShape(IShape* shp, IShape* ptShp, double& minDist, doub
 		resShp->get_Length(&distance);
 		resShp->Release();
 
-        // Check if this is allowed and/or smaller than the previous found point:
+		// Check if this is allowed and/or smaller than the previous found point:
 		if (distance < minDist && distance < maxDistance) {
 			fx = xPnt;
 			fy = yPnt;
@@ -487,11 +487,6 @@ bool ShapefileHelper::GetClosestSnapPosition(IShapefile* sf, double x, double y,
 						partShp->put_ShapeType(SHP_POLYLINEM);
 					else if (shptype == SHP_POLYGONZ)
 						partShp->put_ShapeType(SHP_POLYLINEZ);
-
-					/*CString str;
-					str.Format("0x%016llx\r\n", shp);
-					const CComBSTR bstr(str);
-					partShp->put_Key(bstr); */
 
 					// Insert part
 					long part = 0;

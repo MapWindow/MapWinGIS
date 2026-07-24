@@ -241,8 +241,6 @@ tkExtentsRelation GeometryHelper::RelateExtents(CRect& r1, CRect& r2)
 //**************************************************************************
 bool GeometryHelper::PointInExtent(double xMin, double yMin, double xMax, double yMax, double ptX, double ptY)
 {
-	//xMin, yMin, xMax, yMax
-
 	if ((ptX < xMin && ptX < xMax) || (ptX > xMin && ptX > xMax) ||
 		(ptY < yMin && ptY < yMax) || (ptY > yMin && ptY > yMax))
 	{

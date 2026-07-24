@@ -82,93 +82,34 @@
 *****************************************************************************/ 
 #include "stc123.h"
 
-#if OLD_VERSION
-int g123fstr_old(FILE *fp,char *buf_str,long str_len)
-{
-   /* LOCAL VARIABLES */
-   char *tmpcptr;
-   long len;
-   long i = 1;
-   ldiv_t div_result;
-   
-   /* INITIALIZE LEN */
-   len = 0;
-   
-   /* COMPUTE NUMBER OF TIMES TO READ STRING */
-   div_result = ldiv(str_len,MAXINT);
-   
-   /* INITIALIZE STRING TO EMPTY */
-   *buf_str = NC;
-   
-   /* SET TEMPORARY CHARACTER POINTER TO BUF_PTR */
-   tmpcptr = buf_str;
-   
-   /* WHILE HAVE MORE READS DO */
-   while (div_result.quot >= 0) {
-      
-      /* IF QUOTIENT IS GREATER THAN ZERO { STR_LEN > MAXINT } */
-      if (div_result.quot > 0) {
-         
-         /* READ IN CHARACTER STRING */
-         if ((len += fread(tmpcptr,sizeof(char),(size_t)(MAXINT),fp)) != MAXINT) return(0);
-
-         /* TERMINATE TMPCPTR WITH NULL CHARACTER */
-         tmpcptr[len] = NC;
-         
-         /* INCREMENT STRING POINTER */
-         for (i=1; i<= MAXINT; i++) tmpcptr++;
-         
-      }
-      else {
-         
-         /* READ IN CHARACTER STRING */
-         if ((len += fread(tmpcptr,sizeof(char),(size_t)(div_result.rem),fp)) != div_result.rem) return(0);
-
-         /* TERMINATE TMPCPTR WITH NULL CHARACTER */
-         tmpcptr[len] = NC;
-      };
-      
-      /* DECREMENT QUOTIENT COUNTER */
-      div_result.quot--;
-      
-   };
-   
-   /* IF LEN NOT EQUAL TO STR_LEN, RETURN FAILURE */
-   if (len != str_len) return(0);
-   
-   /*RETURN SUCCESS */
-   return(1);
-}
-#endif
-
 int g123fstr(FILE* fp, char* buf_str, long str_len)
 {
-    /* LOCAL VARIABLES */
-    char* tmpcptr;
-    long remaining;
+	/* LOCAL VARIABLES */
+	char* tmpCptr;
+	long remaining;
 
-    /* BASIC VALIDATION */
-    if (fp == NULL || buf_str == NULL || str_len < 0) return(0);
+	/* BASIC VALIDATION */
+	if (fp == nullptr || buf_str == nullptr || str_len < 0)
+		return(0);
 
-    /* INITIALIZE POINTERS */
-    tmpcptr = buf_str;
-    remaining = str_len;
+	/* INITIALIZE POINTERS */
+	tmpCptr = buf_str;
+	remaining = str_len;
 
-    /* READ THE FULL STRING IN CHUNKS */
-    while (remaining > 0) {
+	/* READ THE FULL STRING IN CHUNKS */
+	while(remaining > 0) {
+		size_t chunk = (remaining > MAXINT) ? static_cast<size_t>(MAXINT) : static_cast<size_t>(remaining);
+		size_t read_len = fread(tmpCptr, sizeof(char), chunk, fp);
 
-        size_t chunk = (remaining > MAXINT) ? (size_t)MAXINT : (size_t)remaining;
-        size_t read_len = fread(tmpcptr, sizeof(char), chunk, fp);
+		if (read_len != chunk) return(0);
 
-        if (read_len != chunk) return(0);
+		tmpCptr += read_len;
+		remaining -= static_cast<long>(read_len);
+	}
 
-        tmpcptr += read_len;
-        remaining -= (long)read_len;
-    }
+	/* APPEND NULL CHARACTER ONCE, AT THE END */
+	*tmpCptr = NC;
 
-    /* APPEND NULL CHARACTER ONCE, AT THE END */
-    *tmpcptr = NC;
-
-    /* RETURN SUCCESS */
-    return(1);
+	/* RETURN SUCCESS */
+	return(1);
 }

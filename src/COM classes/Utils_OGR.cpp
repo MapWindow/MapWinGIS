@@ -17,7 +17,6 @@
 #include "vrtdataset.h"
 
 #pragma warning(disable:4996)
-#define DISABLE_OGR2OGR 1
 
 int CPL_STDCALL GDALProgressCallback(double dfComplete, const char* pszMessage, void* pData);
 
@@ -49,7 +48,6 @@ typedef struct
 } AssociatedLayers;
 
 
-#if GDAL_VERSION_MAJOR >= 3
 static int TranslateLayer(TargetLayerInfo* psInfo,
 	GDALDataset* poSrcDS,
 	OGRLayer* poSrcLayer,
@@ -59,7 +57,7 @@ static int TranslateLayer(TargetLayerInfo* psInfo,
 	const char* pszDateLineOffset,
 	const OGRSpatialReference* poOutputSRS,
 	int bNullifyOutputSRS,
-	const OGRSpatialReference* poUserSourceSRS,
+	OGRSpatialReference* poUserSourceSRS,
 	OGRCoordinateTransformation* poGCPCoordTrans,
 	int eGType,
 	int bPromoteToMulti,
@@ -74,7 +72,7 @@ static int TranslateLayer(TargetLayerInfo* psInfo,
 	GIntBig* pnReadFeatureCount,
 	GDALProgressFunc pfnProgress,
 	void* pProgressArg);
-#endif
+
 
 /* -------------------------------------------------------------------- */
 /*                  CheckDestDataSourceNameConsistency()                */
@@ -890,8 +888,8 @@ public:
 			poSRS->Dereference();
 	}
 
-	virtual const OGRSpatialReference* GetSourceCS() { return poSRS; }
-	virtual const OGRSpatialReference* GetTargetCS() { return poSRS; }
+	virtual OGRSpatialReference* GetSourceCS() { return poSRS; }
+	virtual OGRSpatialReference* GetTargetCS() { return poSRS; }
 
 	virtual int Transform(int nCount,
 		double* x, double* y, double* z) override
@@ -1575,7 +1573,6 @@ __declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalVector
 STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	BSTR bstrOptions, ICallback* cBack, VARIANT_BOOL* retval)
 {
-#if !DISABLE_OGR2OGR
 	USES_CONVERSION;
 
 	struct CallbackParams params(GetCallback(), "Converting");
@@ -3066,10 +3063,6 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	* retval = nRetCode == 0 ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return ResetConfigOptions(tkNO_ERROR);
-#else
-	*retval = VARIANT_FALSE;
-	return 0;
-#endif
 }
 
 /************************************************************************/
@@ -3223,7 +3216,7 @@ public:
 	}
 
 
-	virtual const OGRSpatialReference* GetSourceCS()
+	virtual OGRSpatialReference* GetSourceCS()
 	{
 		return poCT1 ? poCT1->GetSourceCS() :
 			poCT2 ? poCT2->GetSourceCS() : NULL;

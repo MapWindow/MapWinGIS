@@ -409,8 +409,8 @@ bool CShapefileDrawer::Draw(const CRect& rcBounds, IShapefile* sf)
 				}
 			}
 		}
+
 		// Always draw selected objects, so the selection drawing can be drawn on top.
-		//else
 		{
 			long catIndex = (*_shapeData)[offset]->category;
 
