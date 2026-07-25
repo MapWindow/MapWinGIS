@@ -855,7 +855,8 @@ void CMapView::ZoomToMaxVisibleExtents(void)
         {
             const double xrange = l->extents.right - l->extents.left;
             const double yrange = l->extents.top - l->extents.bottom;
-            if (xrange == 0 && yrange == 0 && l->extents.right == 0 && l->extents.top == 0)
+            if ((xrange == 0 && yrange == 0 && l->extents.right == 0 && l->extents.top == 0) ||
+                std::isinf(xrange) || std::isinf(yrange) || std::isinf(l->extents.right) || std::isinf(l->extents.top))
                 continue;
 
             if (extentsSet == false)

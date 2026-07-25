@@ -618,6 +618,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				HandleOnLButtonMoveOrRotate(x, y);
 				break;
 			}
+
 		case cmZoomIn:
 			{
 				this->SetCapture();
