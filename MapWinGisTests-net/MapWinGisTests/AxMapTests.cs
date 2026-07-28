@@ -30,9 +30,10 @@ public class AxMapTests
     public void MapProjectionTest()
     {
         using var form = new WinFormsApp1.Form1();
-        if (Environment.Is64BitProcess)
-        {
-            form.Show(); // We need to show the form to have a valid map control (x64)
+		// Test with Showing form for x86 and x64
+		//if (Environment.Is64BitProcess)
+		{
+			form.Show(); // We need to show the form to have a valid map control (x64)
         }
         form.ShouldNotBeNull();
 
