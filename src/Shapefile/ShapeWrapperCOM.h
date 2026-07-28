@@ -75,8 +75,8 @@ private:
 public:
 	ShapeWrapperType get_WrapperType() { return ShapeWrapperType::swtCom; }
 
-	int get_PointCount(){ return _points.size(); }
-	int get_PartCount(){ return _parts.size(); }
+	int get_PointCount(){ return static_cast<int>(_points.size()); }
+	int get_PartCount(){ return static_cast<int>(_parts.size()); }
 
 	// type
 	ShpfileType get_ShapeType(){ return _shapeType; }

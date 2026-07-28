@@ -13,7 +13,7 @@ const int CUndoList::EMPTY_BATCH_ID = -1;
 //***********************************************************************/
 IShapefile* CUndoList::GetShapefile(long layerHandle)
 {
-	if (!CheckState()) return NULL;
+	if (!CheckState()) return nullptr;
 	return _mapCallback->_GetShapefile(layerHandle);
 }
 
@@ -43,7 +43,7 @@ bool CUndoList::CheckState() {
 	if (!_mapCallback) {
 		ErrorMessage(tkUNDO_LIST_NO_MAP);
 	}
-	return _mapCallback != NULL;
+	return _mapCallback != nullptr;
 }
 
 //***********************************************************************
@@ -92,7 +92,7 @@ STDMETHODIMP CUndoList::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 // **********************************************************
 STDMETHODIMP CUndoList::Clear()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	for (size_t i = 0; i < _list.size(); i++)
 		delete _list[i];
 	_list.clear();
@@ -107,7 +107,7 @@ STDMETHODIMP CUndoList::Clear()
 // **********************************************************
 bool CUndoList::CheckShapeIndex(long layerHandle, LONG shapeIndex)
 {
-	CComPtr<IShapefile> sf = NULL;
+	CComPtr<IShapefile> sf = nullptr;
 	sf.Attach(GetShapefile(layerHandle));
 	if (!sf) return false;
 	long numShapes;
@@ -124,7 +124,7 @@ bool CUndoList::CheckShapeIndex(long layerHandle, LONG shapeIndex)
 // **********************************************************
 STDMETHODIMP CUndoList::Add(tkUndoOperation operation, LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL *retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_OK;
 
@@ -154,7 +154,7 @@ STDMETHODIMP CUndoList::Add(tkUndoOperation operation, LONG LayerHandle, LONG Sh
 	_list.push_back(item);
 	*retVal = VARIANT_TRUE;
 
-	_position = _list.size() - 1;
+	_position = static_cast<int>(_list.size()) - 1;
 
 	if (!item->WithinBatch) {
 		FireUndoListChanged();
@@ -199,7 +199,7 @@ bool CUndoList::AddGroupOperation(tkUndoOperation operation, int layerHandle, ve
 	item->RotationAngle = angleDegrees;
 
 	_list.push_back(item);
-	_position = _list.size() - 1;
+	_position = static_cast<int>(_list.size()) - 1;
 
 	FireUndoListChanged();
 	return true;
@@ -211,7 +211,7 @@ bool CUndoList::AddGroupOperation(tkUndoOperation operation, int layerHandle, ve
 // if we are not in the end of list, trim the undone items
 void CUndoList::TrimList()
 {
-	for (int i = (int)(_list.size() - 1); i > _position; --i) {
+	for (int i = static_cast<int>(_list.size() - 1); i > _position; --i) {
 		delete _list[i];
 		_list.pop_back();
 	}
@@ -226,13 +226,13 @@ bool CUndoList::CopyShapeState(long layerHandle, long shapeIndex, bool copyAttri
 	item->SetShape(shp);
 
 	if (copyAttributes) {
-		CComPtr<IShapefile> sf = NULL;
+		CComPtr<IShapefile> sf = nullptr;
 		sf.Attach(GetShapefile(layerHandle));
 		if (sf) {
-			CComPtr<ITable> tbl = NULL;
+			CComPtr<ITable> tbl = nullptr;
 			sf->get_Table(&tbl);
 			if (tbl) {
-				TableRow* row = TableHelper::Cast(tbl)->CloneTableRow((int)shapeIndex);
+				TableRow* row = TableHelper::Cast(tbl)->CloneTableRow(static_cast<int>(shapeIndex));
 				item->SetRow(row);
 			}
 			long category = -1;
@@ -248,7 +248,7 @@ bool CUndoList::CopyShapeState(long layerHandle, long shapeIndex, bool copyAttri
 // **********************************************************
 STDMETHODIMP CUndoList::Undo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_OK;
 
@@ -282,11 +282,11 @@ STDMETHODIMP CUndoList::Undo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 // **********************************************************
 STDMETHODIMP CUndoList::Redo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_OK;
 
-	int maxIndex = (int)_list.size() - 1;
+	int maxIndex = static_cast<int>(_list.size()) - 1;
 	if (_position + 1 <= maxIndex)
 	{
 		int pos = _position + 1;
@@ -315,7 +315,7 @@ STDMETHODIMP CUndoList::Redo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 void CUndoList::ZoomToShape(VARIANT_BOOL zoomToShape, int itemIndex)
 {
 	if (!zoomToShape) return;
-	if (itemIndex < 0 || itemIndex >= (int)_list.size())return;
+	if (itemIndex < 0 || itemIndex >= static_cast<int>(_list.size()))return;
 	UndoListItem* item = _list[itemIndex];
 
 	if (item->Operation == uoEditShape) {
@@ -346,9 +346,9 @@ bool CUndoList::DiscardOne()
 // **********************************************************
 bool CUndoList::UndoSingleItem(UndoListItem* item)
 {
-	CComPtr<IShapefile> sf = NULL;
+	CComPtr<IShapefile> sf = nullptr;
 	sf.Attach(GetShapefile(item->LayerHandle));
-	CComPtr<ITable> table = NULL;
+	CComPtr<ITable> table = nullptr;
 	sf->get_Table(&table);
 
 	VARIANT_BOOL vb;
@@ -357,12 +357,12 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 		case uoRotateShapes:
 			if (item->ShapeIndices)
 			{
-				int size = item->ShapeIndices->size();
+				int size = static_cast<int>(item->ShapeIndices->size());
 				for (int i = 0; i < size; i++)
 				{
 					int index = (*item->ShapeIndices)[i];
-					CComPtr<IShape> shp = NULL;
-					sf->get_Shape((long)index, &shp);
+					CComPtr<IShape> shp = nullptr;
+					sf->get_Shape(index, &shp);
 					if (shp) {
 						shp->Rotate(item->ProjOffset.x, item->ProjOffset.y, -item->RotationAngle);
 					}
@@ -373,12 +373,12 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 		case uoMoveShapes:
 			if (item->ShapeIndices)
 			{
-				int size = item->ShapeIndices->size();
+				int size = static_cast<int>(item->ShapeIndices->size());
 				for (int i = 0; i < size; i++)
 				{
 					int index = (*item->ShapeIndices)[i];
-					CComPtr<IShape> shp = NULL;
-					sf->get_Shape((long)index, &shp);
+					CComPtr<IShape> shp = nullptr;
+					sf->get_Shape(index, &shp);
 					if (shp) {
 						shp->Move(item->ProjOffset.x, item->ProjOffset.y);
 					}
@@ -396,12 +396,12 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 				TableRow* oldRow = TableHelper::Cast(table)->SwapTableRow(item->Row, item->ShapeIndex);
 				if (oldRow) delete oldRow;
 				sf->put_ShapeCategory(item->ShapeIndex, item->StyleCategory);
-				item->SetShape(NULL);
-				item->Row = NULL;		// the instance is used by table now
+				item->SetShape(nullptr);
+				item->Row = nullptr;		// the instance is used by table now
 				item->Operation = uoAddShape;
 				IShapeEditor* editor = _mapCallback->_GetShapeEditor();
 				if (editor && !item->WithinBatch) {
-					CComPtr<IShape> shp = NULL;
+					CComPtr<IShape> shp = nullptr;
 					shp.Attach(GetCurrentState(item->LayerHandle, item->ShapeIndex));
 					((CShapeEditor*)editor)->RestoreState(shp, item->LayerHandle, item->ShapeIndex);
 				}
@@ -465,12 +465,12 @@ IShape* CUndoList::GetCurrentState(long layerHandle, long shapeIndex)
 {
 	IShapeEditor* editor = _mapCallback->_GetShapeEditor();
 	
-	IShape* shp = NULL;
+	IShape* shp = nullptr;
 	if (ShapeInEditor(layerHandle, shapeIndex)) {
 		editor->get_RawData(&shp);
 	}
 	else {
-		CComPtr<IShapefile> sf = NULL;
+		CComPtr<IShapefile> sf = nullptr;
 		sf.Attach(GetShapefile(layerHandle));
 		if (sf) {
 			sf->get_Shape(shapeIndex, &shp);
@@ -484,7 +484,7 @@ IShape* CUndoList::GetCurrentState(long layerHandle, long shapeIndex)
 // **********************************************************
 STDMETHODIMP CUndoList::get_UndoCount(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = CheckState() ? FindPosition(_position) : -1;
 	return S_OK;
 }
@@ -494,7 +494,7 @@ STDMETHODIMP CUndoList::get_UndoCount(LONG* pVal)
 // **********************************************************
 STDMETHODIMP CUndoList::get_RedoCount(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	long totalLength, undoCount;
 	get_TotalLength(&totalLength);
 	get_UndoCount(&undoCount);
@@ -525,9 +525,9 @@ long CUndoList::FindPosition(int position)
 // **********************************************************
 bool CUndoList::WithinBatch(int position)
 {
-	if (position < 0 || position >= (int)_list.size()) return false;
+	if (position < 0 || position >= static_cast<int>(_list.size())) return false;
 	int id = _list[position]->BatchId;
-	if (position + 1 < (int)_list.size() && _list[position + 1]->BatchId == id)
+	if (position + 1 < static_cast<int>(_list.size()) && _list[position + 1]->BatchId == id)
 		return true;
 	if (position - 1 >= 0 && _list[position - 1]->BatchId == id)
 		return true;
@@ -539,7 +539,7 @@ bool CUndoList::WithinBatch(int position)
 // **********************************************************
 STDMETHODIMP CUndoList::get_TotalLength(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	int lastId = EMPTY_BATCH_ID;
 	long count = 0;
 	for (size_t i = 0; i < _list.size(); i++)
@@ -558,7 +558,7 @@ STDMETHODIMP CUndoList::get_TotalLength(LONG* pVal)
 // **********************************************************
 STDMETHODIMP CUndoList::BeginBatch(VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_batchId == EMPTY_BATCH_ID) {
 		_batchId = NextId();
 		*retVal = VARIANT_TRUE;
@@ -575,14 +575,14 @@ STDMETHODIMP CUndoList::BeginBatch(VARIANT_BOOL* retVal)
 // **********************************************************
 STDMETHODIMP CUndoList::EndBatch(LONG* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_batchId == EMPTY_BATCH_ID) {
 		*retVal = -1;
 		return S_OK;
 	}
 	else {
 		long count = 0;
-		for (int i = _list.size() - 1; i >= 0; --i)
+		for (int i = static_cast<int>(_list.size()) - 1; i >= 0; --i)
 		{
 			if (_list[i]->BatchId == _batchId)
 				count++;
@@ -602,7 +602,7 @@ STDMETHODIMP CUndoList::EndBatch(LONG* retVal)
 // **********************************************************
 STDMETHODIMP CUndoList::GetLastId(LONG* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = _list.size() > 0 ? _list.at(_list.size() - 1)->BatchId : -1;
 	return S_OK;
 }
@@ -612,13 +612,13 @@ STDMETHODIMP CUndoList::GetLastId(LONG* retVal)
 // **********************************************************
 STDMETHODIMP CUndoList::get_ShortcutKey(tkUndoShortcut* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _shortcutKey;
 	return S_OK;
 }
 STDMETHODIMP CUndoList::put_ShortcutKey(tkUndoShortcut newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_shortcutKey = newVal;
 	return S_OK;
 }
@@ -638,9 +638,9 @@ void CUndoList::FireUndoListChanged()
 // **********************************************************
 STDMETHODIMP CUndoList::ClearForLayer(LONG LayerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	bool changed = false;
-	for (int i = (int)_list.size() - 1; i >= 0; i--)
+	for (int i = static_cast<int>(_list.size()) - 1; i >= 0; i--)
 	{
 		if (_list[i]->LayerHandle == LayerHandle) 
 		{

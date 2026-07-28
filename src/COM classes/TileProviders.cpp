@@ -307,7 +307,7 @@ STDMETHODIMP CTileProviders::Clear(VARIANT_BOOL clearCache)
 STDMETHODIMP CTileProviders::get_Count(LONG* pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    *pVal = _providers.size();
+    *pVal = static_cast<LONG>(_providers.size());
     return S_OK;
 }
 
@@ -366,14 +366,14 @@ STDMETHODIMP CTileProviders::Add(int Id, BSTR name, BSTR urlPattern, tkTileProje
 STDMETHODIMP CTileProviders::get_Id(int Index, LONG* retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         *retVal = -1;
     }
     else
     {
-        *retVal = (LONG)_providers[Index]->Id;
+        *retVal = static_cast<LONG>(_providers[Index]->Id);
     }
     return S_OK;
 }
@@ -385,7 +385,7 @@ STDMETHODIMP CTileProviders::get_Name(int Index, BSTR* retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
     USES_CONVERSION;
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         *retVal = A2BSTR("");
@@ -400,7 +400,7 @@ STDMETHODIMP CTileProviders::get_Name(int Index, BSTR* retVal)
 STDMETHODIMP CTileProviders::put_Name(int Index, BSTR pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         return S_OK;
@@ -418,7 +418,7 @@ STDMETHODIMP CTileProviders::get_Language(int Index, BSTR* retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
     USES_CONVERSION;
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         *retVal = A2BSTR("");
@@ -433,7 +433,7 @@ STDMETHODIMP CTileProviders::get_Language(int Index, BSTR* retVal)
 STDMETHODIMP CTileProviders::put_Language(int Index, BSTR pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
     }
@@ -461,7 +461,7 @@ STDMETHODIMP CTileProviders::get_Version(int Index, BSTR* retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
     USES_CONVERSION;
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         *retVal = A2BSTR("");
@@ -479,7 +479,7 @@ STDMETHODIMP CTileProviders::get_Version(int Index, BSTR* retVal)
 STDMETHODIMP CTileProviders::put_Version(int Index, BSTR pVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
     }
@@ -497,7 +497,7 @@ STDMETHODIMP CTileProviders::put_Version(int Index, BSTR pVal)
 STDMETHODIMP CTileProviders::get_UrlPattern(int Index, BSTR* retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         *retVal = A2BSTR("");
@@ -515,7 +515,7 @@ STDMETHODIMP CTileProviders::get_UrlPattern(int Index, BSTR* retVal)
 STDMETHODIMP CTileProviders::get_Projection(int Index, tkTileProjection* retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         *retVal = (tkTileProjection)-1;
@@ -534,7 +534,7 @@ STDMETHODIMP CTileProviders::get_Projection(int Index, tkTileProjection* retVal)
 STDMETHODIMP CTileProviders::get_MinZoom(int Index, int* retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         *retVal = -1;
@@ -552,7 +552,7 @@ STDMETHODIMP CTileProviders::get_MinZoom(int Index, int* retVal)
 STDMETHODIMP CTileProviders::get_MaxZoom(int Index, int* retVal)
 {
     AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    if (Index < 0 || Index >= (int)_providers.size())
+    if (Index < 0 || Index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         *retVal = -1;
@@ -583,7 +583,7 @@ STDMETHODIMP CTileProviders::get_IndexByProviderId(int providerId, int* retVal)
     {
         if (providerId == _providers[i]->Id)
         {
-            *retVal = i;
+            *retVal = static_cast<int>(i);
             break;
         }
     }
@@ -597,7 +597,7 @@ CStringW CTileProviders::get_CopyrightNotice(tkTileProvider provider)
 {
     int index = -1;
     get_IndexByProviderId((int)provider, &index);
-    if (index >= 0 && index < (int)_providers.size())
+    if (index >= 0 && index < static_cast<int>(_providers.size()))
     {
         return _providers[index]->get_Copyright();
     }
@@ -613,7 +613,7 @@ CString CTileProviders::get_LicenseUrl(tkTileProvider provider)
 
     get_IndexByProviderId((int)provider, &index);
 
-    if (index >= 0 && index < (int)_providers.size())
+    if (index >= 0 && index < static_cast<int>(_providers.size()))
     {
         return _providers[index]->get_LicenseUrl();
     }
@@ -625,7 +625,7 @@ CString CTileProviders::get_LicenseUrl(tkTileProvider provider)
 // *******************************************************
 STDMETHODIMP CTileProviders::get_GeographicBounds(int Index, IExtents** pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
     *pVal = nullptr;
 
@@ -640,7 +640,7 @@ STDMETHODIMP CTileProviders::get_GeographicBounds(int Index, IExtents** pVal)
 
 STDMETHODIMP CTileProviders::put_GeographicBounds(int Index, IExtents* newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
     if (!ValidateProviderIndex(Index)) return S_OK;
 
@@ -656,7 +656,7 @@ STDMETHODIMP CTileProviders::put_GeographicBounds(int Index, IExtents* newVal)
 // *******************************************************
 bool CTileProviders::ValidateProviderIndex(int index)
 {
-    if (index < 0 || index >= (int)_providers.size())
+    if (index < 0 || index >= static_cast<int>(_providers.size()))
     {
         ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
         return false;

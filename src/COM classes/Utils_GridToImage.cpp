@@ -17,7 +17,7 @@ void ReadBreaks(IGridColorScheme* ci, std::deque<BreakVal>& result)
 	double lowval, highval;
 	for (int i = 0; i < numBreaks; i++)
 	{
-		IGridColorBreak * bi = NULL;
+		IGridColorBreak * bi = nullptr;
 		ci->get_Break(i, &bi);
 		bi->get_LowValue(&lowval);
 		bi->get_HighValue(&highval);
@@ -37,7 +37,7 @@ void GetLightSource(IGridColorScheme* ci, cppVector& lightsource)
 {
 	// TODO: can be moved to IGridColorScheme
 	double lsi, lsj, lsk;
-	IVector * v = NULL;
+	IVector * v = nullptr;
 	ci->GetLightSource(&v);
 	v->get_i(&lsi);
 	v->get_j(&lsj);
@@ -83,7 +83,7 @@ inline void CUtils::WritePixel(IImage* img, int row, int col, OLE_COLOR color,
 STDMETHODIMP CUtils::GridToImage(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, IImage ** retval)
 {
 	// choosing inRam (logic preserved from older versions for backward compatibility)
-	IGridHeader * gridheader = NULL;
+	IGridHeader * gridheader = nullptr;
 	Grid->get_Header(&gridheader);
 	long ncols, nrows;
 	gridheader->get_NumberCols(&ncols);
@@ -108,13 +108,13 @@ STDMETHODIMP CUtils::GridToImage2(IGrid * Grid, IGridColorScheme * ci, tkGridPro
 HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, 
 							   bool inRam, bool checkMemory, ICallback* callback, IImage ** retval)
 {
-	if( Grid == NULL || ci == NULL )
+	if( Grid == nullptr || ci == nullptr)
 	{	
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
 
-	CComPtr<IGridHeader> gridheader = NULL;
+	CComPtr<IGridHeader> gridheader = nullptr;
 	Grid->get_Header(&gridheader);
 	long ncols, nrows;
 	gridheader->get_NumberCols(&ncols);
@@ -152,7 +152,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 	// convert projection to WKT
 	CComBSTR bstr, bstrWkt;
 	gridheader->get_Projection(&bstr);
-	CComPtr<IGeoProjection> gp = NULL;
+	CComPtr<IGeoProjection> gp = nullptr;
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&gp);
 	gp->ImportFromAutoDetect(bstr, &vb);
 	gp->ExportToWKT(&bstrWkt);
@@ -201,14 +201,14 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 		}
 		
 		// open the created file
-		CoCreateInstance(CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)retval);
+		CoCreateInstance(CLSID_Image, nullptr, CLSCTX_INPROC_SERVER, IID_IImage, (void**)retval);
 		if (*retval) {
 			CImageClass* img = (CImageClass*)*retval;
 			CComBSTR bstrName(imageFile);
-			(*retval)->Open(bstrName, ImageType::USE_FILE_EXTENSION, false, NULL, &vb);
+			(*retval)->Open(bstrName, ImageType::USE_FILE_EXTENSION, false, nullptr, &vb);
 			if (!vb) {
 				(*retval)->Release();
-				(*retval) = NULL;
+				(*retval) = nullptr;
 				return S_OK;
 			}
 		}
@@ -244,15 +244,15 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retval = NULL;
+	*retval = nullptr;
 
-	if (_globalCallback == NULL && cBack != NULL)
+	if (_globalCallback == nullptr && cBack != nullptr)
 	{
 		_globalCallback = cBack;
 		_globalCallback->AddRef();
 	}
 	
-	CComPtr<IGridHeader> gridheader = NULL;
+	CComPtr<IGridHeader> gridheader = nullptr;
 	Grid->get_Header(&gridheader);
 
 	long ncols, nrows;
@@ -304,12 +304,12 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	VARIANT_BOOL vbretval;
 	if (inRam)
 	{
-		CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)retval);
+		CoCreateInstance(CLSID_Image, nullptr,CLSCTX_INPROC_SERVER,IID_IImage,(void**)retval);
 		(*retval)->CreateNew( ncols, nrows, &vbretval );
 	}
 	else
 	{
-		_canScanlineBuffer = (MemoryAvailable(ncols * (sizeof(_int32)* 3)));
+		_canScanlineBuffer = MemoryAvailable(static_cast<double>(ncols * (sizeof(_int32) * 3)));
 	}
 
 	std::deque<BreakVal> bvals;
@@ -319,7 +319,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	long newpercent = 0, percent = 0;
 
 	for( int j = nrows-1; j >= 0; j-- )
-	{				
+	{
 		// it could be more smooth in the nested cycle but better to spare performance 
 		CallbackHelper::Progress(_globalCallback, (nrows - j - 1)*ncols - 1, (int)total, "GridToImage", _key, percent);
 
@@ -345,7 +345,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 				continue;
 			}
 
-			IGridColorBreak * bi = NULL;
+			IGridColorBreak * bi = nullptr;
 			ci->get_Break( break_index, &bi );
 
 			OLE_COLOR hiColor, lowColor;
@@ -390,9 +390,9 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 					else if( j <= 0 )
 					{	
 						Grid->get_Value( i, j + 1, &vyone );
-						Grid->get_Value( i + 1, j, &vytwo );						
+						Grid->get_Value( i + 1, j, &vytwo );
 						dVal(vyone,yone);
-						dVal(vytwo,ytwo);						
+						dVal(vytwo,ytwo);
 						ythree = val;
 					}
 				}
@@ -402,7 +402,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 					Grid->get_Value( i + 1, j - 1, &vytwo );
 					Grid->get_Value( i, j - 1, &vythree );
 					dVal(vytwo,ytwo);
-					dVal(vythree,ythree);					
+					dVal(vythree,ythree);
 				}
 
 				double xone = xll + csize*j;
@@ -434,7 +434,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 					two.Normalize();
 
 					//Compute Normal
-					cppVector normal = two.crossProduct( one );					
+					cppVector normal = two.crossProduct( one );
 
 					//Compute I
 					double I = ai*ka + li*kd*( lightsource.dot( normal ) );
@@ -443,11 +443,11 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 					if( I > 1.0 )
 						I = 1.0;
 
-					//Two Color Gradient					
+					//Two Color Gradient
 					if( gradmodel == Linear )
 					{	
 						rightPercent = ( ( val - lowVal ) / biRange );
-						leftPercent = 1.0 - rightPercent;					
+						leftPercent = 1.0 - rightPercent;
 					}
 					else if( gradmodel == Logorithmic )
 					{	
@@ -457,13 +457,12 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 							ht = 1.0;
 						if( biRange > 1.0 && ht - lowVal > 1.0 )
 						{	rightPercent = ( log( ht - lowVal)/log(biRange) );
-							leftPercent = 1.0 - rightPercent;							
-						}					
+							leftPercent = 1.0 - rightPercent;
+						}
 						else
 						{	rightPercent = 0.0;
-							leftPercent = 1.0;							
+							leftPercent = 1.0;
 						}
-							
 					}
 					else if( gradmodel == Exponential )
 					{	
@@ -473,11 +472,11 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 							ht = 1.0;
 						if( biRange > 1.0 )
 						{	rightPercent = ( pow( ht - lowVal, 2)/pow(biRange, 2) );
-							leftPercent = 1.0 - rightPercent;						
-						}					
+							leftPercent = 1.0 - rightPercent;
+						}
 						else
 						{	rightPercent = 0.0;
-							leftPercent = 1.0;							
+							leftPercent = 1.0;
 						}		
 					}
 
@@ -487,16 +486,16 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 					
 					WritePixel(*retval, j, i, RGB(finalColorR, finalColorG, finalColorB), finalColorR, finalColorG, finalColorB, ncols, inRam);
 				}
-			}			
+			}
 			else if( colortype == Gradient )
 			{
 				if( gradmodel == Linear )
-				{	
+				{
 					rightPercent = ( ( val - lowVal ) / biRange );
-					leftPercent = 1.0 - rightPercent;			
+					leftPercent = 1.0 - rightPercent;
 				}
 				else if( gradmodel == Logorithmic )
-				{	
+				{
 					double dLog = 0.0;
 					double ht = val;
 					if( ht < 1 )
@@ -504,16 +503,16 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 					if( biRange > 1.0 && ht - lowVal > 1.0 )
 					{	
 						rightPercent = ( log( ht - lowVal)/log(biRange) );
-						leftPercent = 1.0 - rightPercent;					
-					}					
+						leftPercent = 1.0 - rightPercent;
+					}
 					else
-					{	
+					{
 						rightPercent = 0.0;
-						leftPercent = 1.0;						
-					}						
+						leftPercent = 1.0;
+					}
 				}
 				else if( gradmodel == Exponential )
-				{	
+				{
 					double dLog = 0.0;
 					double ht = val;
 					if( ht < 1 )
@@ -522,12 +521,12 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 					{
 						rightPercent = ( pow( ht - lowVal, 2)/pow(biRange, 2) );
 						leftPercent = 1.0 - rightPercent;
-					}					
+					}
 					else
 					{
 						rightPercent = 0.0;
-						leftPercent = 1.0;						
-					}		
+						leftPercent = 1.0;
+					}
 				}
 
 				int finalColorR = (int)((double)GetRValue(lowColor)*leftPercent + (double)GetRValue(hiColor)*rightPercent ) %256;
@@ -547,7 +546,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 					PutBitmapValue(i, j, GetRValue(lowColor), GetGValue(lowColor), GetBValue(lowColor), ncols);
 				}
 			}
-		}		
+		}
 	}
 	
 	if (!inRam)
@@ -556,11 +555,11 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 
 		FinalizeAndCloseBitmap(ncols);
 
-		if (_rasterDataset != NULL)
+		if (_rasterDataset != nullptr)
 		{
 			_rasterDataset->FlushCache();
 			GDALClose(_rasterDataset);
-			_rasterDataset = NULL;
+			_rasterDataset = nullptr;
 		}
 	}
 
@@ -579,11 +578,11 @@ void CUtils::CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFo
 	GDALAllRegister();
 
     GDALDriver *poDriver;
-    char **papszOptions = NULL;
+    char **papszOptions = nullptr;
 
 	poDriver = GetGDALDriverManager()->GetDriverByName(format == gpfTiffProxy ? "GTiff" : "BMP");
 
-	if( poDriver == NULL )
+	if( poDriver == nullptr)
 		return;
 
 	bool hasOptions = false;
@@ -605,7 +604,7 @@ void CUtils::CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFo
 		_poBandR = _rasterDataset->GetRasterBand(1);
 		_poBandG = _rasterDataset->GetRasterBand(2);
 		_poBandB = _rasterDataset->GetRasterBand(3);
-		if (_poBandR != NULL && _poBandG != NULL && _poBandB != NULL)
+		if (_poBandR != nullptr && _poBandG != nullptr && _poBandB != nullptr)
 		{
 			*retval = VARIANT_TRUE;
 			return;
@@ -652,28 +651,28 @@ inline void CUtils::PutBitmapValue(long col, long row, _int32 Rvalue, _int32 Gva
 		_bufferANum = row;
 
 		// Fetch the buffer rather than creating anew; data may have been written to it out of order.
-		if (_bufferA_R != NULL)
+		if (_bufferA_R != nullptr)
 		{
 			CPLFree(_bufferA_R);
-			_bufferA_R = NULL;
+			_bufferA_R = nullptr;
 		}
 
 		_bufferA_R = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
 		_poBandR->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
 
-		if (_bufferA_G != NULL)
+		if (_bufferA_G != nullptr)
 		{
 			CPLFree(_bufferA_G);
-			_bufferA_G = NULL;
+			_bufferA_G = nullptr;
 		}
 
 		_bufferA_G = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
 		_poBandG->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
 
-		if (_bufferA_B != NULL)
+		if (_bufferA_B != nullptr)
 		{
 			CPLFree(_bufferA_B);
-			_bufferA_B = NULL;
+			_bufferA_B = nullptr;
 		}
 
 		_bufferA_B = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
@@ -702,28 +701,28 @@ inline void CUtils::PutBitmapValue(long col, long row, _int32 Rvalue, _int32 Gva
 		_bufferBNum = row;
 
 		// Fetch the buffer rather than creating anew; data may have been written to it out of order.
-		if (_bufferB_R != NULL)
+		if (_bufferB_R != nullptr)
 		{
 			CPLFree(_bufferB_R);
-			_bufferB_R = NULL;
+			_bufferB_R = nullptr;
 		}
 
 		_bufferB_R = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
 		_poBandR->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
 
-		if (_bufferB_G != NULL)
+		if (_bufferB_G != nullptr)
 		{
 			CPLFree(_bufferB_G);
-			_bufferB_G = NULL;
+			_bufferB_G = nullptr;
 		}
 
 		_bufferB_G = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
 		_poBandG->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
 
-		if (_bufferB_B != NULL)
+		if (_bufferB_B != nullptr)
 		{
 			CPLFree(_bufferB_B);
-			_bufferB_B = NULL;
+			_bufferB_B = nullptr;
 		}
 
 		_bufferB_B = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
@@ -748,54 +747,54 @@ inline void CUtils::PutBitmapValue(long col, long row, _int32 Rvalue, _int32 Gva
 // *************************************************************
 void CUtils::FinalizeAndCloseBitmap(int totalWidth)
 {
-	if (_bufferA_R != NULL && _bufferA_G != NULL && _bufferA_B != NULL && _bufferANum != -1)
+	if (_bufferA_R != nullptr && _bufferA_G != nullptr && _bufferA_B != nullptr && _bufferANum != -1)
 	{
 		_poBandR->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
 		_poBandG->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
 		_poBandB->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_B, totalWidth, 1, GDT_Int32, 0, 0 );
 	}
-	if (_bufferB_R != NULL && _bufferB_G != NULL && _bufferB_B != NULL && _bufferBNum != -1)
+	if (_bufferB_R != nullptr && _bufferB_G != nullptr && _bufferB_B != nullptr && _bufferBNum != -1)
 	{
 		_poBandR->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
 		_poBandG->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
 		_poBandB->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_B, totalWidth, 1, GDT_Int32, 0, 0 );
 	}
 
-	if (_bufferA_R != NULL)
+	if (_bufferA_R != nullptr)
 	{
 		CPLFree(_bufferA_R);
-		_bufferA_R = NULL;
+		_bufferA_R = nullptr;
 	}
-	if (_bufferA_G != NULL)
+	if (_bufferA_G != nullptr)
 	{
 		CPLFree(_bufferA_G);
-		_bufferA_G = NULL;
+		_bufferA_G = nullptr;
 	}
-	if (_bufferA_B != NULL)
+	if (_bufferA_B != nullptr)
 	{
 		CPLFree(_bufferA_B);
-		_bufferA_B = NULL;
+		_bufferA_B = nullptr;
 	}
-	if (_bufferB_R != NULL)
+	if (_bufferB_R != nullptr)
 	{
 		CPLFree(_bufferB_R);
-		_bufferB_R = NULL;
+		_bufferB_R = nullptr;
 	}
-	if (_bufferB_G != NULL)
+	if (_bufferB_G != nullptr)
 	{
 		CPLFree(_bufferB_G);
-		_bufferB_G = NULL;
+		_bufferB_G = nullptr;
 	}
-	if (_bufferB_B != NULL)
+	if (_bufferB_B != nullptr)
 	{
 		CPLFree(_bufferB_B);
-		_bufferB_B = NULL;
+		_bufferB_B = nullptr;
 	}
 
-	if (_rasterDataset != NULL)
+	if (_rasterDataset != nullptr)
 	{
 		delete _rasterDataset;
-		_rasterDataset = NULL;
+		_rasterDataset = nullptr;
 	}
 }
 

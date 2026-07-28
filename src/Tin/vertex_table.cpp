@@ -11,7 +11,7 @@ vertexTable::~vertexTable()
 
 long vertexTable::add( vertex p )
 {	vertex_list.push_back( p );
-	return vertex_list.size() - 1;
+	return static_cast<long>(vertex_list.size()) - 1;
 }
 
 void vertexTable::clear()
@@ -27,5 +27,5 @@ void vertexTable::setVertex( vertex v, long index )
 }
 
 long vertexTable::size()
-{	return vertex_list.size();
+{	return static_cast<long>(vertex_list.size());
 }

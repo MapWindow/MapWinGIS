@@ -30,7 +30,7 @@ SecureHttpClient::SecureHttpClient(): file(nullptr)
     curl = curl_easy_init();
 
     // set up write buffer
-    chunk.memory = (char *)malloc(1); /* will be grown as needed */
+    chunk.memory = static_cast<char*>(malloc(1)); /* will be grown as needed */
     chunk.size = 0; /* no data yet */
 
 	/* PM: Add user agent */
@@ -40,15 +40,15 @@ SecureHttpClient::SecureHttpClient(): file(nullptr)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
     /* we pass our 'chunk' struct to the callback function */
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, static_cast<void*>(&chunk));
 }
 
 size_t SecureHttpClient::WriteMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp)
 {
     const size_t realsize = size * nmemb;
-    auto* mem = (struct MemoryStruct *)userp;
+    auto* mem = static_cast<struct MemoryStruct*>(userp);
 
-    mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
+    mem->memory = static_cast<char*>(realloc(mem->memory, mem->size + realsize + 1));
     if (mem->memory == nullptr)
     {
         /* out of memory! */
@@ -95,8 +95,8 @@ bool SecureHttpClient::SetProxyAndAuthentication(const CString& userName, const 
     }
 
     //curlCode = curl_easy_setopt(curl, CURLOPT_PROXY, (LPCTSTR)domain);
-    curlCode = curl_easy_setopt(curl, CURLOPT_USERNAME, (LPCTSTR)userName);
-    curlCode = curl_easy_setopt(curl, CURLOPT_PASSWORD, (LPCTSTR)password);
+    curlCode = curl_easy_setopt(curl, CURLOPT_USERNAME, static_cast<LPCTSTR>(userName));
+    curlCode = curl_easy_setopt(curl, CURLOPT_PASSWORD, static_cast<LPCTSTR>(password));
 
     // TODO: this needs to be expanded to have more options, e.g. hidden auth is now impossible
     if (m_globalSettings.proxyAuthentication == tkProxyAuthentication::asNtlm)
@@ -112,7 +112,7 @@ bool SecureHttpClient::SetProxyAndAuthentication(const CString& userName, const 
 // *************************************************************
 int SecureHttpClient::GetBodyLength() const
 {
-    return chunk.size;
+    return static_cast<int>(chunk.size);
 }
 
 // *************************************************************
@@ -120,7 +120,7 @@ int SecureHttpClient::GetBodyLength() const
 // *************************************************************
 BYTE* SecureHttpClient::GetBody() const
 {
-    return (BYTE*)chunk.memory;
+    return reinterpret_cast<BYTE*>(chunk.memory);
 }
 
 // *************************************************************
@@ -161,7 +161,7 @@ TileHttpContentType SecureHttpClient::get_ContentType(int providerId) const
         return TileHttpContentType::httpXml;
     }
 
-    if (providerId == (int)tkTileProvider::Rosreestr)
+    if (providerId == static_cast<int>(tkTileProvider::Rosreestr))
     {
         // ad-hoc fix
         return TileHttpContentType::httpImage;

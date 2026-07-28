@@ -53,7 +53,7 @@ void dPRINT_DATA( ofstream & out, void * data )
 }
 
 long CShapeNetwork::UpEnd( edge * e, dPOINT * downpoint, double tolerance )
-{	
+{
 	if( dPOINT_EQUAL( e->one->data, (void *)downpoint, (void*)&tolerance ) )
 		return e->twoIndex;
 	else
@@ -61,7 +61,7 @@ long CShapeNetwork::UpEnd( edge * e, dPOINT * downpoint, double tolerance )
 }
 
 long CShapeNetwork::DownEnd( edge * e, dPOINT * downpoint, double tolerance )
-{	
+{
 	if( dPOINT_EQUAL( e->one->data, (void *)downpoint, (void*)&tolerance ) )
 		return e->oneIndex;
 	else
@@ -69,7 +69,7 @@ long CShapeNetwork::DownEnd( edge * e, dPOINT * downpoint, double tolerance )
 }
 
 void CShapeNetwork::CopyShape( bool reversePoints, IShape * oldshape, IShape * newshape )
-{	
+{
 	ShpfileType shptype;
 	VARIANT_BOOL vbretval;
 	oldshape->get_ShapeType(&shptype);
@@ -79,36 +79,36 @@ void CShapeNetwork::CopyShape( bool reversePoints, IShape * oldshape, IShape * n
 	
 	long numPoints = 0;
 	oldshape->get_NumPoints(&numPoints);
-	
-	IPoint * oldpnt = NULL;
-	IPoint * newpnt = NULL;
+
+	IPoint * oldpnt = nullptr;
+	IPoint * newpnt = nullptr;
 	double x, y, z;
 	long pos = 0;
 	VARIANT_BOOL retval = FALSE;
 	for( int i = 0; i < numPoints; i++ )
-	{	
+	{
 		pos = i;
 		oldshape->get_Point(pos,&oldpnt);
 		oldpnt->get_X(&x);
 		oldpnt->get_Y(&y);
 		oldpnt->get_Z(&z);
 		oldpnt->Release();
-		oldpnt = NULL;
+		oldpnt = nullptr;
 
-		CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&newpnt);		
+		CoCreateInstance(CLSID_Point, nullptr,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&newpnt);		
 		newpnt->put_X(x);
 		newpnt->put_Y(y);
 		newpnt->put_Z(z);
 		if( reversePoints == true )
 			pos = 0;
-		newshape->InsertPoint(newpnt,&pos,&retval);		
-		newpnt->Release();	
-		newpnt = NULL;
+		newshape->InsertPoint(newpnt,&pos,&retval);
+		newpnt->Release();
+		newpnt = nullptr;
 	}
 }
 
 void CShapeNetwork::CopyField( IField * oldfield, IField * newfield )
-{	
+{
 	CComBSTR name;
 	long precision = 0,width = 0;
 	FieldType ftype;
@@ -123,7 +123,8 @@ void CShapeNetwork::CopyField( IField * oldfield, IField * newfield )
 }
 
 void CShapeNetwork::recPrintShpNetwork(shpNetNode * allnodes, long index, ofstream & out)
-{	out<<index<<" : ";
+{
+	out<<index<<" : ";
 	int i = 0;
 	for( i = 0; i < (int)allnodes[index].up.size(); i++ )
 		out<<allnodes[index].up[i]<<" ";
@@ -134,7 +135,7 @@ void CShapeNetwork::recPrintShpNetwork(shpNetNode * allnodes, long index, ofstre
 }
 
 void CShapeNetwork::PrintShpNetwork(shpNetNode * allnodes, long outlet, const char * filename)
-{	
+{
 	ofstream out(filename);
 	recPrintShpNetwork( allnodes, outlet, out );
 	out.close();
@@ -145,12 +146,12 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	//Verify the Shapefile
-	if( Shapefile == NULL )
+	if( Shapefile == nullptr)
 	{	*retval = 0;
 		_lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-		else if( _globalCallback != NULL )
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		else if( _globalCallback != nullptr)
 			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
@@ -161,9 +162,9 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	if( shpfiletype != SHP_POLYLINE && shpfiletype != SHP_POLYLINEZ && shpfiletype != SHP_POLYLINEM )
 	{	*retval = 0;
 		_lastErrorCode = tkINCOMPATIBLE_SHAPEFILE_TYPE;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-		else if( _globalCallback != NULL )
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		else if( _globalCallback != nullptr)
 			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
@@ -175,42 +176,42 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	if( ShapeIndex < 0 || ShapeIndex >= numShapes )
 	{	*retval = 0;
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-		else if( _globalCallback != NULL )
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		else if( _globalCallback != nullptr)
 			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
 	//Verify the PointIndex
-	IShape * outshp = NULL;
+	IShape * outshp = nullptr;
 	long numPoints = 0;
 	Shapefile->get_Shape(ShapeIndex,&outshp);	
 	outshp->get_ShapeType(&shpfiletype);
 	outshp->get_NumPoints(&numPoints);
 	outshp->Release();
-	outshp = NULL;
+	outshp = nullptr;
 
 	if( shpfiletype != SHP_POLYLINE && shpfiletype != SHP_POLYLINEZ && shpfiletype != SHP_POLYLINEM )
 	{	*retval = 0;
 		_lastErrorCode = tkINCOMPATIBLE_SHAPE_TYPE;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-		else if( _globalCallback != NULL )
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		else if( _globalCallback != nullptr)
 			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 	if( FinalPointIndex != 0 && FinalPointIndex != numPoints - 1 )
 	{	*retval = 0;
 		_lastErrorCode = tkINVALID_FINAL_POINT_INDEX;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-		else if( _globalCallback != NULL )
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		else if( _globalCallback != nullptr)
 			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
-	graph undir_graph;	
+	graph undir_graph;
 
 	long percent = 0, newpercent = 0;
 	double total = numShapes;
@@ -220,12 +221,13 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	double x1, y1, x2, y2;
 	//Build the Undirected Graph
 	for( int i = 0; i < numShapes; i++ )
-	{	IShape * shape = NULL;
+	{	IShape * shape = nullptr;
 		Shapefile->get_Shape(i,&shape);
 		shape->get_ShapeType(&shpfiletype);
 
 		if( shpfiletype == SHP_POLYLINE || shpfiletype == SHP_POLYLINEZ || shpfiletype == SHP_POLYLINEM )
-		{	IPoint * pnt1 = NULL, * pnt2 = NULL;
+		{
+			IPoint * pnt1 = nullptr, * pnt2 = nullptr;
 
 			shape->get_NumPoints(&numPoints);
 			shape->get_Point(0,&pnt1);
@@ -252,9 +254,9 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 			if( distance > Tolerance )
 			{
 				graphnode * gnOne = new graphnode();
-				graphnode * gnTwo = new graphnode();		
-				gnOne->data = (void*)p1;
-				gnTwo->data = (void*)p2;
+				graphnode * gnTwo = new graphnode();
+				gnOne->data = static_cast<void*>(p1);
+				gnTwo->data = static_cast<void*>(p2);
 
 				edge * newEdge = new edge();
 				newEdge->one = gnOne;
@@ -263,22 +265,22 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 				undir_graph.Insert(newEdge,(void*)&Tolerance,dPOINT_EQUAL);
 			}
 			else
-			{	
+			{
 				//Add the shape as a blank to the graph
 				undir_graph.InsertBlank();
 
 				//Verify that this isn't the outlet shape
 				if( i == ShapeIndex )
-				{	
+				{
 					shape->Release();
-					shape = NULL;	
-					*retval = 0;			
+					shape = nullptr;
+					*retval = 0;
 					_lastErrorCode = tkTOLERANCE_TOO_LARGE;
-					if( cBack != NULL )
-						cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-					else if( _globalCallback != NULL )
-						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
-					return S_OK;			
+					if( cBack != nullptr)
+						cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+					else if( _globalCallback != nullptr)
+						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+					return S_OK;
 				}
 			}
 		}
@@ -287,13 +289,13 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 			//Verify that this isn't the outlet shape
 			if( i == ShapeIndex )
 			{	shape->Release();
-				shape = NULL;
-				*retval = 0;			
+				shape = nullptr;
+				*retval = 0;
 				_lastErrorCode = tkINCOMPATIBLE_SHAPE_TYPE;
-				if( cBack != NULL )
-					cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-				else if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+				if( cBack != nullptr)
+					cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+				else if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 				return S_OK;
 			}
 			else
@@ -301,7 +303,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 		}
 
 		shape->Release();
-		shape = NULL;
+		shape = nullptr;
 	
 		CallbackHelper::Progress(callback, i, total, "Building ShapeNetwork", _key, percent);
 	}
@@ -312,69 +314,69 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	double length = 0;
 	double fx, fy;
 	dPOINT dpnt;
-	IShape * shape = NULL;
-	IPoint * pnt = NULL;
-	IUtils * gen = NULL;
+	IShape * shape = nullptr;
+	IPoint * pnt = nullptr;
+	IUtils * gen = nullptr;
 	
-	CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&gen);	
+	CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&gen);
 	for( int ls = 0; ls < numShapes; ls++ )
-	{	if( undir_graph.edges[ls] != NULL )
-		{	Shapefile->get_Shape(ls,&shape);		
+	{	if( undir_graph.edges[ls] != nullptr)
+		{	Shapefile->get_Shape(ls,&shape);
 			gen->get_Length(shape,&length);
 
 			if( length <= Tolerance )
 			{	gen->Release();
-				gen = NULL;
+				gen = nullptr;
 				shape->Release();
-				shape = NULL;
-				
-				*retval = 0;			
+				shape = nullptr;
+
+				*retval = 0;
 				_lastErrorCode = tkTOLERANCE_TOO_LARGE;
-				if( cBack != NULL )
-					cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-				else if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+				if( cBack != nullptr)
+					cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+				else if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 				return S_OK;
 			}
 
 			undir_graph.edges[ls]->length = length;
 			if( ShapeIndex == ls )
-			{	shape->get_Point(FinalPointIndex,&pnt);	
+			{	shape->get_Point(FinalPointIndex,&pnt);
 				pnt->get_X(&fx);
 				pnt->get_Y(&fy);
 				dpnt.x = fx;
-				dpnt.y = fy;	
+				dpnt.y = fy;
 				pnt->Release();
-				pnt = NULL;
+				pnt = nullptr;
 			}
 
 			shape->Release();
-			shape = NULL;	
-		}			
+			shape = nullptr;
+		}
 	}
 	gen->Release();
-	gen = NULL;
+	gen = nullptr;
 
-	//convert the undirected graph into a directed acyclic graph	
+	//convert the undirected graph into a directed acyclic graph
 	shpNetNode * edgeNetwork = new shpNetNode[numShapes];
 
 	//Find the up end of the outlet	
 	long up = UpEnd( undir_graph.edges[ShapeIndex], &dpnt, Tolerance );
-	long down = DownEnd( undir_graph.edges[ShapeIndex], &dpnt, Tolerance );		
+	long down = DownEnd( undir_graph.edges[ShapeIndex], &dpnt, Tolerance );
 	edgeNetwork[ShapeIndex].downIndex = down;
 	edgeNetwork[ShapeIndex].upIndex = up;
 	edgeNetwork[ShapeIndex].distanceToOutlet = 0;
 
 	std::deque<long> tmp_ambigShapeIndex;
-	
+
 	heap minheap;
 	heapnode hn;
 	long parentIndex;
 	double distance = 0;
-	
+
 	minheap.insert(ShapeIndex,0);
- 	while( minheap.size() > 0 )
-	{	
+	while( minheap.size() > 0 )
+	{
 		hn = minheap.top();
 		minheap.pop();
 		parentIndex = hn.index;
@@ -385,7 +387,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 
 			_networkSize++;
 			edgeNetwork[parentIndex].used = true;
-			edgeNetwork[parentIndex].length = e->length;		
+			edgeNetwork[parentIndex].length = e->length;
 
 			//Set up the parent
 			if( edgeNetwork[parentIndex].pbIndex.size() > 0 )
@@ -395,20 +397,20 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 
 				if( parentparent >= 0 )
 					edgeNetwork[parentparent].up.push_back(parentIndex);
-				
+
 				//Mark an ambiguous path
 				if( edgeNetwork[parentIndex].pbIndex.size() > 1 )
-					tmp_ambigShapeIndex.push_back(parentIndex);				
+					tmp_ambigShapeIndex.push_back(parentIndex);
 			}
 
 			up = edgeNetwork[parentIndex].upIndex;
-			down = edgeNetwork[parentIndex].downIndex;			
-			
-			distance = edgeNetwork[parentIndex].distanceToOutlet + e->length;				
+			down = edgeNetwork[parentIndex].downIndex;
+
+			distance = edgeNetwork[parentIndex].distanceToOutlet + e->length;
 			graphnode * gn = undir_graph.graphnodes[up];
 
-			for( int i = 0; i < (int)gn->edges.size(); i++ )
-			{	
+			for( int i = 0; i < static_cast<int>(gn->edges.size()); i++ )
+			{
 				long childIndex = gn->edges[i];
 
 				if( edgeNetwork[childIndex].used == false )
@@ -428,62 +430,62 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 					}
 					//Ambiguous Path
 					else if( distance == edgeNetwork[gn->edges[i]].distanceToOutlet )
-						edgeNetwork[childIndex].pbIndex.push_back(parentIndex);					
+						edgeNetwork[childIndex].pbIndex.push_back(parentIndex);
 				}
 			}
 		}
 	}
-	
+
 	//PrintShpNetwork(edgeNetwork,ShapeIndex,"Network.txt");
 
 	//copy the network into a new shapefile
-	if( _network != NULL )
+	if( _network != nullptr)
 		delete [] _network;
 	_network = new shpNetNode[_networkSize];
 	long * shapeMap = new long[numShapes];
 	long shapepos = 0;
 	VARIANT_BOOL vbretval = FALSE;
 	
-	IShape * newshape = NULL;
-	IShape * oldshape = NULL;
+	IShape * newshape = nullptr;
+	IShape * oldshape = nullptr;
 
 	//_unlink("d:\\data\\netfile.shp");
 	//_unlink("d:\\data\\netfile.shx");
 	//_unlink("d:\\data\\netfile.dbf");
 
-	if( _netshpfile != NULL )
+	if( _netshpfile != nullptr)
 		_netshpfile->Release();
-	_netshpfile = NULL;
+	_netshpfile = nullptr;
 	//Create the shapefile
-	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&_netshpfile);
+	CoCreateInstance(CLSID_Shapefile, nullptr,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&_netshpfile);
 	Shapefile->get_ShapefileType(&shpfiletype);
 	_netshpfile->CreateNew(m_globalSettings.emptyBstr,shpfiletype,&vbretval);
 
 	//Copy all of the Fields
 	long numFields = 0;
 	Shapefile->get_NumFields(&numFields);
-	IField * newfield = NULL;	
-	IField * oldfield = NULL;
+	IField * newfield = nullptr;
+	IField * oldfield = nullptr;
 	long fieldpos =0;
 	int f = 0;
 	for( f = 0; f < numFields; f++ )
-	{	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&newfield);
+	{	CoCreateInstance(CLSID_Field, nullptr,CLSCTX_INPROC_SERVER,IID_IField,(void**)&newfield);
 		Shapefile->get_Field(f,&oldfield);
 		CopyField(oldfield,newfield);
 		fieldpos = f;
 		_netshpfile->EditInsertField(newfield,&fieldpos,cBack,&vbretval);
 		oldfield->Release();
-		oldfield = NULL;
+		oldfield = nullptr;
 		newfield->Release();
-		newfield = NULL;
+		newfield = nullptr;
 	}
 
 	//Create two new fields
-	IField * id = NULL;
-	IField * did = NULL;
-	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&id);
-	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&did);
-				
+	IField * id = nullptr;
+	IField * did = nullptr;
+	CoCreateInstance(CLSID_Field, nullptr,CLSCTX_INPROC_SERVER,IID_IField,(void**)&id);
+	CoCreateInstance(CLSID_Field, nullptr,CLSCTX_INPROC_SERVER,IID_IField,(void**)&did);
+
 	CComBSTR bstrNetId("NET_ID");
 	id->put_Name(bstrNetId);
 	id->put_Precision(0);
@@ -500,22 +502,22 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	_netshpfile->EditInsertField(did,&fieldpos,cBack,&vbretval);
 	_netshpfile->EditInsertField(id,&fieldpos,cBack,&vbretval);
 	id->Release();
-	id = NULL;
+	id = nullptr;
 	did->Release();
-	did = NULL;
+	did = nullptr;
 
 	//Create the outlet shape
 	ComHelper::CreateShape(&newshape);
-	Shapefile->get_Shape(ShapeIndex,&oldshape);	
+	Shapefile->get_Shape(ShapeIndex,&oldshape);
 
 	dPOINT zeroPnt;
-	IPoint * izpnt = NULL;
+	IPoint * izpnt = nullptr;
 	oldshape->get_Point(0,&izpnt);
 	double izx,izy;
 	izpnt->get_X(&izx);
 	izpnt->get_Y(&izy);
 	izpnt->Release();
-	izpnt = NULL;
+	izpnt = nullptr;
 	zeroPnt.x = izx;
 	zeroPnt.y = izy;
 
@@ -528,9 +530,9 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	CopyShape(reversePoints,oldshape,newshape);	
 	_netshpfile->EditInsertShape(newshape,&shapepos,&vbretval);
 	oldshape->Release();
-	oldshape = NULL;
+	oldshape = nullptr;
 	newshape->Release();
-	newshape = NULL;
+	newshape = nullptr;
 
 	VARIANT cID,cDID;
 	VariantInit(&cID); 
@@ -543,7 +545,6 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	_netshpfile->EditCellValue(0,shapepos,cID,&vbretval);
 	_netshpfile->EditCellValue(1,shapepos,cDID,&vbretval);
 
-	
 	VARIANT cVal;
 	VariantInit(&cVal); 
 	for( f = 0; f < numFields; f++ )
@@ -551,53 +552,53 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 		//Adjust for the two new fields
 		_netshpfile->EditCellValue(f + 2,shapepos,cVal,&vbretval);
 	}
-		
-	shapeMap[ShapeIndex] = shapepos;	
+
+	shapeMap[ShapeIndex] = shapepos;
 
 	_network[shapepos].distanceToOutlet = 0;
 	_network[shapepos].parentIndex = -1;
 	_network[shapepos].length = edgeNetwork[ShapeIndex].length;
-	
+
 	std::deque<long> netPath;
 	netPath.push_back(ShapeIndex);
-	
+
 	percent = 0, newpercent = 0;
 	total = _networkSize;
-	
+
 	//add all other shapes by simulating a recursive search
 	long shpcnt = 1;
 	long insertedShapes = 1;
 	while( netPath.size() > 0 )
-	{			
+	{
 		long parent = netPath[0];
 		netPath.pop_front();
-		
+
 		shpcnt++;
-		
-		for( int i = 0; i < (int)edgeNetwork[parent].up.size(); i++ )
+
+		for( int i = 0; i < static_cast<int>(edgeNetwork[parent].up.size()); i++ )
 		{	
 			shapepos = insertedShapes;
 
 			long childIndex = edgeNetwork[parent].up[i];
-			netPath.push_back(childIndex);			
+			netPath.push_back(childIndex);
 
 			ComHelper::CreateShape(&newshape);
-			Shapefile->get_Shape(childIndex,&oldshape);				
-			
+			Shapefile->get_Shape(childIndex,&oldshape);
+
 			oldshape->get_Point(0,&izpnt);
 			izpnt->get_X(&izx);
 			izpnt->get_Y(&izy);
 			izpnt->Release();
-			izpnt = NULL;
+			izpnt = nullptr;
 			zeroPnt.x = izx;
 			zeroPnt.y = izy;
 
-			IShape * parentShape = NULL;
+			IShape * parentShape = nullptr;
 			Shapefile->get_Shape(parent,&parentShape);
 			long pnumPts = 0;
-			parentShape->get_NumPoints(&pnumPts);			
-			IPoint * parentPnt1 = NULL;
-			IPoint * parentPnt2 = NULL;
+			parentShape->get_NumPoints(&pnumPts);
+			IPoint * parentPnt1 = nullptr;
+			IPoint * parentPnt2 = nullptr;
 			parentShape->get_Point(0,&parentPnt1);
 			parentShape->get_Point(pnumPts-1,&parentPnt2);
 			double pp1x, pp1y, pp2x, pp2y;
@@ -606,11 +607,11 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 			parentPnt2->get_X(&pp2x);
 			parentPnt2->get_Y(&pp2y);
 			parentPnt1->Release();
-			parentPnt1 = NULL;
+			parentPnt1 = nullptr;
 			parentPnt2->Release();
-			parentPnt2 = NULL;
+			parentPnt2 = nullptr;
 			parentShape->Release();
-			parentShape = NULL;
+			parentShape = nullptr;
 
 			dPOINT dpp1;
 			dpp1.x = pp1x;
@@ -625,12 +626,12 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 			else
 				reversePoints = true;
 
-			CopyShape(reversePoints,oldshape,newshape);				
+			CopyShape(reversePoints,oldshape,newshape);
 			_netshpfile->EditInsertShape(newshape,&shapepos,&vbretval);
 			oldshape->Release();
-			oldshape = NULL;
+			oldshape = nullptr;
 			newshape->Release();
-			newshape = NULL;
+			newshape = nullptr;
 
 			cID.lVal = shapepos;
 			cDID.lVal = shapeMap[parent];
@@ -643,7 +644,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 				_netshpfile->EditCellValue(f + 2,shapepos,cVal,&vbretval);
 			}
 		
-			distance = edgeNetwork[parent].distanceToOutlet + undir_graph.edges[parent]->length;							
+			distance = edgeNetwork[parent].distanceToOutlet + undir_graph.edges[parent]->length;
 
 			shapeMap[childIndex] = shapepos;
 			_network[shapeMap[parent]].up.push_back(shapepos);
@@ -651,7 +652,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 			_network[shapepos].parentIndex = shapeMap[parent];
 			_network[shapepos].length = edgeNetwork[childIndex].length;
 
-			insertedShapes++;			
+			insertedShapes++;
 		}
 
 		CallbackHelper::Progress(callback, shpcnt, total, "ShpNetwork::Copying Shapefile", _key, percent);
@@ -660,17 +661,17 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 
 	//ShapeMap the Ambiguous Shapes
 	_ambigShapeIndex.clear();
-	for( int ti = 0; ti < (int)tmp_ambigShapeIndex.size(); ti++ )
+	for( int ti = 0; ti < static_cast<int>(tmp_ambigShapeIndex.size()); ti++ )
 	{	long shpindex = tmp_ambigShapeIndex[ti];
 	_ambigShapeIndex.push_back(shapeMap[shpindex]);
 	}
-		
+
 	delete [] shapeMap;
 	delete [] edgeNetwork;
 
 	_netshpfile->AddRef();
-	*retval = _ambigShapeIndex.size() + 1; //ARA 02/03/06 Possible to have size() of 0 so needed to be incremented by 1 so it wasn't returning error code
-	
+	*retval = static_cast<long>(_ambigShapeIndex.size()) + 1; //ARA 02/03/06 Possible to have size() of 0 so needed to be incremented by 1 so it wasn't returning error code
+
 	VariantClear(&cID); 
 	VariantClear(&cDID); 
 	VariantClear(&cVal); 
@@ -681,33 +682,33 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 STDMETHODIMP CShapeNetwork::DeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	if( IsAligned() == false )
 	{	*retval = FALSE;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
 	if( ShapeIndex >= 0 && ShapeIndex < _networkSize )
-	{	
+	{
 		VARIANT_BOOL vbretval = FALSE;
 		//Verify that the shapefile and dbf are in editing mode
 		_netshpfile->get_EditingShapes(&vbretval);
 		if( vbretval == FALSE )
 		{	*retval = FALSE;
 			_lastErrorCode = tkSHPFILE_NOT_IN_EDIT_MODE;
-			if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+			if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
 		}
 		_netshpfile->get_EditingTable(&vbretval);
 		if( vbretval == FALSE )
 		{	*retval = FALSE;
 			_lastErrorCode = tkDBF_NOT_IN_EDIT_MODE;
-			if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));						
+			if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
 		}
 
@@ -720,14 +721,14 @@ STDMETHODIMP CShapeNetwork::DeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 		netPath.push_back(ShapeIndex);
 		long localNetSize = 0;
 		while( netPath.size() > 0 )
-		{			
+		{
 			long parent = netPath[0];
 			netPath.pop_front();
 
 			localNetSize++;
 			_network[parent].used = true;
 
-			for( int i = 0; i < (int)_network[parent].up.size(); i++ )
+			for( int i = 0; i < static_cast<int>(_network[parent].up.size()); i++ )
 			{	long index = _network[parent].up[i];
 				netPath.push_back(index);
 			}
@@ -747,41 +748,41 @@ STDMETHODIMP CShapeNetwork::DeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 		int m = 0;
 		for( m = 0; m < _networkSize; m++ )
 		{	if( _network[m].used == true )
-			{	_netshpfile->EditDeleteShape(m - delcnt,&vbretval);					
-				++delcnt;			
+			{	_netshpfile->EditDeleteShape(m - delcnt,&vbretval);
+				++delcnt;
 
 				for( int k = m + 1; k < _networkSize; k++ )
-					shifts[k]++;				
-			}			
+					shifts[k]++;
+			}
 		}
 
-		//Change any indexes in the old network			
+		//Change any indexes in the old network
 		for( m = 0; m < _networkSize; m++ )
 		{	long parentIndex = _network[m].parentIndex;
 			if( parentIndex >= 0 )
 				_network[m].parentIndex -= shifts[parentIndex];
 					
 			int kp = 0;
-			for( kp = 0; kp < (int)_network[m].up.size(); kp++ )
+			for( kp = 0; kp < static_cast<int>(_network[m].up.size()); kp++ )
 			{	long childIndex = _network[m].up[kp];
 				if( _network[childIndex].used == true )
-					_network[m].up.erase( _network[m].up.begin() + kp );				
+					_network[m].up.erase( _network[m].up.begin() + kp );
 			}
 
-			for( kp = 0; kp < (int)_network[m].up.size(); kp++ )
+			for( kp = 0; kp < static_cast<int>(_network[m].up.size()); kp++ )
 				_network[m].up[kp] -= shifts[_network[m].up[kp]];
 		}
-		
-		delete [] shifts;
-		shifts = NULL;
 
-		shpNetNode * newNetwork = new shpNetNode[_networkSize - localNetSize];				
+		delete [] shifts;
+		shifts = nullptr;
+
+		shpNetNode * newNetwork = new shpNetNode[_networkSize - localNetSize];
 		long indcnt = 0;
 		for( m = 0; m < _networkSize; m++ )
-		{	if( _network[m].used == false )			
+		{	if( _network[m].used == false )
 				newNetwork[indcnt++] = _network[m];
 		}
-		
+
 		delete [] _network;
 		_network = newNetwork;
 		_networkSize = _networkSize - localNetSize;
@@ -797,21 +798,20 @@ STDMETHODIMP CShapeNetwork::DeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 			cDID.lVal = _network[fn].parentIndex;
 			_netshpfile->EditCellValue(0,fn,cID,&vbretval);
 			_netshpfile->EditCellValue(1,fn,cDID,&vbretval);
-		}		
-		
+		}
+
 		VariantClear(&cID); 
 		VariantClear(&cDID); 
-		
+
 		*retval = TRUE;
 	}
 	else
 	{	*retval = FALSE;
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));						
-		return S_OK;			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		return S_OK;
 	}
-	
 
 	return S_OK;
 }
@@ -823,13 +823,13 @@ STDMETHODIMP CShapeNetwork::MoveUp(long UpIndex, VARIANT_BOOL *retval)
 	if( IsAligned() == false )
 	{	*retval = FALSE;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
 	if( _currentNode >= 0 )
-	{	long numUps = _network[_currentNode].up.size();
+	{	long numUps = static_cast<long>(_network[_currentNode].up.size());
 		if( UpIndex >= 0 && UpIndex < numUps )
 		{	_currentNode = _network[_currentNode].up[UpIndex];
 			*retval = TRUE;
@@ -837,18 +837,18 @@ STDMETHODIMP CShapeNetwork::MoveUp(long UpIndex, VARIANT_BOOL *retval)
 		else
 		{	*retval = FALSE;
 			_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-			if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));									
+			if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
 		}
 	}
 	else
 	{	*retval = FALSE;
 		_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));									
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
-	}	
+	}
 
 	return S_OK;
 }
@@ -856,17 +856,17 @@ STDMETHODIMP CShapeNetwork::MoveUp(long UpIndex, VARIANT_BOOL *retval)
 STDMETHODIMP CShapeNetwork::MoveDown(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	if( IsAligned() == false )
 	{	*retval = FALSE;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
 	if( _currentNode >= 0 )
-	{	
+	{
 		if( _network[_currentNode].parentIndex >= 0 )
 		{	_currentNode = _network[_currentNode].parentIndex;
 			*retval = TRUE;
@@ -874,18 +874,18 @@ STDMETHODIMP CShapeNetwork::MoveDown(VARIANT_BOOL *retval)
 		else
 		{	*retval = FALSE;
 			_lastErrorCode = tkNODE_AT_OUTLET;
-			if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));									
+			if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
 		}
 	}
 	else
 	{	*retval = FALSE;
 		_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));									
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
-	}	
+	}
 
 	return S_OK;
 }
@@ -897,8 +897,8 @@ STDMETHODIMP CShapeNetwork::MoveTo(long ShapeIndex, VARIANT_BOOL *retval)
 	if( IsAligned() == false )
 	{	*retval = FALSE;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -909,8 +909,8 @@ STDMETHODIMP CShapeNetwork::MoveTo(long ShapeIndex, VARIANT_BOOL *retval)
 	else
 	{	*retval = FALSE;
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -920,12 +920,12 @@ STDMETHODIMP CShapeNetwork::MoveTo(long ShapeIndex, VARIANT_BOOL *retval)
 STDMETHODIMP CShapeNetwork::MoveToOutlet(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	if( IsAligned() == false )
 	{	*retval = FALSE;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -936,8 +936,8 @@ STDMETHODIMP CShapeNetwork::MoveToOutlet(VARIANT_BOOL *retval)
 	else
 	{	*retval = FALSE;
 		_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -949,48 +949,48 @@ STDMETHODIMP CShapeNetwork::get_Shapefile(IShapefile **pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	if( IsAligned() == false )
-	{	*pVal = NULL;
+	{	*pVal = nullptr;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
-	if( _netshpfile != NULL )
+	if( _netshpfile != nullptr)
 		_netshpfile->AddRef();
 
-	*pVal = _netshpfile;	
+	*pVal = _netshpfile;
 	return S_OK;
 }
 
 STDMETHODIMP CShapeNetwork::get_CurrentShape(IShape **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	if( IsAligned() == false )
-	{	*pVal = NULL;
+	{	*pVal = nullptr;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
 	if( _currentNode >= 0 )
-	{	if( _netshpfile != NULL )
+	{	if( _netshpfile != nullptr)
 			_netshpfile->get_Shape(_currentNode,pVal);
 		else
-		{	*pVal = NULL;
+		{	*pVal = nullptr;
 			_lastErrorCode = tkNO_NETWORK;
-			if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+			if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
 		}
 	}
 	else
-	{	*pVal = NULL;
+	{	*pVal = nullptr;
 		_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1004,8 +1004,8 @@ STDMETHODIMP CShapeNetwork::get_CurrentShapeIndex(long *pVal)
 	if( IsAligned() == false )
 	{	*pVal = -1;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1014,8 +1014,8 @@ STDMETHODIMP CShapeNetwork::get_CurrentShapeIndex(long *pVal)
 	else
 	{	*pVal = -1;	
 		_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1025,19 +1025,19 @@ STDMETHODIMP CShapeNetwork::get_CurrentShapeIndex(long *pVal)
 STDMETHODIMP CShapeNetwork::get_DistanceToOutlet(long PointIndex, double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	if( IsAligned() == false )
 	{	*pVal = 0.0;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
 	if( _currentNode >= 0 )
 	{	double distance = 0;
-		
-		IShape * shp = NULL;
+
+		IShape * shp = nullptr;
 		_netshpfile->get_Shape(_currentNode,&shp);
 		long numPoints = 0;
 		shp->get_NumPoints(&numPoints);
@@ -1045,13 +1045,13 @@ STDMETHODIMP CShapeNetwork::get_DistanceToOutlet(long PointIndex, double *pVal)
 		if( PointIndex < 0 || PointIndex >= numPoints )
 		{	*pVal = 0;
 			_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-			if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));						
+			if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
 		}
 		else
-		{	distance = _network[_currentNode].distanceToOutlet;			
-			IPoint * pnt = NULL;
+		{	distance = _network[_currentNode].distanceToOutlet;
+			IPoint * pnt = nullptr;
 			double x1, y1, z1;
 			double x2, y2, z2;
 
@@ -1060,7 +1060,7 @@ STDMETHODIMP CShapeNetwork::get_DistanceToOutlet(long PointIndex, double *pVal)
 			pnt->get_Y(&y1);
 			pnt->get_Z(&z1);
 			pnt->Release();
-			pnt = NULL;
+			pnt = nullptr;
 
 			for( int i = 1; i < PointIndex; i++ )
 			{	
@@ -1069,7 +1069,7 @@ STDMETHODIMP CShapeNetwork::get_DistanceToOutlet(long PointIndex, double *pVal)
 				pnt->get_Y(&y2);
 				pnt->get_Z(&z2);
 				pnt->Release();
-				pnt = NULL;
+				pnt = nullptr;
 
 				distance += sqrt( pow( x2 - x1, 2 ) + pow( y2 - y1, 2 ) + pow( z2 - z1, 2 ) );
 
@@ -1080,15 +1080,15 @@ STDMETHODIMP CShapeNetwork::get_DistanceToOutlet(long PointIndex, double *pVal)
 		}
 		
 		shp->Release();
-		shp = NULL;
+		shp = nullptr;
 
 		*pVal = distance;
 	}
 	else
 	{	*pVal = 0.0;		
 		_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1102,20 +1102,20 @@ STDMETHODIMP CShapeNetwork::get_NumDirectUps(long *pVal)
 	if( IsAligned() == false )
 	{	*pVal = 0;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
 	if( _currentNode >= 0 )
-		*pVal = _network[_currentNode].up.size();
+		*pVal = static_cast<long>(_network[_currentNode].up.size());
 	else
 	{	*pVal = 0;
 		_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
-	}	
+	}
 
 	return S_OK;
 }
@@ -1123,12 +1123,12 @@ STDMETHODIMP CShapeNetwork::get_NumDirectUps(long *pVal)
 STDMETHODIMP CShapeNetwork::get_NetworkSize(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	if( IsAligned() == false )
 	{	*pVal = 0;
 		_lastErrorCode = tkNOT_ALIGNED;
 		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1144,7 +1144,7 @@ STDMETHODIMP CShapeNetwork::get_NetworkSize(long *pVal)
 			netPath.pop_front();
 			localNetSize++;
 
-			for( int i = 0; i < (int)_network[parent].up.size(); i++ )
+			for( int i = 0; i < static_cast<int>(_network[parent].up.size()); i++ )
 			{	long index = _network[parent].up[i];
 				netPath.push_back(index);
 			}
@@ -1154,8 +1154,8 @@ STDMETHODIMP CShapeNetwork::get_NetworkSize(long *pVal)
 	else
 	{	*pVal = 0;
 		_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1165,22 +1165,22 @@ STDMETHODIMP CShapeNetwork::get_NetworkSize(long *pVal)
 STDMETHODIMP CShapeNetwork::get_AmbigShapeIndex(long Index, long * pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	if( IsAligned() == false )
 	{	*pVal = -1;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
-	if (Index >= 0 && Index < (long)_ambigShapeIndex.size())
+	if (Index >= 0 && Index < static_cast<long>(_ambigShapeIndex.size()))
 		*pVal = _ambigShapeIndex[Index];
 	else
 	{	*pVal = -1;
 		_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1190,17 +1190,17 @@ STDMETHODIMP CShapeNetwork::get_AmbigShapeIndex(long Index, long * pVal)
 STDMETHODIMP CShapeNetwork::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	*pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
-	
+
 	return S_OK;
 }
 
 STDMETHODIMP CShapeNetwork::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
 
 	return S_OK;
@@ -1209,10 +1209,10 @@ STDMETHODIMP CShapeNetwork::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CShapeNetwork::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	*pVal = _globalCallback;
-	if( _globalCallback != NULL )
-	{	
+	if( _globalCallback != nullptr)
+	{
 		_globalCallback->AddRef();
 	}
 	return S_OK;
@@ -1255,8 +1255,8 @@ STDMETHODIMP CShapeNetwork::get_ParentIndex(long *pVal)
 	if( IsAligned() == false )
 	{	*pVal = -2;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1265,8 +1265,8 @@ STDMETHODIMP CShapeNetwork::get_ParentIndex(long *pVal)
 	else
 	{	*pVal = -2;
 		_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1275,19 +1275,19 @@ STDMETHODIMP CShapeNetwork::get_ParentIndex(long *pVal)
 
 STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if( IsAligned() == false )
 	{	_lastErrorCode = tkNOT_ALIGNED;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
 	if( _currentNode == 0 )
 	{	_lastErrorCode = tkCANT_CHANGE_OUTLET_PARENT;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 	else if(_currentNode > 0 )
@@ -1298,46 +1298,46 @@ STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 			{	if( snn.parentIndex == _currentNode )
 				{	//There would create a loop
 					_lastErrorCode = tkNET_LOOP;
-					if( _globalCallback != NULL )
-						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+					if( _globalCallback != nullptr)
+						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 					return S_OK;
 				}
 			}
 
 			//Possibly flip the shape so that Point0 is down
-			IShape * parentShape = NULL;
+			IShape * parentShape = nullptr;
 			_netshpfile->get_Shape(newVal,&parentShape);
 
 			long numPoints = 0;
 			parentShape->get_NumPoints(&numPoints);
 			if( numPoints < 2 )
 			{	_lastErrorCode = tkINVALID_SHP_FILE;
-				if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+				if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 				return S_OK;
 			}
-			
-			IPoint * ppnt = NULL;
+
+			IPoint * ppnt = nullptr;
 			parentShape->get_Point(numPoints-1,&ppnt);
 			double ppx, ppy;
 			ppnt->get_X(&ppx);
 			ppnt->get_Y(&ppy);
 			ppnt->Release();
-			ppnt = NULL;
+			ppnt = nullptr;
 			parentShape->Release();
-			parentShape = NULL;
+			parentShape = nullptr;
 
-			IShape * shp = NULL;
+			IShape * shp = nullptr;
 			_netshpfile->get_Shape(_currentNode,&shp);
 			shp->get_NumPoints(&numPoints);
 			if( numPoints < 2 )
 			{	_lastErrorCode = tkINVALID_SHP_FILE;
-				if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+				if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 				return S_OK;
 			}
 
-			IPoint * pnt1 = NULL, * pnt2 = NULL;
+			IPoint * pnt1 = nullptr, * pnt2 = nullptr;
 			shp->get_Point(0,&pnt1);
 			shp->get_Point(numPoints-1,&pnt2);
 			double px1, px2, py1, py2;
@@ -1346,11 +1346,11 @@ STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 			pnt2->get_X(&px2);
 			pnt2->get_Y(&py2);
 			shp->Release();
-			shp = NULL;
+			shp = nullptr;
 			pnt1->Release();
-			pnt1 = NULL;
+			pnt1 = nullptr;
 			pnt2->Release();
-			pnt2 = NULL;
+			pnt2 = nullptr;
 
 			double distance1 = sqrt( fabs( pow( px1 - ppx, 2 ) + pow( py1 - ppy, 2 ) ) );
 			double distance2 = sqrt( fabs( pow( px2 - ppx, 2 ) + pow( py2 - ppy, 2 ) ) );
@@ -1359,24 +1359,24 @@ STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 			_netshpfile->get_EditingShapes(&retval);
 			if( retval == FALSE )
 			{	_lastErrorCode = tkSHPFILE_NOT_IN_EDIT_MODE;
-				if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+				if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 				return S_OK;
 			}
 
 			_netshpfile->get_EditingTable(&retval);
 			if( retval == FALSE )
 			{	_lastErrorCode = tkDBF_NOT_IN_EDIT_MODE;
-				if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+				if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 				return S_OK;
 			}
 
 			//Reverse the points
 			if( distance2 < distance1 )
 			{	_netshpfile->get_Shape(_currentNode,&shp);
-				shp->get_NumPoints(&numPoints);			
-				IPoint * pnt = NULL;
+				shp->get_NumPoints(&numPoints);
+				IPoint * pnt = nullptr;
 				long pntcnt = numPoints;
 				int i = 0;
 				for( i = numPoints - 1; i >= 0; i-- )
@@ -1384,7 +1384,7 @@ STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 					long tmppntcnt = pntcnt;
 					shp->InsertPoint(pnt,&tmppntcnt,&retval);
 					pnt->Release();
-					pnt = NULL;
+					pnt = nullptr;
 					pntcnt++;
 				}
 				for( i = 0; i < numPoints; i++ )
@@ -1404,7 +1404,7 @@ STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 			_network[newVal].up.push_back(_currentNode);
 
 			//Push all of the nodes up's onto the parent
-			for( int i = 0; i < (int)_network[_currentNode].up.size(); i++ )
+			for( int i = 0; i < static_cast<int>(_network[_currentNode].up.size()); i++ )
 			{	long childIndex = _network[_currentNode].up[i];
 				_netshpfile->EditCellValue(1,childIndex,vnv,&retval);
 
@@ -1417,23 +1417,23 @@ STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 		else
 		{	if( newVal == _currentNode )
 			{	_lastErrorCode = tkNET_LOOP;
-				if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+				if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 				return S_OK;
 			}
 			else
 			{	_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-				if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+				if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 				return S_OK;
 			}
 		}
 	}
 	else
 	{	_lastErrorCode = tkINVALID_NODE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
-		return S_OK;	
+		if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		return S_OK;
 	}
 
 	return S_OK;
@@ -1445,13 +1445,13 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 
 	ICallback* callback = cBack ? cBack : _globalCallback;
 
-	if( sf == NULL )
+	if( sf == nullptr)
 	{	*retval = FALSE;
 		_lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		else if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 	
@@ -1461,10 +1461,10 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 	if( numShapes <= 0 )
 	{	*retval = FALSE;
 		_lastErrorCode = tkINVALID_SHP_FILE;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-		else if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		else if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
@@ -1474,39 +1474,39 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 	if( numFields < 2 )
 	{	*retval = FALSE;
 		_lastErrorCode = tkMISSING_FIELD;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-		else if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		else if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
-	}	
+	}
 	FieldType foneType;
 	FieldType ftwoType;
-	IField * fone = NULL;
-	IField * ftwo = NULL;
+	IField * fone = nullptr;
+	IField * ftwo = nullptr;
 	sf->get_Field(0,&fone);
 	sf->get_Field(1,&ftwo);
 	fone->get_Type(&foneType);
 	ftwo->get_Type(&ftwoType);
 	fone->Release();
 	ftwo->Release();
-	fone = NULL;
-	ftwo = NULL;
+	fone = nullptr;
+	ftwo = nullptr;
 	if( foneType != INTEGER_FIELD || ftwoType != INTEGER_FIELD )
 	{	*retval = FALSE;
 		_lastErrorCode = tkINVALID_FIELD;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-		else if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		else if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 		return S_OK;
 	}
 
 	Close(retval);
-	
+
 	_netshpfile = sf;
-	_netshpfile->AddRef();	
-	
+	_netshpfile->AddRef();
+
 	_networkSize = numShapes;
 	_currentNode = 0;
 	_network = new shpNetNode[numShapes];
@@ -1516,29 +1516,29 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 	VariantInit(&cDID); 
 	long lval1 = 0, lval2 = 0;
 
-	IUtils * gen = NULL;	
-	CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&gen);	
-	
+	IUtils * gen = nullptr;
+	CoCreateInstance(CLSID_Utils, nullptr,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&gen);
+
 	long percent = 0, newpercent = 0;
 	double total = numShapes;
 
 	double length = 0;
 	int i = 0;
 	for( i = 0; i < numShapes; i++ )
-	{	
-		IShape * shp = NULL;		
+	{
+		IShape * shp = nullptr;
 		_netshpfile->get_Shape(i,&shp);
-		if( shp == NULL )
-		{	
+		if( shp == nullptr)
+		{
 			_netshpfile->Release();
-			_netshpfile = NULL;
+			_netshpfile = nullptr;
 			*retval = FALSE;
 			_lastErrorCode = tkINVALID_SHP_FILE;
-			if( cBack != NULL )
-				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-			else if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
-		
+			if( cBack != nullptr)
+				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+			else if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+
 			VariantClear(&cID); 
 			VariantClear(&cDID); 
 
@@ -1550,17 +1550,17 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 		gen->get_Length(shp,&length);
 
 		shp->Release();
-		shp = NULL;
+		shp = nullptr;
 
 		if( shptype != SHP_POLYLINE && shptype != SHP_POLYLINEZ && shptype != SHP_POLYLINEM )
 		{	gen->Release();
 			Close(retval);
 			*retval = FALSE;
 			_lastErrorCode = tkINCOMPATIBLE_SHAPEFILE_TYPE;
-			if( cBack != NULL )
-				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-			else if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+			if( cBack != nullptr)
+				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+			else if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 
 			VariantClear(&cID); 
 			VariantClear(&cDID); 
@@ -1580,18 +1580,18 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 				Close(retval);
 				*retval = FALSE;
 				_lastErrorCode = tkINVALID_FIELD_VALUE;
-				if( cBack != NULL )
-					cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-				else if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
-				
+				if( cBack != nullptr)
+					cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+				else if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+
 				VariantClear(&cID); 
 				VariantClear(&cDID); 
 
 				return S_OK;
-			}		
+			}
 
-			lVal(cDID,lval2);		
+			lVal(cDID,lval2);
 			if( i == 0 )
 			{
 				//assert( lval2 == -1 && "The DID != -1" );
@@ -1601,19 +1601,19 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 					Close(retval);
 					*retval = FALSE;
 					_lastErrorCode = tkINVALID_FIELD_VALUE;
-					if( cBack != NULL )
-						cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-					else if( _globalCallback != NULL )
-						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
-				
+					if( cBack != nullptr)
+						cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+					else if( _globalCallback != nullptr)
+						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+
 					VariantClear(&cID); 
 					VariantClear(&cDID); 
 
 					return S_OK;
-				}	
+				}
 			}
 			else
-			{	
+			{
 				//assert( ( lval2 >= 0 && lval2 < numShapes ) && "The DID is out of range." );
 
 				if( lval2 < 0 || lval2 >= numShapes )
@@ -1621,30 +1621,30 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 					Close(retval);
 					*retval = FALSE;
 					_lastErrorCode = tkINVALID_FIELD_VALUE;
-					if( cBack != NULL )
-						cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-					else if( _globalCallback != NULL )
-						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
-					
+					if( cBack != nullptr)
+						cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+					else if( _globalCallback != nullptr)
+						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+
 					VariantClear(&cID); 
 					VariantClear(&cDID); 
 
 					return S_OK;
-				}	
+				}
 			}
-			
+
 			_network[i].length = length;
 			_network[i].used = false;
 			if( lval2 != -1 )
 				_network[lval2].up.push_back(i);
 			_network[i].parentIndex = lval2;
 		}
-		
+
 		CallbackHelper::Progress(callback, i, total, "ShpNetwork::Open", _key, percent);
 	}
 	gen->Release();
-	gen = NULL;
-	
+	gen = nullptr;
+
 	//Verify that every end shape can get to the outlet
 	std::deque<long> netEnds;
 	for( i = 0; i < _networkSize; i++ )
@@ -1652,8 +1652,8 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 			netEnds.push_back(i);
 	}
 	percent = 0, newpercent = 0;
-	total = netEnds.size();
-	for( i = 0; i < (int)netEnds.size(); i++ )
+	total = static_cast<double>(netEnds.size());
+	for( i = 0; i < static_cast<int>(netEnds.size()); i++ )
 	{
 		bool * used = new bool[_networkSize];
 		memset(used,0,sizeof(bool)*_networkSize);
@@ -1663,24 +1663,24 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 			{
 				delete [] used;
 
-				//This would create a loop				
+				//This would create a loop
 				Close(retval);
 				*retval = FALSE;
 
 				_lastErrorCode = tkNET_LOOP;
-				if( cBack != NULL )
-					cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-				else if( _globalCallback != NULL )
-					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
-				
-				VariantClear(&cID); 
-				VariantClear(&cDID); 
+				if( cBack != nullptr)
+					cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+				else if( _globalCallback != nullptr)
+					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 
-				return S_OK;				
+				VariantClear(&cID);
+				VariantClear(&cDID);
+
+				return S_OK;
 			}
 			used[snn.parentIndex] = true;
 		}
-		
+
 		delete [] used;
 
 		CallbackHelper::Progress(callback, i, total, "ShpNetwork::Verifying Integrity of Network", _key, percent);
@@ -1694,16 +1694,16 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 	{	long parent = travNet[0];
 		travNet.pop_front();
 		
-		for( int i = 0; i < (int)_network[parent].up.size(); i++ )
+		for( int i = 0; i < static_cast<int>(_network[parent].up.size()); i++ )
 		{	long index = _network[parent].up[i];
 			_network[index].distanceToOutlet = _network[parent].distanceToOutlet + _network[parent].length;
 			travNet.push_back(index);
-		}		
+		}
 	}
 
 	*retval = TRUE;
-	VariantClear(&cID); 
-	VariantClear(&cDID); 
+	VariantClear(&cID);
+	VariantClear(&cDID);
 	return S_OK;
 }
 
@@ -1711,12 +1711,12 @@ STDMETHODIMP CShapeNetwork::Close(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( _netshpfile != NULL )
+	if( _netshpfile != nullptr)
 		_netshpfile->Release();
-	_netshpfile = NULL;
-	if( _network != NULL )
+	_netshpfile = nullptr;
+	if( _network != nullptr)
 		delete [] _network;
-	_network = NULL;
+	_network = nullptr;
 	_currentNode = -1;
 	_networkSize = 0;
 
@@ -1724,7 +1724,7 @@ STDMETHODIMP CShapeNetwork::Close(VARIANT_BOOL *retval)
 }
 
 bool CShapeNetwork::IsAligned()
-{	if( _netshpfile == NULL )
+{	if( _netshpfile == nullptr)
 	{	if( _currentNode == -1 )
 			return true;
 		else
@@ -1743,9 +1743,9 @@ bool CShapeNetwork::IsAligned()
 long roundCustom( double d )
 {	
 	if( ceil(d) - d <= .5 )
-		return (int)ceil(d);
+		return static_cast<int>(ceil(d));
 	else
-		return (int)floor(d);
+		return static_cast<int>(floor(d));
 }
 
 STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHeader * Header, double cellsize, ICallback *cBack, IGrid **retval)
@@ -1756,23 +1756,23 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 	ICallback * callback = _globalCallback ? _globalCallback : cBack;
 
 	if( IsAligned() == false )
-	{	*retval = NULL;
+	{	*retval = nullptr;
 		_lastErrorCode = tkNOT_ALIGNED;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-		else if( _globalCallback != NULL )
-			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
-		return S_OK;		
+		if( cBack != nullptr)
+			cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		else if( _globalCallback != nullptr)
+			_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+		return S_OK;
 	}
 
-	if( cBack == NULL )
+	if( cBack == nullptr)
 		cBack = _globalCallback;
 
 	short nodata = -1;
-		
+
 	if( UseNetworkBounds != VARIANT_FALSE )
-	{	
-		IExtents * box = NULL;
+	{
+		IExtents * box = nullptr;
 		_netshpfile->get_Extents(&box);
 		double xllcenter = 0, yllcenter = 0;
 		double xurcenter = 0, yurcenter = 0;
@@ -1781,26 +1781,26 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		box->get_xMax(&xurcenter);
 		box->get_yMax(&yurcenter);
 		box->Release();
-		
+
 		if( cellsize <= 0 )
-		{	*retval = NULL;
+		{	*retval = nullptr;
 			_lastErrorCode = tkINVALID_PARAMETER_VALUE;
-			if( cBack != NULL )
-				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-			else if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+			if( cBack != nullptr)
+				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+			else if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
 		}
 
 		long ncols = roundCustom((xurcenter - xllcenter) / cellsize) + 1;
 		long nrows = roundCustom((yurcenter - yllcenter) / cellsize) + 1;
 
-		IGridHeader * nbheader = NULL;
-		CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)&nbheader);
+		IGridHeader * nbheader = nullptr;
+		CoCreateInstance(CLSID_GridHeader, nullptr,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)&nbheader);
 		nbheader->put_dX(cellsize);
 		nbheader->put_dY(cellsize);
 		VARIANT vndv;
-		VariantInit(&vndv); 
+		VariantInit(&vndv);
 		vndv.vt = VT_I4;
 		vndv.lVal = nodata;
 		nbheader->put_NodataValue(vndv);
@@ -1810,35 +1810,35 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		nbheader->put_YllCenter(yllcenter);
 
 		VARIANT_BOOL vbretval = FALSE;
-		CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
+		CoCreateInstance(CLSID_Grid, nullptr,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
 
 		CallbackHelper::Progress(_globalCallback, 0, "ShpNetwork::RasterizeD8", _key);
 
 		(*retval)->CreateNew(m_globalSettings.emptyBstr,nbheader,ShortDataType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
 		nbheader->Release();
-		VariantClear(&vndv); 
+		VariantClear(&vndv);
 		if( vbretval == VARIANT_FALSE )
 		{	(*retval)->Release();
-			*retval = NULL;
+			*retval = nullptr;
 			_lastErrorCode = tkGRID_NOT_INITIALIZED;
-			if( cBack != NULL )
-				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-			else if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+			if( cBack != nullptr)
+				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+			else if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
 		}
 	}
 	else
-	{	if( Header == NULL )
-		{	*retval = NULL;
+	{	if( Header == nullptr)
+		{	*retval = nullptr;
 			_lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
-			if( cBack != NULL )
-				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-			else if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+			if( cBack != nullptr)
+				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+			else if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
-		}	
-			
+		}
+
 		double dx = 0.0, dy = 0.0;
 		Header->get_dX(&dx);
 		Header->get_dY(&dy);
@@ -1847,19 +1847,19 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 			cellsize = dy;
 
 		if( cellsize <= 0 )
-		{	*retval = NULL;
-			
+		{	*retval = nullptr;
+
 			if( cellsize == dx )
 				_lastErrorCode = tkINVALID_DX;
 			else
 				_lastErrorCode = tkINVALID_DY;
 
-			if( cBack != NULL )
-				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-			else if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+			if( cBack != nullptr)
+				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+			else if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
-		}		
+		}
 
 		//Reset the nodata value
 		VARIANT vndv;
@@ -1869,38 +1869,38 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		Header->put_NodataValue(vndv);
 
 		VARIANT_BOOL vbretval = FALSE;
-		CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
+		CoCreateInstance(CLSID_Grid, nullptr,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
 
 		CallbackHelper::Progress(_globalCallback, 0, "ShpNetwork::RasterizeD8", _key);
 
 		(*retval)->CreateNew(m_globalSettings.emptyBstr, Header, ShortDataType, vndv, VARIANT_TRUE, UseExtension, cBack, &vbretval);
-		VariantClear(&vndv); 
+		VariantClear(&vndv);
 		if( vbretval == FALSE )
 		{	(*retval)->Release();
-			*retval = NULL;
+			*retval = nullptr;
 			_lastErrorCode = tkGRID_NOT_INITIALIZED;
 			if( cBack != NULL )
-				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));		
-			else if( _globalCallback != NULL )
-				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
+				cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
+			else if( _globalCallback != nullptr)
+				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 			return S_OK;
 		}
-	}	
-	
+	}
+
 	//Generate a stack that has the ups at elements 0 -
 	std::deque<long> upsfirst;
 	std::deque<long> netstack;
 	netstack.push_back(0);
 
 	while( netstack.size() > 0 )//&& upsfirst.size() < 30 )
-	{	
+	{
 		long parent = netstack[0];
 		netstack.pop_front();
-		upsfirst.push_front(parent);		
+		upsfirst.push_front(parent);
 
-		for( int i = 0; i < (int)_network[parent].up.size(); i++ )
+		for( int i = 0; i < static_cast<int>(_network[parent].up.size()); i++ )
 		{	long index = _network[parent].up[i];
-			netstack.push_back(index);			
+			netstack.push_back(index);
 		}
 	}
 
@@ -1908,26 +1908,26 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 	//	Point0 is always the outlet
 
 	long percent = 0, newpercent = 0;
-	double total = upsfirst.size();
+	double total = static_cast<double>(upsfirst.size());
 
-	for( int s = 0; s < (int)upsfirst.size(); s++ )
+	for( int s = 0; s < static_cast<int>(upsfirst.size()); s++ )
 	{	long shapeIndex = upsfirst[s];
 
-		IShape * shp = NULL;
+		IShape * shp = nullptr;
 		_netshpfile->get_Shape(shapeIndex,&shp);
 
 		long numPoints = 0;
 		shp->get_NumPoints(&numPoints);
-			
+
 		std::deque<snraspnt> Rasterize;
 		//Create a raster_cell that will be written
-		IPoint * downpnt = NULL;
+		IPoint * downpnt = nullptr;
 		shp->get_Point(0,&downpnt);
 		double dpx, dpy;
 		downpnt->get_X(&dpx);
 		downpnt->get_Y(&dpy);
 		downpnt->Release();
-		
+
 		snraspnt current_point;
 		(*retval)->ProjToCell(dpx,dpy,&(current_point.column),&(current_point.row));
 		current_point.length = cellsize;
@@ -1936,9 +1936,9 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 
 		//Step through the line incrementing the length inside of the cell
 		for( int i = 0; i < numPoints - 1; i++ )
-		{		
-			IPoint * one = NULL;
-			IPoint * two = NULL;
+		{
+			IPoint * one = nullptr;
+			IPoint * two = nullptr;
 
 			shp->get_Point(i,&one);
 			shp->get_Point(i+1,&two);
@@ -1964,19 +1964,18 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 			if( dx > 0 )
 				step_x = increment;
 			if( dy > 0 )
-				step_y = increment;		
-					
+				step_y = increment;
+
 			if( dx != 0.0 )
-			{	
+			{
 				double m = dy/dx;
 				double b = y1 - m*x1;
 
 				if( fabs(dx) > fabs(dy) )
-				{	
+				{
 					for( double i = 0; i < fabs(dx); i=i+increment )
 					{	y1 = ( m*x1 + b );
-						
-						(*retval)->ProjToCell(x1,y1,&(temp_point.column),&(temp_point.row));						
+						(*retval)->ProjToCell(x1,y1,&(temp_point.column),&(temp_point.row));
 						current_point.column = temp_point.column;
 						current_point.row = temp_point.row;
 
@@ -1987,7 +1986,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 						else
 						{	//Check to see if this raster has been used before
 							bool prevUsed = false;
-							for( int pu = 0; pu < (int)Rasterize.size(); pu++ )
+							for( int pu = 0; pu < static_cast<int>(Rasterize.size()); pu++ )
 							{	if( Rasterize[pu] == current_point )
 								{	prevUsed = true;
 									current_point = Rasterize[pu];
@@ -2002,18 +2001,16 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 								current_point.length = increment;
 								Rasterize.push_back( current_point );
 							}
-							
 						}
-																
+
 						x1 = x1 + step_x;
 					}
 				}
 				else
 				{
 					for( double j = 0; j < fabs(dy); j=j+increment )
-					{	x1 = ( ( y1 - b )/m );						
-
-						(*retval)->ProjToCell(x1,y1,&(temp_point.column),&(temp_point.row));						
+					{	x1 = ( ( y1 - b )/m );
+						(*retval)->ProjToCell(x1,y1,&(temp_point.column),&(temp_point.row));
 						current_point.column = temp_point.column;
 						current_point.row = temp_point.row;
 
@@ -2024,7 +2021,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 						else
 						{	//Check to see if this raster has been used before
 							bool prevUsed = false;
-							for( int pu = 0; pu < (int)Rasterize.size(); pu++ )
+							for( int pu = 0; pu < static_cast<int>(Rasterize.size()); pu++ )
 							{	if( Rasterize[pu] == current_point )
 								{	prevUsed = true;
 									current_point = Rasterize[pu];
@@ -2040,16 +2037,16 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 								Rasterize.push_back( current_point );
 							}
 						}
-										
+
 						y1 = y1 + step_y;
 					}
 				}
 			}
 			else
-			{	
+			{
 				for( double j = 0; j < fabs(dy); j=j+increment )
-				{	
-					(*retval)->ProjToCell(x1,y1,&(temp_point.column),&(temp_point.row));						
+				{
+					(*retval)->ProjToCell(x1,y1,&(temp_point.column),&(temp_point.row));
 					current_point.column = temp_point.column;
 					current_point.row = temp_point.row;
 
@@ -2060,7 +2057,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 					else
 					{	//Check to see if this raster has been used before
 						bool prevUsed = false;
-						for( int pu = 0; pu < (int)Rasterize.size(); pu++ )
+						for( int pu = 0; pu < static_cast<int>(Rasterize.size()); pu++ )
 						{	if( Rasterize[pu] == current_point )
 							{	prevUsed = true;
 								current_point = Rasterize[pu];
@@ -2079,11 +2076,11 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 					
 					y1 = y1 + step_y;
 				}
-			}			
+			}
 		}
 
 		//Push the last point onto the deque
-		IPoint * uppnt = NULL;
+		IPoint * uppnt = nullptr;
 		shp->get_Point(numPoints - 1,&uppnt);
 		double uppx, uppy;
 		uppnt->get_X(&uppx);
@@ -2094,17 +2091,17 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		if( Rasterize[ Rasterize.size() - 1 ] == temp_point )
 			Rasterize[ Rasterize.size() - 1 ] = temp_point;
 		else
-			Rasterize.push_back( temp_point );		
+			Rasterize.push_back( temp_point );
 
 		shp->Release();
-		shp = NULL;
+		shp = nullptr;
 
 		//Write the raster_cells to the grid
 		//	with directional information of network flow
 		//
 		//	Flow Diagram
 		//
-		//	4 3 2		
+		//	4 3 2
 		//  5 X 1
 		//  6 7 8
 		
@@ -2115,10 +2112,10 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		VARIANT vval;
 		VariantInit(&vval); 
 		short val;
-			
+
 		snraspnt last_raster = Rasterize[0];
 
-		for( int k = 1; k < (int)Rasterize.size(); k++ )
+		for( int k = 1; k < static_cast<int>(Rasterize.size()); k++ )
 		{	
 			//Test if the Length is long enough to write in the final_grid
 			double length = Rasterize[k].length;
@@ -2131,7 +2128,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 					sVal(vval,val);
 					if( val != nodata )
 					{	last_raster = Rasterize[k];
-						continue;					
+						continue;
 					}
 				}
 
@@ -2143,10 +2140,10 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 				(*retval)->put_Value( Rasterize[k].column, Rasterize[k].row, vval );
 				last_raster = Rasterize[k];
 			}
-		}				
+		}
 
-		Rasterize.clear();	
-		
+		Rasterize.clear();
+
 		CallbackHelper::Progress(callback, s, total, "ShpNetwork::RasterizeD8", _key, percent);
 
 		VariantClear(&vval); 
@@ -2156,8 +2153,8 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 }
 
 short CShapeNetwork::RasterDirection( snraspnt & source, snraspnt & sink )
-{	
-	long src_i = source.column; 
+{
+	long src_i = source.column;
 	long src_j = source.row;
 	long snk_i = sink.column;
 	long snk_j = sink.row;

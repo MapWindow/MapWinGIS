@@ -16,14 +16,14 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 	for(size_t i = 0; i < _activeLayers.size(); i++)
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
-		if( l != NULL )
+		if( l != nullptr)
 		{	
 			if(l->IsImage())
 			{
-				IImage* iimg = NULL;
+				IImage* iimg = nullptr;
 				if (l->QueryImage(&iimg))
 				{
-					CImageClass* img = (CImageClass*)iimg;
+					CImageClass* img = static_cast<CImageClass*>(iimg);
 					img->m_groupID = -1;
 					
 					if (l->get_Visible())
@@ -59,7 +59,7 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 									(group->yllCenter == yllCenter))
 								{
 									groupFound = true;
-									group->imageIndices.push_back(i);
+									group->imageIndices.push_back(static_cast<int>(i));
 									break;
 								}
 							}
@@ -69,7 +69,7 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 								// adding new group
 								ImageGroup* group = new ImageGroup(dx, dy, xllCenter, yllCenter, width, height);
 								imageGroups.push_back(group);
-								imageGroups[imageGroups.size() - 1]->imageIndices.push_back(i);
+								imageGroups[imageGroups.size() - 1]->imageIndices.push_back(static_cast<int>(i));
 							}
 						}
 					}
@@ -81,11 +81,11 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 	// now we'll check whether the pixels of image are scarce enough for us
 	// the group wil work only in case there is more then 1 suitable image
 	int groupId = 0;
-	IImage* iimg = NULL;
+	IImage* iimg = nullptr;
 	for (size_t i = 0; i < imageGroups.size(); i++)
 	{
 		std::vector<int>* indices = &imageGroups[i]->imageIndices;
-		int groupSize = indices->size();
+		int groupSize = static_cast<int>(indices->size());
 
 		if (groupSize > 1)
 		{
@@ -94,7 +94,7 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 				Layer * l = _allLayers[_activeLayers[(*indices)[j]]];
 				if (l->QueryImage(&iimg))
 				{
-					CImageClass* img = (CImageClass*)iimg;
+					CImageClass* img = static_cast<CImageClass*>(iimg);
 					
 					if (!img->_pixelsSaved)				// it's the first time we try to draw image or transparency color chnaged
 					{
@@ -122,7 +122,7 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 					Layer * l = _allLayers[_activeLayers[imageIndex]];
 					if (l->QueryImage(&iimg))
 					{
-						CImageClass* img = (CImageClass*)iimg;
+						CImageClass* img = static_cast<CImageClass*>(iimg);
 						img->m_groupID = groupId;
 						iimg->Release();
 					}
@@ -172,16 +172,16 @@ tkInterpolationMode CMapView::ChooseInterpolationMode(tkInterpolationMode mode1,
 void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphics, int groupIndex)
 {
 	CImageDrawer imgDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, _viewWidth, _viewHeight);
-	IImage* iimg = NULL;
+	IImage* iimg = nullptr;
 
 	ImageGroup* group = (*_imageGroups)[groupIndex];
 	if (! group->isValid ) 
 		return;
-	
+
 	// in case the image was drawn at least once at current resolution, we can use screenBitmap
-	ScreenBitmap* bmp = NULL;
+	ScreenBitmap* bmp = nullptr;
 	bmp = group->screenBitmap;
-	if (bmp != NULL)
+	if (bmp != nullptr)
 	{
 		if (bmp->extents == _extents &&
 			bmp->pixelPerProjectionX == _pixelPerProjectionX &&
@@ -199,17 +199,17 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 			return;
 		}
 	}
-	
+
 	double scale = GetCurrentScale();
 	int zoom;
 	this->_tiles->get_CurrentZoom(&zoom);
 
-	if(group->image == NULL)
+	if(group->image == nullptr)
 	{
-		// creating a new temporary image		
-		IImage* imgGroup = NULL;
+		// creating a new temporary image
+		IImage* imgGroup = nullptr;
 		VARIANT_BOOL vbretval;
-		CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&imgGroup);
+		CoCreateInstance(CLSID_Image, nullptr,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&imgGroup);
 		imgGroup->CreateNew(group->width, group->height, &vbretval);
 
 		if ( !vbretval )
@@ -228,23 +228,23 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 			tkInterpolationMode upsamplingMode = imNone;
 			
 			// acquiring reference to the destination color array
-			unsigned char* data = ((CImageClass*)imgGroup)->get_ImageData();
+			unsigned char* data = static_cast<CImageClass*>(imgGroup)->get_ImageData();
 			colour* dstData = reinterpret_cast<colour*>(data);
-			
+
 			// passing the data from all images
 			bool visibleLayerExists = false;
-			bool useTransparencyColor = true;		
+			bool useTransparencyColor = true;
 			for(size_t j = 0; j < _activeLayers.size(); j++)
 			{
 				Layer * l = _allLayers[_activeLayers[j]];
-				if( l != NULL )
-				{	
+				if( l != nullptr)
+				{
 					//if(l->type == ImageLayer && (l->flags & Visible))
 					if(l->IsImage() && l->IsVisible(scale, zoom))
 					{
 						if (l->QueryImage(&iimg))
 						{
-							CImageClass* img = (CImageClass*)iimg;
+							CImageClass* img = static_cast<CImageClass*>(iimg);
 
 							if ( img )
 							{
@@ -254,7 +254,7 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 									tkInterpolationMode upMode;
 									img->get_DownsamplingMode(&downMode);
 									img->get_UpsamplingMode(&upMode);
-									
+
 									// in case at least one image don't use transparency the grouped bitmap will have white background
 									VARIANT_BOOL transp;
 									img->get_UseTransparencyColor(&transp);
@@ -284,7 +284,7 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 					}
 				}
 			}
-			
+
 			if (useTransparencyColor)
 			{
 				imgGroup->put_TransparencyColor(RGB(255, 255, 255));
@@ -315,12 +315,12 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 	bmp = imgDrawer.DrawImage(rcBounds, group->image, true);
 	if (bmp)
 	{
-		if (group->screenBitmap != NULL)
+		if (group->screenBitmap != nullptr)
 		{
 			delete group->screenBitmap;
-			group->screenBitmap = NULL;
+			group->screenBitmap = nullptr;
 		}
-		
+
 		int width = bmp->bitmap->GetWidth();
 		int height = bmp->bitmap->GetHeight();
 		
@@ -355,16 +355,16 @@ bool CMapView::ImageGroupsAreEqual(std::vector<ImageGroup*>& groups1, std::vecto
 // *********************************************************
 void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if(IS_VALID_LAYER(LayerHandle,_allLayers))
 	{
 		// redirected to image class for backward compatibility
 		IImage* img = this->GetImage(LayerHandle);
-		if (img != NULL)
+		if (img != nullptr)
 		{
 			USES_CONVERSION;
-			((CImageClass*)img)->SetSourceGridName(A2W(newVal));		// TODO: use Unicode
+			static_cast<CImageClass*>(img)->SetSourceGridName(A2W(newVal));		// TODO: use Unicode
 			img->Release();
 		}
 		else
@@ -393,10 +393,10 @@ void CMapView::ReloadBuffers()
 
 		if (l->IsImage())
 		{
-			IImage * iimg = NULL;
+			IImage * iimg = nullptr;
 			if (l->QueryImage(&iimg))
 			{	
-				((CImageClass*)iimg)->SetBufferReloadIsNeeded();
+				static_cast<CImageClass*>(iimg)->SetBufferReloadIsNeeded();
 				iimg->Release();
 			}
 		}

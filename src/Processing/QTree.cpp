@@ -43,7 +43,7 @@ QTree::~QTree(void)
 
 void QTree::Regenerate()
 {
-	const unsigned int nodeNumber = nodes.size();
+	const int nodeNumber = static_cast<int>(nodes.size());
 	const double middleX = (this->extent.left + this->extent.right) / 2;
 	const double middleY = (this->extent.top + this->extent.bottom) / 2;
 
@@ -221,7 +221,7 @@ void QTree::AddNode(const QTreeNode& node)
 
 bool QTree::RemoveNode(int index)
 {
-	for (int i = nodes.size() - 1; i >= 0; i--)
+	for (int i = static_cast<int>(nodes.size()) - 1; i >= 0; i--)
 	{
 		if (nodes[i]->index == index)
 		{
@@ -230,7 +230,6 @@ bool QTree::RemoveNode(int index)
 			nodes.erase(nodes.begin() + i);
 			return true;
 		}
-
 	}
 	if (LT != nullptr && LT->RemoveNode(index))
 	{
@@ -306,7 +305,7 @@ vector<int> QTree::GetNodes(QTreeExtent queryExtent)
 			}
 		}
 	}
-	for (int i = nodes.size() - 1; i >= 0; i--)
+	for (int i = static_cast<int>(nodes.size()) - 1; i >= 0; i--)
 	{
 		if (nodes[i]->Extent.IntersectIn(queryExtent))
 			result.push_back(nodes[i]->index);

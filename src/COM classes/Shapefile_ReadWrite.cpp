@@ -37,10 +37,10 @@ STDMETHODIMP CShapefile::get_Shape(long shapeIndex, IShape **pVal)
 	VARIANT_BOOL vbretval = VARIANT_FALSE;
 
 	// out of bounds?
-	if( shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	if( shapeIndex < 0 || shapeIndex >= static_cast<long>(_shapeData.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*pVal = NULL;
+		*pVal = nullptr;
 		return S_OK;
 	}
 
@@ -69,7 +69,8 @@ STDMETHODIMP CShapefile::get_Shape(long shapeIndex, IShape **pVal)
 //		ReadFastModeShape()
 // ************************************************************
 IShape* CShapefile::ReadFastModeShape(long shapeIndex)
-{	fseek(_shpfile, _shpOffsets[shapeIndex], SEEK_SET);
+{
+	fseek(_shpfile, _shpOffsets[shapeIndex], SEEK_SET);
 
 	// read the shp from disk
 	int index = ShapeUtility::ReadIntBigEndian(_shpfile);
@@ -77,7 +78,7 @@ IShape* CShapefile::ReadFastModeShape(long shapeIndex)
 	if (index != shapeIndex + 1)
 	{
 		ErrorMessage(tkINVALID_SHP_FILE);
-		return NULL;
+		return nullptr;
 	}
 
 	int contentLength = ShapeUtility::ReadIntBigEndian(_shpfile) * 2;
@@ -87,17 +88,17 @@ IShape* CShapefile::ReadFastModeShape(long shapeIndex)
 	int length = contentLength; //- 2 * sizeof(int);
 
 	char* data = new char[length];
-	int count = (int)fread(data, sizeof(char), length, _shpfile);
+	int count = static_cast<int>(fread(data, sizeof(char), length, _shpfile));
 
 	if (count != length)
 	{
 		delete[] data;
-		return NULL;
+		return nullptr;
 	}
 
-	IShape* shape = NULL;
+	IShape* shape = nullptr;
 
-	if (data != NULL)
+	if (data != nullptr)
 	{
 		ComHelper::CreateShape(&shape);
 		shape->put_GlobalCallback(_globalCallback);
@@ -112,7 +113,8 @@ IShape* CShapefile::ReadFastModeShape(long shapeIndex)
 //		ReadComShape()
 // ************************************************************
 IShape* CShapefile::ReadComShape(long shapeIndex)
-{	// read the shp from disk
+{
+	// read the shp from disk
 	fseek(_shpfile, _shpOffsets[shapeIndex], SEEK_SET);
 
 	int intbuf;
@@ -123,7 +125,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 	if (intbuf != shapeIndex + 1 && intbuf != shapeIndex)
 	{
 		ErrorMessage(tkINVALID_SHP_FILE);
-		return NULL;
+		return nullptr;
 	}
 	
 	fread(&intbuf, sizeof(int), 1, _shpfile);
@@ -134,8 +136,8 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 
 	ShpfileType shpType = (ShpfileType)intbuf;
 
-	IShape * shape = NULL;
-	IPoint * pnt = NULL;
+	IShape * shape = nullptr;
+	IPoint * pnt = nullptr;
 	VARIANT_BOOL vbretval;
 
 #pragma region Nullshape Or Mismatch
@@ -154,7 +156,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 		if (shpType != SHP_NULLSHAPE)
 		{
 			ErrorMessage(tkINVALID_SHP_FILE);
-			return NULL;
+			return nullptr;
 		}
 		else
 		{
@@ -166,7 +168,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 	else if (shpType != SHP_NULLSHAPE && !areEqualTypes)
 	{
 		ErrorMessage(tkINVALID_SHP_FILE);
-		return NULL;
+		return nullptr;
 	}
 #pragma endregion
 
@@ -197,7 +199,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			if (vbretval == VARIANT_FALSE)
 			{
 				shape->Release();
-				return NULL;
+				return nullptr;
 			}
 			pnt->Release();
 		}
@@ -233,7 +235,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			if (vbretval == VARIANT_FALSE)
 			{
 				shape->Release();
-				return NULL;
+				return nullptr;
 			}
 			pnt->Release();
 		}
@@ -267,7 +269,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			if (vbretval == VARIANT_FALSE)
 			{
 				shape->Release();
-				return NULL;
+				return nullptr;
 			}
 			pnt->Release();
 		}
@@ -310,7 +312,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 			}
 
@@ -328,7 +330,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->Release();
 			}
@@ -370,7 +372,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 			}
 
@@ -389,7 +391,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->Release();
 			}
@@ -401,12 +403,12 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			{
 				fread(&z, sizeof(double), 1, _shpfile);
 				pointIndex = k;
-				IPoint * pnt = NULL;
+				IPoint * pnt = nullptr;
 				shape->get_Point(pointIndex, &pnt);
-				if (pnt == NULL)
+				if (pnt == nullptr)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->put_Z(z);
 				pnt->Release();
@@ -419,12 +421,12 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint * pnt = nullptr;
 				shape->get_Point(pointIndex, &pnt);
-				if (pnt == NULL)
+				if (pnt == nullptr)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->put_M(m);
 				//Rob Cairns 20-Dec-05
@@ -469,7 +471,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 			}
 
@@ -488,7 +490,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->Release();
 			}
@@ -500,12 +502,12 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint * pnt = nullptr;
 				shape->get_Point(pointIndex, &pnt);
-				if (pnt == NULL)
+				if (pnt == nullptr)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->put_M(m);
 				pnt->Release();
@@ -551,7 +553,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 			}
 
@@ -569,7 +571,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->Release();
 			}
@@ -611,7 +613,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 			}
 
@@ -630,7 +632,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->Release();
 			}
@@ -642,12 +644,12 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			{
 				fread(&z, sizeof(double), 1, _shpfile);
 				pointIndex = k;
-				IPoint * pnt = NULL;
+				IPoint * pnt = nullptr;
 				shape->get_Point(pointIndex, &pnt);
-				if (pnt == NULL)
+				if (pnt == nullptr)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->put_Z(z);
 				pnt->Release();
@@ -660,12 +662,12 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint * pnt = nullptr;
 				shape->get_Point(pointIndex, &pnt);
-				if (pnt == NULL)
+				if (pnt == nullptr)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->put_M(m);
 				pnt->Release();
@@ -708,7 +710,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 			}
 
@@ -727,7 +729,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->Release();
 			}
@@ -740,12 +742,12 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint * pnt = nullptr;
 				shape->get_Point(pointIndex, &pnt);
-				if (pnt == NULL)
+				if (pnt == nullptr)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->put_M(m);
 				pnt->Release();
@@ -792,7 +794,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->Release();
 			}
@@ -837,7 +839,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->Release();
 			}
@@ -849,12 +851,12 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			{
 				fread(&z, sizeof(double), 1, _shpfile);
 				pointIndex = k;
-				IPoint * pnt = NULL;
+				IPoint * pnt = nullptr;
 				shape->get_Point(pointIndex, &pnt);
-				if (pnt == NULL)
+				if (pnt == nullptr)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->put_Z(z);
 				pnt->Release();
@@ -867,12 +869,12 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint * pnt = nullptr;
 				shape->get_Point(pointIndex, &pnt);
-				if (pnt == NULL)
+				if (pnt == nullptr)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->put_M(m);
 				pnt->Release();
@@ -918,7 +920,7 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 				if (retval == VARIANT_FALSE)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->Release();
 			}
@@ -930,12 +932,12 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 			{
 				fread(&m, sizeof(double), 1, _shpfile);
 				pointIndex = mc;
-				IPoint * pnt = NULL;
+				IPoint * pnt = nullptr;
 				shape->get_Point(pointIndex, &pnt);
-				if (pnt == NULL)
+				if (pnt == nullptr)
 				{
 					shape->Release();
-					return NULL;
+					return nullptr;
 				}
 				pnt->put_M(m);
 				pnt->Release();
@@ -954,7 +956,8 @@ IShape* CShapefile::ReadComShape(long shapeIndex)
 //		ReadShx()
 // **************************************************************
 BOOL CShapefile::ReadShx()
-{	// guaranteed that .shx file is open
+{
+	// guaranteed that .shx file is open
 	rewind(_shxfile);
 	_shpOffsets.clear();
 
@@ -1021,7 +1024,8 @@ BOOL CShapefile::ReadShx()
 //		AppendToShx()
 // **************************************************************
 bool CShapefile::AppendToShx(FILE* shx, IShape* shp, int offset)
-{	if (!shx || !shp) return false;
+{
+	if (!shx || !shp) return false;
 
 	_shpOffsets.push_back(offset);
 
@@ -1041,7 +1045,8 @@ bool CShapefile::AppendToShx(FILE* shx, IShape* shp, int offset)
 //		WriteShx()
 // **************************************************************
 BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
-{	ICallback* callback = cBack ? cBack : _globalCallback;
+{
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	// guaranteed that .shx file is open
 	rewind(shx);
@@ -1056,7 +1061,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 	}
 
 	// FILELENGTH (16 bit words)
-	int fileLength = HEADER_BYTES_16 + (int)_shapeData.size() * 4;
+	int fileLength = HEADER_BYTES_16 + static_cast<int>(_shapeData.size()) * 4;
 	ShapeUtility::WriteBigEndian(shx, fileLength);
 
 	//VERSION
@@ -1074,12 +1079,12 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 	long numPoints = 0;
 	long numParts = 0;
 	ShpfileType shptype;
-	IShape * shape = NULL;
+	IShape * shape = nullptr;
 
 	long percent = 0, newpercent = 0;
 
 	_shpOffsets.clear();
-	int size  = (int)_shapeData.size();
+	int size  = static_cast<int>(_shapeData.size());
 	for( int i = 0; i < size; i++)
 	{
 		// convert to (32 bit words)
@@ -1117,7 +1122,8 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 //		GetWriteFileLength()
 // **************************************************************
 int CShapefile::GetWriteFileLength()
-{	IShape * sh = NULL;
+{
+	IShape * sh = nullptr;
 	long numPoints = 0;
 	long numParts = 0;
 	long part = 0;
@@ -1145,12 +1151,13 @@ int CShapefile::GetWriteFileLength()
 //		AppendToShpFile()
 // **************************************************************
 bool CShapefile::AppendToShpFile(FILE* shp, IShapeWrapper* wrapper)
-{	if (!shp || !wrapper) return false;
+{
+	if (!shp || !wrapper) return false;
 
 	int length = wrapper->get_ContentLength();
 
 	// write record header
-	ShapeUtility::WriteBigEndian(shp, _shapeData.size());
+	ShapeUtility::WriteBigEndian(shp, static_cast<int>(_shapeData.size()));
 	ShapeUtility::WriteBigEndian(shp, length / 2);
 
 	// write content		
@@ -1174,7 +1181,8 @@ bool CShapefile::AppendToShpFile(FILE* shp, IShapeWrapper* wrapper)
 //		WriteShp()
 // **************************************************************
 void CShapefile::WriteBounds(FILE * shp)
-{	double ShapefileBounds[8];
+{
+	double ShapefileBounds[8];
 	ShapefileBounds[0] = _minX;
 	ShapefileBounds[1] = _minY;
 	ShapefileBounds[2] = _maxX;
@@ -1190,7 +1198,8 @@ void CShapefile::WriteBounds(FILE * shp)
 //		WriteShp()
 // **************************************************************
 BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
-{	// guaranteed that .shp file is open
+{
+	// guaranteed that .shp file is open
 	rewind(shp);
 
 	//FILE_CODE
@@ -1224,9 +1233,9 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	long numPoints = 0;
 	long numParts = 0;
 	long part = 0;
-	IShape * sh = NULL;
+	IShape * sh = nullptr;
 
-	int size = _shapeData.size();
+	int size = static_cast<int>(_shapeData.size());
 
 	for( int k = 0; k < size; k++)
 	{

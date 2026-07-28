@@ -30,7 +30,7 @@ void DiskCache::InitEncoder()
 {
 	if (_ext.GetLength() >= 4)
 	{
-	    const CStringW s = _ext.Mid(0, 4).MakeLower(); // try to guess it from input
+		const CStringW s = _ext.Mid(0, 4).MakeLower(); // try to guess it from input
 
 		if (s == L".png")
 		{
@@ -105,7 +105,7 @@ void DiskCache::AddTile(TileCore* tile)
 
 	for (size_t i = 0; i < tile->Overlays.size(); i++)
 	{
-		bmp = tile->get_Bitmap(i)->m_bitmap;
+		bmp = tile->get_Bitmap(static_cast<int>(i))->m_bitmap;
 		if (bmp)
 		{
 			g->DrawImage(bmp, 0.0f, 0.0f);
@@ -113,7 +113,7 @@ void DiskCache::AddTile(TileCore* tile)
 	}
 
 	USES_CONVERSION;
-    const CStringW path = tile->GetPath(_rootPath, _ext);
+	const CStringW path = tile->GetPath(_rootPath, _ext);
 	bmp->Save(path, &_pngClsid, nullptr);
 
 	delete g;

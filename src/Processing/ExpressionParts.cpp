@@ -351,7 +351,7 @@ void CExpressionPart::ReleaseValue()
 		// functions don't have nested elements, only parts,
 		// so we own the element, and must release it
 		delete val;
-		val = NULL;
+		val = nullptr;
 	}
 }
 
@@ -360,8 +360,8 @@ void CExpressionPart::ReleaseValue()
 //************************************************************
 void CExpressionPart::Reset()
 {
-	int size = elements.size();
-	for (int j = 0; j < size; j++)
+	size_t size = elements.size();
+	for (size_t j = 0; j < size; j++)
 	{
 		CElement* el = elements[j];
 		el->wasCalculated = false;

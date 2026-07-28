@@ -452,17 +452,17 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
 
    /* INIT STATUS TO FAILURE */
    *status = 0;
-    
+
    /* CALL GET123LEVEL() TO GET APPROPRIATE FM ENTRY FOR THIS FILE POINTER */
    if (!get123level(fp)) return(0);
 
    /* SET CUR_DR TO NEXT FIELD */
-   if (cur_fm->cur_dr != NULL) {
+   if (cur_fm->cur_dr != nullptr) {
       cur_fm->cur_dr = cur_fm->cur_dr->next;
-   };   
+   }
 
    /* IF CUR_DR IS NULL */
-   if (cur_fm->cur_dr == NULL) {
+   if (cur_fm->cur_dr == nullptr) {
 
       /* CALL LD123REC() TO LOAD DATA RECORD INFORMATION INTO DATA
           STRUCTURES FOR REFERENCE
@@ -474,16 +474,16 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
 
             /* SET STATUS TO END OF FILE */
             *status = 4;
-         };
+         }
          return(0);
-      };    
-      
+      }
+
       /* SET STATUS TO START OF RECORD */
       *status = 2;
-      
+
       /* SET CUR_DR TO NEXT POINTER OF DR_HD */
       cur_fm->cur_dr = cur_fm->dr_hd->next;
-   };
+   }
 
    /* CALL RET123MATCH() TO RETURN DATA DESCRIPTION FOR CURRENT ENTRY */
    if (!ret123match(cur_fm->cur_dr->tag)) return(0);
@@ -506,24 +506,24 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
 #else
       strcat(rd_str,anum);
 #endif
-        
+
       /* UPDATE INDEX POINTER */
-      byte_pos += _tcslen(anum);
+      byte_pos += static_cast<int>(_tcslen(anum));
 
       /* CONCATENATE UT TO RD_STR */
       strcat(rd_str,UT_STR);
 
       /* UPDATE INDEX POINTER */
-      byte_pos += _tcslen(UT_STR);
+      byte_pos += static_cast<int>(_tcslen(UT_STR));
 
       /* SET CUR_DM TO DIM_LPTR */
       cur_fm->cur_dm = cur_fm->cur_dr->dim_lptr;
-         
+
       /* SKIP DUMMY DM */
       cur_fm->cur_dm = cur_fm->cur_dm->nxt;
 
       /* WHILE CUR_DM NOT NULL DO */
-      while(cur_fm->cur_dm != NULL) {
+      while(cur_fm->cur_dm != nullptr) {
 
          /* CONCATENATE LEN TO RD_STR */
          i123toa(cur_fm->cur_dm->len,anum);
@@ -534,13 +534,13 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
 #endif
 
          /* UPDATE INDEX POINTER */
-         byte_pos += _tcslen(anum);
+         byte_pos += static_cast<int>(_tcslen(anum));
 
          /* CONCATENATE UT TO RD_STR */
          strcat(rd_str,UT_STR);
 
          /* UPDATE INDEX POINTER */
-         byte_pos += _tcslen(UT_STR);
+         byte_pos += static_cast<int>(_tcslen(UT_STR));
 
          /* SET CUR_DM TO NXT */
          cur_fm->cur_dm = cur_fm->cur_dm->nxt;
@@ -548,23 +548,20 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
    }
 
    /* IF FMT_RT OF CUR_DD IS NULL { NO FORMATS FOR VALUES } */
-   if (cur_fm->cur_dd->fmt_rt == NULL) {
+   if (cur_fm->cur_dd->fmt_rt == nullptr) {
 
       /* SET ROW_DVH TO NXT_VSET FIELD OF VALUES FIELD OF CUR_DR  */
       cur_fm->row_dvh = cur_fm->cur_dr->values->nxt_vset;
 
       /* WHILE ROW_DVH NOT NULL DO */
-      while(cur_fm->row_dvh != NULL) {
-
+      while(cur_fm->row_dvh != nullptr) {
          /* SET CUR_DV TO ROW_DVH */
          cur_fm->cur_dv = cur_fm->row_dvh;
 
          /* WHILE CUR_DV NOT NULL DO */
-         while(cur_fm->cur_dv != NULL) {
-
+         while(cur_fm->cur_dv != nullptr) {
             /* IF STRING VALUE NOT NULL */
-            if (cur_fm->cur_dv->value != NULL) {
-            
+            if (cur_fm->cur_dv->value != nullptr) {
                /* DETERMINE LENGTH OF VALUE IN BYTES */
                b_siz = _tcslen(cur_fm->cur_dv->value);
 
@@ -576,22 +573,21 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
 #endif
 
                /* UPDATE INDEX POINTER */
-               byte_pos += b_siz;
+               byte_pos += static_cast<int>(b_siz);
 
-            };
+            }
             
             /* SET CUR_DV TO NXT_VAL */
             cur_fm->cur_dv = cur_fm->cur_dv->nxt_val;
 
             /* IF CUR_DV NOT NULL */
-            if (cur_fm->cur_dv != NULL) {
+            if (cur_fm->cur_dv != nullptr) {
 
                /* CONCATENATE UT TO RD_STR */
                strcat(&rd_str[byte_pos],UT_STR);
 
                /* UPDATE INDEX POINTER */
                byte_pos++;
-               
             }
          }
 
@@ -599,14 +595,13 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
          cur_fm->row_dvh = cur_fm->row_dvh->nxt_vset;
 
          /* IF ROW_DVH NOT NULL */
-         if (cur_fm->row_dvh != NULL) {
+         if (cur_fm->row_dvh != nullptr) {
 
             /* CONCATENATE UT TO RD_STR */
             strcat(&rd_str[byte_pos],UT_STR);
 
             /* UPDATE INDEX POINTER */
             byte_pos++;
-
          }
       }
    }
@@ -620,20 +615,19 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
       cur_fm->cur_fcr = cur_fm->cur_fc;
 
       /* IF VALUES OF CUR_DR NOT NULL */
-      if (cur_fm->cur_dr->values != NULL) {
+      if (cur_fm->cur_dr->values != nullptr) {
 
          /* SET ROW_DVH TO NXT_VSET FIELD OF VALUES FIELD OF CUR_DR  */
          cur_fm->row_dvh = cur_fm->cur_dr->values->nxt_vset;
 
          /* WHILE ROW_DVH NOT NULL DO */
-         while(cur_fm->row_dvh != NULL) {
+         while(cur_fm->row_dvh != nullptr) {
 
             /* SET CUR_DV TO ROW_DVH */
             cur_fm->cur_dv = cur_fm->row_dvh;
 
             /* WHILE CUR_DV NOT NULL DO */
-            while(cur_fm->cur_dv != NULL) {
-
+            while(cur_fm->cur_dv != nullptr) {
                /* INITIALIZE VARIABLES */
                memset(delim,NC,2);
                memset(dtyp,NC,2);
@@ -654,7 +648,7 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
                   }
 
                   /* IF VALUE STRING IS NOT NULL */
-                  if (cur_fm->cur_dv->value != NULL) {
+                  if (cur_fm->cur_dv->value != nullptr) {
 
                      /* DETERMINE LENGTH OF VALUE IN BYTES */
                      b_siz = _tcslen(cur_fm->cur_dv->value);
@@ -667,9 +661,9 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
 #endif
 
                      /* UPDATE INDEX POINTER */
-                     byte_pos += b_siz;
+                     byte_pos += static_cast<int>(b_siz);
                   }
-               } 
+               }
                /* ELSE BINARY DATA */
                else {
 
@@ -757,13 +751,12 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
                            }
 
                            /* COMPUTE NEW BYTE AND BITS POSITIONS */
-                           byte_pos = byte_pos + (int) bytes.quot;
-                           bit_pos = (int) bytes.rem;
+                           byte_pos = byte_pos + static_cast<int>(bytes.quot);
+                           bit_pos = static_cast<int>(bytes.rem);
 
                            /* ADD TRUNCATING NULL CHARACTER TO READ STRING */
                            if (bytes.rem != 0) rd_str[byte_pos+1] = NC;
                            else                rd_str[byte_pos] = NC;
-
                         }
              
                         /* ELSE ON BYTE BOUNDARY */
@@ -776,8 +769,8 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
                            rd_str[byte_pos+b_siz] = NC;
  
                            /* COMPUTE NEW BYTE AND BIT POSITIONS */
-                           byte_pos = byte_pos + (int) bytes.quot;
-                           bit_pos = (int) bytes.rem;
+                           byte_pos = byte_pos + static_cast<int>(bytes.quot);
+                           bit_pos = static_cast<int>(bytes.rem);
                         }
                      }
 
@@ -797,10 +790,10 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
                         rd_str[byte_pos+b_siz] = NC;
 
                         /* UPDATE INDEX POINTER */
-                        byte_pos += b_siz;
+                        byte_pos += static_cast<int>(b_siz);
                      }  
                   }
-               };
+               }
 
                /* IF DATA TYPE IS NOT BINARY */
                if (*dtyp != 'B') {
@@ -809,7 +802,7 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
                   if (!width && delim[0] == NC) {
 
                      /* IF NEXT OF CUR_DV NOT NULL */
-                     if (cur_fm->cur_dv->nxt_val != NULL) {
+                     if (cur_fm->cur_dv->nxt_val != nullptr) {
 
                         /* CONCATENATE UT TO RD_STR */
                         strcat(&rd_str[byte_pos],UT_STR);
@@ -822,7 +815,7 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
                   else if (delim[0] != NC) {
 
                      /* IF NEXT OF CUR_DV NOT NULL */
-                     if (cur_fm->cur_dv->nxt_val != NULL) {
+                     if (cur_fm->cur_dv->nxt_val != nullptr) {
 
                         /* CONCATENATE DELIM RETRIEVED BY GET123FMT() TO RD_STR */
 #if CONV
@@ -833,7 +826,7 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
 
                         /* UPDATE INDEX POINTER */
                         byte_pos++;
-                     };
+                     }
                   }
                }
 
@@ -848,7 +841,7 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
             if (*dtyp != 'B') {
 
                /* IF ROW_DVH IS NOT NULL */
-               if (cur_fm->row_dvh != NULL) {
+               if (cur_fm->row_dvh != nullptr) {
    
                   /* IF WIDTH IS ZERO AND DELIM IS NC */
                   if (!width && delim[0] == NC) {
@@ -899,31 +892,28 @@ int rd123fld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int* sta
    cur_fm->sf_state_dr = 4;
 
    /* IF NOT END OF DR FIELDS */
-   if ( cur_fm->cur_dr->next != NULL) {
-   
+   if ( cur_fm->cur_dr->next != nullptr) {
       /* IF STATUS NOT EQUAL TO START OF RECORD */
       if (*status != 2) {
-      
          /* SET STATUS TO OK */
          *status = 1;
-      };   
+      }
    }
    else {
-   
       /*  CALL SET123STAT TO CHECK FOR END OF FILE */
       if (!set123stat(fp,status)) return(0);
-      
+
       /* IF STATUS IS NOT END OF FILE */ 
       if (*status != 4) {
  
          /* SET STATUS TO END OF RECORD */
          *status = 3;
-      };   
-   };   
-   
+      }
+   }
+ 
    /* SET STR_LEN */
-   *str_len = (long) byte_pos;
-      
+   *str_len = static_cast<long>(byte_pos);
+
    /* RETURN SUCCESS */
    return(1);
 }

@@ -12,7 +12,7 @@ void CExpression::Clear()
 	if (_table)
 	{
 		_table->Release();
-		_table = NULL;
+		_table = nullptr;
 	}
 }
 
@@ -35,7 +35,7 @@ bool CExpression::ValidateExpression()
 // **********************************************************
 STDMETHODIMP CExpression::get_LastErrorMessage(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = W2BSTR(_lastErrorMessage);
 
@@ -47,7 +47,7 @@ STDMETHODIMP CExpression::get_LastErrorMessage(BSTR* pVal)
 // **********************************************************
 STDMETHODIMP CExpression::get_LastErrorPosition(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _lastErrorPosition;
 
@@ -59,9 +59,9 @@ STDMETHODIMP CExpression::get_LastErrorPosition(LONG* pVal)
 // **********************************************************
 STDMETHODIMP CExpression::get_NumSupportedFunctions(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = parser::functions.size();
+	*pVal = static_cast<long>(parser::functions.size());
 
 	return S_OK;
 }
@@ -71,19 +71,19 @@ STDMETHODIMP CExpression::get_NumSupportedFunctions(LONG* pVal)
 // **********************************************************
 STDMETHODIMP CExpression::get_SupportedFunction(LONG functionIndex, IFunction** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = NULL;
+	*pVal = nullptr;
 
 	vector<CustomFunction*> list = parser::functions;
 
-	if (functionIndex < 0 || functionIndex >= (int)list.size())
+	if (functionIndex < 0 || functionIndex >= static_cast<int>(list.size()))
 	{
 		CallbackHelper::ErrorMsg("CExpression::get_SupportedFunction: index out of bounds");
 		return S_OK;
 	}
 
-	IFunction* fn = NULL;
+	IFunction* fn = nullptr;
 	ComHelper::CreateInstance(idFunction, (IDispatch**)&fn);
 	((CFunction*)fn)->Inject(list[functionIndex]);
 
@@ -97,7 +97,7 @@ STDMETHODIMP CExpression::get_SupportedFunction(LONG functionIndex, IFunction** 
 // **********************************************************
 STDMETHODIMP CExpression::Parse(BSTR expr, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*retVal = VARIANT_FALSE;
 
@@ -114,7 +114,7 @@ STDMETHODIMP CExpression::Parse(BSTR expr, VARIANT_BOOL* retVal)
 // **********************************************************
 STDMETHODIMP CExpression::ParseForTable(BSTR expr, ITable* table, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*retVal = VARIANT_FALSE;
 
@@ -141,7 +141,7 @@ STDMETHODIMP CExpression::ParseForTable(BSTR expr, ITable* table, VARIANT_BOOL* 
 // **********************************************************
 STDMETHODIMP CExpression::Calculate(VARIANT* result, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*retVal = VARIANT_FALSE;
 
@@ -160,7 +160,7 @@ STDMETHODIMP CExpression::Calculate(VARIANT* result, VARIANT_BOOL* retVal)
 // **********************************************************
 STDMETHODIMP CExpression::CalculateForTableRow2(LONG rowIndex, VARIANT* result, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*retVal = VARIANT_FALSE;
 
@@ -187,7 +187,7 @@ STDMETHODIMP CExpression::CalculateForTableRow2(LONG rowIndex, VARIANT* result, 
 // **********************************************************
 STDMETHODIMP CExpression::CalculateForTableRow(LONG rowIndex, LONG targetFieldIndex, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*retVal = VARIANT_FALSE;
 
@@ -267,9 +267,9 @@ void CExpression::SetVariant(CExpressionValue* value, VARIANT* result)
 // **********************************************************
 STDMETHODIMP CExpression::get_Table(ITable** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (_table)	{
+	if (_table) {
 		_table->AddRef();
 	}
 

@@ -53,7 +53,7 @@ STDMETHODIMP CFieldStatOperations::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CFieldStatOperations::get_FieldIndex(int index, int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( index < 0 || index >= (long)_operations.size() )
+	if( index < 0 || index >= static_cast<long>(_operations.size()) )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = -1;
@@ -63,7 +63,7 @@ STDMETHODIMP CFieldStatOperations::get_FieldIndex(int index, int* retVal)
 		*retVal = _operations[index]->fieldIndex;
 	}
 	return S_OK;
-};
+}
 
 //****************************************************************
 //		get_FieldName()
@@ -71,7 +71,7 @@ STDMETHODIMP CFieldStatOperations::get_FieldIndex(int index, int* retVal)
 STDMETHODIMP CFieldStatOperations::get_FieldName(int index, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( index < 0 || index >= (long)_operations.size() )
+	if( index < 0 || index >= static_cast<long>(_operations.size()) )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
@@ -81,7 +81,7 @@ STDMETHODIMP CFieldStatOperations::get_FieldName(int index, BSTR* retVal)
 		*retVal = W2BSTR(_operations[index]->fieldName);
 	}
 	return S_OK;
-};
+}
 
 //****************************************************************
 //			get_Operation()
@@ -89,7 +89,7 @@ STDMETHODIMP CFieldStatOperations::get_FieldName(int index, BSTR* retVal)
 STDMETHODIMP CFieldStatOperations::get_Operation(int index, tkFieldStatOperation* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( index < 0 || index >= (long)_operations.size() )
+	if( index < 0 || index >= static_cast<long>(_operations.size()) )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = (tkFieldStatOperation)0;
@@ -99,7 +99,7 @@ STDMETHODIMP CFieldStatOperations::get_Operation(int index, tkFieldStatOperation
 		*retVal = _operations[index]->operation;
 	}
 	return S_OK;
-};
+}
 
 //****************************************************************
 //			get_Count()
@@ -107,9 +107,9 @@ STDMETHODIMP CFieldStatOperations::get_Operation(int index, tkFieldStatOperation
 STDMETHODIMP CFieldStatOperations::get_Count(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _operations.size();
+	*retVal = static_cast<int>(_operations.size());
 	return S_OK;
-};
+}
 
 // ***************************************************************
 //		AddFieldIndex()
@@ -149,7 +149,7 @@ STDMETHODIMP CFieldStatOperations::Remove(int index, VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 
-	if( index < 0 || index >= (long)_operations.size() )
+	if( index < 0 || index >= static_cast<long>(_operations.size()) )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
@@ -202,7 +202,7 @@ STDMETHODIMP CFieldStatOperations::Validate(IShapefile* sf, VARIANT_BOOL* retVal
 			// searching index for name
 			if (op->hasName)
 			{
-				CComPtr<ITable> table = NULL;
+				CComPtr<ITable> table = nullptr;
 				sf->get_Table(&table);
 				if (table)
 				{
@@ -212,8 +212,8 @@ STDMETHODIMP CFieldStatOperations::Validate(IShapefile* sf, VARIANT_BOOL* retVal
 					op->fieldIndex = fieldIndex;
 				}
 			}
-			
-			IField* field = NULL;
+
+			IField* field = nullptr;
 			if (op->fieldIndex >= 0 && op->fieldIndex < numFields)
 			{
 				sf->get_Field(op->fieldIndex, &field);
@@ -254,7 +254,7 @@ STDMETHODIMP CFieldStatOperations::Validate(IShapefile* sf, VARIANT_BOOL* retVal
 STDMETHODIMP CFieldStatOperations::get_OperationIsValid(int index, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( index < 0 || index >= (long)_operations.size() )
+	if( index < 0 || index >= static_cast<long>(_operations.size()) )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
@@ -272,7 +272,7 @@ STDMETHODIMP CFieldStatOperations::get_OperationIsValid(int index, VARIANT_BOOL*
 STDMETHODIMP CFieldStatOperations::get_OperationIsValidReason(int index, tkFieldOperationValidity* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( index < 0 || index >= (long)_operations.size() )
+	if( index < 0 || index >= static_cast<long>(_operations.size()) )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = fovValid;

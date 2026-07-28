@@ -178,7 +178,7 @@ int cmp123dddir()
    int status;
 
    /* IF DD_HD NEXT IS NULL, RETURN FAILURE */
-   if (cur_fm->dd_hd->next == NULL) return(0);
+   if (cur_fm->dd_hd->next == nullptr) return(0);
     
    /* CALL VER123DDTAG() TO VERIFY TAG ORDER IN DATA DESCRIPTIVE RECORD */
    if (!ver123ddtag()) return(0);
@@ -187,7 +187,7 @@ int cmp123dddir()
    cur_fm->cur_dd = cur_fm->dd_hd->next;
 
    /* WHILE CUR_DD NOT NULL DO */
-   while(cur_fm->cur_dd != NULL) {
+   while(cur_fm->cur_dd != nullptr) {
 
       /* SET SUBFIELD STATE TO FIELD CONTROL SUBFIELD */
       cur_fm->sf_state_dd = 1;
@@ -196,7 +196,7 @@ int cmp123dddir()
       if (!rd123ddfld(cur_fm->fp,tag,glb_str2,&status)) return(0);
 
       /* SET FD_LEN TO LENGTH OF THE STRING RETURNED FROM RD123DDFLD() */
-      cur_fm->cur_dd->fd_len = _tcslen(glb_str2);
+      cur_fm->cur_dd->fd_len = static_cast<long>(_tcslen(glb_str2));
 
       /* SET FD_POS TO POS */
       cur_fm->cur_dd->fd_pos = pos;

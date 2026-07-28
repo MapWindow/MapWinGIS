@@ -41,7 +41,7 @@ namespace Coloring
 	{
 		for(size_t i = 0; i < this->edges.size(); i++)
 		{
-			this->GetNeighbor(i)->IncrementSpentCount();
+			this->GetNeighbor(static_cast<int>(i))->IncrementSpentCount();
 		}
 	}
 
@@ -132,7 +132,7 @@ namespace Coloring
 				colors.insert(nodes[i]->color);
 			}
 		}
-		return colors.size();
+		return static_cast<int>(colors.size());
 	}
 
 	// ********************************************************
@@ -155,7 +155,7 @@ namespace Coloring
 	{
 		for(size_t i = 0; i < n->edges.size(); i++)
 		{
-			ColorNode* nb = n->GetNeighbor(i);
+			ColorNode* nb = n->GetNeighbor(static_cast<int>(i));
 			if (nb->spent == 0)
 				candidates.push_back(nb);
 		}
@@ -185,7 +185,7 @@ namespace Coloring
 				for(size_t i = 0; i < nodes.size(); i++)
 				{
 					if (nodes[i]->color == -1)
-						nonColored.push_back(i);
+						nonColored.push_back(static_cast<int>(i));
 				}
 				seedId = nonColored.size() > 10 ? nonColored[rand() % (nonColored.size() - 1)] : nonColored[0];
 			}

@@ -8,7 +8,7 @@
 // ****************************************************************
 STDMETHODIMP CSelectionList::AddShape(LONG layerHandle, LONG shapeIndex)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_items.push_back(new SelectedItem(layerHandle, shapeIndex));
 	return S_OK;
 }
@@ -18,8 +18,8 @@ STDMETHODIMP CSelectionList::AddShape(LONG layerHandle, LONG shapeIndex)
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_Count(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _items.size();
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = static_cast<long>(_items.size());
 	return S_OK;
 }
 
@@ -28,9 +28,9 @@ STDMETHODIMP CSelectionList::get_Count(LONG* pVal)
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_LayerHandle(LONG index, LONG* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (index < 0 || index >= (long)_items.size())
+	if (index < 0 || index >= static_cast<long>(_items.size()))
 	{
 		*retVal = -1;
 		return S_OK;
@@ -46,8 +46,8 @@ STDMETHODIMP CSelectionList::get_LayerHandle(LONG index, LONG* retVal)
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_ShapeIndex(LONG index, LONG* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (index < 0 || index >= (long)_items.size())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (index < 0 || index >= static_cast<long>(_items.size()))
 	{
 		*retVal = -1;
 		return S_OK;
@@ -61,12 +61,12 @@ STDMETHODIMP CSelectionList::get_ShapeIndex(LONG index, LONG* retVal)
 // ****************************************************************
 STDMETHODIMP CSelectionList::Clear()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	for (size_t i = 0; i < _items.size(); i++)
 	{
 		delete _items[i];
-		_items[i] = NULL;
+		_items[i] = nullptr;
 	}
 
 	_items.clear();
@@ -79,11 +79,11 @@ STDMETHODIMP CSelectionList::Clear()
 // ****************************************************************
 STDMETHODIMP CSelectionList::RemoveByLayerHandle(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	for (long i = (long)_items.size() - 1; i >= 0; i--) 
+	for (long i = static_cast<long>(_items.size()) - 1; i >= 0; i--)
 	{
-		if (_items[i]->LayerHandle == layerHandle) 
+		if (_items[i]->LayerHandle == layerHandle)
 		{
 			delete _items[i];
 			_items.erase(_items.begin() + i);
@@ -98,7 +98,7 @@ STDMETHODIMP CSelectionList::RemoveByLayerHandle(LONG layerHandle)
 // ****************************************************************
 STDMETHODIMP CSelectionList::AddPixel(LONG layerHandle, LONG column, LONG row)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	_items.push_back(new SelectedItem(layerHandle, row, column));
 
@@ -110,7 +110,7 @@ STDMETHODIMP CSelectionList::AddPixel(LONG layerHandle, LONG column, LONG row)
 // ****************************************************************
 STDMETHODIMP CSelectionList::TogglePixel(LONG layerHandle, LONG column, LONG row)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	for (size_t i = 0; i < _items.size(); i++)
 	{
@@ -131,9 +131,9 @@ STDMETHODIMP CSelectionList::TogglePixel(LONG layerHandle, LONG column, LONG row
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_LayerType(LONG index, tkLayerType* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (index < 0 || index >= (long)_items.size())
+	if (index < 0 || index >= static_cast<long>(_items.size()))
 	{
 		*pVal = tkLayerType::ltUndefined;
 		return S_OK;
@@ -149,9 +149,9 @@ STDMETHODIMP CSelectionList::get_LayerType(LONG index, tkLayerType* pVal)
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_RasterX(LONG index, LONG* pVal)
 {
-	//AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	//if (index < 0 || index >= (long)_items.size())
+	//if (index < 0 || index >= static_cast<long>(_items.size()))
 	//{
 	//	*pVal = tkLayerType::ltUndefined;
 	//	return S_OK;
@@ -169,7 +169,7 @@ STDMETHODIMP CSelectionList::get_RasterX(LONG index, LONG* pVal)
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_RasterY(LONG index, LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	//if (index < 0 || index >= (long)_items.size())
 	//{
@@ -190,9 +190,9 @@ STDMETHODIMP CSelectionList::get_RasterY(LONG index, LONG* pVal)
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_Row(LONG index, LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (index < 0 || index >= (long)_items.size())
+	if (index < 0 || index >= static_cast<long>(_items.size()))
 	{
 		*pVal = tkLayerType::ltUndefined;
 		return S_OK;
@@ -207,9 +207,9 @@ STDMETHODIMP CSelectionList::get_Row(LONG index, LONG* pVal)
 // ****************************************************************
 STDMETHODIMP CSelectionList::get_Column(LONG index, LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (index < 0 || index >= (long)_items.size())
+	if (index < 0 || index >= static_cast<long>(_items.size()))
 	{
 		*pVal = tkLayerType::ltUndefined;
 		return S_OK;
@@ -257,9 +257,9 @@ void CSelectionList::UpdatePixelBounds(long layerHandle, IImage* source, bool po
 // ****************************************************************
 SelectedItem* CSelectionList::GetItem(int index)
 {
-	if (index < 0 || index >= (long)_items.size())
+	if (index < 0 || index >= static_cast<long>(_items.size()))
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return _items[index];

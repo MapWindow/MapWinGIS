@@ -33,20 +33,20 @@ struct _DrawCircle
 };
 
 struct _DrawPolygon
-{	
+{
 	_DrawPolygon()
-	{	xpnts=NULL;
-		ypnts=NULL;
+	{	xpnts = nullptr;
+		ypnts = nullptr;
 	}
 	~_DrawPolygon()
 	{	if( xpnts )
 			delete [] xpnts;
-		xpnts = NULL;
+		xpnts = nullptr;
 		if( ypnts )
 			delete [] ypnts;
-		ypnts = NULL;
+		ypnts = nullptr;
 	}
-    
+
 	double * xpnts;
 	double * ypnts;
 	long numPoints;
@@ -57,30 +57,30 @@ struct _DrawPolygon
 };
 
 class DrawList //: public LabelLayer
-{	
+{
 public:
 	DrawList()
 	{	
 		key = SysAllocString(L"");
-		m_labels = NULL;
-		CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
+		m_labels = nullptr;
+		CoCreateInstance(CLSID_Labels, nullptr,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
 	}
 	~DrawList()
 	{	::SysFreeString(key);
 		register int i;
-		int endcondition = m_dpoints.size();
+		auto endcondition = static_cast<int>(m_dpoints.size());
 		for(i=0;i<endcondition;i++)
 			delete m_dpoints[i];
 
-		endcondition = m_dlines.size();
+		endcondition = static_cast<int>(m_dlines.size());
 		for(i=0;i<endcondition;i++)
 			delete m_dlines[i];
 
-		endcondition = m_dcircles.size();
+		endcondition = static_cast<int>(m_dcircles.size());
 		for(i=0;i<endcondition;i++)
 			delete m_dcircles[i];
 
-		endcondition = m_dpolygons.size();
+		endcondition = static_cast<int>(m_dpolygons.size());
 		for(i=0;i<endcondition;i++)
 			delete m_dpolygons[i];
 
@@ -89,10 +89,10 @@ public:
 		m_dcircles.clear();
 		m_dpolygons.clear();
 		
-		if (m_labels != NULL)
+		if (m_labels != nullptr)
 			m_labels->Release();
 	}
-	
+
 	tkDrawReferenceList listType;
 	BSTR key;
 

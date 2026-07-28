@@ -24,7 +24,7 @@ void UndoListHelper::AddShapes(IShapefile* sf, vector<IShape*> shapes, long laye
 void UndoListHelper::DeleteShapes(IShapefile* sf, vector<long>& deleteList, long layerHandle, IUndoList* undoList)
 {
 	VARIANT_BOOL vb;
-	for (int i = deleteList.size() - 1; i >= 0; i--)
+	for (int i = static_cast<int>(deleteList.size()) - 1; i >= 0; i--)
 	{
 		undoList->Add(uoRemoveShape, layerHandle, deleteList[i], &vb);
 		if (vb) {

@@ -34,7 +34,7 @@
 CExpressionValue* CustomExpression::Calculate(CStringW& errorMessage)
 {
 	Reset();
-    
+
 	bool success = false;
 	
 	// if the operations should be cached we'll ensure that there is no obsolete data in vector
@@ -67,7 +67,7 @@ CExpressionValue* CustomExpression::Calculate(CStringW& errorMessage)
 		}
 	}
 	while (true);
-    
+
 	// operation was saved - no need to cache any more
 	if (_saveOperations)
 	{
@@ -75,7 +75,7 @@ CExpressionValue* CustomExpression::Calculate(CStringW& errorMessage)
 		_saveOperations = false;
 	}
 
-	return success ? _parts[_parts.size() - 1]->val : NULL;
+	return success ? _parts[_parts.size() - 1]->val : nullptr;
 }
 
 // *******************************************************************
@@ -135,7 +135,7 @@ bool CustomExpression::EvaluateFunction(CExpressionPart* part)
 
 	// we did the same check during parsing,
 	// but still let's leave it as additional safeguard
-	if (!part->function->CheckArguments((int)args.size(), _errorMessage))
+	if (!part->function->CheckArguments(static_cast<int>(args.size()), _errorMessage))
 	{
 		return false;
 	}
@@ -205,7 +205,7 @@ bool CustomExpression::FinishPart(CExpressionPart* part)
 
 	if (part->activeCount == 1)
 	{
-		int size = part->elements.size();
+		int size = static_cast<int>(part->elements.size());
 		for (int i = 0; i < size; i++)
 		{
 			if (!part->elements[i]->turnedOff)
@@ -227,7 +227,7 @@ void CustomExpression::ResetActiveCountForParts()
 {
 	for (unsigned int i = 0; i < _parts.size(); i++)
 	{
-		_parts[i]->activeCount = _parts[i]->elements.size();
+		_parts[i]->activeCount = static_cast<int>(_parts[i]->elements.size());
 	}
 }
 
@@ -256,7 +256,7 @@ bool CustomExpression::FindOperation(CExpressionPart* part, COperation& operatio
 	int priority = 255;
 	
 	std::vector<CElement*>* elements = &part->elements;
-	int size = elements->size();
+	int size = static_cast<int>(elements->size());
 	for (int i = 0; i < size; i++)
 	{
 		CElement* element =  (*elements)[i];
@@ -392,10 +392,10 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 {
 	USES_CONVERSION;
 
-	CExpressionValue* valLeft = NULL; 
-	CExpressionValue* valRight = NULL; 
-	CElement* elLeft = NULL;
-	CElement* elRight = NULL;
+	CExpressionValue* valLeft = nullptr;
+	CExpressionValue* valRight = nullptr;
+	CElement* elLeft = nullptr;
+	CElement* elRight = nullptr;
 
 	tkOperation oper = part->elements[operation.id]->operation;
 	if (oper == operNOT || oper == operChangeSign )
@@ -546,7 +546,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 					RasterMatrix* matrix = elLeft->calcVal->matrix();
 					
 					float* data = new float[1];
-					data[0] = (float)valRight->dbl();
+					data[0] = static_cast<float>(valRight->dbl());
 
 					RasterMatrix* right = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *right);
@@ -558,7 +558,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 					elLeft->calcVal->matrix(matrix);
 
 					float* data = new float[1];
-					data[0] = (float)valLeft->dbl();
+					data[0] = static_cast<float>(valLeft->dbl());
 
 					RasterMatrix* left = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *left);
@@ -658,9 +658,9 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 						}
 						else
 						{
-							elLeft->calcVal->dbl(double((int)valLeft->dbl() / (int)valRight->dbl()));
+							elLeft->calcVal->dbl(static_cast<double>(static_cast<int>(valLeft->dbl()) / static_cast<int>(valRight->dbl())));
 						}
-					else if ( oper == operMOD )		elLeft->calcVal->dbl(double((int)valLeft->dbl() % (int)valRight->dbl()));
+					else if ( oper == operMOD )		elLeft->calcVal->dbl(static_cast<double>(static_cast<int>(valLeft->dbl()) % static_cast<int>(valRight->dbl())));
 				}
 				else if (valLeft->IsFloatArray() && valRight->IsFloatArray() )
 				{
@@ -678,7 +678,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 					RasterMatrix* matrix = elLeft->calcVal->matrix();
 
 					float* data = new float[1];
-					data[0] = (float)valRight->dbl();
+					data[0] = static_cast<float>(valRight->dbl());
 					RasterMatrix* right = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *right);
 					delete right;
@@ -689,7 +689,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 					elLeft->calcVal->matrix(matrix);
 
 					float* data = new float[1];
-					data[0] = (float)valLeft->dbl();
+					data[0] = static_cast<float>(valLeft->dbl());
 					RasterMatrix* left = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *left);
 					delete left;
@@ -707,7 +707,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 				return false;
 			}
 	}
-	
+
 	if (oper == operNOT || oper == operChangeSign)
 	{
 		// unary operator
@@ -731,7 +731,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 inline CExpressionValue* CustomExpression::GetValue(CExpressionPart* part, int elementId )
 {
 	CElement* element = part->elements[elementId];
-	CExpressionValue* val = NULL;
+	CExpressionValue* val = nullptr;
 
 	if ( element->wasCalculated )		val = element->calcVal;
 	else if (element->partIndex != -1)	val = _parts[element->partIndex]->val;
@@ -746,16 +746,16 @@ inline CExpressionValue* CustomExpression::GetValue(CExpressionPart* part, int e
 bool CustomExpression::ReadFieldNames(ITable* tbl)
 {
 	_fields.clear();
-	
+
 	if (!tbl) return false;
-	
+
 	long numFields;
 	tbl->get_NumFields(&numFields);
 
 	for (int i = 0; i < numFields; i++)
 	{
 		// TODO: wrap
-		IField* fld = NULL;
+		IField* fld = nullptr;
 		tbl->get_Field(i, &fld);
 		if (fld)
 		{
@@ -811,7 +811,7 @@ void CustomExpression::Clear()
 	{
 		// arguments are references to parts present in the list
 		// therefore there is no need to delete them
-		_parts[i]->arguments.clear();		
+		_parts[i]->arguments.clear();
 		delete _parts[i];
 	}
 
@@ -825,7 +825,7 @@ void CustomExpression::Clear()
 	if (_shape)
 	{
 		_shape->Release();
-		_shape = NULL;
+		_shape = nullptr;
 	}
 }
 
@@ -908,13 +908,14 @@ void CustomExpression::put_Shape(IShape* shape)
 	ComHelper::SetRef(shape, (IDispatch**)&_shape, true);
 }
 
-void CustomExpression::put_FieldValue(int FieldId, BSTR newVal) 
+void CustomExpression::put_FieldValue(int FieldId, BSTR newVal)
 {
 	USES_CONVERSION;
 	_variables[FieldId]->val->str(OLE2W(newVal));
 }
 
-void CustomExpression::put_FieldValue(int FieldId, CStringW newVal) {
+void CustomExpression::put_FieldValue(int FieldId, CStringW newVal)
+{
 	USES_CONVERSION;
 	_variables[FieldId]->val->str(newVal);
 }

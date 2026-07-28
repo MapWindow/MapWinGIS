@@ -22,7 +22,7 @@
 // ************************************************************
 long CMapView::GetNumLayers()
 {
-	return _activeLayers.size();
+	return static_cast<long>(_activeLayers.size());
 }
 
 // ************************************************************
@@ -30,7 +30,7 @@ long CMapView::GetNumLayers()
 // ************************************************************
 BSTR CMapView::GetLayerName(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (IsValidLayer(layerHandle))
 	{
@@ -44,7 +44,7 @@ BSTR CMapView::GetLayerName(LONG layerHandle)
 
 void CMapView::SetLayerName(LONG layerHandle, LPCTSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (IsValidLayer(layerHandle))
 	{
@@ -62,7 +62,7 @@ void CMapView::SetLayerName(LONG layerHandle, LPCTSTR newVal)
 // ****************************************************
 BSTR CMapView::GetLayerDescription(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	Layer* layer = GetLayer(layerHandle);
 	if (!layer) {
@@ -78,7 +78,7 @@ BSTR CMapView::GetLayerDescription(LONG layerHandle)
 // ****************************************************
 void CMapView::SetLayerDescription(LONG layerHandle, LPCTSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (Layer* layer = GetLayer(layerHandle))
 	{
 		layer->description = newVal;
@@ -121,7 +121,7 @@ long CMapView::GetLayerPosition(long layerHandle)
 {
 	if (IsValidLayer(layerHandle))
 	{
-		const long endcondition = _activeLayers.size();
+		const long endcondition = static_cast<long>(_activeLayers.size());
 		for (int i = 0; i < endcondition; i++)
 		{
 			if (_activeLayers[i] == layerHandle)
@@ -141,7 +141,7 @@ long CMapView::GetLayerPosition(long layerHandle)
 long CMapView::GetLayerHandle(long layerPosition)
 {
 	// TODO: How to cast _activeLayers.size() to long?
-	if (layerPosition >= 0 && layerPosition < (long)_activeLayers.size())
+	if (layerPosition >= 0 && layerPosition < static_cast<long>(_activeLayers.size()))
 	{
 		return _activeLayers[layerPosition];
 	}
@@ -266,7 +266,7 @@ int CMapView::AddLayerCore(Layer* layer)
 	{
 		if (!_allLayers[i])  // that means we can reuse it
 		{
-			layerHandle = i;
+			layerHandle = static_cast<int>(i);
 			_allLayers[i] = layer;
 			break;
 		}
@@ -274,7 +274,7 @@ int CMapView::AddLayerCore(Layer* layer)
 
 	if (layerHandle == -1)
 	{
-		layerHandle = _allLayers.size();
+		layerHandle = static_cast<int>(_allLayers.size());
 		_allLayers.push_back(layer);
 	}
 
@@ -926,7 +926,7 @@ void CMapView::RemoveLayerCore(long layerHandle, bool closeDatasources, bool fro
 		}
 
 		const bool hadLayers = _activeLayers.size() > 0;
-		if (layerHandle >= (long)_allLayers.size()) return; // TODO: How to cast _activeLayers.size() to long?
+		if (layerHandle >= static_cast<long>(_allLayers.size())) return; // TODO: How to cast _activeLayers.size() to long?
 
 		Layer* l = _allLayers[layerHandle];
 		if (l == nullptr) return;
@@ -1025,15 +1025,15 @@ void CMapView::RemoveAllLayers()
 // ***************************************************************
 BOOL CMapView::MoveLayerUp(long initialPosition)
 {
-	if (initialPosition >= 0 && initialPosition < (long)_activeLayers.size())   // TODO: How to cast _activeLayers.size() to long?
+	if (initialPosition >= 0 && initialPosition < static_cast<long>(_activeLayers.size()))
 	{
 		const long layerHandle = _activeLayers[initialPosition];
 
 		_activeLayers.erase(_activeLayers.begin() + initialPosition);
 
 		long newPos = initialPosition + 1;
-		if (newPos > (long)_activeLayers.size())  // TODO: How to cast _activeLayers.size() to long?
-			newPos = _activeLayers.size();
+		if (newPos > static_cast<long>(_activeLayers.size()))
+			newPos = static_cast<long>(_activeLayers.size());
 
 		_activeLayers.insert(_activeLayers.begin() + newPos, layerHandle);
 
@@ -1051,7 +1051,7 @@ BOOL CMapView::MoveLayerUp(long initialPosition)
 BOOL CMapView::MoveLayerDown(long initialPosition)
 {
 	// TODO: How to cast _activeLayers.size() to long?
-	if (initialPosition >= 0 && initialPosition < (long)_activeLayers.size())
+	if (initialPosition >= 0 && initialPosition < static_cast<long>(_activeLayers.size()))
 	{
 		const long layerHandle = _activeLayers[initialPosition];
 		_activeLayers.erase(_activeLayers.begin() + initialPosition);
@@ -1080,8 +1080,8 @@ BOOL CMapView::MoveLayer(long initialPosition, long targetPosition)
 		return TRUE;
 
 	// TODO: How to cast _activeLayers.size() to long?
-	if (initialPosition >= 0 && initialPosition < (long)_activeLayers.size() &&
-		targetPosition >= 0 && targetPosition < (long)_activeLayers.size())
+	if (initialPosition >= 0 && initialPosition < static_cast<long>(_activeLayers.size()) &&
+		targetPosition >= 0 && targetPosition < static_cast<long>(_activeLayers.size()))
 	{
 		const long layerHandle = _activeLayers[initialPosition];
 
@@ -1103,7 +1103,7 @@ BOOL CMapView::MoveLayer(long initialPosition, long targetPosition)
 BOOL CMapView::MoveLayerTop(long initialPosition)
 {
 	// TODO: How to cast _activeLayers.size() to long?
-	if (initialPosition >= 0 && initialPosition < (long)_activeLayers.size())
+	if (initialPosition >= 0 && initialPosition < static_cast<long>(_activeLayers.size()))
 	{
 		const long layerHandle = _activeLayers[initialPosition];
 		_activeLayers.erase(_activeLayers.begin() + initialPosition);
@@ -1124,7 +1124,7 @@ BOOL CMapView::MoveLayerTop(long initialPosition)
 BOOL CMapView::MoveLayerBottom(long initialPosition)
 {
 	// TODO: How to cast _activeLayers.size() to long?
-	if (initialPosition >= 0 && initialPosition < (long)_activeLayers.size())
+	if (initialPosition >= 0 && initialPosition < static_cast<long>(_activeLayers.size()))
 	{
 		const long layerHandle = _activeLayers[initialPosition];
 		_activeLayers.erase(_activeLayers.begin() + initialPosition);
@@ -1193,7 +1193,7 @@ void CMapView::ReSourceLayer(long layerHandle, LPCTSTR newSrcPath)
 // ***************************************************************
 BOOL CMapView::ReloadOgrLayerFromSource(long ogrLayerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	// get the layer from the specified handle
 	Layer* layer = GetLayer(ogrLayerHandle);
@@ -1245,7 +1245,7 @@ BOOL CMapView::ReloadOgrLayerFromSource(long ogrLayerHandle)
 // ***************************************************************
 void CMapView::RestartBackgroundLoading(long ogrLayerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	// get the layer from the specified handle
 	Layer* layer = GetLayer(ogrLayerHandle);
@@ -1262,14 +1262,14 @@ void CMapView::RestartBackgroundLoading(long ogrLayerHandle)
 // ****************************************************************** 
 DOUBLE CMapView::GetLayerMaxVisibleScale(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	const Layer* const layer = GetLayer(layerHandle);
 	return layer ? layer->maxVisibleScale : 0.0;
 }
 
 void CMapView::SetLayerMaxVisibleScale(LONG layerHandle, DOUBLE newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (Layer* layer = GetLayer(layerHandle)) {
 		layer->maxVisibleScale = newVal;
 	}
@@ -1280,14 +1280,14 @@ void CMapView::SetLayerMaxVisibleScale(LONG layerHandle, DOUBLE newVal)
 // ****************************************************************** 
 DOUBLE CMapView::GetLayerMinVisibleScale(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	const Layer* const layer = GetLayer(layerHandle);
 	return layer ? layer->minVisibleScale : 0.0;
 }
 
 void CMapView::SetLayerMinVisibleScale(LONG layerHandle, DOUBLE newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (Layer* layer = GetLayer(layerHandle)) {
 		layer->minVisibleScale = newVal;
 	}
@@ -1298,14 +1298,14 @@ void CMapView::SetLayerMinVisibleScale(LONG layerHandle, DOUBLE newVal)
 // ****************************************************************** 
 int CMapView::GetLayerMinVisibleZoom(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	const Layer* const layer = GetLayer(layerHandle);
 	return layer ? layer->minVisibleZoom : -1;
 }
 
 void CMapView::SetLayerMinVisibleZoom(LONG layerHandle, int newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (Layer* layer = GetLayer(layerHandle)) {
 		if (newVal < 0) newVal = 0;
 		if (newVal > 18) newVal = 18;
@@ -1318,14 +1318,14 @@ void CMapView::SetLayerMinVisibleZoom(LONG layerHandle, int newVal)
 // ****************************************************************** 
 int CMapView::GetLayerMaxVisibleZoom(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	const Layer* const layer = GetLayer(layerHandle);
 	return layer ? layer->maxVisibleZoom : -1;
 }
 
 void CMapView::SetLayerMaxVisibleZoom(LONG layerHandle, int newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (Layer* layer = GetLayer(layerHandle))
 	{
 		if (newVal < 0) newVal = 0;
@@ -1339,14 +1339,14 @@ void CMapView::SetLayerMaxVisibleZoom(LONG layerHandle, int newVal)
 // ****************************************************************** 
 VARIANT_BOOL CMapView::GetLayerDynamicVisibility(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	const Layer* const layer = GetLayer(layerHandle);
 	return layer ? static_cast<VARIANT_BOOL>(layer->dynamicVisibility) : VARIANT_FALSE;
 }
 
 void CMapView::SetLayerDynamicVisibility(LONG layerHandle, VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (Layer* layer = GetLayer(layerHandle))
 	{
 		layer->dynamicVisibility = newVal ? true : false;
@@ -1516,7 +1516,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW projectName, bool 
 // Filename isn't saved
 BSTR CMapView::SerializeLayer(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
 	CString str = "";
@@ -1541,7 +1541,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG layerHandle, CStringW filename)
 	USES_CONVERSION;
 
 	// TODO: How to cast _activeLayers.size() to long?
-	if (layerHandle < 0 || layerHandle >= (long)_allLayers.size())
+	if (layerHandle < 0 || layerHandle >= static_cast<long>(_allLayers.size()))
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return nullptr;
@@ -1666,7 +1666,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG layerHandle, CStringW filename)
 // Restores options, but doesn't add layer
 VARIANT_BOOL CMapView::DeserializeLayer(LONG layerHandle, LPCTSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
 	const CString s = newVal;
@@ -1832,12 +1832,12 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG layerHandle, CPLXMLNode*
 // *********************************************************
 BSTR CMapView::GetLayerFilename(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	BSTR filename;
 
 	// TODO: How to cast _activeLayers.size() to long?
-	if (layerHandle < 0 || layerHandle >= (long)_allLayers.size())
+	if (layerHandle < 0 || layerHandle >= static_cast<long>(_allLayers.size()))
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 		filename = SysAllocString(L"");
@@ -1858,7 +1858,7 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 // *********************************************************
 VARIANT_BOOL CMapView::RemoveLayerOptions(LONG layerHandle, LPCTSTR optionsName)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	const CString name = get_OptionsFilename(layerHandle, optionsName);
 	if (Utility::FileExists(name))
 	{
@@ -1897,7 +1897,7 @@ CString CMapView::get_OptionsFilename(LONG layerHandle, LPCTSTR optionsName)
 // *********************************************************
 VARIANT_BOOL CMapView::SaveLayerOptions(LONG layerHandle, LPCTSTR optionsName, VARIANT_BOOL overwrite, LPCTSTR description)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	bool result = false;
 
 	if (Layer* layer = GetLayer(layerHandle))
@@ -2029,7 +2029,7 @@ VARIANT_BOOL CMapView::LoadLayerOptionsCore(CString baseName, LONG layerHandle, 
 // *********************************************************
 VARIANT_BOOL CMapView::LoadLayerOptions(LONG layerHandle, LPCTSTR optionsName, BSTR* description)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (Layer* l = GetLayer(layerHandle))
 	{
@@ -2056,10 +2056,10 @@ VARIANT_BOOL CMapView::LoadLayerOptions(LONG layerHandle, LPCTSTR optionsName, B
 // *******************************************************
 VARIANT_BOOL CMapView::GetLayerSkipOnSaving(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	// TODO: How to cast _activeLayers.size() to long?
-	if (layerHandle < 0 || layerHandle >= (long)_allLayers.size())
+	if (layerHandle < 0 || layerHandle >= static_cast<long>(_allLayers.size()))
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return VARIANT_FALSE;
@@ -2078,10 +2078,10 @@ VARIANT_BOOL CMapView::GetLayerSkipOnSaving(LONG layerHandle)
 // *******************************************************
 void CMapView::SetLayerSkipOnSaving(LONG layerHandle, VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	// TODO: How to cast _activeLayers.size() to long?
-	if (layerHandle < 0 || layerHandle >= (long)_allLayers.size())
+	if (layerHandle < 0 || layerHandle >= static_cast<long>(_allLayers.size()))
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return;
@@ -2098,7 +2098,7 @@ void CMapView::SetLayerSkipOnSaving(LONG layerHandle, VARIANT_BOOL newVal)
 // *******************************************************
 IExtents* CMapView::GetLayerExtents(LONG layerHandle)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (!IsValidLayer(layerHandle))
 	{

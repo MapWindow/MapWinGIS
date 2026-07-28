@@ -39,7 +39,7 @@
 STDMETHODIMP CShapefileCategories::get_Count(long* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _categories.size();
+	*pVal = static_cast<long>(_categories.size());
 	return S_OK;
 }
 
@@ -48,8 +48,8 @@ STDMETHODIMP CShapefileCategories::get_Count(long* pVal)
 // ***************************************************************
 STDMETHODIMP CShapefileCategories::Add(BSTR Name, IShapefileCategory** retVal)
 {
-	this->Insert(_categories.size(), Name, retVal);
-	
+	this->Insert(static_cast<long>(_categories.size()), Name, retVal);
+
 	return S_OK;
 }
 
@@ -59,9 +59,9 @@ STDMETHODIMP CShapefileCategories::Add(BSTR Name, IShapefileCategory** retVal)
 STDMETHODIMP CShapefileCategories::Insert(long Index, BSTR Name, IShapefileCategory** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		
-	if(Index < 0 || Index > (long)_categories.size())
-	{	
+
+	if(Index < 0 || Index > static_cast<long>(_categories.size()))
+	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = nullptr;
 		return NULL;
@@ -71,7 +71,7 @@ STDMETHODIMP CShapefileCategories::Insert(long Index, BSTR Name, IShapefileCateg
 	IShapefileCategory* cat = nullptr;
 	CoCreateInstance( CLSID_ShapefileCategory, nullptr, CLSCTX_INPROC_SERVER, IID_IShapefileCategory, (void**)&cat);
 	if (cat == nullptr) return S_OK;
-	
+
 	// initialization with default options if shapefile is present
 	if (_shapefile != nullptr)
 	{
@@ -79,7 +79,7 @@ STDMETHODIMP CShapefileCategories::Insert(long Index, BSTR Name, IShapefileCateg
 		_shapefile->get_DefaultDrawingOptions(&defaultOpt);
 		CDrawingOptionsEx* newOpt =((CShapeDrawingOptions*)defaultOpt)->get_UnderlyingOptions();
 		defaultOpt->Release();
-		
+
 		IShapeDrawingOptions* opt = nullptr;
 		cat->get_DrawingOptions(&opt);
 		((CShapeDrawingOptions*)opt)->put_underlyingOptions(newOpt);
@@ -95,7 +95,7 @@ STDMETHODIMP CShapefileCategories::Insert(long Index, BSTR Name, IShapefileCateg
 	{
 		_categories.insert( _categories.begin() + Index, cat);
 	}
-	
+
 	*retVal = cat;
 	((CShapefileCategory*) *retVal)->put_parentCollection(this);
 
@@ -111,8 +111,8 @@ STDMETHODIMP CShapefileCategories::Remove(long Index, VARIANT_BOOL* vbRetval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*vbRetval = VARIANT_FALSE;
 
-	if( Index < 0 || Index >= (long)_categories.size() )
-	{	
+	if( Index < 0 || Index >= static_cast<long>(_categories.size()) )
+	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*vbRetval = VARIANT_FALSE;
 	}
@@ -134,7 +134,7 @@ STDMETHODIMP CShapefileCategories::Clear()
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	for (auto& _categorie : _categories)
 	{
-	    _categorie->Release();
+		_categorie->Release();
 	}
 	_categories.clear();
 
@@ -143,7 +143,7 @@ STDMETHODIMP CShapefileCategories::Clear()
 		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 		for (auto& i : *data)
 		{
-		    i->category = -1;
+			i->category = -1;
 		}
 	}
 	return S_OK;
@@ -155,8 +155,8 @@ STDMETHODIMP CShapefileCategories::Clear()
 STDMETHODIMP CShapefileCategories::get_Item (long Index, IShapefileCategory** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( Index < 0 || Index >= (long)_categories.size() )
-	{	
+	if( Index < 0 || Index >= static_cast<long>(_categories.size()) )
+	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retval = nullptr;
 	}
@@ -171,23 +171,23 @@ STDMETHODIMP CShapefileCategories::get_Item (long Index, IShapefileCategory** re
 STDMETHODIMP CShapefileCategories::put_Item(long Index, IShapefileCategory* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( Index < 0 || Index >= (long)_categories.size() )
-	{	
+	if( Index < 0 || Index >= static_cast<long>(_categories.size()) )
+	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
-    if (!newVal)
-    {
-        ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-        return S_OK;
-    }
-    if (_categories[Index] != newVal)
-    {
-        _categories[Index]->Release();
-        _categories[Index] = newVal;
-        _categories[Index]->AddRef();
-    }
-    return S_OK;
+	if (!newVal)
+	{
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
+	}
+	if (_categories[Index] != newVal)
+	{
+		_categories[Index]->Release();
+		_categories[Index] = newVal;
+		_categories[Index]->AddRef();
+	}
+	return S_OK;
 }
 
 // ***************************************************************
@@ -196,27 +196,27 @@ STDMETHODIMP CShapefileCategories::put_Item(long Index, IShapefileCategory* newV
 // Add categories for a given range
 STDMETHODIMP CShapefileCategories::AddRange(long FieldIndex, tkClassificationType ClassificationType, long numClasses, VARIANT minValue, VARIANT maxValue, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	*retVal = VARIANT_FALSE;
-	
+
 	if(_shapefile == nullptr) 
 		return S_OK;
-	
+
 	CComPtr<ITable> tbl = nullptr;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
 		return S_OK;
-		
+
 	std::vector<CategoriesData>* values = TableHelper::Cast(tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses, minValue, maxValue);
-	
+
 	if (!values)
 		return S_OK;
-	
+
 	_classificationField = -1;		// fast processing is off
 
 	IShapefileCategory* cat = nullptr;
-	
+
 	for (auto& value : *values)
 	{
 		CString strValue;
@@ -228,16 +228,16 @@ STDMETHODIMP CShapefileCategories::AddRange(long FieldIndex, tkClassificationTyp
 		cat->put_MinValue(value.minValue);
 		cat->put_MaxValue(value.maxValue);
 		cat->Release();
-	}	
+	}
 
 	if (ClassificationType == ctUniqueValues)
-	{	
+	{
 		// no fast processing in this mode as user could generate categories by several fields
 		// m_classificationField = FieldIndex;		
 	}
-	
+
 	delete values;
-	
+
 	//this->ApplyExpressions();
 
 	*retVal = VARIANT_TRUE;
@@ -249,7 +249,7 @@ STDMETHODIMP CShapefileCategories::AddRange(long FieldIndex, tkClassificationTyp
 // ********************************************************
 STDMETHODIMP CShapefileCategories::Generate2(BSTR fieldName, tkClassificationType ClassificationType, LONG numClasses, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 
 	if (!_shapefile) return S_OK;
@@ -271,18 +271,18 @@ STDMETHODIMP CShapefileCategories::Generate2(BSTR fieldName, tkClassificationTyp
 // ***************************************************************
 STDMETHODIMP CShapefileCategories::Generate(long FieldIndex, tkClassificationType ClassificationType, long numClasses, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	*retVal = VARIANT_FALSE;
 	
 	if(_shapefile == nullptr) 
 		return S_OK;
-	
+
 	CComPtr<ITable> tbl = nullptr;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
 		return S_OK;
-		
+
 	std::vector<CategoriesData>* values = TableHelper::Cast(tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses);
 	if (!values)
 		return S_OK;
@@ -370,18 +370,18 @@ STDMETHODIMP CShapefileCategories::put_Caption(BSTR newVal)
 // **********************************************************
 STDMETHODIMP CShapefileCategories::get_VisibilityExpression(BSTR* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        USES_CONVERSION;
-    *pVal = OLE2BSTR(_visExpression);
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	USES_CONVERSION;
+	*pVal = OLE2BSTR(_visExpression);
+	return S_OK;
 }
 STDMETHODIMP CShapefileCategories::put_VisibilityExpression(BSTR newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        ::SysFreeString(_visExpression);
-    USES_CONVERSION;
-    _visExpression = OLE2BSTR(newVal);
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	::SysFreeString(_visExpression);
+	USES_CONVERSION;
+	_visExpression = OLE2BSTR(newVal);
+	return S_OK;
 }
 
 //***********************************************************************/
@@ -459,7 +459,7 @@ CDrawingOptionsEx* CShapefileCategories::get_UnderlyingOptions(int Index)
 {
 	if (Index >=0 && Index < (int)_categories.size())
 		return ((CShapefileCategory*)_categories[Index])->get_UnderlyingOptions();
-    return nullptr;
+	return nullptr;
 }
 
 // *******************************************************************
@@ -485,7 +485,7 @@ STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex, long star
 	{
 		if (i->category == CategoryIndex)
 		{
-		    i->category = -1;
+			i->category = -1;
 		}
 	}
 
@@ -500,37 +500,37 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex, long startRow
 {
 	if (!_shapefile)
 		return;
-	
+
 	CComPtr<ITable> tbl = nullptr;
 	_shapefile->get_Table(&tbl);
 	if ( !tbl )	return;
-	
+
 	// Process shape index range:
 	long numShapes;
 	_shapefile->get_NumShapes(&numShapes);
 	endRowIndex = endRowIndex < 0 ? numShapes - 1 : endRowIndex;
 	startRowIndex = startRowIndex < 0 ? 0 : startRowIndex;
 	numShapes = endRowIndex - startRowIndex + 1;
-		
+
 	// vector of numShapes size with category index for each shape
 	std::vector<int> results;
 	results.resize(numShapes, -1);
 
-    std::vector<std::vector<double>> rotations;
-    rotations.resize(_categories.size() + 1);
+	std::vector<std::vector<double>> rotations;
+	rotations.resize(_categories.size() + 1);
 
 	bool uniqueValues = true;
 	for (auto& _categorie : _categories)
 	{
 		tkCategoryValue value;
-	    _categorie->get_ValueType(&value);
+		_categorie->get_ValueType(&value);
 		if (value != cvSingleValue) {
 			uniqueValues = false;
 			break;
 		}
 	}
 
-    bool allCategories = CategoryIndex == -1;
+	bool allCategories = CategoryIndex == -1;
 
 	// ----------------------------------------------------------------
 	// we got unique values classification and want to process it fast
@@ -543,8 +543,8 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex, long startRow
 		std::map<CComVariant, long> myMap;				// variant value as key and number of category as result
 		for (unsigned int i = 0; i < _categories.size(); i++)
 		{
-            if (!allCategories && i != CategoryIndex)
-                continue;
+			if (!allCategories && i != CategoryIndex)
+				continue;
 
 			CComVariant val;
 			_categories[i]->get_MinValue(&val);
@@ -679,7 +679,7 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme (tkColorSchemeType Type, ICo
 STDMETHODIMP CShapefileCategories::ApplyColorScheme2 (tkColorSchemeType Type, IColorScheme* ColorScheme, tkShapeElements ShapeElement)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	ApplyColorScheme3(Type, ColorScheme, ShapeElement, 0, _categories.size() - 1);
+	ApplyColorScheme3(Type, ColorScheme, ShapeElement, 0, static_cast<long>(_categories.size()) - 1);
 	return S_OK;
 }
 
@@ -707,9 +707,9 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 	}
 
 	// we'll correct invalid indices
-	if (CategoryEndIndex >= (long)_categories.size())
+	if (CategoryEndIndex >= static_cast<long>(_categories.size()))
 	{
-		CategoryEndIndex = (long)(_categories.size() - 1);
+		CategoryEndIndex = static_cast<long>(_categories.size() - 1);
 	}
 
 	if (CategoryStartIndex < 0)
@@ -726,7 +726,7 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 
 	double maxValue;
 	ColorScheme->get_BreakValue(numBreaks - 1, &maxValue);
-	
+
 	// choosing the element to apply colors to
 	if ( ShapeElement == shElementDefault)
 	{
@@ -750,19 +750,19 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 	{
 		OLE_COLOR color;
 		double value;
-		if ( Type == ctSchemeRandom )			
+		if ( Type == ctSchemeRandom )
 		{
 			value = double(rand()/double(RAND_MAX));
 			ColorScheme->get_RandomColor(value, &color);
 		}
-		else if ( Type == ctSchemeGraduated )	
+		else if ( Type == ctSchemeGraduated )
 		{
 			value = double(i - CategoryStartIndex)/double(CategoryEndIndex - CategoryStartIndex) * maxValue;
 			ColorScheme->get_GraduatedColor(value, &color);
 		}
-		
+
 		_categories[i]->get_DrawingOptions(&options);
-		
+
 		if ( options )
 		{
 			switch (ShapeElement)
@@ -786,7 +786,7 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 STDMETHODIMP CShapefileCategories::MoveUp (long Index, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < (long)_categories.size() && Index > 0)
+	if (Index < static_cast<long>(_categories.size()) && Index > 0)
 	{
 		IShapefileCategory* catBefore = _categories[Index - 1];
 		_categories[Index - 1] = _categories[Index];
@@ -797,11 +797,11 @@ STDMETHODIMP CShapefileCategories::MoveUp (long Index, VARIANT_BOOL* retval)
 		{
 			if (i->category == Index)
 			{
-			    i->category = Index - 1;
+				i->category = Index - 1;
 			}
 			else if (i->category == Index - 1)
 			{
-			    i->category = Index;
+				i->category = Index;
 			}
 		}
 
@@ -821,7 +821,7 @@ STDMETHODIMP CShapefileCategories::MoveUp (long Index, VARIANT_BOOL* retval)
 STDMETHODIMP CShapefileCategories::MoveDown (long Index, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < (long)_categories.size() - 1 && Index >= 0)
+	if (Index < static_cast<long>(_categories.size()) - 1 && Index >= 0)
 	{
 		IShapefileCategory* catAfter = _categories[Index + 1];
 		_categories[Index + 1] = _categories[Index];
@@ -832,11 +832,11 @@ STDMETHODIMP CShapefileCategories::MoveDown (long Index, VARIANT_BOOL* retval)
 		{
 			if (i->category == Index)
 			{
-			    i->category = Index + 1;
+				i->category = Index + 1;
 			}
 			else if (i->category == Index + 1)
 			{
-			    i->category = Index;
+				i->category = Index;
 			}
 		}
 		*retval = VARIANT_TRUE;
@@ -870,7 +870,7 @@ CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName)
 	
 	CPLXMLNode* psTree = CPLCreateXMLNode( nullptr, CXT_Element, ElementName);
 
-    // classification field
+	// classification field
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "ClassificationField", CPLString().Printf("%d", _classificationField));
 
 	// field type
@@ -952,7 +952,7 @@ bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressio
 		s = CPLGetXMLValue( node, "ClassificationField", nullptr );
 		if (s != "")
 		{
-		    const int fieldIndex = atoi(s);
+			const int fieldIndex = atoi(s);
 
 			CComPtr<ITable> table = nullptr;
 			_shapefile->get_Table(&table);
@@ -1015,7 +1015,7 @@ bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressio
 				cat->Release();
 			}
 			node = node->psNext;
-		} 
+		}
 
 		if (applyExpressions)
 			this->ApplyExpressions();
@@ -1059,7 +1059,7 @@ STDMETHODIMP CShapefileCategories::get_CategoryIndexByName(BSTR categoryName, in
 		
 		if (lstrcmpW(bstr, categoryName) == 0)
 		{
-			*categoryIndex = i;
+			*categoryIndex = static_cast<int>(i);
 			break;
 		}
 	}
@@ -1077,7 +1077,7 @@ STDMETHODIMP CShapefileCategories::get_CategoryIndex(IShapefileCategory* categor
 	{
 		if (_categories[i] == category)
 		{
-			*categoryIndex = i;
+			*categoryIndex = static_cast<int>(i);
 			break;
 		}
 	}
@@ -1091,7 +1091,7 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
-	
+
 	// -------------------------------------------------
 	// parameter validation
 	// -------------------------------------------------
@@ -1125,19 +1125,19 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 		//scheme->SetColors4(PredefinedColorScheme::SummerMountains);
 		tempScheme= true;
 	}
-	
+
 	// -------------------------------------------------
 	//  do the processing
 	// -------------------------------------------------
 	Coloring::ColorGraph* graph = ((CShapefile*)_shapefile)->GeneratePolygonColors();
 	if (graph)
 	{
-	    const int colorCount = graph->GetColorCount();
+		const int colorCount = graph->GetColorCount();
 
 		// -------------------------------------------------
 		// create categories
 		// -------------------------------------------------
-	    const int firstCategory = _categories.size();
+	    const int firstCategory = static_cast<int>(_categories.size());
 		long numBreaks;
 		scheme->get_NumBreaks(&numBreaks);
 		for(int i = 0; i < colorCount; i++)
@@ -1228,33 +1228,33 @@ STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending,
 		// string and boolean can be treated as string
 		valDefault = "";
 	}
-		
+
 	multimap <CComVariant, IShapefileCategory*> map;
 
 	for (auto& _categorie : _categories)
 	{
-	    const VARIANT_BOOL vbretval = VARIANT_FALSE;
+		const VARIANT_BOOL vbretval = VARIANT_FALSE;
 		CComVariant var = NULL;
 		BSTR expr;
-	    _categorie->get_Expression(&expr);
+		_categorie->get_Expression(&expr);
 
 		// TODO: implement
 		//table->CalculateStat(FieldIndex, Operation, expr, &var, &vbretval);
 
 		if (vbretval)
 		{
-			pair<CComVariant, IShapefileCategory*> myPair(var, _categorie);	
+			pair<CComVariant, IShapefileCategory*> myPair(var, _categorie);
 			map.insert(myPair);	
 		}
 		else
 		{
-			pair<CComVariant, IShapefileCategory*> myPair(valDefault, _categorie);	
+			pair<CComVariant, IShapefileCategory*> myPair(valDefault, _categorie);
 			map.insert(myPair);	
 		}
 	}
 
-    multimap<CComVariant, IShapefileCategory*>::iterator p = map.begin();
-		
+	multimap<CComVariant, IShapefileCategory*>::iterator p = map.begin();
+
 	int i = 0;
 	ASSERT(map.size() == _categories.size());
 	
@@ -1262,8 +1262,8 @@ STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending,
 	{
 		// IShapefileCategory* cat = p->second;
 		_categories[i] = p->second;
-		i++; 
-	    ++p;
+		i++;
+		++p;
 	}
 
 	*retVal = VARIANT_TRUE;
@@ -1275,13 +1275,13 @@ STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending,
 // ********************************************************
 STDMETHODIMP CShapefileCategories::get_ClassificationField(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _classificationField;
 	return S_OK;
 }
 STDMETHODIMP CShapefileCategories::put_ClassificationField(LONG newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_classificationField = newVal;
 	return S_OK;
 }
@@ -1295,12 +1295,12 @@ void CShapefileCategories::GetCategoryData(vector<CategoriesData*>& data)
 	data.clear();
 	for (auto& _categorie : _categories)
 	{
-	    auto* ct = new CategoriesData();
-	    _categorie->get_MinValue(&ct->minValue);
-	    _categorie->get_MaxValue(&ct->maxValue);
-	    _categorie->get_ValueType(&ct->valueType);
+		auto* ct = new CategoriesData();
+		_categorie->get_MinValue(&ct->minValue);
+		_categorie->get_MaxValue(&ct->maxValue);
+		_categorie->get_ValueType(&ct->valueType);
 		CComBSTR expr;
-	    _categorie->get_Expression(&expr);
+		_categorie->get_Expression(&expr);
 		ct->expression = OLE2A(expr);
 		ct->classificationField = _classificationField;
 		data.push_back(ct);
@@ -1312,7 +1312,7 @@ void CShapefileCategories::GetCategoryData(vector<CategoriesData*>& data)
 // ********************************************************
 STDMETHODIMP CShapefileCategories::Add2(IShapefileCategory* category)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (!category)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -1328,14 +1328,14 @@ STDMETHODIMP CShapefileCategories::Add2(IShapefileCategory* category)
 // ********************************************************
 STDMETHODIMP CShapefileCategories::Insert2(LONG index, IShapefileCategory* category, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 	if (!category)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
-	if (index < 0 || index >= (long)_categories.size())
+	if (index < 0 || index >= static_cast<long>(_categories.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;

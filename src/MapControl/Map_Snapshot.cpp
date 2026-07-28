@@ -34,25 +34,25 @@
 // *********************************************************
 LPDISPATCH CMapView::SnapShot(IExtents* BoundBox)
 {
-	if( BoundBox == NULL )
-	{	
+	if( BoundBox == nullptr)
+	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return NULL;
+		return nullptr;
 	}
 
-	IExtents * box = NULL;
+	IExtents * box = nullptr;
 	BoundBox->QueryInterface(IID_IExtents, (void**)&box);
 
-	if( box == NULL )
+	if( box == nullptr)
 	{	
 		ErrorMessage(tkINTERFACE_NOT_SUPPORTED);
-		return NULL;
+		return nullptr;
 	}
 
 	double left, right, bottom, top, nv;
 	box->GetBounds(&left,&bottom,&nv,&right,&top,&nv);
 	box->Release();
-	
+
 	return SnapShotCore(left, right, bottom, top, _viewWidth, _viewHeight);
 }
 
@@ -61,8 +61,8 @@ LPDISPATCH CMapView::SnapShot(IExtents* BoundBox)
 // *********************************************************
 // use the indicated layer and zoom/width to determine the output size and clipping
 IDispatch* CMapView::SnapShot2(LONG clippingLayerNbr, DOUBLE zoom, long pWidth)
-{   
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	long Width, Height;
 	double left, right, bottom, top;
@@ -71,10 +71,10 @@ IDispatch* CMapView::SnapShot2(LONG clippingLayerNbr, DOUBLE zoom, long pWidth)
 	if( !IS_VALID_PTR(l) )
 	{
 		ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return NULL;
+		return nullptr;
 	}
 	else
-	{	
+	{
 		this->AdjustLayerExtents(clippingLayerNbr);
 		left = l->extents.left;
 		right = l->extents.right;
@@ -84,30 +84,30 @@ IDispatch* CMapView::SnapShot2(LONG clippingLayerNbr, DOUBLE zoom, long pWidth)
 		if( l->IsShapefile() )
 		{
 			double ar = (right-left)/(top-bottom);
-			Width = (long) (pWidth == 0 ? ((right - left) * zoom) : pWidth);
-			Height = (long)((double)pWidth / ar);
+			Width = static_cast<long>(pWidth == 0 ? ((right - left) * zoom) : pWidth);
+			Height = static_cast<long>(static_cast<double>(pWidth) / ar);
 		}
 		else if(l->IsImage())
 		{
-			Width = (long)(right - left);
-			Height = (long)(top - bottom);
+			Width = static_cast<long>(right - left);
+			Height = static_cast<long>(top - bottom);
 			if (zoom > 0)
 			{
-				Width *= (long)zoom;
-				Height *= (long)zoom;
+				Width *= static_cast<long>(zoom);
+				Height *= static_cast<long>(zoom);
 			}
 		}
 		else
 		{
 			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
-			return NULL;
+			return nullptr;
 		}
 	}
 
 	if (Width <= 0 || Height <= 0)
 	{
 		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
-		return NULL;
+		return nullptr;
 	}
 
 	return this->SnapShotCore(left, right, top, bottom, Width, Height);
@@ -119,14 +119,14 @@ IDispatch* CMapView::SnapShot2(LONG clippingLayerNbr, DOUBLE zoom, long pWidth)
 //A new snapshot method which works a bit better specifically for the printing engine
 //1. Draw to a back buffer, 2. Populate an Image object
 LPDISPATCH CMapView::SnapShot3(double left, double right, double top, double bottom, long width)
-{   
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	long Height = (long)((double)width / ((right-left)/(top-bottom)));
+	long Height = static_cast<long>(static_cast<double>(width) / ((right - left) / (top - bottom)));
 	if (width <= 0 || Height <= 0)
 	{
 		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
-		return NULL;
+		return nullptr;
 	}
 
 	return this->SnapShotCore(left, right, top, bottom, width, Height);
@@ -138,33 +138,32 @@ LPDISPATCH CMapView::SnapShot3(double left, double right, double top, double bot
 // Loads tiles for specified extents
 BOOL CMapView::LoadTilesForSnapshot(IExtents* extents, LONG widthPixels, LPCTSTR key)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (!extents) 
+	if (!extents)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return FALSE;
 	}
-	
+
 	// Get the image height based on the box aspect ratio
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	extents->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 		
 	// Make sure that the width and height are valid
-	long Height = static_cast<long>((double)widthPixels *(yMax - yMin) / (xMax - xMin));
+	long Height = static_cast<long>(static_cast<double>(widthPixels) *(yMax - yMin) / (xMax - xMin));
 	if (widthPixels <= 0 || Height <= 0)
 	{
 		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
 		return FALSE;
 	}
-		
+
 	//CString key = (char*)key;
 	SetTempExtents(xMin, xMax, yMin, yMax, widthPixels, Height);
 
 	bool tilesInCache = TilesAreInCache();
 	if (!tilesInCache) {
 		ReloadTiles(true, true, key);
-		
 	}
 
 	RestoreExtents();
@@ -178,27 +177,27 @@ BOOL CMapView::LoadTilesForSnapshot(IExtents* extents, LONG widthPixels, LPCTSTR
 BOOL CMapView::SnapShotToDC2(PVOID hdc, IExtents* extents, LONG width, float offsetX, float offsetY,
 							 float clipX, float clipY, float clipWidth, float clipHeight)
 {
-	if(!extents || !hdc) 
+	if(!extents || !hdc)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return FALSE;
 	}
 	// getting DC to draw
-	HDC dc = reinterpret_cast<HDC>(hdc);
+	HDC dc = static_cast<HDC>(hdc);
 	CDC * tempDC = CDC::FromHandle(dc);
 
 	// Get the image height based on the box aspect ration
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	extents->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-	
+
 	// Make sure that the width and height are valid
-	long Height = static_cast<long>((double)width *(yMax - yMin) / (xMax - xMin));
+	long Height = static_cast<long>(static_cast<double>(width) *(yMax - yMin) / (xMax - xMin));
 	if (width <= 0 || Height <= 0)
 	{
 		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
 		return FALSE;
 	}
-	
+
 	SnapShotCore(xMin, xMax, yMin, yMax, width, Height, tempDC, offsetX, offsetY, clipX, clipY, clipWidth, clipHeight);
 	return TRUE;
 }
@@ -238,7 +237,7 @@ void CMapView::SetTempExtents(double left, double right, double top, double bott
 		_viewWidth=Width;
 		_viewHeight=Height;
 		//ResizeBuffers(m_viewWidth, m_viewHeight);
-		_aspectRatio = (double)Width / (double)Height; 
+		_aspectRatio = static_cast<double>(Width) / static_cast<double>(Height); 
 
 		double xrange = right - left;
 		double yrange = top - bottom;
@@ -287,15 +286,15 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 {
 	if (left == right || top == bottom)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	// PM dec 2017
 	if (Width == 0) Width = 100;
 	if (Height == 0) Height = 100;
 
-	bool createDC = (snapDC == NULL);
-	CBitmap * bmp = NULL;
+	bool createDC = (snapDC == nullptr);
+	CBitmap * bmp = nullptr;
 	
 	if (createDC)
 	{
@@ -304,7 +303,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 		{
 			delete bmp;
 			ErrorMessage(tkFAILED_TO_ALLOCATE_MEMORY);
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -313,7 +312,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	SetTempExtents(left, right, top, bottom, Width, Height);
 
 	// create canvas
-	CBitmap * oldBMP = NULL;
+	CBitmap * oldBMP = nullptr;
 	if (createDC)
 	{
 		snapDC = new CDC();
@@ -332,7 +331,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	ReloadTiles(true,true);		// simply move them to the screen buffer (is performed synchronously)
 
 	CRect rcBounds(0,0,_viewWidth,_viewHeight);
-	CRect rcClip((int)clipX, (int)clipY, (int)clipWidth, (int)clipHeight);
+	CRect rcClip(static_cast<int>(clipX), static_cast<int>(clipY), static_cast<int>(clipWidth), static_cast<int>(clipHeight));
 	CRect* r = clipWidth != 0.0 && clipHeight != 0.0 ? &rcClip : &rcBounds;
 	
 	// draws to output canvas directly because of m_isSnapshot parameter
@@ -344,28 +343,27 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	ScheduleLayerRedraw();
 
 	_isSnapshot = false;
-	IImage * iimg = NULL;
+	IImage * iImg = nullptr;
 
 	if (createDC)
 	{
 		// create output
 		VARIANT_BOOL retval;
-		ComHelper::CreateInstance(idImage, (IDispatch**)&iimg);
-		iimg->SetImageBitsDC((long)snapDC->m_hDC,&retval);
+		ComHelper::CreateInstance(idImage, reinterpret_cast<IDispatch**>(&iImg));
+		iImg->SetImageBitsDC(static_cast<long>(reinterpret_cast<LONG_PTR>(snapDC->m_hDC)), &retval);
 
-		double dx = (right-left)/(double)(_viewWidth);
-		double dy = (top-bottom)/(double)(_viewHeight);
-		iimg->put_dX(dx);
-		iimg->put_dY(dy);
-		iimg->put_XllCenter(left + dx*.5);
-		iimg->put_YllCenter(bottom + dy*.5);
+		double dx = (right-left)/static_cast<double>(_viewWidth);
+		double dy = (top-bottom)/static_cast<double>(_viewHeight);
+		iImg->put_dX(dx);
+		iImg->put_dY(dy);
+		iImg->put_XllCenter(left + dx*.5);
+		iImg->put_YllCenter(bottom + dy*.5);
 	
 		// dispose the canvas
 		snapDC->SelectObject(oldBMP);
 		bmp->DeleteObject();
 		snapDC->DeleteDC();
 		delete bmp;
-		delete snapDC;
 	}
 
 	RestoreExtents();
@@ -380,7 +378,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	ReloadTiles(true,true);
 
 	LockWindow( lmUnlock );
-	return iimg;
+	return iImg;
 }
 
 // ********************************************************************
@@ -396,7 +394,7 @@ void CMapView::DrawBackBuffer(int hdc, int imageWidth, int imageHeight)
 		return;
 	}
 	
-	CDC* dc = CDC::FromHandle((HDC)hdc);
+	CDC* dc = CDC::FromHandle(reinterpret_cast<HDC>(static_cast<INT_PTR>(hdc)));
 	CRect rect(0,0, imageWidth, imageHeight);
 	OnDraw(dc, rect, rect);
 }

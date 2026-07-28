@@ -321,7 +321,7 @@ int chk123sfld(FILE *fp,char *tag,char *descr,char *frmt)
    else if (cur_fm->sf_state_dr == 3) {
 
       /* IF CUR_DR DIMENSION LENGTH POINTER NULL */
-      if (cur_fm->cur_dr->dim_lptr == NULL) {
+      if (cur_fm->cur_dr->dim_lptr == nullptr) {
       
          /* SET PREVIOUS STATE TO STATE */
          p_state = cur_fm->sf_state_dr;
@@ -329,7 +329,7 @@ int chk123sfld(FILE *fp,char *tag,char *descr,char *frmt)
       else {
       
          /* IF CUR_DV IS CUR_DR VALUES OR CUR_DV IS NULL */
-         if (cur_fm->cur_dv == cur_fm->cur_dr->values || cur_fm->cur_dv == NULL) {
+         if (cur_fm->cur_dv == cur_fm->cur_dr->values || cur_fm->cur_dv == nullptr) {
 
             /* SET PREVIOUS STATE TO DIMENSION LENGTH POINTER SUBFIELD */
             p_state = 2;
@@ -378,7 +378,7 @@ int chk123sfld(FILE *fp,char *tag,char *descr,char *frmt)
       index = 0;   
 
       /* IF ROOT POINTER TO FORMAT CONTROL IS NOT NULL */ 
-      if (cur_fm->cur_dd->fmt_rt != NULL) {
+      if (cur_fm->cur_dd->fmt_rt != nullptr) {
 
          /* SET FORMAT STRING TO DATA TYPE AND INCREMENT INDEX */ 
          frmt[index++] = cur_fm->cur_fc->d_type;
@@ -409,7 +409,7 @@ int chk123sfld(FILE *fp,char *tag,char *descr,char *frmt)
                strcat(frmt,w_str);
             
                /* SET INDEX TO LENGTH OF FORMAT STRING */
-               index = _tcslen(frmt);
+               index = static_cast<long>(_tcslen(frmt));
             }
 
             /* APPEND RIGHT PARENTHESIS TO FORMAT STRING AND INCREMENT INDEX */
@@ -424,13 +424,13 @@ int chk123sfld(FILE *fp,char *tag,char *descr,char *frmt)
       *descr = NC;
 
       /* IF LABELS NOT NULL */
-      if (cur_fm->cur_dd->labels != NULL) {
+      if (cur_fm->cur_dd->labels != nullptr) {
 
          /* SET CUR_LP TO LP_HD */
          cur_fm->cur_lp = cur_fm->lp_hd;
 
          /* WHILE CUR_LP NEXT IS NOT NULL DO */
-         while (cur_fm->cur_lp->next != NULL) {
+         while (cur_fm->cur_lp->next != nullptr) {
 
             /* SET CUR_LP TO CUR_LP NEXT */
             cur_fm->cur_lp = cur_fm->cur_lp->next;
@@ -448,7 +448,7 @@ int chk123sfld(FILE *fp,char *tag,char *descr,char *frmt)
             }
             
             /* IF CURRENT LABEL NOT NULL */
-            if (cur_fm->cur_lp->cur->label != NULL) {
+            if (cur_fm->cur_lp->cur->label != nullptr) {
             
                /* CONCATENATE CURRENT LABEL TO DESCRIPTION */
                strcat(descr,cur_fm->cur_lp->cur->label);

@@ -40,19 +40,19 @@ class ATL_NO_VTABLE CLabels :
 public:
 	CLabels()
 	{
-		_pUnkMarshaler = NULL;
+		_pUnkMarshaler = nullptr;
 		
 		_useVariableSize = VARIANT_TRUE;
 		_logScaleForSize = VARIANT_FALSE;
 		_fontSizeChanged = true;
 		_floatNumberFormat = m_globalSettings.floatNumberFormat;
-		_shapefile = NULL;
+		_shapefile = nullptr;
 		_synchronized = VARIANT_FALSE;
 		USES_CONVERSION;
 		_key = SysAllocString(L"");
 		_expression = SysAllocString(L"");
 		
-		_globalCallback = NULL;
+		_globalCallback = nullptr;
 		_lastErrorCode = tkNO_ERROR;
 		_scale = false;
 		_verticalPosition = vpAboveAllLayers;
@@ -97,7 +97,7 @@ public:
 			_category->Release();
 		}
 
-		_shapefile = NULL;
+		_shapefile = nullptr;
 
 		gReferenceCounter.Release(tkInterface::idLabels);
 	}
@@ -151,7 +151,7 @@ public:
 	STDMETHOD(ClearCategories)();
 
 	// managing labels
-	STDMETHOD(get_Count)(/*[out, retval]*/long* pVal)				{*pVal = _labels.size();	return S_OK;};
+	STDMETHOD(get_Count)(/*[out, retval]*/long* pVal)				{*pVal = static_cast<long>(_labels.size());	return S_OK;};
 	STDMETHOD(get_NumParts)(/*[in]*/long index, /*[out, retval]*/long* pVal);
 	STDMETHOD(get_NumCategories)(/*[out, retval]*/long* pVal);
 	

@@ -33,7 +33,7 @@
 CJenksBreaks::CJenksBreaks(std::vector<double>* values, int numClasses)
 {
 	_init = false;
-	if ((int)values->size() < numClasses)
+	if (static_cast<int>(values->size()) < numClasses)
 	{
 		// it doesn't make any sense to create Jenks breaks
 		// more simple classification shall be used
@@ -43,10 +43,10 @@ CJenksBreaks::CJenksBreaks(std::vector<double>* values, int numClasses)
 	if (numClasses > 0)
 	{
 		_numClasses = numClasses;
-		_numValues = values->size();
-		
-		double classCount = (double)_numValues/(double)numClasses;
-		sort(values->begin(), values->end());		//values sould be sorted
+		_numValues = static_cast<int>(values->size());
+
+		double classCount = static_cast<double>(_numValues)/static_cast<double>(numClasses);
+		sort(values->begin(), values->end());		//values should be sorted
 		
 		// fill values
 		for (int i = 0; i < _numValues; i++)
@@ -54,7 +54,7 @@ CJenksBreaks::CJenksBreaks(std::vector<double>* values, int numClasses)
 			JenksData data;
 			data.value = (*values)[i];
 			data.square = pow((*values)[i], 2.0);
-			data.classId = int(floor(i/classCount));
+			data.classId = static_cast<int>(floor(i / classCount));
 			_values.push_back(data);
 		}
 		
@@ -118,7 +118,7 @@ std::vector<long>* CJenksBreaks::get_Results()
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -133,7 +133,7 @@ void CJenksBreaks::Optimize()
 	// initialization
 	double minValue = get_SumStandardDeviations();	// current best minimum
 	_leftBound = 0;							// we'll consider all classes in the beginning
-	_rightBound = _classes.size() - 1;
+	_rightBound = static_cast<int>(_classes.size() - 1);
 	_previousMaxId = -1;
 	_previousTargetId = - 1;
 	int numAttemmpts = 0;
@@ -379,7 +379,7 @@ std::vector<int>* CJenksBreaks::SolveAsDP(std::vector<double>& data, int numClas
 		
 	    for(size_t m = 1; m <= l; m++)
 	    {
-			int i = l - m;
+			int i = static_cast<int>(l - m);
 			double val = data[i];
 			s2 += val * val;
 			s1 += val;
@@ -391,7 +391,7 @@ std::vector<int>* CJenksBreaks::SolveAsDP(std::vector<double>& data, int numClas
 				double newVal = values[i][j - 1] + SSD;
  				if(newVal <= values[l][j])		// if new class is better than previous than let's write it
 				{
-					values[l][j] = (float)newVal;
+					values[l][j] = static_cast<float>(newVal);
 					chosen[l][j] = i;
 				}
 			}
@@ -399,10 +399,10 @@ std::vector<int>* CJenksBreaks::SolveAsDP(std::vector<double>& data, int numClas
 	}
 	
 	// building result
-	int k = numValues;
+	auto k = numValues;
     std::vector<int>* result = new std::vector<int>();
 	result->resize(numClasses);
-	for(int j = result->size() - 1; j >= 1; j--)
+	for(size_t j = result->size() - 1; j >= 1; j--)
     {
         int id = chosen[k][j] - 1;
         (*result)[j - 1] = id;
@@ -419,7 +419,7 @@ std::vector<int>* CJenksBreaks::SolveAsDP(std::vector<double>& data, int numClas
 // For testing only
 std::vector<int>* CJenksBreaks::BuildEqualBreaks(std::vector<double>& data, int numClasses)
 {
-	int numValues = data.size();
+	int numValues = static_cast<int>(data.size());
 
 	std::vector<int>* result = new std::vector<int>;
 	result->resize(numClasses + 1);

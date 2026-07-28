@@ -236,7 +236,7 @@ int cmp123drlead()
    cur_fm->cur_dr = cur_fm->dr_hd;
 
    /* WHILE CUR_DR NEXT NOT NULL DO */
-   while (cur_fm->cur_dr->next != NULL) {
+   while (cur_fm->cur_dr->next != nullptr) {
 
       /* SET CUR_DR TO CUR_DR NEXT */ 
       cur_fm->cur_dr = cur_fm->cur_dr->next;
@@ -245,32 +245,32 @@ int cmp123drlead()
       i123toa(cur_fm->cur_dr->fd_len,anum);
       
       /* SET LEN TO NUMBER OF CHARACTERS IN ANUM */
-      len = _tcslen(anum);
+      len = static_cast<long>(_tcslen(anum));
 
       /* IF NUMBER OF CHARACTERS IN FD_LEN EXCEEDS S_FDLEN */
       if (len > cur_fm->rl_hd->s_fdlen) {
   
          /* SET S_FDLEN TO NUMBER OF CHARACTERS IN FD_LEN */
          cur_fm->rl_hd->s_fdlen = len;
-      } 
-   
+      }
+
       /* IF NUMBER OF CHARACTERS IN TAG EXCEED S_TAG */
-      len = _tcslen (cur_fm->cur_dr->tag);
+      len = static_cast<long>(_tcslen (cur_fm->cur_dr->tag));
       if (len > cur_fm->rl_hd->s_tag) {
 
          /* SET S_TAG TO NUMBER OF CHARACTERS IN TAG */
          cur_fm->rl_hd->s_tag = len;
-      } 
+      }
 
       /* INCREMENT NUM_ENT */
       num_ent++;
-   } 
+   }
 
    /* SET S_FDPOS TO NUMBER OF CHARACTERS IN 
        FD_POS { LAST DR FIELD ENTRY }
    */
    i123toa(cur_fm->cur_dr->fd_pos,anum);
-   len = _tcslen(anum);
+   len = static_cast<long>(_tcslen(anum));
    cur_fm->rl_hd->s_fdpos = len;
 
    /* IF SIZE OF FIELD POSITION IS NOT VALID SIZE, RETURN FAILURE */

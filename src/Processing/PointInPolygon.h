@@ -8,7 +8,7 @@ private:
 	deque<double> _polyY;
 	deque<double> _scanX;		// line data for a single scan (y = const)
 	deque<long> _scanParts;
-public:	
+public:
 	// **************************************************
 	//		setPolygon
 	// **************************************************
@@ -17,14 +17,14 @@ public:
 		if (!poly)
 			return false;
 
-		ShpfileType shptype;
-		poly->get_ShapeType(&shptype);
+		ShpfileType shpType;
+		poly->get_ShapeType(&shpType);
 
-		if(shptype != SHP_POLYGON && shptype != SHP_POLYGONZ && shptype != SHP_POLYGONM )
+		if(shpType != SHP_POLYGON && shpType != SHP_POLYGONZ && shpType != SHP_POLYGONM )
 		{	
 			return false;
 		}
-		
+
 		_polyParts.clear();
 		_polyX.clear();
 		_polyY.clear();
@@ -36,23 +36,23 @@ public:
 		
 		if(numParts == 0)
 		{
-			_polyParts.push_back(0);			
+			_polyParts.push_back(0);
 		}
 		else
 		{
 			long part =0;
 			for( int j = 0; j < numParts; j++ )
-			{	
+			{
 				poly->get_Part(j,&part);
 				_polyParts.push_back(part);
 			}
 		}
-		
+
 		VARIANT_BOOL ret;
 		double x = 0.0;
 		double y = 0.0;
 		for( int i = 0; i < numPoints; i++ )
-		{	
+		{
 			poly->get_XY(i, &x, &y, &ret);
 			_polyX.push_back(x);
 			_polyY.push_back(y);
@@ -69,12 +69,12 @@ public:
 		_scanX.clear();
 		_scanParts.clear();
 
-		long numParts = _polyParts.size();
+		long numParts = static_cast<long>(_polyParts.size());
 
 		for (long j = 0; j < numParts; j++)
 		{
 			long start = _polyParts[j];
-			long end = (j == numParts - 1) ? _polyX.size(): _polyParts[j + 1];
+			long end = (j == numParts - 1) ? static_cast<long>(_polyX.size()): _polyParts[j + 1];
 			
 			bool partEmpty = true;
 
@@ -95,7 +95,7 @@ public:
 					_scanX.push_back(x);
 					if (partEmpty)
 					{
-						_scanParts.push_back(_scanX.size() - 1);	// save the index of the first intersection for a part
+						_scanParts.push_back(static_cast<long>(_scanX.size()) - 1);	// save the index of the first intersection for a part
 						partEmpty = false;
 					}
 				}
@@ -105,7 +105,7 @@ public:
 				sort(_scanX.begin() + _scanParts[_scanParts.size() - 1], _scanX.end());
 			}
 		}
-		
+
 		#ifdef _DEBUG
 			CString temp;
 			CString s;
@@ -142,7 +142,7 @@ public:
 			{
 				int count = 0;
 				long start = _scanParts[j];
-				long end = (j == numParts - 1) ? _scanX.size(): _scanParts[j + 1];
+				long end = (j == numParts - 1) ? static_cast<long>(_scanX.size()): _scanParts[j + 1];
 				for (long i = start; i < end; i++)
 				{
 					if (_scanX[i] < x)

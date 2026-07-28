@@ -20,7 +20,8 @@ extern ESRI_GRIDDELETE_PROC griddelete;
 extern ESRI_CELLLAYERCREATE_PROC celllayercreate;
 
 dGrid::dGrid()
-{	data = NULL;
+{
+	data = nullptr;
 	isInRam = true;
 	findNewMax = false;
 	findNewMin = false;
@@ -33,16 +34,16 @@ dGrid::dGrid()
 	current_row = -1;
 
 	//BINARY
-	row_one = NULL;
-	row_two = NULL;
-	row_three = NULL;
-	file_in_out = NULL;
+	row_one = nullptr;
+	row_two = nullptr;
+	row_three = nullptr;
+	file_in_out = nullptr;
 
 	//ESRI
-	grid_layer = -1;	
-	row_buf1 = NULL;	
-	row_buf2 = NULL;
-	row_buf3 = NULL;	
+	grid_layer = -1;
+	row_buf1 = nullptr;
+	row_buf2 = nullptr;
+	row_buf3 = nullptr;
 	
 	leadid = 0;
 	initialize_esri();
@@ -66,13 +67,13 @@ long dGrid::LastErrorCode()
 		
 //OPERATORS
 double dGrid::operator()( int Column, int Row )
-{	
+{
 	if( inGrid( Column, Row ) )
 	{
 		if( isInRam )
-			return data[Row][Column];			
+			return data[Row][Column];
 		else
-			return getValueDisk( Column, Row );			
+			return getValueDisk( Column, Row );
 	}
 	else
 		return gridHeader.getNodataValue();
@@ -83,7 +84,7 @@ bool dGrid::open( const char * cfilename, bool InRam, GRID_TYPE GridType, void (
 {	
 	CString filename = cfilename;
 
-	if( data != NULL || file_in_out != NULL )
+	if( data != nullptr || file_in_out != nullptr)
 		close();
 
 	isInRam = InRam;
@@ -98,9 +99,8 @@ bool dGrid::open( const char * cfilename, bool InRam, GRID_TYPE GridType, void (
 	gridType = GridType;
 	if( gridType == USE_EXTENSION )
 		gridType = getGridType( filename );
-	
 	if( isInRam == true )
-		return readDiskToMemory( callback );				
+		return readDiskToMemory( callback );
 	else
 	{	//1. Read the header information
 		//2. Find the min and max
@@ -110,7 +110,7 @@ bool dGrid::open( const char * cfilename, bool InRam, GRID_TYPE GridType, void (
 }
 
 bool dGrid::readDiskToMemory( void (*callback)(int number, const char * message ) )
-{	
+{
 	if( gridType == ASCII_GRID )
 		return asciiReadDiskToMemory( callback );
 	else if( gridType == BINARY_GRID )
@@ -137,14 +137,14 @@ bool dGrid::readDiskToDisk( void (*callback)(int number, const char * message ) 
 	*/
 	lastErrorCode = tkINVALID_GRID_FILE_TYPE;
 	return false;
-}	
+}
 
 bool dGrid::writeMemoryToDisk( void(*callback)(int number, const char * message ) )
 {
 	if( gridType == ASCII_GRID )
 		return asciiWriteMemoryToDisk( callback );
 	else if( gridType == BINARY_GRID )
-		return binaryWriteMemoryToDisk( callback );	
+		return binaryWriteMemoryToDisk( callback );
 	else if( gridType == ESRI_GRID )
 		return esriWriteMemoryToDisk( callback );
 	/*
@@ -152,15 +152,15 @@ bool dGrid::writeMemoryToDisk( void(*callback)(int number, const char * message 
 		return sdtsWriteMemoryToDisk( callback );
 	*/
 	lastErrorCode = tkINVALID_GRID_FILE_TYPE;
-	return false;	
+	return false;
 }
 
 bool dGrid::writeDiskToDisk()
-{	
+{
 	if( gridType == ASCII_GRID )
 		return asciiWriteDiskToDisk();
 	else if( gridType == BINARY_GRID )
-		return binaryWriteDiskToDisk();	
+		return binaryWriteDiskToDisk();
 	else if( gridType == ESRI_GRID )
 		return esriWriteDiskToDisk();
 	/*
@@ -176,7 +176,7 @@ bool dGrid::initialize( const char * cfilename, dHeader header, double initialVa
 	CString filename = cfilename;
 	close();
 
-	isInRam = InRam;	
+	isInRam = InRam;
 	gridFilename = filename;
 	gridHeader = header;
 	
@@ -193,11 +193,11 @@ bool dGrid::initialize( const char * cfilename, dHeader header, double initialVa
 		isInRam = true; // Force inram true for ascii grids; no support for disk-based ascii grids.
 
 	if( isInRam == true )
-	{	
-		if (data != NULL)
+	{
+		if (data != nullptr)
 		{
 			delete [] data;
-			data = NULL;
+			data = nullptr;
 		}
 		data = new double*[ gridHeader.getNumberRows() ];
 		for( int y = 0; y < gridHeader.getNumberRows(); y++ )
@@ -213,7 +213,7 @@ bool dGrid::initialize( const char * cfilename, dHeader header, double initialVa
 		return true;
 	}
 	else
-	{	
+	{
 		if( gridType == BINARY_GRID )
 			return binaryInitializeDisk( initialValue );
 		else if( gridType == ESRI_GRID )
@@ -234,13 +234,13 @@ bool dGrid::initialize( const char * cfilename, dHeader header, double initialVa
 
 #pragma optimize("", off)
 bool dGrid::close()
-{	
+{
 	if( isInRam == true )
 	{	dealloc();
 		return true;
 	}
 	else
-	{	
+	{
 		// bool result = writeDiskToDisk();
 
 		// Chris Michaelis July 02 2003 - every time this is called,
@@ -253,37 +253,37 @@ bool dGrid::close()
 		// This change is made in sGrid, dGrid, fGrid, and lGrid.
 		bool result = true;
 
-		if( file_in_out != NULL )
+		if( file_in_out != nullptr)
 		{	fclose( file_in_out );
-			file_in_out = NULL;
+			file_in_out = nullptr;
 		}
-		if( row_one != NULL )
+		if( row_one != nullptr)
 		{	delete [] row_one;
-			row_one = NULL;
+			row_one = nullptr;
 		}
-		if( row_two != NULL )
+		if( row_two != nullptr)
 		{	delete [] row_two;
-			row_two = NULL;
+			row_two = nullptr;
 		}
-		if( row_three != NULL )
+		if( row_three != nullptr)
 		{	delete [] row_three;
-			row_three = NULL;
+			row_three = nullptr;
 		}
-		if( row_buf1 != NULL )
-		{	CFree1((char *)row_buf1);
-			row_buf1 = NULL;
+		if( row_buf1 != nullptr)
+		{	CFree1(static_cast<char*>(row_buf1));
+			row_buf1 = nullptr;
 		}
-		if( row_buf2 != NULL )
-		{	CFree1((char *)row_buf2);
-			row_buf2 = NULL;
+		if( row_buf2 != nullptr)
+		{	CFree1(static_cast<char*>(row_buf2));
+			row_buf2 = nullptr;
 		}
-		if( row_buf3 != NULL )
-		{	CFree1((char *)row_buf3);
-			row_buf3 = NULL;
+		if( row_buf3 != nullptr)
+		{	CFree1(static_cast<char*>(row_buf3));
+			row_buf3 = nullptr;
 		}
 		if( grid_layer >= 0 )
 		{	
-			if( celllyrclose != NULL )
+			if( celllyrclose != nullptr)
 				celllyrclose(grid_layer);
 			grid_layer = -1;
 		}
@@ -293,7 +293,7 @@ bool dGrid::close()
 #pragma optimize("", on)
 
 bool dGrid::save( const char * cfilename, GRID_TYPE GridType, void (*callback)(int number, const char * message ) )
-{	
+{
 	CString filename = cfilename;
 
 	if( isInRam == true )
@@ -303,7 +303,7 @@ bool dGrid::save( const char * cfilename, GRID_TYPE GridType, void (*callback)(i
 
 		if( GridType == USE_EXTENSION )
 			GridType = getGridType( gridFilename );
-			
+
 		// Save was successful.  Update my grid type to be the new grid type.
 		gridType = GridType;
 
@@ -321,9 +321,9 @@ bool dGrid::save( const char * cfilename, GRID_TYPE GridType, void (*callback)(i
 		}
 	}
 	else
-	{	
+	{
 		if( filename.GetLength() <= 0 )
-			return writeDiskToDisk();		
+			return writeDiskToDisk();
 		//Convert the Grid
 		else
 		{	if( GridType == USE_EXTENSION )
@@ -336,11 +336,11 @@ bool dGrid::save( const char * cfilename, GRID_TYPE GridType, void (*callback)(i
 					
 					gridFilename += "\\";
 			}
-		
+
 			if( GridType == ASCII_GRID )
 			{
 				if ( asciiSaveAs( filename, callback ) )
-				{	
+				{
 					// Save was successful.  Update my grid type to be the new grid type.
 					gridType = GridType;
 					return true;
@@ -349,7 +349,7 @@ bool dGrid::save( const char * cfilename, GRID_TYPE GridType, void (*callback)(i
 			else if( GridType == BINARY_GRID )
 			{
 				if ( binarySaveAs( filename, callback ) )
-				{	
+				{
 					// Save was successful.  Update my grid type to be the new grid type.
 					gridType = GridType;	
 					return true;
@@ -358,7 +358,7 @@ bool dGrid::save( const char * cfilename, GRID_TYPE GridType, void (*callback)(i
 			else if( GridType == ESRI_GRID )
 			{
 				if ( esriSaveAs( filename, callback ) )
-				{	
+				{
 					// Save was successful.  Update my grid type to be the new grid type.
 					gridType = GridType;
 					return true;
@@ -375,9 +375,9 @@ inline double dGrid::getValue( int Column, int Row )
 	if( inGrid( Column ,Row ) )
 	{
 		if( isInRam )
-			return data[Row][Column];			
+			return data[Row][Column];
 		else
-			return getValueDisk( Column, Row );			
+			return getValueDisk( Column, Row );
 	}
 	else
 	{	lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
@@ -399,7 +399,7 @@ inline double dGrid::getValueDisk( int Column, int Row )
 }
 
 void dGrid::setValue( int Column, int Row, double Value )
-{		
+{
 	if( inGrid( Column, Row ) )
 	{	
 		if( max == gridHeader.getNodataValue() )
@@ -419,7 +419,7 @@ void dGrid::setValue( int Column, int Row, double Value )
 		if( isInRam )
 			data[Row][Column] = Value;
 		else
-			setValueDisk( Column, Row, Value );		
+			setValueDisk( Column, Row, Value );
 	}
 	else
 		lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
@@ -433,15 +433,16 @@ inline void dGrid::setValueDisk( int Column, int Row, double Value )
 	else if( gridType == ESRI_GRID )
 		esriSetValueDisk( Column, Row, Value );
 	else if( gridType == SDTS_GRID )
-		return;	
+		return;
 }
 
 void dGrid::dealloc()
-{	if( isInRam && data != NULL )
+{
+	if( isInRam && data != nullptr)
 	{	for( int y = 0; y < gridHeader.getNumberRows(); y++ )
-			delete [] data[y];		
-		delete [] data;				
-		data = NULL;
+			delete [] data[y];
+		delete [] data;
+		data = nullptr;
 	}
 	gridHeader.setNumberRows( 0 );
 	gridHeader.setNumberCols( 0 );
@@ -450,29 +451,31 @@ void dGrid::dealloc()
 }
 
 void dGrid::alloc()
-{	if( isInRam )
+{
+	if( isInRam )
 	{
 		if( gridHeader.getNumberCols() > 0 && gridHeader.getNumberRows() > 0 )
 		{
-			if (data != NULL)
+			if (data != nullptr)
 			{
 				delete [] data;
-				data = NULL;
+				data = nullptr;
 			}
 			data = new double *[gridHeader.getNumberRows()];
 			for( int y = 0; y < gridHeader.getNumberRows(); y++ )
-				data[y] = new double[gridHeader.getNumberCols()];		
-		}		
+				data[y] = new double[gridHeader.getNumberCols()];
+		}
 	}
 }
 
 //DATA MEMBER ACCESS
 dHeader dGrid::getHeader()
-{	return gridHeader;
+{
+	return gridHeader;
 }
 
 void dGrid::setHeader( dHeader h )
-{	
+{
 	//Don't allow the Rows and Columns to Change
 	gridHeader.setDx( h.getDx() );
 	gridHeader.setDy( h.getDy() );
@@ -499,9 +502,9 @@ void dGrid::CellToProj( long column, long row, double & x, double & y )
 
 inline int dGrid::round( double d )
 {	if( ceil(d) - d <= .5 )
-		return (int)ceil(d);
+		return static_cast<int>(ceil(d));
 	else
-		return (int)floor(d);
+		return static_cast<int>(floor(d));
 }
 
 void dGrid::clear(double clearValue)
@@ -512,16 +515,18 @@ void dGrid::clear(double clearValue)
 		int nrows= gridHeader.getNumberRows();
 		for( int j = 0; j < nrows; j++ )
 		{	for( int i = 0; i < ncols; i++ )
-				data[j][i] = clearValue;					
+				data[j][i] = clearValue;
 		}
 	}
 	else
-	{	clearDisk(clearValue);
+	{
+		clearDisk(clearValue);
 	}
 }
 
 void dGrid::clearDisk(double clearValue)
-{	if( gridType == ASCII_GRID )
+{
+	if( gridType == ASCII_GRID )
 		return;
 	else if( gridType == BINARY_GRID )
 		binaryClearDisk(clearValue);
@@ -632,11 +637,11 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 {	
 	GRID_TYPE grid_type = INVALID_GRID_TYPE;
 
-	if( filename != NULL && _tcslen( filename ) > 0 )
+	if( filename != nullptr && _tcslen( filename ) > 0 )
 	{	
 		char * clean_filename = new char[_tcslen( filename ) + 1];
 		strcpy( clean_filename, filename );
-		for( int i = _tcslen( clean_filename ) - 1; i >= 0; i-- )
+		for( int i = static_cast<int>(_tcslen( clean_filename )) - 1; i >= 0; i-- )
 		{	if( clean_filename[i] == '\\' || clean_filename[i] == '/' )
 				clean_filename[i] = '\0';
 			else
@@ -667,7 +672,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		cff.Close();
 
 		//File does not exist so parse it out
-		int length = _tcslen(filename );
+		int length = static_cast<int>(_tcslen(filename ));
 		bool foundPeriod = false;
 		for( int e = length-1; e >= 0; e-- )
 		{	if( filename[e] == '\\' || filename[e] == '/' )
@@ -737,16 +742,18 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 ///\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 	bool dGrid::asciiReadDiskToMemory( void (*callback)(int number, const char * message ) )
-	{	
+	{
 		ifstream in(gridFilename);
 
 		if( !in )
-		{	lastErrorCode = tkCANT_OPEN_FILE;
+		{
+			lastErrorCode = tkCANT_OPEN_FILE;
 			return false;
 		}
 		else
-		{	asciiReadHeader( in );
-		
+		{
+			asciiReadHeader( in );
+
 			int percent = 0;
 			long num_read = 0;
 			double total = gridHeader.getNumberRows()*gridHeader.getNumberCols();
@@ -761,21 +768,21 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 					return false;
 				}
 			else
-			{	if( callback != NULL )
+			{	if( callback != nullptr)
 					callback( 0, "Allocating and Initializing Memory" );
 
 				alloc();
 			}
-						
+
 			for( int j = 0; j < gridHeader.getNumberRows(); j++ )
 			{	for( int i = 0; i < gridHeader.getNumberCols(); i++ )
 				{	num_read++;
 					if( !in )
 					{	dealloc();
-						return false;						
+						return false;
 					}
 
-					in>>data[j][i];				
+					in>>data[j][i];
 					if( min == nodata )
 					{	min = data[j][i];
 						max = data[j][i];
@@ -790,24 +797,25 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 						}
 					}
 					
-					if( callback != NULL )
-					{	int newpercent = (int)(((num_read)/total)*100);
+					if( callback != nullptr)
+					{	int newpercent = static_cast<int>(((num_read) / total) * 100);
 						if( newpercent > percent )
 						{	percent = newpercent;
-							callback( percent, "Reading Ascii Grid" );											
+							callback( percent, "Reading Ascii Grid" );
 						}
-					}				
+					}
 				}
 			}
 			asciiReadFooter( in );
 			in.close();
 			return true;
-		}		
+		}
 	}
 
 	bool dGrid::asciiReadDiskToDisk( void(*callback)(int number, const char * message ) )
-	{	isInRam = true;
-		return asciiReadDiskToMemory( callback );		
+	{
+		isInRam = true;
+		return asciiReadDiskToMemory( callback );
 	}
 
 	bool dGrid::asciiWriteMemoryToDisk( void(*callback)(int number, const char * message ) )
@@ -819,7 +827,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			return false;
 		}
 		else
-		{	
+		{
 			asciiWriteHeader(out);
 			double total = gridHeader.getNumberRows()*gridHeader.getNumberCols();
 			int percent = 0;
@@ -828,24 +836,24 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			for( int j = 0; j < gridHeader.getNumberRows(); j++ )
 			{	for( int i = 0; i < gridHeader.getNumberCols(); i++ )
 				{	num_written++;
-					
+
 					out<<data[j][i]<<" ";
-					
-					if( callback != NULL )
+
+					if( callback != nullptr)
 					{
-						int newpercent = (int)((num_written/total)*100);
+						int newpercent = static_cast<int>((num_written / total) * 100);
 						if( newpercent > percent )
 						{	percent = newpercent;
 							callback( percent, "Writing Ascii Grid" );
-						}						
+						}
 					}
 				}
 				out<<endl;
 			}
 			asciiWriteFooter(out);
 			out.close();
-			return true;			
-		}		
+			return true;
+		}
 	}
 
 	bool dGrid::asciiWriteDiskToDisk()
@@ -862,7 +870,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		{	filePosition = in.tellg();
 			in>>header_value;
 		}
-		
+
 		//Read past a header value, so put it back
 		in.seekg( filePosition, ios::beg );
 
@@ -879,18 +887,20 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 	}
 
 	void dGrid::asciiReadFooter( istream & in )
-	{	char * header_value = new char[MAX_STRING_LENGTH];
+	{
+		char * header_value = new char[MAX_STRING_LENGTH];
 		in>>header_value;
 		while( in )
 		{	asciiIsHeaderValue( (TCHAR*)header_value, in );
-			in>>header_value;	
+			in>>header_value;
 		}
 
 		delete [] header_value;
 	}
 
 	void dGrid::asciiWriteHeader( ostream & out )
-	{	out<<"NCOLS "<<gridHeader.getNumberCols()<<endl;
+	{
+		out<<"NCOLS "<<gridHeader.getNumberCols()<<endl;
 		out<<"NROWS "<<gridHeader.getNumberRows()<<endl;
 	
 		out.setf(ios::fixed);
@@ -909,9 +919,10 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 	}
 
 	void dGrid::asciiWriteFooter( ostream & out )
-	{	if( gridHeader.getProjection() != NULL )
+	{
+		if( gridHeader.getProjection() != nullptr)
 			out<<"PROJECTION "<<gridHeader.getProjection()<<endl;
-		if( gridHeader.getNotes() != NULL )
+		if( gridHeader.getNotes() != nullptr)
 			out<<"NOTES "<<gridHeader.getNotes()<<endl;
 	}
 
@@ -1046,16 +1057,16 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			for( int j = 0; j < gridHeader.getNumberRows(); j++ )
 			{	for( int i = 0; i < gridHeader.getNumberCols(); i++ )
 				{	num_written++;
-					
+
 					out<<getValue( i, j )<<" ";
-					
-					if( callback != NULL )
+
+					if( callback != nullptr)
 					{
-						int newpercent = (int)((num_written/total)*100);
+						int newpercent = static_cast<int>((num_written / total) * 100);
 						if( newpercent > percent )
 						{	percent = newpercent;
 							callback( percent, "Writing Ascii Grid" );
-						}						
+						}
 					}
 				}
 				out<<endl;
@@ -1064,9 +1075,9 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			out.close();
 
 			if( isInRam == true )
-				return true;			
+				return true;
 			else
-			{	close();				
+			{	close();
 				return open( filename, true, ASCII_GRID, callback );
 			}
 		}		
@@ -1085,8 +1096,9 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 ///\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 	bool dGrid::binaryReadDiskToMemory( void (*callback)(int number, const char * message ) )
-	{	FILE * in = fopen( gridFilename, "rb" );
-		
+	{
+		FILE * in = fopen( gridFilename, "rb" );
+
 		if( !in )
 		{	lastErrorCode = tkCANT_OPEN_FILE;
 			return false;
@@ -1106,7 +1118,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 					lastErrorCode = tkINCOMPATIBLE_DATA_TYPE;
 					return false;
 				}
-			
+
 			alloc();
 
 			int percent = 0;
@@ -1122,7 +1134,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 					}
 
 					fread( &data[j][i],sizeof(double),1,in );
-								
+
 					if( min == nodata )
 					{	min = data[j][i];
 						max = data[j][i];
@@ -1136,8 +1148,8 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 								max = data[j][i];
 						}
 					}
-					
-					if( callback != NULL )
+
+					if( callback != nullptr)
 					{
 						int newpercent = (int)(((num_read)/total)*100);
 						if( newpercent > percent )
@@ -1145,26 +1157,24 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 							callback( percent, "Reading Binary Grid" );
 						}
 					}
-							
 				}
-			}	
-			
+			}
+
 			fclose(in);
-			return true;			
+			return true;
 		}
-				
 	}
 
 	bool dGrid::binaryReadDiskToDisk()
-	{	
+	{
 		file_in_out = fopen( gridFilename, "r+b" );
-		
+
 		if( !file_in_out )
 		{	lastErrorCode = tkCANT_CREATE_FILE;
 			return false;
 		}
 		else
-		{	
+		{
 			binaryReadHeader(file_in_out);
 			
 			if( gridHeader.getNumberCols() < 0 || gridHeader.getNumberRows() < 0 || 
@@ -1172,7 +1182,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				data_type != DOUBLE_TYPE )
 				{	dealloc();
 					fclose( file_in_out );
-					file_in_out = NULL;
+					file_in_out = nullptr;
 					lastErrorCode = tkINCOMPATIBLE_DATA_TYPE;
 					return false;
 				}
@@ -1199,7 +1209,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			//			lastErrorCode = tkINVALID_FILE;
 			//			return false;
 			//		}
-			//				
+			//	
 
 			//		fread( &value,sizeof(double),1,file_in_out );
 
@@ -1218,34 +1228,34 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			//		}
 			//	}
 			//}
-			
+
 			//Darrel Brown, 10/10/2003
 			//set flags in the grid to make sure the min/max get calculated when asked for
 			// This is done because the above code was commented
 			findNewMax = findNewMin = true;
 
 			if( gridHeader.getNumberCols() > 0 )
-			{	
+			{
 				row_one = new double[gridHeader.getNumberCols()];
 				row_two = new double[gridHeader.getNumberCols()];
 				row_three = new double[gridHeader.getNumberCols()];
-					
-				binaryBufferRows( 1 );				
-			}				
-			return true;		
-		}		
+
+				binaryBufferRows( 1 );
+			}
+			return true;
+		}
 	}
 
 	bool dGrid::binaryWriteMemoryToDisk( void(*callback)(int number, const char * message ) )
-	{	
+	{
 		FILE * out = fopen( gridFilename, "wb" );
-		
+
 		if( !out )
 		{	lastErrorCode = tkCANT_CREATE_FILE;
 			return false;
 		}
 		else
-		{	
+		{
 			binaryWriteHeader(out);
 			double total = gridHeader.getNumberRows() * gridHeader.getNumberCols();
 			int percent = 0;
@@ -1254,22 +1264,22 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			for( int j = 0; j < gridHeader.getNumberRows(); j++ )
 			{	for( int i = 0; i < gridHeader.getNumberCols(); i++ )
 				{	num_written++;
-					
+
 					fwrite( &data[j][i],sizeof(double),1,out);
 
-					if( callback != NULL )
+					if( callback != nullptr)
 					{
-						int newpercent = (int)((num_written/total)*100);
+						int newpercent = static_cast<int>((num_written / total) * 100);
 						if( newpercent > percent )
 						{	percent = newpercent;
 							callback( percent, "Binary Grid Write");
-						}											
+						}
 					}
-				}				
+				}
 			}
 			fclose( out );
-			return true;			
-		}		
+			return true;
+		}
 	}
 
 	bool dGrid::binaryWriteDiskToDisk()
@@ -1280,12 +1290,12 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		{	rewind( file_in_out );
 			binaryWriteHeader(file_in_out);
 			return true;
-		}	
+		}
 	
 	}
 
 	bool dGrid::binaryInitializeDisk( double initialValue )
-	{			
+	{
 		file_in_out = fopen( gridFilename, "w+b" );
 
 		if( !file_in_out )
@@ -1293,20 +1303,20 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			return false;
 		}
 		else
-		{				
+		{
 			binaryWriteHeader(file_in_out);
 			file_position_beg_of_data = ftell( file_in_out);
 			
 			for( int j = gridHeader.getNumberRows() - 1; j >= 0; j-- )
 			{	for( int i = 0; i < gridHeader.getNumberCols(); i++ )
-				{	
-					fwrite( &initialValue,sizeof(double),1,file_in_out);																						
-				}				
+				{
+					fwrite(&initialValue, sizeof(double), 1, file_in_out);
+				}
 			}
-			
+
 			min = initialValue;
 			max = initialValue;
-			
+
 			current_row = 0;
 			row_one = new double[gridHeader.getNumberCols()];
 			row_two = new double[gridHeader.getNumberCols()];
@@ -1318,11 +1328,11 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				row_three[i] = initialValue;
 			}
 		}
-		return true;		
+		return true;
 	}
 
 	void dGrid::binaryReadHeader( FILE * in )
-	{	
+	{
 		rewind(in);
 		long ncols;
 		fread( &ncols, sizeof(int),1,in);
@@ -1349,9 +1359,9 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		gridHeader.setYllcenter( yllcenter );
 
 		fread( &data_type, sizeof(DATA_TYPE),1,in);
-		
+
 		double nodata_value;
-		fread( &nodata_value, sizeof(double),1,in);		
+		fread( &nodata_value, sizeof(double),1,in);
 		gridHeader.setNodataValue( nodata_value );
 
 		char * projection = new char[MAX_STRING_LENGTH + 1];
@@ -1384,13 +1394,13 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		fwrite( &type, sizeof(DATA_TYPE),1,out);
 		double nodata = gridHeader.getNodataValue();
 		fwrite( &nodata, sizeof(double),1,out);
-		
+
 		char * projection = new char[MAX_STRING_LENGTH + 1];
 		strcpy( projection, gridHeader.getProjection() );
 		if( _tcslen( projection ) > 0 )
 			fwrite( projection, sizeof(char), _tcslen(projection),out);
 		if( _tcslen( projection ) < MAX_STRING_LENGTH )
-		{	int size_of_pad = MAX_STRING_LENGTH - _tcslen(projection);
+		{	int size_of_pad = MAX_STRING_LENGTH - static_cast<int>(_tcslen(projection));
 			char * pad = new char[size_of_pad];
 			for( int p = 0; p < size_of_pad; p++ )
 				pad[p] = 0;
@@ -1404,13 +1414,13 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		if( _tcslen( notes ) > 0 )
 			fwrite( notes, sizeof(char), _tcslen(notes), out);
 		if( _tcslen( notes ) < MAX_STRING_LENGTH )
-		{	int size_of_pad = MAX_STRING_LENGTH - _tcslen(notes);
+		{	int size_of_pad = MAX_STRING_LENGTH - static_cast<int>(_tcslen(notes));
 			char * pad = new char[size_of_pad];
 			for( int p = 0; p < size_of_pad; p++ )
 				pad[p] = 0;
 			fwrite(pad, sizeof(char), size_of_pad, out );
 			delete [] pad;
-		}	
+		}
 		delete [] notes;
 	}
 
@@ -1425,28 +1435,28 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		else
 		{	binaryBufferRows( Row );
 			return row_two[ Column ];
-		}	
+		}
 	}
 
 	void dGrid::binarySetValueDisk( int Column, int Row, double Value )
 	{
 		long file_position = file_position_beg_of_data + sizeof(double)*Row*gridHeader.getNumberCols() + sizeof(double)*Column;
-		
+
 		if( fseek( file_in_out, file_position, SEEK_SET ) == -1L )
 		{}
 		else
-		{	
+		{
 			if( fwrite( &Value, sizeof(double), 1, file_in_out ) < 1 )
-			{}								
+			{}
 			else
 			{	if( Row == current_row - 1 )
 					row_one[ Column ] = Value;
 				else if( Row == current_row )
 					row_two[ Column ] = Value;
 				else if( Row == current_row + 1 )
-					row_three[ Column ] = Value;					
+					row_three[ Column ] = Value;
 			}
-		}		
+		}
 	}
 	
 	void dGrid::binaryClearDisk(double clearValue)
@@ -1454,14 +1464,14 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		if( fseek( file_in_out, file_position_beg_of_data, SEEK_SET ) == -1L )
 			return;
 		else
-		{	
+		{
 			for( int j = 0; j < gridHeader.getNumberRows(); j++ )
 			{	for( int i = 0; i < gridHeader.getNumberCols(); i++ )
 				{	if( fwrite( &clearValue, sizeof(double), 1, file_in_out ) < 1 )
 						return;
 				}
-			}					
-		}		
+			}
+		}
 	}
 
 	void dGrid::binaryBufferRows( int center_row )
@@ -1480,7 +1490,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		}
 		else
 			nd_fill_one = true;
-				
+
 		if( gridHeader.getNumberRows() >= center_row && center_row >= 0 )
 		{	long file_position = file_position_beg_of_data + sizeof(double)*(center_row)*gridHeader.getNumberCols();
 
@@ -1502,7 +1512,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		}
 		else
 			nd_fill_three = true;
-			
+
 		current_row = center_row;
 
 		if( nd_fill_one || nd_fill_two || nd_fill_three )
@@ -1521,12 +1531,12 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 
 
 	bool dGrid::binarySaveAs( CString filename, void(*callback)(int number, const char * message) )
-	{	
+	{
 		// Write to a temporary file first.
 		char tempName[ FILENAME_MAX ] = {0};
 		tmpnam(tempName);
 		FILE * out = fopen( tempName, "wb" );
-		
+
 		if( !out )
 			return false;
 
@@ -1543,15 +1553,15 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				value = getValue( i, j );
 				fwrite( &value,sizeof(double),1,out);
 
-				if( callback != NULL )
+				if( callback != nullptr)
 				{
-					int newpercent = (int)((num_written/total)*100);
+					int newpercent = static_cast<int>((num_written / total) * 100);
 					if( newpercent > percent )
 					{	percent = newpercent;
 						callback( percent, "Binary Grid Write");
-					}											
+					}
 				}
-			}				
+			}
 		}
 		fclose( out );
 
@@ -1592,32 +1602,32 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 	#pragma optimize("", off)
 	bool dGrid::esriReadDiskToMemory( void (*callback)(int number, const char * message ) )
 	{	
-		if( celllayeropen == NULL ||
-			celllyrclose == NULL ||
-			bndcellread == NULL ||
-			privateaccesswindowset == NULL ||
-			privatewindowcols == NULL ||
-			privatewindowrows == NULL ||
-			getwindowrow == NULL ||
-			getmissingfloat == NULL )
+		if( celllayeropen == nullptr ||
+			celllyrclose == nullptr ||
+			bndcellread == nullptr ||
+			privateaccesswindowset == nullptr ||
+			privatewindowcols == nullptr ||
+			privatewindowrows == nullptr ||
+			getwindowrow == nullptr ||
+			getmissingfloat == nullptr)
 			{	grid_layer = -1;
 				lastErrorCode = tkESRI_DLL_NOT_INITIALIZED;
 				return false;
 			}
 
-		double csize;	
+		double csize;
 		double bndbox[4];
 		double adjbndbox[4];
 		double nodata = -1;
 		int cell_type;
-		
-		char * fname = new char[_MAX_PATH+1];		
+
+		char * fname = new char[_MAX_PATH+1];
 		if( GetShortPathName(gridFilename,fname,_MAX_PATH) == 0 )
-			strcpy( fname, gridFilename );	
+			strcpy( fname, gridFilename );
 		grid_layer = celllayeropen(fname,READONLY,ROWIO,&cell_type,&csize);
 
 		if( grid_layer >= 0 )
-		{			
+		{
 			//Get the bounding box of the input cell layer 
 			//Bounding box is xllcorner, yllcorner, xurcorner, yurcorner
 			if( bndcellread(fname,bndbox) < 0 )
@@ -1627,11 +1637,11 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				grid_layer = -1;
 				lastErrorCode = tkESRI_INVALID_BOUNDS;
 				return false;
-			}			
-			
+			}
+
 			//Need to find cell_type
 			if( cell_type == CELLFLOAT )
-			{	getmissingfloat(&float_null);	
+			{	getmissingfloat(&float_null);
 				nodata = float_null;
 			}
 			if( cell_type == CELLINT )
@@ -1640,15 +1650,15 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				celllyrclose(grid_layer);
 				grid_layer = -1;
 				lastErrorCode = tkINVALID_GRID_FILE_TYPE;
-				return false;				
+				return false;
 			}
 			gridHeader.setXllcenter( bndbox[0] + .5*csize );
 			gridHeader.setYllcenter( bndbox[1] + .5*csize );
 			gridHeader.setDx( csize );
 			gridHeader.setDy( csize );
 			gridHeader.setNodataValue( nodata );
-				
-			//Set the Window to the output bounding box and cellsize        
+
+			//Set the Window to the output bounding box and cellsize
 			if( privateaccesswindowset(grid_layer,bndbox,csize,adjbndbox) < 0)
 			{	dealloc();
 				//Close handle
@@ -1657,7 +1667,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				lastErrorCode = tkESRI_ACCESS_WINDOW_SET;
 				return false;
 			}
-   
+
 			//Get the number of rows and columns in the window
 			gridHeader.setNumberCols( privatewindowcols(grid_layer) );
 			gridHeader.setNumberRows( privatewindowrows(grid_layer) );
@@ -1675,9 +1685,9 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			alloc();
 
 			//Now copy row major into array
-			//Allocate row buffer				
-			row_buf1 = (CELLTYPE*)CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE));
-			if ( row_buf1 == NULL )
+			//Allocate row buffer
+			row_buf1 = reinterpret_cast<CELLTYPE*>(CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE)));
+			if ( row_buf1 == nullptr)
 			{	dealloc();
 				//Close handle
 				celllyrclose(grid_layer);
@@ -1695,9 +1705,9 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			max = nodata;
 			for ( int j = 0; j < gridHeader.getNumberRows(); j++)
 			{	
-				getwindowrow(grid_layer, j, (CELLTYPE*)row_buf1);
+				getwindowrow(grid_layer, j, static_cast<CELLTYPE*>(row_buf1));
 
-				register float *buf = (float *)row_buf1;
+				register float *buf = static_cast<float*>(row_buf1);
 				for( int i = 0; i < gridHeader.getNumberCols(); i++)
 				{	
 					if( buf[i] == float_null )
@@ -1713,15 +1723,14 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 						if( max == nodata )
 							max = buf[i];
 						else if( buf[i] > max )
-							max = buf[i];							
+							max = buf[i];
 					}
-				}             
-							 
+				}
 
 				int newpercent = (int)((j/total)*100);
 				if( newpercent > percent )
 				{   percent = newpercent;
-					if( callback != NULL )
+					if( callback != nullptr)
 						callback( percent, "Reading Esri Grid" );
 				}
 
@@ -1729,55 +1738,55 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 
 			//Free row buffer
 			CFree1((char *)row_buf1);
-			row_buf1 = NULL;
+			row_buf1 = nullptr;
   
 			//Close handle
 			celllyrclose(grid_layer);
 			grid_layer = -1;
 			return true;
-		}							
+		}
 		else
 		{	dealloc();
 			grid_layer = -1;
 			lastErrorCode = tkESRI_LAYER_OPEN;
 			return false;
-		}			
+		}
 	}
 	#pragma optimize("", on)
 
 	#pragma optimize("", off)
 	bool dGrid::esriReadDiskToDisk()
-	{	
+	{
 		//Check for the needed functions
-		if( bndcellread == NULL ||
-			celllyrclose == NULL || 
-			celllayeropen == NULL ||
-			privateaccesswindowset == NULL ||
-			privatewindowcols == NULL ||
-			privatewindowrows == NULL ||
-			getwindowrow == NULL ||
-			getmissingfloat == NULL )
+		if( bndcellread == nullptr ||
+			celllyrclose == nullptr ||
+			celllayeropen == nullptr ||
+			privateaccesswindowset == nullptr ||
+			privatewindowcols == nullptr ||
+			privatewindowrows == nullptr ||
+			getwindowrow == nullptr ||
+			getmissingfloat == nullptr)
 			{	grid_layer = -1;
 				lastErrorCode = tkESRI_DLL_NOT_INITIALIZED;
 				return false;
 			}
 
-		double csize;	
+		double csize;
 		double bndbox[4];
 		double adjbndbox[4];
 		double nodata = -1;
 		int cell_type;
 
-		char * fname = new char[_MAX_PATH+1];		
+		char * fname = new char[_MAX_PATH+1];
 		if( GetShortPathName(gridFilename,fname,_MAX_PATH) == 0 )
 			strcpy( fname, gridFilename );	
 		grid_layer = celllayeropen(fname,READWRITE,ROWIO,&cell_type,&csize);
 
 		if( grid_layer >= 0 )
-		{					
+		{
 			//Get the bounding box of the input cell layer 
 			//Bounding box is xllcorner, yllcorner, xurcorner, yurcorner
-			
+
 			if( bndcellread(fname,bndbox) < 0 )
 			{	dealloc();
 				//Close handle
@@ -1800,7 +1809,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				grid_layer = -1;
 				lastErrorCode = tkINVALID_GRID_FILE_TYPE;
 				delete [] fname;
-				return false;				
+				return false;
 			}
 
 			gridHeader.setXllcenter( bndbox[0] + .5*csize );
@@ -1809,7 +1818,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			gridHeader.setDy( csize );
 			gridHeader.setNodataValue( nodata );
 			
-			//Set the Window to the output bounding box and cellsize        
+			//Set the Window to the output bounding box and cellsize
 			if( privateaccesswindowset(grid_layer,bndbox,csize,adjbndbox) < 0)
 			{	dealloc();
 				//Close handle
@@ -1834,11 +1843,11 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				return false;
 			}
 
-			//Allocate row buffer				
+			//Allocate row buffer
 			row_buf1 = (CELLTYPE*)CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE));
-			row_buf2 = (CELLTYPE*)CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE));				
-			row_buf3 = (CELLTYPE*)CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE));				
-			if ( row_buf1 == NULL || row_buf2 == NULL || row_buf3 == NULL )
+			row_buf2 = (CELLTYPE*)CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE));
+			row_buf3 = (CELLTYPE*)CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE));
+			if ( row_buf1 == nullptr || row_buf2 == nullptr || row_buf3 == nullptr)
 			{	dealloc();
 				//Close handle
 				celllyrclose(grid_layer);
@@ -1847,7 +1856,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				delete [] fname;
 				return false;
 			}
-			
+
 			//Find the min and max
 			double nodata = gridHeader.getNodataValue();
 			min = nodata;
@@ -1855,7 +1864,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			findNewMin = true;
 			findNewMax = true;
 			/*for ( int j = 0; j < gridHeader.getNumberRows(); j++)
-			{	
+			{
 				getwindowrow(grid_layer, j, (CELLTYPE*)row_buf1);
 
 				register float *buf = (float *)row_buf1;
@@ -1872,12 +1881,12 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 						else if( buf[i] > max )
 							max = buf[i];
 					}
-				}						
+				}
 				 
-			}				*/
+			} */
 			esriBufferRows( 0 );
 			delete [] fname;
-			return true;								
+			return true;
 		}
 		else
 		{	dealloc();
@@ -1893,13 +1902,13 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 	bool dGrid::esriWriteMemoryToDisk( void(*callback)(int number, const char * message ) )
 	{
 		//Check the needed functions
-		if( celllyrclose == NULL ||
-			celllyrexists == NULL ||
-			celllayercreate == NULL ||
-			griddelete == NULL ||			
-			privateaccesswindowset == NULL ||
-			getmissingfloat == NULL ||
-			putwindowrow == NULL )
+		if( celllyrclose == nullptr ||
+			celllyrexists == nullptr ||
+			celllayercreate == nullptr ||
+			griddelete == nullptr ||
+			privateaccesswindowset == nullptr ||
+			getmissingfloat == nullptr ||
+			putwindowrow == nullptr)
 			{	grid_layer = -1;
 				lastErrorCode = tkESRI_DLL_NOT_INITIALIZED;
 				return false;
@@ -1915,12 +1924,12 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		bndbox[2] = gridHeader.getXllcenter() + gridHeader.getNumberCols()*gridHeader.getDx() - gridHeader.getDx()*.5;
 		bndbox[3] = gridHeader.getYllcenter() + gridHeader.getNumberRows()*gridHeader.getDy() - gridHeader.getDy()*.5;
 		double adjbndbox[4];
-	
+
 		char * fname = new char[gridFilename.GetLength()+1];
-		strcpy( fname, gridFilename );		
+		strcpy( fname, gridFilename );
 		if( celllyrexists( fname ) != 0 )
 			griddelete( fname );
-					
+
 		grid_layer = celllayercreate( fname, WRITEONLY, ROWIO, cell_type, csize, bndbox);
 		if( grid_layer < 0 )
 		{	grid_layer = -1;
@@ -1931,20 +1940,20 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		if( privateaccesswindowset( grid_layer, bndbox, csize, adjbndbox) < 0 )
 		{	celllyrclose(grid_layer);
 			if( celllyrexists( fname ) )
-				griddelete( fname );						
+				griddelete( fname );
 			grid_layer = -1;
 			lastErrorCode = tkESRI_ACCESS_WINDOW_SET;
 			return false;
 		}
 		
-		getmissingfloat(&float_null);				
+		getmissingfloat(&float_null);
 
-		//Allocate row buffer				
-		row_buf1 = (CELLTYPE*)CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE));
-		if ( row_buf1 == NULL )
+		//Allocate row buffer
+		row_buf1 = reinterpret_cast<CELLTYPE*>(CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE)));
+		if ( row_buf1 == nullptr)
 		{	celllyrclose(grid_layer);
 			if( celllyrexists( fname ) )
-				griddelete( fname );						
+				griddelete( fname );
 			grid_layer = -1;
 			lastErrorCode = tkCANT_ALLOC_MEMORY;
 			return false;
@@ -1954,32 +1963,32 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		int percent = 0;
 
 		double nodata = gridHeader.getNodataValue();
-		register float *buf = (float *)row_buf1;					
+		register float *buf = static_cast<float*>(row_buf1);
 		for( int j = 0; j < gridHeader.getNumberRows(); j++)
 		{
 			for( int i = 0; i < gridHeader.getNumberCols(); i++)
 			{
-				buf[i] = (float)data[j][i];
+				buf[i] = static_cast<float>(data[j][i]);
 				if(buf[i] == nodata)
 					buf[i] = float_null;
 			}
-			putwindowrow( grid_layer, j, (CELLTYPE*)row_buf1);				
+			putwindowrow( grid_layer, j, static_cast<CELLTYPE*>(row_buf1));
 
 			int newpercent = (int)((j/total)*100);
 			if( newpercent > percent )
 			{	percent = newpercent;
-				if( callback != NULL )
+				if( callback != nullptr)
 					callback( percent, "Writing Esri Grid" );
 			}
 		}
-	
-		CFree1 ((char *)row_buf1);	
-		row_buf1 = NULL;
 
-		//Close handle					
+		CFree1 (static_cast<char*>(row_buf1));
+		row_buf1 = nullptr;
+
+		//Close handle
 		celllyrclose(grid_layer);
 		grid_layer = -1;
-		return true;					
+		return true;
 	}
 	#pragma optimize("", on)
 
@@ -1990,21 +1999,21 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 
 	#pragma optimize("", off)
 	bool dGrid::esriInitializeDisk( double InitialValue )
-	{	
-		if( celllyrexists == NULL ||
-			celllyrclose == NULL ||
-			griddelete == NULL ||
-			celllayercreate == NULL ||
-			privateaccesswindowset == NULL ||
-			putwindowrow == NULL ||
-			getmissingfloat == NULL )	
+	{
+		if( celllyrexists == nullptr ||
+			celllyrclose == nullptr ||
+			griddelete == nullptr ||
+			celllayercreate == nullptr ||
+			privateaccesswindowset == nullptr ||
+			putwindowrow == nullptr ||
+			getmissingfloat == nullptr)
 			{	grid_layer = -1;
 				lastErrorCode = tkESRI_DLL_NOT_INITIALIZED;
 				return false;
 			}
 
 		int cell_type = CELLFLOAT;
-		
+
 		double csize = gridHeader.getDx();
 		//Bounding box is xllcorner, yllcorner, xurcorner, yurcorner
 		double bndbox[4];
@@ -2012,10 +2021,10 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		bndbox[1] = gridHeader.getYllcenter() - gridHeader.getDy()*.5;
 		bndbox[2] = gridHeader.getXllcenter() + gridHeader.getNumberCols()*gridHeader.getDx() - gridHeader.getDx()*.5;
 		bndbox[3] = gridHeader.getYllcenter() + gridHeader.getNumberRows()*gridHeader.getDy() - gridHeader.getDy()*.5;
-		
+
 		char * fname = new char[gridFilename.GetLength()+1];
 		strcpy( fname, gridFilename );
-		
+
 		if( celllyrexists( fname ) != 0 )
 		{
 			if( griddelete( fname ) == 0 )
@@ -2025,7 +2034,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				return false;
 			}
 		}
-	
+
 		grid_layer = celllayercreate( fname, WRITEONLY, ROWIO, cell_type, csize, bndbox);
 
 		if( grid_layer < 0 )
@@ -2034,38 +2043,38 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			delete [] fname;
 			return false;
 		}
-		
+
 		getmissingfloat(&float_null);
 
 		double adjbndbox[4];
 		if( privateaccesswindowset( grid_layer, bndbox, csize, adjbndbox) < 0 )
 		{	celllyrclose(grid_layer);
 			if( celllyrexists( fname ) )
-				griddelete( fname );						
+				griddelete( fname );
 			grid_layer = -1;
 			lastErrorCode = tkESRI_ACCESS_WINDOW_SET;
 			delete [] fname;
 			return false;
 		}
 
-		//Allocate row buffer				
+		//Allocate row buffer
 		row_buf1 = (CELLTYPE*)CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE));
-		if( row_buf1 == NULL )
-		{	
-			celllyrclose(grid_layer);						
+		if( row_buf1 == nullptr)
+		{
+			celllyrclose(grid_layer);
 			if( celllyrexists( fname ) )
 				griddelete( fname );
 			grid_layer = -1;
 			lastErrorCode = tkCANT_ALLOC_MEMORY;
 			delete [] fname;
 			return false;
-		}	
+		}
 
-		double nodata = gridHeader.getNodataValue();	
+		double nodata = gridHeader.getNodataValue();
 		max = nodata;
 		min = nodata;
 
-		float *buf = (float *)row_buf1;					
+		float *buf = static_cast<float*>(row_buf1);
 		
 		if( InitialValue == nodata )
 		{
@@ -2075,20 +2084,20 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		else
 		{	for( int i = 0; i < gridHeader.getNumberCols(); i++)
 				//casting added by dpa 6/7/05
-				buf[i] = (float) InitialValue;
+				buf[i] = static_cast<float>(InitialValue);
 		}
-			
+
 		for( int j = 0; j < gridHeader.getNumberRows(); j++)
-			putwindowrow( grid_layer, j, (CELLTYPE*)row_buf1);			
-								
-		//Close and Reopen so VAT Table is Written		
+			putwindowrow( grid_layer, j, static_cast<CELLTYPE*>(row_buf1));
+
+		//Close and Reopen so VAT Table is Written
 		celllyrclose(grid_layer);
 		grid_layer = -1;
-		CFree1 ((char *)row_buf1);
-		row_buf1 = NULL;
+		CFree1 (static_cast<char*>(row_buf1));
+		row_buf1 = nullptr;
 
 		delete [] fname;
-		return esriReadDiskToDisk();								
+		return esriReadDiskToDisk();
 	}
 	#pragma optimize("", on)
 
@@ -2102,28 +2111,28 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 
 		if( Row == current_row - 1 )
 		{	
-			if( ((float *)row_buf1)[Column] == float_null )
+			if( static_cast<float*>(row_buf1)[Column] == float_null )
 				return gridHeader.getNodataValue();
-			return double((((float *)row_buf1)[Column]));						
+			return static_cast<double>(static_cast<float*>(row_buf1)[Column]);
 		}
 		else if( Row == current_row )
 		{	
-			if( ((float *)row_buf2)[Column] == float_null )
+			if( static_cast<float*>(row_buf2)[Column] == float_null )
 				return gridHeader.getNodataValue();
-			return double((((float *)row_buf2)[Column]));						
+			return static_cast<double>(static_cast<float*>(row_buf2)[Column]);
 		}
 		else if( Row == current_row + 1 )
 		{	
-			if( ((float *)row_buf3)[Column] == float_null )
+			if( static_cast<float*>(row_buf3)[Column] == float_null )
 				return gridHeader.getNodataValue();
-			return double((((float *)row_buf3)[Column]));						
+			return static_cast<double>(static_cast<float*>(row_buf3)[Column]);
 		}
 		else
 		{	esriBufferRows( Row );
 			
-			if( ((float *)row_buf2)[Column] == float_null )
+			if( static_cast<float*>(row_buf2)[Column] == float_null )
 				return gridHeader.getNodataValue();
-			return double((((float *)row_buf2)[Column]));								
+			return static_cast<double>(static_cast<float*>(row_buf2)[Column]);
 		}
 		
 		return gridHeader.getNodataValue();
@@ -2133,7 +2142,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 	#pragma optimize("", off)
 	void dGrid::esriSetValueDisk( int Column, int Row, double Value )
 	{
-		if( putwindowrow == NULL )
+		if( putwindowrow == nullptr)
 			return;
 
 		double value = Value;
@@ -2144,41 +2153,41 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			if( value == gridHeader.getNodataValue() )
 				value = float_null;
 
-			register float *buf = (float *)row_buf1;			
+			register float *buf = static_cast<float*>(row_buf1);
 			//casting added by dpa 6/7/05
-			buf[Column] = (float) value;					
-			putwindowrow( grid_layer, Row, (CELLTYPE*)row_buf1);
+			buf[Column] = static_cast<float>(value);
+			putwindowrow( grid_layer, Row, static_cast<CELLTYPE*>(row_buf1));
 		}
 		else if( Row == current_row )
 		{
 			if( value == gridHeader.getNodataValue() )
 				value = float_null;
-				
-			register float *buf = (float *)row_buf2;			
-     		//casting added by dpa 6/7/05
-			buf[Column] = (float) value;
-			putwindowrow( grid_layer, Row, (CELLTYPE*)row_buf2);			
+
+			register float *buf = static_cast<float*>(row_buf2);
+			//casting added by dpa 6/7/05
+			buf[Column] = static_cast<float>(value);
+			putwindowrow( grid_layer, Row, static_cast<CELLTYPE*>(row_buf2));
 		}
 		else if( Row == current_row + 1 )
 		{
 			if( value == gridHeader.getNodataValue() )
 				value = float_null;
 
-			register float *buf = (float *)row_buf3;			
+			register float *buf = static_cast<float*>(row_buf3);
 			//casting added by dpa 6/7/05
-			buf[Column] = (float) value;
-			putwindowrow( grid_layer, Row, (CELLTYPE*)row_buf3);			
-		}		
+			buf[Column] = static_cast<float>(value);
+			putwindowrow( grid_layer, Row, static_cast<CELLTYPE*>(row_buf3));
+		}
 	}
 	#pragma optimize("", on)
 
 	#pragma optimize("", off)
 	void dGrid::esriClearDisk(double clearValue)
 	{	
-		if( putwindowrow == NULL )
+		if( putwindowrow == nullptr)
 			return;
 
-		register float *buf = (float *)row_buf1;					
+		register float *buf = static_cast<float*>(row_buf1);
 		for( int j = 0; j < gridHeader.getNumberRows(); j++)
 		{	
 			double val = clearValue;
@@ -2187,35 +2196,35 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			for( int i = 0; i < gridHeader.getNumberCols(); i++)
 			{
 				//casting added by dpa 6/7/05
-				buf[i]=(float) val;
+				buf[i] = static_cast<float>(val);
 			}
-			putwindowrow( grid_layer, j, (CELLTYPE*)row_buf1);								
+			putwindowrow( grid_layer, j, static_cast<CELLTYPE*>(row_buf1));
 		}
 		for( int i = 0; i < gridHeader.getNumberCols(); i++)
 		{
 			//casting added by dpa 6/7/05
-			buf[i]=(float) clearValue;
-		}					
+			buf[i] = static_cast<float>(clearValue);
+		}
 
-		esriBufferRows( 0 );				
+		esriBufferRows( 0 );
 	}
 	#pragma optimize("", on)
 
 	#pragma optimize("", off)
 	void dGrid::esriBufferRows( int center_row )
 	{
-		if( getwindowrow == NULL )
+		if( getwindowrow == nullptr)
 		{	register float *ibuf;
 		
 			for( int i = 0; i < gridHeader.getNumberCols(); i++ )
-			{	
-				ibuf = (float *)row_buf1;
+			{
+				ibuf = static_cast<float*>(row_buf1);
 				ibuf[i] = float_null;
-				ibuf = (float *)row_buf2;
+				ibuf = static_cast<float*>(row_buf2);
 				ibuf[i] = float_null;
-				ibuf = (float *)row_buf3;
-				ibuf[i] = float_null;																	
-			}	
+				ibuf = static_cast<float*>(row_buf3);
+				ibuf[i] = float_null;
+			}
 			return;
 		}
 
@@ -2225,7 +2234,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 
 		if( gridHeader.getNumberRows() >= center_row -1 && center_row - 1 >= 0 )
 		{					
-			getwindowrow(grid_layer, center_row - 1, (CELLTYPE*)row_buf1);		
+			getwindowrow(grid_layer, center_row - 1, static_cast<CELLTYPE*>(row_buf1));
 			nd_fill_one = false;
 		}
 		else
@@ -2233,7 +2242,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 
 		if( gridHeader.getNumberRows() >= center_row && center_row >= 0 )
 		{			
-			getwindowrow(grid_layer, center_row, (CELLTYPE*)row_buf2);		
+			getwindowrow(grid_layer, center_row, static_cast<CELLTYPE*>(row_buf2));
 			nd_fill_two = false;
 		}
 		else
@@ -2241,7 +2250,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 
 		if( gridHeader.getNumberRows() >= center_row + 1 && center_row + 1 >= 0 )
 		{
-			getwindowrow(grid_layer, center_row + 1, (CELLTYPE*)row_buf3);		
+			getwindowrow(grid_layer, center_row + 1, static_cast<CELLTYPE*>(row_buf3));
 			nd_fill_three = false;
 		}
 		else
@@ -2253,22 +2262,22 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		if( nd_fill_one || nd_fill_two || nd_fill_three )
 		{	
 			register float *ibuf;
-			
+
 			for( int i = 0; i < gridHeader.getNumberCols(); i++ )
 			{	
 				if( nd_fill_one )
-				{	ibuf = (float *)row_buf1;
+				{	ibuf = static_cast<float*>(row_buf1);
 					ibuf[i] = float_null;
 				}
 				if( nd_fill_two )
-				{	ibuf = (float *)row_buf2;
+				{	ibuf = static_cast<float*>(row_buf2);
 					ibuf[i] = float_null;
 				}
 				if( nd_fill_three )
-				{	ibuf = (float *)row_buf3;
+				{	ibuf = static_cast<float*>(row_buf3);
 					ibuf[i] = float_null;
-				}												
-			}			
+				}
+			}
 		}
 	}
 	#pragma optimize("", on)
@@ -2278,20 +2287,20 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 	{
 		long temp_grid_layer = -1;
 		//Check the needed functions
-		if( celllyrclose == NULL ||
-			celllyrexists == NULL ||
-			celllayercreate == NULL ||
-			griddelete == NULL ||			
-			privateaccesswindowset == NULL ||
-			getmissingfloat == NULL ||
-			putwindowrow == NULL )
+		if( celllyrclose == nullptr ||
+			celllyrexists == nullptr ||
+			celllayercreate == nullptr ||
+			griddelete == nullptr ||
+			privateaccesswindowset == nullptr ||
+			getmissingfloat == nullptr ||
+			putwindowrow == nullptr)
 			{	temp_grid_layer = -1;
 				lastErrorCode = tkESRI_DLL_NOT_INITIALIZED;
 				return false;
 			}
 
 		int cell_type = CELLFLOAT;
-		
+
 		double csize = gridHeader.getDx();
 		//Bounding box is xllcorner, yllcorner, xurcorner, yurcorner
 		double bndbox[4];
@@ -2300,12 +2309,12 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		bndbox[2] = gridHeader.getXllcenter() + gridHeader.getNumberCols()*gridHeader.getDx() - gridHeader.getDx()*.5;
 		bndbox[3] = gridHeader.getYllcenter() + gridHeader.getNumberRows()*gridHeader.getDy() - gridHeader.getDy()*.5;
 		double adjbndbox[4];
-	
+
 		char * fname = new char[filename.GetLength()+1];
-		strcpy( fname, filename );		
+		strcpy( fname, filename );
 		if( celllyrexists( fname ) != 0 )
 			griddelete( fname );
-					
+
 		temp_grid_layer = celllayercreate( fname, WRITEONLY, ROWIO, cell_type, csize, bndbox);
 		if( temp_grid_layer < 0 )
 		{	temp_grid_layer = -1;
@@ -2317,7 +2326,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		if( privateaccesswindowset( temp_grid_layer, bndbox, csize, adjbndbox) < 0 )
 		{	celllyrclose(temp_grid_layer);
 			if( celllyrexists( fname ) )
-				griddelete( fname );						
+				griddelete( fname );
 			temp_grid_layer = -1;
 			lastErrorCode = tkESRI_ACCESS_WINDOW_SET;
 			delete [] fname;
@@ -2325,13 +2334,13 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		}
 
 		getmissingfloat(&float_null);
-									
-		//Allocate row buffer				
+
+		//Allocate row buffer
 		void * temp_row_buf = (CELLTYPE*)CAllocate1(gridHeader.getNumberCols() + 1, sizeof(CELLTYPE));
-		if ( temp_row_buf == NULL )
+		if ( temp_row_buf == nullptr)
 		{	celllyrclose(temp_grid_layer);
 			if( celllyrexists( fname ) )
-				griddelete( fname );						
+				griddelete( fname );
 			temp_grid_layer = -1;
 			lastErrorCode = tkCANT_ALLOC_MEMORY;
 			delete [] fname;
@@ -2342,35 +2351,35 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		int percent = 0;
 
 		double nodata = gridHeader.getNodataValue();
-		register float *buf = (float *)temp_row_buf;					
+		register float *buf = static_cast<float*>(temp_row_buf);
 		for( int j = 0; j < gridHeader.getNumberRows(); j++)
 		{
 			for( int i = 0; i < gridHeader.getNumberCols(); i++)
 			{
-				buf[i] = (float)getValue( i, j );
+				buf[i] = static_cast<float>(getValue(i, j));
 				if(buf[i] == nodata)
 					buf[i] = float_null;
 			}
-			putwindowrow( temp_grid_layer, j, (CELLTYPE*)temp_row_buf);				
+			putwindowrow( temp_grid_layer, j, (CELLTYPE*)temp_row_buf);
 
 			int newpercent = (int)((j/total)*100);
 			if( newpercent > percent )
 			{	percent = newpercent;
-				if( callback != NULL )
+				if( callback != nullptr)
 					callback( percent, "Writing Esri Grid" );
 			}
 		}
 	
-		CFree1 ((char *)temp_row_buf);	
-		temp_row_buf = NULL;
+		CFree1 (static_cast<char*>(temp_row_buf));
+		temp_row_buf = nullptr;
 
 		if( isInRam == true )
 		{	gridFilename = filename;
-			//Close handle					
+			//Close handle
 			celllyrclose(temp_grid_layer);
 			temp_grid_layer = -1;
 			delete [] fname;
-			return true;					
+			return true;
 		}
 		else
 		{	celllyrclose(temp_grid_layer);
@@ -2396,14 +2405,13 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 
 	# define null 0
 	bool dGrid::sdtsReadDiskToMemory( void(*callback)(int number, const char * message ) )
-	{	
-		
+	{
 		//Initialize the grid
 		strcpy( file_name, gridFilename );
 
-		//Find the byte order of the machine		
+		//Find the byte order of the machine
 		g123order(&order);
-					
+
 		char * fname = new char[ gridFilename.GetLength() + 1];
 		strcpy( fname, gridFilename );
 		long fillvalue;
@@ -2411,9 +2419,9 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		{	lastErrorCode = tkSDTS_BAD_FILE_HEADER;
 			return false;
 		}
-		
+
 		alloc();
-					
+
 		cells_out( gridFilename, status, fillvalue, callback );
 
 		//Check for -255 Value that can be produced on extraction
@@ -2421,11 +2429,11 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		double value = gridHeader.getNodataValue();
 		double average = 0;
 		int cnt = 0;
-		
+
 		for( int row = 0; row < gridHeader.getNumberRows(); row++ )
-		{	
+		{
 			for( int column = 0; column < gridHeader.getNumberCols(); column++ )
-			{	
+			{
 				value = getValue( column, row );
 				average = 0;
 				cnt = 0;
@@ -2477,16 +2485,16 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 					else
 						average = nodata_value;
 
-					setValue( column, row, (double)average );
+					setValue( column, row, average );
 				}
 			}
 		}
-							
-		return true;	
+
+	return true;
 	}
 
 	bool dGrid::read_sdts_header(char * filename, dHeader & h, long & fillvalue)
-	{	
+	{
 		strcpy( file_name, filename );
 		baseAndId();
 		if (!beg123file (filename,'R',&int_level,&ice,ccs,&fpin))
@@ -2541,7 +2549,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 	{
 		int len,j;
 		//parse out base_name 
-		len = _tcslen(file_name);
+		len = static_cast<int>(_tcslen(file_name));
 		for(j=0;j<len-8;j++)
 			base_name[j] = file_name[j];
 		base_name[j] = '\0';
@@ -3253,7 +3261,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 				goto done;
 			}
 
-			if (strstr (frmts, "B") != NULL)
+			if (strstr (frmts, "B") != nullptr)
 			{	
 				/*
 				strncpy (temp, string, (int)str_len);
@@ -3305,7 +3313,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 						float f;
 					} u;
 					s123tol(string, &u.i, !order);
-					li = (int) (vscale * u.f);					
+					li = (int) (vscale * u.f);
 				}
 				else
 				{
@@ -3426,7 +3434,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			   }
 			   else if (strstr(frmts, "R"))
 			   {
-					sadr_x = (long) atof(string);
+					sadr_x = static_cast<long>(atof(string));
 			   }
 		  }
 		  else if (!strcmp (tag, "SADR") && !strcmp (descr, "Y"))
@@ -3443,7 +3451,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 			   }
 			   else if (strstr(frmts, "R"))
 			   {
-					sadr_y = (long) atof(string);
+					sadr_y = static_cast<long>(atof(string));
 			   }
 		  }  
 	 } while (status != 4);   /* Break out of loop at end of file */
@@ -3467,7 +3475,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		char		data[1000];
 		FILE*		fp;
 		int			len;
-		char*		index = NULL;
+		char*		index = nullptr;
 
 		baseAndId();
 		strcpy (file_name,base_name);
@@ -3477,7 +3485,7 @@ GRID_TYPE dGrid::getGridType( const char * filename )
 		if(!fp)
 			return 0;
 
-		len = fread(data,sizeof(char),MAX-1,fp);
+		len = static_cast<int>(fread(data,sizeof(char),MAX-1,fp));
 		fclose(fp);
 		data[MAX-1] = '\0';
 

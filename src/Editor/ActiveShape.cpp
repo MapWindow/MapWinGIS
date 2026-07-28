@@ -308,7 +308,7 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, const int size, const Gdiplus:
 				bounds.Y = static_cast<Gdiplus::REAL>(data[i].Y + dy - bounds.Height / 2);
 			}
 
-			CRect r((bounds.GetLeft()), (bounds.GetTop()), (bounds.GetRight()), (bounds.GetBottom()));
+			CRect r(static_cast<int>(bounds.GetLeft()), static_cast<int>(bounds.GetTop()), static_cast<int>(bounds.GetRight()), static_cast<int>(bounds.GetBottom()));
 			if (!collisionList.HaveCollision(r)) {
 				g->FillRectangle(&_whiteBrush, bounds);
 				g->DrawString(s, s.GetLength(), _font, bounds, &_format, &_textBrush);

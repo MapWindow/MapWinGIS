@@ -95,8 +95,8 @@ STDMETHODIMP CChart::put_IsDrawn(VARIANT_BOOL newVal)
 // ***********************************************************
 STDMETHODIMP CChart::get_ScreenExtents(IExtents** retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	IExtents* ext = NULL;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	IExtents* ext = nullptr;
 
 	if (_chartData->frame)
 	{
@@ -107,7 +107,7 @@ STDMETHODIMP CChart::get_ScreenExtents(IExtents** retval)
 	}
 	else
 	{
-		*retval = NULL;
+		*retval = nullptr;
 	}
 	return S_OK;
 }
@@ -122,13 +122,13 @@ char* CChart::get_ChartData()
 }
 void CChart::put_ChartData(char* newVal)
 {
-	if (newVal == NULL) return;
+	if (newVal == nullptr) return;
 	
 	// if the memory was allocated in this class we should free it;
 	if (_canDelete)
 	{
 		delete _chartData;
-		_chartData = NULL;
+		_chartData = nullptr;
 	}
 
 	_chartData = reinterpret_cast<CChartInfo*>(newVal);

@@ -39,25 +39,25 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CStringW fieldNa
 	minValue.vt = VT_EMPTY;
 	maxValue.vt = VT_EMPTY;
 
-	long numShapes = srcValues.size();
+	long numShapes = static_cast<int>(srcValues.size());
 
 	/* we won't define intervals for string values */
 	if (ClassificationType != ctUniqueValues && fieldType == STRING_FIELD)
 	{
 		errorCode = tkNOT_UNIQUE_CLASSIFICATION_FOR_STRINGS;
-		return NULL;
+		return nullptr;
 	}
 
 	if ((numClasses <= 0 || numClasses > 1000) && (ClassificationType != ctUniqueValues))
 	{
 		errorCode = tkTOO_MANY_CATEGORIES;
-		return NULL;
+		return nullptr;
 	}
 
 	if (ClassificationType == ctStandardDeviation)
 	{
 		errorCode = tkINVALID_PARAMETER_VALUE;
-		return NULL;
+		return nullptr;
 	}
 
 	// natural breaks aren't designed to work otherwise
@@ -101,7 +101,7 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CStringW fieldNa
 		std::vector<CComVariant> values;
 		copy(dict.begin(), dict.end(), inserter(values, values.end()));
 
-		for (int i = 0; i < (int)values.size(); i++)
+		for (int i = 0; i < static_cast<int>(values.size()); i++)
 		{
 			CategoriesData data;
 			data.minValue = values[i];
@@ -130,14 +130,14 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CStringW fieldNa
 		}
 		sort(values.begin(), values.end());
 
-		double step = totalSum / (double)numClasses;
+		double step = totalSum / static_cast<double>(numClasses);
 		int index = 1;
 		double sum = 0;
 
-		for (int i = 0; i < (int)values.size(); i++)
+		for (int i = 0; i < static_cast<int>(values.size()); i++)
 		{
 			sum += values[i];
-			if (sum >= step * (double)index || i == numShapes - 1)
+			if (sum >= step * static_cast<double>(index) || i == numShapes - 1)
 			{
 				CategoriesData data;
 
@@ -178,7 +178,7 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CStringW fieldNa
 		vMin.Clear(); vMax.Clear();
 
 		/*	creating classes */
-		double dStep = (dMax - dMin) / (double)numClasses;
+		double dStep = (dMax - dMin) / static_cast<double>(numClasses);
 		while (dMin < dMax)
 		{
 			CategoriesData data;
@@ -287,7 +287,7 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CStringW fieldNa
 	if (ClassificationType == ctUniqueValues)
 	{
 		USES_CONVERSION;
-		for (int i = 0; i < (int)result->size(); i++)
+		for (int i = 0; i < static_cast<int>(result->size()); i++)
 		{
 			//CString strExpression;
 			CStringW strValue;
@@ -317,7 +317,7 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CStringW fieldNa
 		// in case % is present, we need to put to double it for proper formatting
 		fieldName.Replace(L"%", L"%%");
 
-		for (int i = 0; i < (int)result->size(); i++)
+		for (int i = 0; i < static_cast<int>(result->size()); i++)
 		{
 			CategoriesData* data = &((*result)[i]);
 
@@ -357,6 +357,6 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CStringW fieldNa
 	else
 	{
 		delete result;
-		return NULL;
+		return nullptr;
 	}
 }

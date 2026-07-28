@@ -413,7 +413,7 @@ namespace Utility
 	{
 		FILE* file = _wfopen(filename, L"rb");
 
-		long size = 0;
+		size_t size = 0;
 		if (file)
 		{
 			fseek(file, 0, SEEK_END);
@@ -426,14 +426,14 @@ namespace Utility
 			}
 			fclose(file);
 		}
-		return size;
+		return static_cast<int>(size);
 	}
 
 	int ReadFileToBuffer(CStringW filename, char** buffer)
 	{
 		FILE* file = _wfopen(filename, L"rb");
 
-		long size = 0;
+		size_t size = 0;
 		if (file)
 		{
 			fseek(file, 0, SEEK_END);
@@ -446,7 +446,7 @@ namespace Utility
 			}
 			fclose(file);
 		}
-		return size;
+		return static_cast<int>(size);
 	}
 
 #define _SECOND ((__int64) 10000000)
@@ -842,7 +842,7 @@ namespace Utility
 		static const double doBase = 10.0;
 		double doComplete5, doComplete5i;
 
-		doComplete5 = doValue * pow(doBase, (double)(nPrecision + 1));
+		doComplete5 = doValue * pow(doBase, static_cast<double>(nPrecision + 1));
 
 		if (doValue < 0.0)
 			doComplete5 -= 5.0;
@@ -852,7 +852,7 @@ namespace Utility
 		doComplete5 /= doBase;
 		modf(doComplete5, &doComplete5i);
 
-		return doComplete5i / pow(doBase, (double)nPrecision);
+		return doComplete5i / pow(doBase, static_cast<double>(nPrecision));
 	}
 
 	bool FloatsEqual(const float& a, const float& b)
@@ -880,7 +880,7 @@ namespace Utility
 		if (size == 0)
 			return -1;  // Failure
 
-		pImageCodecInfo = (Gdiplus::ImageCodecInfo*)(malloc(size));
+		pImageCodecInfo = static_cast<Gdiplus::ImageCodecInfo*>(malloc(size));
 		if (pImageCodecInfo == nullptr)
 			return -1;  // Failure
 
@@ -963,7 +963,7 @@ namespace Utility
 			memcpy(&bitsNew[i * nBytesInRow], &pixels[i * width * 3], width * 3);
 
 		// saing the image
-		Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(&bif, (void*)bitsNew);
+		Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(&bif, static_cast<void*>(bitsNew));
 
 		CLSID pngClsid;
 		GetEncoderClsid(L"png", &pngClsid);	// perhaps some other formats ?
@@ -998,19 +998,19 @@ namespace Utility
 			temp.push_back(inpStr[iter]);
 		}
 
-		int size = temp.size();
+		auto size = static_cast<int>(temp.size());
 		DWORD* output = new DWORD[size];
 
 		//get the multiplier
-		multiplier = atoi((char*)&temp[0]);
+		multiplier = atoi(reinterpret_cast<char*>(&temp[0]));
 
 		for (int i = 1; i < size; i++)
 		{
-			output[i - 1] = multiplier * atoi((char*)&temp[i]); // multiply to enhance value since range = 0 - 9
+			output[i - 1] = multiplier * atoi(reinterpret_cast<char*>(&temp[i])); // multiply to enhance value since range = 0 - 9
 		}
 
 		/* get the number of elements*/
-		num = temp.size() - 1; // take off one for the multiplier and one for the null value
+		num = static_cast<int>(temp.size() - 1); // take off one for the multiplier and one for the null value
 		temp.clear(); // be frugal with memory..
 
 		return output;
@@ -1029,7 +1029,7 @@ namespace Utility
 
 	byte Utility::GetBrightness(OLE_COLOR color)
 	{
-		return ((short)GetRValue(color) + (short)GetGValue(color) + (short)GetBValue(color)) / 3;
+		return (static_cast<short>(GetRValue(color)) + static_cast<short>(GetGValue(color)) + static_cast<short>(GetBValue(color))) / 3;
 	}
 
 	// ***********************************************************
@@ -1178,11 +1178,11 @@ namespace Utility
 
 			if (GetFileVersionInfoW(path, verHandle, verSize, verData))
 			{
-				if (VerQueryValue(verData, "\\", (VOID FAR * FAR*) & lpBuffer, &size))
+				if (VerQueryValue(verData, "\\", reinterpret_cast<void* *>(&lpBuffer), &size))
 				{
 					if (size)
 					{
-						VS_FIXEDFILEINFO* verInfo = (VS_FIXEDFILEINFO*)lpBuffer;
+						VS_FIXEDFILEINFO* verInfo = reinterpret_cast<VS_FIXEDFILEINFO*>(lpBuffer);
 						if (verInfo->dwSignature == 0xfeef04bd)
 						{
 							int major = HIWORD(verInfo->dwFileVersionMS);
@@ -1327,11 +1327,11 @@ namespace Utility
 		register LPBYTE pOutTmp = nullptr;
 		LPBYTE pOutBuf = nullptr;
 		register LPBYTE pInTmp = nullptr;
-		LPBYTE pInBuf = (LPBYTE)sIn.GetBuffer(nLen);
+		LPBYTE pInBuf = reinterpret_cast<LPBYTE>(sIn.GetBuffer(nLen));
 		BYTE b = 0;
 
 		//alloc out buffer
-		pOutBuf = (LPBYTE)sOut.GetBuffer(nLen * 3 - 2);//new BYTE [nLen  * 3];
+		pOutBuf = reinterpret_cast<LPBYTE>(sOut.GetBuffer(nLen * 3 - 2));//new BYTE [nLen  * 3];
 
 		if (pOutBuf)
 		{
@@ -1378,10 +1378,10 @@ namespace Utility
 			nullptr,
 			socketError,
 			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPTSTR)&lpMsgBuf,
+			reinterpret_cast<LPTSTR>(&lpMsgBuf),
 			0, nullptr);
 
-		CString s = (char*)lpMsgBuf;
+		CString s = static_cast<char*>(lpMsgBuf);
 		LocalFree(lpMsgBuf);
 
 		return s;

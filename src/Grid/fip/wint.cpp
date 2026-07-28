@@ -78,7 +78,7 @@ int w123int(FILE *fp,long i_val,long o_len)
    i123toa(i_val,int_str);
 
    /* GET STRING LENGTH OF INT_STR */
-   s_len = _tcslen(int_str);
+   s_len = static_cast<long>(_tcslen(int_str));
 
    /* IF LEN OF INT_STR LESS THAN O_LEN AND O_LEN NOT ZERO */
    if (s_len < o_len && o_len) {

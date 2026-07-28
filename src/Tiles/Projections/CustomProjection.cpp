@@ -29,10 +29,10 @@ void CustomProjection::FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 {
 	double lat = pnt.Lat;
 	double lng = pnt.Lng;
-	
+
 	VARIANT_BOOL vb;
 	_projWGS84->Transform(&lng, &lat, &vb);
-	
+
 	FromProjToXY(lat, lng, zoom, ret);
 }
 
@@ -53,8 +53,8 @@ void CustomProjection::FromProjToXY(double lat, double lng, int zoom, CPoint &re
 	int mapSizeX = s.cx;
 	int mapSizeY = s.cy;
 
-	ret.x = (int) Clip(x * mapSizeX, 0, mapSizeX);
-	ret.y = (int) Clip(y * mapSizeY, 0, mapSizeY);
+	ret.x = static_cast<int>(Clip(x * mapSizeX, 0, mapSizeX));
+	ret.y = static_cast<int>(Clip(y * mapSizeY, 0, mapSizeY));
 
 	Clip(ret, zoom);
 }
@@ -102,8 +102,8 @@ void CustomProjection::GetTileSizeProj(int zoom, SizeLatLng &size)
 {
 	CSize sizeInt;
 	GetTileMatrixSizeXY(zoom, sizeInt);
-	size.WidthLng = (_xMax - _xMin) / (double)sizeInt.cx;
-	size.HeightLat = (_yMax - _yMin) / (double)sizeInt.cy;
+	size.WidthLng = (_xMax - _xMin) / static_cast<double>(sizeInt.cx);
+	size.HeightLat = (_yMax - _yMin) / static_cast<double>(sizeInt.cy);
 }
 
 // ******************************************************

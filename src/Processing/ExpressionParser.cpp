@@ -304,7 +304,7 @@ CustomFunction* ExpressionParser::ParseFunction(CStringW& s, int begin, int& fnB
 		return fn;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // ************************************************************
@@ -329,16 +329,16 @@ bool ExpressionParser::ParseArgumentList(CStringW s, CustomFunction* fn)
 		
 		if (arg)
 		{
-			arg->isArgument = true; 
+			arg->isArgument = true;
 			_expression->AddPart(arg);
 			
-            // argument list holds references to parts which are calculated before function
+			// argument list holds references to parts which are calculated before function
 			// there is no need to delete arguments, as they will be deleted when parts list is cleared
 			part->arguments.push_back(arg);
 		}
 		else
 		{
-			// error message is set above			
+			// error message is set above
 			delete part;
 			return false;
 		}
@@ -347,7 +347,7 @@ bool ExpressionParser::ParseArgumentList(CStringW s, CustomFunction* fn)
 	};
 
 	CStringW errorMessage;
-	if (!fn->CheckArguments(part->arguments.size(), errorMessage))
+	if (!fn->CheckArguments(static_cast<int>(part->arguments.size()), errorMessage))
 	{
 		SetErrorMessage(errorMessage);
 		delete part;
@@ -383,7 +383,7 @@ CExpressionPart* ExpressionParser::ParseExpressionPart(CStringW s)
 		{
 			delete element;
 			delete part;
-			return NULL;
+			return nullptr;
 		}
 
 		// saving element
@@ -400,14 +400,14 @@ CExpressionPart* ExpressionParser::ParseExpressionPart(CStringW s)
 	{
 		SetErrorMessage(L"Expression part is empty");
 		delete part;
-		return NULL;
+		return nullptr;
 	}
 
 	if (part->elements[part->elements.size() - 1]->type == etOperation)
 	{
 		SetErrorMessage(L"Operator doesn't have right operand.");
 		delete part;
-		return NULL;
+		return nullptr;
 	}
 
 	return part;
@@ -618,7 +618,7 @@ bool ExpressionParser::ReadValue(CStringW s, int& position, CElement* element)
 			if (IsInteger(sub))
 			{
 				element->type = etValue;
-				unsigned int index = _wtoi(LPCWSTR(sub));
+				unsigned int index = _wtoi(static_cast<LPCWSTR>(sub));
 
 				vector<CStringW>* strings = _expression->GetStrings();
 				element->val->str(index < strings->size() ? (*strings)[index] : L"");
@@ -648,7 +648,7 @@ bool ExpressionParser::ReadValue(CStringW s, int& position, CElement* element)
 			// writing the number of bracket
 			if (IsInteger(sub))
 			{
-				element->partIndex = _wtoi(LPCWSTR(sub));
+				element->partIndex = _wtoi(static_cast<LPCWSTR>(sub));
 				element->type = etPart;
 			}
 			else

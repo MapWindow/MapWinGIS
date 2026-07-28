@@ -31,7 +31,7 @@ ShpfileType ShapeHelper::GetShapeType2D(IShape* shp)
 bool ShapeHelper::PointInThisPoly(IShape* shp, double x, double y)
 {
 	if (!shp) return false;
-	CComPtr<IPoint> pnt = NULL;
+	CComPtr<IPoint> pnt = nullptr;
 	ComHelper::CreatePoint(&pnt);
 	VARIANT_BOOL vb;
 	shp->PointInThisPoly(pnt, &vb);
@@ -102,7 +102,7 @@ bool ShapeHelper::PointWithinShape(IShape* shape, double projX, double projY, do
 				return true;
 
 			VARIANT_BOOL vb;
-			IPoint* pnt = NULL;
+			IPoint* pnt = nullptr;
 			ComHelper::CreatePoint(&pnt);
 
 			pnt->put_X(b_minX);
@@ -282,7 +282,7 @@ bool ShapeHelper::ForceProperShapeType(IShape* shp, ShpfileType sfType)
 	if (ShapeUtility::Convert2D(sfType) == SHP_MULTIPOINT && ShapeUtility::Convert2D(shapeType) == SHP_POINT)
 	{
 		VARIANT_BOOL vb;
-		CComPtr<IPoint> pnt = NULL;
+		CComPtr<IPoint> pnt = nullptr;
 		shp->get_Point(0, &pnt);
 		shp->Create(sfType, &vb);
 		if (vb)
@@ -349,7 +349,7 @@ int ShapeHelper::GetLargestPart(IShape* shp)
 
 	for (int j = 0; j < numParts; j++)
 	{
-		CComPtr<IShape> shpPart = NULL;
+		CComPtr<IShape> shpPart = nullptr;
 		shp->get_PartAsShape(j, &shpPart);
 		if (!shpPart) continue;
 
@@ -395,13 +395,13 @@ void ShapeHelper::AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, tkLab
 // *************************************************************
 IShape* ShapeHelper::CenterAsShape(IShape* shp)
 {
-	if (!shp) return NULL;
+	if (!shp) return nullptr;
 
-	CComPtr<IPoint> pnt = NULL;
+	CComPtr<IPoint> pnt = nullptr;
 	shp->get_Center(&pnt);
 
 	VARIANT_BOOL vb;
-	IShape* shpNew = NULL;
+	IShape* shpNew = nullptr;
 	ComHelper::CreateShape(&shp);
 	shp->Create(SHP_POINT, &vb);
 	
@@ -429,7 +429,7 @@ int ShapeHelper::GetContentLength(IShape* shp)
 }
 
 
-#if DEBUG_LOG
+#ifndef RELEASE_MODE
 // *************************************************************
 //		DebugDump()
 // *************************************************************

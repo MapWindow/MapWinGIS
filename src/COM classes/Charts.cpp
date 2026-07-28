@@ -208,7 +208,7 @@ STDMETHODIMP CCharts::put_PieRotation(double newVal)
 STDMETHODIMP CCharts::get_NumFields(long* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*retVal = _bars.size();
+		*retVal = static_cast<long>(_bars.size());
 	return S_OK;
 }
 
@@ -219,7 +219,7 @@ STDMETHODIMP CCharts::AddField2(long FieldIndex, OLE_COLOR Color)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		VARIANT_BOOL vbretval;
-	this->InsertField2(_bars.size(), FieldIndex, Color, &vbretval);
+	this->InsertField2(static_cast<long>(_bars.size()), FieldIndex, Color, &vbretval);
 	return S_OK;
 }
 
@@ -246,15 +246,15 @@ STDMETHODIMP CCharts::AddField(IChartField* Field, VARIANT_BOOL* retVal)
 STDMETHODIMP CCharts::InsertField2(long Index, long FieldIndex, OLE_COLOR Color, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Index < 0 || Index >(long)_bars.size())
+		if (Index < 0 || Index >static_cast<long>(_bars.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*retVal = VARIANT_FALSE;
 		}
 		else
 		{
-			IChartField* chartField = NULL;
-			CoCreateInstance(CLSID_ChartField, NULL, CLSCTX_INPROC_SERVER, IID_IChartField, (void**)&chartField);
+			IChartField* chartField = nullptr;
+			CoCreateInstance(CLSID_ChartField, nullptr, CLSCTX_INPROC_SERVER, IID_IChartField, (void**)&chartField);
 			if (chartField)
 			{
 				chartField->put_Index(FieldIndex);
@@ -274,7 +274,7 @@ STDMETHODIMP CCharts::InsertField2(long Index, long FieldIndex, OLE_COLOR Color,
 STDMETHODIMP CCharts::InsertField(long Index, IChartField* Field, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Index < 0 || Index >(long)_bars.size())
+		if (Index < 0 || Index >static_cast<long>(_bars.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*retVal = VARIANT_FALSE;
@@ -302,7 +302,7 @@ STDMETHODIMP CCharts::InsertField(long Index, IChartField* Field, VARIANT_BOOL* 
 STDMETHODIMP CCharts::RemoveField(long Index, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Index < 0 || Index >(long)_bars.size())
+		if (Index < 0 || Index >static_cast<long>(_bars.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*retVal = VARIANT_FALSE;
@@ -470,7 +470,7 @@ STDMETHODIMP CCharts::put_UseVariableRadius(VARIANT_BOOL newVal)
 STDMETHODIMP CCharts::get_Transparency(SHORT* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*retVal = (short)_options.transparency;
+		*retVal = static_cast<short>(_options.transparency);
 	return S_OK;
 }
 STDMETHODIMP CCharts::put_Transparency(SHORT newVal)
@@ -541,7 +541,7 @@ STDMETHODIMP CCharts::get_Chart(long ShapeIndex, IChart** retVal)
 		if (!_shapefile)
 		{
 			ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
-			*retVal = NULL;
+			*retVal = nullptr;
 			return S_OK;
 		}
 		else
@@ -550,13 +550,13 @@ STDMETHODIMP CCharts::get_Chart(long ShapeIndex, IChart** retVal)
 			if (ShapeIndex < 0 || ShapeIndex >(long)positions->size())
 			{
 				ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-				*retVal = NULL;
+				*retVal = nullptr;
 				return S_OK;
 			}
 			else
 			{
-				IChart* chart = NULL;
-				CoCreateInstance(CLSID_Chart, NULL, CLSCTX_INPROC_SERVER, IID_IChart, (void**)&chart);
+				IChart* chart = nullptr;
+				CoCreateInstance(CLSID_Chart, nullptr, CLSCTX_INPROC_SERVER, IID_IChart, (void**)&chart);
 				if (chart)
 				{
 					ShapeRecord* data = (*positions)[ShapeIndex];
@@ -575,7 +575,7 @@ STDMETHODIMP CCharts::get_Field(long FieldIndex, IChartField** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (FieldIndex < 0 || FieldIndex >(long)_bars.size() - 1)
+		if (FieldIndex < 0 || FieldIndex >static_cast<long>(_bars.size()) - 1)
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		}
@@ -686,10 +686,10 @@ STDMETHODIMP CCharts::Clear()
 		std::vector<ShapeRecord*>* data = ((CShapefile*)sf)->get_ShapeVector();
 		for (unsigned int i = 0; i < data->size(); i++)
 		{
-			if ((*data)[i]->chart != NULL)
+			if ((*data)[i]->chart != nullptr)
 			{
 				delete (*data)[i]->chart;
-				(*data)[i]->chart = NULL;
+				(*data)[i]->chart = nullptr;
 			}
 		}
 	}
@@ -712,7 +712,7 @@ STDMETHODIMP CCharts::DrawChart(int hdc, float x, float y, VARIANT_BOOL hideLabe
 			return S_OK;
 		}
 
-	CDC* dc = CDC::FromHandle((HDC)hdc);
+	CDC* dc = CDC::FromHandle(reinterpret_cast<HDC>(static_cast<INT_PTR>(hdc)));
 	*retVal = DrawChartCore(dc, x, y, hideLabels, backColor);
 	return S_OK;
 }
@@ -759,7 +759,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 	Gdiplus::SolidBrush brushBackground(clr);
 	Gdiplus::Pen penBackground(clr);
 
-	CFont* oldFont = NULL;
+	CFont* oldFont = nullptr;
 	CFont fnt;
 	CBrush brushFrame(_options.valuesFrameColor);
 
@@ -837,7 +837,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 			}
 			else
 			{
-				CComPtr<IChartField> fld = NULL;
+				CComPtr<IChartField> fld = nullptr;
 				this->get_Field(j, &fld);
 				fld->get_Color(&color);
 			}
@@ -1003,11 +1003,11 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 			}
 			else
 			{
-				IChartField* fld = NULL;
+				IChartField* fld = nullptr;
 				this->get_Field(j, &fld);
 				fld->get_Color(&color);
 				fld->Release();
-				fld = NULL;
+				fld = nullptr;
 			}
 
 			// initializing brushes
@@ -1126,7 +1126,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 					ValueRectangle value;
 					value.string = s;
 
-					// drawing frame							
+					// drawing frame
 					if (!vertical)
 					{
 						CRect r(rect->left - 2, rect->top, rect->right + 2, rect->bottom);
@@ -1185,7 +1185,7 @@ STDMETHODIMP CCharts::get_IconWidth(long *retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		if (_options.chartType == chtBarChart)
 		{
-			int barCount = _bars.size() == 0 ? 1 : _bars.size();
+			int barCount = static_cast<int>(_bars.size()) == 0 ? 1 : static_cast<int>(_bars.size());
 			*retVal = _options.barWidth * barCount + 2;
 			if (_options.use3Dmode)
 				*retVal += int(sqrt(2.0f) / 2.0 * _options.thickness);		// 45 degrees
@@ -1228,7 +1228,7 @@ STDMETHODIMP CCharts::get_ValuesFontName(BSTR* retval)
 		USES_CONVERSION;
 	*retval = OLE2BSTR(_options.valuesFontName);
 	return S_OK;
-};
+}
 STDMETHODIMP CCharts::put_ValuesFontName(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -1236,7 +1236,7 @@ STDMETHODIMP CCharts::put_ValuesFontName(BSTR newVal)
 	::SysFreeString(_options.valuesFontName);
 	_options.valuesFontName = OLE2BSTR(newVal);
 	return S_OK;
-};
+}
 
 // *****************************************************************
 //		Select()
@@ -1258,7 +1258,7 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 
 	vector<long> results;
 
-	IUtils* utils = NULL;
+	IUtils* utils = nullptr;
 	CoCreateInstance(CLSID_Utils, NULL, CLSCTX_INPROC_SERVER, IID_IUtils, (void**)&utils);
 
 	long numShapes;
@@ -1268,7 +1268,7 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 
 	for (long i = 0; i < numShapes; i++)
 	{
-		if ((*data)[i]->chart->isDrawn && (*data)[i]->chart->frame != NULL)
+		if ((*data)[i]->chart->isDrawn && (*data)[i]->chart->frame != nullptr)
 		{
 			CRect* frame = (*data)[i]->chart->frame;
 			tkExtentsRelation relation = GeometryHelper::RelateExtents(box, *frame);
@@ -1288,7 +1288,7 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 
 	(*retval) = Templates::Vector2SafeArray(&results, VT_I4, Indices);
 	return S_OK;
-};
+}
 
 #pragma region "Serialiation"
 
@@ -1310,7 +1310,7 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 {
 	USES_CONVERSION;
 
-	CPLXMLNode* psTree = CPLCreateXMLNode(NULL, CXT_Element, "ChartsClass");
+	CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, "ChartsClass");
 	CString str;
 
 	// fields
@@ -1511,19 +1511,19 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 		{
 			if (strcmp(node->pszValue, "ChartFieldClass") == 0)
 			{
-				IChartField* field = NULL;
-				CoCreateInstance(CLSID_ChartField, NULL, CLSCTX_INPROC_SERVER, IID_IChartField, (void**)&field);
+				IChartField* field = nullptr;
+				CoCreateInstance(CLSID_ChartField, nullptr, CLSCTX_INPROC_SERVER, IID_IChartField, (void**)&field);
 
 				// name
-				s = CPLGetXMLValue(node, "Name", NULL);
+				s = CPLGetXMLValue(node, "Name", nullptr);
 				CComBSTR vbstr(s);
 				field->put_Name(vbstr);
 
-				s = CPLGetXMLValue(node, "Color", NULL);
+				s = CPLGetXMLValue(node, "Color", nullptr);
 				OLE_COLOR color = atoi(s);
 				field->put_Color(color);
 
-				s = CPLGetXMLValue(node, "Index", NULL);
+				s = CPLGetXMLValue(node, "Index", nullptr);
 				long index = atoi(s);
 				field->put_Index(index);
 
@@ -1707,7 +1707,7 @@ STDMETHODIMP CCharts::SaveToXML(BSTR Filename, VARIANT_BOOL* retVal)
 		return S_OK;
 	}
 
-	CPLXMLNode *psTree = CPLCreateXMLNode(NULL, CXT_Element, "MapWindow");
+	CPLXMLNode *psTree = CPLCreateXMLNode(nullptr, CXT_Element, "MapWindow");
 	if (psTree)
 	{
 		Utility::WriteXmlHeaderAttributes(psTree, "Charts");
@@ -1731,17 +1731,17 @@ STDMETHODIMP CCharts::SaveToXML(BSTR Filename, VARIANT_BOOL* retVal)
 // ********************************************************
 CPLXMLNode* CCharts::SerializeChartData(CString ElementName)
 {
-	CPLXMLNode* psCharts = CPLCreateXMLNode(NULL, CXT_Element, ElementName);
+	CPLXMLNode* psCharts = CPLCreateXMLNode(nullptr, CXT_Element, ElementName);
 	if (psCharts)
 	{
 		if (!_shapefile)
-			return NULL;
+			return nullptr;
 
 		std::vector<ShapeRecord*>* data = ((CShapefile*)_shapefile)->get_ShapeVector();
 		if (data)
 		{
-			CPLXMLNode* nodeOld = NULL;
-			CPLXMLNode* nodeNew = NULL;
+			CPLXMLNode* nodeOld = nullptr;
+			CPLXMLNode* nodeNew = nullptr;
 
 			for (unsigned int i = 0; i < data->size(); i++)
 			{
@@ -1751,7 +1751,7 @@ CPLXMLNode* CCharts::SerializeChartData(CString ElementName)
 				}
 				else
 				{
-					nodeNew = CPLCreateXMLNode(NULL, CXT_Element, "Chart");
+					nodeNew = CPLCreateXMLNode(nullptr, CXT_Element, "Chart");
 					CPLAddXMLSibling(nodeOld, nodeNew);
 					nodeOld = nodeNew;
 				}
@@ -1841,7 +1841,7 @@ bool CCharts::DeserializeChartData(CPLXMLNode* node)
 
 	node = CPLGetXMLNode(node, "Chart");
 
-	int count = data->size();
+	int count = static_cast<int>(data->size());
 	while (node && i < count)
 	{
 		s = CPLGetXMLValue(node, "X", "0.0");

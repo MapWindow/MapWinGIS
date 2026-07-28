@@ -46,7 +46,7 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, GEOSGeometry* gsGeom
 bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM)
 {
 	bool substitute = false;
-	bool has25D = false;	
+	bool has25D = false;
 
 	if (!GeosHelper::IsValid(gsGeom))
 	{
@@ -101,7 +101,7 @@ GEOSGeom GeosConverter::ShapeToGeom(IShape* shp)
 		OGRGeometryFactory::destroyGeometry(oGeom);
 		return result;
 	}
-    return nullptr;
+	return nullptr;
 }
 
 // *****************************************************
@@ -111,8 +111,8 @@ GEOSGeom GeosConverter::ShapeToGeom(IShape* shp)
 GEOSGeometry* GeosConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance)
 {
 	const GEOSGeometry* gsRing = GeosHelper::GetExteriorRing(gsGeom);	// no memory is allocated there
-    // ReSharper disable once CppLocalVariableMayBeConst
-    GEOSGeom gsPoly = GeosHelper::TopologyPreserveSimplify(gsRing, tolerance);		// memory allocation
+	// ReSharper disable once CppLocalVariableMayBeConst
+	GEOSGeom gsPoly = GeosHelper::TopologyPreserveSimplify(gsRing, tolerance);		// memory allocation
 
 	if (!gsPoly)
 		return nullptr;
@@ -127,7 +127,7 @@ GEOSGeometry* GeosConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double 
 			if (gsOut)
 			{
 				char* type = GeosHelper::GetGeometryType(gsOut);
-			    const CString s = type;
+				const CString s = type;
 				GeosHelper::Free(type);
 				if (s == "LinearRing")
 					holes.push_back(gsOut);
@@ -138,7 +138,7 @@ GEOSGeometry* GeosConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double 
 	GEOSGeometry *gsNew;
 	if (!holes.empty())
 	{
-		gsNew = GeosHelper::CreatePolygon(gsPoly, &holes[0], holes.size()); // memory allocation (should be released by caller)
+		gsNew = GeosHelper::CreatePolygon(gsPoly, &holes[0], static_cast<unsigned int>(holes.size())); // memory allocation (should be released by caller)
 	}
 	else
 	{
@@ -154,7 +154,7 @@ void GeosConverter::NormalizeSplitResults(GEOSGeometry* result, GEOSGeometry* su
 {
 	if (!result) return;
 
-    const int numGeoms = GeosHelper::GetNumGeometries(result);
+	const int numGeoms = GeosHelper::GetNumGeometries(result);
 	if (numGeoms > 1)
 	{
 		if (shpType == SHP_POLYGON)
@@ -174,7 +174,7 @@ void GeosConverter::NormalizeSplitResults(GEOSGeometry* result, GEOSGeometry* su
 				double polyArea;
 				GeosHelper::Area(polygon, &polyArea);
 
-			    const double areaRatio = intersectArea / polyArea;
+				const double areaRatio = intersectArea / polyArea;
 				if (areaRatio > 0.99 && areaRatio < 1.01) {
 					GEOSGeometry* clone = GeosHelper::CloneGeometry(polygon);
 					if (clone) {
@@ -213,7 +213,7 @@ GEOSGeometry* GeosConverter::MergeGeometries(vector<GEOSGeometry*>& data, ICallb
 	int count = 0;	// number of union operation performed
 	long percent = 0;
 
-    const int size = data.size();
+    const int size = static_cast<const int>(data.size());
 	int depth = 0;
 
 	if (size == 1)

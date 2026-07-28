@@ -20,9 +20,9 @@ bool CFunction::Validate()
 // **********************************************************
 STDMETHODIMP CFunction::get_Name(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	if (!Validate()) 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
+	if (!Validate())
 	{
 		*pVal = m_globalSettings.CreateEmptyBSTR();
 		return S_OK;
@@ -39,7 +39,7 @@ STDMETHODIMP CFunction::get_Name(BSTR* pVal)
 // **********************************************************
 STDMETHODIMP CFunction::get_Alias(long aliasIndex, BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (Validate())
 	{
@@ -47,7 +47,7 @@ STDMETHODIMP CFunction::get_Alias(long aliasIndex, BSTR* pVal)
 
 		vector<CStringW>* aliases = _function->getAliases();
 
-		if (aliasIndex <= 0 || aliasIndex >= (long)aliases->size())
+		if (aliasIndex <= 0 || aliasIndex >= static_cast<long>(aliases->size()))
 		{
 			CallbackHelper::ErrorMsg("Function::get_Alias: index out of bounds.");
 		}
@@ -67,9 +67,9 @@ STDMETHODIMP CFunction::get_Alias(long aliasIndex, BSTR* pVal)
 // **********************************************************
 STDMETHODIMP CFunction::get_NumAliases(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (!Validate()) 
+	if (!Validate())
 	{
 		*pVal = 0;
 		return S_OK;
@@ -77,7 +77,7 @@ STDMETHODIMP CFunction::get_NumAliases(long* pVal)
 
 	vector<CStringW>* aliases = _function->getAliases();
 
-	*pVal = aliases->size() - 1;
+	*pVal = static_cast<long>(aliases->size()) - 1;
 	
 	if (*pVal == -1)  {
 		*pVal = 0;
@@ -91,7 +91,7 @@ STDMETHODIMP CFunction::get_NumAliases(long* pVal)
 // **********************************************************
 STDMETHODIMP CFunction::get_NumParameters(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	if (!Validate()) 
 	{
@@ -109,7 +109,7 @@ STDMETHODIMP CFunction::get_NumParameters(long* pVal)
 // **********************************************************
 STDMETHODIMP CFunction::get_Group(tkFunctionGroup* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (!Validate()) 
 	{
@@ -127,7 +127,7 @@ STDMETHODIMP CFunction::get_Group(tkFunctionGroup* pVal)
 // **********************************************************
 STDMETHODIMP CFunction::get_Description(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (Validate())
 	{
@@ -143,7 +143,7 @@ STDMETHODIMP CFunction::get_Description(BSTR* pVal)
 
 STDMETHODIMP CFunction::put_Description(BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	// may be useful for localization, currently not exposed to API
 
@@ -155,7 +155,7 @@ STDMETHODIMP CFunction::put_Description(BSTR newVal)
 // **********************************************************
 STDMETHODIMP CFunction::get_ParameterName(LONG parameterIndex, BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (!Validate())
 	{
@@ -183,7 +183,7 @@ STDMETHODIMP CFunction::get_ParameterName(LONG parameterIndex, BSTR* pVal)
 
 STDMETHODIMP CFunction::put_ParameterName(LONG parameterIndex, BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	// may be useful for localization, currently not exposed to API
 
@@ -195,7 +195,7 @@ STDMETHODIMP CFunction::put_ParameterName(LONG parameterIndex, BSTR newVal)
 // **********************************************************
 STDMETHODIMP CFunction::get_ParameterDescription(LONG parameterIndex, BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (!Validate())
 	{
@@ -223,7 +223,7 @@ STDMETHODIMP CFunction::get_ParameterDescription(LONG parameterIndex, BSTR* pVal
 
 STDMETHODIMP CFunction::put_ParameterDescription(LONG parameterIndex, BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	// may be useful for localization, currently not exposed to API
 
@@ -235,7 +235,7 @@ STDMETHODIMP CFunction::put_ParameterDescription(LONG parameterIndex, BSTR newVa
 // **********************************************************
 STDMETHODIMP CFunction::get_Signature(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (Validate())
 	{

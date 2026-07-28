@@ -60,7 +60,7 @@ STDMETHODIMP CLinePattern::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _globalCallback;
-	if( _globalCallback != NULL )
+	if( _globalCallback != nullptr)
 		_globalCallback->AddRef();
 	return S_OK;
 }
@@ -91,7 +91,7 @@ STDMETHODIMP CLinePattern::put_Key(BSTR newVal)
 }
 
 // **************************************************************
-//		CLinePattern::ErrorMessage()								      
+//		CLinePattern::ErrorMessage()
 // **************************************************************
 void CLinePattern::ErrorMessage(long ErrorCode)
 {
@@ -107,7 +107,7 @@ void CLinePattern::ErrorMessage(long ErrorCode)
 STDMETHODIMP CLinePattern::get_Count(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _lines.size();
+	*retVal = static_cast<int>(_lines.size());
 	return S_OK;
 }
 
@@ -117,10 +117,10 @@ STDMETHODIMP CLinePattern::get_Count(int* retVal)
 STDMETHODIMP CLinePattern::get_Line(int Index, ILineSegment** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if(Index < 0 || Index >= (int)_lines.size())
+	if(Index < 0 || Index >= static_cast<int>(_lines.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = NULL;
+		*retVal = nullptr;
 	}
 	else
 	{
@@ -137,7 +137,7 @@ STDMETHODIMP CLinePattern::put_Line(int Index, ILineSegment* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if(Index < 0 || Index >= (int)_lines.size())
+	if(Index < 0 || Index >= static_cast<int>(_lines.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
@@ -163,7 +163,7 @@ STDMETHODIMP CLinePattern::AddLine(OLE_COLOR color, float width, tkDashStyle sty
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	VARIANT_BOOL vbretval;
-	InsertLine(_lines.size(), color, width, style, &vbretval);
+	InsertLine(static_cast<int>(_lines.size()), color, width, style, &vbretval);
 	return S_OK;
 }
 
@@ -173,15 +173,15 @@ STDMETHODIMP CLinePattern::AddLine(OLE_COLOR color, float width, tkDashStyle sty
 STDMETHODIMP CLinePattern::InsertLine(int Index, OLE_COLOR color, float width, tkDashStyle style, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index > (int)_lines.size())
+	if (Index < 0 || Index > static_cast<int>(_lines.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
 	}
 	else
 	{
-		ILineSegment* segm = NULL;
-		CoCreateInstance( CLSID_LineSegment, NULL, CLSCTX_INPROC_SERVER, IID_ILineSegment, (void**)&segm );				
+		ILineSegment* segm = nullptr;
+		CoCreateInstance( CLSID_LineSegment, nullptr, CLSCTX_INPROC_SERVER, IID_ILineSegment, (void**)&segm );
 		segm->put_Color(color);
 		segm->put_LineWidth(width);
 		segm->put_LineStyle(style);
@@ -200,7 +200,7 @@ STDMETHODIMP CLinePattern::InsertLine(int Index, OLE_COLOR color, float width, t
 STDMETHODIMP CLinePattern::AddMarker(tkDefaultPointSymbol marker, ILineSegment** retVal )
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	InsertMarker(_lines.size(), marker, retVal);
+	InsertMarker(static_cast<int>(_lines.size()), marker, retVal);
 	return S_OK;
 }
 
@@ -210,15 +210,15 @@ STDMETHODIMP CLinePattern::AddMarker(tkDefaultPointSymbol marker, ILineSegment**
 STDMETHODIMP CLinePattern::InsertMarker(int Index, tkDefaultPointSymbol marker, ILineSegment** retVal )
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index > (int)_lines.size())
+	if (Index < 0 || Index > static_cast<int>(_lines.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		*retVal = NULL;
+		*retVal = nullptr;
 	}
 	else
 	{
-		ILineSegment* segm = NULL;
-		CoCreateInstance( CLSID_LineSegment, NULL, CLSCTX_INPROC_SERVER, IID_ILineSegment, (void**)&segm );				
+		ILineSegment* segm = nullptr;
+		CoCreateInstance( CLSID_LineSegment, nullptr, CLSCTX_INPROC_SERVER, IID_ILineSegment, (void**)&segm );
 		segm->put_Marker(marker);
 		segm->put_LineType(lltMarker);
 		segm->AddRef();
@@ -256,13 +256,13 @@ STDMETHODIMP CLinePattern::RemoveItem(int Index, VARIANT_BOOL* retVal)
 STDMETHODIMP CLinePattern::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
 	for (unsigned int i = 0; i < _lines.size(); i++)
 	{
 		if (_lines[i])
 		{
 			_lines[i]->Release();
-			_lines[i] = NULL;
+			_lines[i] = nullptr;
 		}
 	}
 
@@ -285,7 +285,7 @@ STDMETHODIMP CLinePattern::Draw(int hdc, float x, float y, int clipWidth, int cl
 		return S_OK;
 	}
 
-	CDC* dc = CDC::FromHandle((HDC)hdc);
+	CDC* dc = CDC::FromHandle(reinterpret_cast<HDC>(static_cast<INT_PTR>(hdc)));
 	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
@@ -356,13 +356,13 @@ VARIANT_BOOL CLinePattern::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 // ****************************************************************
 STDMETHODIMP CLinePattern::get_Transparency (BYTE *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _transparency;
 	return S_OK;
 }
 STDMETHODIMP CLinePattern::put_Transparency (BYTE newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0) newVal = 0;
 	if (newVal > 255) newVal = 255;
 	_transparency = newVal;	
@@ -387,12 +387,12 @@ STDMETHODIMP CLinePattern::Serialize(BSTR* retVal)
 CPLXMLNode* CLinePattern::SerializeCore(CString ElementName)
 {
 	USES_CONVERSION;
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
-	 
+	CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, ElementName);
+
 	CString str = OLE2CA(_key);
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", CPLString().Printf(str));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Transparency", CPLString().Printf("%d", (int)_transparency));
-	
+
 	// segments
 	if (_lines.size() > 0)
 	{
@@ -477,14 +477,14 @@ bool CLinePattern::DeserializeCore(CPLXMLNode* node)
 		return false;
 
 	CString s;
-	s = CPLGetXMLValue( node, "Key", NULL );
+	s = CPLGetXMLValue( node, "Key", nullptr);
 	if (s != "")
 	{
 		CComBSTR bstr(s);
 		this->put_Key(bstr);
 	}
 
-	s = CPLGetXMLValue( node, "Transparency", NULL );
+	s = CPLGetXMLValue( node, "Transparency", nullptr);
 	if (s != "") _transparency = (unsigned char)atoi(s.GetString());
 	
 	// restoring segments
@@ -498,85 +498,85 @@ bool CLinePattern::DeserializeCore(CPLXMLNode* node)
 		{
 			if (strcmp(node->pszValue, "LineSegmentClass") == 0)
 			{
-				ILineSegment* segment = NULL;
+				ILineSegment* segment = nullptr;
 				this->AddMarker(dpsDiamond, &segment);
 				
 				if (segment)
 				{
 					// line type
 					tkLineType lineType;
-					s = CPLGetXMLValue( node, "LineType", NULL );
+					s = CPLGetXMLValue( node, "LineType", nullptr);
 					if (s != "") lineType = (tkLineType)atoi( s );
 					segment->put_LineType(lineType);
 
 					// color
 					OLE_COLOR color = RGB(0,0,0);
-					s = CPLGetXMLValue( node, "Color", NULL );
+					s = CPLGetXMLValue( node, "Color", nullptr);
 					if (s != "") color = (OLE_COLOR)atoi( s );
 					segment->put_Color(color);
 
 					// outline color
 					color = RGB(0,0,0);
-					s = CPLGetXMLValue( node, "MarkerOutlineColor", NULL );
+					s = CPLGetXMLValue( node, "MarkerOutlineColor", nullptr);
 					if (s != "") color = (OLE_COLOR)atoi( s );
 					segment->put_MarkerOutlineColor(color);
 
 					// line width
 					float val = 0.0f;
-					s = CPLGetXMLValue( node, "LineWidth", NULL );
+					s = CPLGetXMLValue( node, "LineWidth", nullptr);
 					if (s != "") val = (float)Utility::atof_custom( s );
 					segment->put_LineWidth(val);
 
 					// marker size
 					val = 0.0f;
-					s = CPLGetXMLValue( node, "MarkerSize", NULL );
+					s = CPLGetXMLValue( node, "MarkerSize", nullptr);
 					if (s != "") val = (float)Utility::atof_custom( s );
 					segment->put_MarkerSize(val);
 
 					// marker interval
 					val = 0.0f;
-					s = CPLGetXMLValue( node, "MarkerInterval", NULL );
+					s = CPLGetXMLValue( node, "MarkerInterval", nullptr);
 					if (s != "") val = (float)Utility::atof_custom( s );
 					segment->put_MarkerInterval(val);
 
                     // marker interval is relative
                     VARIANT_BOOL isRelative = VARIANT_FALSE;
-                    s = CPLGetXMLValue(node, "MarkerIntervalIsRelative", NULL);
+                    s = CPLGetXMLValue(node, "MarkerIntervalIsRelative", nullptr);
                     if (s != "") isRelative = (VARIANT_BOOL)atoi(s);
                     segment->put_MarkerIntervalIsRelative(isRelative);
 
 					// marker offset
 					val = 0.0f;
-					s = CPLGetXMLValue( node, "MarkerOffset", NULL );
+					s = CPLGetXMLValue( node, "MarkerOffset", nullptr);
 					if (s != "") val = (float)Utility::atof_custom( s );
 					segment->put_MarkerOffset(val);
 
                     // marker interval is relative
-                    s = CPLGetXMLValue(node, "MarkerOffsetIsRelative", NULL);
+                    s = CPLGetXMLValue(node, "MarkerOffsetIsRelative", nullptr);
                     if (s != "") isRelative = (VARIANT_BOOL)atoi(s);
                     segment->put_MarkerOffsetIsRelative(isRelative);
 
 					// line style
 					tkDashStyle lineStyle = dsSolid;
-					s = CPLGetXMLValue( node, "LineStyle", NULL );
+					s = CPLGetXMLValue( node, "LineStyle", nullptr);
 					if (s != "") lineStyle = (tkDashStyle)atoi( s );
 					segment->put_LineStyle(lineStyle);
 
 					// marker
 					tkDefaultPointSymbol marker = dpsDiamond;
-					s = CPLGetXMLValue( node, "Marker", NULL );
+					s = CPLGetXMLValue( node, "Marker", nullptr);
 					if (s != "") marker = (tkDefaultPointSymbol)atoi( s );
 					segment->put_Marker(marker);
 
 					// marker orientation
 					tkLineLabelOrientation orientation = lorHorizontal;
-					s = CPLGetXMLValue( node, "MarkerOrientation", NULL );
+					s = CPLGetXMLValue( node, "MarkerOrientation", nullptr);
 					if (s != "") orientation = (tkLineLabelOrientation)atoi( s );
 					segment->put_MarkerOrientation(orientation);
 
 					// marker flip first
 					VARIANT_BOOL flipFirst = VARIANT_FALSE;
-					s = CPLGetXMLValue( node, "MarkerFlipFirst", NULL );
+					s = CPLGetXMLValue( node, "MarkerFlipFirst", nullptr);
 					if (s != "") flipFirst = (VARIANT_BOOL)atoi( s );
 					segment->put_MarkerFlipFirst(flipFirst);
 

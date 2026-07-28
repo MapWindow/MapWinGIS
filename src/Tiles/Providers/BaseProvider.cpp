@@ -109,18 +109,18 @@ CMemoryBitmap* BaseProvider::GetTileFileData(CString url)
 		return nullptr;
 
 	fl.seekg(0, std::ios::end);
-	const int sz = fl.tellg();
+	const std::streamoff sz = fl.tellg();
 	if (sz == 0)
 		return nullptr;
 
-	std::vector<char> buf(sz);
+	std::vector<char> buf(static_cast<size_t>(sz));
 
 	fl.seekg(0, std::ios::beg);
 	fl.read(buf.data(), buf.size());
 	if (!fl)
 		return nullptr;
 
-	return ReadBitmap(buf.data(), buf.size());
+	return ReadBitmap(buf.data(), static_cast<int>(buf.size()));
 }
 
 // ************************************************************

@@ -7,13 +7,13 @@ graph::graph()
 
 graph::~graph()
 {	for( int i = 0; i < (int)edges.size(); i++ )
-	{	if( edges[i] != NULL )
+	{	if( edges[i] != nullptr)
 			delete edges[i];
-		edges[i] = NULL;
+		edges[i] = nullptr;
 	}
-	for( int j = 0; j < (int)graphnodes.size(); j++ )
+	for( int j = 0; j < static_cast<int>(graphnodes.size()); j++ )
 	{	delete graphnodes[j];
-		graphnodes[j] = NULL;
+		graphnodes[j] = nullptr;
 	}
 }
 
@@ -27,7 +27,7 @@ long graph::Insert( edge * e, void * exParam, bool (* CALLBACK_EQUALS)( void * d
 
 	long oneIndex = 0, twoIndex = 0;
 
-	for( int i = 0; i < (int)graphnodes.size(); i++ )
+	for( int i = 0; i < static_cast<int>(graphnodes.size()); i++ )
 	{	
 		if( !one_equal ) 
 		{	if( CALLBACK_EQUALS(e->one->data, graphnodes[i]->data, exParam ) == true )
@@ -53,17 +53,17 @@ long graph::Insert( edge * e, void * exParam, bool (* CALLBACK_EQUALS)( void * d
 	}
 
 	if( one_equal == false )
-	{	oneIndex = graphnodes.size();
+	{	oneIndex = static_cast<long>(graphnodes.size());
 		graphnodes.push_back(e->one);
 	}
 	if( two_equal == false )
-	{	twoIndex = graphnodes.size();	
+	{	twoIndex = static_cast<long>(graphnodes.size());
 		graphnodes.push_back(e->two);
 	}
 
 	e->oneIndex = oneIndex;
 	e->twoIndex = twoIndex;
-	long position = edges.size();
+	long position = static_cast<long>(edges.size());
 	e->one->edges.push_back(position);
 	e->two->edges.push_back(position);
 	edges.push_back( e );
@@ -72,17 +72,17 @@ long graph::Insert( edge * e, void * exParam, bool (* CALLBACK_EQUALS)( void * d
 }
 
 void graph::InsertBlank()
-{	edges.push_back( NULL );
+{	edges.push_back( nullptr );
 }
 
 void graph::Save(const char * filename, void (*PRINT_DATA)( ofstream & out, void * data ) )
 {	
 	ofstream outf("graph.txt");
 
-	for( int j = 0; j < (int)graphnodes.size(); j++ )
+	for( int j = 0; j < static_cast<int>(graphnodes.size()); j++ )
 	{	PRINT_DATA( outf, graphnodes[j]->data );
 		outf<<"\t:";
-		for( int i = 0; i < (int)graphnodes[j]->edges.size(); i++ )
+		for( int i = 0; i < static_cast<int>(graphnodes[j]->edges.size()); i++ )
 			outf<<graphnodes[j]->edges[i]<<" ";
 		outf<<endl;
 	}

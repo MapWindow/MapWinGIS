@@ -486,7 +486,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
       if (!free123lab()) return (0);
       
       /* IF CUR_DR IS NULL */
-      if (cur_fm->cur_dr == NULL) {
+      if (cur_fm->cur_dr == nullptr) {
       
          /* CALL LD123REC() TO INPUT DATA RECORD */
          if (!ld123rec()) {
@@ -511,7 +511,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
       };
 
       /* IF NEXT CUR_DR NOT NULL */
-      if (cur_fm->cur_dr->next != NULL) {
+      if (cur_fm->cur_dr->next != nullptr) {
 
          /* MOVE CUR_DR TO CUR_DR NEXT */
          cur_fm->cur_dr = cur_fm->cur_dr->next;
@@ -603,13 +603,13 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
          cur_fm->cur_dm = cur_fm->cur_dm->nxt;
 
         /* IF CUR_DM IS NULL */
-         if (cur_fm->cur_dm == NULL) {
+         if (cur_fm->cur_dm == nullptr) {
 
             /* SET STATE TO DATA VALUE STRING SUBFIELD */
             cur_fm->sf_state_dr = 3;
 
             /* IF LABELS ARE PRESENT */
-            if (cur_fm->cur_dd->labels != NULL) {
+            if (cur_fm->cur_dd->labels != nullptr) {
 
                /* CALL SETUP123LAB() TO SET UP LABELS POINTER STRUCTURE */
                if (!setup123lb()) return (0);
@@ -643,7 +643,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
       cur_fm->sf_state_dr = 3;
 
       /* IF LABELS ARE PRESENT */
-      if (cur_fm->cur_dd->labels != NULL) {
+      if (cur_fm->cur_dd->labels != nullptr) {
       
          /* CALL SETUP123LB() TO SET UP LABELS POINTER STRUCTURE */
          if (!setup123lb()) return (0);
@@ -714,7 +714,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
       if (!first) {
      
          /* IF LABELS FIELD OF CURRENT DD NOT NULL */
-         if (cur_fm->cur_dd->labels != NULL) {
+         if (cur_fm->cur_dd->labels != nullptr) {
          
             /* CALL INCRE123LAB() TO INCREMENT LABEL TO CORRESPOND TO THIS 
                 DATA VALUE 
@@ -730,7 +730,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
       }; 
 
       /* IF FORMATS FIELD OF CURRENT DD NOT EQUAL TO NULL */
-      if (cur_fm->cur_dd->fmt_rt != NULL ) {
+      if (cur_fm->cur_dd->fmt_rt != nullptr) {
       
          /* CALL GET123FMT() TO RETRIEVE FORMAT CORRESPONDING TO THIS DATA VALUE */
          if(!get123fmt(&dtyp,&width,&delim)) return (0);
@@ -738,10 +738,10 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
       };
       
       /* IF CUR_DV NOT NULL */
-      if (cur_fm->cur_dv != NULL) {
+      if (cur_fm->cur_dv != nullptr) {
 
          /* IF VALUE IS NOT NULL */
-         if (cur_fm->cur_dv->value != NULL) {
+         if (cur_fm->cur_dv->value != nullptr) {
          
             /* IF DATA TYPE IS NOT BINARY */ 
             if (dtyp != 'B') {
@@ -750,7 +750,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
                strcpy(rd_str,cur_fm->cur_dv->value);
 
                /* SET STRING LENGTH */
-               *str_len = _tcslen(cur_fm->cur_dv->value);
+               *str_len = static_cast<long>(_tcslen(cur_fm->cur_dv->value));
             }
             /* ELSE BINARY DATA */
             else {
@@ -781,7 +781,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
                   rd_str[b_siz] = NC;
 
                   /* SET STRING LENGTH */
-                  *str_len = b_siz;
+                  *str_len = static_cast<long>(b_siz);
                } 
          
                /* ELSE FIELD IS FIXED LENGTH BIT FIELD */
@@ -798,7 +798,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
                   rd_str[b_siz] = NC;
 
                   /* SET STRING LENGTH */
-                  *str_len = b_siz;
+                  *str_len = static_cast<long>(b_siz);
                }
             };
          }
@@ -817,10 +817,10 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
          cur_fm->cur_dv = cur_fm->row_dvh;
 
          /* IF CUR_DV NOT NULL */
-         if (cur_fm->cur_dv != NULL) {
+         if (cur_fm->cur_dv != nullptr) {
 
             /* IF VALUE IS NOT NULL */
-            if (cur_fm->cur_dv->value != NULL) {
+            if (cur_fm->cur_dv->value != nullptr) {
          
                /* IF DATA TYPE IS NOT BINARY */
                if (dtyp != 'B') {
@@ -829,7 +829,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
                   strcpy(rd_str,cur_fm->cur_dv->value);
 
                   /* SET STRING LENGTH */
-                  *str_len = _tcslen(cur_fm->cur_dv->value);
+                  *str_len = static_cast<long>(_tcslen(cur_fm->cur_dv->value));
                }
             
                /* ELSE BINARY DATA */
@@ -861,7 +861,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
                      rd_str[b_siz] = NC;
 
                      /* SET STRING LENGTH */
-                     *str_len = b_siz;
+                     *str_len = static_cast<long>(b_siz);
                   } 
          
                   /* ELSE FIELD IS FIXED LENGTH BIT FIELD */
@@ -878,7 +878,7 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
                      rd_str[b_siz] = NC;
          
                      /* SET STRING LENGTH */
-                     *str_len = b_siz;
+                     *str_len = static_cast<long>(b_siz);
                   }
                };
             }
@@ -900,11 +900,11 @@ int rd123sfld(FILE *fp,char *tag,char *leadid,char *rd_str,long *str_len,int *st
       } 
 
       /* IF NXT_VAL IS NULL AND ROW_DVH NXT_VSET IS NULL */
-      if ((cur_fm->cur_dv->nxt_val == NULL) && 
-       (cur_fm->row_dvh->nxt_vset == NULL)) {
+      if ((cur_fm->cur_dv->nxt_val == nullptr) &&
+       (cur_fm->row_dvh->nxt_vset == nullptr)) {
      
          /* IF CUR_DR NEXT IS NULL */
-         if (cur_fm->cur_dr->next == NULL) {
+         if (cur_fm->cur_dr->next == nullptr) {
 
             /* CHECK FOR END OF FILE */
             if (!set123stat(fp,status)) return (0);

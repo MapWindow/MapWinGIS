@@ -88,7 +88,7 @@ char *str123tok(char **string,char *delims,long *str_len)
    *string += strspn(*string,delims);
 
    /* IF INPUT STRING POINTER IS NULL CHARACTER, RETURN NULL */
-   if (**string == NC) return(NULL);
+   if (**string == NC) return(nullptr);
 
    /* SET START STRING POINTER TO INPUT STRING POINTER */
    st_str = *string;
@@ -99,10 +99,10 @@ char *str123tok(char **string,char *delims,long *str_len)
    tmp_str = strpbrk(*string,delims);
 
    /* IF TEMPORARY STRING POINTER IS NULL */
-   if (tmp_str == NULL) {
+   if (tmp_str == nullptr) {
 
       /* SET INPUT STRING POINTER TO END OF STRING */
-      for(i = 0, *str_len = _tcslen(st_str); i < *str_len; (*string)++, i++);
+      for(i = 0, *str_len = static_cast<long>(_tcslen(st_str)); i < *str_len; (*string)++, i++);
    }
    else {
 

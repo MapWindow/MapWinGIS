@@ -453,50 +453,49 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
    struct dd *cur_dd   ;
    struct dv *new_dv   ;
    char      *save_in_str;
-  
    /* SAVE POINTER TO INPUT STRING */ 
    save_in_str = *in_str;
-      
+
    /* SET LOCAL CUR_DD TO CUR_DD IN FM STRUCTURE */
    cur_dd = cur_fm->cur_dd;
-       
+
    /* IF LABELS POINTER AND FMT_RT POINTER OF CUR_DD ARE NULL */
-   if ((cur_dd->labels == NULL) && (cur_dd->fmt_rt == NULL)) {
-          
+   if ((cur_dd->labels == nullptr) && (cur_dd->fmt_rt == nullptr)) {
+
       /* IF NO FIELD CONTROLS { ELEMENTARY DATA FIELD } */
       if (!_tcslen(cur_dd->fd_cntrl)) {
 
          /* ALLOCATE NEW_DV  { SET UP DUMMY HEADER } */
-         if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == NULL) return(0);
+         if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == nullptr) return(0);
 
          /* INITIALIZE POINTERS */
-         new_dv->value = NULL;
-         new_dv->nxt_val = NULL;
-         new_dv->nxt_vset = NULL;
+         new_dv->value = nullptr;
+         new_dv->nxt_val = nullptr;
+         new_dv->nxt_vset = nullptr;
 
          /* SET VALUES OF CUR_DR TO NEW_DV */
          cur_fm->cur_dr->values = new_dv;
-            
+
          /* SET CUR_DV TO NEW_DV */
          cur_fm->cur_dv = new_dv;
 
          /* ALLOCATE NEW_DV */
-         if((new_dv = (struct dv *) malloc(sizeof(struct dv))) == NULL)
+         if((new_dv = (struct dv *) malloc(sizeof(struct dv))) == nullptr)
           return(0);
 
          /* INITIALIZE POINTERS */
-         new_dv->value = NULL;
-         new_dv->nxt_val = NULL;
-         new_dv->nxt_vset = NULL;
+         new_dv->value = nullptr;
+         new_dv->nxt_val = nullptr;
+         new_dv->nxt_vset = nullptr;
 
          /* SET NXT_VSET CUR_DV TO NEW_DV */
          cur_fm->cur_dv->nxt_vset = new_dv;
                
          /* CALCULATE SIZE OF AND ALLOCATE BUFFER SPACE FOR VALUE */
          len = (size_t) (cur_fm->cur_dr->fd_len + 1);
-         if ((new_dv->value = (char *) malloc(len * sizeof(char))) == NULL)
+         if ((new_dv->value = (char *) malloc(len * sizeof(char))) == nullptr)
           return(0);
-                
+
          /* INITIALIZE STRING */
          *new_dv->value = NC;
             
@@ -511,13 +510,13 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
 
       }
       else {
-               
+
          /* IF FIELD CONTROLS INDICATE VECTOR OR ELEMENTARY FIELD */
          if ((cur_dd->fd_cntrl[FCDSTYPE] == '1') || (cur_dd->fd_cntrl[FCDSTYPE] == '0')) {
                   
             /*  ALLOCATE BUFFER OF SIZE FIELD LENGTH */
             len = (size_t) (cur_fm->cur_dr->fd_len + 1);
-            if ((buffer = (char *) malloc(len * sizeof(char))) == NULL)
+            if ((buffer = (char *) malloc(len * sizeof(char))) == nullptr)
              return(0);
              
             /* SET START BUFFER POINTER TO BEGINNING OF BUFFER */
@@ -534,70 +533,69 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
 
             /* CALL STR123TOK() TO SEPARATE DELIMITED DATA VALUES */
             i = str123tok(&buffer,DEL_STR,&tok_len);
-               
+
             /* ALLOCATE NEW_DV  { SET UP DUMMY HEADER } */
-            if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == NULL) return(0);               
+            if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == nullptr) return(0);
 
             /* INITIALIZE POINTERS */
-            new_dv->value = NULL;
-            new_dv->nxt_val = NULL;
-            new_dv->nxt_vset = NULL;
-               
+            new_dv->value = nullptr;
+            new_dv->nxt_val = nullptr;
+            new_dv->nxt_vset = nullptr;
+
             /* SET CURRENT DATA RECORD VALUES TO NEW_DV */
             cur_fm->cur_dr->values = new_dv;
-               
+
             /* SET CUR_DV TO NEW_DV */
             cur_fm->cur_dv = new_dv;
-               
+
             /* WHILE POINTER RETURNED FROM STR123TOK() NOT NULL */
-            while ( i != NULL) {
-                  
+            while ( i != nullptr) {
+
                /* ALLOCATE NEW_DV */
-               if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == NULL) return(0);                                      
+               if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == nullptr) return(0);
 
                /* INITIALIZE POINTERS */
-               new_dv->value = NULL;
-               new_dv->nxt_val = NULL;
-               new_dv->nxt_vset = NULL;
-                                      
+               new_dv->value = nullptr;
+               new_dv->nxt_val = nullptr;
+               new_dv->nxt_vset = nullptr;
+
                /* SET LEN TO LENGTH OF DATA VALUE RETURNED */
                len = (size_t) _tcslen(i) + 1;
-                      
+
                /* ALLOCATE SPACE FOR STRING */
-               if ((val_str = (char *) malloc(len * sizeof(char))) == NULL)
+               if ((val_str = static_cast<char*>(malloc(len * sizeof(char)))) == nullptr)
                 return(0); 
 
                /* SET STRING TO EMPTY */
                *val_str = NC;
-                  
+
                /* COPY STRING RETURNED FROM STR123TOK() TO NEW SPACE */
                strcpy(val_str,i);
-                      
-               /* SET VALUE TO VAL_STR */               
+
+               /* SET VALUE TO VAL_STR */
                new_dv->value = val_str;
                   
                /* IF NOT AT HEADER RECORD */
                if (cur_fm->cur_dr->values != cur_fm->cur_dv) {
-                  
                   /* SET NEXT FIELD OF CUR_DV TO NEW_DV */
                   cur_fm->cur_dv->nxt_val = new_dv;
                }
                else {
                   /* SET NEXT VALUE SET FIELD TO NEW_DV */
                   cur_fm->cur_dv->nxt_vset = new_dv;
-               };
-                    
+               }
+
                /* SET CUR_DV TO NEW_DV */
                cur_fm->cur_dv = new_dv;
-                   
+
                /* CALL STR123TOK() TO RETURN NEXT DATA VALUE */
                i = str123tok(&buffer,DEL_STR,&tok_len);
-                   
-            };
+
+            }
             /* FREE SPACE OF START OF BUFFER POINTER */
             free(st_buff);
-                
-         }   
+
+         }
          /* ELSE  { ARRAY DATA } */
          else {
 
@@ -609,78 +607,77 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
                cur_fm->cur_dm = cur_dd->dim_lptr->nxt;
             }
             else {
-           
                /* CALL GET123DIM() TO INPUT AND STORE DIMENSION INFORMATION
                    FROM DR
                */
                if (!get123dim(in_str,&cur_fm->cur_dr->num_dim,&prim_dms))
                 return(0);
             }
-                                    
+
             /* IF FIELD LENGTH EXCEEDS MAXIMUM AMOUNT OF CONTIGUOUS SPACE,
                 RETURN FAILURE
             */
             if (cur_fm->cur_dr->fd_len > MAXSIZ) return(0);
-                   
+
             /* CALL G123DSTR() TO LOAD BUFFER WITH ALL DATA VALUES */
             if (!g123dstr(in_str,glb_str,FT)) return(0);
 
             /* CALL RET123DV() TO EXTRACT DATA VALUES */
             if (!ret123dv(glb_str,prim_dms)) return(0);
-                   
-         };
-      };
-   }     
+
+         }
+      }
+   }
    /* ELSEIF FMT_RT IS NOT NULL AND LABELS IS NULL OF CUR_DD */
-   else if ((cur_dd->fmt_rt != NULL) && (cur_dd->labels == NULL)) {
+   else if ((cur_dd->fmt_rt != nullptr) && (cur_dd->labels == nullptr)) {
         
       /* IF FIELD CONTROLS INDICATE VECTOR OR ELEMENTARY DATA */
       if ((cur_dd->fd_cntrl[FCDSTYPE] == '1') || (cur_dd->fd_cntrl[FCDSTYPE] == '0')) {
-      
+
          /* ALLOCATE NEW_DV  { SET UP DUMMY HEADER } */
-         if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == NULL)
-          return(0);               
+         if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == nullptr)
+          return(0);
 
          /* INITIALIZE POINTERS */
-         new_dv->value = NULL;
-         new_dv->nxt_val = NULL;
-         new_dv->nxt_vset = NULL;
-               
+         new_dv->value = nullptr;
+         new_dv->nxt_val = nullptr;
+         new_dv->nxt_vset = nullptr;
+
          /* SET CURRENT DATA RECORD VALUES TO NEW_DV */
          cur_fm->cur_dr->values = new_dv;
-               
+
          /* SET CUR_DV TO NEW_DV */
          cur_fm->cur_dv = new_dv;
-              
+
          /* SET CUR_FCR TO FMT_RT OF CUR_DD  { INITIALIZE FOR GET123FMT } */
          cur_fm->cur_fcr = cur_dd->fmt_rt;
 
          /* SET CUR_FC TO FMT_RT FIELD OF CUR_DD */
          cur_fm->cur_fc = cur_dd->fmt_rt;
-            
+
          /* INITIALIZE END OF FIELD FLAG */
          end_of_fld = 0;
-            
+
          /* WHILE HAVE NOT READ LAST VALUE OF FIELD DO */
          while ( !end_of_fld) {
-                   
+
             /* CALL GET123FMT() TO RETRIEVE FORMAT OF DATA VALUE STRING */
             if (!get123fmt(&d_type,&width,&delim)) return(0);
-                      
+
             /* CLEAR STRING */
             glb_str[0] = NC;
 
             /* CALL GET123DVAL() TO READ IN DATA VALUE INTO VAL_STR */
             if (!get123dval(in_str,in_str_end,d_type,&width,delim,comprssd,glb_str))
              return(0);
-             
+
             /* ALLOCATE NEW_DV  */
-            if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == NULL) return(0);               
+            if ((new_dv = (struct dv *) malloc(sizeof(struct dv))) == nullptr) return(0);
 
             /* INITIALIZE POINTERS */
-            new_dv->value = NULL;
-            new_dv->nxt_val = NULL;
-            new_dv->nxt_vset = NULL;
+            new_dv->value = nullptr;
+            new_dv->nxt_val = nullptr;
+            new_dv->nxt_vset = nullptr;
    
             /* IF DATA TYPE NOT 'B' */
             if (d_type != 'B') {
@@ -691,27 +688,26 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
                tmp_cptr = strchr(glb_str,FT);
                   
                /* SET END OF FIELD FLAG IF FT IS IN STRING */
-               end_of_fld = (tmp_cptr != NULL);
+               end_of_fld = (tmp_cptr != nullptr);
                
                /* IF TMP_CPTR NOT NULL REPLACE FT WITH NULL CHARACTER */
-               if (tmp_cptr != NULL) *tmp_cptr = NC;
-               
+               if (tmp_cptr != nullptr) *tmp_cptr = NC;
+
                /* SET LEN TO LENGTH OF DATA VALUE */
-               len = (size_t) _tcslen(glb_str) + 1;
-                         
+               len = _tcslen(glb_str) + 1;
+
                /* RESERVE SPACE FOR STRING */
-               if ((val_str = (char *) malloc(len * sizeof(char))) == NULL) return(0); 
+               if ((val_str = static_cast<char*>(malloc(len * sizeof(char)))) == nullptr) return(0);
 
                /* SET VAL_STR TO EMPTY STRING */
                *val_str = NC;
-               
+
                /* COPY STRING FROM BUFFER TO NEW SPACE */
                strcpy(val_str,glb_str);
-                         
-               /* SET VALUE TO VAL_STR */               
+
+               /* SET VALUE TO VAL_STR */
                new_dv->value = val_str;
-                         
-            }    
+            }
 
             /* ELSE DATA TYPE IS BINARY */
             else {
@@ -720,8 +716,8 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
                len = (size_t) width + 1;
 
                /* RESERVE SPACE FOR STRING */
-               if ((val_str = (char *) malloc(len * sizeof(char))) == NULL)
-                return(0); 
+               if ((val_str = (char *) malloc(len * sizeof(char))) == nullptr)
+                return(0);
 
                /* COPY BUFFER TO VALUE STRING */
                memcpy(val_str,glb_str,--len);
@@ -741,25 +737,21 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
 
             }
             else {
-                  
                /* SET NXT_VSET FIELD OF CUR_DV TO NEW_DV */
                cur_fm->cur_dv->nxt_vset = new_dv;
-            };
-                      
+            }
+
             /* SET CUR_DV TO NEW_DV */
             cur_fm->cur_dv = new_dv;
 
             /* IF NOT END OF FIELD */
             if (!end_of_fld) {
-            
                /* IF END OF INPUT STRING */
                if (*in_str >= in_str_end) {
-                  
                   /* SET END OF FIELD FLAG TO TRUE */
                   end_of_fld = 1;
                }
                else {
-                   
                   /* IF DATA TYPE IS BINARY AND ENTIRE FIELD LENGTH HAS
                       BEEN RETRIEVED
                   */
@@ -770,19 +762,16 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
 
                      /* MOVE BEGINNING OF INPUT STRING PAST FIELD TERMINATOR */
                      *in_str = *in_str + 1;
-
                   }
                   /* ELSE IF DATA TYPE IS NOT BINARY AND CHARACTER IS
                       FIELD TERMINATOR AND DATA VALUE IS NOT DELIMITED
                   */
                   else if (d_type != 'B' && *in_str[0] == FT && width != 0) {
-                     
                      /* SET END OF FIELD FLAG TO TRUE */
                      end_of_fld = 1;
 
                      /* MOVE BEGINNING OF INPUT STRING PAST FIELD TERMINATOR */
                      *in_str = *in_str + 1;
-
                   }
                }
             }
@@ -790,7 +779,6 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
       }  
       /* ELSE { ARRAY DATA } */
       else {
-             
          /* IF NUMBER OF DIMENSIONS IN DDR (CUR_DD) EXISTS */
          if (cur_dd->num_dim) {
 
@@ -799,65 +787,64 @@ int load123fld(char **in_str,char *in_str_end,int comprssd)
             cur_fm->cur_dm = cur_dd->dim_lptr->nxt;
          }
          else {
-           
             /* CALL GET123DIM() TO INPUT AND STORE DIMENSION INFORMATION
                 FROM DR
             */
             if (!get123dim(in_str,&cur_fm->cur_dr->num_dim,&prim_dms))
              return(0);
          }
-                                    
+
          /* SET CUR_FCR TO FMT_RT FIELD OF CUR_DD */
          cur_fm->cur_fcr = cur_dd->fmt_rt;
 
          /* SET CUR_FC TO FMT_RT FIELD OF CUR_DD */
          cur_fm->cur_fc = cur_dd->fmt_rt;
-                   
+
          /* COMPUTE PROPER FIELD LENGTH */
-         if (comprssd) field_length = cur_fm->cur_dr->fd_len-(*in_str-save_in_str);
-         else          field_length = in_str_end - *in_str;
-                   
+         if (comprssd) field_length = static_cast<long>(cur_fm->cur_dr->fd_len-(*in_str-save_in_str));
+         else          field_length = static_cast<long>(in_str_end - *in_str);
+
          /* CALL RET123FV() TO RETRIEVE FORMATTED DATA VALUES RETURN A 
-             POINTER TO A STRUCTURE STORING THE VALUES 
+             POINTER TO A STRUCTURE STORING THE VALUES
          */
          if (!ret123fv(in_str,in_str_end,prim_dms,field_length,comprssd)) return(0);
 
       }
-   }   
+   }
    /* ELSEIF LABELS IS NOT NULL AND FMT_RT IS NULL OF CUR_DD */
-   else if ((cur_dd->labels != NULL) && (cur_dd->fmt_rt == NULL)) {
-        
+   else if ((cur_dd->labels != nullptr) && (cur_dd->fmt_rt == nullptr)) {
+
       /* CALL RET123PDM() TO RETURN PRIM_DMS */
       if (!ret123pdm(&prim_dms)) return(0);
-            
+
       /* CALL G123DSTR() TO LOAD BUFFER WITH ALL DATA VALUES */
       if (!g123dstr(in_str,glb_str,FT)) return(0);
 
       /* CALL RET123DV() TO EXTRACT DATA VALUES */
       if (!ret123dv(glb_str,prim_dms)) return(0);
-   }   
+   }
    /* ELSE { LABELS AND FMT_RT POINTER FIELD OF CUR_DD NOT NULL } */
    else {
-         
+
       /* CALL RET123PDM() TO RETURN PRIM_DMS */
       if (!ret123pdm(&prim_dms)) return(0);
-          
+
       /* SET CUR_FCR TO FMT_RT FIELD OF CUR_DD */
       cur_fm->cur_fcr = cur_dd->fmt_rt;
-            
+
       /* SET CUR_FC TO FMT_RT FIELD OF CUR_DD */
       cur_fm->cur_fc = cur_dd->fmt_rt;
-            
+
       /* COMPUTE PROPER FIELD LENGTH */
       if (comprssd) field_length = cur_fm->cur_dr->fd_len;
-      else          field_length = in_str_end - *in_str;
-            
+      else          field_length = static_cast<long>(in_str_end - *in_str);
+
       /* CALL RET123FV() TO RETRIEVE FORMATTED DATA VALUES AND RETURN A  
           POINTER TO A STRUCTURE STORING THE VALUES
       */
       if (!ret123fv(in_str,in_str_end,prim_dms,field_length,comprssd)) return(0);
    }
 
-   /* RETURN SUCCESS */  
+   /* RETURN SUCCESS */
    return(1);
 }

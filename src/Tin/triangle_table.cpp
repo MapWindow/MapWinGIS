@@ -2,7 +2,7 @@
 # include "triangle_table.h"
 
 triangleTable::triangleTable()
-{	
+{
 }
 
 triangleTable::~triangleTable()
@@ -10,9 +10,9 @@ triangleTable::~triangleTable()
 }
 
 void triangleTable::clear()
-{	for( int i = 0; i < (int)rows.size(); i++ )
+{	for( int i = 0; i < static_cast<int>(rows.size()); i++ )
 	{	delete rows[i];
-		rows[i] = NULL;
+		rows[i] = nullptr;
 	}
 	rows.clear();
 }
@@ -46,28 +46,28 @@ void * triangleTable::getValue( COLUMN column, long row )
 
 void triangleTable::setValue( COLUMN column, long row, void * value )
 {	if( column == VTX_ONE )
-		rows[row]->row.vertexOne = *((long*)value);
+		rows[row]->row.vertexOne = *static_cast<long*>(value);
 	else if( column == VTX_TWO )
-		rows[row]->row.vertexTwo = *((long*)value);
+		rows[row]->row.vertexTwo = *static_cast<long*>(value);
 	else if( column == VTX_THREE )
-		rows[row]->row.vertexThree = *((long*)value);
+		rows[row]->row.vertexThree = *static_cast<long*>(value);
 	else if( column == BDR_ONE )
-		rows[row]->row.borderOne = *((long*)value);
+		rows[row]->row.borderOne = *static_cast<long*>(value);
 	else if( column == BDR_TWO )
-		rows[row]->row.borderTwo = *((long*)value);
+		rows[row]->row.borderTwo = *static_cast<long*>(value);
 	else if( column == BDR_THREE )
-		rows[row]->row.borderThree = *((long*)value);
+		rows[row]->row.borderThree = *static_cast<long*>(value);
 	else if( column == DEV_VERTEX )
-		rows[row]->row.devVertex = *((vertex*)value);
+		rows[row]->row.devVertex = *static_cast<vertex*>(value);
 	else if( column == MAX_DEV )
-		rows[row]->row.maxDev = *((double*)value);	
+		rows[row]->row.maxDev = *static_cast<double*>(value);
 }
 
 long triangleTable::addRow( tinTableRow & r )
 {	tableRowNode * new_row = new tableRowNode();
 	new_row->row = r;
 	rows.push_back( new_row );
-	return rows.size() - 1;	
+	return static_cast<long>(rows.size()) - 1;
 }
 
 void triangleTable::setRow( tinTableRow & r, long row )
@@ -75,5 +75,5 @@ void triangleTable::setRow( tinTableRow & r, long row )
 }
 
 long triangleTable::size()
-{	return rows.size();
+{	return static_cast<long>(rows.size());
 }
