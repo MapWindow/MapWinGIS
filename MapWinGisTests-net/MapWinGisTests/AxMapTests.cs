@@ -72,7 +72,7 @@ public class AxMapTests
         // AS mentioned at https://mapwindow.discourse.group/t/key-property-of-shape-object-not-work/1250
 
         using var form = new WinFormsApp1.Form1();
-        if (Environment.Is64BitProcess)
+        //if (Environment.Is64BitProcess)
         {
             form.Show(); // We need to show the form to have a valid map control (x64)
 		}
