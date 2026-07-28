@@ -9,17 +9,17 @@ public sealed partial class Form1
     {
         var versionString = axMap1.VersionNumber;
         var ver = Version.Parse(versionString);
-        LogProgress("MapWinGIS version: " + ver);    
+        LogProgress("MapWinGIS version: " + ver);
         return ver;
     }
 
-    public int OpenFile(string fileLocation)
+    public int OpenFile(string fileLocation, bool visible = true)
     {
         if (axMap1 == null) throw new Exception("MapWinGIS.Map is not initialized");
         
         if (!File.Exists(fileLocation)) throw new FileNotFoundException(fileLocation);
 
-        var layerHandle = axMap1.AddLayerFromFilename(fileLocation, tkFileOpenStrategy.fosAutoDetect, true);
+        var layerHandle = axMap1.AddLayerFromFilename(fileLocation, tkFileOpenStrategy.fosAutoDetect, visible);
         if (layerHandle == -1) throw new Exception($"Could not add file [{fileLocation}] to map");
 
         return layerHandle;
@@ -40,12 +40,12 @@ public sealed partial class Form1
         return axMap1.get_Shapefile(layerHandle);
     }
 
-    public int AddShapefileToMap(IShapefile sf)
+    public int AddShapefileToMap(IShapefile sf, bool visible = true)
     {
         // Check:
         ArgumentNullException.ThrowIfNull(sf);
 
-        var layerHandle = axMap1.AddLayer(sf, true);
+        var layerHandle = axMap1.AddLayer(sf, visible);
         if (layerHandle == -1) throw new Exception("Could not add shapefile object to map");
 
         return layerHandle;
