@@ -7,7 +7,13 @@ public class AxMapTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
-    public AxMapTests(ITestOutputHelper testOutputHelper)
+    internal static bool IsRunningOnGitHubActions =>
+	    string.Equals(
+		    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
+		    "true",
+		    StringComparison.OrdinalIgnoreCase);
+
+	public AxMapTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
     }
@@ -30,11 +36,13 @@ public class AxMapTests
 	public void MapProjectionTest()
 	{
 		using var form = new WinFormsApp1.Form1();
-		form.Show(); // To get a valid map control, WpfFact thread pumps messages
+		if(Environment.Is64BitProcess)
+			form.Show(); // We need to show the form to have a valid map control (x64)
 		form.ShouldNotBeNull();
 
+		var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
 		var sfLocation = Helpers.GetTestFilePath("UnitedStates-3857.shp");
-		var layerHandle = form.OpenFile(sfLocation);
+		var layerHandle = form.OpenFile(sfLocation, visible);
 		layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
 		var epsgCode = form.GetMapProjectionAsEpsgCode();
@@ -46,9 +54,10 @@ public class AxMapTests
     {
         using var form = new WinFormsApp1.Form1();
         form.ShouldNotBeNull();
+        var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
 
-        var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
-        var layerHandle = form.OpenFile(sfLocation);
+		var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
+        var layerHandle = form.OpenFile(sfLocation, visible);
         layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
         var sf = form.GetShapefileFromLayer(layerHandle);
@@ -98,8 +107,9 @@ public class AxMapTests
         // Re-check:
         sfPolygon.Key.ShouldBe(sfKeyValue);
 
-        // Add shapefile to map and test again:
-        var layerHandle = form.AddShapefileToMap(sfPolygon);
+		// Add shapefile to map and test again:
+		var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
+		var layerHandle = form.AddShapefileToMap(sfPolygon, visible);
         // Get sf back:
         var sf = form.GetShapefileFromLayer(layerHandle);
         sf.Key.ShouldBe(sfKeyValue);
