@@ -26,24 +26,48 @@ public class AxMapTests
         _testOutputHelper.WriteLine("Version: {0}", version);
     }
 
-    [WpfFact]
-    public void MapProjectionTest()
-    {
-        using var form = new WinFormsApp1.Form1();
-		// Test with Showing form for x86 and x64
-		//if (Environment.Is64BitProcess)
+	[WpfFact]
+	public void MapProjectionTest()
+	{
+		Exception? workerError = null;
+		var done = new System.Threading.ManualResetEventSlim(false);
+
+		var worker = new Thread(() =>
 		{
-			form.Show(); // We need to show the form to have a valid map control (x64)
-        }
-        form.ShouldNotBeNull();
+			try {
+				using var form = new WinFormsApp1.Form1();
 
-        var sfLocation = Helpers.GetTestFilePath("UnitedStates-3857.shp");
-        var layerHandle = form.OpenFile(sfLocation);
-        layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
+				form.Show(); // We need to show the form to have a valid map control (x64)
 
-        var epsgCode = form.GetMapProjectionAsEpsgCode();
-        epsgCode.ShouldBe(3857);
-    }
+				form.ShouldNotBeNull();
+
+				var sfLocation = Helpers.GetTestFilePath("UnitedStates-3857.shp");
+				var layerHandle = form.OpenFile(sfLocation);
+				layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
+
+				var epsgCode = form.GetMapProjectionAsEpsgCode();
+				epsgCode.ShouldBe(3857);
+			} catch(Exception ex)
+			{
+				workerError = ex;
+			} finally
+			{
+				done.Set();
+			}
+		});
+		worker.SetApartmentState(ApartmentState.STA);
+		worker.IsBackground = true;
+		worker.Start();
+
+		if (!done.Wait(TimeSpan.FromSeconds(30)))
+		{
+			_testOutputHelper.WriteLine("MapProjectionTest did not complete within the timeout; abandoning the form.");
+			throw new TimeoutException("MapProjectionTest: Timed out while showing/using the map form.");
+		}
+
+		if (workerError is not null)
+			throw new Exception("MapProjectionTest failed on the STA worker thread.", workerError);
+	}
 
     [WpfFact]
     public void OpenShapefileWithInvalidSpatialIndex()
