@@ -42,6 +42,7 @@ public class AxMapTests
 
 		var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
 		var sfLocation = Helpers.GetTestFilePath("UnitedStates-3857.shp");
+		_testOutputHelper.WriteLine($"MapProjectionTest() call form.OpenFile() with visible: {visible}");
 		var layerHandle = form.OpenFile(sfLocation, visible);
 		layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
@@ -57,7 +58,8 @@ public class AxMapTests
         var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
 
 		var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
-        var layerHandle = form.OpenFile(sfLocation, visible);
+		_testOutputHelper.WriteLine($"OpenShapefileWithInvalidSpatialIndex() call form.OpenFile() with visible: {visible}");
+		var layerHandle = form.OpenFile(sfLocation, visible);
         layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
         var sf = form.GetShapefileFromLayer(layerHandle);
