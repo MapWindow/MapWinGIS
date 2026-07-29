@@ -18,11 +18,12 @@ public class AxMapTests
         _testOutputHelper = testOutputHelper;
     }
     
-    [WpfFact]
+    [StaFact]
     public void VersionTest()
     {
         using var form = new WinFormsApp1.Form1();
         form.ShouldNotBeNull();
+        form.EnsureMapControlCreated();
 
         var version = form.GetMapWinGisVersion();
         version.ShouldNotBeNull();
@@ -39,6 +40,7 @@ public class AxMapTests
 		if(Environment.Is64BitProcess)
 			form.Show(); // We need to show the form to have a valid map control (x64)
 		form.ShouldNotBeNull();
+		form.EnsureMapControlCreated();
 
 		var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
 		var sfLocation = Helpers.GetTestFilePath("UnitedStates-3857.shp");
@@ -50,12 +52,13 @@ public class AxMapTests
 		epsgCode.ShouldBe(3857);
 	}
 
-    [WpfFact]
+    [StaFact]
     public void OpenShapefileWithInvalidSpatialIndex()
     {
         using var form = new WinFormsApp1.Form1();
         form.ShouldNotBeNull();
         var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
+        form.EnsureMapControlCreated();
 
 		var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
 		_testOutputHelper.WriteLine($"OpenShapefileWithInvalidSpatialIndex() call form.OpenFile() with visible: {visible}");
@@ -77,7 +80,7 @@ public class AxMapTests
         sf.Extents.yMax.ShouldBe(34.457816, 0.00001);
     }
 
-    [WpfFact]
+    [StaFact]
     public void ShapefileKeyTest()
     {
         // AS mentioned at https://mapwindow.discourse.group/t/key-property-of-shape-object-not-work/1250
@@ -88,6 +91,7 @@ public class AxMapTests
             form.Show(); // We need to show the form to have a valid map control (x64)
 		}
         form.ShouldNotBeNull();
+        form.EnsureMapControlCreated();
 
         // Create shapefile:
         var sfPolygon = Helpers.CreateTestPolygonShapefile();

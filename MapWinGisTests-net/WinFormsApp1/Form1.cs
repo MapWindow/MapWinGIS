@@ -23,8 +23,6 @@ public sealed partial class Form1 : Form, ICallback
         {
             LoadOsm();
         }*/
-
-        GetMapWinGisVersion();
     }
 
 
@@ -33,6 +31,17 @@ public sealed partial class Form1 : Form, ICallback
 		    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
 		    "true",
 		    StringComparison.OrdinalIgnoreCase);
+
+	public void EnsureMapControlCreated()
+	{
+		CreateControl();
+		axMap1.CreateControl();
+
+		if(!axMap1.IsHandleCreated)
+		{
+			throw new InvalidOperationException("AxMap control handle was not created.");
+		}
+	}
 
 
 	private void AxMap1_FileDropped(object sender, _DMapEvents_FileDroppedEvent e)
