@@ -111,6 +111,7 @@ public class AxMapTests
 
 		// Add shapefile to map and test again:
 		var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
+		_testOutputHelper.WriteLine($"ShapefileKeyTest() call form.AddShapefileToMap() with visible: {visible}");
 		var layerHandle = form.AddShapefileToMap(sfPolygon, visible);
         // Get sf back:
         var sf = form.GetShapefileFromLayer(layerHandle);
