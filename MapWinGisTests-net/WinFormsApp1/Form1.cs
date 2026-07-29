@@ -14,10 +14,10 @@ public sealed partial class Form1 : Form, ICallback
             CallbackVerbosity = tkCallbackVerbosity.cvAll
         };
 
-        // Test with Showing form for x86 and x64
-		//if(Environment.Is64BitProcess)
+		if(!IsRunningOnGitHubActions)
         {
-            Shown += (s, e) => LoadOsm(); // This need to be done after the form is shown (x64)
+			// Don't call LoadOsm() when running on GitHub Actions.
+			Shown += (s, e) => LoadOsm(); // This need to be done after the form is shown (x64)
 		}
         /*else
         {
@@ -27,7 +27,15 @@ public sealed partial class Form1 : Form, ICallback
         GetMapWinGisVersion();
     }
 
-    private void AxMap1_FileDropped(object sender, _DMapEvents_FileDroppedEvent e)
+
+    internal static bool IsRunningOnGitHubActions =>
+	    string.Equals(
+		    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
+		    "true",
+		    StringComparison.OrdinalIgnoreCase);
+
+
+	private void AxMap1_FileDropped(object sender, _DMapEvents_FileDroppedEvent e)
     {
         TxtProgress.Text += $@"Opening {e.filename} after dropping.{Environment.NewLine}";
         axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
