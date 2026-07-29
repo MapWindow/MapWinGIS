@@ -32,7 +32,7 @@ public class AxMapTests
         _testOutputHelper.WriteLine("Version: {0}", version);
     }
 
-	[WpfFact]
+	[StaFact]
 	public void MapProjectionTest()
 	{
 		using var form = new WinFormsApp1.Form1();
