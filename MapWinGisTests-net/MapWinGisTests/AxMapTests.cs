@@ -5,13 +5,13 @@ namespace MapWinGisTests;
 [Collection(nameof(NotThreadSafeResourceCollection))]
 public class AxMapTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
+	private readonly ITestOutputHelper _testOutputHelper;
 
-    internal static bool IsRunningOnGitHubActions =>
-	    string.Equals(
-		    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
-		    "true",
-		    StringComparison.OrdinalIgnoreCase);
+	internal static bool IsRunningOnGitHubActions =>
+		string.Equals(
+			Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
+			"true",
+			StringComparison.OrdinalIgnoreCase);
 
 	public AxMapTests(ITestOutputHelper testOutputHelper)
 	{
@@ -42,8 +42,8 @@ public class AxMapTests
 		WinFormsTestRunner.Run(() =>
 		{
 			using var form = new WinFormsApp1.Form1();
-			if(Environment.Is64BitProcess)
-				form.Show(); // We need to show the form to have a valid map control (x64)
+			//if(Environment.Is64BitProcess)
+			form.Show(); // We need to show the form to have a valid map control (x64)
 			form.ShouldNotBeNull();
 			form.EnsureMapControlCreated();
 
@@ -97,9 +97,9 @@ public class AxMapTests
 		WinFormsTestRunner.Run(() =>
 		{
 			using var form = new WinFormsApp1.Form1();
-			if (Environment.Is64BitProcess)
-				form.Show(); // We need to show the form to have a valid map control (x64)
-	
+			//if(Environment.Is64BitProcess)
+			form.Show(); // We need to show the form to have a valid map control (x64)
+
 			form.ShouldNotBeNull();
 			form.EnsureMapControlCreated();
 
