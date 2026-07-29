@@ -1,4 +1,6 @@
+using System.Runtime.InteropServices;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace MapWinGisTests;
 
@@ -6,6 +8,10 @@ namespace MapWinGisTests;
 public class AxMapTests
 {
 	private readonly ITestOutputHelper _testOutputHelper;
+
+	[DllImport("kernel32.dll", EntryPoint = "OutputDebugStringW", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+	private static extern void OutputDebugString(string lpOutputString);
+
 
 	internal static bool IsRunningOnGitHubActions =>
 		string.Equals(
@@ -21,9 +27,8 @@ public class AxMapTests
 	[StaFact]
 	public void VersionTest()
 	{
-		WinFormsTestRunner.Run(() =>
+		WinFormsTestRunner.Run(form=>
 		{
-			using var form = new WinFormsApp1.Form1();
 			form.ShouldNotBeNull();
 			form.EnsureMapControlCreated();
 
@@ -39,9 +44,9 @@ public class AxMapTests
 	[StaFact]
 	public void MapProjectionTest()
 	{
-		WinFormsTestRunner.Run(() =>
+		WinFormsTestRunner.Run(form =>
 		{
-			using var form = new WinFormsApp1.Form1();
+			//using var form = new WinFormsApp1.Form1();
 			//if(Environment.Is64BitProcess)
 			form.Show(); // We need to show the form to have a valid map control (x64)
 			form.ShouldNotBeNull();
@@ -49,7 +54,9 @@ public class AxMapTests
 
 			var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
 			var sfLocation = Helpers.GetTestFilePath("UnitedStates-3857.shp");
+
 			_testOutputHelper.WriteLine($"MapProjectionTest() call form.OpenFile() with visible: {visible}");
+			OutputDebugString($"MapProjectionTest() call form.OpenFile() with visible: {visible}");
 			var layerHandle = form.OpenFile(sfLocation, visible);
 			layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
@@ -61,15 +68,16 @@ public class AxMapTests
 	[StaFact]
 	public void OpenShapefileWithInvalidSpatialIndex()
 	{
-		WinFormsTestRunner.Run(() =>
+		WinFormsTestRunner.Run(form =>
 		{
-			using var form = new WinFormsApp1.Form1();
+			//using var form = new WinFormsApp1.Form1();
 			form.ShouldNotBeNull();
 			var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
 			form.EnsureMapControlCreated();
 
 			var sfLocation = Helpers.GetTestFilePath("Issue-216.shp");
 			_testOutputHelper.WriteLine($"OpenShapefileWithInvalidSpatialIndex() call form.OpenFile() with visible: {visible}");
+			OutputDebugString($"OpenShapefileWithInvalidSpatialIndex() call form.OpenFile() with visible: {visible}");
 			var layerHandle = form.OpenFile(sfLocation, visible);
 			layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
@@ -94,9 +102,9 @@ public class AxMapTests
 	{
 		// AS mentioned at https://mapwindow.discourse.group/t/key-property-of-shape-object-not-work/1250
 
-		WinFormsTestRunner.Run(() =>
+		WinFormsTestRunner.Run(form =>
 		{
-			using var form = new WinFormsApp1.Form1();
+			//using var form = new WinFormsApp1.Form1();
 			//if(Environment.Is64BitProcess)
 			form.Show(); // We need to show the form to have a valid map control (x64)
 
@@ -126,6 +134,7 @@ public class AxMapTests
 			// Add shapefile to map and test again:
 			var visible = !IsRunningOnGitHubActions; // Don't render when running on GitHub Actions
 			_testOutputHelper.WriteLine($"ShapefileKeyTest() call form.AddShapefileToMap() with visible: {visible}");
+			OutputDebugString($"ShapefileKeyTest() call form.AddShapefileToMap() with visible: {visible}");
 			var layerHandle = form.AddShapefileToMap(sfPolygon, visible);
 			// Get sf back:
 			var sf = form.GetShapefileFromLayer(layerHandle);
