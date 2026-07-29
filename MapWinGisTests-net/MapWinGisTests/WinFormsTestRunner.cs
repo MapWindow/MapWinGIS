@@ -1,38 +1,58 @@
-﻿using System.Windows.Forms;
+﻿using System.Runtime.ExceptionServices;
+using System.Windows.Forms;
 using WinFormsApp1;
 
 namespace MapWinGisTests
 {
 	internal static class WinFormsTestRunner
 	{
-		public static void Run(Action<Form1> action)
+		public static void Run(Action<Form1> action, int timeoutMilliseconds = 120000)
 		{
-			Exception? exception = null;
+			ExceptionDispatchInfo? exception = null;
+
+			var completed = new ManualResetEventSlim(false);
 
 			var thread = new Thread(() => {
-				using var form = new Form1();
+				try
+				{
 
-				form.Shown += (_, _) => {
-					try {
-						form.EnsureMapControlCreated();
-						Application.DoEvents();
+					using var form = new Form1();
 
-						action(form);
-					} catch(Exception ex) {
-						exception = ex;
-					} finally {
-						form.Close();
-					}
-				};
-				Application.Run(form);
+					form.Shown += (_, _) =>
+					{
+						form.BeginInvoke(() =>
+						{
+							try {
+								form.EnsureMapControlCreated();
+								Application.DoEvents();
+
+								action(form);
+							} catch(Exception ex) {
+								exception = ExceptionDispatchInfo.Capture(ex);
+							} finally {
+								completed.Set();
+								form.Close();
+							}
+						});
+					};
+					Application.Run(form);
+				} catch(Exception ex) {
+					exception = ExceptionDispatchInfo.Capture(ex);
+					completed.Set();
+				}
 			});
 
 			thread.SetApartmentState(ApartmentState.STA);
 			thread.Start();
+
+			if(!completed.Wait(timeoutMilliseconds)) {
+				throw new TimeoutException(
+					$"WinForms test did not complete within {timeoutMilliseconds} ms.");
+			}
+
 			thread.Join();
 
-			if(exception != null)
-				throw exception;
+			exception?.Throw();
 		}
 	}
 }

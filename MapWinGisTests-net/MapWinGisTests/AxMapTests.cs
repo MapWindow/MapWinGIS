@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -58,6 +59,8 @@ public class AxMapTests
 			_testOutputHelper.WriteLine($"MapProjectionTest() call form.OpenFile() with visible: {visible}");
 			OutputDebugString($"MapProjectionTest() call form.OpenFile() with visible: {visible}");
 			var layerHandle = form.OpenFile(sfLocation, visible);
+			Application.DoEvents();
+
 			layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
 			var epsgCode = form.GetMapProjectionAsEpsgCode();
@@ -79,6 +82,7 @@ public class AxMapTests
 			_testOutputHelper.WriteLine($"OpenShapefileWithInvalidSpatialIndex() call form.OpenFile() with visible: {visible}");
 			OutputDebugString($"OpenShapefileWithInvalidSpatialIndex() call form.OpenFile() with visible: {visible}");
 			var layerHandle = form.OpenFile(sfLocation, visible);
+			Application.DoEvents();
 			layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
 			var sf = form.GetShapefileFromLayer(layerHandle);
@@ -106,10 +110,14 @@ public class AxMapTests
 		{
 			//using var form = new WinFormsApp1.Form1();
 			//if(Environment.Is64BitProcess)
+			OutputDebugString("calling form.Show()");
 			form.Show(); // We need to show the form to have a valid map control (x64)
+			OutputDebugString("form.Show() done!");
 
 			form.ShouldNotBeNull();
+			OutputDebugString("calling form.EnsureMapControlCreated()");
 			form.EnsureMapControlCreated();
+			OutputDebugString("form.EnsureMapControlCreated() done!");
 
 			// Create shapefile:
 			var sfPolygon = Helpers.CreateTestPolygonShapefile();
@@ -136,6 +144,7 @@ public class AxMapTests
 			_testOutputHelper.WriteLine($"ShapefileKeyTest() call form.AddShapefileToMap() with visible: {visible}");
 			OutputDebugString($"ShapefileKeyTest() call form.AddShapefileToMap() with visible: {visible}");
 			var layerHandle = form.AddShapefileToMap(sfPolygon, visible);
+			Application.DoEvents();
 			// Get sf back:
 			var sf = form.GetShapefileFromLayer(layerHandle);
 			sf.Key.ShouldBe(sfKeyValue);
