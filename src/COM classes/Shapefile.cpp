@@ -2762,8 +2762,25 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		return false;
 
 	m_globalSettings.gdalErrorMessage = "";
-	OGRSpatialReference* projSource = static_cast<CGeoProjection*>(_geoProjection)->get_SpatialReference();
-	OGRSpatialReference* projTarget = static_cast<CGeoProjection*>(newProjection)->get_SpatialReference();
+	OGRSpatialReference* projSource = dynamic_cast<CGeoProjection*>(_geoProjection)->get_SpatialReference();
+	OGRSpatialReference* projTarget = dynamic_cast<CGeoProjection*>(newProjection)->get_SpatialReference();
+
+	char* pszWKT;
+	projSource->exportToPrettyWkt(&pszWKT);
+	auto srcWkt = CGeoProjection::CorrectAxisOrder(pszWKT);
+	auto ret1 = projSource->importFromWkt(srcWkt.c_str());
+	/*
+	::OutputDebugStringA("\r\nprojSource:\r\n\r\n");
+	::OutputDebugStringA(pszWKT); */
+
+	projTarget->exportToPrettyWkt(&pszWKT);
+	auto dstWkt = CGeoProjection::CorrectAxisOrder(pszWKT);
+	auto ret2 = projTarget->importFromWkt(dstWkt.c_str());
+	/*
+	::OutputDebugStringA("\r\nprojTarget:\r\n");
+	::OutputDebugStringA(pszWKT);
+	::OutputDebugStringA("\r\n"); */
+
 
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation(projSource, projTarget);
 	if (!transf)
