@@ -37,7 +37,7 @@
 CMutex selectShapesMutex(FALSE);
 STDMETHODIMP CShapefile::SelectShapes(IExtents* boundBox, const double tolerance, const SelectMode selectMode, VARIANT* result, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*retval = VARIANT_FALSE;
 
@@ -138,7 +138,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 			qtreeResult = _qtree->GetNodes(QTreeExtent(bMinX, bMaxX, bMaxY, bMinY));
 		}
 
-		localNumShapes = qtreeResult.size();
+		localNumShapes = static_cast<int>(qtreeResult.size());
 		useQTreeResults = true;
 	}
 
@@ -311,7 +311,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 			{
 				if (this->DefineShapePoints(shapeVal, shapeType, parts, xPts, yPts) != FALSE)
 				{
-					const long numpoints = xPts.size();
+					const long numpoints = static_cast<long>(xPts.size());
 					bool addShape = false;
 					for (int j = 0; j < numpoints; j++)
 					{
@@ -360,7 +360,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 //  Returns and sets the selection state for a shape.
 STDMETHODIMP CShapefile::get_ShapeSelected(const long shapeIndex, VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
@@ -375,7 +375,7 @@ STDMETHODIMP CShapefile::get_ShapeSelected(const long shapeIndex, VARIANT_BOOL* 
 }
 STDMETHODIMP CShapefile::put_ShapeSelected(const long shapeIndex, const VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (shapeIndex < 0 || shapeIndex >= gsl::narrow_cast<long>(_shapeData.size()))
 	{
@@ -393,7 +393,7 @@ STDMETHODIMP CShapefile::put_ShapeSelected(const long shapeIndex, const VARIANT_
 // *************************************************************
 STDMETHODIMP CShapefile::get_NumSelected(long* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	long count = 0;
 	for (const auto& i : _shapeData)
@@ -410,7 +410,7 @@ STDMETHODIMP CShapefile::get_NumSelected(long* pVal)
 // *************************************************************
 STDMETHODIMP CShapefile::SelectAll()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	for (const auto& i : _shapeData)
 	{
@@ -425,7 +425,7 @@ STDMETHODIMP CShapefile::SelectAll()
 // *************************************************************
 STDMETHODIMP CShapefile::SelectNone()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	for (const auto& i : _shapeData)
 	{
@@ -440,7 +440,7 @@ STDMETHODIMP CShapefile::SelectNone()
 // *************************************************************
 STDMETHODIMP CShapefile::InvertSelection()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	for (const auto& i : _shapeData)
 	{
@@ -521,7 +521,7 @@ BOOL CShapefile::DefineShapePoints(const long shapeIndex, ShpfileType& shapeType
 		if (numPoints < 2)
 			return FALSE;
 
-		// fill up parts: polyline must have at least 1 part			
+		// fill up parts: polyline must have at least 1 part
 		if (numParts > 0)
 		{
 			for (int p = 0; p < numParts; p++)
@@ -549,7 +549,7 @@ BOOL CShapefile::DefineShapePoints(const long shapeIndex, ShpfileType& shapeType
 		if (numPoints < 2)
 			return FALSE;
 
-		// fill up parts: polygon must have at least 1 part			
+		// fill up parts: polygon must have at least 1 part
 		if (numParts > 0)
 		{
 			for (int p = 0; p < numParts; p++)

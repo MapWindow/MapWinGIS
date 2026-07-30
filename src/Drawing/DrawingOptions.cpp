@@ -86,9 +86,9 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 	this->minLineWidth = opt.minLineWidth;
 	this->maxLineWidth = opt.maxLineWidth;
 
-	this->picture = NULL;
-	this->bitmapPlus = NULL;
-	this->imgAttributes = NULL;
+	this->picture = nullptr;
+	this->bitmapPlus = nullptr;
+	this->imgAttributes = nullptr;
 
 	this->verticesColor = opt.verticesColor;
 	this->verticesFillVisible = opt.verticesFillVisible;
@@ -106,13 +106,13 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
     this->minVisibleZoom = opt.minVisibleZoom;
     this->maxVisibleZoom = opt.maxVisibleZoom;
 
-	brushPlus = NULL;
+	brushPlus = nullptr;
 	if(pen) delete pen;
 	pen = new CPen();
 	if (brush) delete brush;
 	brush = new CBrush();
-	penOld = NULL;
-	brushOld = NULL;
+	penOld = nullptr;
+	brushOld = nullptr;
 	
 	return *this;
 }
@@ -277,14 +277,14 @@ void CDrawingOptionsEx::ReleaseGdiBrushAndPen(CDC* dc)
 	{
 		dc->SelectObject(this->penOld);
 		this->pen->DeleteObject();
-		this->penOld = NULL;
+		this->penOld = nullptr;
 	}
 
 	if (this->brushOld)
 	{
 		dc->SelectObject(this->brushOld);
 		this->brush->DeleteObject();
-		this->brushOld = NULL;
+		this->brushOld = nullptr;
 	}
 }
 #pragma endregion
@@ -323,7 +323,7 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 
 	this->ReleaseGdiPlusBrush();
 
-	long alpha = ((long)this->fillTransparency)<<24;
+	long alpha = static_cast<long>(this->fillTransparency)<<24;
 	
 	if (this->fillType == ftStandard )
 	{
@@ -337,7 +337,7 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 		{
 			brushPlus = new SolidBrush(Color(alpha | BGR_TO_RGB(this->fillColor)));
 		}
-		else 
+		else
 		{
 			Gdiplus::Color clr;
 			if ( this->fillBgTransparent )
@@ -356,8 +356,8 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 	{
 		// texture fill
 		bool canDraw = true;
-		
-		if (this->picture == NULL) canDraw = false;
+
+		if (this->picture == nullptr) canDraw = false;
 		if (this->scaleX == 0 || this->scaleY == 0) canDraw = false;
 		
 		long width, height;
@@ -379,7 +379,7 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 			// swap with scaled bitmap
 			if (this->scaleX != 1.0 || this->scaleY != 1.0)
 			{
-				Bitmap* newBmp = new Bitmap((int)(bmp->GetWidth() * this->scaleX), 
+				Bitmap* newBmp = new Bitmap((int)(bmp->GetWidth() * this->scaleX),
 											(int)(bmp->GetHeight() * this->scaleY));
 				Graphics* g = new Gdiplus::Graphics(newBmp);
 				g->DrawImage(bmp, Rect(0, 0, newBmp->GetWidth(), newBmp->GetHeight()), 0, 0, bmp->GetWidth(), bmp->GetHeight(), Gdiplus::UnitPixel);
@@ -595,7 +595,7 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 {
 	this->ReleaseGdiPlusBitmap();
 
-	if (this->picture == NULL) 
+	if (this->picture == nullptr)
 	{
 		return;
 	}
@@ -613,7 +613,7 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 	if (imgAttributes)
 	{
 		delete imgAttributes;
-		imgAttributes = NULL;
+		imgAttributes = nullptr;
 	}
 
 	double alpha = fillTransparency/255.0;
@@ -634,7 +634,6 @@ void CDrawingOptionsEx::LoadIcon()
 	// first let's check whether it is in-memory GDI+ icon after deserialization
 	if (type == istGDIPlus)
 	{
-
 		bitmapPlus = ImageHelper::GetGdiPlusIcon(this->picture);
 		_needDeleteBitmapPlus = false;
 		return;
@@ -685,20 +684,20 @@ Gdiplus::GraphicsPath* CDrawingOptionsEx::get_FontCharacterPath(CDC* dc, bool pr
 	CFont* oldFont = dc->SelectObject(&fnt);
 	Gdiplus::Font fontPlus(dc->m_hDC);
 	dc->SelectObject(&oldFont);
-	
+
 	CString str((char)this->pointCharcter);
-	int fontSize = MultiByteToWideChar(CP_ACP, 0, str.GetString(), -1, NULL, 0);
+	int fontSize = MultiByteToWideChar(CP_ACP, 0, str.GetString(), -1, nullptr, 0);
 	WCHAR* wText = new WCHAR[fontSize];
 	MultiByteToWideChar(CP_ACP, 0, str.GetString(), -1, wText, fontSize);
-	
+
 	Gdiplus::GraphicsPath* path = new Gdiplus::GraphicsPath();
 	Gdiplus::StringFormat fmt;
 	fmt.SetAlignment(Gdiplus::StringAlignmentCenter);
 	fmt.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 	Gdiplus::FontFamily family; fontPlus.GetFamily(&family);
-	
+
 	path->StartFigure();
-	path->AddString(wText, wcslen(wText), &family , fontPlus.GetStyle(), fontPlus.GetSize(), Gdiplus::PointF(0.0f, 0.0f), &fmt);
+	path->AddString(wText, static_cast<int>(wcslen(wText)), &family , fontPlus.GetStyle(), fontPlus.GetSize(), Gdiplus::PointF(0.0f, 0.0f), &fmt);
 	delete[] wText;
 
 	return path;
@@ -712,7 +711,7 @@ void CDrawingOptionsEx::ReleaseGdiPlusBrush()
 	if (brushPlus)
 	{
 		delete brushPlus;
-		brushPlus = NULL;
+		brushPlus = nullptr;
 	}
 }
 
@@ -726,7 +725,7 @@ void CDrawingOptionsEx::ReleaseGdiPlusBitmap()
 		// deleting only in case it's not in-memory bitmap
 		delete bitmapPlus; 
 	}
-	bitmapPlus = NULL;
+	bitmapPlus = nullptr;
 }
 
 // ***************************************************************
@@ -737,7 +736,7 @@ void CDrawingOptionsEx::ReleaseGdiPlusPen()
 	if (penPlus)
 	{
 		delete penPlus;
-		penPlus = NULL;
+		penPlus = nullptr;
 	}
 }
 
@@ -751,7 +750,7 @@ void CDrawingOptionsEx::InitGdiVerticesPen(CDC* dc)
 	{
 		if (this->penOld || this->brushOld)
 		{
-			this->ReleaseGdiBrushAndPen(dc);	
+			this->ReleaseGdiBrushAndPen(dc);
 		}
 
 		if (this->verticesFillVisible)
@@ -885,7 +884,7 @@ void CDrawingOptionsEx::DrawPointSymbol(Gdiplus::Graphics& g, CDC* dc, Gdiplus::
 				g.SetTransform(&mtx);
 				
 				delete[] pointsTemp;
-				pointsTemp = NULL;
+				pointsTemp = nullptr;
 			}
 		}
 	}
@@ -981,7 +980,7 @@ void CDrawingOptionsEx::DrawPointSymbol(Gdiplus::Graphics& g, CDC* dc, Gdiplus::
 			if (this->penPlus)
 				this->penPlus->SetAlignment(Gdiplus::PenAlignmentCenter);
 
-			Gdiplus::GraphicsPath* path2 = NULL;
+			Gdiplus::GraphicsPath* path2 = nullptr;
 			if (path && this->drawFrame)
 			{
 				path2 = this->GetFrameForPath(*path);
@@ -1106,7 +1105,7 @@ bool CDrawingOptionsEx::CanUseLinePattern()
 
 Gdiplus::GraphicsPath* CDrawingOptionsEx::GetFrameForPath(Gdiplus::GraphicsPath& path)
 {
-	Gdiplus::GraphicsPath* path2 = NULL;
+	Gdiplus::GraphicsPath* path2 = nullptr;
 	Gdiplus::RectF bounds;
 	Gdiplus::Status status = path.GetBounds(&bounds);
 	if (status == Gdiplus::Status::Ok)

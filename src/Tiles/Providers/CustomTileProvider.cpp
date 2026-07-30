@@ -95,7 +95,7 @@ CString CustomTileProvider::MakeTileImageUrl(CPoint &pos, int zoom)
 
 	if (_pattern.GetLength() != 0 && _tokens.size() > 0)
 	{
-		int val = GetServerNum(pos, _tokens.size());
+		int val = GetServerNum(pos, static_cast<int>(_tokens.size()));
 		url.Replace(_pattern, _tokens[val]);
 	}
 	return url;

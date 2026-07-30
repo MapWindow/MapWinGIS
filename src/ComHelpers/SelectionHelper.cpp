@@ -20,13 +20,13 @@ bool SelectionHelper::PolylineIntersection(std::vector<double>& xPts, std::vecto
     int end_part = 0;
 
     size_t numpoints = xPts.size();
-    long numparts = parts.size();
+    long numparts = static_cast<long>(parts.size());
 
     for (long i = 0; i < numparts; i++)
     {
         beg_part = parts[i];
         if (beg_part < 0) beg_part = 0;
-        end_part = (int)(parts.size() - 1) > i ? parts[i + 1] : numpoints;
+        end_part = static_cast<int>(parts.size()) - 1 > i ? parts[i + 1] : static_cast<int>(numpoints);
 
         //for(size_t j = 0; j < numpoints - 1; j++)
         for (long j = beg_part; j < end_part - 1; j++)
@@ -68,7 +68,7 @@ bool SelectionHelper::PolylineIntersection(std::vector<double>& xPts, std::vecto
                 return true;
             }
 
-            // generate the equation of the line							
+            // generate the equation of the line
             double m = dy / dx;
             double b = p1y - m*p1x;
 
@@ -103,7 +103,7 @@ bool SelectionHelper::PolygonIntersection(std::vector<double>& xPts, std::vector
     int end_part = 0;
 
     bool selected = false;
-    long numparts = parts.size();
+    long numparts = static_cast<long>(parts.size());
     size_t numpoints = xPts.size();
 
     for (long j = 0; j < numparts && !selected; j++)
@@ -115,7 +115,7 @@ bool SelectionHelper::PolygonIntersection(std::vector<double>& xPts, std::vector
         if ((int)(parts.size() - 1) > j)
             end_part = parts[j + 1];
         else
-            end_part = numpoints;
+            end_part = static_cast<int>(numpoints);
 
         for (long k = beg_part; k < end_part - 1; k++)
         {
@@ -162,7 +162,7 @@ bool SelectionHelper::PolygonIntersection(std::vector<double>& xPts, std::vector
                 return true;
             }
 
-            // generate the equation of the line							
+            // generate the equation of the line
             double m = dy / dx;
             double b = p1y - m*p1x;
 
@@ -190,7 +190,7 @@ bool SelectionHelper::PolygonIntersection(std::vector<double>& xPts, std::vector
 bool SelectionHelper::SelectWithShapeBounds(IShapefile* sf, IShape* shp, vector<long>& indices)
 {
     if (!sf || !shp) return false;
-    CComPtr<IExtents> box = NULL;
+    CComPtr<IExtents> box = nullptr;
     shp->get_Extents(&box);
     return SelectShapes(sf, Extent(box), SelectMode::INTERSECTION, indices);
 }
@@ -347,7 +347,7 @@ int SelectionHelper::SelectByPolygon(IShapefile* sf, IShape* poly, int& errorCod
 
     for (size_t i = 0; i < indices.size(); i++)
     {
-        CComPtr<IShape> shp = NULL;
+        CComPtr<IShape> shp = nullptr;
         sf->get_Shape(indices[i], &shp);
         if (shp)
         {

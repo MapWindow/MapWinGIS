@@ -14,11 +14,11 @@ int EditorBase::GetClosestVertex(double projX, double projY, double tolerance)
 		if (dist < min)
 		{
 			min = dist;
-			pointIndex = i;
+			pointIndex = static_cast<int>(i);
 		}
 	}
 	if (pointIndex == 0 && HasClosedPolygon()) {
-		pointIndex = _points.size() - 1;
+		pointIndex = static_cast<int>(_points.size()) - 1;
 	}
 
 	return min < tolerance ? pointIndex : -1;
@@ -114,7 +114,7 @@ bool EditorBase::ClearHighlightedPart()
 // ************************************************
 bool EditorBase::SetSelectedVertex(int index)
 {
-	if (index < 0 || index >= (int)_points.size())
+	if (index < 0 || index >= static_cast<int>(_points.size()))
 		return false;
 
 	_selectedPart = -1;
@@ -136,7 +136,7 @@ bool EditorBase::SetSelectedVertex(int index)
 // ************************************************
 bool EditorBase::SetHighlightedVertex(int index)
 {
-	if (index < 0 || index >= (int)_points.size())
+	if (index < 0 || index >= static_cast<int>(_points.size()))
 		return false;
 
 	if (index != _highlightedVertex)
@@ -192,9 +192,9 @@ bool EditorBase::PartIsWithin(int outerRing, int innerRing)
 {
 	if (GetShapeType2D() == SHP_POLYGON)
 	{
-		CComPtr<IShape> shp = NULL;
+		CComPtr<IShape> shp = nullptr;
 		shp.Attach(GetPartAsShape(outerRing));
-		if (shp != NULL)
+		if (shp != nullptr)
 		{
 			int startIndex, endIndex;
 			if (GetPart(innerRing, startIndex, endIndex))
@@ -202,7 +202,7 @@ bool EditorBase::PartIsWithin(int outerRing, int innerRing)
 				VARIANT_BOOL vb;
 				for (int i = startIndex; i <= endIndex; i++)
 				{
-					CComPtr<IPoint> pnt = NULL;
+					CComPtr<IPoint> pnt = nullptr;
 					ComHelper::CreatePoint(&pnt);
 					pnt->put_X(_points[i]->Proj.x);
 					pnt->put_Y(_points[i]->Proj.y);
@@ -224,7 +224,7 @@ IShape* EditorBase::GetPartAsShape(int partIndex)
 	int startIndex, endIndex;
 	if (GetPart(partIndex, startIndex, endIndex))
 	{
-		IShape* shp = NULL;
+		IShape* shp = nullptr;
 		ComHelper::CreateShape(&shp);
 		VARIANT_BOOL vb;
 		shp->Create(GetShapeType2D(), &vb);
@@ -237,7 +237,7 @@ IShape* EditorBase::GetPartAsShape(int partIndex)
 		}
 		return shp;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ************************************************
@@ -247,7 +247,7 @@ bool EditorBase::GetPart(int partIndex, int& startIndex, int& endIndex)
 {
 	startIndex = GetPartStart(partIndex);
 	endIndex = SeekPartEnd(startIndex);
-	if (startIndex >= (int)_points.size() && endIndex >= (int)_points.size()) return false;
+	if (startIndex >= static_cast<int>(_points.size()) && endIndex >= static_cast<int>(_points.size())) return false;
 	return startIndex != -1 && endIndex != -1;
 }
 
@@ -269,7 +269,7 @@ bool EditorBase::SetHighlightedPart(int part)
 // *******************************************************
 bool EditorBase::RemoveVertex(int vertexIndex)
 {
-	if (vertexIndex < 0 && vertexIndex >= (int)_points.size())
+	if (vertexIndex < 0 && vertexIndex >= static_cast<int>(_points.size()))
 		return false;
 
 	PointPart part = _points[vertexIndex]->Part;
@@ -343,7 +343,7 @@ void EditorBase::Move(double offsetXProj, double offsetYProj)
 	{
 		_points[i]->Proj.x += offsetXProj;
 		_points[i]->Proj.y += offsetYProj;
-		UpdateLatLng(i);
+		UpdateLatLng(static_cast<int>(i));
 	}
 	SetModified();
 }
@@ -383,14 +383,14 @@ void EditorBase::MoveVertex(double xProj, double yProj)
 	int index = _selectedVertex;
 	int closeIndex = GetCloseIndex(index);
 
-	if (index >= 0 && index < (int)_points.size())
+	if (index >= 0 && index < static_cast<int>(_points.size()))
 	{
 		_points[index]->Proj.x = xProj;
 		_points[index]->Proj.y = yProj;
 		UpdateLatLng(index);
 
 		// coordinates of the first and last point of polygon must be the same
-		if (closeIndex >= 0 && closeIndex < (int)_points.size()) {
+		if (closeIndex >= 0 && closeIndex < static_cast<int>(_points.size())) {
 			_points[closeIndex]->Proj.x = _points[index]->Proj.x;
 			_points[closeIndex]->Proj.y = _points[index]->Proj.y;
 			UpdateLatLng(closeIndex);

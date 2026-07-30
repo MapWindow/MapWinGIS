@@ -185,25 +185,25 @@ int load123tagp(char *string)
    char second_tag[10];
 
    /* ALLOCATE NEW_TL { DUMMY } */
-   if ((new_tl = (struct tl *) malloc(sizeof(struct tl))) == NULL) return(0);
+   if ((new_tl = (struct tl *) malloc(sizeof(struct tl))) == nullptr) return(0);
 
    /* SET TAG_L TO NEW_TL */
    cur_fm->cr_hd->tag_l = new_tl;
 
    /* SET NEW_TL NEXT TO NULL */
-   new_tl->next = NULL;
+   new_tl->next = nullptr;
 
    /* SET CUR_TL TO NEW_TL */
    cur_tl = new_tl;
 
    /* GET INPUT STRING LENGTH */
-   length = _tcslen(string);
+   length = static_cast<long>(_tcslen(string));
    
    /* WHILE INDEX LESS THAN LENGTH DO */
    while(index < length) {
 
       /* PARSE FIRST TAG FROM STRING */
-      strncpy(first_tag,&string[index],(int) cur_fm->dl_hd->s_tag);
+      strncpy(first_tag,&string[index],static_cast<int>(cur_fm->dl_hd->s_tag));
       first_tag[cur_fm->dl_hd->s_tag] = NC;
 
       /* UPDATE INDEX OF INPUT STRING */
@@ -217,13 +217,13 @@ int load123tagp(char *string)
       index += cur_fm->dl_hd->s_tag;
 
       /* ALLOCATE NEW_TL */
-      if ((new_tl = (struct tl *) malloc(sizeof(struct tl))) == NULL) return(0);
+      if ((new_tl = (struct tl *) malloc(sizeof(struct tl))) == nullptr) return(0);
 
       /* SET CUR_TL NEXT TO NEW_TL */
       cur_tl->next = new_tl;
 
       /* SET NEW_TL NEXT TO NULL */
-      new_tl->next = NULL;
+      new_tl->next = nullptr;
 
       /* SET TAG1 TO FIRST TAG */
       strcpy(new_tl->tag_1,first_tag);

@@ -7,7 +7,7 @@
 bool MeasuringBase::GetPartStartAndEnd(int partIndex, MixedShapePart whichPoints, int& startIndex, int& endIndex)
 {
 	startIndex = 0;
-	endIndex = _points.size();		// actually the next after end one
+	endIndex = static_cast<int>(_points.size());		// actually the next after end one
 
 	switch (whichPoints)
 	{
@@ -15,12 +15,12 @@ bool MeasuringBase::GetPartStartAndEnd(int partIndex, MixedShapePart whichPoints
 		{
 			if (_firstPolyPointIndex == -1)
 				return false;
-			if (_firstPolyPointIndex >(int)_points.size() - 1)
+			if (_firstPolyPointIndex >static_cast<int>(_points.size()) - 1)
 			{
 				return false;
 			}
 			startIndex = _firstPolyPointIndex;
-			endIndex = (int)_points.size();
+			endIndex = static_cast<int>(_points.size());
 			return true;
 		}
 	}
@@ -109,7 +109,7 @@ bool MeasuringBase::SnapToPreviousVertex(int& vertexIndex, double screenX, doubl
 	double xTemp, yTemp;
 	vertexIndex = -1;
 
-	int size = _points.size() - 2;
+	int size = static_cast<int>(_points.size()) - 2;
 	for (int i = 0; i < size; i++)
 	{
 		ProjToPixel(_points[i]->Proj.x, _points[i]->Proj.y, xTemp, yTemp);

@@ -72,7 +72,6 @@ protected:
 
 public:
 	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint& ret) = 0;
-	
 	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng& ret) = 0;
 	virtual void FromXYToProj(CPoint pnt, int zoom, PointLatLng& ret) = 0;
 	virtual double GetWidth() = 0;

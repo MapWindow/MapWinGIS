@@ -54,7 +54,7 @@ void CLabelDrawer::InitSettings(LabelSettings& settings, ILabels* labels, IShape
 
 	settings.scaleFactor = GetScaleFactor(labels);
 
-	settings.autoOffset = sf != nullptr ? GetAutoOffset(labels, sf) : false;
+	settings.autoOffset = GetAutoOffset(labels, sf);
 
 	settings.numLabels = LabelsHelper::GetCount(labels);
 
@@ -254,15 +254,15 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 int* CLabelDrawer::PlaceLabels(ILabels* labels)
 {
 	if (!CheckVisibility(labels))
-		return NULL;
+		return nullptr;
 
 	CLabels* lbs = static_cast<CLabels*>(labels);
 	vector<vector<CLabelInfo*>*>* labelData = lbs->get_LabelData();
 
 	IShapefile* sf = lbs->get_ParentShapefile();
-	std::vector<ShapeRecord*>* shapeData = NULL;
+	std::vector<ShapeRecord*>* shapeData = nullptr;
 	if (sf) {
-		shapeData = ((CShapefile*)sf)->get_ShapeVector();
+		shapeData = static_cast<CShapefile*>(sf)->get_ShapeVector();
 	}
 
 	// ---------------------------------
@@ -275,13 +275,13 @@ int* CLabelDrawer::PlaceLabels(ILabels* labels)
 	GetVisibilityMask(labels, sf, shapeData, visibilityMask);
 
 	// sort them if sort field is specified
-	vector<long>* indices = NULL;
+	vector<long>* indices = nullptr;
 	if (sf) {
 		((CShapefile*)sf)->GetSorting(&indices);
 	}
 
 	if (indices && indices->size() != settings.numLabels) {
-		indices = NULL;
+		indices = nullptr;
 	}
 
 	// ---------------------------------
@@ -323,7 +323,7 @@ int* CLabelDrawer::PlaceLabels(ILabels* labels)
 			}
 
 			vector<CLabelInfo*>* parts = (*labelData)[i];
-			for (int j = 0; j < (int)parts->size(); j++)
+			for (int j = 0; j < static_cast<int>(parts->size()); j++)
 			{
 				CLabelInfo* lbl = (*parts)[j];
 
@@ -341,8 +341,8 @@ int* CLabelDrawer::PlaceLabels(ILabels* labels)
 				{
 					if (uniqueValues.find(lbl->text) != uniqueValues.end())
 						continue;
-					else
-						uniqueValues.insert(lbl->text);
+
+					uniqueValues.insert(lbl->text);
 				}
 
 				// measuring label
@@ -383,11 +383,13 @@ int* CLabelDrawer::PlaceLabels(ILabels* labels)
 			}
 		} // label
 	}
+
+	return nullptr;
 }
 
 CRect CLabelDrawer::GetLabelExtents(ILabels* labels, long index)
 {
-	auto lbs = static_cast<CLabels*>(labels);
+	auto lbs = dynamic_cast<CLabels*>(labels);
 	//CLabels* lbs = static_cast<CLabels*>(labels);
 	vector<vector<CLabelInfo*>*>* labelData = lbs->get_LabelData();
 
@@ -467,7 +469,7 @@ CRect CLabelDrawer::GetLabelExtents(ILabels* labels, long index)
 // *********************************************************************
 vector<int> CLabelDrawer::PlaceAllMapLabels(ILabels* labels)
 {
-	std:vector<int> indexes;
+	vector<int> indexes;
 
 	if (!CheckVisibility(labels))
 		return indexes;

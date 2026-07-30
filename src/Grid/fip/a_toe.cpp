@@ -311,11 +311,11 @@ int a123toe(char *string)
 
 
    /* DO FOR EACH CHARACTER IN STRING */
-   len = _tcslen(string);
+   len = static_cast<int>(_tcslen(string));
    for (i=0;i<len;i++) {
 
       /* SET ASCII CHARACTER TO EBCDIC EQUIVELENT IN TABLE */
-      string[i] = ebcdic[(int)string[i]];
+      string[i] = ebcdic[static_cast<int>(string[i])];
 
    }
 

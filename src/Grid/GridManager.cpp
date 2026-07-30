@@ -15,7 +15,7 @@ GridManager::~GridManager()
 }
 
 DATA_TYPE GridManager::getGridDataType( const char * cfilename, GRID_TYPE GridType )
-{	
+{
 	CString filename = cfilename;
 
 	GRID_TYPE grid_type = GridType;
@@ -58,7 +58,7 @@ DATA_TYPE GridManager::getGridDataType( const char * cfilename, GRID_TYPE GridTy
 			else
 			{
 				type = UNKNOWN_TYPE;
-			}			
+			}
 		}
 		XTIFFClose(tiff);
 
@@ -67,7 +67,7 @@ DATA_TYPE GridManager::getGridDataType( const char * cfilename, GRID_TYPE GridTy
 	else if( grid_type == ASCII_GRID )
 		return DOUBLE_TYPE;
 	else if( grid_type == BINARY_GRID )
-	{	
+	{
 		FILE * in = fopen( filename, "rb" );
 		if( !in )
 			return INVALID_DATA_TYPE;
@@ -94,7 +94,7 @@ DATA_TYPE GridManager::getGridDataType( const char * cfilename, GRID_TYPE GridTy
 		return DOUBLE_TYPE;
 	else if( grid_type == ESRI_GRID )
 	{	if( filename.GetLength() <= 0 )
-			return INVALID_DATA_TYPE;		
+			return INVALID_DATA_TYPE;
 		else
 		{	DATA_TYPE data_type = esri_data_type(filename);
 			return data_type;
@@ -105,7 +105,7 @@ DATA_TYPE GridManager::getGridDataType( const char * cfilename, GRID_TYPE GridTy
 }
 
 GRID_TYPE GridManager::getGridType( const char * cfilename )
-{	
+{
 	CString filename = cfilename;
 
 	GRID_TYPE grid_type = INVALID_GRID_TYPE;
@@ -114,7 +114,7 @@ GRID_TYPE GridManager::getGridType( const char * cfilename )
 	{	
 		char * clean_filename = new char[ filename.GetLength() + 1];
 		strcpy( clean_filename, filename );
-		for( int i = _tcslen( clean_filename ) - 1; i >= 0; i-- )
+		for( size_t i = _tcslen( clean_filename ) - 1; i >= 0; i-- )
 		{	if( clean_filename[i] == '\\' || clean_filename[i] == '/' )
 				clean_filename[i] = '\0';
 			else
@@ -146,7 +146,7 @@ GRID_TYPE GridManager::getGridType( const char * cfilename )
 		cff.Close();
 
 		//File does not exist so parse it out
-		int length = _tcslen(filename );
+		int length = static_cast<int>(_tcslen(filename ));
 		bool foundPeriod = false;
 		for( int e = length-1; e >= 0; e-- )
 		{	if( filename[e] == '\\' || filename[e] == '/' )
@@ -158,9 +158,9 @@ GRID_TYPE GridManager::getGridType( const char * cfilename )
 			}
 		}
 
-		if ( foundPeriod == false ) 
+		if ( foundPeriod == false )
 			return ESRI_GRID;
-		
+
 		if( length > 4 )
 		{
 			char ext[4];
@@ -168,7 +168,7 @@ GRID_TYPE GridManager::getGridType( const char * cfilename )
 			ext[1] = filename[length - 2];
 			ext[2] = filename[length - 1];
 			ext[3] = '\0';
-			
+
 			if( islower( ext[0] ) )
 				ext[0] = toupper( ext[0] );
 			if( islower( ext[1] ) )
@@ -205,11 +205,11 @@ bool GridManager::deleteGrid( const char * cfilename, GRID_TYPE GridType )
 	if( type == GEOTIFF_GRID)//added 8/15/05 -- ah, might need to change to delete
 		_unlink(filename);
 	else if( type == ASCII_GRID )
-		_unlink( filename );			
+		_unlink( filename );
 	else if( type == BINARY_GRID )
-		_unlink( filename );			
+		_unlink( filename );
 	else if( type == ESRI_GRID )
-		delete_esri_grid( filename );			
+		delete_esri_grid( filename );	
 	else if( type == SDTS_GRID )
 	{
 		CString prefix = filename.Left( 4 );
@@ -254,7 +254,7 @@ bool GridManager::NeedProxyForGrid(CStringW filename, tkGridProxyMode proxyMode,
 	if(GdalHelper::HasOverviews(filename))
 		return false;
 
-	bool tempGridNeeded = grid == NULL;
+	bool tempGridNeeded = grid == nullptr;
 
 	// then if there is a proxy
 	bool hasProxy = GridManager::HasValidProxy(filename);
@@ -269,7 +269,7 @@ bool GridManager::NeedProxyForGrid(CStringW filename, tkGridProxyMode proxyMode,
 	}
 
 	bool canBuildOverviews = m_globalSettings.rasterOverviewCreation != rocNo;
-	if (!GdalHelper::SupportsOverviews(filename, NULL))
+	if (!GdalHelper::SupportsOverviews(filename, nullptr))
 		canBuildOverviews = false;
 	return !canBuildOverviews;
 }

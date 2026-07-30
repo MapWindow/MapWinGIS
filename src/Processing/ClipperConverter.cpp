@@ -9,21 +9,21 @@
 // ClipperLib::Polygons* ClipperConverter::Shape2ClipperPolygon(IShape* shp)
 ClipperLib::Paths* ClipperConverter::Shape2ClipperPolygon(IShape* shp)
 {
-	if (!shp) 
-		return NULL;
+	if (!shp)
+		return nullptr;
 
 	ShpfileType shpType;
 	shp->get_ShapeType(&shpType);
 	if (shpType != SHP_POLYGON && shpType != SHP_POLYGONM && shpType != SHP_POLYGONZ)
-		return NULL;
-	
+		return nullptr;
+
 	long numParts, numPoints;
 	shp->get_NumParts(&numParts);
 	shp->get_NumPoints(&numPoints);
 	
 	if (numPoints == 0 || numParts == 0)
-		return NULL;
-	
+		return nullptr;
+
 	double x, y;
 
 	// ClipperLib::Polygons* retval = new ClipperLib::Polygons();
@@ -52,8 +52,8 @@ ClipperLib::Paths* ClipperConverter::Shape2ClipperPolygon(IShape* shp)
 				y *= conversionFactor;
 			}
 
-			pnt.X = (ClipperLib::long64)x;
-			pnt.Y = (ClipperLib::long64)y;
+			pnt.X = static_cast<ClipperLib::long64>(x);
+			pnt.Y = static_cast<ClipperLib::long64>(y);
 			polygon.push_back(pnt);
 		}
 		retval->push_back(polygon);
@@ -66,7 +66,7 @@ ClipperLib::Paths* ClipperConverter::Shape2ClipperPolygon(IShape* shp)
 	else
 	{
 		delete retval;
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -79,7 +79,7 @@ ClipperLib::Paths* ClipperConverter::Shape2ClipperPolygon(IShape* shp)
 IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Paths* polygon)
 {
 	bool pointsExist = false;
-	for (long i = 0; i < (long)polygon->size(); i++)
+	for (long i = 0; i < static_cast<long>(polygon->size()); i++)
 	{
 		// ClipperLib::Polygon* poly = &((*polygon)[i]);
 		ClipperLib::Path* poly = &((*polygon)[i]);
@@ -91,26 +91,26 @@ IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Paths* polygon)
 	}
 
 	if (!pointsExist)
-		return NULL;
+		return nullptr;
 	
-	IShape* shp = NULL;
+	IShape* shp = nullptr;
 	ComHelper::CreateShape(&shp);
 	if (!shp) 
-		return NULL;
+		return nullptr;
 	
 	VARIANT_BOOL vbretval;
 	shp->Create(SHP_POLYGON, &vbretval);
 	if (!vbretval)
 	{
 		shp->Release();
-		return NULL;
+		return nullptr;
 	}
 
 	double x, y;
 
 	long cnt = 0;
 	long part = 0;
-	for (long i = 0; i < (long)polygon->size(); i++)
+	for (long i = 0; i < static_cast<long>(polygon->size()); i++)
 	{
 		// ClipperLib::Polygon* poly = &((*polygon)[i]);
 		ClipperLib::Path* poly = &((*polygon)[i]);
@@ -118,15 +118,15 @@ IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Paths* polygon)
 		{
 			shp->InsertPart(cnt, &part, &vbretval);
 			part++;
-			
-			int j = poly->size() - 1;
+
+			int j = static_cast<int>(poly->size() - 1);
 			for (; j >= 0; j--)
 			{
-				IPoint* pnt = NULL;
+				IPoint* pnt = nullptr;
 				ComHelper::CreatePoint(&pnt);
 				
-				x = (double)(*poly)[j].X;
-				y = (double)(*poly)[j].Y;
+				x = static_cast<double>((*poly)[j].X);
+				y = static_cast<double>((*poly)[j].Y);
 
 				if (this->conversionFactor != 1.0)
 				{
@@ -143,24 +143,24 @@ IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Paths* polygon)
 			}
 			
 			// the first and the last point of the part must be the same
-			int size = poly->size() - 1;
+			int size = static_cast<int>(poly->size() - 1);
 			if (size > 0)
 			{
 				if (((*poly)[0]).X != ((*poly)[size]).X ||
 					((*poly)[0]).Y != ((*poly)[size]).Y)
 				{
-					IPoint* pnt = NULL;
+					IPoint* pnt = nullptr;
 					ComHelper::CreatePoint(&pnt);
 					
-					x = (double)(*poly)[size].X;	// slightly inoptimal, this point was calculated already
-					y = (double)(*poly)[size].Y;
+					x = static_cast<double>((*poly)[size].X);	// slightly inoptimal, this point was calculated already
+					y = static_cast<double>((*poly)[size].Y);
 
 					if (this->conversionFactor != 1.0)
 					{
 						x  /= conversionFactor;
 						y  /= conversionFactor;
 					}
-					
+
 					pnt->put_X(x);
 					pnt->put_Y(y);
 
@@ -209,12 +209,12 @@ ClipperLib::Paths* ClipperConverter::ClipPolygon(ClipperLib::Paths* polyClip, Cl
 		}
 		else
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -238,10 +238,10 @@ IShape* ClipperConverter::ClipPolygon(IShape* shapeClip, IShape* shapeSubject, P
 		case UNION_OPERATION:
 			operNew = ClipperLib::ctUnion;
 			break;
-		default: 
-			return NULL;
+		default:
+			return nullptr;
 	}
-	
+
 	//shapeSubject
 	ClipperConverter ogr;
 	// ClipperLib::Polygons* poly1 = ogr.Shape2ClipperPolygon(shapeClip);
@@ -259,7 +259,7 @@ IShape* ClipperConverter::ClipPolygon(IShape* shapeClip, IShape* shapeSubject, P
 			return shp;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************
@@ -267,14 +267,14 @@ IShape* ClipperConverter::ClipPolygon(IShape* shapeClip, IShape* shapeSubject, P
 // ***************************************************
 void ClipperConverter::AddPolygons(IShapefile* sf, ClipperLib::Clipper& clp, ClipperLib::PolyType clipType, bool selectedOnly)
 {
-    if (!sf) return;
+	if (!sf) return;
 
 	long numShapes;
 	sf->get_NumShapes(&numShapes);
 
 	ClipperConverter converter(sf);
 
-	IShape* shp = NULL;
+	IShape* shp = nullptr;
 	for (long i = 0; i < numShapes; i++)
 	{
 		if (selectedOnly && !ShapefileHelper::ShapeSelected(sf, i))

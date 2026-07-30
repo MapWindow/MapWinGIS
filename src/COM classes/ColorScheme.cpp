@@ -157,7 +157,7 @@ STDMETHODIMP CColorScheme::SetColors4 (PredefinedColorScheme Scheme)
 
 	_breaks.clear();
 
-	int size = colors.size();
+	int size = static_cast<int>(colors.size());
 	for (int i = 0; i < size; i++)
 	{
 		ColorBreak br;
@@ -234,7 +234,7 @@ STDMETHODIMP CColorScheme::Remove(long Index, VARIANT_BOOL* retVal)
 STDMETHODIMP CColorScheme::get_NumBreaks(long * retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _breaks.size();
+	*retVal = static_cast<long>(_breaks.size());
 	return S_OK;
 }
 
@@ -285,7 +285,7 @@ STDMETHODIMP CColorScheme::get_RandomColor(double Value, OLE_COLOR* retVal)
 		// the specified value is too big (there is no such big value in color scheme), we'll use the last interval in this case
 		if (index == 0)
 		{
-			index = _breaks.size() - 1;
+			index = static_cast<int>(_breaks.size()) - 1;
 			Value = _breaks[index].value;
 		}
 
@@ -343,7 +343,7 @@ STDMETHODIMP CColorScheme::get_GraduatedColor(double Value, OLE_COLOR* retVal)
 		// the specified value is to big (there is no such big value in color scheme), we'll use the last interval in this case
 		if (index == 0)
 		{
-			index = _breaks.size() - 1;
+			index = static_cast<int>(_breaks.size()) - 1;
 			Value = _breaks[index].value;
 		}
 		

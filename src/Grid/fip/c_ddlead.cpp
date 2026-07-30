@@ -236,7 +236,7 @@ int cmp123ddlead()
    cur_fm->cur_dd = cur_fm->dd_hd;
 
    /* WHILE CUR_DD NEXT NOT NULL DO */
-   while(cur_fm->cur_dd->next != NULL) {
+   while(cur_fm->cur_dd->next != nullptr) {
 
       /* SET CUR_DD TO CUR_DD NEXT */
       cur_fm->cur_dd = cur_fm->cur_dd->next;
@@ -245,21 +245,21 @@ int cmp123ddlead()
       i123toa(cur_fm->cur_dd->fd_len,tmp_str);
       
       /* IF NUMBER OF CHARACTERS MAKING UP FD_LEN IS LARGER THAN S_FDLEN */
-      if ((tmp_len = _tcslen(tmp_str)) > cur_fm->dl_hd->s_fdlen) {
+      if ((tmp_len = static_cast<long>(_tcslen(tmp_str))) > cur_fm->dl_hd->s_fdlen) {
 
          /* SET S_FDLEN TO NUMBER OF CHARACTERS IN FD_LEN */
          cur_fm->dl_hd->s_fdlen = tmp_len;
       }
       
       /* IF NUMBER OF CHARACTERS MAKING UP FD_CNTRL LARGER THAN FD_CNTRL_L */
-      if ((tmp_len = _tcslen(cur_fm->cur_dd->fd_cntrl)) > cur_fm->dl_hd->fd_cntrl_l) {
+      if ((tmp_len = static_cast<long>(_tcslen(cur_fm->cur_dd->fd_cntrl))) > cur_fm->dl_hd->fd_cntrl_l) {
 
          /* SET FD_CNTRL_L TO NUMBER OF CHARACTERS IN FD_CNTRL */
          cur_fm->dl_hd->fd_cntrl_l = tmp_len;
       }
       
       /* IF NUMBER OF CHARACTERS IN TAG EXCEED S_TAG */
-      if ((tmp_len = _tcslen(cur_fm->cur_dd->tag)) > cur_fm->dl_hd->s_tag) {
+      if ((tmp_len = static_cast<long>(_tcslen(cur_fm->cur_dd->tag))) > cur_fm->dl_hd->s_tag) {
 
          /* SET S_TAG TO NUMBER OF CHARACTERS */
          cur_fm->dl_hd->s_tag = tmp_len;
@@ -281,7 +281,7 @@ int cmp123ddlead()
        { LAST FIELD IN DD }
    */
    i123toa(cur_fm->cur_dd->fd_pos,tmp_str);
-   cur_fm->dl_hd->s_fdpos = _tcslen(tmp_str);
+   cur_fm->dl_hd->s_fdpos = static_cast<long>(_tcslen(tmp_str));
 
    /* IF SIZE OF FIELD POSITION IS NOT A VALID SIZE, RETURN FAILURE */
    if (cur_fm->dl_hd->s_fdpos < 1 || cur_fm->dl_hd->s_fdpos > 9) return(0);

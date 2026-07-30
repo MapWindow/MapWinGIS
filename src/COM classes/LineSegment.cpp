@@ -165,15 +165,15 @@ STDMETHODIMP CLineSegment::put_MarkerInterval(float newVal)
 // *************************************************************
 STDMETHODIMP CLineSegment::get_MarkerIntervalIsRelative(VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        * retVal = _markerIntervalIsRelative;
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	* retVal = _markerIntervalIsRelative;
+	return S_OK;
 }
 STDMETHODIMP CLineSegment::put_MarkerIntervalIsRelative(VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        _markerIntervalIsRelative = newVal;
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_markerIntervalIsRelative = newVal;
+	return S_OK;
 }
 
 // *************************************************************
@@ -181,15 +181,15 @@ STDMETHODIMP CLineSegment::put_MarkerIntervalIsRelative(VARIANT_BOOL newVal)
 // *************************************************************
 STDMETHODIMP CLineSegment::get_MarkerAllowOverflow(VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        * retVal = _markerAllowOverflow;
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	* retVal = _markerAllowOverflow;
+	return S_OK;
 }
 STDMETHODIMP CLineSegment::put_MarkerAllowOverflow(VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        _markerAllowOverflow = newVal;
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_markerAllowOverflow = newVal;
+	return S_OK;
 }
 
 // *************************************************************
@@ -223,7 +223,7 @@ STDMETHODIMP CLineSegment::put_MarkerFlipFirst(VARIANT_BOOL newVal)
 	_markerFlipFirst = newVal;
 	return S_OK;
 }
-	
+
 // *************************************************************
 //		get_MarkerOffset()
 // *************************************************************
@@ -245,15 +245,15 @@ STDMETHODIMP CLineSegment::put_MarkerOffset(float newVal)
 // *************************************************************
 STDMETHODIMP CLineSegment::get_MarkerOffsetIsRelative(VARIANT_BOOL* retVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        * retVal = _markerOffsetIsRelative;
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	* retVal = _markerOffsetIsRelative;
+	return S_OK;
 }
 STDMETHODIMP CLineSegment::put_MarkerOffsetIsRelative(VARIANT_BOOL newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        _markerOffsetIsRelative = newVal;
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_markerOffsetIsRelative = newVal;
+	return S_OK;
 }
 
 // *************************************************************
@@ -266,7 +266,7 @@ STDMETHODIMP CLineSegment::Draw (int hdc, float x, float y, int clipWidth, int c
 		return S_OK;
 	}
 
-	CDC* dc = CDC::FromHandle((HDC)hdc);
+	CDC* dc = CDC::FromHandle(reinterpret_cast<HDC>(static_cast<INT_PTR>(hdc)));
 	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
 }
@@ -304,8 +304,8 @@ VARIANT_BOOL CLineSegment::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 	Gdiplus::SolidBrush brushBackground(clr);
 	g.Clear(clr);
 
-    VARIANT_BOOL vb;
-    Draw(g, (BYTE) 255, clipWidth, clipHeight, (int) x, (int) y, &vb);
+	VARIANT_BOOL vb;
+	Draw(g, (BYTE) 255, clipWidth, clipHeight, static_cast<int>(x), static_cast<int>(y), &vb);
 
 	Gdiplus::Graphics gResult(dc->GetSafeHdc());
 	gResult.DrawImage(&bmp, x, y);
@@ -330,7 +330,7 @@ STDMETHODIMP CLineSegment::Draw(Gdiplus::Graphics& g, BYTE transparency, int Ima
 void CLineSegment::DrawSimpleSegment(Gdiplus::Graphics& g, int ImageWidth, int ImageHeight, const BYTE& transparency)
 {
     if (_lineWidth <= 0)
-        return;       
+        return;
 
     Gdiplus::PointF points[2];
     points[0].X = 0.0f;

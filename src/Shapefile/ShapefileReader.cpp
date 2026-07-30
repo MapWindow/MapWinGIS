@@ -13,7 +13,7 @@ bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile, CCri
 	{
 		return false;
 	}
-	
+
 	// reading shape index (SHX)
 	CStringW sFilename = filename;
 	sFilename.SetAt(sFilename.GetLength() - 1, L'x');
@@ -22,23 +22,23 @@ bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile, CCri
 
 	if (!shxfile )
 	{
-		_shpfile = NULL;
-		_indexData = NULL;
+		_shpfile = nullptr;
+		_indexData = nullptr;
 
 		USES_CONVERSION;
 		CallbackHelper::ErrorMsg(Debug::Format("Failed to open SHX file: %s", OLE2A(sFilename)));
 
 		return false;
 	}
-	
+
 	fseek (shxfile, 0, SEEK_END);
 	int indexFileSize = ftell(shxfile);
 	rewind(shxfile);
-		
+
 	// 100 is for header
 	fseek(shxfile, 100, SEEK_SET);
 	_indexData = new char[indexFileSize - 100];
-	long result = fread(_indexData, sizeof(char), indexFileSize - 100, shxfile);
+	auto result = fread(_indexData, sizeof(char), indexFileSize - 100, shxfile);
 	fclose(shxfile);
 
 	//_shpHeader.numShapes = (indexFileSize - 100)/8;	// 2 int on record
@@ -67,31 +67,31 @@ char* CShapefileReader::ReadShapeData(int& offset, int& recordLength)
 	// index records are 8 bytes;
 	char* data = _indexData + offset*8;	
 	SwapEndian(data);
-	int readOffset =  (*(int*)data) * 2;
+	int readOffset =  (*reinterpret_cast<int*>(data)) * 2;
 
 	data = _indexData + offset * 8 + 4;
 	SwapEndian(data);
-	int contentLength = (*(int*)data);
+	int contentLength = (*reinterpret_cast<int*>(data));
 	
 	if (contentLength > 0)
 	{
 		CSingleLock lock(_readLock);
 		lock.Lock();
 
-		int ret = fseek(_shpfile, (long)readOffset + 2 * sizeof(int), SEEK_SET);
-		if (ret != 0) return NULL;
+		int ret = fseek(_shpfile, static_cast<long>(readOffset) + 2 * sizeof(int), SEEK_SET);
+		if (ret != 0) return nullptr;
 		
 		// *2: for conversion from 16-bit words to 8-bit words
 		int length = contentLength * 2;
 
 		char* shapeData = new char[length];
-		int count = (int)fread(shapeData, sizeof(char), length, _shpfile);
+		int count = static_cast<int>(fread(shapeData, sizeof(char), length, _shpfile));
 
 		recordLength = length;
 		return shapeData;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // ****************************************************************
@@ -100,10 +100,10 @@ char* CShapefileReader::ReadShapeData(int& offset, int& recordLength)
 PolygonData* CShapefileReader::ReadPolygonData(char* data)
 {
 	PolygonData* shapeData = new PolygonData();
-	shapeData->partCount = *(int*)(data + 36);
-	shapeData->pointCount = *(int*)(data + 40);
-	shapeData->parts = (int*)(data + 44);
-	shapeData->points = (double*)(data + 44 + sizeof(int) * shapeData->partCount);
+	shapeData->partCount = *reinterpret_cast<int*>(data + 36);
+	shapeData->pointCount = *reinterpret_cast<int*>(data + 40);
+	shapeData->parts = reinterpret_cast<int*>(data + 44);
+	shapeData->points = reinterpret_cast<double*>(data + 44 + sizeof(int) * shapeData->partCount);
 	return shapeData;
 }
 
@@ -111,9 +111,9 @@ PolygonData* CShapefileReader::ReadMultiPointData(char* data)
 {
 	PolygonData* shapeData = new PolygonData();
 	shapeData->partCount = 0;
-	shapeData->pointCount = *(int*)(data + 36);
-	shapeData->parts = NULL;
-	shapeData->points = (double*)(data + 40);
+	shapeData->pointCount = *reinterpret_cast<int*>(data + 36);
+	shapeData->parts = nullptr;
+	shapeData->points = reinterpret_cast<double*>(data + 40);
 	return shapeData;
 }
 

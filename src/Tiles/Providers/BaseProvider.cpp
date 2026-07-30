@@ -41,10 +41,6 @@ TileCore* BaseProvider::GetTileImage(CPoint& pos, const int zoom)
 {
     auto* tile = new TileCore(this->Id, zoom, pos, this->_projection);  // TODO: Fix compile warning
 	auto* customProvider = dynamic_cast<WmsCustomProvider*>(this);
-
-	if (tile->tileX() == 234 && tile->tileY() == 28)
-		::OutputDebugStringA("\r\n");
-
     if (customProvider != nullptr)
     {
         auto bbOrder = customProvider->get_BoundingBoxOrder();
@@ -122,18 +118,18 @@ CMemoryBitmap* BaseProvider::GetTileFileData(CString url)
 		return nullptr;
 
 	fl.seekg(0, std::ios::end);
-	const int sz = fl.tellg();
+	const std::streamoff sz = fl.tellg();
 	if (sz == 0)
 		return nullptr;
 
-	std::vector<char> buf(sz);
+	std::vector<char> buf(static_cast<size_t>(sz));
 
 	fl.seekg(0, std::ios::beg);
 	fl.read(buf.data(), buf.size());
 	if (!fl)
 		return nullptr;
 
-	return ReadBitmap(buf.data(), buf.size());
+	return ReadBitmap(buf.data(), static_cast<int>(buf.size()));
 }
 
 // ************************************************************
@@ -185,10 +181,12 @@ CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, const CS
     case TileHttpContentType::httpXml:
         if (IsWms())
         {
+#ifndef RELEASE_MODE
             auto status = client->GetStatus();
             CString sOutput;
             sOutput.AppendFormat("WMS server response status: %d", status);
             ::OutputDebugStringA(sOutput.GetBuffer());
+#endif
             const CString s(body);
             ParseServerException(s);
         }

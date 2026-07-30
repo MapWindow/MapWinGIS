@@ -46,7 +46,7 @@ void CheckExtensionConsistency(const char* pszDestFilename,
         {
             GDALDriverH hDriver = GDALGetDriver(i);
             const char* pszDriverExtension = 
-                GDALGetMetadataItem( hDriver, GDAL_DMD_EXTENSION, NULL );   
+                GDALGetMetadataItem( hDriver, GDAL_DMD_EXTENSION, NULL );
             if (pszDriverExtension && EQUAL(pszDestExtension, pszDriverExtension))
             {
                 if (GDALGetDriverByName(pszDriverName) != hDriver)
@@ -152,7 +152,7 @@ BOOL CUtils::ProcessGeneralOptions(int * opts)
 
             fpOptFile = VSIFOpen( sFileName, "rb" );
 
-            if( fpOptFile == NULL )
+            if( fpOptFile == nullptr)
             {
                 CPLError( CE_Failure, CPLE_AppDefined, 
                           "Unable to open optfile '%s'.\n%s",
@@ -160,7 +160,7 @@ BOOL CUtils::ProcessGeneralOptions(int * opts)
                 return FALSE;
             }
             
-            while( (pszLine = CPLReadLine( fpOptFile )) != NULL )
+            while( (pszLine = CPLReadLine( fpOptFile )) != nullptr)
             {
                 char **papszTokens;
                 int i;
@@ -169,7 +169,7 @@ BOOL CUtils::ProcessGeneralOptions(int * opts)
                     continue;
 
                 papszTokens = CSLTokenizeString( pszLine );
-                for( i = 0; papszTokens != NULL && papszTokens[i] != NULL; i++)
+                for( i = 0; papszTokens != nullptr && papszTokens[i] != nullptr; i++)
                     _sArr.Add( papszTokens[i] );
                 CSLDestroy( papszTokens );
             }
@@ -178,7 +178,7 @@ BOOL CUtils::ProcessGeneralOptions(int * opts)
         }
 	}
 
-	*opts = _sArr.GetCount();
+	*opts = static_cast<int>(_sArr.GetCount());
 
 	return TRUE;
 }
@@ -186,7 +186,7 @@ BOOL CUtils::ProcessGeneralOptions(int * opts)
 HRESULT CUtils::ResetConfigOptions(long ErrorCode)
 {
 	for( int i = 0; i < _sConfig.GetCount(); i++ )
-		CPLSetConfigOption( _sConfig[i].GetBuffer(0), NULL);
+		CPLSetConfigOption( _sConfig[i].GetBuffer(0), nullptr);
 
 	_sConfig.RemoveAll();
 
@@ -230,10 +230,10 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	int				bReportHistograms = FALSE;
 	int				bReportProj4 = FALSE;
 	int				nSubdataset = -1;
-	const char		*pszFilename = NULL;
-	char			**papszExtraMDDomains = NULL, **papszFileList;
-	const char		*pszProjection = NULL;
-	OGRCoordinateTransformationH hTransform = NULL;
+	const char		*pszFilename = nullptr;
+	char			**papszExtraMDDomains = nullptr, **papszFileList;
+	const char		*pszProjection = nullptr;
+	OGRCoordinateTransformationH hTransform = nullptr;
 	int				bShowFileList = TRUE;
 
 	pszFilename = OLE2CA(bstrSrcFilename);
@@ -302,10 +302,9 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 				GDALDriverH hDriver = GDALGetDriver(iDr);
 				const char *pszRWFlag;
 
-				if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL ) )
+				if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, nullptr) )
 					pszRWFlag = "rw+";
-				else if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATECOPY, 
-					NULL ) )
+				else if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATECOPY, nullptr) )
 					pszRWFlag = "rw";
 				else
 					pszRWFlag = "ro";
@@ -346,7 +345,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 			sOutput.AppendFormat( "  Short Name: %s\n", GDALGetDriverShortName( hDriver ) );
 			sOutput.AppendFormat( "  Long Name: %s\n", GDALGetDriverLongName( hDriver ) );
 
-			papszMD = GDALGetMetadata( hDriver, NULL );
+			papszMD = GDALGetMetadata( hDriver, nullptr);
 
 			if( CSLFetchNameValue( papszMD, GDAL_DMD_EXTENSION ) )
 			{
@@ -397,7 +396,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	/*      Open dataset.                                                   */
 	/* -------------------------------------------------------------------- */
 	hDataset = GdalHelper::OpenRasterDatasetW(OLE2W(bstrSrcFilename), GA_ReadOnly);
-    if( hDataset == NULL )
+    if( hDataset == nullptr)
     {
         CPLError(CE_Failure,0,
                  "gdalinfo failed - unable to open '%s'.\n",
@@ -407,7 +406,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
     
         GDALDumpOpenDatasets( stderr );
 
-        CPLDumpSharedList( NULL );
+        CPLDumpSharedList(nullptr);
 
         return ResetConfigOptions(tkGDAL_ERROR);
     }
@@ -462,7 +461,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
         sOutput.AppendFormat( "Files: %s\n", papszFileList[0] );
         if( bShowFileList )
         {
-            for( i = 1; papszFileList[i] != NULL; i++ )
+            for( i = 1; papszFileList[i] != nullptr; i++ )
                 sOutput.AppendFormat( "       %s\n", papszFileList[i] );
         }
     }
@@ -475,17 +474,17 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	/* -------------------------------------------------------------------- */
 	/*      Report projection.                                              */
 	/* -------------------------------------------------------------------- */
-    if( GDALGetProjectionRef( hDataset ) != NULL )
+    if( GDALGetProjectionRef( hDataset ) != nullptr)
     {
         OGRSpatialReferenceH  hSRS;
         char		      *pszProjection;
 
         pszProjection = (char *) GDALGetProjectionRef( hDataset );
 
-        hSRS = OSRNewSpatialReference(NULL);
+        hSRS = OSRNewSpatialReference(nullptr);
         if( OSRImportFromWkt( hSRS, &pszProjection ) == CE_None )
         {
-            char	*pszPrettyWkt = NULL;
+            char	*pszPrettyWkt = nullptr;
 
             OSRExportToPrettyWkt( hSRS, &pszPrettyWkt, FALSE );
             sOutput.AppendFormat( "Coordinate System is:\n%s\n", pszPrettyWkt );
@@ -497,7 +496,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 
         if ( bReportProj4 ) 
         {
-            char *pszProj4 = NULL;
+            char *pszProj4 = nullptr;
             OSRExportToProj4( hSRS, &pszProj4 );
             sOutput.AppendFormat("PROJ.4 string is:\n\'%s\'\n",pszProj4);
             CPLFree( pszProj4 ); 
@@ -536,17 +535,17 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	/* -------------------------------------------------------------------- */
     if( bShowGCPs && GDALGetGCPCount( hDataset ) > 0 )
     {
-        if (GDALGetGCPProjection(hDataset) != NULL)
+        if (GDALGetGCPProjection(hDataset) != nullptr)
         {
             OGRSpatialReferenceH  hSRS;
             char		      *pszProjection;
 
             pszProjection = (char *) GDALGetGCPProjection( hDataset );
 
-            hSRS = OSRNewSpatialReference(NULL);
+            hSRS = OSRNewSpatialReference(nullptr);
             if( OSRImportFromWkt( hSRS, &pszProjection ) == CE_None )
             {
-                char	*pszPrettyWkt = NULL;
+                char	*pszPrettyWkt = nullptr;
 
                 OSRExportToPrettyWkt( hSRS, &pszPrettyWkt, FALSE );
                 sOutput.AppendFormat( "GCP Projection = \n%s\n", pszPrettyWkt );
@@ -576,11 +575,11 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	/* -------------------------------------------------------------------- */
 	/*      Report metadata.                                                */
 	/* -------------------------------------------------------------------- */
-    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, NULL ) : NULL;
+    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, nullptr) : nullptr;
     if( bShowMetadata && CSLCount(papszMetadata) > 0 )
     {
         sOutput += "Metadata:\n";
-        for( i = 0; papszMetadata[i] != NULL; i++ )
+        for( i = 0; papszMetadata[i] != nullptr; i++ )
         {
             sOutput.AppendFormat( "  %s\n", papszMetadata[i] );
         }
@@ -592,7 +591,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
         if( CSLCount(papszMetadata) > 0 )
         {
             sOutput.AppendFormat( "Metadata (%s):\n", papszExtraMDDomains[iMDD]);
-            for( i = 0; papszMetadata[i] != NULL; i++ )
+            for( i = 0; papszMetadata[i] != nullptr; i++ )
             {
                 if (EQUALN(papszExtraMDDomains[iMDD], "xml:", 4))
                     sOutput.AppendFormat( "%s\n", papszMetadata[i] );
@@ -605,11 +604,11 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	/* -------------------------------------------------------------------- */
 	/*      Report "IMAGE_STRUCTURE" metadata.                              */
 	/* -------------------------------------------------------------------- */
-    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, "IMAGE_STRUCTURE" ) : NULL;
+    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, "IMAGE_STRUCTURE" ) : nullptr;
     if( bShowMetadata && CSLCount(papszMetadata) > 0 )
     {
         sOutput += "Image Structure Metadata:\n";
-        for( i = 0; papszMetadata[i] != NULL; i++ )
+        for( i = 0; papszMetadata[i] != nullptr; i++ )
         {
             sOutput.AppendFormat( "  %s\n", papszMetadata[i] );
         }
@@ -622,7 +621,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
     if( CSLCount(papszMetadata) > 0 )
     {
         sOutput += "Subdatasets:\n";
-        for( i = 0; papszMetadata[i] != NULL; i++ )
+        for( i = 0; papszMetadata[i] != nullptr; i++ )
         {
             sOutput.AppendFormat( "  %s\n", papszMetadata[i] );
         }
@@ -631,11 +630,11 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	/* -------------------------------------------------------------------- */
 	/*      Report geolocation.                                             */
 	/* -------------------------------------------------------------------- */
-    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, "GEOLOCATION" ) : NULL;
+    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, "GEOLOCATION" ) : nullptr;
     if( bShowMetadata && CSLCount(papszMetadata) > 0 )
     {
         sOutput += "Geolocation:\n";
-        for( i = 0; papszMetadata[i] != NULL; i++ )
+        for( i = 0; papszMetadata[i] != nullptr; i++ )
         {
             sOutput.AppendFormat( "  %s\n", papszMetadata[i] );
         }
@@ -644,11 +643,11 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	/* -------------------------------------------------------------------- */
 	/*      Report RPCs                                                     */
 	/* -------------------------------------------------------------------- */
-    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, "RPC" ) : NULL;
+    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, "RPC" ) : nullptr;
     if( bShowMetadata && CSLCount(papszMetadata) > 0 )
     {
         sOutput += "RPC Metadata:\n";
-        for( i = 0; papszMetadata[i] != NULL; i++ )
+        for( i = 0; papszMetadata[i] != nullptr; i++ )
         {
             sOutput.AppendFormat( "  %s\n", papszMetadata[i] );
         }
@@ -660,15 +659,15 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
     if( GDALGetGeoTransform( hDataset, adfGeoTransform ) == CE_None )
         pszProjection = GDALGetProjectionRef(hDataset);
 
-    if( pszProjection != NULL && strlen(pszProjection) > 0 )
+    if( pszProjection != nullptr && strlen(pszProjection) > 0 )
     {
-        OGRSpatialReferenceH hProj, hLatLong = NULL;
+        OGRSpatialReferenceH hProj, hLatLong = nullptr;
 
         hProj = OSRNewSpatialReference( pszProjection );
-        if( hProj != NULL )
+        if( hProj != nullptr)
             hLatLong = OSRCloneGeogCS( hProj );
 
-        if( hLatLong != NULL )
+        if( hLatLong != nullptr)
         {
             CPLPushErrorHandler( CPLQuietErrorHandler );
             hTransform = OCTNewCoordinateTransformation( hProj, hLatLong );
@@ -677,7 +676,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
             OSRDestroySpatialReference( hLatLong );
         }
 
-        if( hProj != NULL )
+        if( hProj != nullptr)
             OSRDestroySpatialReference( hProj );
     }
 
@@ -698,10 +697,10 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
                           GDALGetRasterXSize(hDataset)/2.0, 
                           GDALGetRasterYSize(hDataset)/2.0 );
 
-    if( hTransform != NULL )
+    if( hTransform != nullptr)
     {
         OCTDestroyCoordinateTransformation( hTransform );
-        hTransform = NULL;
+        hTransform = nullptr;
     }
 
 	/* ==================================================================== */
@@ -735,7 +734,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
                 GDALGetColorInterpretationName(
                     GDALGetRasterColorInterpretation(hBand)) );
 
-        if( GDALGetDescription( hBand ) != NULL 
+        if( GDALGetDescription( hBand ) != nullptr
             && strlen(GDALGetDescription( hBand )) > 0 )
             sOutput.AppendFormat( "  Description = %s\n", GDALGetDescription(hBand) );
 
@@ -773,7 +772,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 
         if( bReportHistograms )
         {
-            int nBucketCount, *panHistogram = NULL;
+            int nBucketCount, *panHistogram = nullptr;
 			struct CallbackParams params( GetCallback(), "Analyzing" );
 
             eErr = GDALGetDefaultHistogram( hBand, &dfMin, &dfMax, 
@@ -819,13 +818,13 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
                  iOverview++ )
             {
                 GDALRasterBandH	hOverview;
-                const char *pszResampling = NULL;
+                const char *pszResampling = nullptr;
 
                 if( iOverview != 0 )
                     sOutput += ", " ;
 
                 hOverview = GDALGetOverview( hBand, iOverview );
-                if (hOverview != NULL)
+                if (hOverview != nullptr)
                 {
                     sOutput.AppendFormat( "%dx%d", 
                             GDALGetRasterBandXSize( hOverview ),
@@ -872,7 +871,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
         {
             sOutput += "  Overviews: arbitrary\n";
         }
-        
+
         nMaskFlags = GDALGetMaskFlags( hBand );
         if( (nMaskFlags & (GMF_NODATA|GMF_ALL_VALID)) == 0 )
         {
@@ -889,7 +888,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
                 sOutput += "ALL_VALID ";
             sOutput += "\n";
 
-            if( hMaskBand != NULL &&
+            if( hMaskBand != nullptr &&
                 GDALGetOverviewCount(hMaskBand) > 0 )
             {
                 int		iOverview;
@@ -918,13 +917,13 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
             sOutput.AppendFormat( "  Unit Type: %s\n", GDALGetRasterUnitType(hBand) );
         }
 
-        if( GDALGetRasterCategoryNames(hBand) != NULL )
+        if( GDALGetRasterCategoryNames(hBand) != nullptr)
         {
             char **papszCategories = GDALGetRasterCategoryNames(hBand);
             int i;
 
             sOutput += "  Categories:\n";
-            for( i = 0; papszCategories[i] != NULL; i++ )
+            for( i = 0; papszCategories[i] != nullptr; i++ )
                 sOutput.AppendFormat( "    %3d: %s\n", i, papszCategories[i] );
         }
 
@@ -934,28 +933,28 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
                     GDALGetRasterOffset( hBand, &bSuccess ),
                     GDALGetRasterScale( hBand, &bSuccess ) );
 
-        papszMetadata = (bShowMetadata) ? GDALGetMetadata( hBand, NULL ) : NULL;
+        papszMetadata = (bShowMetadata) ? GDALGetMetadata( hBand, nullptr) : nullptr;
         if( bShowMetadata && CSLCount(papszMetadata) > 0 )
         {
             sOutput += "  Metadata:\n";
-            for( i = 0; papszMetadata[i] != NULL; i++ )
+            for( i = 0; papszMetadata[i] != nullptr; i++ )
             {
                 sOutput.AppendFormat( "    %s\n", papszMetadata[i] );
             }
         }
 
-        papszMetadata = (bShowMetadata) ? GDALGetMetadata( hBand, "IMAGE_STRUCTURE" ) : NULL;
+        papszMetadata = (bShowMetadata) ? GDALGetMetadata( hBand, "IMAGE_STRUCTURE" ) : nullptr;
         if( bShowMetadata && CSLCount(papszMetadata) > 0 )
         {
             sOutput += "  Image Structure Metadata:\n";
-            for( i = 0; papszMetadata[i] != NULL; i++ )
+            for( i = 0; papszMetadata[i] != nullptr; i++ )
             {
                 sOutput.AppendFormat( "    %s\n", papszMetadata[i] );
             }
         }
 
         if( GDALGetRasterColorInterpretation(hBand) == GCI_PaletteIndex 
-            && (hTable = GDALGetRasterColorTable( hBand )) != NULL )
+            && (hTable = GDALGetRasterColorTable( hBand )) != nullptr)
         {
 			int			i;
 
@@ -981,11 +980,11 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
             }
         }
 
-        if( bShowRAT && GDALGetDefaultRAT( hBand ) != NULL )
+        if( bShowRAT && GDALGetDefaultRAT( hBand ) != nullptr)
         {
             GDALRasterAttributeTableH hRAT = GDALGetDefaultRAT( hBand );
             
-            GDALRATDumpReadable( hRAT, NULL );
+            GDALRATDumpReadable( hRAT, nullptr);
         }
     }
 
@@ -995,7 +994,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
     
     GDALDumpOpenDatasets( stderr );
 
-    CPLDumpSharedList( NULL );
+    CPLDumpSharedList(nullptr);
     CPLCleanupTLS();
 
 	*bstrInfo = sOutput.AllocSysString();
@@ -1053,8 +1052,8 @@ GDALInfoReportCorner(GDALDatasetH hDataset,
 	/* -------------------------------------------------------------------- */
 	/*      Transform to latlong and report.                                */
 	/* -------------------------------------------------------------------- */
-    if( hTransform != NULL 
-        && OCTTransform(hTransform,1,&dfGeoX,&dfGeoY,NULL) )
+    if( hTransform != nullptr
+        && OCTTransform(hTransform,1,&dfGeoX,&dfGeoY, nullptr) )
     {
         
         sTemp.Format( "(%s,", GDALDecToDMS( dfGeoX, "Long", 2 ) );
@@ -1126,7 +1125,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	GDALDatasetH	hDataset, hOutDS;
     int			i;
 	int				nRasterXSize, nRasterYSize;
-	const char		*pszSource=NULL, *pszDest=NULL, *pszFormat = "GTiff";
+	const char		*pszSource = nullptr, *pszDest = nullptr, *pszFormat = "GTiff";
     int bFormatExplicitelySet = FALSE;
 	GDALDriverH		hDriver;
 	int				*panBandList = NULL; /* negative value of panBandList[i] means mask band of ABS(panBandList[i]) */
@@ -1134,20 +1133,20 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	double			adfGeoTransform[6];
 	GDALDataType	eOutputType = GDT_Unknown;
 	int				nOXSize = 0, nOYSize = 0;
-	char			*pszOXSize=NULL, *pszOYSize=NULL;
-	char			**papszCreateOptions = NULL;
+	char			*pszOXSize = nullptr, *pszOYSize = nullptr;
+	char			**papszCreateOptions = nullptr;
     int                 anSrcWin[4], bStrict = FALSE;
 	const char		*pszProjection;
 	int				bScale = FALSE, bHaveScaleSrc = FALSE, bUnscale = FALSE;
 	double			dfScaleSrcMin=0.0, dfScaleSrcMax=255.0;
 	double			dfScaleDstMin=0.0, dfScaleDstMax=255.0;
     double              dfULX, dfULY, dfLRX, dfLRY;
-	char			**papszMetadataOptions = NULL;
-	char			*pszOutputSRS = NULL;
+	char			**papszMetadataOptions = nullptr;
+	char			*pszOutputSRS = nullptr;
 	int				bGotBounds = FALSE;
 	GDALProgressFunc    pfnProgress = (GDALProgressFunc)GDALProgressCallback;
 	int				nGCPCount = 0;
-	GDAL_GCP		*pasGCPs = NULL;
+	GDAL_GCP		*pasGCPs = nullptr;
 	int				bCopySubDatasets = FALSE;
     double              adfULLR[4] = { 0,0,0,0 };
 	int				bSetNoData = FALSE;
@@ -1188,7 +1187,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		}
 	}
 	else
-		argc = _sArr.GetCount();
+		argc = static_cast<int>(_sArr.GetCount());
 
 /* -------------------------------------------------------------------- */
 /*		Handle command line arguments.									*/
@@ -1206,7 +1205,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             
             for( iType = 1; iType < GDT_TypeCount; iType++ )
 			{
-				if (GDALGetDataTypeName((GDALDataType)iType) != NULL
+				if (GDALGetDataTypeName((GDALDataType)iType) != nullptr
                     && EQUAL(GDALGetDataTypeName((GDALDataType)iType),
                              _sArr[i+1]) )
 				{
@@ -1478,7 +1477,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	hDataset = GDALOpenShared(pszSource, GA_ReadOnly);
 
-	if (hDataset == NULL)
+	if (hDataset == nullptr)
 	{
 		return ResetConfigOptions(tkGDAL_ERROR);
 	}
@@ -1507,7 +1506,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		(*retval) = VARIANT_TRUE;
 
 		_bSubCall = TRUE;
-		for ( i = 0; papszSubdatasets[i] != NULL; i += 2 )
+		for ( i = 0; papszSubdatasets[i] != nullptr; i += 2 )
 		{
 			sprintf (pszSubDest, "%s%d", pszDest, i/2 + 1);
 
@@ -1515,7 +1514,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			BSTR bstrSubSrc = SysAllocString(CT2W(strstr(papszSubdatasets[i],"=")+1));
 
 			VARIANT_BOOL subret = VARIANT_FALSE;
-			this->TranslateRaster(bstrSubSrc,bstrSubDest,NULL,cBack,&subret);
+			this->TranslateRaster(bstrSubSrc,bstrSubDest, nullptr,cBack,&subret);
 
 			SysFreeString(bstrSubDest);
 			SysFreeString(bstrSubSrc);
@@ -1621,7 +1620,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		{
 			CPLError(CE_Failure, 0,
 				"Computed -srcwin falls outside raster size of %dx%d.",
-				GDALGetRasterXSize(hDataset), 
+				GDALGetRasterXSize(hDataset),
 				GDALGetRasterYSize(hDataset) );
 			return ResetConfigOptions(tkGDAL_ERROR);
 		}
@@ -1651,7 +1650,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /*		Find the output driver.											*/
 /* -------------------------------------------------------------------- */
 	hDriver = GDALGetDriverByName (pszFormat);
-	if (hDriver == NULL)
+	if (hDriver == nullptr)
 	{
 		CPLError(CE_Failure,0, "Output driver `%s' not recognized.", pszFormat );
 
@@ -1676,7 +1675,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
            anSrcWin[0] == 0 && anSrcWin[1] == 0
         && anSrcWin[2] == GDALGetRasterXSize(hDataset)
         && anSrcWin[3] == GDALGetRasterYSize(hDataset)
-        && pszOXSize == NULL && pszOYSize == NULL );
+        && pszOXSize == nullptr && pszOYSize == nullptr);
 
 	if( eOutputType == GDT_Unknown
 		&& !bScale && !bUnscale
@@ -1684,7 +1683,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		&& eMaskMode == MASK_AUTO
 		&& bSpatialArrangementPreserved
 		&& nGCPCount == 0 && !bGotBounds
-		&& pszOutputSRS == NULL && !bSetNoData && !bUnsetNoData
+		&& pszOutputSRS == nullptr && !bSetNoData && !bUnsetNoData
 		&& nRGBExpand == 0 && !bStats)
 	{
 		struct CallbackParams params(GetCallback(), "Translating");
@@ -1693,7 +1692,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                                  bStrict, papszCreateOptions,
 								 pfnProgress, &params);
 
-		if (hOutDS != NULL)
+		if (hOutDS != nullptr)
 		{
 			(*retval) = VARIANT_TRUE;
 			GDALClose (hOutDS);
@@ -1720,7 +1719,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
 /*		Establish some parameters.										*/
 /* -------------------------------------------------------------------- */
-	if (pszOXSize == NULL)
+	if (pszOXSize == nullptr)
 	{
 		nOXSize = anSrcWin[2];
 		nOYSize = anSrcWin[3];
@@ -1745,14 +1744,14 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	if (nGCPCount == 0)
 	{
-		if (pszOutputSRS != NULL)
+		if (pszOutputSRS != nullptr)
 		{
 			poVDS->SetProjection (pszOutputSRS);
 		}
 		else
 		{
 			pszProjection = GDALGetProjectionRef (hDataset);
-			if (pszProjection != NULL && strlen (pszProjection) > 0)
+			if (pszProjection != nullptr && strlen (pszProjection) > 0)
 				poVDS->SetProjection (pszProjection);
 		}
 	}
@@ -1789,9 +1788,9 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	{
 		const char *pszGCPProjection = pszOutputSRS;
 
-		if( pszGCPProjection == NULL )
+		if( pszGCPProjection == nullptr)
 			pszGCPProjection = GDALGetGCPProjection( hDataset );
-		if( pszGCPProjection == NULL )
+		if( pszGCPProjection == nullptr)
 			pszGCPProjection = "";
 
 		poVDS->SetGCPs( nGCPCount, pasGCPs, pszGCPProjection );
@@ -1860,11 +1859,11 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		char **papszMD;
 
 		papszMD = ((GDALDataset*)hDataset)->GetMetadata("RPC");
-		if( papszMD != NULL )
+		if( papszMD != nullptr)
 			poVDS->SetMetadata( papszMD, "RPC" );
 
 		papszMD = ((GDALDataset*)hDataset)->GetMetadata("GEOLOCATION");
-		if( papszMD != NULL )
+		if( papszMD != nullptr)
 			poVDS->SetMetadata( papszMD, "GEOLOCATION" );
 	}
 
@@ -1878,7 +1877,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		if (panBandList[0] < 0)
 			poSrcBand = poSrcBand->GetMaskBand();
 		GDALColorTable* poColorTable = poSrcBand->GetColorTable();
-		if (poColorTable == NULL)
+		if (poColorTable == nullptr)
 		{
 			CPLError(CE_Failure, 0, "Error : band %d has no color table", ABS(panBandList[0]));
 			GDALClose( hDataset );
@@ -1955,7 +1954,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		/* -------------------------------------------------------------------- */
 		/*      Create this band.                                               */
 		/* -------------------------------------------------------------------- */
-		poVDS->AddBand( eBandType, NULL );
+		poVDS->AddBand( eBandType, nullptr);
 		poVRTBand = (VRTSourcedRasterBand *) poVDS->GetRasterBand( i+1 );
 		if (nSrcBand < 0)
 		{
@@ -2151,7 +2150,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		{
 			double dfMin, dfMax, dfMean, dfStdDev;
 			poVDS->GetRasterBand(i+1)->ComputeStatistics( bApproxStats,
-				&dfMin, &dfMax, &dfMean, &dfStdDev, GDALDummyProgress, NULL );
+				&dfMin, &dfMax, &dfMean, &dfStdDev, GDALDummyProgress, nullptr);
 		}
 	}
 
@@ -2163,7 +2162,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	hOutDS = GDALCreateCopy( hDriver, pszDest, (GDALDatasetH) poVDS,
                              bStrict, papszCreateOptions,
 							 pfnProgress, &params );
-	if( hOutDS != NULL )
+	if( hOutDS != nullptr)
 	{
 		int bHasGotErr = FALSE;
 		CPLErrorReset();
@@ -2175,7 +2174,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 		GDALClose( hOutDS );
 		if (bHasGotErr)
-			hOutDS = NULL;
+			hOutDS = nullptr;
 	}
 
 	GDALClose( (GDALDatasetH) poVDS );
@@ -2231,11 +2230,11 @@ static void AttachMetadata( GDALDatasetH hDS, char **papszMetadataOptions )
 
 	for( i = 0; i < nCount; i++ )
 	{
-		char    *pszKey = NULL;
+		char    *pszKey = nullptr;
 		const char *pszValue;
 
 		pszValue = CPLParseNameValue( papszMetadataOptions[i], &pszKey );
-		GDALSetMetadataItem(hDS,pszKey,pszValue,NULL);
+		GDALSetMetadataItem(hDS,pszKey,pszValue, nullptr);
 		CPLFree( pszKey );
 	}
 
@@ -2263,8 +2262,8 @@ static void CopyBandInfo(GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand,
 	else
 	{
 		char** papszMetadata = poSrcBand->GetMetadata();
-		char** papszMetadataNew = NULL;
-		for( int i = 0; papszMetadata != NULL && papszMetadata[i] != NULL; i++ )
+		char** papszMetadataNew = nullptr;
+		for( int i = 0; papszMetadata != nullptr && papszMetadata[i] != nullptr; i++ )
 		{
 			if (strncmp(papszMetadata[i], "STATISTICS_", 11) != 0)
 				papszMetadataNew = CSLAddString(papszMetadataNew, papszMetadata[i]);
@@ -2386,23 +2385,23 @@ static void ProcessLayer(
 /* -------------------------------------------------------------------- */
     if (!bSRSIsSet)
     {
-        OGRSpatialReferenceH  hDstSRS = NULL;
-        if( GDALGetProjectionRef( hDstDS ) != NULL )
+        OGRSpatialReferenceH  hDstSRS = nullptr;
+        if( GDALGetProjectionRef( hDstDS ) != nullptr)
         {
             char *pszProjection;
     
             pszProjection = (char *) GDALGetProjectionRef( hDstDS );
     
-            hDstSRS = OSRNewSpatialReference(NULL);
+            hDstSRS = OSRNewSpatialReference(nullptr);
             if( OSRImportFromWkt( hDstSRS, &pszProjection ) != CE_None )
             {
                 OSRDestroySpatialReference(hDstSRS);
-                hDstSRS = NULL;
+                hDstSRS = nullptr;
             }
         }
     
         OGRSpatialReferenceH hSrcSRS = OGR_L_GetSpatialRef(hSrcLayer);
-        if( hDstSRS != NULL && hSrcSRS != NULL )
+        if( hDstSRS != nullptr && hSrcSRS != nullptr)
         {
             if( OSRIsSame(hSrcSRS, hDstSRS) == FALSE )
             {
@@ -2411,20 +2410,20 @@ static void ProcessLayer(
                         "Results might be incorrect (no on-the-fly reprojection of input data).\n");
             }
         }
-        else if( hDstSRS != NULL && hSrcSRS == NULL )
+        else if( hDstSRS != nullptr && hSrcSRS == nullptr)
         {
             CPLError( CE_Warning, CPLE_AppDefined,
                     "Warning : the output raster dataset has a SRS, but the input vector layer SRS is unknown.\n"
                     "Ensure input vector has the same SRS, otherwise results might be incorrect.\n");
         }
-        else if( hDstSRS == NULL && hSrcSRS != NULL )
+        else if( hDstSRS == nullptr && hSrcSRS != nullptr)
         {
             CPLError( CE_Warning, CPLE_AppDefined,
                     "Warning : the input vector layer has a SRS, but the output raster dataset SRS is unknown.\n"
                     "Ensure output raster dataset has the same SRS, otherwise results might be incorrect.\n");
         }
     
-        if( hDstSRS != NULL )
+        if( hDstSRS != nullptr)
         {
             OSRDestroySpatialReference(hDstSRS);
         }
@@ -2459,11 +2458,11 @@ static void ProcessLayer(
 
     OGR_L_ResetReading( hSrcLayer );
     
-    while( (hFeat = OGR_L_GetNextFeature( hSrcLayer )) != NULL )
+    while( (hFeat = OGR_L_GetNextFeature( hSrcLayer )) != nullptr)
     {
         OGRGeometryH hGeom;
 
-        if( OGR_F_GetGeometryRef( hFeat ) == NULL )
+        if( OGR_F_GetGeometryRef( hFeat ) == nullptr)
         {
             OGR_F_Destroy( hFeat );
             continue;
@@ -2511,9 +2510,9 @@ static void ProcessLayer(
 /* -------------------------------------------------------------------- */
 /*      Perform the burn.                                               */
 /* -------------------------------------------------------------------- */
-    GDALRasterizeGeometries( hDstDS, anBandList.size(), &(anBandList[0]), 
-                             ahGeometries.size(), &(ahGeometries[0]), 
-                             NULL, NULL, &(adfFullBurnValues[0]), 
+    GDALRasterizeGeometries( hDstDS, static_cast<int>(anBandList.size()), &(anBandList[0]),
+                             static_cast<int>(ahGeometries.size()), &(ahGeometries[0]),
+                             nullptr, nullptr, &(adfFullBurnValues[0]),
                              papszRasterizeOptions,
                              pfnProgress, pProgressData );
 
@@ -2522,7 +2521,7 @@ static void ProcessLayer(
 /* -------------------------------------------------------------------- */
     int iGeom;
 
-    for( iGeom = ahGeometries.size()-1; iGeom >= 0; iGeom-- )
+    for( iGeom = static_cast<int>(ahGeometries.size())-1; iGeom >= 0; iGeom-- )
         OGR_G_DestroyGeometry( ahGeometries[iGeom] );
 }
 
@@ -2542,8 +2541,8 @@ GDALDatasetH CreateOutputDataset(std::vector<OGRLayerH> ahLayers,
                                  int bNoDataSet, double dfNoData)
 {
     int bFirstLayer = TRUE;
-    char* pszWKT = NULL;
-    GDALDatasetH hDstDS = NULL;
+    char* pszWKT = nullptr;
+    GDALDatasetH hDstDS = nullptr;
     unsigned int i;
 
     for( i = 0; i < ahLayers.size(); i++ )
@@ -2557,7 +2556,7 @@ GDALDatasetH CreateOutputDataset(std::vector<OGRLayerH> ahLayers,
             if (OGR_L_GetExtent(hLayer, &sLayerEnvelop, TRUE) != OGRERR_NONE)
             {
                 CPLError( CE_Failure, CPLE_AppDefined, "Cannot get layer extent\n");
-                return NULL;
+                return nullptr;
             }
 
             /* When rasterizing point layers and that the bounds have */
@@ -2579,7 +2578,7 @@ GDALDatasetH CreateOutputDataset(std::vector<OGRLayerH> ahLayers,
                 sEnvelop.MaxX = sLayerEnvelop.MaxX;
                 sEnvelop.MaxY = sLayerEnvelop.MaxY;
 
-                if (hSRS == NULL)
+                if (hSRS == nullptr)
                     hSRS = OGR_L_GetSpatialRef(hLayer);
 
                 bFirstLayer = FALSE;
@@ -2596,7 +2595,7 @@ GDALDatasetH CreateOutputDataset(std::vector<OGRLayerH> ahLayers,
         {
             if (bFirstLayer)
             {
-                if (hSRS == NULL)
+                if (hSRS == nullptr)
                     hSRS = OGR_L_GetSpatialRef(hLayer);
 
                 bFirstLayer = FALSE;
@@ -2633,10 +2632,10 @@ GDALDatasetH CreateOutputDataset(std::vector<OGRLayerH> ahLayers,
 
     hDstDS = GDALCreate(hDriver, pszDstFilename, nXSize, nYSize,
                         nBandCount, eOutputType, papszCreateOptions);
-    if (hDstDS == NULL)
+    if (hDstDS == nullptr)
     {
         CPLError( CE_Failure, CPLE_AppDefined, "Cannot create %s\n", pszDstFilename);
-        return NULL;
+        return nullptr;
     }
 
     GDALSetGeoTransform(hDstDS, adfProjection);
@@ -2691,21 +2690,21 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	int argc = 0;
     int i, b3D = FALSE;
     int bInverse = FALSE;
-    const char *pszSrcFilename = NULL;
-    const char *pszDstFilename = NULL;
-    char **papszLayers = NULL;
-    const char *pszSQL = NULL;
-    const char *pszBurnAttribute = NULL;
-    const char *pszWHERE = NULL;
+    const char *pszSrcFilename = nullptr;
+    const char *pszDstFilename = nullptr;
+    char **papszLayers = nullptr;
+    const char *pszSQL = nullptr;
+    const char *pszBurnAttribute = nullptr;
+    const char *pszWHERE = nullptr;
     std::vector<int> anBandList;
     std::vector<double> adfBurnValues;
-    char **papszRasterizeOptions = NULL;
+    char **papszRasterizeOptions = nullptr;
     double dfXRes = 0, dfYRes = 0;
     int bCreateOutput = FALSE;
     const char* pszFormat = "GTiff";
     int bFormatExplicitelySet = FALSE;
-    char **papszCreateOptions = NULL;
-    GDALDriverH hDriver = NULL;
+    char **papszCreateOptions = nullptr;
+    GDALDriverH hDriver = nullptr;
     GDALDataType eOutputType = GDT_Float64;
     std::vector<double> adfInitVals;
     int bNoDataSet = FALSE;
@@ -2715,7 +2714,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     int nXSize = 0, nYSize = 0;
     int bQuiet = FALSE;
     GDALProgressFunc pfnProgress = GDALProgressCallback;
-    OGRSpatialReferenceH hSRS = NULL;
+    OGRSpatialReferenceH hSRS = nullptr;
     int bTargetAlignedPixels = FALSE;
 	struct CallbackParams params(GetCallback(), "Rasterizing");
     
@@ -2852,7 +2851,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         }
         else if( EQUAL(_sArr[i],"-a_srs") && i < argc-1 )
         {
-            hSRS = OSRNewSpatialReference( NULL );
+            hSRS = OSRNewSpatialReference(nullptr);
 
             if( OSRSetFromUserInput(hSRS, _sArr[i+1]) != OGRERR_NONE )
             {
@@ -2894,7 +2893,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             
             for( iType = 1; iType < GDT_TypeCount; iType++ )
             {
-                if( GDALGetDataTypeName((GDALDataType)iType) != NULL
+                if( GDALGetDataTypeName((GDALDataType)iType) != nullptr
                     && EQUAL(GDALGetDataTypeName((GDALDataType)iType),
                              _sArr[i+1]) )
                 {
@@ -2942,13 +2941,13 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	pszSrcFilename = OLE2CA(bstrSrcFilename);
 	pszDstFilename = OLE2CA(bstrDstFilename);
 
-    if( pszSrcFilename == NULL || pszDstFilename == NULL )
+    if( pszSrcFilename == nullptr || pszDstFilename == nullptr)
     {
         CPLError( CE_Failure, CPLE_AppDefined, "Missing source or destination.\n\n" );
 		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
-    if( adfBurnValues.size() == 0 && pszBurnAttribute == NULL && !b3D )
+    if( adfBurnValues.size() == 0 && pszBurnAttribute == nullptr && !b3D )
     {
         CPLError( CE_Failure, CPLE_AppDefined, "At least one of -3d, -burn or -a required.\n\n" );
 		return ResetConfigOptions(tkGDAL_ERROR);
@@ -2977,10 +2976,10 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         int nBandCount = 1;
 
         if (adfBurnValues.size() != 0)
-            nBandCount = adfBurnValues.size();
+            nBandCount = static_cast<int>(adfBurnValues.size());
 
         if ((int)adfInitVals.size() > nBandCount)
-            nBandCount = adfInitVals.size();
+            nBandCount = static_cast<int>(adfInitVals.size());
 
         if (adfInitVals.size() == 1)
         {
@@ -3003,19 +3002,19 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
     OGRDataSourceH hSrcDS;
 
-    hSrcDS = OGROpen( pszSrcFilename, FALSE, NULL );
-    if( hSrcDS == NULL )
+    hSrcDS = OGROpen( pszSrcFilename, FALSE, nullptr);
+    if( hSrcDS == nullptr)
     {
         CPLError( CE_Failure, CPLE_AppDefined, "Failed to open feature source: %s\n", 
                  pszSrcFilename);
 		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
-    if( pszSQL == NULL && papszLayers == NULL )
+    if( pszSQL == nullptr && papszLayers == nullptr)
     {
         if( OGR_DS_GetLayerCount(hSrcDS) == 1 )
         {
-            papszLayers = CSLAddString(NULL, OGR_L_GetName(OGR_DS_GetLayer(hSrcDS, 0)));
+            papszLayers = CSLAddString(nullptr, OGR_L_GetName(OGR_DS_GetLayer(hSrcDS, 0)));
         }
         else
         {
@@ -3028,7 +3027,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /*      Open target raster file.  Eventually we will add optional       */
 /*      creation.                                                       */
 /* -------------------------------------------------------------------- */
-    GDALDatasetH hDstDS = NULL;
+    GDALDatasetH hDstDS = nullptr;
 
     if (bCreateOutput)
     {
@@ -3036,8 +3035,8 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /*      Find the output driver.                                         */
 /* -------------------------------------------------------------------- */
         hDriver = GDALGetDriverByName( pszFormat );
-        if( hDriver == NULL 
-            || GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL ) == NULL )
+        if( hDriver == nullptr
+            || GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, nullptr) == nullptr)
         {
 
 			CPLError(CE_Failure, CPLE_AppDefined, "Output driver `%s' not recognised or does not support direct output file creation", pszFormat);
@@ -3050,19 +3049,19 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     else
     {
 		hDstDS = GdalHelper::OpenRasterDatasetW(OLE2W(bstrDstFilename), GA_Update);
-        if( hDstDS == NULL )
+        if( hDstDS == nullptr)
             return ResetConfigOptions();
     }
 
 /* -------------------------------------------------------------------- */
 /*      Process SQL request.                                            */
 /* -------------------------------------------------------------------- */
-    if( pszSQL != NULL )
+    if( pszSQL != nullptr)
     {
         OGRLayerH hLayer;
 
-        hLayer = OGR_DS_ExecuteSQL( hSrcDS, pszSQL, NULL, NULL ); 
-        if( hLayer != NULL )
+        hLayer = OGR_DS_ExecuteSQL( hSrcDS, pszSQL, nullptr, nullptr);
+        if( hLayer != nullptr)
         {
             if (bCreateOutput)
             {
@@ -3074,12 +3073,12 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                                  hDriver, pszDstFilename,
                                  nXSize, nYSize, dfXRes, dfYRes,
                                  bTargetAlignedPixels,
-                                 anBandList.size(), eOutputType,
+                                 static_cast<int>(anBandList.size()), eOutputType,
                                  papszCreateOptions, adfInitVals,
                                  bNoDataSet, dfNoData);
             }
 
-            ProcessLayer( hLayer, hSRS != NULL, hDstDS, anBandList, 
+            ProcessLayer( hLayer, hSRS != nullptr, hDstDS, anBandList,
                           adfBurnValues, b3D, bInverse, pszBurnAttribute,
                           papszRasterizeOptions, pfnProgress, &params );
 
@@ -3092,14 +3091,14 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
     int nLayerCount = CSLCount(papszLayers);
 
-    if (bCreateOutput && hDstDS == NULL)
+    if (bCreateOutput && hDstDS == nullptr)
     {
         std::vector<OGRLayerH> ahLayers;
 
         for( i = 0; i < nLayerCount; i++ )
         {
             OGRLayerH hLayer = OGR_DS_GetLayerByName( hSrcDS, papszLayers[i] );
-            if( hLayer == NULL )
+            if( hLayer == nullptr)
             {
                 continue;
             }
@@ -3111,7 +3110,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                                 hDriver, pszDstFilename,
                                 nXSize, nYSize, dfXRes, dfYRes,
                                 bTargetAlignedPixels,
-                                anBandList.size(), eOutputType,
+                                static_cast<int>(anBandList.size()), eOutputType,
                                 papszCreateOptions, adfInitVals,
                                 bNoDataSet, dfNoData);
     }
@@ -3123,7 +3122,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     for( i = 0; i < nLayerCount; i++ )
     {
         OGRLayerH hLayer = OGR_DS_GetLayerByName( hSrcDS, papszLayers[i] );
-        if( hLayer == NULL )
+        if( hLayer == nullptr)
         {
             CPLError( CE_Warning, CPLE_AppDefined, "Unable to find layer %s, skipping.\n", 
                       papszLayers[i] );
@@ -3141,7 +3140,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             GDALCreateScaledProgress( 0.0, 1.0 * (i + 1) / nLayerCount,
                                       pfnProgress, &params );
 
-        ProcessLayer( hLayer, hSRS != NULL, hDstDS, anBandList, 
+        ProcessLayer( hLayer, hSRS != nullptr, hDstDS, anBandList,
                       adfBurnValues, b3D, bInverse, pszBurnAttribute,
                       papszRasterizeOptions, GDALScaledProgress, pScaledProgress );
 
@@ -3199,11 +3198,11 @@ char *SanitizeSRS( const char *pszUserInput )
 
 {
     OGRSpatialReferenceH hSRS;
-    char *pszResult = NULL;
+    char *pszResult = nullptr;
 
     CPLErrorReset();
     
-    hSRS = OSRNewSpatialReference( NULL );
+    hSRS = OSRNewSpatialReference(nullptr);
     if( OSRSetFromUserInput( hSRS, pszUserInput ) == OGRERR_NONE )
         OSRExportToWkt( hSRS, &pszResult );
     else
@@ -3211,7 +3210,7 @@ char *SanitizeSRS( const char *pszUserInput )
         CPLError( CE_Failure, CPLE_AppDefined,
                   "Translating source or target SRS failed:\n%s",
                   pszUserInput );
-        return NULL;
+        return nullptr;
     }
     
     OSRDestroySpatialReference( hSRS );
@@ -3238,28 +3237,28 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     GDALDatasetH	hDstDS;
     const char         *pszFormat = "GTiff";
     int bFormatExplicitelySet = FALSE;
-    char              **papszSrcFiles = NULL;
+    char              **papszSrcFiles = nullptr;
     char               *pszDstFilename = NULL;
     int                 bCreateOutput = FALSE, i;
-    void               *hTransformArg, *hGenImgProjArg=NULL, *hApproxArg=NULL;
-    char               **papszWarpOptions = NULL;
+    void               *hTransformArg, *hGenImgProjArg = nullptr, *hApproxArg = nullptr;
+    char               **papszWarpOptions = nullptr;
     double             dfErrorThreshold = 0.125;
     double             dfWarpMemoryLimit = 0.0;
-    GDALTransformerFunc pfnTransformer = NULL;
-    char                **papszCreateOptions = NULL;
+    GDALTransformerFunc pfnTransformer = nullptr;
+    char                **papszCreateOptions = nullptr;
     GDALDataType        eOutputType = GDT_Unknown, eWorkingType = GDT_Unknown; 
     GDALResampleAlg     eResampleAlg = GRA_NearestNeighbour;
-    const char          *pszSrcNodata = NULL;
-    const char          *pszDstNodata = NULL;
+    const char          *pszSrcNodata = nullptr;
+    const char          *pszDstNodata = nullptr;
     int                 bMulti = FALSE;
-    char                **papszTO = NULL;
-    char                *pszCutlineDSName = NULL;
-    char                *pszCLayer = NULL, *pszCWHERE = NULL, *pszCSQL = NULL;
-    void                *hCutline = NULL;
+    char                **papszTO = nullptr;
+    char                *pszCutlineDSName = nullptr;
+    char                *pszCLayer = nullptr, *pszCWHERE = nullptr, *pszCSQL = nullptr;
+    void                *hCutline = nullptr;
     int                  bHasGotErr = FALSE;
     int                  bCropToCutline = FALSE;
     int                  bOverwrite = FALSE;
-	struct CallbackParams params(GetCallback(), "Warping");	
+	struct CallbackParams params(GetCallback(), "Warping");
 
 /* -------------------------------------------------------------------- */
 /*      Register standard GDAL drivers, and process generic GDAL        */
@@ -3330,7 +3329,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         {
             char *pszSRS = SanitizeSRS(_sArr[++i]);
 
-			if (pszSRS == NULL)
+			if (pszSRS == nullptr)
 			{
 				CPLError(CE_Warning, CPLE_AppDefined, "GdalWarp: failed to read target projection argument (-t_srs).");
 				return ResetConfigOptions();
@@ -3343,7 +3342,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         {
             char *pszSRS = SanitizeSRS(_sArr[++i]);
 
-			if (pszSRS == NULL)
+			if (pszSRS == nullptr)
 			{
 				CPLError(CE_Warning, CPLE_AppDefined, "GdalWarp: failed to read source projection argument (-s_srs).");
 				return ResetConfigOptions();
@@ -3434,7 +3433,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             
             for( iType = 1; iType < GDT_TypeCount; iType++ )
             {
-                if( GDALGetDataTypeName((GDALDataType)iType) != NULL
+                if( GDALGetDataTypeName((GDALDataType)iType) != nullptr
                     && EQUAL(GDALGetDataTypeName((GDALDataType)iType),
                              _sArr[i+1]) )
                 {
@@ -3456,7 +3455,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             
             for( iType = 1; iType < GDT_TypeCount; iType++ )
             {
-                if( GDALGetDataTypeName((GDALDataType)iType) != NULL
+                if( GDALGetDataTypeName((GDALDataType)iType) != nullptr
                     && EQUAL(GDALGetDataTypeName((GDALDataType)iType),
                              _sArr[i+1]) )
                 {
@@ -3578,10 +3577,10 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     if( CSLCount(papszSrcFiles) > 1 )
     {
         pszDstFilename = papszSrcFiles[CSLCount(papszSrcFiles)-1];
-        papszSrcFiles[CSLCount(papszSrcFiles)-1] = NULL;
+        papszSrcFiles[CSLCount(papszSrcFiles)-1] = nullptr;
     }
 
-    if( pszDstFilename == NULL )
+    if( pszDstFilename == nullptr)
 	{
 		CPLError(CE_Warning, CPLE_AppDefined, "GdalWarp: failed to find destination file name.");
 		return ResetConfigOptions();
@@ -3614,13 +3613,13 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	hDstDS = GdalHelper::OpenRasterDatasetW(OLE2W(bstrDstFilename), GA_Update);
     CPLPopErrorHandler();
 
-    if( hDstDS != NULL && bOverwrite )
+    if( hDstDS != nullptr && bOverwrite )
     {
         GDALClose(hDstDS);
-        hDstDS = NULL;
+        hDstDS = nullptr;
     }
 
-    if( hDstDS != NULL && bCreateOutput )
+    if( hDstDS != nullptr && bCreateOutput )
     {
         CPLError( CE_Failure, CPLE_AppDefined,
                  "Output dataset %s exists,\n"
@@ -3633,7 +3632,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
     /* Avoid overwriting an existing destination file that cannot be opened in */
     /* update mode with a new GTiff file */
-    if ( hDstDS == NULL && !bOverwrite )
+    if ( hDstDS == nullptr && !bOverwrite )
     {
         CPLPushErrorHandler( CPLQuietErrorHandler );
         hDstDS = GdalHelper::OpenRasterDatasetW(OLE2W(bstrDstFilename), GA_ReadOnly);
@@ -3654,7 +3653,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /*      If we have a cutline datasource read it and attach it in the    */
 /*      warp options.                                                   */
 /* -------------------------------------------------------------------- */
-    if( pszCutlineDSName != NULL )
+    if( pszCutlineDSName != nullptr)
     {
         LoadCutline( pszCutlineDSName, pszCLayer, pszCWHERE, pszCSQL,
                      &hCutline );
@@ -3754,10 +3753,10 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
     int   bInitDestSetForFirst = FALSE;
 
-    void* hUniqueTransformArg = NULL;
-    GDALDatasetH hUniqueSrcDS = NULL;
+    void* hUniqueTransformArg = nullptr;
+    GDALDatasetH hUniqueSrcDS = nullptr;
 
-    if( hDstDS == NULL )
+    if( hDstDS == nullptr)
     {
         if (!bFormatExplicitelySet)
             CheckExtensionConsistency(pszDstFilename, pszFormat);
@@ -3774,14 +3773,14 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 									   bEnableSrcAlpha, bEnableDstAlpha);
         bCreateOutput = TRUE;
 
-        if( CSLFetchNameValue( papszWarpOptions, "INIT_DEST" ) == NULL 
-            && pszDstNodata == NULL )
+        if( CSLFetchNameValue( papszWarpOptions, "INIT_DEST" ) == nullptr
+            && pszDstNodata == nullptr)
         {
             papszWarpOptions = CSLSetNameValue(papszWarpOptions,
                                                "INIT_DEST", "0");
             bInitDestSetForFirst = TRUE;
         }
-        else if( CSLFetchNameValue( papszWarpOptions, "INIT_DEST" ) == NULL )
+        else if( CSLFetchNameValue( papszWarpOptions, "INIT_DEST" ) == nullptr)
         {
             papszWarpOptions = CSLSetNameValue(papszWarpOptions,
                                                "INIT_DEST", "NO_DATA" );
@@ -3789,10 +3788,10 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         }
 
         CSLDestroy( papszCreateOptions );
-        papszCreateOptions = NULL;
+        papszCreateOptions = nullptr;
     }
  
-    if( hDstDS == NULL )
+    if( hDstDS == nullptr)
         // TODO: clean up memory...set error code?
 		return ResetConfigOptions();
 
@@ -3801,7 +3800,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
     int iSrc;
 
-    for( iSrc = 0; papszSrcFiles[iSrc] != NULL; iSrc++ )
+    for( iSrc = 0; papszSrcFiles[iSrc] != nullptr; iSrc++ )
     {
         GDALDatasetH hSrcDS;
        
@@ -3813,7 +3812,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         else
             hSrcDS = GDALOpen( papszSrcFiles[iSrc], GA_ReadOnly );			// TODO: use Unicode
     
-        if( hSrcDS == NULL )
+        if( hSrcDS == nullptr)
             // TODO: clean up memory?
 			return ResetConfigOptions();
 
@@ -3833,7 +3832,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
  
         if ( eResampleAlg != GRA_NearestNeighbour &&
-             GDALGetRasterColorTable(GDALGetRasterBand(hSrcDS, 1)) != NULL)
+             GDALGetRasterColorTable(GDALGetRasterBand(hSrcDS, 1)) != nullptr)
         {
             CPLError( CE_Warning, CPLE_AppDefined, "Warning: Input file %s has a color table, which will likely lead to "
                     "bad results when using a resampling method other than "
@@ -3862,7 +3861,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             hTransformArg = hGenImgProjArg =
                 GDALCreateGenImgProjTransformer2( hSrcDS, hDstDS, papszTO );
         
-        if( hTransformArg == NULL )
+        if( hTransformArg == nullptr)
             // TODO: clean up memory?
 			return ResetConfigOptions();
         
@@ -3885,7 +3884,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
         if( bInitDestSetForFirst && iSrc == 1 )
             papszWarpOptions = CSLSetNameValue( papszWarpOptions, 
-                                                "INIT_DEST", NULL );
+                                                "INIT_DEST", nullptr);
 
 /* -------------------------------------------------------------------- */
 /*      Setup warp options.                                             */
@@ -3945,7 +3944,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
 /*      Setup NODATA options.                                           */
 /* -------------------------------------------------------------------- */
-        if( pszSrcNodata != NULL && !EQUALN(pszSrcNodata,"n",1) )
+        if( pszSrcNodata != nullptr && !EQUALN(pszSrcNodata,"n",1) )
         {
             char **papszTokens = CSLTokenizeString( pszSrcNodata );
             int  nTokenCount = CSLCount(papszTokens);
@@ -3980,7 +3979,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /*      If -srcnodata was not specified, but the data has nodata        */
 /*      values, use them.                                               */
 /* -------------------------------------------------------------------- */
-        if( pszSrcNodata == NULL )
+        if( pszSrcNodata == nullptr)
         {
             int bHaveNodata = FALSE;
             double dfReal = 0.0;
@@ -4022,7 +4021,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /*      If the output dataset was created, and we have a destination    */
 /*      nodata value, go through marking the bands with the information.*/
 /* -------------------------------------------------------------------- */
-        if( pszDstNodata != NULL )
+        if( pszDstNodata != nullptr)
         {
             char **papszTokens = CSLTokenizeString( pszDstNodata );
             int  nTokenCount = CSLCount(papszTokens);
@@ -4110,7 +4109,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /*      If we have a cutline, transform it into the source              */
 /*      pixel/line coordinate system and insert into warp options.      */
 /* -------------------------------------------------------------------- */
-        if( hCutline != NULL )
+        if( hCutline != nullptr)
         {
             TransformCutlineToSource( hSrcDS, hCutline, 
                                       &(psWO->papszWarpOptions), 
@@ -4136,7 +4135,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             /* have wrapped it inside the hApproxArg */
             if (pfnTransformer == GDALApproxTransform)
             {
-                if( hGenImgProjArg != NULL )
+                if( hGenImgProjArg != nullptr)
                     GDALDestroyGenImgProjTransformer( hGenImgProjArg );
             }
 
@@ -4175,10 +4174,10 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
 /*      Cleanup                                                         */
 /* -------------------------------------------------------------------- */
-        if( hApproxArg != NULL )
+        if( hApproxArg != nullptr)
             GDALDestroyApproxTransformer( hApproxArg );
         
-        if( hGenImgProjArg != NULL )
+        if( hGenImgProjArg != nullptr)
             GDALDestroyGenImgProjTransformer( hGenImgProjArg );
         
         GDALDestroyWarpOptions( psWO );
@@ -4239,26 +4238,26 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
     GDALDriverH hDriver;
     GDALDatasetH hDstDS;
     void *hTransformArg;
-    GDALColorTableH hCT = NULL;
+    GDALColorTableH hCT = nullptr;
     double dfWrkMinX=0, dfWrkMaxX=0, dfWrkMinY=0, dfWrkMaxY=0;
     double dfWrkResX=0, dfWrkResY=0;
     int nDstBandCount = 0;
     std::vector<GDALColorInterp> apeColorInterpretations;
 
-    *phTransformArg = NULL;
-    *phSrcDS = NULL;
+    *phTransformArg = nullptr;
+    *phSrcDS = nullptr;
 
 /* -------------------------------------------------------------------- */
 /*      Find the output driver.                                         */
 /* -------------------------------------------------------------------- */
     hDriver = GDALGetDriverByName( pszFormat );
-    if( hDriver == NULL 
-        || GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL ) == NULL )
+    if( hDriver == nullptr
+        || GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, nullptr) == nullptr)
     {
 		CPLError(CE_Failure, CPLE_AppDefined, "Output driver `%s' not recognised or does not support direct output file creation.", pszFormat);
         
         // TODO: free up memory...set error code?
-		return NULL;
+		return nullptr;
     }
 
 /* -------------------------------------------------------------------- */
@@ -4275,18 +4274,18 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
 /* -------------------------------------------------------------------- */
     int     iSrc;
     char    *pszThisTargetSRS = (char*)CSLFetchNameValue( papszTO, "DST_SRS" );
-    if( pszThisTargetSRS != NULL )
+    if( pszThisTargetSRS != nullptr)
         pszThisTargetSRS = CPLStrdup( pszThisTargetSRS );
 
-    for( iSrc = 0; papszSrcFiles[iSrc] != NULL; iSrc++ )
+    for( iSrc = 0; papszSrcFiles[iSrc] != nullptr; iSrc++ )
     {
         GDALDatasetH hSrcDS;
         const char *pszThisSourceSRS = CSLFetchNameValue(papszTO,"SRC_SRS");
 
         hSrcDS = GDALOpen( papszSrcFiles[iSrc], GA_ReadOnly );			// TODO: use Unicode
-        if( hSrcDS == NULL )
+        if( hSrcDS == nullptr)
 			// TODO: free up memory...set error code?
-			return NULL;
+			return nullptr;
 
 /* -------------------------------------------------------------------- */
 /*      Check that there's at least one raster band                     */
@@ -4295,7 +4294,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
         {
 			CPLError(CE_Failure, CPLE_AppDefined, "Input file %s has no raster bands.\n", papszSrcFiles[iSrc]);
             // TODO: free up memory...set error code?
-			return NULL;
+			return nullptr;
         }
 
         if( eDT == GDT_Unknown )
@@ -4309,7 +4308,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
         {
             nDstBandCount = GDALGetRasterCount(hSrcDS);
             hCT = GDALGetRasterColorTable( GDALGetRasterBand(hSrcDS,1) );
-            if( hCT != NULL )
+            if( hCT != nullptr)
             {
                 hCT = GDALCloneColorTable( hCT );
                 if( !bQuiet )
@@ -4327,21 +4326,21 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
 /* -------------------------------------------------------------------- */
 /*      Get the sourcesrs from the dataset, if not set already.         */
 /* -------------------------------------------------------------------- */
-        if( pszThisSourceSRS == NULL )
+        if( pszThisSourceSRS == nullptr)
         {
             const char *pszMethod = CSLFetchNameValue( papszTO, "METHOD" );
 
-            if( GDALGetProjectionRef( hSrcDS ) != NULL 
+            if( GDALGetProjectionRef( hSrcDS ) != nullptr
                 && strlen(GDALGetProjectionRef( hSrcDS )) > 0
-                && (pszMethod == NULL || EQUAL(pszMethod,"GEOTRANSFORM")) )
+                && (pszMethod == nullptr || EQUAL(pszMethod,"GEOTRANSFORM")) )
                 pszThisSourceSRS = GDALGetProjectionRef( hSrcDS );
             
-            else if( GDALGetGCPProjection( hSrcDS ) != NULL
+            else if( GDALGetGCPProjection( hSrcDS ) != nullptr
                      && strlen(GDALGetGCPProjection(hSrcDS)) > 0 
                      && GDALGetGCPCount( hSrcDS ) > 1 
-                     && (pszMethod == NULL || EQUALN(pszMethod,"GCP_",4)) )
+                     && (pszMethod == nullptr || EQUALN(pszMethod,"GCP_",4)) )
                 pszThisSourceSRS = GDALGetGCPProjection( hSrcDS );
-            else if( pszMethod != NULL && EQUAL(pszMethod,"RPC") )
+            else if( pszMethod != nullptr && EQUAL(pszMethod,"RPC") )
 #if GDAL_VERSION_MAJOR >= 3
                 pszThisSourceSRS = SRS_WKT_WGS84_LAT_LONG; //  SRS_WKT_WGS84 macro is no longer declared by default since WKT without AXIS is too ambiguous. Preferred remediation: use SRS_WKT_WGS84_LAT_LONG
 #else
@@ -4351,7 +4350,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
                 pszThisSourceSRS = "";
         }
 
-        if( pszThisTargetSRS == NULL )
+        if( pszThisTargetSRS == nullptr)
             pszThisTargetSRS = CPLStrdup( pszThisSourceSRS );
         
 /* -------------------------------------------------------------------- */
@@ -4359,13 +4358,13 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
 /*      destination coordinate system.                                  */
 /* -------------------------------------------------------------------- */
         hTransformArg = 
-            GDALCreateGenImgProjTransformer2( hSrcDS, NULL, papszTO );
+            GDALCreateGenImgProjTransformer2( hSrcDS, nullptr, papszTO );
         
-        if( hTransformArg == NULL )
+        if( hTransformArg == nullptr)
         {
             CPLFree( pszThisTargetSRS );
             GDALClose( hSrcDS );
-            return NULL;
+            return nullptr;
         }
         
         GDALTransformerInfo* psInfo = (GDALTransformerInfo*)hTransformArg;
@@ -4385,10 +4384,10 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
         {
             CPLFree( pszThisTargetSRS );
             GDALClose( hSrcDS );
-            return NULL;
+            return nullptr;
         }
         
-        if (CPLGetConfigOption( "CHECK_WITH_INVERT_PROJ", NULL ) == NULL)
+        if (CPLGetConfigOption( "CHECK_WITH_INVERT_PROJ", nullptr) == nullptr)
         {
             double MinX = adfExtent[0];
             double MaxX = adfExtent[2];
@@ -4439,7 +4438,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
                 {
                     CPLFree( pszThisTargetSRS );
                     GDALClose( hSrcDS );
-                    return NULL;
+                    return nullptr;
                 }
             }
         }
@@ -4467,7 +4466,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
             dfWrkResY = MIN(dfWrkResY,ABS(adfThisGeoTransform[5]));
         }
 
-        if (iSrc == 0 && papszSrcFiles[1] == NULL)
+        if (iSrc == 0 && papszSrcFiles[1] == nullptr)
         {
             *phTransformArg = hTransformArg;
             *phSrcDS = hSrcDS;
@@ -4487,7 +4486,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
         CPLError( CE_Failure, CPLE_AppDefined,
                   "No usable source images." );
         CPLFree( pszThisTargetSRS );
-        return NULL;
+        return nullptr;
     }
 
 /* -------------------------------------------------------------------- */
@@ -4637,10 +4636,10 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
     hDstDS = GDALCreate( hDriver, pszFilename, nPixels, nLines, 
                          nDstBandCount, eDT, *ppapszCreateOptions );
     
-    if( hDstDS == NULL )
+    if( hDstDS == nullptr)
     {
         CPLFree( pszThisTargetSRS );
-        return NULL;
+        return nullptr;
     }
 
 /* -------------------------------------------------------------------- */
@@ -4649,7 +4648,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
     GDALSetProjection( hDstDS, pszThisTargetSRS );
     GDALSetGeoTransform( hDstDS, adfDstGeoTransform );
 
-    if (*phTransformArg != NULL)
+    if (*phTransformArg != nullptr)
         GDALSetGenImgProjTransformerDstGeoTransform( *phTransformArg, adfDstGeoTransform);
 
 /* -------------------------------------------------------------------- */
@@ -4685,7 +4684,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
 /* -------------------------------------------------------------------- */
 /*      Copy the color table, if required.                              */
 /* -------------------------------------------------------------------- */
-    if( hCT != NULL )
+    if( hCT != nullptr)
     {
         GDALSetRasterColorTable( GDALGetRasterBand(hDstDS,1), hCT );
         GDALDestroyColorTable( hCT );
@@ -4708,11 +4707,11 @@ public:
 
     void         *hSrcImageTransformer;
 
-    virtual OGRSpatialReference *GetSourceCS() { return NULL; }
-    virtual OGRSpatialReference *GetTargetCS() { return NULL; }
+    virtual OGRSpatialReference *GetSourceCS() { return nullptr; }
+    virtual OGRSpatialReference *GetTargetCS() { return nullptr; }
 
     virtual int Transform( int nCount, 
-                           double *x, double *y, double *z = NULL ) {
+                           double *x, double *y, double *z = nullptr) {
         int nResult;
 
         int *pabSuccess = (int *) CPLCalloc(sizeof(int),nCount);
@@ -4723,8 +4722,8 @@ public:
     }
 
     virtual int TransformEx( int nCount, 
-                             double *x, double *y, double *z = NULL,
-                             int *pabSuccess = NULL ) {
+                             double *x, double *y, double *z = nullptr,
+                             int *pabSuccess = nullptr) {
         return GDALGenImgProjTransform( hSrcImageTransformer, TRUE, 
                                         nCount, x, y, z, pabSuccess );
     }
@@ -5163,23 +5162,23 @@ VRTBuilder::VRTBuilder(const char* pszOutputFilename,
     this->bAllowProjectionDifference = bAllowProjectionDifference;
     this->bAddAlpha = bAddAlpha;
     this->bHideNoData = bHideNoData;
-    this->pszSrcNoData = (pszSrcNoData) ? CPLStrdup(pszSrcNoData) : NULL;
-    this->pszVRTNoData = (pszVRTNoData) ? CPLStrdup(pszVRTNoData) : NULL;
+    this->pszSrcNoData = (pszSrcNoData) ? CPLStrdup(pszSrcNoData) : nullptr;
+    this->pszVRTNoData = (pszVRTNoData) ? CPLStrdup(pszVRTNoData) : nullptr;
 
     bUserExtent = FALSE;
-    pszProjectionRef = NULL;
+    pszProjectionRef = nullptr;
     nBands = 0;
-    pasBandProperties = NULL;
+    pasBandProperties = nullptr;
     bFirst = TRUE;
     bHasGeoTransform = FALSE;
     nRasterXSize = 0;
     nRasterYSize = 0;
-    pasDatasetProperties = NULL;
+    pasDatasetProperties = nullptr;
     bAllowSrcNoData = TRUE;
-    padfSrcNoData = NULL;
+    padfSrcNoData = nullptr;
     nSrcNoDataCount = 0;
     bAllowVRTNoData = TRUE;
-    padfVRTNoData = NULL;
+    padfVRTNoData = nullptr;
     nVRTNoDataCount = 0;
     bHasRunBuild = FALSE;
     bHasDatasetMask = FALSE;
@@ -5202,7 +5201,7 @@ VRTBuilder::~VRTBuilder()
     }
     CPLFree(ppszInputFilenames);
 
-    if (pasDatasetProperties != NULL)
+    if (pasDatasetProperties != nullptr)
     {
         for(i=0;i<nInputFiles;i++)
         {
@@ -5212,7 +5211,7 @@ VRTBuilder::~VRTBuilder()
     }
     CPLFree(pasDatasetProperties);
 
-    if (!bSeparate && pasBandProperties != NULL)
+    if (!bSeparate && pasBandProperties != nullptr)
     {
         int j;
         for(j=0;j<nBands;j++)
@@ -5241,7 +5240,7 @@ static int ProjAreEqual(const char* pszWKT1, const char* pszWKT2)
 
     hSRS1 = OSRNewSpatialReference(pszWKT1);
     hSRS2 = OSRNewSpatialReference(pszWKT2);
-    bRet = hSRS1 != NULL && hSRS2 != NULL && OSRIsSame(hSRS1,hSRS2);
+    bRet = hSRS1 != nullptr && hSRS2 != nullptr && OSRIsSame(hSRS1,hSRS2);
     if (hSRS1)
         OSRDestroySpatialReference(hSRS1);
     if (hSRS2)
@@ -5268,7 +5267,7 @@ int VRTBuilder::AnalyseRaster( GDALDatasetH hDS, const char* dsFileName,
         int count = 1;
         char subdatasetNameKey[256];
         sprintf(subdatasetNameKey, "SUBDATASET_%d_NAME", count);
-        while(*papszMetadata != NULL)
+        while(*papszMetadata != nullptr)
         {
             if (EQUALN(*papszMetadata, subdatasetNameKey, strlen(subdatasetNameKey)))
             {
@@ -5474,9 +5473,9 @@ int VRTBuilder::AnalyseRaster( GDALDatasetH hDS, const char* dsFileName,
     }
     else
     {
-        if ((proj != NULL && pszProjectionRef == NULL) ||
-            (proj == NULL && pszProjectionRef != NULL) ||
-            (proj != NULL && pszProjectionRef != NULL && ProjAreEqual(proj, pszProjectionRef) == FALSE))
+        if ((proj != nullptr && pszProjectionRef == nullptr) ||
+            (proj == nullptr && pszProjectionRef != nullptr) ||
+            (proj != nullptr && pszProjectionRef != nullptr && ProjAreEqual(proj, pszProjectionRef) == FALSE))
         {
             if (!bAllowProjectionDifference)
             {
@@ -5511,7 +5510,7 @@ int VRTBuilder::AnalyseRaster( GDALDatasetH hDS, const char* dsFileName,
                     GDALColorTableH colorTable = GDALGetRasterColorTable( hRasterBand );
                     int nRefColorEntryCount = GDALGetColorEntryCount(pasBandProperties[j].colorTable);
                     int i;
-                    if (colorTable == NULL ||
+                    if (colorTable == nullptr ||
                         GDALGetColorEntryCount(colorTable) != nRefColorEntryCount)
                     {
                         CPLError(CE_Warning, CPLE_NotSupported,
@@ -5621,7 +5620,7 @@ void VRTBuilder::CreateVRTSeparate(VRTDatasetH hVRTDS)
 
         const char* dsFileName = ppszInputFilenames[i];
 
-        GDALAddBand(hVRTDS, psDatasetProperties->firstBandType, NULL);
+        GDALAddBand(hVRTDS, psDatasetProperties->firstBandType, nullptr);
 
         GDALProxyPoolDatasetH hProxyDS =
             GDALProxyPoolDatasetCreate(dsFileName,
@@ -5638,7 +5637,7 @@ void VRTBuilder::CreateVRTSeparate(VRTDatasetH hVRTDS)
                 (VRTSourcedRasterBandH)GDALGetRasterBand(hVRTDS, iBand);
 
         if (bHideNoData)
-            GDALSetMetadataItem(hVRTBand,"HideNoDataValue","1",NULL);
+            GDALSetMetadataItem(hVRTBand,"HideNoDataValue","1", nullptr);
 
         if (bAllowSrcNoData && psDatasetProperties->panHasNoData[0])
         {
@@ -5672,7 +5671,7 @@ void VRTBuilder::CreateVRTNonSeparate(VRTDatasetH hVRTDS)
     for(j=0;j<nBands;j++)
     {
         GDALRasterBandH hBand;
-        GDALAddBand(hVRTDS, pasBandProperties[j].dataType, NULL);
+        GDALAddBand(hVRTDS, pasBandProperties[j].dataType, nullptr);
         hBand = GDALGetRasterBand(hVRTDS, j+1);
         GDALSetRasterColorInterpretation(hBand, pasBandProperties[j].colorInterpretation);
         if (pasBandProperties[j].colorInterpretation == GCI_PaletteIndex)
@@ -5682,14 +5681,14 @@ void VRTBuilder::CreateVRTNonSeparate(VRTDatasetH hVRTDS)
         if (bAllowVRTNoData && pasBandProperties[j].bHasNoData)
             GDALSetRasterNoDataValue(hBand, pasBandProperties[j].noDataValue);
         if ( bHideNoData )
-            GDALSetMetadataItem(hBand,"HideNoDataValue","1",NULL);
+            GDALSetMetadataItem(hBand,"HideNoDataValue","1", nullptr);
     }
 
-    VRTSourcedRasterBand* hMaskVRTBand = NULL;
+    VRTSourcedRasterBand* hMaskVRTBand = nullptr;
     if (bAddAlpha)
     {
         GDALRasterBandH hBand;
-        GDALAddBand(hVRTDS, GDT_Byte, NULL);
+        GDALAddBand(hVRTDS, GDT_Byte, nullptr);
         hBand = GDALGetRasterBand(hVRTDS, nBands + 1);
         GDALSetRasterColorInterpretation(hBand, GCI_AlphaBand);
     }
@@ -5791,7 +5790,7 @@ int VRTBuilder::Build(GDALProgressFunc pfnProgress, void * pProgressData)
         return CE_Failure;
     bHasRunBuild = TRUE;
 
-    if( pfnProgress == NULL )
+    if( pfnProgress == nullptr)
         pfnProgress = GDALDummyProgress;
 
     bUserExtent = (minX != 0 || minY != 0 || maxX != 0 || maxY != 0);
@@ -5823,7 +5822,7 @@ int VRTBuilder::Build(GDALProgressFunc pfnProgress, void * pProgressData)
     pasDatasetProperties =
             (DatasetProperty*) CPLCalloc(nInputFiles, sizeof(DatasetProperty));
 
-    if (pszSrcNoData != NULL)
+    if (pszSrcNoData != nullptr)
     {
         if (EQUAL(pszSrcNoData, "none"))
         {
@@ -5840,7 +5839,7 @@ int VRTBuilder::Build(GDALProgressFunc pfnProgress, void * pProgressData)
         }
     }
 
-    if (pszVRTNoData != NULL)
+    if (pszVRTNoData != nullptr)
     {
         if (EQUAL(pszVRTNoData, "none"))
         {
@@ -5862,7 +5861,7 @@ int VRTBuilder::Build(GDALProgressFunc pfnProgress, void * pProgressData)
     {
         const char* dsFileName = ppszInputFilenames[i];
 
-        if (!pfnProgress( 1.0 * (i+1) / nInputFiles, NULL, pProgressData))
+        if (!pfnProgress( 1.0 * (i+1) / nInputFiles, nullptr, pProgressData))
         {
             return CE_Failure;
         }
@@ -5967,7 +5966,7 @@ static void add_file_to_list(const char* filename, const char* tile_index,
 #ifndef OGR_ENABLED
         CPLError(CE_Failure, CPLE_AppDefined, "OGR support needed to read tileindex");
         *pnInputFiles = 0;
-        *pppszInputFilenames = NULL;
+        *pppszInputFilenames = nullptr;
 #else
         OGRDataSourceH hDS;
         OGRLayerH      hLayer;
@@ -6053,10 +6052,10 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 
 	int nArgc = 0;
     const char *tile_index = "location";
-    const char *resolution = NULL;
+    const char *resolution = nullptr;
     int nInputFiles = 0;
-    char ** ppszInputFilenames = NULL;
-    const char * pszOutputFilename = NULL;
+    char ** ppszInputFilenames = nullptr;
+    const char * pszOutputFilename = nullptr;
     int i, iArg;
     int bSeparate = FALSE;
     int bAllowProjectionDifference = FALSE;
@@ -6068,8 +6067,8 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
     int bAddAlpha = FALSE;
     int bForceOverwrite = FALSE;
     int bHideNoData = FALSE;
-    const char* pszSrcNoData = NULL;
-    const char* pszVRTNoData = NULL;
+    const char* pszSrcNoData = nullptr;
+    const char* pszVRTNoData = nullptr;
 	CallbackParams params(GetCallback(), "Building Virtual Dataset");
 
     GDALAllRegister();
@@ -6183,7 +6182,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 
 	pszOutputFilename = OLE2CA(bstrDstFilename);
 
-    if( pszOutputFilename == NULL )
+    if( pszOutputFilename == nullptr)
 	{
 		this->_lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, CPLE_AppDefined, "Invalid output file specified");
@@ -6205,7 +6204,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
         int bExists = (VSIStat(pszOutputFilename, &sBuf) == 0);
         if (bExists)
         {
-            GDALDriverH hDriver = GDALIdentifyDriver( pszOutputFilename, NULL );
+            GDALDriverH hDriver = GDALIdentifyDriver( pszOutputFilename, nullptr);
             if (hDriver && !EQUAL(GDALGetDriverShortName(hDriver), "VRT"))
             {
                 CPLError(CE_Failure, CPLE_AppDefined,
@@ -6219,7 +6218,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
     }
     
     if (we_res != 0 && ns_res != 0 &&
-        resolution != NULL && !EQUAL(resolution, "user"))
+        resolution != nullptr && !EQUAL(resolution, "user"))
     {
         CPLError(CE_Failure, CPLE_AppDefined, "-tr option is not compatible with -resolution %s\n", resolution);
 		return ResetConfigOptions(tkGDAL_ERROR);
@@ -6238,11 +6237,11 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
     }
         
     ResolutionStrategy eStrategy = AVERAGE_RESOLUTION;
-    if ( resolution == NULL || EQUAL(resolution, "user") )
+    if ( resolution == nullptr || EQUAL(resolution, "user") )
     {
         if ( we_res != 0 || ns_res != 0)
             eStrategy = USER_RESOLUTION;
-        else if ( resolution != NULL && EQUAL(resolution, "user") )
+        else if ( resolution != nullptr && EQUAL(resolution, "user") )
         {
             CPLError(CE_Failure, CPLE_AppDefined, "-tr option must be used with -resolution user\n");
 			return ResetConfigOptions(tkGDAL_ERROR);
@@ -6262,7 +6261,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
     
     /* If -srcnodata is specified, use it as the -vrtnodata if the latter is not */
     /* specified */
-    if (pszSrcNoData != NULL && pszVRTNoData == NULL)
+    if (pszSrcNoData != nullptr && pszVRTNoData == nullptr)
         pszVRTNoData = pszSrcNoData;
 
     VRTBuilder oBuilder(pszOutputFilename, nInputFiles, ppszInputFilenames,
@@ -6303,7 +6302,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 	int nArgc = 0;
     GDALDatasetH     hDataset;
     const char      *pszResampling = "nearest";
-    const char      *pszFilename = NULL;
+    const char      *pszFilename = nullptr;
     int              anLevels[1024];
     int              nLevelCount = 0;
     int              nResultStatus = 0;
@@ -6352,7 +6351,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 		sLevelToken = sLevels.Tokenize(" ", curPos);
 	}
 
-    if( pszFilename == NULL || (nLevelCount == 0 && !bClean) )
+    if( pszFilename == nullptr || (nLevelCount == 0 && !bClean) )
 	{
 		return ResetConfigOptions();
 	}
@@ -6361,7 +6360,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 /*      Open data file.                                                 */
 /* -------------------------------------------------------------------- */
     if (bReadOnly)
-        hDataset = NULL;
+        hDataset = nullptr;
     else
     {
         CPLPushErrorHandler( CPLQuietErrorHandler );
@@ -6369,12 +6368,12 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
         CPLPopErrorHandler();
     }
 
-    if( hDataset == NULL )
+    if( hDataset == nullptr)
 	{
 		hDataset = GdalHelper::OpenRasterDatasetW(OLE2W(bstrSrcFilename), GA_ReadOnly);
 	}
 
-    if( hDataset == NULL )
+    if( hDataset == nullptr)
 	{
 		return ResetConfigOptions(tkGDAL_ERROR);
 	}
@@ -6384,7 +6383,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 /* -------------------------------------------------------------------- */
     if ( bClean &&
         GDALBuildOverviews( hDataset,pszResampling, 0, 0, 
-                             0, NULL, pfnProgress, &params ) != CE_None )
+                             0, nullptr, pfnProgress, &params ) != CE_None )
     {
 		this->_lastErrorCode = tkGDAL_ERROR;
         CPLError(CE_Failure,0,"Cleaning overviews failed.");
@@ -6396,7 +6395,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 /* -------------------------------------------------------------------- */
     if (nLevelCount > 0 && nResultStatus == 0 &&
         GDALBuildOverviews( hDataset,pszResampling, nLevelCount, anLevels,
-                             0, NULL, pfnProgress, &params ) != CE_None )
+                             0, nullptr, pfnProgress, &params ) != CE_None )
     {
 		this->_lastErrorCode = tkGDAL_ERROR;
         CPLError(CE_Failure,0,"Overview building failed.");
@@ -6461,14 +6460,14 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 /*      Open source file.                                               */
 /* -------------------------------------------------------------------- */
 	GDALDatasetH hSrcDS = GdalHelper::OpenRasterDatasetW(OLE2W(pszSrcFilename), GA_ReadOnly);
-	if( hSrcDS == NULL )
+	if( hSrcDS == nullptr)
 	{
 		(*retval) = VARIANT_FALSE;
 		return S_OK;
 	}
 
 	GDALRasterBandH hSrcBand = GDALGetRasterBand( hSrcDS, iSrcBand );
-	if( hSrcBand == NULL )
+	if( hSrcBand == nullptr)
     {
         CPLError( CE_Failure, CPLE_AppDefined,
 			      "Band %d does not exist on dataset.", iSrcBand );
@@ -6477,12 +6476,12 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
     }
 
 	GDALRasterBandH hMaskBand;
-	GDALDatasetH hMaskDS = NULL;
+	GDALDatasetH hMaskDS = nullptr;
 	if( NoMask )
 	{
-		hMaskBand = NULL;
+		hMaskBand = nullptr;
 	}
-	else if( pszMaskFilename == NULL) // default mask
+	else if( pszMaskFilename == nullptr) // default mask
 	{
 		hMaskBand = GDALGetMaskBand( hSrcBand );
 	}
@@ -6496,24 +6495,23 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 /*      Try opening the destination file as an existing file.           */
 /* -------------------------------------------------------------------- */
 	CPLPushErrorHandler(CPLQuietErrorHandler);
-	OGRDataSourceH hDstDS =  OGROpen( OLE2A(pszDstFilename), TRUE, NULL );
+	OGRDataSourceH hDstDS =  OGROpen( OLE2A(pszDstFilename), TRUE, nullptr);
 	CPLPopErrorHandler();
 
 /* -------------------------------------------------------------------- */
 /*      Create output file.                                             */
 /* -------------------------------------------------------------------- */
-	if( hDstDS == NULL )
+	if( hDstDS == nullptr)
 	{
 		OGRSFDriverH hDriver = OGRGetDriverByName( OLE2A(pszOGRFormat) );
-		if( hDriver == NULL )
+		if( hDriver == nullptr)
 		{
 			(*retval) = VARIANT_FALSE;
 			return S_OK;
 		}
 
-		hDstDS = OGR_Dr_CreateDataSource( hDriver, OLE2A(pszDstFilename),
-										  NULL );
-		if( hDstDS == NULL )
+		hDstDS = OGR_Dr_CreateDataSource( hDriver, OLE2A(pszDstFilename),nullptr);
+		if( hDstDS == nullptr)
 		{
 			(*retval) = VARIANT_FALSE;
 			return S_OK;
@@ -6527,18 +6525,18 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 
 	OGRLayerH hDstLayer = OGR_DS_GetLayerByName( hDstDS,
 												 OLE2A(pszDstLayerName) );
-	if( hDstLayer == NULL )
+	if( hDstLayer == nullptr)
 	{
-		OGRSpatialReferenceH hSRS = NULL;
+		OGRSpatialReferenceH hSRS = nullptr;
 		const char *pszWkt = GDALGetProjectionRef(hSrcDS);
-		if( pszWkt != NULL && _tcslen(pszWkt) != 0 )
+		if( pszWkt != nullptr && _tcslen(pszWkt) != 0 )
 		{
 			hSRS = OSRNewSpatialReference( pszWkt );
 		}
 
 		hDstLayer = OGR_DS_CreateLayer( hDstDS, OLE2A(pszDstLayerName), hSRS,
-										wkbUnknown, NULL );
-		if( hDstLayer == NULL )
+										wkbUnknown, nullptr);
+		if( hDstLayer == nullptr)
 		{
 			(*retval) = VARIANT_FALSE;
 			return S_OK;
@@ -6557,7 +6555,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 /* -------------------------------------------------------------------- */
 	struct CallbackParams params(GetCallback(), "Polygonizing");
 
-	GDALPolygonize( hSrcBand, hMaskBand, hDstLayer, dst_field, NULL,
+	GDALPolygonize( hSrcBand, hMaskBand, hDstLayer, dst_field, nullptr,
 					(GDALProgressFunc) GDALProgressCallback, &params );
 
 	OGR_DS_Destroy( hDstDS );
@@ -6657,14 +6655,14 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     GDALRasterBandH hBand;
 
 	hSrcDS = GdalHelper::OpenRasterDatasetW(OLE2W(pszSrcFilename), GA_ReadOnly);
-    if( hSrcDS == NULL )
+    if( hSrcDS == nullptr)
 	{
 		(*retval) = VARIANT_FALSE;
 		return S_OK;
 	}
 
     hBand = GDALGetRasterBand( hSrcDS, nBandIn );
-    if( hBand == NULL )
+    if( hBand == nullptr)
     {
 		this->_lastErrorCode = tkGDAL_ERROR;
         CPLError( CE_Failure, CPLE_AppDefined, 
@@ -6683,11 +6681,11 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 /* -------------------------------------------------------------------- */
 /*      Try to get a coordinate system from the raster.                 */
 /* -------------------------------------------------------------------- */
-    OGRSpatialReferenceH hSRS = NULL;
+    OGRSpatialReferenceH hSRS = nullptr;
 
     const char *pszWKT = GDALGetProjectionRef( hBand );
 
-    if( pszWKT != NULL && _tcslen(pszWKT) != 0 )
+    if( pszWKT != nullptr && _tcslen(pszWKT) != 0 )
         hSRS = OSRNewSpatialReference( pszWKT );
 
 /* -------------------------------------------------------------------- */
@@ -6699,7 +6697,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     OGRLayerH hLayer;
     int nElevField = -1;
 
-    if( hDriver == NULL )
+    if( hDriver == nullptr)
     {
 		this->_lastErrorCode = tkGDAL_ERROR;
         CPLError( CE_Failure, CPLE_AppDefined, "Unable to find format driver named %s.\n", 
@@ -6708,8 +6706,8 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
         return S_OK;
     }
 
-    hDS = OGR_Dr_CreateDataSource( hDriver, OLE2A(pszDstFilename), NULL );
-    if( hDS == NULL )
+    hDS = OGR_Dr_CreateDataSource( hDriver, OLE2A(pszDstFilename), nullptr);
+    if( hDS == nullptr)
 	{
 		this->_lastErrorCode = tkGDAL_ERROR;
 		(*retval) = VARIANT_FALSE;
@@ -6718,8 +6716,8 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 
     hLayer = OGR_DS_CreateLayer( hDS, "contour", hSRS, 
                                  b3D ? wkbLineString25D : wkbLineString,
-                                 NULL );
-    if( hLayer == NULL )
+                                 nullptr);
+    if( hLayer == nullptr)
 	{
 		this->_lastErrorCode = tkGDAL_ERROR;
 		(*retval) = VARIANT_FALSE;

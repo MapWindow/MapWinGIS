@@ -47,7 +47,7 @@ STDMETHODIMP CLabels::get_FontName(BSTR* retval)
 		USES_CONVERSION;
 	*retval = OLE2BSTR(_options->fontName);
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::put_FontName(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -55,7 +55,7 @@ STDMETHODIMP CLabels::put_FontName(BSTR newVal)
 	::SysFreeString(_options->fontName);
 	_options->fontName = OLE2BSTR(newVal);
 	return S_OK;
-};
+}
 
 // *****************************************************************
 //		Font/FrameTransparency()
@@ -65,7 +65,7 @@ STDMETHODIMP CLabels::get_FontTransparency(long* retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		* retval = _options->fontTransparency;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::put_FontTransparency(long newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -73,13 +73,13 @@ STDMETHODIMP CLabels::put_FontTransparency(long newVal)
 	if (newVal > 255) newVal = 255;
 	_options->fontTransparency = newVal;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::get_FrameTransparency(long* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		* retval = _options->frameTransparency;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::put_FrameTransparency(long newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -87,7 +87,7 @@ STDMETHODIMP CLabels::put_FrameTransparency(long newVal)
 	if (newVal > 255) newVal = 255;
 	_options->frameTransparency = newVal;
 	return S_OK;
-};
+}
 
 // *****************************************************************
 //			Font style options
@@ -96,46 +96,46 @@ STDMETHODIMP CLabels::get_FontItalic(VARIANT_BOOL* retval)
 {
 	*retval = _options->fontStyle & fstItalic ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::put_FontItalic(const VARIANT_BOOL newVal)
 {
 	if (newVal)		_options->fontStyle |= fstItalic;
 	else			_options->fontStyle &= 0xFFFFFFFF ^ fstItalic;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::get_FontBold(VARIANT_BOOL* retval)
 {
 	*retval = _options->fontStyle & fstBold ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::put_FontBold(const VARIANT_BOOL newVal)
 {
 	if (newVal)		_options->fontStyle |= fstBold;
 	else			_options->fontStyle &= 0xFFFFFFFF ^ fstBold;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::get_FontUnderline(VARIANT_BOOL* retval)
 {
 	*retval = _options->fontStyle & fstUnderline ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::put_FontUnderline(const VARIANT_BOOL newVal)
 {
 	if (newVal)		_options->fontStyle |= fstUnderline;
 	else			_options->fontStyle &= 0xFFFFFFFF ^ fstUnderline;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::get_FontStrikeOut(VARIANT_BOOL* retval)
 {
 	*retval = _options->fontStyle & fstStrikeout ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
-};
+}
 STDMETHODIMP CLabels::put_FontStrikeOut(const VARIANT_BOOL newVal)
 {
 	if (newVal)		_options->fontStyle |= fstStrikeout;
 	else			_options->fontStyle &= 0xFFFFFFFF ^ fstStrikeout;
 	return S_OK;
-};
+}
 ////////////////////////////////////////////////////////////////
 //      END OF COMMON OPTIONS
 ////////////////////////////////////////////////////////////////
@@ -207,7 +207,7 @@ STDMETHODIMP CLabels::get_Label(const long index, const long part, ILabel** pVal
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (index < 0 || index >= (long)_labels.size())
+		if (index < 0 || index >= static_cast<long>(_labels.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*pVal = nullptr;
@@ -215,7 +215,7 @@ STDMETHODIMP CLabels::get_Label(const long index, const long part, ILabel** pVal
 		else
 		{
 			const std::vector<CLabelInfo*>* parts = _labels[index];
-			if (part < 0 || part >= (long)parts->size())
+			if (part < 0 || part >= static_cast<long>(parts->size()))
 			{
 				ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 				*pVal = nullptr;
@@ -230,7 +230,7 @@ STDMETHODIMP CLabels::get_Label(const long index, const long part, ILabel** pVal
 			}
 		}
 	return S_OK;
-};
+}
 
 //***********************************************************************/
 //*			get_NumCategories()
@@ -238,9 +238,9 @@ STDMETHODIMP CLabels::get_Label(const long index, const long part, ILabel** pVal
 STDMETHODIMP CLabels::get_NumCategories(long* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		* pVal = _categories.size();
+		* pVal = static_cast<long>(_categories.size());
 	return S_OK;
-};
+}
 
 //***********************************************************************/
 //*		get_numParts()
@@ -248,7 +248,7 @@ STDMETHODIMP CLabels::get_NumCategories(long* pVal)
 STDMETHODIMP CLabels::get_NumParts(const long index, long* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (index < 0 || index >= (long)_labels.size())
+		if (index < 0 || index >= static_cast<long>(_labels.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*pVal = -1;
@@ -256,10 +256,10 @@ STDMETHODIMP CLabels::get_NumParts(const long index, long* pVal)
 		else
 		{
 			const std::vector<CLabelInfo*>* parts = _labels[index];
-			*pVal = parts->size();
+			*pVal = static_cast<long>(parts->size());
 		}
 	return S_OK;
-};
+}
 
 //***********************************************************************/
 //*			get_Category()
@@ -282,7 +282,7 @@ STDMETHODIMP CLabels::get_Category(const long index, ILabelCategory** retval)
 	//}
 	//else
 	{
-		if (index < 0 || index >= (long)_categories.size())
+		if (index < 0 || index >= static_cast<long>(_categories.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		}
@@ -302,7 +302,7 @@ STDMETHODIMP CLabels::put_Category(const long index, ILabelCategory* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (index < 0 || index >= (long)_categories.size())
+		if (index < 0 || index >= static_cast<long>(_categories.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		}
@@ -328,7 +328,7 @@ STDMETHODIMP CLabels::AddLabel(const BSTR text, const double x, const double y, 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		VARIANT_BOOL vbretval;
-	this->InsertLabel(_labels.size(), text, x, y, rotation, category, offsetX, offsetY, &vbretval);
+	this->InsertLabel(static_cast<long>(_labels.size()), text, x, y, rotation, category, offsetX, offsetY, &vbretval);
 	return S_OK;
 }
 
@@ -338,7 +338,7 @@ STDMETHODIMP CLabels::AddLabel(const BSTR text, const double x, const double y, 
 STDMETHODIMP CLabels::InsertLabel(long Index, BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Index < 0 || Index >(long)_labels.size())
+		if (Index < 0 || Index >static_cast<long>(_labels.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*retVal = VARIANT_FALSE;
@@ -385,7 +385,7 @@ CLabelInfo* CLabels::CreateNewLabel(const BSTR& Text, double x, double y, double
 STDMETHODIMP CLabels::RemoveLabel(long Index, VARIANT_BOOL* vbretval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Index < 0 || Index >= (long)_labels.size())
+		if (Index < 0 || Index >= static_cast<long>(_labels.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*vbretval = VARIANT_FALSE;
@@ -402,7 +402,7 @@ STDMETHODIMP CLabels::RemoveLabel(long Index, VARIANT_BOOL* vbretval)
 			*vbretval = VARIANT_TRUE;
 		}
 	return S_OK;
-};
+}
 
 ///***********************************************************************/
 ///*		AddPart()
@@ -410,7 +410,7 @@ STDMETHODIMP CLabels::RemoveLabel(long Index, VARIANT_BOOL* vbretval)
 STDMETHODIMP CLabels::AddPart(long Index, BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Index < 0 || Index >(int)_labels.size())
+		if (Index < 0 || Index >static_cast<long>(_labels.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			return S_OK;
@@ -418,9 +418,9 @@ STDMETHODIMP CLabels::AddPart(long Index, BSTR Text, double x, double y, double 
 	std::vector<CLabelInfo*>* parts = _labels[Index];
 
 	VARIANT_BOOL vbretval;
-	InsertPart(Index, parts->size(), Text, x, y, Rotation, Category, offsetX, offsetY, &vbretval);
+	InsertPart(Index, static_cast<long>(parts->size()), Text, x, y, Rotation, Category, offsetX, offsetY, &vbretval);
 	return S_OK;
-};
+}
 
 ///***********************************************************************/
 ///*		AddPart()
@@ -428,7 +428,7 @@ STDMETHODIMP CLabels::AddPart(long Index, BSTR Text, double x, double y, double 
 STDMETHODIMP CLabels::InsertPart(long Index, long Part, BSTR Text, double x, double y, double Rotation, long Category, double offsetX, double offsetY, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Index < 0 || Index >= (int)_labels.size())
+		if (Index < 0 || Index >= static_cast<long>(_labels.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			return S_OK;
@@ -448,7 +448,7 @@ STDMETHODIMP CLabels::InsertPart(long Index, long Part, BSTR Text, double x, dou
 		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
-};
+}
 ///***********************************************************************/
 ///*		RemovePart()
 ///***********************************************************************/
@@ -456,7 +456,7 @@ STDMETHODIMP CLabels::RemovePart(long Index, long Part, VARIANT_BOOL* vbretval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (Index < 0 || Index >= (long)_labels.size())
+		if (Index < 0 || Index >= static_cast<long>(_labels.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*vbretval = VARIANT_FALSE;
@@ -464,7 +464,7 @@ STDMETHODIMP CLabels::RemovePart(long Index, long Part, VARIANT_BOOL* vbretval)
 		else
 		{
 			std::vector<CLabelInfo*>* parts = _labels[Index];
-			if (Part < 0 || Part >= (long)parts->size())
+			if (Part < 0 || Part >= static_cast<long>(parts->size()))
 			{
 				ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 				*vbretval = VARIANT_FALSE;
@@ -477,7 +477,7 @@ STDMETHODIMP CLabels::RemovePart(long Index, long Part, VARIANT_BOOL* vbretval)
 			}
 		}
 	return S_OK;
-};
+}
 
 
 // *****************************************************************
@@ -485,7 +485,7 @@ STDMETHODIMP CLabels::RemovePart(long Index, long Part, VARIANT_BOOL* vbretval)
 // *****************************************************************
 STDMETHODIMP CLabels::AddCategory(BSTR Name, ILabelCategory** retVal)
 {
-	this->InsertCategory(_categories.size(), Name, retVal);
+	this->InsertCategory(static_cast<long>(_categories.size()), Name, retVal);
 	return S_OK;
 }
 
@@ -496,7 +496,7 @@ STDMETHODIMP CLabels::InsertCategory(long Index, BSTR Name, ILabelCategory** ret
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		if (Index < 0 || Index >(long)_categories.size())
+		if (Index < 0 || Index >static_cast<long>(_categories.size()))
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			*retVal = nullptr;
@@ -534,7 +534,7 @@ STDMETHODIMP CLabels::RemoveCategory(long Index, VARIANT_BOOL* vbretval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		* vbretval = VARIANT_FALSE;
 
-	if (Index < 0 || Index >= (long)_categories.size())
+	if (Index < 0 || Index >= static_cast<long>(_categories.size()))
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*vbretval = VARIANT_FALSE;
@@ -566,7 +566,7 @@ STDMETHODIMP CLabels::Clear()
 		}
 	_labels.clear();
 	return S_OK;
-};
+}
 
 // *****************************************************************
 //			ClearAllCategories()
@@ -603,7 +603,7 @@ STDMETHODIMP CLabels::ApplyColorScheme(tkColorSchemeType Type, IColorScheme* Col
 STDMETHODIMP CLabels::ApplyColorScheme2(tkColorSchemeType Type, IColorScheme* ColorScheme, tkLabelElements Element)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		ApplyColorScheme3(Type, ColorScheme, Element, 0, _categories.size() - 1);
+		ApplyColorScheme3(Type, ColorScheme, Element, 0, static_cast<long>(_categories.size()) - 1);
 	return S_OK;
 }
 
@@ -615,7 +615,7 @@ STDMETHODIMP CLabels::ApplyColorScheme3(tkColorSchemeType Type, IColorScheme* Co
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		long numBreaks;
+	long numBreaks;
 	ColorScheme->get_NumBreaks(&numBreaks);
 
 	if (Element == leDefault)
@@ -633,8 +633,8 @@ STDMETHODIMP CLabels::ApplyColorScheme3(tkColorSchemeType Type, IColorScheme* Co
 	}
 
 	// we'll correct inproper indices
-	if (CategoryEndIndex >= (long)_categories.size())
-		CategoryEndIndex = (long)(_categories.size() - 1);
+	if (CategoryEndIndex >= static_cast<long>(_categories.size()))
+		CategoryEndIndex = static_cast<long>(_categories.size() - 1);
 
 	if (CategoryStartIndex < 0)
 		CategoryStartIndex = 0;
@@ -908,7 +908,7 @@ CLabelOptions* CLabels::get_LabelOptions()
 // *****************************************************************
 STDMETHODIMP CLabels::GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	*retVal = VARIANT_FALSE;
 
@@ -931,7 +931,7 @@ STDMETHODIMP CLabels::GenerateCategories(long FieldIndex, tkClassificationType C
 
 	ILabelCategory* cat = nullptr;
 
-	for (int i = 0; i < (int)values->size(); i++)
+	for (int i = 0; i < static_cast<int>(values->size()); i++)
 	{
 		CString strValue;
 
@@ -1129,7 +1129,7 @@ void CLabels::UpdateLabelOffsetsFromShapefile(long labelIndex, long categoryInde
 // Determines to which category belong individual labels
 STDMETHODIMP CLabels::ApplyCategories()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	this->ApplyExpression_(-1);
 	return S_OK;
 }
@@ -1164,7 +1164,7 @@ void CLabels::RefreshExpressions()
 
 	CString numberFormat = LabelsHelper::GetFloatNumberFormat(this);
 
-	for (int i = 0; i < (int)_categories.size(); i++)
+	for (int i = 0; i < static_cast<int>(_categories.size()); i++)
 	{
 		CComVariant vMin, vMax;
 		_categories[i]->get_MinValue(&vMin);
@@ -1194,13 +1194,13 @@ void CLabels::RefreshExpressions()
 // *****************************************************************
 STDMETHODIMP CLabels::get_ClassificationField(long* FieldIndex)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*FieldIndex = _classificationField;
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_ClassificationField(long FieldIndex)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_classificationField = FieldIndex;
 	return S_OK;
 }
@@ -1210,7 +1210,7 @@ STDMETHODIMP CLabels::put_ClassificationField(long FieldIndex)
 // *****************************************************************
 STDMETHODIMP CLabels::put_Synchronized(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal)
 	{
 		_synchronized = newVal;
@@ -1228,7 +1228,7 @@ STDMETHODIMP CLabels::put_Synchronized(VARIANT_BOOL newVal)
 }
 STDMETHODIMP CLabels::get_Synchronized(VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	// the property must be set and the number of labels/parts must correspond
 	if (LabelsSynchronized() && _synchronized)
@@ -1248,7 +1248,7 @@ bool CLabels::LabelsSynchronized()
 
 	long numShapes;
 	_shapefile->get_NumShapes(&numShapes);
-	return numShapes == (long)_labels.size();
+	return numShapes == static_cast<long>(_labels.size());
 }
 
 // *****************************************************************
@@ -1258,7 +1258,7 @@ STDMETHODIMP CLabels::get_Options(ILabelCategory** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		* retVal = _category;
+	*retVal = _category;
 
 	if (_category)
 		_category->AddRef();
@@ -1269,9 +1269,9 @@ STDMETHODIMP CLabels::put_Options(ILabelCategory* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		/*CLabelCategory* coCat =	static_cast<CLabelCategory*>(newVal);
-		CLabelOptions* options =  coCat->get_LabelOptions();
-		_options = *options;*/
+	/*CLabelCategory* coCat =	static_cast<CLabelCategory*>(newVal);
+	CLabelOptions* options =  coCat->get_LabelOptions();
+	_options = *options;*/
 
 		ComHelper::SetRef(newVal, (IDispatch**)&_category, false);
 	_options = ((CLabelCategory*)_category)->get_LabelOptions();
@@ -1286,10 +1286,10 @@ STDMETHODIMP CLabels::put_Options(ILabelCategory* newVal)
 // Must be called before the redraw (before the call of MapView::DrawLabelsAlt).
 void CLabels::ClearLabelFrames()
 {
-	for (int iLabel = 0; iLabel < (int)_labels.size(); iLabel++)
+	for (int iLabel = 0; iLabel < static_cast<int>(_labels.size()); iLabel++)
 	{
 		vector<CLabelInfo*>* parts = _labels[iLabel];
-		for (int j = 0; j < (int)parts->size(); j++)
+		for (int j = 0; j < static_cast<int>(parts->size()); j++)
 		{
 			CLabelInfo* lbl = parts->at(j);
 			if (lbl->horizontalFrame)
@@ -1331,13 +1331,13 @@ STDMETHODIMP CLabels::put_VisibilityExpression(BSTR newVal)
 // **********************************************************
 STDMETHODIMP CLabels::get_MinDrawingSize(LONG* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = _minDrawingSize;
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_MinDrawingSize(LONG newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_minDrawingSize = newVal;
 	return S_OK;
 }
@@ -1348,7 +1348,7 @@ STDMETHODIMP CLabels::put_MinDrawingSize(LONG newVal)
 STDMETHODIMP CLabels::MoveCategoryUp(long Index, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Index < (long)_categories.size() && Index > 0)
+		if (Index < static_cast<long>(_categories.size()) && Index > 0)
 		{
 			ILabelCategory* catBefore = _categories[Index - 1];
 			_categories[Index - 1] = _categories[Index];
@@ -1369,7 +1369,7 @@ STDMETHODIMP CLabels::MoveCategoryUp(long Index, VARIANT_BOOL* retval)
 STDMETHODIMP CLabels::MoveCategoryDown(long Index, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		if (Index < (long)_categories.size() - 1 && Index >= 0)
+		if (Index < static_cast<long>(_categories.size()) - 1 && Index >= 0)
 		{
 			ILabelCategory* catAfter = _categories[Index + 1];
 			_categories[Index + 1] = _categories[Index];
@@ -2644,7 +2644,7 @@ STDMETHODIMP CLabels::put_SavingMode(tkSavingMode newVal)
 // *************************************************************
 STDMETHODIMP CLabels::get_Positioning(tkLabelPositioning* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _positioning;
 	return S_OK;
 }
@@ -2654,7 +2654,7 @@ STDMETHODIMP CLabels::get_Positioning(tkLabelPositioning* pVal)
 // *************************************************************
 STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_shapefile)
 	{
 		ShpfileType type;
@@ -2696,14 +2696,14 @@ STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 // *************************************************************
 STDMETHODIMP CLabels::get_TextRenderingHint(tkTextRenderingHint* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _textRenderingHint;
 	return S_OK;
 }
 
 STDMETHODIMP CLabels::put_TextRenderingHint(tkTextRenderingHint newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal >= 0 && newVal <= ClearTypeGridFit)
 		_textRenderingHint = newVal;
 	return S_OK;
@@ -2717,7 +2717,7 @@ bool CLabels::HasRotation()
 	for (unsigned int i = 0; i < _labels.size(); i++)
 	{
 		vector<CLabelInfo*>* parts = _labels[i];
-		for (int j = 0; j < (int)parts->size(); j++)
+		for (int j = 0; j < static_cast<int>(parts->size()); j++)
 		{
 			CLabelInfo* lbl = (*parts)[j];
 			if (lbl->rotation != 0.0)
@@ -2744,7 +2744,7 @@ void CLabels::AddEmptyLabel()
 // *************************************************************
 STDMETHODIMP CLabels::get_FloatNumberFormat(BSTR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = A2BSTR(_floatNumberFormat);
 	return S_OK;
 }
@@ -2754,7 +2754,7 @@ STDMETHODIMP CLabels::get_FloatNumberFormat(BSTR* pVal)
 // *************************************************************
 STDMETHODIMP CLabels::put_FloatNumberFormat(BSTR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	CString format = OLE2A(newVal);
 	CString s;
@@ -2783,13 +2783,13 @@ STDMETHODIMP CLabels::ForceRecalculateExpression()
 // *************************************************************
 STDMETHODIMP CLabels::get_FontSize(LONG* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = _options->fontSize;
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_FontSize(LONG newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_options->fontSize = newVal;
 
 	if (_options->fontSize > MAX_LABEL_SIZE) {
@@ -2806,7 +2806,7 @@ STDMETHODIMP CLabels::put_FontSize(LONG newVal)
 // *************************************************************
 STDMETHODIMP CLabels::get_FontSize2(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _options->fontSize2;
 
@@ -2814,7 +2814,7 @@ STDMETHODIMP CLabels::get_FontSize2(LONG* pVal)
 }
 STDMETHODIMP CLabels::put_FontSize2(LONG newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	_options->fontSize2 = newVal;
 
@@ -2834,7 +2834,7 @@ STDMETHODIMP CLabels::put_FontSize2(LONG newVal)
 // *************************************************************
 STDMETHODIMP CLabels::get_UseVariableSize(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _useVariableSize;
 
@@ -2842,7 +2842,7 @@ STDMETHODIMP CLabels::get_UseVariableSize(VARIANT_BOOL* pVal)
 }
 STDMETHODIMP CLabels::put_UseVariableSize(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	_useVariableSize = newVal;
 	_fontSizeChanged = true;
@@ -2855,7 +2855,7 @@ STDMETHODIMP CLabels::put_UseVariableSize(VARIANT_BOOL newVal)
 // *************************************************************
 STDMETHODIMP CLabels::get_LogScaleForSize(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _logScaleForSize;
 
@@ -2863,7 +2863,7 @@ STDMETHODIMP CLabels::get_LogScaleForSize(VARIANT_BOOL* pVal)
 }
 STDMETHODIMP CLabels::put_LogScaleForSize(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	_logScaleForSize = newVal;
 	_fontSizeChanged = true;
@@ -2940,7 +2940,7 @@ bool CLabels::RecalculateFontSize()
 // *************************************************************
 STDMETHODIMP CLabels::UpdateSizeField()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	_fontSizeChanged = true;
 

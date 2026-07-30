@@ -7,7 +7,7 @@ point_table::point_table()
 
 long point_table::add( Point p )
 {	point_list.push_back( p );
-	return point_list.size() - 1;
+	return static_cast<long>(point_list.size()) - 1;
 }
 
 void point_table::clear()

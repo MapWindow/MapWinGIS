@@ -32,9 +32,8 @@ private:
 public:
 	CustomExpression() 
 		: _useFields(true), _saveOperations(true), _floatFormat(m_globalSettings.floatNumberFormat),
-		_shape(NULL), _errorPosition(-1)
+		_shape(nullptr), _errorPosition(-1)
 	{
-		
 	}
 
 	~CustomExpression()
@@ -95,7 +94,7 @@ public:
 	vector<CStringW>* GetFields() { return &_fields; }
 
 	// variable fields
-	int get_NumFields() { return _variables.size(); }
+	int get_NumFields() { return static_cast<int>(_variables.size()); }
 	int get_FieldIndex(int FieldId)	{ return _variables[FieldId]->fieldIndex; }
 	CStringW get_FieldName(int FieldId) { return _variables[FieldId]->fieldName; }
 	CExpressionValue* get_FieldValue(int FieldId) {	return _variables[FieldId]->val;}
@@ -103,7 +102,7 @@ public:
 	void put_FieldValue(int FieldId, BSTR newVal);
 	void put_FieldValue(int FieldId, CStringW newVal);
 	void put_FieldValue(int FieldId, bool newVal) {	_variables[FieldId]->val->bln(newVal);}
-	int get_PartCount() { return _parts.size(); }
+	int get_PartCount() { return static_cast<int>(_parts.size()); }
 
 	IShape* get_Shape();
 	void put_Shape(IShape* shape);

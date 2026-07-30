@@ -87,8 +87,8 @@ public:
 		_dbl = 0.0;
 		_bln = false;
 		_type = vtDouble;
-		_matrix = NULL;
-		_band = NULL;
+		_matrix = nullptr;
+		_band = nullptr;
 	}
 
 	~CExpressionValue()
@@ -155,7 +155,7 @@ public:
 	{
 		if (_matrix) {
 			delete _matrix;
-			_matrix = NULL;
+			_matrix = nullptr;
 		}
 	}
 
@@ -288,7 +288,7 @@ public:
 
 	CStringW GetName()  { return _aliases[0]; }
 
-	int numParams() { return _params.size(); }
+	int numParams() { return static_cast<int>(_params.size()); }
 
 	bool useGeometry() { return _useGeometry; }
 
@@ -315,7 +315,7 @@ public:
 	{
 		if (parameterIndex < 0 || parameterIndex >= static_cast<int>(_params.size()))
 		{
-			return NULL;
+			return nullptr;
 		}
 
 		return _params[parameterIndex];
@@ -346,8 +346,8 @@ public:
 	{
 		isArgument = false;
 		activeCount = 0;
-		function = NULL;
-		val = NULL;
+		function = nullptr;
+		val = nullptr;
 	}
 
 	~CExpressionPart()
@@ -360,6 +360,6 @@ private:
 	void ReleaseValue();
 
 public:
-	bool isFunction() { return function != NULL; }
+	bool isFunction() { return function != nullptr; }
 	void Reset();
 };

@@ -294,32 +294,6 @@ void CMapView::SetNewExtentsWithForcedZooming(Extent ext, bool zoomIn)
 }
 
 // ****************************************************
-//	   SetNewExtentsWithZoomOut()
-// ****************************************************
-// Sets new extents by zooming out using given extent (drawn rectangle)
-void CMapView::SetNewExtentsWithZoomOut(Extent ext)
-{
-    auto extent = GetExtents();
-    if (extent == NULL) return;
-
-    double width, height;
-    extent->get_Width(&width);
-    extent->get_Height(&height);
-
-    auto const pt = ext.GetCenter();
-    auto const widthFactor = width / ext.Width();
-    auto const heightFactor = height / ext.Height();
-    width  *= widthFactor;
-    height *= heightFactor;
-
-    double zMin, zMax;
-    extent->get_zMin(&zMin);
-    extent->get_zMax(&zMax);
-    extent->SetBounds(pt.x - width / 2, pt.y - height / 2, zMin, pt.x + width / 2, pt.y + height / 2, zMax);
-    SetExtents(extent);
-}
-
-// ****************************************************
 //	   SetExtentsCore()
 // ****************************************************
 // adjustZoom - when we use discrete zoom levels the extents should be adjusted
@@ -395,7 +369,7 @@ void CMapView::GetMapSizeInches(double& mw, double& mh)
 // **********************************************************
 DOUBLE CMapView::GetCurrentScale(void)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
     if (_extents.Width() == 0.0 || _extents.Height() == 0.0 || _viewWidth == 0 || _viewHeight == 0)
     {
@@ -417,7 +391,7 @@ DOUBLE CMapView::GetCurrentScale(void)
 // **********************************************************
 void CMapView::SetCurrentScale(DOUBLE newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
     if (newVal <= 0.0) return;
 
@@ -483,7 +457,7 @@ void CMapView::SetExtents(IExtents* newValue)
 // *****************************************************
 VARIANT_BOOL CMapView::SetGeographicExtents(IExtents* extents)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     if (!extents)
     {
         this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -492,9 +466,7 @@ VARIANT_BOOL CMapView::SetGeographicExtents(IExtents* extents)
 
     if (_transformationMode == tmNotDefined)
     {
-#if RELEASE_MODE
         this->ErrorMessage(tkTRANSFORMATIONMODE_NOT_DEFINED);
-#endif
         return VARIANT_FALSE;
     }
 
@@ -551,7 +523,7 @@ VARIANT_BOOL CMapView::SetGeographicExtents(IExtents* extents)
 // *****************************************************
 IMeasuring* CMapView::GetMeasuring()
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     if (_measuring) {
         _measuring->AddRef();
     }
@@ -563,7 +535,7 @@ IMeasuring* CMapView::GetMeasuring()
 // *****************************************************
 IShapeEditor* CMapView::GetShapeEditor()
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     if (_shapeEditor) {
         _shapeEditor->AddRef();
     }
@@ -575,7 +547,7 @@ IShapeEditor* CMapView::GetShapeEditor()
 // *****************************************************
 IExtents* CMapView::GetGeographicExtents()
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     return GetGeographicExtentsCore(false);
 }
 
@@ -584,11 +556,6 @@ IExtents* CMapView::GetGeographicExtents()
 // ***************************************************************
 bool CMapView::GetGeographicExtentsInternal(bool clipForTiles, Extent* clipExtents, Extent& result)
 {
-    if (clipExtents != nullptr)
-    {
-        ::OutputDebugStringA(clipExtents->ToString());
-        ::OutputDebugStringA("\r\n");
-    }
     // we don't want to have coordinates outside world bounds, as it breaks tiles loading
     IExtents* ext = GetGeographicExtentsCore(clipForTiles, clipExtents);
     if (!ext) return false;
@@ -597,8 +564,6 @@ bool CMapView::GetGeographicExtentsInternal(bool clipForTiles, Extent* clipExten
     ext->Release();
 
     result = bounds;
-    ::OutputDebugStringA(result.ToString());
-    ::OutputDebugStringA("\r\n");
 
     return true;
 }
@@ -699,7 +664,7 @@ cleaning:
 // *****************************************************
 DOUBLE CMapView::GetPixelsPerDegree(void)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     double val = 1.0;
 
     if (this->_unitsOfMeasure != umDecimalDegrees)
@@ -738,7 +703,7 @@ DOUBLE CMapView::GetPixelsPerDegree(void)
 // Without conversion to decimal degrees
 DOUBLE CMapView::PixelsPerMapUnit(void)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     const double val = 1.0;
     double x = 0.0, y = 0.0;
     double screenX = 0.0, screenY = 0.0;
@@ -804,7 +769,7 @@ double CMapView::UnitsPerPixel()
 // *****************************************************
 VARIANT_BOOL CMapView::ZoomToSelected(LONG layerHandle)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     long numSelected = 0;
 
     IShapefile* sf = this->GetShapefile(layerHandle);
@@ -833,7 +798,7 @@ void CMapView::ZoomToMaxExtents()
 {
     bool extentsSet = false;
 
-    const long endcondition = _activeLayers.size();
+    const long endcondition = static_cast<long>(_activeLayers.size());
     for (int i = 0; i < endcondition; i++)
     {
         if (this->LayerIsEmpty(_activeLayers[i])) continue;
@@ -881,7 +846,7 @@ void CMapView::ZoomToMaxVisibleExtents(void)
 {
     bool extentsSet = false;
 
-    const long endcondition = _activeLayers.size();
+    const long endcondition = static_cast<long>(_activeLayers.size());
     for (int i = 0; i < endcondition; i++)
     {
         Layer* l = _allLayers[_activeLayers[i]];
@@ -983,7 +948,7 @@ VARIANT_BOOL CMapView::ZoomToShape2(long layerHandle, long shapeIndex, VARIANT_B
     IShapefile* sf = GetShapefile(layerHandle);
 
     double left, right, top, bottom;
-    static_cast<CShapefile*>(sf)->QuickExtentsCore(shapeIndex, &left, &bottom, &right, &top);
+    dynamic_cast<CShapefile*>(sf)->QuickExtentsCore(shapeIndex, &left, &bottom, &right, &top);
     sf->Release();
 
     Extent extNew(left, right, bottom, top);
@@ -1007,10 +972,6 @@ void CMapView::CalculateVisibleExtents(Extent e, bool MapSizeChanged)
     double right = MAX(e.left, e.right);
     double bottom = MIN(e.bottom, e.top);
     double top = MAX(e.bottom, e.top);
-
-	CString sOutput;
-	sOutput.AppendFormat("CalculateVisibleExtents() left: %.2f, right: %.2f, bottom: %.2f, top: : %.2f\r\n", left, right, bottom, top);
-	::OutputDebugStringA(sOutput.GetBuffer());
 
     if (left == right)	// lsu 26 jul 2009 for zooming to single point
     {
@@ -1171,7 +1132,7 @@ void CMapView::CalculateVisibleExtents(Extent e, bool MapSizeChanged)
 // ****************************************************************
 IExtents* CMapView::GetMaxExtents()
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
     bool extentsSet = false;
     Extent maxExtents;
@@ -1320,7 +1281,7 @@ void CMapView::LogPrevExtent()
     }
 
     // let's discard part of the history that was reverted with ZoomToPrev
-    const int removeCount = _prevExtents.size() - 1 - _prevExtentsIndex;
+    const int removeCount = static_cast<int>(_prevExtents.size() - 1 - _prevExtentsIndex);
     if (removeCount > 0)
     {
         int count = 0;
@@ -1340,7 +1301,7 @@ void CMapView::LogPrevExtent()
         _prevExtents.erase(_prevExtents.begin());
     }
 
-    _prevExtentsIndex = _prevExtents.size() - 1;
+    _prevExtentsIndex = static_cast<int>(_prevExtents.size() - 1);
 }
 
 // ***************************************************
@@ -1411,7 +1372,7 @@ long CMapView::GetExtentHistoryRedoCount()
         return 0;
     }
 
-    return (_prevExtents.size() - 1) - _prevExtentsIndex;
+    return static_cast<long>((_prevExtents.size() - 1) - _prevExtentsIndex);
 }
 
 // ***************************************************

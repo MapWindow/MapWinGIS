@@ -45,10 +45,10 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 		OGRFeatureDefn *poFields = layer->GetLayerDefn();
 
 		layer->ResetReading();
-		while ((poFeature = layer->GetNextFeature()) != NULL)
+		while ((poFeature = layer->GetNextFeature()) != nullptr)
 		{
 			// Get shape or create empty one:
-			IShape* shp = NULL;
+			IShape* shp = nullptr;
 			OGRGeometry *oGeom = poFeature->GetGeometryRef();
 			if (oGeom)
 				shp = OgrConverter::GeometryToShape(oGeom, loader->IsMShapefile);
@@ -82,7 +82,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 	}
 
 	loader->PutData(shapeData);
-	callback->LoadedCount = shapeData.size();
+	callback->LoadedCount = static_cast<long>(shapeData.size());
 	loader->LastSuccessExtents = *extents;
 
 	if (callback->LoadedCount == 0)

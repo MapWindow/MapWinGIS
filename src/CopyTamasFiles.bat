@@ -10,7 +10,7 @@ REM * Paul Meems, update for ecw dll, June 2015                 *
 REM * Paul Meems, update for ecw dll to v5.3, Aug 2017          *
 REM * Paul Meems, update for xerces and lti_dsdk dll, Aug 2018  *
 REM * Paul Meems, update for GDAL v3+, Jan 2022                 *
-REM * Daniel Hedén, update for GDAL v3.10.3, proj9              *
+REM * Daniel Hedén, update for GDAL v3.10.3 and proj9           *
 REM * Usage to test:                                            *
 REM * CopyTamasFiles.bat D:\dev\MapwinGIS\GitHub\support\GDAL_SDK\v140\bin\win32 D:\dev\MapwinGIS\GitHub\src\bin\Win32\
 REM *************************************************************
@@ -37,9 +37,6 @@ REM Copy PROJ4 data:
 xcopy /v /c /r /y %_from_dir%\gdal-data\*.* %_to_dir%gdal-data\
 REM xcopy /v /c /r /y %_from_dir%\proj\SHARE\*.* %_to_dir%..\PROJ_NAD\
 
-REM Copy Proj7 data. TODO: Check if copied to correct location:
-rem xcopy /v /c /r /y %_from_dir%\proj7\share\*.* %_to_dir%proj7\share\
-
 REM Copy Proj9 data. TODO: Check if copied to correct location:
 xcopy /v /c /r /y %_from_dir%\proj9\share\*.* %_to_dir%proj9\share\
 
@@ -53,9 +50,9 @@ REM Copy gdal plugins-external
 xcopy /v /c /r /y %_from_dir%\gdal\plugins-optional\*.* %_to_dir%gdal\plugins-optional\
 
 REM Copy needed Tamas binaries:
-FOR %%G IN (cfitsio.dll freexl.dll geos.dll geos_c.dll hdf.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcrypto-1_1.dll libcrypto-1_1-x64.dll libcrypto-3-x64.dll
+FOR %%G IN (cfitsio.dll freexl.dll geos.dll geos_c.dll hdf.dll hdf5.dll hdf5_hl.dll hdf5_cpp.dll hdf5_hl_cpp.dll libcrypto-3.dll libcrypto-1_1.dll libcrypto-1_1-x64.dll libcrypto-3-x64.dll
 			libcurl.dll libexpat.dll tiff.dll tiffxx.dll ogdi.dll mfhdf.dll pcre.dll
-            iconv-2.dll libmysql.dll libpng16.dll libpq.dll libssl-1_1.dll libssl-1_1-x64.dll libssl-3-x64.dll libxml2.dll lti_lidar_dsdk_1.1.dll netcdf.dll   
+            iconv-2.dll libmysql.dll libpng16.dll libpq.dll libssl-1_1.dll libssl-1_1-x64.dll libssl-3.dll libssl-3-x64.dll libxml2.dll lti_lidar_dsdk_1.1.dll netcdf.dll   
             openjp2.dll proj_9.dll spatialite.dll sqlite3.dll szip.dll tbb.dll xdr.dll zlib.dll zstd.dll
             NCSEcw.dll) DO (
 	IF EXIST %_from_dir%\%%G (

@@ -60,7 +60,7 @@ VARIANT_BOOL CImageClass::WriteWorldFile(const CStringW worldFileName)
 	}
 
 	setlocale(LC_ALL,"C");
-	fprintf(fout,"%.14f\n",_dX);	
+	fprintf(fout,"%.14f\n",_dX);
 	fprintf(fout,"%.14f\n",0.0);
 	fprintf(fout,"%.14f\n",0.0);
 	fprintf(fout,"%.14f\n",_dY*-1.0);
@@ -118,7 +118,7 @@ STDMETHODIMP CImageClass::Resource(BSTR newImgPath, VARIANT_BOOL *retval)
 	USES_CONVERSION;
 
 	Close(retval);
-	Open(newImgPath, USE_FILE_EXTENSION, true, NULL, retval);
+	Open(newImgPath, USE_FILE_EXTENSION, true, nullptr, retval);
 
 	return S_OK;
 }
@@ -180,7 +180,7 @@ void CImageClass::LoadImageAttributesFromGridColorScheme(IGridColorScheme* schem
 // checkForProxy = false; image is being opened by grid code and we already know that it is a proxy, and all the logic will be executed in grid class
 void CImageClass::OpenImage(CStringW imageFileName, ImageType fileType, VARIANT_BOOL inRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval)
 {
-	_fileName = imageFileName;	
+	_fileName = imageFileName;
 	_inRam = inRam == VARIANT_TRUE;
 
 	// child classes will be deleted here
@@ -188,7 +188,7 @@ void CImageClass::OpenImage(CStringW imageFileName, ImageType fileType, VARIANT_
 
 	if (*retval == VARIANT_FALSE)
 		return;
-	
+
 	// figuring out extension from the path
 	if(fileType == USE_FILE_EXTENSION)
 	{
@@ -275,7 +275,7 @@ void CImageClass::SetImageTypeCore(ImageType fileType)
 // ********************************************************
 // checks if this is a proxy for some grid
 bool CImageClass::CheckForProxy()
-{	
+{
 	if (!Utility::EndsWith(_fileName, L"_proxy.bmp") && !Utility::EndsWith(_fileName, L"_proxy.tif"))
 	{
 		return false;
@@ -288,8 +288,8 @@ bool CImageClass::CheckForProxy()
 	}
 	
 	CPLXMLNode* node = GdalHelper::ParseXMLFile(legendName);
-			
-	const char* value = CPLGetXMLValue( node, "GridName", NULL );
+
+	const char* value = CPLGetXMLValue( node, "GridName", nullptr);
 	CStringW nameW = Utility::ConvertFromUtf8(value);
 
 	if (nameW.GetLength() == 0 && _fileName.GetLength() > 16) 
@@ -308,7 +308,7 @@ bool CImageClass::CheckForProxy()
 			this->isGridProxy = true;
 
 			VARIANT_BOOL vb;
-			IGridColorScheme* scheme = NULL;
+			IGridColorScheme* scheme = nullptr;
 			ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
 
 			CComBSTR bstrName(legendName);
@@ -330,14 +330,14 @@ bool CImageClass::CheckForProxy()
 //		OpenGdalRaster()
 // ********************************************************
 bool CImageClass::OpenGdalRaster(const CStringW ImageFile, GDALAccess accessMode)
-{	
+{
 	if (!_raster) {
 		return false;
 	}
-	
-	// inRam is always true for GDAL-based images	
-	_inRam = true;	
-	
+
+	// inRam is always true for GDAL-based images
+	_inRam = true;
+
 	if (!_raster->Open(ImageFile, accessMode))
 	{	
 		ErrorMessage(tkCANT_OPEN_FILE);
@@ -346,10 +346,10 @@ bool CImageClass::OpenGdalRaster(const CStringW ImageFile, GDALAccess accessMode
 
 	_fileName = ImageFile;
 	_gdal = true;
-	_dataLoaded = false; //not yet loaded into ImageData	
+	_dataLoaded = false; //not yet loaded into ImageData
 
-	// default is RGB(0,0,0) if no data value wasn't set	
-	_transColor = (int)_raster->GetTransparentColor();		
+	// default is RGB(0,0,0) if no data value wasn't set
+	_transColor = static_cast<int>(_raster->GetTransparentColor());
 	_transColor2 = _transColor;
 	_useTransColor = _raster->HasTransparency() ? VARIANT_TRUE : VARIANT_FALSE;
 
@@ -506,7 +506,7 @@ STDMETHODIMP CImageClass::Close(VARIANT_BOOL *retval)
 			{
 				_raster->Close();
 				delete _raster;
-				_raster = NULL;
+				_raster = nullptr;
 			}
 			else
 			{
@@ -516,14 +516,14 @@ STDMETHODIMP CImageClass::Close(VARIANT_BOOL *retval)
 	}
 	else
 	{
-		if(  _bitmapImage )
+		if( _bitmapImage )
 		{
 			_bitmapImage->Close();
 			delete _bitmapImage;
-			_bitmapImage = NULL;
+			_bitmapImage = nullptr;
 		}
 	}
-	
+
 	if (_labels)
 	{
 		_labels->Clear();
@@ -532,13 +532,13 @@ STDMETHODIMP CImageClass::Close(VARIANT_BOOL *retval)
 	if (_imageData)
 	{
 		delete[] _imageData;
-		_imageData = NULL;
+		_imageData = nullptr;
 	}
 
 	if (_screenBitmap)
 	{
 		delete _screenBitmap;
-		_screenBitmap = NULL;
+		_screenBitmap = nullptr;
 	}
 
 	// set default properties
@@ -552,18 +552,18 @@ STDMETHODIMP CImageClass::Close(VARIANT_BOOL *retval)
 	if (m_pixels)
 	{
 		delete[] m_pixels; 
-		m_pixels = NULL;
+		m_pixels = nullptr;
 	}
 
 	m_groupID = -1;
-	m_pixels = NULL;
+	m_pixels = nullptr;
 	m_pixelsCount = 0;
 	_pixelsSaved = false;
 
 	if (_iconGdiPlus)
 	{
 		delete _iconGdiPlus;
-		_iconGdiPlus = NULL;
+		_iconGdiPlus = nullptr;
 	}
 
 	_sourceType = istUninitialized;
@@ -591,7 +591,7 @@ STDMETHODIMP CImageClass::Clear(OLE_COLOR CanvasColor, ICallback *CBack, VARIANT
 	colour NewColor(Red, Green, Blue);
 	long size = _height * _width;
 	
-	if (_imageData == NULL)
+	if (_imageData == nullptr)
 	{
 		*retval = VARIANT_FALSE;
 		ErrorMessage(tkFILE_NOT_OPEN);
@@ -691,7 +691,7 @@ STDMETHODIMP CImageClass::get_Value(long row, long col, int *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if (!GetValueCore(row, col, true, (long*)pVal))
+	if (!GetValueCore(row, col, true, reinterpret_cast<long*>(pVal)))
 	{
 		*pVal = -1;
 	}
@@ -706,7 +706,7 @@ STDMETHODIMP CImageClass::get_ValueWithAlpha(LONG row, LONG col, OLE_COLOR* pVal
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (!GetValueCore(row, col, true, (long*)pVal))
+	if (!GetValueCore(row, col, true, reinterpret_cast<long*>(pVal)))
 	{
 		*pVal = 0x00000000;
 	}
@@ -869,7 +869,7 @@ STDMETHODIMP CImageClass::get_TransparencyColor2(OLE_COLOR* retVal)
 STDMETHODIMP CImageClass::put_TransparencyColor2(OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (newVal != _transColor2) 
+	if (newVal != _transColor2)
 	{
 		_pixelsSaved = false;	// pixels saved for grouping will be invalid
 		_canUseGrouping = true;
@@ -889,7 +889,7 @@ STDMETHODIMP CImageClass::get_UseTransparencyColor(VARIANT_BOOL *pVal)
 STDMETHODIMP CImageClass::put_UseTransparencyColor(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (newVal != _useTransColor) 
+	if (newVal != _useTransColor)
 	{
 		_pixelsSaved = false;	// pixels saved for grouping will be invalid
 		_canUseGrouping = true;
@@ -953,7 +953,7 @@ STDMETHODIMP CImageClass::get_GlobalCallback(ICallback **pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _globalCallback;
-	if( _globalCallback != NULL )
+	if( _globalCallback != nullptr)
 		_globalCallback->AddRef();
 
 	return S_OK;
@@ -1004,7 +1004,7 @@ STDMETHODIMP CImageClass::get_FileHandle(long *pVal)
 	if( _imgType == BITMAP_FILE )
 	{	int handle = _bitmapImage->FileHandle();
 		if( handle >= 0 )
-			*pVal = _dup(handle);				
+			*pVal = _dup(handle);
 		else
 			*pVal = -1;
 	}
@@ -1105,13 +1105,13 @@ CStringW GetGdiPlusFormat(ImageType type, CStringW& ext)
 // **********************************************************
 bool CImageClass::WriteGDIPlus(const CStringW imageFile, const bool worldFile, const ImageType type, ICallback *cBack)
 {
-	if (!_inRam) 
+	if (!_inRam)
 	{
 		ErrorMessage(tkGDIPLUS_SAVING_AVAILABLE_INRAM);
 		return false;
 	}
 
-	if (_width == 0 || _height == 0) 
+	if (_width == 0 || _height == 0)
 	{
 		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
 		return false;
@@ -1261,17 +1261,17 @@ bool CImageClass::getFileType(const CStringW ImageFile, ImageType &ft)
 //	  ReadBMP()
 // **********************************************************
 bool CImageClass::ReadBMP(const CStringW ImageFile, bool InRam)
-{	
+{
 	bool result;
-	
+
 	_inRam = InRam;
-	
+
 	if (_imageData)
 	{
 		delete [] _imageData;
-		_imageData = NULL;
+		_imageData = nullptr;
 	}
-		
+
 	result = _inRam ? _bitmapImage->Open(ImageFile,_imageData): _bitmapImage->Open(ImageFile);
 	if(!result)
 	{
@@ -1291,7 +1291,7 @@ bool CImageClass::ReadBMP(const CStringW ImageFile, bool InRam)
 	int NameLength = ImageFile.GetLength();
 	CStringW WorldFileName = ImageFile.Left(LocationOfPeriod);
 	CStringW ext = ImageFile.Right(NameLength - LocationOfPeriod - 1);
-	
+
 	//Try all three worldfile naming conventions
 	WorldFileName += "." + ext + "w";
 	if (! (ReadWorldFile(WorldFileName)) )
@@ -1304,10 +1304,10 @@ bool CImageClass::ReadBMP(const CStringW ImageFile, bool InRam)
 			WorldFileName += ".wld";
 			ReadWorldFile(WorldFileName);
 		}
-	} 
+	}
 
 	int val;
-	get_Value( 0, 0, &val );					
+	get_Value( 0, 0, &val );
 	_transColor = val;
 	_transColor2 = val;
 	return true;
@@ -1368,7 +1368,7 @@ STDMETHODIMP CImageClass::get_Picture(IPictureDisp **pVal)
 
 	if (_width <= 0 || _height <= 0)
 	{
-		*pVal = NULL;
+		*pVal = nullptr;
 		return S_OK;
 	}
 
@@ -1377,7 +1377,7 @@ STDMETHODIMP CImageClass::get_Picture(IPictureDisp **pVal)
 	HBITMAP bmp = CreateCompatibleBitmap(desktop, _width, _height);
 	HGDIOBJ oldobj = SelectObject(compatdc, bmp);
 	VARIANT_BOOL vbretval;
-	GetImageBitsDC((long)compatdc, &vbretval);
+	GetImageBitsDC(static_cast<long>(reinterpret_cast<LONG_PTR>(compatdc)), &vbretval);
 	DeleteDC(compatdc);
 	ReleaseDC(GetDesktopWindow(), desktop);
 
@@ -1385,7 +1385,7 @@ STDMETHODIMP CImageClass::get_Picture(IPictureDisp **pVal)
 	pd.cbSizeofstruct = sizeof(PICTDESC);
 	pd.picType = PICTYPE_BITMAP;
 	pd.bmp.hbitmap = bmp;
-	pd.bmp.hpal = NULL;
+	pd.bmp.hpal = nullptr;
 
 	OleCreatePictureIndirect(&pd, IID_IPictureDisp, TRUE, (void**)pVal);
 
@@ -1397,7 +1397,7 @@ STDMETHODIMP CImageClass::putref_Picture(IPictureDisp *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( newVal == NULL )
+	if( newVal == nullptr)
 	{	
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
@@ -1421,7 +1421,7 @@ STDMETHODIMP CImageClass::putref_Picture(IPictureDisp *newVal)
 			//Variable Definitions
 			HDC hdc, hdcold;
 			SIZE size, bmpsize;
-			VARIANT_BOOL vbretval;			
+			VARIANT_BOOL vbretval;
 
 			//Dimensions  - Conversion
 			pic->get_Width(&size.cx);
@@ -1432,19 +1432,19 @@ STDMETHODIMP CImageClass::putref_Picture(IPictureDisp *newVal)
 			hdc = CreateCompatibleDC(GetDC(GetDesktopWindow()));
 			
 			//Change the dc of the IPicture
-			pic->SelectPicture(hdc,&hdcold,NULL);
+			pic->SelectPicture(hdc,&hdcold, nullptr);
 
-			SetImageBitsDC((long)hdc,&vbretval);
+			SetImageBitsDC(static_cast<long>(reinterpret_cast<LONG_PTR>(hdc)),&vbretval);
 
 			//Reset the dc of the IPicture
-			pic->SelectPicture(hdcold,NULL,NULL);
+			pic->SelectPicture(hdcold, nullptr, nullptr);
 
 			//Delete DC
 			DeleteDC(hdc);
 			break;
 	}
 	pic->Release();
-	pic = NULL;
+	pic = nullptr;
 
 	return S_OK;
 }
@@ -1455,27 +1455,27 @@ STDMETHODIMP CImageClass::putref_Picture(IPictureDisp *newVal)
 STDMETHODIMP CImageClass::GetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		
+
 	*retval = VARIANT_FALSE;
-	
+
 	if (_gdal && !_dataLoaded)
 	{
 		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
 		return S_OK;
 	}
-	
+
 	HBITMAP hBMP;
-	hBMP = (HBITMAP)GetCurrentObject((HDC)hDC,OBJ_BITMAP);
+	hBMP = (HBITMAP)GetCurrentObject(reinterpret_cast<HDC>(static_cast<LONG_PTR>(hDC)),OBJ_BITMAP);
 	if (hBMP == NULL)  {
 		return S_OK;
 	}
 
 	BITMAP bm;
-	if(! GetObject(hBMP,sizeof(BITMAP),(void*)&bm) ) {	
+	if(! GetObject(hBMP,sizeof(BITMAP),(void*)&bm) ) {
 		return S_OK;
 	}
 
-	if( bm.bmWidth != _width || bm.bmHeight != _height ) {	
+	if( bm.bmWidth != _width || bm.bmHeight != _height ) {
 		return S_OK;
 	}
 
@@ -1488,7 +1488,7 @@ STDMETHODIMP CImageClass::GetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 
 	ImageBufferToBits(bits, rowLength);
 
-	SetDIBitsToDevice((HDC)hDC,0,0,_width,_height,0,0,0,_height,bits,&bif,DIB_RGB_COLORS);
+	SetDIBitsToDevice(reinterpret_cast<HDC>(static_cast<LONG_PTR>(hDC)),0,0,_width,_height,0,0,0,_height,bits,&bif,DIB_RGB_COLORS);
 
 	delete [] bits; 
 
@@ -1534,7 +1534,7 @@ void CImageClass::ImageBufferToBits(unsigned char * bits, int rowLength)
 bool CImageClass::DCBitsToImageBuffer(HDC hDC)
 {
 	HBITMAP hBMP = (HBITMAP)GetCurrentObject(hDC,OBJ_BITMAP);
-	if( hBMP == NULL ) return false;
+	if( hBMP == nullptr) return false;
 
 	BITMAP bm;
 	if (!GetObject(hBMP, sizeof(BITMAP), (void*)&bm)) {
@@ -1642,7 +1642,7 @@ STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 
-	bool result = DCBitsToImageBuffer((HDC)hDC);
+	bool result = DCBitsToImageBuffer(reinterpret_cast<HDC>(static_cast<LONG_PTR>(hDC)));
 
 	// GDI methods when drawing to bitmap with alpha component set alpha values to 0,
 	// i.e. creating fully transparent pixels (this is true for fonts);
@@ -1659,7 +1659,7 @@ STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 // ****************************************************************
 STDMETHODIMP CImageClass::SetProjection(BSTR Proj4, VARIANT_BOOL * retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	_projection->ImportFromProj4(Proj4, retval);
 	if (retval)
@@ -1677,21 +1677,21 @@ STDMETHODIMP CImageClass::SetProjection(BSTR Proj4, VARIANT_BOOL * retval)
 // ****************************************************************
 STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_projection->ExportToProj4(Proj4);
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::get_OriginalWidth(LONG* OriginalWidth)
-{   
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*OriginalWidth = _gdal ? _raster->GetOrigWidth() : _width;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::get_OriginalHeight(LONG* OriginalHeight)
-{  
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*OriginalHeight = _gdal ? _raster->GetOrigHeight() : _height;
 	return S_OK;
 }
@@ -1830,16 +1830,16 @@ STDMETHODIMP CImageClass::get_NoBands(int *pVal)
 // ****************************************************************
 unsigned char* CImageClass::get_ImageData()
 {
-	return _imageData ? reinterpret_cast<unsigned char*>(_imageData) : NULL;
+	return _imageData ? reinterpret_cast<unsigned char*>(_imageData) : nullptr;
 }
 
 void CImageClass::put_ImageData(colour* data)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_imageData)
 	{
 		delete[] _imageData;
-		_imageData = NULL;
+		_imageData = nullptr;
 	}
 	_imageData = data;
 	return;
@@ -1853,7 +1853,7 @@ void CImageClass::ClearBuffer()
 	if( _imageData )
 	{
 		delete[] _imageData;
-		_imageData = NULL;
+		_imageData = nullptr;
 	}
 
 	_imageData = new colour[1];
@@ -1876,13 +1876,13 @@ void CImageClass::ClearBuffer()
 // **************************************************************
 STDMETHODIMP CImageClass::get_ClearGDALCache(VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = _gdal ? _raster->GetClearGdalCache() : VARIANT_FALSE;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::put_ClearGDALCache(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_gdal)
 	{
 		_raster->SetClearGdalCache(newVal ? true : false);
@@ -1897,14 +1897,14 @@ STDMETHODIMP CImageClass::put_ClearGDALCache(VARIANT_BOOL newVal)
 // **************************************************************
 STDMETHODIMP CImageClass::get_TransparencyPercent(double* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal =  _transparencyPercent;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = _transparencyPercent;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::put_TransparencyPercent(double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0.0)	newVal = 0.0;
 	if (newVal > 1.0)	newVal = 1.0;
 	_transparencyPercent = newVal;
@@ -1917,13 +1917,13 @@ STDMETHODIMP CImageClass::put_TransparencyPercent(double newVal)
 // **************************************************************
 STDMETHODIMP CImageClass::get_DownsamplingMode(tkInterpolationMode* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = _downsamplingMode;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::put_DownsamplingMode(tkInterpolationMode newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_downsamplingMode = newVal;
 	_bufferReloadIsNeeded = true;
 	return S_OK;
@@ -1934,13 +1934,13 @@ STDMETHODIMP CImageClass::put_DownsamplingMode(tkInterpolationMode newVal)
 // **************************************************************
 STDMETHODIMP CImageClass::get_UpsamplingMode(tkInterpolationMode* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = _upsamplingMode;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::put_UpsamplingMode(tkInterpolationMode newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_upsamplingMode = newVal;
 	_bufferReloadIsNeeded = true;
 	return S_OK;
@@ -1951,13 +1951,13 @@ STDMETHODIMP CImageClass::put_UpsamplingMode(tkInterpolationMode newVal)
 // **************************************************************
 STDMETHODIMP CImageClass::get_DrawingMethod(int* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = 0;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::put_DrawingMethod(int newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	return S_OK;
 }
 
@@ -1972,10 +1972,10 @@ bool CImageClass::get_BufferIsDownsampled()
 __declspec(deprecated("This is a deprecated function, use CGdalUtils::GdalBuildOverviews instead"))
 STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMethod, int numOverviews, SAFEARRAY* OverviewList, VARIANT_BOOL* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 
-	int count = (int)OverviewList->rgsabound[0].cElements;
+	int count = static_cast<int>(OverviewList->rgsabound[0].cElements);
 	if (count < 0 || count != numOverviews)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
@@ -1988,7 +1988,7 @@ STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMetho
 		return S_OK;
 	}
 
-	int* overviewList = (int*)OverviewList->pvData;
+	int* overviewList = static_cast<int*>(OverviewList->pvData);
 	GDALDataset* dataset = _raster->GetDataset();
 	if (dataset)
 	{
@@ -2012,17 +2012,17 @@ STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMetho
 //  Returns reference to Labels class
  STDMETHODIMP CImageClass::get_Labels(ILabels** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _labels;
-	if (_labels != NULL)
+	if (_labels != nullptr)
 		_labels->AddRef();
 	return S_OK;
-};
+}
 
 STDMETHODIMP CImageClass::put_Labels(ILabels* newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (newVal == NULL)
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (newVal == nullptr)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return S_OK;
@@ -2030,16 +2030,16 @@ STDMETHODIMP CImageClass::put_Labels(ILabels* newVal)
 	
 	ComHelper::SetRef(newVal, (IDispatch**)&_labels, false);
 	return S_OK;
-};
+}
 
 // ********************************************************************
 //		get_Extents()
 // ********************************************************************
 STDMETHODIMP CImageClass::get_Extents(IExtents** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	IExtents * bBox = NULL;
+	IExtents * bBox = nullptr;
 	ComHelper::CreateExtents(&bBox);
 	
 	double minX, minY, maxX, maxY;
@@ -2071,8 +2071,8 @@ void CImageClass::ClearNotNullPixels()
 {
 	if ( m_pixels )
 	{
-		delete[] m_pixels; 
-		m_pixels = NULL;
+		delete[] m_pixels;
+		m_pixels = nullptr;
 		m_pixelsCount = 0;
 	}
 }
@@ -2098,7 +2098,7 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 
 	if (_width <= 0 || _height <= 0 || (_width * _height > 1048576.0 * 100.0 / 3.0 ))	// 100 MB
 		return false;
-	
+
 	// the maximum part of non-transparent pixels
 	double part = 0.1;
 	if (forceSaving)
@@ -2117,7 +2117,7 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 
 		int count = 0;
 		int maxPixels = (int)((double)_width * (double)_height * part);	// this method will work only when pixles are scarce, therefore we set 10% as maximum 
-		
+
 		// there is single transparent color
 		if (_transColor == _transColor2)
 		{
@@ -2174,7 +2174,7 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 		}
 
 		// copying pixels to the permanent structure
-		if ( count < maxPixels)	
+		if ( count < maxPixels)
 		{
 			if (count > 0)
 			{
@@ -2190,23 +2190,23 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 			m_pixelsCount = 0;
 			result = false;
 		}
-		
+
 		// cleaning
 		if( _imageData )
 		{
 			delete[] _imageData;
-			_imageData = NULL;
+			_imageData = nullptr;
 		}
 		_width = 0;
-		_height = 0;			
+		_height = 0;
 	}
-	
+
 	delete[] tmpData;
 	return result;
 }
 
 // ********************************************************************
-//						ErrorMessage()						         
+//						ErrorMessage()
 // ********************************************************************
 void CImageClass::ErrorMessage(long ErrorCode)
 {
@@ -2220,7 +2220,7 @@ void CImageClass::ErrorMessage(long ErrorCode)
 // Returns image coordinates to the given map coordinates
 STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* Column, long* Row)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_gdal)
 	{
 		*Column = Utility::Rint((ProjX - _raster->GetOrigXllCenter()) / _raster->GetOrigDx());
@@ -2241,8 +2241,8 @@ STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* Co
 // !!! Don't check that input pixel is within width / height bounds !!!
 STDMETHODIMP CImageClass::ImageToProjection(long Column, long Row, double* ProjX, double* ProjY)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
 	if (_gdal)
 	{
 		*ProjX = _raster->GetOrigXllCenter() + (Column - 0.5) * _raster->GetOrigDx();
@@ -2262,7 +2262,7 @@ STDMETHODIMP CImageClass::ImageToProjection(long Column, long Row, double* ProjX
 // Returns image coordinates to the given map coordinates
 STDMETHODIMP CImageClass::ProjectionToBuffer(double ProjX, double ProjY, long* BufferX, long* BufferY)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*BufferX = Utility::Rint((ProjX - _xllCenter)/_dX);
 	*BufferY = Utility::Rint((double)_height - 1 - ((ProjY - _yllCenter)/_dY));
 	return S_OK;
@@ -2274,7 +2274,7 @@ STDMETHODIMP CImageClass::ProjectionToBuffer(double ProjX, double ProjY, long* B
 // Returns map coordinates to the given image coordinates
 STDMETHODIMP CImageClass::BufferToProjection(long BufferX, long BufferY, double* ProjX, double* ProjY)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*ProjX = _xllCenter + (BufferX - 0.5) * _dX;
 	*ProjY = _yllCenter + (_height - 1 - BufferY + 0.5) * _dY;
 	return S_OK;
@@ -2285,13 +2285,13 @@ STDMETHODIMP CImageClass::BufferToProjection(long BufferX, long BufferY, double*
 // **************************************************************
 STDMETHODIMP CImageClass::get_CanUseGrouping (VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal =  (VARIANT_BOOL)_canUseGrouping;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::put_CanUseGrouping(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_canUseGrouping = newVal?true:false;
 	return S_OK;
 }
@@ -2324,14 +2324,14 @@ STDMETHODIMP CImageClass::put_CanUseGrouping(VARIANT_BOOL newVal)
 // **************************************************************
 STDMETHODIMP CImageClass::get_OriginalXllCenter( double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _gdal && _raster ? _raster->GetOrigXllCenter() : _xllCenter;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::put_OriginalXllCenter( double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_gdal && _raster)
 	{
 		_raster->SetOrigXllCenter(newVal);
@@ -2347,14 +2347,14 @@ STDMETHODIMP CImageClass::put_OriginalXllCenter( double newVal)
 // **************************************************************
 STDMETHODIMP CImageClass::get_OriginalYllCenter( double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _gdal && _raster ? _raster->GetOrigYllCenter() : _yllCenter;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::put_OriginalYllCenter( double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_gdal && _raster)
 	{		
 		_raster->SetOrigYllCenter(newVal);
@@ -2377,7 +2377,7 @@ STDMETHODIMP CImageClass::get_OriginalDX( double *pVal)
 
 STDMETHODIMP CImageClass::put_OriginalDX( double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if ( newVal > 0.0)
 	{
 		if (_gdal && _raster)
@@ -2398,14 +2398,14 @@ STDMETHODIMP CImageClass::put_OriginalDX( double newVal)
 // **************************************************************
 STDMETHODIMP CImageClass::get_OriginalDY( double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _gdal && _raster ? _raster->GetOrigDy() : _dY;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::put_OriginalDY( double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if ( newVal > 0.0)
 	{
 		if (_gdal && _raster)
@@ -2537,7 +2537,7 @@ STDMETHODIMP CImageClass::GetUniqueColors (double MaxBufferSizeMB, VARIANT* Colo
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	colour* data = NULL;
+	colour* data = nullptr;
 	if ( _gdal )
 	{
 		// TODO: opening for the second time isn't good enough; reconsider
@@ -2553,14 +2553,14 @@ STDMETHODIMP CImageClass::GetUniqueColors (double MaxBufferSizeMB, VARIANT* Colo
 					long size = raster->GetWidth() * raster->GetHeight();
 					BuildColorMap(data, size, Colors, Frequencies, Count);
 					delete[] data;
-					data = NULL;
+					data = nullptr;
 				}
 			}
 			
 			// deleting temporary raster
 			raster->Close();
 			delete raster; 
-			raster = NULL;
+			raster = nullptr;
 		}
 	}
 	else
@@ -2604,11 +2604,11 @@ STDMETHODIMP CImageClass::GetUniqueColors (double MaxBufferSizeMB, VARIANT* Colo
 bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT* Frequencies, long* count)
 {
 	*count = 0;
-	
+
 	if (size == 0) return false;
-	
+
 	std::map<OLE_COLOR, long> myMap;				// color as key and frequency as value
-		
+
 	// building list of colors and frequencies
 	for (int i = 0; i < size; i++)
 	{
@@ -2617,16 +2617,16 @@ bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT
 			
 		if (myMap.find(clr) != myMap.end())
 			myMap[clr] += 1;
-		else									
+		else
 			myMap[clr] = 1;
 	}
-		
+
 	// sorting by frequency
 	std::multimap <long, OLE_COLOR> sortedMap;
 	std::map <OLE_COLOR, long>::iterator p = myMap.begin();
 	while(p != myMap.end())
 	{
-		pair<long, OLE_COLOR> myPair(p->second, p->first);	
+		pair<long, OLE_COLOR> myPair(p->second, p->first);
 		sortedMap.insert(myPair);
 		++p;
 	}
@@ -2645,11 +2645,10 @@ bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT
 		frequences[i] = pp->first;
 		++pp; ++i;
 	}
-	*count = sortedMap.size();
+	*count = static_cast<long>(sortedMap.size());
 		
 	// converting to safe arrays
 	return (Templates::Vector2SafeArray( &colors, VT_UI4, Colors) && Templates::Vector2SafeArray(&frequences, VT_I4, Frequencies));
-	
 }
 
 // **************************************************************
@@ -2657,7 +2656,7 @@ bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT
 // **************************************************************
 STDMETHODIMP CImageClass::SetNoDataValue(double Value, VARIANT_BOOL* Result)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (_gdal && _raster)
 	{
 		GDALDataset* dataset = _raster->GetDataset();
@@ -2665,7 +2664,7 @@ STDMETHODIMP CImageClass::SetNoDataValue(double Value, VARIANT_BOOL* Result)
 	}
 	else
 		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
-	
+
 	return S_OK;
 }
 
@@ -2674,7 +2673,7 @@ STDMETHODIMP CImageClass::SetNoDataValue(double Value, VARIANT_BOOL* Result)
 // **************************************************************
 STDMETHODIMP CImageClass::get_NumOverviews(int* retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*retval = 0;
 
@@ -2696,8 +2695,8 @@ STDMETHODIMP CImageClass::get_NumOverviews(int* retval)
 // loads the whole buffer
 STDMETHODIMP CImageClass::LoadBuffer(double maxBufferSize, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())		
-	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
 	*retVal = VARIANT_FALSE;
 
 	if (_sourceType == istGDIPlus)
@@ -2744,7 +2743,7 @@ STDMETHODIMP CImageClass::LoadBuffer(double maxBufferSize, VARIANT_BOOL* retVal)
 // **************************************************************
 STDMETHODIMP CImageClass::get_SourceType (tkImageSourceType* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = _sourceType;
 	return S_OK;
 }
@@ -2755,41 +2754,41 @@ STDMETHODIMP CImageClass::get_SourceType (tkImageSourceType* retVal)
 //		Deprecated methods. Use 'Original' properties instead
 // ***************************************************
 STDMETHODIMP CImageClass::GetOriginalXllCenter(double *pVal)
-{	
+{
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _gdal && _raster ? _raster->GetOrigXllCenter() : *pVal = _xllCenter;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::GetOriginalYllCenter(double *pVal)
-{	
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()) 
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _gdal && _raster ? _raster->GetOrigYllCenter() : _yllCenter;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::GetOriginal_dX(double *pVal)
-{	
+{
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _gdal && _raster ? _raster->GetOrigDx() : *pVal = _dX;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::GetOriginal_dY(double *pVal)
-{	
+{
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _gdal && _raster ? _raster->GetOrigDy() : *pVal = _dY;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::GetOriginalHeight(long *pVal)
-{	
+{
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _gdal && _raster ? _raster->GetOrigHeight() : _height;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::GetOriginalWidth(long *pVal)
-{	
+{
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _gdal ? _raster->GetOrigWidth() : _width;
 	return S_OK;
@@ -2834,10 +2833,10 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 	if (SerializePixels && (fullWidth * fullHeight > 200000) )
 	{
 		ErrorMessage(tkICON_OR_TEXTURE_TOO_BIG);
-		return NULL;		
+		return nullptr;
 	}
 
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
+	CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, ElementName);
 	
 	// properties
 	if (_setRGBToGrey != false)
@@ -2893,7 +2892,7 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 	}
 	else
 	{
-		// if pixels are serialized, then it's icon or a texture;		
+		// if pixels are serialized, then it's icon or a texture;
 		// it's obvious that no labels can be there
 		CPLXMLNode* psLabels = ((CLabels*)_labels)->SerializeCore("LabelsClass");
 		if (psLabels)
@@ -2917,43 +2916,43 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 	CString s = CPLGetXMLValue( node, "SetToGrey", "0" );
 	if (s != "") _setRGBToGrey = atoi(s) == 0 ? false : true;
 
-	s = CPLGetXMLValue( node, "TransparencyColor", NULL );
+	s = CPLGetXMLValue( node, "TransparencyColor", nullptr);
 	if (s != "") _transColor = (OLE_COLOR)atoi(s);
 
-	s = CPLGetXMLValue( node, "TransparencyColor2", NULL );
+	s = CPLGetXMLValue( node, "TransparencyColor2", nullptr);
 	_transColor2 = s != "" ? (OLE_COLOR)atoi(s) : _transColor ;
 
-	s = CPLGetXMLValue( node, "UseTransparencyColor", NULL );
+	s = CPLGetXMLValue( node, "UseTransparencyColor", nullptr);
 	if (s != "") _useTransColor = (VARIANT_BOOL)atoi(s);
 
-	s = CPLGetXMLValue( node, "TransparencyPercent", NULL );
+	s = CPLGetXMLValue( node, "TransparencyPercent", nullptr);
 	if (s != "") _transparencyPercent = Utility::atof_custom(s);
 
-	s = CPLGetXMLValue( node, "DownsamplingMode", NULL );
+	s = CPLGetXMLValue( node, "DownsamplingMode", nullptr);
 	if (s != "") _downsamplingMode = (tkInterpolationMode)atoi(s);
 
-	s = CPLGetXMLValue( node, "UpsamplingMode", NULL );
+	s = CPLGetXMLValue( node, "UpsamplingMode", nullptr);
 	if (s != "") _upsamplingMode = (tkInterpolationMode)atoi(s);
 
-	s = CPLGetXMLValue(node, "Brightness", NULL);
+	s = CPLGetXMLValue(node, "Brightness", nullptr);
 	if (s != "") put_Brightness(static_cast<float>(Utility::atof_custom(s)));
 
-	s = CPLGetXMLValue(node, "Contrast", NULL);
+	s = CPLGetXMLValue(node, "Contrast", nullptr);
 	if (s != "") put_Contrast(static_cast<float>(Utility::atof_custom(s)));
 
-	s = CPLGetXMLValue(node, "Saturation", NULL);
+	s = CPLGetXMLValue(node, "Saturation", nullptr);
 	if (s != "") put_Saturation(static_cast<float>(Utility::atof_custom(s)));
 
-	s = CPLGetXMLValue(node, "Hue", NULL);
+	s = CPLGetXMLValue(node, "Hue", nullptr);
 	if (s != "") put_Hue(static_cast<float>(Utility::atof_custom(s)));
 
-	s = CPLGetXMLValue(node, "Gamma", NULL);
+	s = CPLGetXMLValue(node, "Gamma", nullptr);
 	if (s != "") put_Gamma(static_cast<float>(Utility::atof_custom(s)));
 
-	s = CPLGetXMLValue(node, "ColorizeIntensity", NULL);
+	s = CPLGetXMLValue(node, "ColorizeIntensity", nullptr);
 	if (s != "") put_ColorizeIntensity(static_cast<float>(Utility::atof_custom(s)));
 
-	s = CPLGetXMLValue(node, "ColorizeColor", NULL);
+	s = CPLGetXMLValue(node, "ColorizeColor", nullptr);
 	if (s != "") put_ColorizeColor((OLE_COLOR)atoi(s));
 
 	// labels
@@ -3004,7 +3003,7 @@ void CImageClass::SerializePixelsCore(CPLXMLNode* psTree, long fullWidth, long f
 			this->get_Filename(&filename);
 			USES_CONVERSION;
 
-			unsigned char* buffer = NULL;
+			unsigned char* buffer = nullptr;
 			int size = Utility::ReadFileToBuffer(OLE2W(filename), &buffer);
 
 			if (size > 0)
@@ -3058,12 +3057,12 @@ void CImageClass::DeserializePixels(CPLXMLNode* node)
 	if (nodeBuffer)
 	{
 		bool gdiPlus = false;
-		s = CPLGetXMLValue(nodeBuffer, "GdiPlusBitmap", NULL);
+		s = CPLGetXMLValue(nodeBuffer, "GdiPlusBitmap", nullptr);
 		if (s != "") gdiPlus = atoi(s) == 0 ? false : true;
 
 		if (gdiPlus)
 		{
-			std::string str = CPLGetXMLValue(nodeBuffer, "=ImageBuffer", NULL);
+			std::string str = CPLGetXMLValue(nodeBuffer, "=ImageBuffer", nullptr);
 			if (str.size() != 0)
 			{
 				VARIANT_BOOL vbretval;
@@ -3086,16 +3085,16 @@ void CImageClass::DeserializePixels(CPLXMLNode* node)
 		else
 		{
 			long width = 0, height = 0;
-			s = CPLGetXMLValue(nodeBuffer, "Width", NULL);
+			s = CPLGetXMLValue(nodeBuffer, "Width", nullptr);
 			if (s != "") width = atoi(s);
 
-			s = CPLGetXMLValue(nodeBuffer, "Height", NULL);
+			s = CPLGetXMLValue(nodeBuffer, "Height", nullptr);
 			if (s != "") height = atoi(s);
 
 			if (width > 0 && height > 0 &&
 				width * height < 200000)
 			{
-				std::string str = CPLGetXMLValue(nodeBuffer, "=ImageBuffer", NULL);
+				std::string str = CPLGetXMLValue(nodeBuffer, "=ImageBuffer", nullptr);
 				if (str.size() != 0)
 				{
 					// restoring buffer
@@ -3142,7 +3141,7 @@ STDMETHODIMP CImageClass::Deserialize(BSTR newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_SourceGridName(BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	*retVal = OLE2BSTR(this->sourceGridName);
 	return S_OK;
@@ -3153,7 +3152,7 @@ STDMETHODIMP CImageClass::get_SourceGridName(BSTR* retVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_SourceFilename(BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	*retVal = OLE2BSTR(isGridProxy ? this->sourceGridName: _fileName);
 	return S_OK;
@@ -3164,7 +3163,7 @@ STDMETHODIMP CImageClass::get_SourceFilename(BSTR* retVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_IsGridProxy(VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = isGridProxy ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
@@ -3174,15 +3173,15 @@ STDMETHODIMP CImageClass::get_IsGridProxy(VARIANT_BOOL* retVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_GridProxyColorScheme(IGridColorScheme** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*retVal = NULL;
+	*retVal = nullptr;
 	if (isGridProxy)
 	{
 		CStringW legendName = GridManager::GetProxyLegendName(sourceGridName);
 		if (Utility::FileExistsW(legendName))
 		{
-			IGridColorScheme* scheme = NULL;
+			IGridColorScheme* scheme = nullptr;
 			ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
 			VARIANT_BOOL vb;
 			CComBSTR bstrName(legendName);
@@ -3206,7 +3205,7 @@ STDMETHODIMP CImageClass::get_GridProxyColorScheme(IGridColorScheme** retVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_GridRendering(VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*retVal = _gdal ? _raster->WillBeRenderedAsGrid() : VARIANT_FALSE;
 
@@ -3312,7 +3311,7 @@ STDMETHODIMP CImageClass::get_CustomColorScheme(IGridColorScheme** retVal)
 	}
 	else
 	{
-		(*retVal) = NULL;
+		(*retVal) = nullptr;
 		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 	}
 
@@ -3364,7 +3363,7 @@ STDMETHODIMP CImageClass::get_IsRgb(VARIANT_BOOL* retVal)
 STDMETHODIMP CImageClass::OpenAsGrid(IGrid** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = NULL;
+	*retVal = nullptr;
 	CStringW filename = isGridProxy ? this->sourceGridName : _fileName;
 
 	if (Utility::FileExistsW(filename))
@@ -3378,7 +3377,7 @@ STDMETHODIMP CImageClass::OpenAsGrid(IGrid** retVal)
 		if (!vb)
 		{
 			(*retVal)->Release();
-			(*retVal) = NULL;
+			(*retVal) = nullptr;
 		}
 	}
 	return S_OK;
@@ -3415,7 +3414,7 @@ STDMETHODIMP CImageClass::put_SourceGridBandIndex(int newValue)
 // ********************************************************
 STDMETHODIMP CImageClass::get_GeoProjection(IGeoProjection** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_projection)
 		_projection->AddRef();
@@ -3429,7 +3428,7 @@ STDMETHODIMP CImageClass::get_GeoProjection(IGeoProjection** pVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_IsEmpty(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _sourceType == istUninitialized ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
@@ -3439,7 +3438,7 @@ STDMETHODIMP CImageClass::get_IsEmpty(VARIANT_BOOL* pVal)
 // ********************************************************
 int CImageClass::GetOriginalBufferWidth()
 {
-	if (_gdal && _raster) 
+	if (_gdal && _raster)
 	{
 		return (_raster->GetVisibleRect().right - _raster->GetVisibleRect().left);
 	}
@@ -3452,7 +3451,7 @@ int CImageClass::GetOriginalBufferWidth()
 // ********************************************************
 int CImageClass::GetOriginalBufferHeight()
 {
-	if (_gdal && _raster)	 
+	if (_gdal && _raster)
 	{
 		return (_raster->GetVisibleRect().right - _raster->GetVisibleRect().left);
 	}
@@ -3465,9 +3464,9 @@ int CImageClass::GetOriginalBufferHeight()
 // ********************************************************
 STDMETHODIMP CImageClass::get_Band(long bandIndex, IGdalRasterBand** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*retVal = NULL;
+	*retVal = nullptr;
 
 	if (!_gdal)
 	{
@@ -3501,7 +3500,7 @@ STDMETHODIMP CImageClass::get_Band(long bandIndex, IGdalRasterBand** retVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_PaletteInterpretation2(tkPaletteInterpretation* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_gdal)
 	{
@@ -3520,11 +3519,11 @@ STDMETHODIMP CImageClass::get_PaletteInterpretation2(tkPaletteInterpretation* pV
 // ********************************************************
 STDMETHODIMP CImageClass::get_ActiveBand(IGdalRasterBand** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = NULL;
+	*pVal = nullptr;
 
-	if (_raster != NULL)
+	if (_raster != nullptr)
 	{
 		long bandIndex = _raster->GetActiveBandIndex();
 		get_Band(bandIndex, pVal);
@@ -3542,7 +3541,7 @@ STDMETHODIMP CImageClass::get_ActiveBand(IGdalRasterBand** pVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_Brightness(FLOAT* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _brightness;
 
@@ -3551,7 +3550,7 @@ STDMETHODIMP CImageClass::get_Brightness(FLOAT* pVal)
 
 STDMETHODIMP CImageClass::put_Brightness(FLOAT newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (newVal < -1.0f) newVal = -1.0f;
 	if (newVal > 1.0f) newVal = 1.0f;
@@ -3566,7 +3565,7 @@ STDMETHODIMP CImageClass::put_Brightness(FLOAT newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_Contrast(FLOAT* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _contrast;
 
@@ -3575,7 +3574,7 @@ STDMETHODIMP CImageClass::get_Contrast(FLOAT* pVal)
 
 STDMETHODIMP CImageClass::put_Contrast(FLOAT newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (newVal < 0.0f) newVal = 0.0f;
 	if (newVal > 4.0f) newVal = 4.0f;
@@ -3591,7 +3590,7 @@ STDMETHODIMP CImageClass::put_Contrast(FLOAT newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_Saturation(FLOAT* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _saturation;
 
@@ -3600,7 +3599,7 @@ STDMETHODIMP CImageClass::get_Saturation(FLOAT* pVal)
 
 STDMETHODIMP CImageClass::put_Saturation(FLOAT newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (newVal < 0.0f) newVal = 0.0f;
 	if (newVal > 3.0f) newVal = 3.0f;
@@ -3615,7 +3614,7 @@ STDMETHODIMP CImageClass::put_Saturation(FLOAT newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_Hue(FLOAT* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _hue;
 
@@ -3624,7 +3623,7 @@ STDMETHODIMP CImageClass::get_Hue(FLOAT* pVal)
 
 STDMETHODIMP CImageClass::put_Hue(FLOAT newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (newVal < -180.0f) newVal = -180.0f;
 	if (newVal > 180.0f) newVal = 180.0f;
@@ -3639,7 +3638,7 @@ STDMETHODIMP CImageClass::put_Hue(FLOAT newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_Gamma(FLOAT* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _gamma;
 
@@ -3648,7 +3647,7 @@ STDMETHODIMP CImageClass::get_Gamma(FLOAT* pVal)
 
 STDMETHODIMP CImageClass::put_Gamma(FLOAT newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (newVal < 0.0f) newVal = 0.0f;
 	if (newVal > 4.0f) newVal = 4.0f;
@@ -3663,7 +3662,7 @@ STDMETHODIMP CImageClass::put_Gamma(FLOAT newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_ColorizeIntensity(FLOAT* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _colorizeIntensity;
 
@@ -3672,7 +3671,7 @@ STDMETHODIMP CImageClass::get_ColorizeIntensity(FLOAT* pVal)
 
 STDMETHODIMP CImageClass::put_ColorizeIntensity(FLOAT newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (newVal < 0.0f) newVal = 0.0f;
 	if (newVal > 1.0f) newVal = 1.0f;
@@ -3687,7 +3686,7 @@ STDMETHODIMP CImageClass::put_ColorizeIntensity(FLOAT newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_ColorizeColor(OLE_COLOR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _colorizeColor;
 
@@ -3696,7 +3695,7 @@ STDMETHODIMP CImageClass::get_ColorizeColor(OLE_COLOR* pVal)
 
 STDMETHODIMP CImageClass::put_ColorizeColor(OLE_COLOR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	_colorizeColor = newVal;
 
@@ -3718,7 +3717,7 @@ Gdiplus::ColorMatrix CImageClass::GetColorMatrix()
 // ********************************************************
 STDMETHODIMP CImageClass::ClearOverviews(VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	if (!_gdal)
 	{
@@ -3738,9 +3737,9 @@ STDMETHODIMP CImageClass::ClearOverviews(VARIANT_BOOL* retVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_GdalDriver(IGdalDriver** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = NULL;
+	*pVal = nullptr;
 
 	if (!_gdal)
 	{
@@ -3764,7 +3763,7 @@ STDMETHODIMP CImageClass::get_GdalDriver(IGdalDriver** pVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_RedBandIndex(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = static_cast<long>(GetRgbBandIndex(BandChannelRed));
 
@@ -3773,7 +3772,7 @@ STDMETHODIMP CImageClass::get_RedBandIndex(LONG* pVal)
 
 STDMETHODIMP CImageClass::put_RedBandIndex(LONG newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	SetRgbBandIndex(BandChannelRed, newVal);
 
@@ -3785,7 +3784,7 @@ STDMETHODIMP CImageClass::put_RedBandIndex(LONG newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_GreenBandIndex(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = static_cast<long>(GetRgbBandIndex(BandChannelGreen));
 
@@ -3794,7 +3793,7 @@ STDMETHODIMP CImageClass::get_GreenBandIndex(LONG* pVal)
 
 STDMETHODIMP CImageClass::put_GreenBandIndex(LONG newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	SetRgbBandIndex(BandChannelGreen, newVal);
 
@@ -3806,7 +3805,7 @@ STDMETHODIMP CImageClass::put_GreenBandIndex(LONG newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_BlueBandIndex(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = static_cast<long>(GetRgbBandIndex(BandChannelBlue));
 
@@ -3815,7 +3814,7 @@ STDMETHODIMP CImageClass::get_BlueBandIndex(LONG* pVal)
 
 STDMETHODIMP CImageClass::put_BlueBandIndex(LONG newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	SetRgbBandIndex(BandChannelBlue, newVal);
 
@@ -3827,7 +3826,7 @@ STDMETHODIMP CImageClass::put_BlueBandIndex(LONG newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_UseRgbBandMapping(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_raster)
 	{
@@ -3843,7 +3842,7 @@ STDMETHODIMP CImageClass::get_UseRgbBandMapping(VARIANT_BOOL* pVal)
 
 STDMETHODIMP CImageClass::put_UseRgbBandMapping(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_raster)
 	{
@@ -3897,7 +3896,7 @@ void CImageClass::SetRgbBandIndex(BandChannel channel, int bandIndex)
 // ********************************************************
 STDMETHODIMP CImageClass::get_ForceSingleBandRendering(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_raster)
 	{
@@ -3909,7 +3908,7 @@ STDMETHODIMP CImageClass::get_ForceSingleBandRendering(VARIANT_BOOL* pVal)
 
 STDMETHODIMP CImageClass::put_ForceSingleBandRendering(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_raster)
 	{
@@ -3924,7 +3923,7 @@ STDMETHODIMP CImageClass::put_ForceSingleBandRendering(VARIANT_BOOL newVal)
 // ********************************************************
 bool CImageClass::GetBufferReloadIsNeeded()
 {
-	if (_bufferReloadIsNeeded)  {
+	if (_bufferReloadIsNeeded) {
 		return true;
 	}
 
@@ -3941,7 +3940,7 @@ bool CImageClass::GetBufferReloadIsNeeded()
 // ********************************************************
 STDMETHODIMP CImageClass::get_AlphaBandIndex(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = static_cast<long>(GetRgbBandIndex(BandChannelAlpha));
 
@@ -3950,7 +3949,7 @@ STDMETHODIMP CImageClass::get_AlphaBandIndex(LONG* pVal)
 
 STDMETHODIMP CImageClass::put_AlphaBandIndex(LONG newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	SetRgbBandIndex(BandChannelAlpha, newVal);
 
@@ -3962,7 +3961,7 @@ STDMETHODIMP CImageClass::put_AlphaBandIndex(LONG newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_UseActiveBandAsAlpha(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_raster)
 	{
@@ -3974,7 +3973,7 @@ STDMETHODIMP CImageClass::get_UseActiveBandAsAlpha(VARIANT_BOOL* pVal)
 
 STDMETHODIMP CImageClass::put_UseActiveBandAsAlpha(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_raster)
 	{
@@ -4009,7 +4008,7 @@ bool CImageClass::ValidateBandIndex(int bandIndex)
 // ********************************************************
 STDMETHODIMP CImageClass::get_BandMinimum(LONG bandIndex, DOUBLE* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (ValidateBandIndex(bandIndex))
 	{
@@ -4024,7 +4023,7 @@ STDMETHODIMP CImageClass::get_BandMinimum(LONG bandIndex, DOUBLE* pVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_BandMaximum(LONG bandIndex, DOUBLE* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (ValidateBandIndex(bandIndex))
 	{
@@ -4039,7 +4038,7 @@ STDMETHODIMP CImageClass::get_BandMaximum(LONG bandIndex, DOUBLE* pVal)
 // ********************************************************
 STDMETHODIMP CImageClass::SetBandMinMax(LONG bandIndex, DOUBLE min, DOUBLE max, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (!ValidateBandIndex(bandIndex)) {
 		*retVal = VARIANT_FALSE;
@@ -4047,7 +4046,7 @@ STDMETHODIMP CImageClass::SetBandMinMax(LONG bandIndex, DOUBLE min, DOUBLE max, 
 	}
 
 	_raster->SetBandMinMax(bandIndex, min, max);
-	
+
 	*retVal = VARIANT_TRUE;
 	return S_OK;
 }
@@ -4057,7 +4056,7 @@ STDMETHODIMP CImageClass::SetBandMinMax(LONG bandIndex, DOUBLE min, DOUBLE max, 
 // ********************************************************
 STDMETHODIMP CImageClass::SetDefaultMinMax(LONG bandIndex, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (!ValidateBandIndex(bandIndex)) {
 		*retVal = VARIANT_FALSE;
@@ -4065,7 +4064,7 @@ STDMETHODIMP CImageClass::SetDefaultMinMax(LONG bandIndex, VARIANT_BOOL* retVal)
 	}
 	
 	_raster->SetDefaultMinMax(bandIndex);
-	
+
 	*retVal = VARIANT_TRUE;
 	return S_OK;
 }
@@ -4075,7 +4074,7 @@ STDMETHODIMP CImageClass::SetDefaultMinMax(LONG bandIndex, VARIANT_BOOL* retVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_ReverseGreyscale(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (IsGdalImageAvailable())
 	{
@@ -4087,7 +4086,7 @@ STDMETHODIMP CImageClass::get_ReverseGreyscale(VARIANT_BOOL* pVal)
 
 STDMETHODIMP CImageClass::put_ReverseGreyscale(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (IsGdalImageAvailable())
 	{
@@ -4102,7 +4101,7 @@ STDMETHODIMP CImageClass::put_ReverseGreyscale(VARIANT_BOOL newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_IgnoreColorTable(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (IsGdalImageAvailable())
 	{
@@ -4114,7 +4113,7 @@ STDMETHODIMP CImageClass::get_IgnoreColorTable(VARIANT_BOOL* pVal)
 
 STDMETHODIMP CImageClass::put_IgnoreColorTable(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (IsGdalImageAvailable())
 	{
@@ -4129,7 +4128,7 @@ STDMETHODIMP CImageClass::put_IgnoreColorTable(VARIANT_BOOL newVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_RenderingMode(tkRasterRendering* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*pVal = _raster ? _raster->GuessRenderingMode() : rrRGB;
 
@@ -4141,7 +4140,7 @@ STDMETHODIMP CImageClass::get_RenderingMode(tkRasterRendering* pVal)
 // ********************************************************
 Gdiplus::Bitmap* CImageClass::GetIcon()
 {
-	return _iconGdiPlus ? _iconGdiPlus->m_bitmap : NULL;
+	return _iconGdiPlus ? _iconGdiPlus->m_bitmap : nullptr;
 }
 
 // ********************************************************
@@ -4149,7 +4148,7 @@ Gdiplus::Bitmap* CImageClass::GetIcon()
 // ********************************************************
 STDMETHODIMP CImageClass::get_BufferOffsetX(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_raster)
 	{
@@ -4168,7 +4167,7 @@ STDMETHODIMP CImageClass::get_BufferOffsetX(LONG* pVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_BufferOffsetY(LONG* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_raster)
 	{
@@ -4187,7 +4186,7 @@ STDMETHODIMP CImageClass::get_BufferOffsetY(LONG* pVal)
 // ********************************************************
 STDMETHODIMP CImageClass::get_ActiveColorScheme(IGridColorScheme** pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (_raster)
 	{
@@ -4197,7 +4196,7 @@ STDMETHODIMP CImageClass::get_ActiveColorScheme(IGridColorScheme** pVal)
 	}
 	else
 	{
-		(*pVal) = NULL;
+		(*pVal) = nullptr;
 		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 	}
 
@@ -4209,7 +4208,7 @@ STDMETHODIMP CImageClass::get_ActiveColorScheme(IGridColorScheme** pVal)
 // ********************************************************
 STDMETHODIMP CImageClass::put_GeoProjection(IGeoProjection* newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	ComHelper::SetRef((IDispatch*)newVal, (IDispatch**)&_projection, false);
 

@@ -203,8 +203,8 @@ private:
 	bool SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace, ICallback* cBack);
 	void LoadDefaultFields();
 	void LoadDefaultRows();
-	long RowCount() { return _rows.size(); }
-	long FieldCount() { return _fields.size(); }
+	long RowCount() { return static_cast<long>(_rows.size()); }
+	long FieldCount() { return static_cast<long>(_fields.size()); }
 	bool ReadRecord(long RowIndex);
 	bool WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowIndex, bool isUTF8 = false);
 	void ClearRow(long rowIndex);
@@ -262,7 +262,7 @@ public:
 	bool GetSorting(long fieldIndex, vector<long>& indices);
 	bool GetRelativeValues(long fieldIndex, bool logScale, vector<double>& values);
 	bool WriteAppendedRow();
-	void StartAppendMode() { _appendMode = true; _appendStartShapeCount = _rows.size(); };
+	void StartAppendMode() { _appendMode = true; _appendStartShapeCount = static_cast<int>(_rows.size()); };
 	void StopAppendMode();
 	void MarkRowIsClean(long rowIndex);
 	void MarkFieldsAreClean();

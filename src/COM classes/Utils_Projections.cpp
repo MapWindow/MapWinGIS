@@ -154,7 +154,7 @@ STDMETHODIMP CUtils::GetWGS84ProjectionName(tkWgs84Projection projectionID, BSTR
 // but also includes those not specified by the enumerations, such as NAD27, NAD83 Harn, Beijing, Pulkova, etc.
 STDMETHODIMP CUtils::GetProjectionNameByID(int SRID, BSTR* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	try
 	{
@@ -184,7 +184,7 @@ STDMETHODIMP CUtils::GetProjectionNameByID(int SRID, BSTR* retVal)
 
 STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* list, VARIANT_BOOL* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	// guilty until proven innocent
 	*retVal = VARIANT_FALSE;
@@ -197,14 +197,14 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 	}
 	else
 	{
-		SAFEARRAY FAR* psa = NULL;
+		SAFEARRAY FAR* psa = nullptr;
 		SAFEARRAYBOUND sabound[1];
 		sabound[0].lLbound = 0;
 
 		int theSize = 0;
 		if ((projectionSets & psAll_Projections) == psAll_Projections)
 		{
-			theSize = pcsStrings.size();
+			theSize = static_cast<int>(pcsStrings.size());
 		}
 		else
 		{
@@ -242,7 +242,7 @@ STDMETHODIMP CUtils::GetProjectionList(tkProjectionSet projectionSets, VARIANT* 
 
 		if (psa)
 		{
-			BSTR* pBSTR = NULL;
+			BSTR* pBSTR = nullptr;
 			SafeArrayAccessData(psa, (void **)&pBSTR);
 
 			CComBSTR comBSTR;

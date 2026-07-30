@@ -71,7 +71,7 @@ void TilesDrawer::DrawTiles( TileManager* manager, IGeoProjection* mapProjection
 	InitImageAttributes(manager, attr);
 
 	bool isSame = IsSameProjection(mapProjection, provider);
-
+	
 	// copy to temporary vector, for not lock the original one for the whole length of drawing	
 	std::vector<TileCore*> tiles;
 	manager->CopyBuffer(tiles);
@@ -120,7 +120,7 @@ void TilesDrawer::DrawTiles( TileManager* manager, IGeoProjection* mapProjection
 				DrawGrid(tile, screenBounds);
 			}
 
-			tile->isDrawn(true);	
+			tile->isDrawn(true);
 		}
 	}
 
@@ -179,7 +179,7 @@ void TilesDrawer::DrawOverlays(TileCore* tile, RectF screenBounds, ImageAttribut
 #endif
 	for (size_t i = 0; i < tile->Overlays.size(); i++)
 	{
-		Bitmap* bmp = tile->get_Bitmap(i)->m_bitmap;
+		Bitmap* bmp = tile->get_Bitmap(static_cast<int>(i))->m_bitmap;
 		if (bmp)
 		{
 			// to debug the issue with occasional seams
@@ -330,7 +330,7 @@ bool TilesDrawer::IsSameProjection(IGeoProjection* mapProjection, BaseProvider* 
 	// check perhaps map projection is the same as the one for tiles
 	// then we don't have to use conversion to WGS84 decimal degrees
 	VARIANT_BOOL isSame = VARIANT_FALSE;
-	CustomProjection* customProj = NULL;
+	CustomProjection* customProj = nullptr;
 
 	if (mapProjection)
 	{
@@ -442,7 +442,7 @@ void TilesDrawer::DrawGridText(TileCore* tile, RectF& screenRect)
 	format.SetAlignment(StringAlignmentCenter);
 	format.SetLineAlignment(StringAlignmentCenter);
 
-	_graphics->DrawString(wStr, wcslen(wStr), font, screenRect, &format, &brush);
+	_graphics->DrawString(wStr, static_cast<int>(wcslen(wStr)), font, screenRect, &format, &brush);
 
 	delete font;
 	delete wStr;

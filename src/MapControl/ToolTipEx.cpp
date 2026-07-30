@@ -71,7 +71,7 @@ COLORREF CToolTipEx::SetBkColor(COLORREF crColor)
 {
 	COLORREF oldColor;
 
-	oldColor = SendMessage(TTM_GETTIPBKCOLOR, 0, 0);
+	oldColor = static_cast<COLORREF>(SendMessage(TTM_GETTIPBKCOLOR, 0, 0));
 	SendMessage(TTM_SETTIPBKCOLOR, (WPARAM)(COLORREF)crColor, 0);
 
 	return oldColor;
@@ -81,7 +81,7 @@ COLORREF CToolTipEx::SetTextColor(COLORREF crColor)
 {
 	COLORREF oldColor;
 
-	oldColor = SendMessage(TTM_GETTIPTEXTCOLOR, 0, 0);
+	oldColor = static_cast<COLORREF>(SendMessage(TTM_GETTIPTEXTCOLOR, 0, 0));
 	SendMessage(TTM_SETTIPTEXTCOLOR, (WPARAM)(COLORREF)crColor, 0);
 
 	return oldColor;
@@ -89,12 +89,12 @@ COLORREF CToolTipEx::SetTextColor(COLORREF crColor)
 
 COLORREF CToolTipEx::GetBkColor()
 {
-	return SendMessage(TTM_GETTIPBKCOLOR, 0, 0);
+	return static_cast<COLORREF>(SendMessage(TTM_GETTIPBKCOLOR, 0, 0));
 }
 
 COLORREF CToolTipEx::GetTextColor()
 {
-	return SendMessage(TTM_GETTIPTEXTCOLOR, 0, 0);
+	return static_cast<COLORREF>(SendMessage(TTM_GETTIPTEXTCOLOR, 0, 0));
 }
 
 int CToolTipEx::SetDelayTime(DWORD dwType, int nTime)
@@ -118,8 +118,8 @@ int CToolTipEx::SetDelayTime(DWORD dwType, int nTime)
 	case TTDT_AUTOPOP:
 	case TTDT_INITIAL:
 	case TTDT_RESHOW:
-		nDuration = SendMessage(TTM_GETDELAYTIME, (DWORD)dwType, 0);
-		SendMessage(TTM_SETDELAYTIME, (WPARAM)(DWORD)dwType, (LPARAM)(INT)MAKELONG(nTime, 0));
+		nDuration = static_cast<int>(SendMessage(TTM_GETDELAYTIME, dwType, 0));
+		SendMessage(TTM_SETDELAYTIME, dwType, static_cast<INT>(MAKELONG(nTime, 0)));
 		return nDuration;
 	}
 	return -1;
@@ -138,13 +138,13 @@ int CToolTipEx::GetDelayTime(DWORD dwType)
 	//
 	// TTDT_RESHOW  Retrieve the length of time it takes for
 	// subsequent tooltip windows to appear as the pointer moves
-	// from one tool to another.  
+	// from one tool to another.
 	switch(dwType)
 	{
 	case TTDT_AUTOPOP:
 	case TTDT_INITIAL:
 	case TTDT_RESHOW:
-		return SendMessage(TTM_GETDELAYTIME, (DWORD)dwType, 0);
+		return static_cast<int>(SendMessage(TTM_GETDELAYTIME, dwType, 0));
 	}
 	return -1;
 }
@@ -159,7 +159,7 @@ void CToolTipEx::GetMargin(LPRECT lpRect)
 	//   tooltip text, in pixels.  
 	// lpRect.right  Distance between right border and right end of
 	//   tooltip text, in pixels
-	SendMessage(TTM_GETMARGIN, 0, (LPARAM)(LPRECT)lpRect);
+	SendMessage(TTM_GETMARGIN, 0, reinterpret_cast<LPARAM>(lpRect));
 }
 
 int CToolTipEx::GetMaxTipWidth()
@@ -172,7 +172,7 @@ int CToolTipEx::GetMaxTipWidth()
 	// played on a single line. The length of this line may exceed
 	// the maximum tooltip width.
 	// Defaults to -1 when tooltip control is first created.
-	return SendMessage(TTM_GETMAXTIPWIDTH, 0, 0);
+	return static_cast<int>(SendMessage(TTM_GETMAXTIPWIDTH, 0, 0));
 }
 
 RECT CToolTipEx::SetMargin(LPRECT lpRect)
@@ -187,7 +187,7 @@ RECT CToolTipEx::SetMargin(LPRECT lpRect)
 	//   tooltip text, in pixels.  
 	RECT TempRect;
 	GetMargin(&TempRect);
-	SendMessage(TTM_SETMARGIN, 0, (LPARAM)(LPRECT)lpRect);
+	SendMessage(TTM_SETMARGIN, 0, reinterpret_cast<LPARAM>(lpRect));
 
 	return TempRect;
 }
@@ -201,13 +201,13 @@ int CToolTipEx::SetMaxTipWidth(int nWidth)
 	// cannot be segmented into multiple lines, it will be dis-
 	// played on a single line. The length of this line may exceed
 	// the maximum tooltip width.
-	return SendMessage(TTM_SETMAXTIPWIDTH, 0, (LPARAM)(INT)nWidth);
+	return static_cast<int>(SendMessage(TTM_SETMAXTIPWIDTH, 0, nWidth));
 }
 
 void CToolTipEx::TrackActivate(BOOL bActivate, LPTOOLINFO lpti)
 {
-	SendMessage(TTM_TRACKACTIVATE, (WPARAM)(BOOL)bActivate,
-		(LPARAM)(LPTOOLINFO)lpti);
+	SendMessage(TTM_TRACKACTIVATE, static_cast<WPARAM>(bActivate),
+		reinterpret_cast<LPARAM>(lpti));
 }
 
 void CToolTipEx::TrackPosition(LPPOINT lppt)
@@ -219,7 +219,7 @@ void CToolTipEx::TrackPosition(LPPOINT lppt)
 	// displayed at specific coordinates, include the TTF_ABSOLUTE
 	// flag in the uFlags member of the TOOLINFO structure when
 	// adding the tool.
-	SendMessage(TTM_TRACKPOSITION, 0, (LPARAM)(DWORD)MAKELONG(lppt->x, lppt->y));
+	SendMessage(TTM_TRACKPOSITION, 0, static_cast<DWORD>(MAKELONG(lppt->x, lppt->y)));
 }
 
 void CToolTipEx::TrackPosition(int xPos, int yPos)
@@ -231,5 +231,5 @@ void CToolTipEx::TrackPosition(int xPos, int yPos)
 	// displayed at specific coordinates, include the TTF_ABSOLUTE
 	// flag in the uFlags member of the TOOLINFO structure when
 	// adding the tool.
-	SendMessage(TTM_TRACKPOSITION, 0, (LPARAM)(DWORD)MAKELONG(xPos, yPos));
+	SendMessage(TTM_TRACKPOSITION, 0, static_cast<DWORD>(MAKELONG(xPos, yPos)));
 }

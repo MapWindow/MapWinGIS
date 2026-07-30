@@ -93,13 +93,13 @@ int g123sstr(char **in_str,char *buf_str,long str_len)
    if (strchr(*in_str,FT))  
 
       /* SET FTPOS TO POSITION OF FIELD TERMINATOR */
-      ftpos = strcspn(*in_str,FT_STR) + 1L;
+      ftpos = static_cast<long>(strcspn(*in_str,FT_STR)) + 1L;
 
    /* ELSE SET FTPOS TO ZERO */
    else ftpos = 0;
 
    /* SET IN_STR_LEN TO INPUT STRING LENGTH */
-   in_str_len = _tcslen(*in_str);
+   in_str_len = static_cast<long>(_tcslen(*in_str));
 
    /* IF STRING TERMINATED BY A FIELD TERMINATOR IS SHORTER THAN STRING
        TO BE RETRIEVED */

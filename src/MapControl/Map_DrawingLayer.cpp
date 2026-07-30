@@ -12,7 +12,7 @@
 // ***************************************************************
 bool CMapView::IsValidDrawList(long listHandle)
 {
-	if (listHandle >= 0 && listHandle < (long)_allDrawLists.size())
+	if (listHandle >= 0 && listHandle < static_cast<long>(_allDrawLists.size()))
 	{
 		return _allDrawLists[listHandle] != nullptr;
 	}
@@ -357,13 +357,13 @@ void CMapView::DrawCircleOnGraphics(Gdiplus::Graphics* graphics, _DrawCircle* ci
 {
 
 	auto color = Utility::OleColor2GdiPlus(circle->color, circle->alpha);
-	auto radius = (float)circle->radius;
+	auto radius = static_cast<float>(circle->radius);
 	if (project)
 		radius *= static_cast<float>(_pixelPerProjectionX);
-	auto width = (float)circle->width;
+	auto width = static_cast<float>(circle->width);
 
-	Gdiplus::REAL pixX = (float)circle->x;
-	Gdiplus::REAL pixY = (float)circle->y;
+	Gdiplus::REAL pixX = static_cast<float>(circle->x);
+	Gdiplus::REAL pixY = static_cast<float>(circle->y);
 	if (project)
 		PROJECTION_TO_PIXEL(pixX, pixY, pixX, pixY);
 	pixX -= radius;
@@ -389,7 +389,7 @@ void CMapView::DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* 
 
 	Gdiplus::Point* pnts = new Gdiplus::Point[polygon->numPoints];
 	long pointCount = polygon->numPoints;
-	auto width = (float)polygon->width;
+	auto width = static_cast<float>(polygon->width);
 	auto color = Utility::OleColor2GdiPlus(polygon->color, polygon->alpha);
 
 	for (int j = 0; j < pointCount; j++)
@@ -407,12 +407,12 @@ void CMapView::DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* 
 	if (polygon->fill)
 	{
 		Gdiplus::SolidBrush brush(color);
-		graphics->FillPolygon(&brush, pnts, (INT)pointCount);
+		graphics->FillPolygon(&brush, pnts, static_cast<INT>(pointCount));
 	}
 	else
 	{
 		Gdiplus::Pen pen(color, width);
-		graphics->DrawPolygon(&pen, pnts, (INT)pointCount);
+		graphics->DrawPolygon(&pen, pnts, static_cast<INT>(pointCount));
 	}
 
 	delete[] pnts;
@@ -420,7 +420,7 @@ void CMapView::DrawPolygonOnGraphics(Gdiplus::Graphics* graphics, _DrawPolygon* 
 
 void CMapView::DrawLineOnGraphics(Gdiplus::Graphics* graphics, _DrawLine* line, bool project)
 {
-	auto width = (float)line->width;
+	auto width = static_cast<float>(line->width);
 	auto color = Utility::OleColor2GdiPlus(line->color, line->alpha);
 
 	Gdiplus::Point* pnts = new Gdiplus::Point[2];
@@ -482,7 +482,7 @@ void CMapView::ClearDrawing(long Drawing)
 
 	if (IsValidDrawList(Drawing))
 	{
-		long endcondition = _activeDrawLists.size();
+		long endcondition = static_cast<long>(_activeDrawLists.size());
 		for (int i = 0; i < endcondition; i++)
 		{
 			if (_activeDrawLists[i] == Drawing)
@@ -522,7 +522,7 @@ LONG CMapView::DrawLabel(LPCTSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation)
 // ***************************************************************
 LONG CMapView::DrawLabelEx(LONG drawHandle, LPCTSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (IsValidDrawList(drawHandle))
 	{
 		if (_allDrawLists[drawHandle]->m_labels)
@@ -611,7 +611,7 @@ void CMapView::ClearDrawings()
 {
 	_currentDrawing = -1;
 
-	long endcondition = _allDrawLists.size();
+	long endcondition = static_cast<long>(_allDrawLists.size());
 	for (int i = 0; i < endcondition; i++)
 	{
 		if (IsValidDrawList(i))
@@ -628,12 +628,12 @@ void CMapView::ClearDrawings()
 long CMapView::NewDrawing(short projection)
 {
 	DrawList* dlist = new DrawList();
-	dlist->listType = (tkDrawReferenceList)projection;
+	dlist->listType = static_cast<tkDrawReferenceList>(projection);
 	bool inserted = false;
 	long drawHandle = -1;
 	register int i;
 
-	long endcondition = _allDrawLists.size();
+	long endcondition = static_cast<long>(_allDrawLists.size());
 	for (i = 0; i < endcondition && !inserted; i++)
 	{
 		if (_allDrawLists[i] == nullptr)
@@ -645,7 +645,7 @@ long CMapView::NewDrawing(short projection)
 	}
 	if (inserted == false)
 	{
-		drawHandle = _allDrawLists.size();
+		drawHandle = static_cast<long>(_allDrawLists.size());
 		_allDrawLists.push_back(dlist);
 	}
 
@@ -754,8 +754,8 @@ void CMapView::DrawPolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoints, O
 	USES_CONVERSION;
 	SAFEARRAY* sax = *xPoints->pparray;
 	SAFEARRAY* say = *yPoints->pparray;
-	double* xPts = (double*)sax->pvData;
-	double* yPts = (double*)say->pvData;
+	double* xPts = static_cast<double*>(sax->pvData);
+	double* yPts = static_cast<double*>(say->pvData);
 
 	if (IsValidDrawList(_currentDrawing))
 	{
@@ -793,8 +793,8 @@ void CMapView::DrawWidePolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoint
 	USES_CONVERSION;
 	SAFEARRAY* sax = *xPoints->pparray;
 	SAFEARRAY* say = *yPoints->pparray;
-	double* xPts = (double*)sax->pvData;
-	double* yPts = (double*)say->pvData;
+	double* xPts = static_cast<double*>(sax->pvData);
+	double* yPts = static_cast<double*>(say->pvData);
 
 	if (IsValidDrawList(_currentDrawing))
 	{
@@ -828,7 +828,7 @@ void CMapView::DrawWidePolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoint
 // *****************************************************************
 void CMapView::DrawWideCircleEx(LONG layerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short outlineWidth, BYTE alpha)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	long oldCurrentLayer = this->_currentDrawing;	//Save the current layer for restore
 	this->_currentDrawing = layerHandle;
 	this->DrawWideCircle(x, y, radius, color, fill, outlineWidth, alpha);
@@ -840,7 +840,7 @@ void CMapView::DrawWideCircleEx(LONG layerHandle, double x, double y, double rad
 // ***********************************************************
 void CMapView::DrawWidePolygonEx(LONG layerHandle, VARIANT* xPoints, VARIANT* yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short outlineWidth, BYTE alpha)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	long oldCurrentLayer = this->_currentDrawing;	//Save the current layer for restore
 	this->_currentDrawing = layerHandle;
 	this->DrawWidePolygon(xPoints, yPoints, numPoints, color, fill, outlineWidth, alpha);
@@ -852,7 +852,7 @@ void CMapView::DrawWidePolygonEx(LONG layerHandle, VARIANT* xPoints, VARIANT* yP
 // *****************************************************************
 void CMapView::DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color, BYTE alpha)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
 	this->_currentDrawing = LayerHandle;
@@ -866,7 +866,7 @@ void CMapView::DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOU
 // *****************************************************************
 void CMapView::DrawPointEx(LONG layerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color, BYTE alpha)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
 	this->_currentDrawing = layerHandle;
@@ -880,7 +880,7 @@ void CMapView::DrawPointEx(LONG layerHandle, DOUBLE x, DOUBLE y, LONG pixelSize,
 // *****************************************************************
 void CMapView::DrawCircleEx(LONG layerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, BYTE alpha)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
 	this->_currentDrawing = layerHandle;
@@ -893,7 +893,7 @@ void CMapView::DrawCircleEx(LONG layerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRa
 // *****************************************************************
 void CMapView::DrawPolygonEx(LONG layerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill, BYTE alpha)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	long oldCurrentLayer = this->_currentDrawing;//Save the current layer for restore
 	this->_currentDrawing = layerHandle;
@@ -906,7 +906,7 @@ void CMapView::DrawPolygonEx(LONG layerHandle, VARIANT* xPoints, VARIANT* yPoint
 // *****************************************************************
 void CMapView::SetDrawingLayerVisible(LONG layerHandle, VARIANT_BOOL visible)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if (!visible)
 	{
@@ -972,7 +972,7 @@ void CMapView::SetDrawingKey(long DrawHandle, LPCTSTR lpszNewValue)
 // Access for CLabels class
 ILabels* CMapView::GetDrawingLabels(long DrawingLayerIndex)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (IsValidDrawList(DrawingLayerIndex))
 	{
 		_allDrawLists[DrawingLayerIndex]->m_labels->AddRef();
@@ -992,7 +992,7 @@ ILabels* CMapView::GetDrawingLabels(long DrawingLayerIndex)
 // Setting new CLabels class
 void CMapView::SetDrawingLabels(long DrawingLayerIndex, ILabels* newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal == nullptr)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -1033,7 +1033,7 @@ IPlacedLabels* CMapView::PlaceAllMapLabels(long layerHandle)
 	ComHelper::CreateInstance(idPlacedLabels, (IDispatch**)&placedLabels);
 
 	auto indexes = array.data();
-	placedLabels->SetVector(indexes, array.size());
+	placedLabels->SetVector(indexes, static_cast<int>(array.size()));
 
 	return placedLabels;
 }

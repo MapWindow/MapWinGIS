@@ -106,7 +106,7 @@ void TileManager::LoadTiles(BaseProvider* provider, bool isSnapshot, const CStri
     // it will be considered completed when this amount of tiles is loaded
     if (!cacheOnly)
     {
-        requestInfo->totalCount = activeTasks.size() + points.size();
+        requestInfo->totalCount = static_cast<int>(activeTasks.size() + points.size());
     }
 
     // delete unused tiles from the screen buffer

@@ -14,8 +14,8 @@ const long BUFFER_SIZE = 500;
 
 RegistryKey::RegistryKey()
 {
-	m_hKey = NULL;
-	m_KeyName = NULL;
+	m_hKey = nullptr;
+	m_KeyName = nullptr;
 	m_ErrorCode =  REG_KEY_NOT_OPEN;
 	m_NumSubKeys =  -1;
 	m_NumValues =  -1;
@@ -28,10 +28,9 @@ RegistryKey::~RegistryKey()
 
 bool RegistryKey::OpenKey(HKEY BaseSection, char *KeyName)
 {
-
 	Close();
 
-	if (KeyName == NULL)
+	if (KeyName == nullptr)
 	{
 		m_ErrorCode = REG_INVALID_NULL_PARAM;
 		return false;
@@ -42,8 +41,7 @@ bool RegistryKey::OpenKey(HKEY BaseSection, char *KeyName)
 	if (m_ErrorCode != REG_NO_ERROR)
 		return false;
 
-
-	m_ErrorCode = RegQueryInfoKey(m_hKey,NULL,NULL,NULL,&m_NumSubKeys,NULL,NULL,&m_NumValues,NULL,NULL,NULL,NULL);
+	m_ErrorCode = RegQueryInfoKey(m_hKey, nullptr, nullptr, nullptr,&m_NumSubKeys, nullptr, nullptr,&m_NumValues, nullptr, nullptr, nullptr, nullptr);
 
 	if (m_ErrorCode != REG_NO_ERROR)
 		return false;
@@ -57,7 +55,7 @@ bool RegistryKey::OpenKey(HKEY BaseSection, char *KeyName)
 
 char * RegistryKey::getValueName(unsigned long KeyIndex)
 {
-	char * buffer = NULL;
+	char * buffer = nullptr;
 
 	if(isOpen() == false)
 	{
@@ -75,7 +73,7 @@ char * RegistryKey::getValueName(unsigned long KeyIndex)
 	if (LoadValue(KeyIndex,false) == true)
 		return m_KeyValues[KeyIndex]->name;
 	else
-		return NULL;
+		return nullptr;
 }
 
 //char * RegistryKey::getErrorMsg()
@@ -116,7 +114,7 @@ char * RegistryKey::getValueName(unsigned long KeyIndex)
 
 bool RegistryKey::isOpen()
 {
-	if (m_hKey == NULL)
+	if (m_hKey == nullptr)
 		return false;
 	else
 		return true;
@@ -139,26 +137,24 @@ void RegistryKey::Close()
 		RegCloseKey(m_hKey);
 	}
 
-	
-
 	while (m_KeyValues.empty() == false)
 	{
-		KeyValue * kv = NULL;
+		KeyValue * kv = nullptr;
 		
 		kv = m_KeyValues[0];
 		m_KeyValues.erase(m_KeyValues.begin());
-		if (kv != NULL)
+		if (kv != nullptr)
 			delete kv;//->~KeyValue();
 	}
 
 	m_KeyValues.clear();
 
-	if (m_KeyName != NULL)
+	if (m_KeyName != nullptr)
 		delete [] m_KeyName;
 
-	m_KeyName = NULL;
+	m_KeyName = nullptr;
 	m_ErrorCode = REG_KEY_NOT_OPEN;
-	m_hKey = NULL;
+	m_hKey = nullptr;
 	m_NumSubKeys = -1;
 	m_NumValues = -1;
 }
@@ -168,12 +164,12 @@ RegistryKey * RegistryKey::getSubKey(unsigned long Index)
 	RegistryKey * retval = new RegistryKey;
 
 	if (!isOpen())
-		return NULL;
+		return nullptr;
 
 	if (Index >= m_NumSubKeys)
 	{
 		m_ErrorCode = REG_INDEX_OUT_OF_BOUNDS;
-		return NULL;
+		return nullptr;
 	}
 
 	//get the name of the Requested key specified
@@ -183,15 +179,14 @@ RegistryKey * RegistryKey::getSubKey(unsigned long Index)
 	RegEnumKey(m_hKey,Index,KeyName,BUFFER_SIZE);
 	
 	if (retval->OpenKey(m_hKey,KeyName) == false)
-		return NULL;
+		return nullptr;
 	
 	return retval;
-
 }
 
 void RegistryKey::setKeyName(char *name)
 {
-	if(m_KeyName != NULL)
+	if(m_KeyName != nullptr)
 		delete [] m_KeyName;
 
 	m_KeyName = new char [strlen(name) + 1];
@@ -204,35 +199,35 @@ BYTE * RegistryKey::getValueData(unsigned long ValueIndex)
 	if(isOpen() == false)
 	{
 		m_ErrorCode = REG_KEY_NOT_OPEN;
-		return NULL;
+		return nullptr;
 	}
 
 	if (ValueIndex >= m_NumValues)
 	{
 		m_ErrorCode = REG_INDEX_OUT_OF_BOUNDS;
-		return NULL;
+		return nullptr;
 	}
 
 
 	if (LoadValue(ValueIndex,false) == true)
-	{	
-		KeyValue * kv = NULL;
+	{
+		KeyValue * kv = nullptr;
 		kv = m_KeyValues[ValueIndex];
 		unsigned long bufferSize = kv->dataSize;
 		LPBYTE buffer = new BYTE[bufferSize];
 
-		unsigned long NameLength = strlen(kv->name) +1;
+		unsigned long NameLength = static_cast<unsigned long>(strlen(kv->name) +1);
 
-		m_ErrorCode = RegEnumValue(m_hKey,ValueIndex,kv->name,&NameLength,NULL,&(kv->type),buffer,&bufferSize);
+		m_ErrorCode = RegEnumValue(m_hKey,ValueIndex,kv->name,&NameLength, nullptr,&(kv->type),buffer,&bufferSize);
 
-		
+
 		if (m_ErrorCode != REG_NO_ERROR)
 		{
 			cout << "DataType: " << REG_SZ << endl;
 			cout.flush();
 			delete [] buffer;
-			buffer = NULL;
-			return NULL;
+			buffer = nullptr;
+			return nullptr;
 		}
 
 		kv->dataSize = bufferSize;
@@ -240,13 +235,13 @@ BYTE * RegistryKey::getValueData(unsigned long ValueIndex)
 		return buffer;
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 char * RegistryKey::getKeyName()
 {
-	char * retval = NULL;
-	if (m_KeyName != NULL)
+	char * retval = nullptr;
+	if (m_KeyName != nullptr)
 	{
 		retval = new char[strlen(m_KeyName)+1];
 		strcpy(retval,m_KeyName);
@@ -262,56 +257,52 @@ DWORD RegistryKey::getValueType(unsigned long Index)
 		return REG_NONE;
 	}
 
-	
 	if (LoadValue(Index,false) == true)
 		return m_KeyValues[Index]->type;
 	else
-		return NULL;
-	
+		return 0;
 }
 
 void RegistryKey::InitKeyValueList()
 {
-	for (int i = 0; i < (int)m_NumValues; i++)
-		m_KeyValues.push_back(NULL);
+	for (int i = 0; i < static_cast<int>(m_NumValues); i++)
+		m_KeyValues.push_back(nullptr);
 }
 
 bool RegistryKey::LoadValue(unsigned long Index, bool ForceReload)
 {
-	
 	char * NameBuffer;
 	unsigned long NameLength = BUFFER_SIZE;
 
-	if (m_KeyValues[Index] == NULL || ForceReload == true)
+	if (m_KeyValues[Index] == nullptr || ForceReload == true)
 	{
 		
-		if (m_KeyValues[Index] != NULL)
+		if (m_KeyValues[Index] != nullptr)
 			delete m_KeyValues[Index];
 
-		m_KeyValues[Index] = NULL;
+		m_KeyValues[Index] = nullptr;
 
 		NameBuffer = new char [NameLength];
 		
 		KeyValue * kv = new KeyValue();
 		
 		//get the information, but don't get the data until requested
-		m_ErrorCode = RegEnumValue(m_hKey,Index,NameBuffer,&NameLength, NULL,&(kv->type),NULL,&(kv->dataSize));
-		
-		
+		m_ErrorCode = RegEnumValue(m_hKey,Index,NameBuffer,&NameLength, nullptr,&(kv->type), nullptr,&(kv->dataSize));
+
 		if (m_ErrorCode != REG_NO_ERROR)
 		{
 			delete [] NameBuffer;
 			delete kv;
 			return false;
 		}
-		
+
 		kv->name = new char[NameLength+1];
-		
+
 		strcpy(kv->name,NameBuffer);
 		delete [] NameBuffer;
-		
+
 		m_KeyValues[Index] = kv;
-		kv = NULL;
+		kv = nullptr;
 		kv = m_KeyValues[Index];
 	}
 	return true;

@@ -15,13 +15,13 @@
 class HashEntry
 {
 public:
-	HashEntry(){Occupied = false; ent = NULL; index = -1;}
+	HashEntry(){Occupied = false; ent = nullptr; index = -1;}
 	ColorEntry * ent;
 	int index;
 	bool Occupied;
 };
 
-class HashTable  
+class HashTable
 {
 private:
 	int Hash(colort c, ColorEntry * ent)
@@ -29,7 +29,7 @@ private:
 		int hash;
 
 		hash = c;
-		hash = (hash << 1) ^ (int)ent ^ hash;
+		hash = (hash << 1) ^ static_cast<int>(reinterpret_cast<intptr_t>(ent)) ^ hash;
 		hash &= 8191;
 
 		return hash;
@@ -65,9 +65,7 @@ public:
 
 	void InsertEntry(ColorEntry * ce, int i)
 	{
-		int hash;
-
-		hash = Hash(ce->c, ce->next);
+		int hash = Hash(ce->c, ce->next);
 
 		while(table[hash].Occupied)
 		{

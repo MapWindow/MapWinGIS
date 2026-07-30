@@ -14,25 +14,25 @@ namespace Templates
 	template <typename T>
 	bool Vector2SafeArray(std::vector<T*>* v, VARIANT* arr)
 	{
-		SAFEARRAY FAR* psa = NULL;
+		SAFEARRAY FAR* psa = nullptr;
 		SAFEARRAYBOUND rgsabound[1];
-		rgsabound[0].lLbound = 0;	
+		rgsabound[0].lLbound = 0;
 
-		if( v != NULL && v->size() > 0 )
+		if( v != nullptr && v->size() > 0 )
 		{
-			rgsabound[0].cElements = v->size();
-    		psa = SafeArrayCreate( VT_DISPATCH, 1, rgsabound);
-	    			
+			rgsabound[0].cElements = static_cast<ULONG>(v->size());
+			psa = SafeArrayCreate( VT_DISPATCH, 1, rgsabound);
+
 			if( psa )
 			{
-				LPDISPATCH *pDispatch = NULL;
-				SafeArrayAccessData(psa,(void HUGEP* FAR*)(&pDispatch));
+				LPDISPATCH *pDispatch = nullptr;
+				SafeArrayAccessData(psa,reinterpret_cast<void* *>(&pDispatch));
 				
-				for( int i = 0; i < (int)v->size(); i++)
+				for( int i = 0; i < static_cast<int>(v->size()); i++)
 					pDispatch[i] = (*v)[i];
-				
+
 				SafeArrayUnaccessData(psa);
-				
+
 				arr->vt = VT_ARRAY|VT_DISPATCH;
 				arr->parray = psa;
 				return true;
@@ -54,29 +54,29 @@ namespace Templates
 	template <typename T>
 	bool Vector2SafeArray(std::vector<T>* v, VARTYPE variantType, VARIANT* arr)
 	{
-		SAFEARRAY FAR* psa = NULL;
+		SAFEARRAY FAR* psa = nullptr;
 		SAFEARRAYBOUND rgsabound[1];
-		rgsabound[0].lLbound = 0;	
+		rgsabound[0].lLbound = 0;
 
 		if (v->size() > 0)
 		{
-			rgsabound[0].cElements = v->size();
+			rgsabound[0].cElements = static_cast<ULONG>(v->size());
 			psa = SafeArrayCreate( variantType, 1, rgsabound);
-			
+
 			if( psa )
 			{
 				T/*long HUGEP*/ *plng;
-				SafeArrayAccessData(psa,(void HUGEP* FAR*)&plng);
-				
+				SafeArrayAccessData(psa, (void HUGEP * FAR*) & plng);
+
 				// can we copy bytes from set object directly?
 				memcpy(plng,&(v->at(0)),sizeof(T)*v->size());
 				SafeArrayUnaccessData(psa);
-				
+
 				arr->vt = VT_ARRAY|variantType;
 				arr->parray = psa;
 				return true;
 			}
-			
+
 			arr->vt = VT_ARRAY|variantType;
 			arr->parray = psa;
 			return false;

@@ -9,7 +9,7 @@
 // *******************************************************
 BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-   HCURSOR NewCursor = NULL;
+   HCURSOR NewCursor = nullptr;
 
 	if( nHitTest != HTCLIENT )
 	{
@@ -19,19 +19,19 @@ BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	bool hasGuiCursor = true;
 	if (_copyrightLinkActive) {
-		NewCursor = LoadCursor(NULL, IDC_HAND);
+		NewCursor = LoadCursor(nullptr, IDC_HAND);
 	}
 	else
 	{
 		switch (_lastZooombarPart)
 		{
 			case ZoombarHandle:
-				NewCursor = LoadCursor(NULL, IDC_SIZENS);
+				NewCursor = LoadCursor(nullptr, IDC_SIZENS);
 				break;
 			case ZoombarMinus:
 			case ZoombarPlus:
 			case ZoombarBar:
-				NewCursor = LoadCursor(NULL, IDC_HAND);
+				NewCursor = LoadCursor(nullptr, IDC_HAND);
 				break;
 			default:
 				hasGuiCursor = false;
@@ -48,7 +48,7 @@ BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		}
 	}
 
-	if (NewCursor != NULL)
+	if (NewCursor != nullptr)
 		::SetCursor( NewCursor );
 	else
 		COleControl::OnSetCursor( pWnd, nHitTest, message );
@@ -61,7 +61,7 @@ BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 // *******************************************************
 HCURSOR CMapView::GetCursorIcon()
 {
-	HCURSOR newCursor = NULL; 
+	HCURSOR newCursor = nullptr;
 	switch (m_mapCursor)
 	{
 		case crsrMapDefault:
@@ -80,8 +80,8 @@ HCURSOR CMapView::GetCursorIcon()
 					newCursor = (_useAlternatePanCursor == TRUE) ? _cursorAlternatePan : _cursorPan;
 					break;
 
-                case cmSelection:
-                case cmSelectByPolygon:
+				case cmSelection:
+				case cmSelectByPolygon:
 					newCursor = _cursorSelect;
 					break;
 
@@ -115,71 +115,71 @@ HCURSOR CMapView::GetCursorIcon()
 					break;*/
 
 				case cmNone:
-					newCursor = (HCURSOR)m_uDCursorHandle;
+					newCursor = reinterpret_cast<HCURSOR>(static_cast<LONG_PTR>(m_uDCursorHandle));
 					break;
 			}
 			break;
 
 		case crsrAppStarting:
-			newCursor = LoadCursor(NULL, IDC_APPSTARTING);
+			newCursor = LoadCursor(nullptr, IDC_APPSTARTING);
 			break;
 
 		case crsrArrow:
-			newCursor = LoadCursor(NULL, IDC_ARROW);
+			newCursor = LoadCursor(nullptr, IDC_ARROW);
 			break;
 
 		case crsrCross:
-			newCursor = LoadCursor(NULL, IDC_CROSS);
+			newCursor = LoadCursor(nullptr, IDC_CROSS);
 			break;
 
 		case crsrHelp:
-			newCursor = LoadCursor(NULL, IDC_HELP);
+			newCursor = LoadCursor(nullptr, IDC_HELP);
 			break;
 
 		case crsrIBeam:
-			newCursor = LoadCursor(NULL, IDC_IBEAM);
+			newCursor = LoadCursor(nullptr, IDC_IBEAM);
 			break;
 
 		case crsrNo:
-			newCursor = LoadCursor(NULL, IDC_NO);
+			newCursor = LoadCursor(nullptr, IDC_NO);
 			break;
 
 		case crsrSizeAll:
-			newCursor = LoadCursor(NULL, IDC_SIZEALL);
+			newCursor = LoadCursor(nullptr, IDC_SIZEALL);
 			break;
 
 		case crsrSizeNESW:
-			newCursor = LoadCursor(NULL, IDC_SIZENESW);
+			newCursor = LoadCursor(nullptr, IDC_SIZENESW);
 			break;
 
 		case crsrSizeNS:
-			newCursor = LoadCursor(NULL, IDC_SIZENS);
+			newCursor = LoadCursor(nullptr, IDC_SIZENS);
 			break;
 
 		case crsrSizeNWSE:
-			newCursor = LoadCursor(NULL, IDC_SIZENWSE);
+			newCursor = LoadCursor(nullptr, IDC_SIZENWSE);
 			break;
 
 		case crsrSizeWE:
-			newCursor = LoadCursor(NULL, IDC_SIZEWE);
+			newCursor = LoadCursor(nullptr, IDC_SIZEWE);
 			break;
 
 		case crsrUpArrow:
-			newCursor = LoadCursor(NULL, IDC_UPARROW);
+			newCursor = LoadCursor(nullptr, IDC_UPARROW);
 			break;
 
 		case crsrHand:
-			newCursor = LoadCursor(NULL, IDC_HAND);
+			newCursor = LoadCursor(nullptr, IDC_HAND);
 			break;
 
 		case crsrWait:
 
 			if (!_disableWaitCursor)
-				newCursor = LoadCursor(NULL, IDC_WAIT);
+				newCursor = LoadCursor(nullptr, IDC_WAIT);
 			break;
 
 		case crsrUserDefined:
-			newCursor = (HCURSOR)m_uDCursorHandle;
+			newCursor = reinterpret_cast<HCURSOR>(static_cast<LONG_PTR>(m_uDCursorHandle));
 			break;
 	}
 	return newCursor;
@@ -221,19 +221,19 @@ void CMapView::UpdateCursor(tkCursorMode newCursor, bool clearEditor)
 		if (!InitRotationTool())
 			return;
 	}
-	
+
 	bool refreshNeeded = newCursor == cmRotateShapes || m_cursorMode == cmRotateShapes;
 
 	if (MeasuringHelper::OnCursorChanged(_measuring, newCursor))
 		refreshNeeded = true;
-	
+
 	if (!EditorHelper::OnCursorChanged(_shapeEditor, clearEditor, newCursor, refreshNeeded))
 		return;
 
 	m_cursorMode = newCursor;
 
 	OnSetCursor(this, HTCLIENT, 0);
-	
+
 	if (refreshNeeded)
 		RedrawCore(RedrawSkipDataLayers, true);
 }
@@ -243,26 +243,26 @@ void CMapView::UpdateCursor(tkCursorMode newCursor, bool clearEditor)
 // *********************************************************
 HCURSOR CMapView::SetWaitCursor()
 {
-   if (_disableWaitCursor)
-		return NULL;
+	if (_disableWaitCursor)
+		return nullptr;
 
 	HCURSOR oldCursor = ::GetCursor();
-   
+
 	CPoint cpos;
 	GetCursorPos(&cpos);
 	CRect wrect;
 	GetWindowRect(&wrect);
-	
+
 	HWND wndActive = ::GetActiveWindow();
 	if ((wndActive == this->GetSafeHwnd()) || (wndActive == this->GetParentOwner()->GetSafeHwnd()))
 	{
 		if( wrect.PtInRect(cpos) && (m_mapCursor != crsrUserDefined) && !_disableWaitCursor)
 		{
-			::SetCursor(LoadCursor(NULL, IDC_WAIT) );
+			::SetCursor(LoadCursor(nullptr, IDC_WAIT) );
 		}
 	}
 
-   return oldCursor;
+	return oldCursor;
 }
 
 

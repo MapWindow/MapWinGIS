@@ -6,7 +6,7 @@ try {
     
     # Rename Control folder
     "Rename Control folder"
-    Rename-Item "$CurrentDir\src\Control" -NewName Control_
+    #Rename-Item "$CurrentDir\src\Control" -NewName Control_
 
     # Check vcpkg install:
     $VcpkgFolder = "$CurrentDir\src\vcpkg"

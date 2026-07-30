@@ -572,14 +572,14 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
          }
 
          /* ALLOCATE NEW_DD */
-         if ((new_dd = (struct dd *) malloc(sizeof(struct dd))) == NULL) return(0);
+         if ((new_dd = static_cast<struct dd*>(malloc(sizeof(struct dd)))) == nullptr) return(0);
 
          /* SET POINTERS TO NULL */
-         new_dd->name = NULL;
-         new_dd->dim_lptr = NULL;
-         new_dd->labels = NULL;
-         new_dd->fmt_rt = NULL;
-         new_dd->next = NULL;
+         new_dd->name = nullptr;
+         new_dd->dim_lptr = nullptr;
+         new_dd->labels = nullptr;
+         new_dd->fmt_rt = nullptr;
+         new_dd->next = nullptr;
 
          /* SET FD_CNTRL TO NULL CHARACTER */
          new_dd->fd_cntrl[FCDSTYPE] = NC;
@@ -604,19 +604,19 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
             if (cur_fm->dl_hd->s_tag == 0) {
 
                /* SET TAG SIZE TO LENGTH OF INPUT TAG */
-               cur_fm->dl_hd->s_tag = _tcslen(tag);
+               cur_fm->dl_hd->s_tag = static_cast<long>(_tcslen(tag));
             }
 
             /* IF CR_HD NOT ALLOCATED */
-            if (cur_fm->cr_hd == NULL) {
+            if (cur_fm->cr_hd == nullptr) {
 
                /* ALLOCATE CR_HD */
-               if ((new_cr = (struct cr *) malloc (sizeof (struct cr))) == NULL) return(0);
+               if ((new_cr = (struct cr *) malloc (sizeof (struct cr))) == nullptr) return(0);
 
                /* SET POINTERS TO NULL */
-               new_cr->f_title = NULL;
-               new_cr->tag_l = NULL;
-               new_cr->u_afd = NULL;
+               new_cr->f_title = nullptr;
+               new_cr->tag_l = nullptr;
+               new_cr->u_afd = nullptr;
 
                /* SET CR_HD TO NEW_CR */
                cur_fm->cr_hd = new_cr;
@@ -636,8 +636,8 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
                /* ALLOCATE SPACE TO HOLD INPUT STRING WR_STR--INCLUDE
                    VALID SUBFIELD FLAG IN LENGTH CALCULATION
                */
-               len = (size_t) _tcslen(wr_str) + validsfld;
-               if ((i_str = (char *) malloc (len * sizeof(char))) == NULL) return(0);
+               len = _tcslen(wr_str) + validsfld;
+               if ((i_str = static_cast<char*>(malloc(len * sizeof(char)))) == nullptr) return(0);
                *i_str = NC;
 
                /* IF VALID SUBFIELD, COPY WR_STR TO I_STR */
@@ -655,23 +655,23 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
          else if (int_tag == 2) {
  
             /* IF CR_HD NOT ALLOCATED */
-            if (cur_fm->cr_hd == NULL) {
+            if (cur_fm->cr_hd == nullptr) {
 
                /* ALLOCATE CR_HD */
-               if ((new_cr = (struct cr *) malloc (sizeof (struct cr))) == NULL) return(0);
+               if ((new_cr = (struct cr *) malloc (sizeof (struct cr))) == nullptr) return(0);
 
                /* SET POINTERS TO NULL */
-               new_cr->f_title = NULL;
-               new_cr->tag_l = NULL;
-               new_cr->u_afd = NULL;
+               new_cr->f_title = nullptr;
+               new_cr->tag_l = nullptr;
+               new_cr->u_afd = nullptr;
 
                /* SET CR_HD TO NEW_CR */
                cur_fm->cr_hd = new_cr;
             }
 
             /* ALLOCATE SPACE TO HOLD INPUT STRING WR_STR */
-            len = (size_t) _tcslen(wr_str) + 1;
-            if ((i_str = (char *) malloc (len*sizeof(char))) == NULL) return(0);
+            len = _tcslen(wr_str) + 1;
+            if ((i_str = static_cast<char*>(malloc(len * sizeof(char)))) == nullptr) return(0);
             *i_str = NC;
 
             /* COPY WR_STR TO I_STR */
@@ -707,8 +707,8 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
                   /* ALLOCATE SPACE TO HOLD INPUT STRING WR_STR
                       --INCLUDE VALID SUBFIELD FLAG IN LENGTH CALCULATION
                   */
-                  len = (size_t) _tcslen(wr_str) + validsfld;
-                  if ((i_str = (char *) malloc (len*sizeof(char))) == NULL) return(0);
+                  len = _tcslen(wr_str) + validsfld;
+                  if ((i_str = static_cast<char*>(malloc(len * sizeof(char)))) == NULL) return(0);
                   *i_str = NC;
 
                   /* IF VALID SUBFIELD, COPY WR_STR TO I_STR */
@@ -777,7 +777,7 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
       case 5:
 
          /* IF DD_HD NEXT IS NULL, RETURN FAILURE */
-         if (cur_fm->dd_hd->next == NULL) return(0);
+         if (cur_fm->dd_hd->next == nullptr) return(0);
 
          /* CASE STATE */
          switch (cur_fm->sf_state_dd) {
@@ -799,8 +799,8 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
                   /* ALLOCATE SPACE TO HOLD INPUT STRING I_STR
                       --INCLUDE VALID SUBFIELD FLAG IN LENGTH CALCULATION
                   */
-                  len = (size_t) _tcslen(wr_str) + validsfld;
-                  if ((i_str = (char *) malloc (len * sizeof(char))) == NULL) return(0);
+                  len = _tcslen(wr_str) + validsfld;
+                  if ((i_str = static_cast<char*>(malloc(len * sizeof(char)))) == nullptr) return(0);
                   *i_str = NC;
 
                   /* IF VALID SUBFIELD, COPY WR_STR TO I_STR */
@@ -826,8 +826,8 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
                   /* ALLOCATE SPACE TO HOLD WR_STR
                       --INCLUDE VALID SUBFIELD FLAG IN LENGTH CALCULATION
                   */
-                  len = (size_t) _tcslen(wr_str) + validsfld;
-                  if ((i_str = (char *) malloc (len*sizeof(char))) == NULL) return(0);
+                  len = _tcslen(wr_str) + validsfld;
+                  if ((i_str = static_cast<char*>(malloc(len * sizeof(char)))) == nullptr) return(0);
                   *i_str = NC;
 
                   /* IF VALID SUBFIELD, COPY WR_STR TO I_STR */
@@ -950,23 +950,23 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
          if (int_tag == 2) {
 
             /* IF CR_HD NOT ALLOCATED */
-            if (cur_fm->cr_hd == NULL) {
+            if (cur_fm->cr_hd == nullptr) {
 
                /* ALLOCATE CR_HD */
-               if ((new_cr = (struct cr *) malloc (sizeof (struct cr))) == NULL) return(0);
+               if ((new_cr = static_cast<struct cr*>(malloc(sizeof(struct cr)))) == nullptr) return(0);
 
                /* SET POINTERS TO NULL */
-               new_cr->f_title = NULL;
-               new_cr->tag_l = NULL;
-               new_cr->u_afd = NULL;
+               new_cr->f_title = nullptr;
+               new_cr->tag_l = nullptr;
+               new_cr->u_afd = nullptr;
 
                /* SET CR_HD TO NEW_CR */
                cur_fm->cr_hd = new_cr;
             }
 
             /* ALLOCATE SPACE TO HOLD INPUT STRING WR_STR */
-            len = (size_t) _tcslen(wr_str) + 1;
-            if ((i_str = (char *) malloc (len * sizeof(char))) == NULL) return(0);
+            len = _tcslen(wr_str) + 1;
+            if ((i_str = static_cast<char*>(malloc(len * sizeof(char)))) == nullptr) return(0);
             *i_str = NC;
 
             /* COPY WR_STR TO I_STR */
@@ -984,14 +984,14 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
                case 1:
 
                   /* ALLOCATE NEW_DD */
-                  if ((new_dd = (struct dd *) malloc(sizeof(struct dd))) == NULL) return(0);
+                  if ((new_dd = static_cast<struct dd*>(malloc(sizeof(struct dd)))) == nullptr) return(0);
 
                   /* SET POINTERS TO NULL */
-                  new_dd->name = NULL;
-                  new_dd->dim_lptr = NULL;
-                  new_dd->labels = NULL;
-                  new_dd->fmt_rt = NULL;
-                  new_dd->next = NULL;
+                  new_dd->name = nullptr;
+                  new_dd->dim_lptr = nullptr;
+                  new_dd->labels = nullptr;
+                  new_dd->fmt_rt = nullptr;
+                  new_dd->next = nullptr;
 
                   /* SET FD_CNTRL TO NULL CHARACTER */
                   new_dd->fd_cntrl[FCDSTYPE] = NC;
@@ -1021,14 +1021,14 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
                   if (cur_fm->dl_hd->ilevel == 1) {
 
                      /* ALLOCATE NEW_DD */
-                     if ((new_dd = (struct dd *) malloc(sizeof(struct dd))) == NULL) return(0);
+                     if ((new_dd = static_cast<struct dd*>(malloc(sizeof(struct dd)))) == nullptr) return(0);
 
                      /* SET POINTERS TO NULL */
-                     new_dd->name = NULL;
-                     new_dd->dim_lptr = NULL;
-                     new_dd->labels = NULL;
-                     new_dd->fmt_rt = NULL;
-                     new_dd->next = NULL;
+                     new_dd->name = nullptr;
+                     new_dd->dim_lptr = nullptr;
+                     new_dd->labels = nullptr;
+                     new_dd->fmt_rt = nullptr;
+                     new_dd->next = nullptr;
 
                      /* SET FD_CNTRL TO NULL CHARACTER */
                      new_dd->fd_cntrl[FCDSTYPE] = NC;
@@ -1055,8 +1055,8 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
                      /* ALLOCATE SPACE TO HOLD INPUT STRING WR_STR
                          --INCLUDE VALID SUBFIELD FLAG IN LENGTH CALCULATION
                      */
-                     len = (size_t) _tcslen(wr_str) + validsfld;
-                     if ((i_str = (char *) malloc (len * sizeof(char))) == NULL) return(0);
+                     len = _tcslen(wr_str) + validsfld;
+                     if ((i_str = static_cast<char*>(malloc(len * sizeof(char)))) == nullptr) return(0);
                      *i_str = NC;
 
                      /* IF VALID SUBFIELD, COPY WR_STR TO I_STR */
@@ -1071,8 +1071,8 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
                      /* ALLOCATE SPACE TO HOLD WR_STR
                          --INCLUDE VALID SUBFIELD FLAG IN LENGTH CALCULATION
                      */
-                     len = (size_t) _tcslen(wr_str) + validsfld;
-                     if ((i_str = (char *) malloc (len * sizeof(char))) == NULL) return(0);
+                     len = _tcslen(wr_str) + validsfld;
+                     if ((i_str = static_cast<char*>(malloc(len * sizeof(char)))) == nullptr) return(0);
                      *i_str = NC;
 
                      /* IF VALID SUBFIELD, COPY WR_STR TO I_STR */
@@ -1080,7 +1080,6 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
                      
                      /* SET NAME TO I_STR */
                      cur_fm->cur_dd->name = i_str;
-
                   }
 
                break;
@@ -1162,5 +1161,5 @@ int wr123ddsfld(FILE *fp,char *tag,char *wr_str,int option)
    /* RETURN SUCCESS */
    return (1);
 
-} 
- 
+}
+

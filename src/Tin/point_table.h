@@ -11,8 +11,8 @@ class point_table
 		Point getPoint( long index );
 		void clear();
 		int size()
-		{	return point_list.size(); }
-	private:		
+		{ return static_cast<int>(point_list.size()); }
+	private:
 		std::deque<Point> point_list;
 };
 

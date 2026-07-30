@@ -34,7 +34,7 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 	
 	//This line is intended to ensure proper function in MSAccess by verifying that the hWnd handle exists
 	//before trying to draw. Lailin Chen - 2005/10/17
-	if (this->m_hWnd == NULL)
+	if (this->m_hWnd == nullptr)
 		return;
 
 	// no redraw is allowed when the rubber band is being dragged
@@ -47,7 +47,7 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 
 	m_drawMutex.Lock();		// TODO: perhaps use lighter CCriticalSection
 
-	if (!_canUseMainBuffer || !_canUseVolatileBuffer || !_canUseLayerBuffer) 
+	if (!_canUseMainBuffer || !_canUseVolatileBuffer || !_canUseLayerBuffer)
 	{
 		bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || 
 								HasDrawingData(tkDrawingDataAvailable::Coordinates) ||
@@ -80,9 +80,9 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 {
 	Gdiplus::Color backColor = Utility::OleColor2GdiPlus(m_backColor);
 
-	Gdiplus::Graphics* gBuffer = NULL;		// for control rendering
-	Gdiplus::Graphics* gPrinting = NULL;	// for snapshot drawing
-	Gdiplus::Graphics* g = NULL;			// the right one to draw
+	Gdiplus::Graphics* gBuffer = nullptr;	// for control rendering
+	Gdiplus::Graphics* gPrinting = nullptr;	// for snapshot drawing
+	Gdiplus::Graphics* g = nullptr;			// the right one to draw
 
 	// preparing graphics (for snapshot drawing to output canvas directly; 
 	// for control rendering main buffer is used)
@@ -121,8 +121,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 
 	if (m_sendOnDrawBackBuffer)
 	{
-		// passing main buffer to client for custom drawing		
-		FireOnDrawbackBufferCore(g, _isSnapshot ? NULL : _bufferBitmap);
+		// passing main buffer to client for custom drawing
+		FireOnDrawbackBufferCore(g, _isSnapshot ? nullptr : _bufferBitmap);
 	}
 #if DEBUG_ALLOCATED_OBJECTS
 	ComHelper::SetBreak(false);
@@ -136,7 +136,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	DWORD endTick = GetTickCount();
 
 	if (layersRedraw) {
-		_lastRedrawTime = (float)(endTick - startTick) / 1000.0f;
+		_lastRedrawTime = static_cast<float>(endTick - startTick) / 1000.0f;
 	}
 	ShowRedrawTime(g, _lastRedrawTime, layersRedraw);
 
@@ -175,11 +175,11 @@ void CMapView::DumpBuffers()
 	#ifndef RELEASE_MODE
 		CLSID clsid;
 		Utility::GetEncoderClsid(L"image/png", &clsid);
-		_bufferBitmap->Save(L"D:\\buffer.png", &clsid, NULL);
-		_drawingBitmap->Save(L"D:\\drawing.png", &clsid, NULL);
-		_tilesBitmap->Save(L"D:\\tiles.png", &clsid, NULL);
-		_layerBitmap->Save(L"D:\\layers.png", &clsid, NULL);
-		_volatileBitmap->Save(L"D:\\volatile.png", &clsid, NULL);
+		_bufferBitmap->Save(L"D:\\buffer.png", &clsid, nullptr);
+		_drawingBitmap->Save(L"D:\\drawing.png", &clsid, nullptr);
+		_tilesBitmap->Save(L"D:\\tiles.png", &clsid, nullptr);
+		_layerBitmap->Save(L"D:\\layers.png", &clsid, nullptr);
+		_volatileBitmap->Save(L"D:\\volatile.png", &clsid, nullptr);
 	#endif
 }
 
@@ -192,7 +192,7 @@ void CMapView::FireOnDrawbackBufferCore(Gdiplus::Graphics* g, Gdiplus::Bitmap* b
 	if (g && (_customDrawingFlags & OnDrawBackBufferHdc))
 	{
 		HDC hdc = g->GetHDC();
-		FireOnDrawBackBuffer((long)hdc);
+		FireOnDrawBackBuffer(static_cast<long>(reinterpret_cast<LONG_PTR>(hdc)));
 		g->ReleaseHDC(hdc);
 	}
 
@@ -202,7 +202,7 @@ void CMapView::FireOnDrawbackBufferCore(Gdiplus::Graphics* g, Gdiplus::Bitmap* b
 		Gdiplus::Rect r(0, 0, _bufferBitmap->GetWidth(), _bufferBitmap->GetHeight());
 		Gdiplus::BitmapData bmd;
 		_bufferBitmap->LockBits(&r, Gdiplus::ImageLockModeRead | Gdiplus::ImageLockModeWrite, _bufferBitmap->GetPixelFormat(), &bmd);
-		FireOnDrawBackBuffer2((long)bmd.Height, (long)bmd.Width, (long)bmd.Stride, (long)bmd.PixelFormat, (long)bmd.Scan0);
+		FireOnDrawBackBuffer2(static_cast<long>(bmd.Height), static_cast<long>(bmd.Width), bmd.Stride, bmd.PixelFormat, static_cast<long>(reinterpret_cast<LONG_PTR>(bmd.Scan0)));
 		_bufferBitmap->UnlockBits(&bmd);
 	}
 }
@@ -232,7 +232,7 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 				int y = dragging ? _dragging.Move.y - _dragging.Start.y : 0;
 
 				// update from the layer buffer
-				g->DrawImage(_layerBitmap, (float)x, (float)y);
+				g->DrawImage(_layerBitmap, static_cast<float>(x), static_cast<float>(y));
 			}
 			else
 			{
@@ -248,7 +248,7 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 				{
 					HDC hdc = g->GetHDC();
 					tkMwBoolean retVal = blnFalse;
-					this->FireBeforeLayers((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+					this->FireBeforeLayers(static_cast<long>(reinterpret_cast<LONG_PTR>(hdc)), rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
 					g->ReleaseHDC(hdc);
 				}
 
@@ -275,7 +275,7 @@ bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds
 			{
 				HDC hdc = g->GetHDC();
 				tkMwBoolean retVal = blnFalse;
-				this->FireAfterLayers((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+				this->FireAfterLayers(static_cast<long>(reinterpret_cast<LONG_PTR>(hdc)), rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
 				g->ReleaseHDC(hdc);
 			}
 		}
@@ -304,7 +304,7 @@ void CMapView::RedrawWmsLayers(Gdiplus::Graphics* g)
 			continue;
 		}
 
-		CComPtr<IWmsLayer> wms = NULL;
+		CComPtr<IWmsLayer> wms = nullptr;
 		layer->QueryWmsLayer(&wms);
 
 		TileManager* manager = WmsHelper::Cast(wms)->get_Manager();
@@ -361,7 +361,7 @@ void CMapView::RedrawTiles(Gdiplus::Graphics* g, CDC* dc)
 {
 	if (HasDrawingData(tkDrawingDataAvailable::TilesData))
 	{
-		CTiles* tiles = (CTiles*)_tiles;
+		CTiles* tiles = static_cast<CTiles*>(_tiles);
 		if (_isSnapshot)
 		{
 			get_TileManager()->MarkUndrawn();
@@ -420,7 +420,7 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 		{
 			HDC hdc = g->GetHDC();
 			tkMwBoolean retVal = blnFalse;
-			this->FireBeforeDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+			this->FireBeforeDrawing(static_cast<long>(reinterpret_cast<LONG_PTR>(hdc)), rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
 			g->ReleaseHDC(hdc);
 		}
 
@@ -438,7 +438,7 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 		{
 			HDC hdc = g->GetHDC();
 			tkMwBoolean retVal = blnFalse;
-			this->FireAfterDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+			this->FireAfterDrawing(static_cast<long>(reinterpret_cast<LONG_PTR>(hdc)), rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
 			g->ReleaseHDC(hdc);
 		}
 	}
@@ -515,7 +515,7 @@ void CMapView::DrawIdentified(Gdiplus::Graphics* g, const CRect& rcBounds)
 // ***************************************************************
 void CMapView::RenderIdentifiedShapes(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds)
 {
-	VARIANT_BOOL vb;	
+	VARIANT_BOOL vb;
 
 	for (size_t i = 0; i < handles.size(); i++)
 	{
@@ -554,7 +554,7 @@ void CMapView::UpdateSelectedPixels(vector<long>& handles, bool& hasPolygons, bo
 
 		if (layer->IsImage())
 		{
-			CComPtr<IImage> img = NULL;
+			CComPtr<IImage> img = nullptr;
 			img.Attach(GetImage(handles[i]));
 			if (!img) continue;
 
@@ -618,7 +618,7 @@ void CMapView::RenderSelectedPixels(vector<long>& handles, CShapefileDrawer& dra
 // ***************************************************************
 void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 {
-	CTiles* tiles = (CTiles*)_tiles;
+	CTiles* tiles = static_cast<CTiles*>(_tiles);
 	Gdiplus::Graphics* gTiles = Gdiplus::Graphics::FromImage(_tilesBitmap);
 	int tileProvider = GetTileProvider();
 	
@@ -629,7 +629,7 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 
 		// it's the first tile for current extents, we need to initialize the buffer
 		bool canReuseBuffer = /*ForceDiscreteZoom() &&*/
-			GetTileProvider() == _tileBuffer.Provider &&			   
+			GetTileProvider() == _tileBuffer.Provider &&
 			_currentZoom != _tileBuffer.Zoom && abs(_currentZoom - _tileBuffer.Zoom) <= 4;		// for larger difference it's not practical
 
 		bool wasReused = false;
@@ -695,10 +695,10 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 	double ty = (_extents.top - match.top)/_extents.Height();
 	double ty2 = 1.0f - (match.bottom - _extents.bottom)/_extents.Height();
 
-	target.X = (float)(tx * _viewWidth);
-	target.Y = (float)(ty * _viewHeight);
-	target.Width = (float)((tx2 - tx) * _viewWidth);
-	target.Height = (float)((ty2 - ty) * _viewHeight);
+	target.X = static_cast<float>(tx * _viewWidth);
+	target.Y = static_cast<float>(ty * _viewHeight);
+	target.Width = static_cast<float>((tx2 - tx) * _viewWidth);
+	target.Height = static_cast<float>((ty2 - ty) * _viewHeight);
 
 	// source rectangle (cached tile buffer)	
 	Extent buffer = _tileBuffer.Extents;
@@ -707,10 +707,10 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 	double sy = (buffer.top - match.top)/buffer.Height();
 	double sy2 = 1.0f - (match.bottom - buffer.bottom)/buffer.Height();
 
-	source.X = (float)(sx * _tilesBitmap->GetWidth());
-	source.Y = (float)(sy * _tilesBitmap->GetHeight());
-	source.Width = (float)((sx2 - sx) * _tilesBitmap->GetWidth());
-	source.Height = (float)((sy2 - sy) * _tilesBitmap->GetHeight());
+	source.X = static_cast<float>(sx * _tilesBitmap->GetWidth());
+	source.Y = static_cast<float>(sy * _tilesBitmap->GetHeight());
+	source.Width = static_cast<float>((sx2 - sx) * _tilesBitmap->GetWidth());
+	source.Height = static_cast<float>((sy2 - sy) * _tilesBitmap->GetHeight());
 
 	double x, x2, y, y2;
 
@@ -772,10 +772,10 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 				y = i / steps * ty;
 				y2 = ty2 + (1 - ty2) * (1 - i/steps);
 
-				tRect.X = (float)(x * _viewWidth);
-				tRect.Width = (float)(x2 * _viewWidth - tRect.X);
-				tRect.Y = (float)(y * _viewHeight);
-				tRect.Height =(float)(y2 * _viewHeight - tRect.Y);
+				tRect.X = static_cast<float>(x * _viewWidth);
+				tRect.Width = static_cast<float>(x2 * _viewWidth - tRect.X);
+				tRect.Y = static_cast<float>(y * _viewHeight);
+				tRect.Height = static_cast<float>(y2 * _viewHeight - tRect.Y);
 
 				lastTime = GetTickCount();
 
@@ -830,7 +830,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	
 	register int i;
 	long startcondition = 0;
-	long endcondition = _activeLayers.size();
+	long endcondition = static_cast<long>(_activeLayers.size());
 
 	//	nothing to draw
 	if (endcondition == 0)
@@ -884,8 +884,8 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 		Layer * l = _allLayers[_activeLayers[i]];
 		if (l->IsShapefile() && l->wasRendered)		// if it's hidden don't clear every time
 		{
-			CComPtr<IShapefile> sf = NULL;
-            // don't mark as 'undrawn' if we're not going to redraw it
+			CComPtr<IShapefile> sf = nullptr;
+			// don't mark as 'undrawn' if we're not going to redraw it
 			if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) != layerBuffer)
 			{
 				ShapefileHelper::Cast(sf)->MarkUndrawn();
@@ -914,17 +914,17 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
 			}
-            else if (l->IsShapefile() || l->IsDynamicOgrLayer())
+			else if (l->IsShapefile() || l->IsDynamicOgrLayer())
 			{
 
-				CComPtr<IShapefile> sf = NULL;
+				CComPtr<IShapefile> sf = nullptr;
 				if (l->IsDynamicOgrLayer())
 				{
 					// Try to get the data loaded so far & update labels & categories
 					l->UpdateShapefile();
 					
 					// Get the shapefile
-                    l->QueryShapefile(&sf);
+					l->QueryShapefile(&sf);
 				}
 				else
 				{
@@ -934,18 +934,18 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 					if (!l->extents.Intersects(_extents))
 						continue;
 
-                    // Update labels & categories
-                    l->UpdateShapefile();
+					// Update labels & categories
+					l->UpdateShapefile();
 				}
 
 				// layerBuffer == true indicates we're drawing the non-Volatile layers
 				if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
 					continue;
 
-                // Perform the draw:
-                sfDrawer.Draw(rcBounds, sf);
-                LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
-                LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
+				// Perform the draw:
+				sfDrawer.Draw(rcBounds, sf);
+				LayerDrawer::DrawLabels(l, lblDrawer, vpAboveParentLayer);
+				LayerDrawer::DrawCharts(l, chartDrawer, vpAboveParentLayer);
 			}
 		}
 	}
@@ -959,7 +959,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 		_shapeCountInView = shapeCount;
 
 	// drawing labels and charts above the layers
-	for (i = 0; i < (int)_activeLayers.size(); i++)
+	for (i = 0; i < static_cast<int>(_activeLayers.size()); i++)
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
 
@@ -967,7 +967,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 		if (!l->IsVisible(scale, zoom))	continue;
 	
-		CComPtr<IShapefile> sf = NULL;
+		CComPtr<IShapefile> sf = nullptr;
 		if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
 			continue;
 
@@ -976,11 +976,11 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 		LayerDrawer::DrawCharts(l, chartDrawer, vpAboveAllLayers);
 	}
 	
-	if (layerBuffer && oldCursor != NULL) {
+	if (layerBuffer && oldCursor != nullptr) {
 		::SetCursor(oldCursor);
 	}
 
-   if (isConcealed)
+	if (isConcealed)
 		delete[] isConcealed;
 }
 
@@ -991,10 +991,10 @@ void CMapView::DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics
 {
 	if (!l->IsImage())	return;
 
-	IImage * iimg = NULL;
+	IImage * iimg = nullptr;
 	if (!l->QueryImage(&iimg)) return;
 
-	CImageClass* img = (CImageClass*)iimg;
+	CImageClass* img = static_cast<CImageClass*>(iimg);
 
 	if (_canUseImageGrouping && img->m_groupID != -1)
 	{
@@ -1097,7 +1097,7 @@ bool CMapView::HaveDataLayersWithinView()
 	for(size_t i = 0; i < _activeLayers.size(); i++)
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
-		if( l != NULL )
+		if( l != nullptr)
 		{	
 			if (l->IsVisible(scale, zoom))
 			{
@@ -1121,9 +1121,9 @@ void CMapView::DrawImageGroups()
 
 		// building groups
 		this->BuildImageGroups(*newGroups);
-		
+
 		// comparing them with the old list
-		if (_imageGroups != NULL)
+		if (_imageGroups != nullptr)
 		{
 			if (this->ImageGroupsAreEqual(*_imageGroups, *newGroups))
 			{
@@ -1134,21 +1134,21 @@ void CMapView::DrawImageGroups()
 				}
 				newGroups->clear();
 				delete newGroups;
-				newGroups = NULL;
+				newGroups = nullptr;
 			}
 			else
 			{
 				// groups has changed, swapping pointers
-				if (_imageGroups != NULL)
+				if (_imageGroups != nullptr)
 				{
 					for (size_t i = 0; i < _imageGroups->size(); i++)
 					{
 						delete (*_imageGroups)[i];
 					}
-					
+
 					_imageGroups->clear();
 					delete _imageGroups;
-					_imageGroups = NULL;
+					_imageGroups = nullptr;
 				}
 				_imageGroups = newGroups;
 			}
@@ -1157,7 +1157,7 @@ void CMapView::DrawImageGroups()
 		{
 			_imageGroups = newGroups;
 		}
-		
+
 		// mark all images as undrawn
 		for (size_t i = 0; i < _imageGroups->size(); i++)
 		{
@@ -1171,7 +1171,7 @@ void ResizeBuffer(Gdiplus::Bitmap** bitmap, int cx, int cy)
 	if (*bitmap)
 	{
 		delete *bitmap;
-		*bitmap = NULL;
+		*bitmap = nullptr;
 	}
 	*bitmap = new Gdiplus::Bitmap(cx, cy);
 }
@@ -1194,7 +1194,7 @@ void CMapView::ResizeBuffers(int cx, int cy)
 	if (_tilesBitmap)
 	{
 		delete _tilesBitmap;
-		_tilesBitmap = NULL;
+		_tilesBitmap = nullptr;
 	}
 	_tilesBitmap = new Gdiplus::Bitmap(cx, cy);
 	_tileBuffer.Provider = tkTileProvider::ProviderNone;		// buffer can't be reused
@@ -1209,7 +1209,7 @@ void CMapView::ResizeBuffers(int cx, int cy)
 // ***************************************************************
 bool CMapView::HasDrawingData(tkDrawingDataAvailable type) 
 {
-	switch(type) 
+	switch(type)
 	{
 		case FocusRect:
 			{
@@ -1225,7 +1225,7 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			{
 				return _dragging.Operation == DragMoveShapes || _dragging.Operation == DragRotateShapes;
 			}
-		case ActShape:	
+		case ActShape:
 			{
 				/*VARIANT_BOOL isEmpty;
 				_shapeEditor->get_IsEmpty(&isEmpty);*/
@@ -1241,7 +1241,7 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 					return false;
 				return true; // GetEditorBase()->GetPointCount() > 0; always draw this to show snap points
 			}
-		case tkDrawingDataAvailable::LayersData:	
+		case tkDrawingDataAvailable::LayersData:
 			{
 				return _activeLayers.size() > 0;
 			}
@@ -1299,7 +1299,7 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 // ****************************************************************
 bool CMapView::HasImages() 
 {
-	for(long i = _activeLayers.size() - 1; i >= 0; i-- )
+	for(long i = static_cast<long>(_activeLayers.size()) - 1; i >= 0; i-- )
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
 		if( IS_VALID_PTR(l) )
@@ -1316,7 +1316,7 @@ bool CMapView::HasImages()
 // ****************************************************************
 bool CMapView::HasHotTracking() 
 {
-	for (long i = _activeLayers.size() - 1; i >= 0; i--) 
+	for (long i = static_cast<long>(_activeLayers.size())- 1; i >= 0; i--) 
 	{
 		if (CheckLayer(slctHotTracking, _activeLayers[i])) 
 		{
@@ -1331,14 +1331,14 @@ bool CMapView::HasHotTracking()
 // ****************************************************************
 bool CMapView::HasVolatileShapefiles() 
 {
-	for(long i = _activeLayers.size() - 1; i >= 0; i-- )
+	for(long i = static_cast<long>(_activeLayers.size()) - 1; i >= 0; i-- )
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
 		if( IS_VALID_PTR(l) )
 		{
 			if( l->IsShapefile())
 			{
-				IShapefile* sf = NULL;
+				IShapefile* sf = nullptr;
 				l->QueryShapefile(&sf);
 				if (sf) {
 					VARIANT_BOOL vb;
@@ -1368,7 +1368,7 @@ void CMapView::CheckForConcealedImages(bool* isConcealed, long& startcondition, 
 			{
 				if( l->IsImage() && l->IsVisible(scale, zoom)) 
 				{
-					IImage * iimg = NULL;
+					IImage * iimg = nullptr;
 					if (!l->QueryImage(&iimg)) continue;
 					
 					this->AdjustLayerExtents(i);
@@ -1376,7 +1376,7 @@ void CMapView::CheckForConcealedImages(bool* isConcealed, long& startcondition, 
 					VARIANT_BOOL useTransparencyColor;
 					iimg->get_UseTransparencyColor(&useTransparencyColor);
 					iimg->Release();
-					iimg = NULL;
+					iimg = nullptr;
 
 					if( useTransparencyColor == FALSE )
 					{
@@ -1430,7 +1430,7 @@ void CMapView::DrawLayersRotated(CDC* pdc, Gdiplus::Graphics* gLayers, const CRe
 	{
 		CDC     *tmpBackbuffer = new CDC();
 		CRect   tmpRcBounds = new CRect();
-		Extent  tmpExtent, saveExtent;       
+		Extent  tmpExtent, saveExtent;
 		long    save_viewWidth, save_viewHeight;
 
 		if (_rotate == NULL)
@@ -1497,9 +1497,9 @@ int* CMapView::PlaceLabels(const CRect& rcBounds, Gdiplus::Graphics* graphics, b
 	// clear extents of drawn labels and charts
 	this->ClearLabelFrames();
 
-	long endcondition = _activeLayers.size();
+	long endCondition = static_cast<long>(_activeLayers.size());
 	//	nothing to draw
-	if (endcondition == 0)
+	if (endCondition == 0)
 		return nullptr;
 
 	register int i;
@@ -1511,15 +1511,15 @@ int* CMapView::PlaceLabels(const CRect& rcBounds, Gdiplus::Graphics* graphics, b
 	//	Check whether some layers are completely concealed by images 
 	//	no need to draw them then
 	// ------------------------------------------------------------------
-	bool* isConcealed = new bool[endcondition];
-	memset(isConcealed, 0, endcondition * sizeof(bool));
+	bool* isConcealed = new bool[endCondition];
+	memset(isConcealed, 0, endCondition * sizeof(bool));
 
 	double scale = GetCurrentScale();
 	int zoom;
 	_tiles->get_CurrentZoom(&zoom);
 
 	if (layerBuffer)
-		CheckForConcealedImages(isConcealed, startcondition, endcondition, scale, zoom);
+		CheckForConcealedImages(isConcealed, startcondition, endCondition, scale, zoom);
 
 	double currentScale = this->GetCurrentScale();
 
@@ -1538,12 +1538,12 @@ int* CMapView::PlaceLabels(const CRect& rcBounds, Gdiplus::Graphics* graphics, b
 	CLabelDrawer lblDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, currentScale, _currentZoom, chosenListLabels, _rotateAngle, _isSnapshot);
 
 	// mark all shapes as not drawn
-	for (int i = startcondition; i < endcondition; i++)
+	for (int i = startcondition; i < endCondition; i++)
 	{
 		Layer* l = _allLayers[_activeLayers[i]];
 		if (l->IsShapefile() && l->wasRendered)		// if it's hidden don't clear every time
 		{
-			CComPtr<IShapefile> sf = NULL;
+			CComPtr<IShapefile> sf = nullptr;
 			// don't mark as 'undrawn' if we're not going to redraw it
 			if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) != layerBuffer)
 			{
@@ -1554,7 +1554,7 @@ int* CMapView::PlaceLabels(const CRect& rcBounds, Gdiplus::Graphics* graphics, b
 
 	//	run drawing
 	int shapeCount = 0;
-	for (int i = startcondition; i < endcondition; i++)
+	for (int i = startcondition; i < endCondition; i++)
 	{
 		long layerHandle = _activeLayers[i];
 		Layer* l = _allLayers[layerHandle];
@@ -1574,7 +1574,7 @@ int* CMapView::PlaceLabels(const CRect& rcBounds, Gdiplus::Graphics* graphics, b
 			else if (l->IsShapefile() || l->IsDynamicOgrLayer())
 			{
 
-				CComPtr<IShapefile> sf = NULL;
+				CComPtr<IShapefile> sf = nullptr;
 				if (l->IsDynamicOgrLayer())
 				{
 					// Try to get the data loaded so far & update labels & categories
@@ -1613,8 +1613,9 @@ int* CMapView::PlaceLabels(const CRect& rcBounds, Gdiplus::Graphics* graphics, b
 	if (!layerBuffer && shapeCount > _shapeCountInView)
 		_shapeCountInView = shapeCount;
 
+	int* ret = nullptr;
 	// drawing labels and charts above the layers
-	for (i = 0; i < (int)_activeLayers.size(); i++)
+	for (i = 0; i < static_cast<int>(_activeLayers.size()); i++)
 	{
 		Layer* l = _allLayers[_activeLayers[i]];
 
@@ -1622,18 +1623,20 @@ int* CMapView::PlaceLabels(const CRect& rcBounds, Gdiplus::Graphics* graphics, b
 
 		if (!l->IsVisible(scale, zoom))	continue;
 
-		CComPtr<IShapefile> sf = NULL;
+		CComPtr<IShapefile> sf = nullptr;
 		if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
 			continue;
 
 		//LayerDrawer::DrawLabels(l, lblDrawer, vpAboveAllLayers);
-		auto ret = LayerDrawer::PlaceLabels(l, lblDrawer, vpAboveAllLayers);
+		ret = LayerDrawer::PlaceLabels(l, lblDrawer, vpAboveAllLayers);
 
 		//LayerDrawer::DrawCharts(l, chartDrawer, vpAboveAllLayers);
 	}
 
 	if (isConcealed)
 		delete[] isConcealed;
+
+	return ret;
 }
 
 

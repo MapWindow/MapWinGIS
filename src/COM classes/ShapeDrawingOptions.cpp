@@ -88,19 +88,19 @@ STDMETHODIMP CShapeDrawingOptions::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 // *****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointRotationExpression(BSTR* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        USES_CONVERSION;
-    *retval = OLE2BSTR(_options.rotationExpression);
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	USES_CONVERSION;
+	*retval = OLE2BSTR(_options.rotationExpression);
+	return S_OK;
 }
 
 STDMETHODIMP CShapeDrawingOptions::put_PointRotationExpression(BSTR newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-        USES_CONVERSION;
-    ::SysFreeString(_options.rotationExpression);
-    _options.rotationExpression = OLE2BSTR(newVal);
-    return S_OK;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	USES_CONVERSION;
+	::SysFreeString(_options.rotationExpression);
+	_options.rotationExpression = OLE2BSTR(newVal);
+	return S_OK;
 }
 
 // *******************************************************
@@ -113,7 +113,7 @@ STDMETHODIMP CShapeDrawingOptions::get_Picture(IImage** pVal)
 	if ( _options.picture )
 		_options.picture->AddRef();
 	return S_OK;
-};
+}
 
 // *******************************************************
 //	   put_Picture()
@@ -156,7 +156,7 @@ STDMETHODIMP CShapeDrawingOptions::put_Picture(IImage* newVal)
 		}
 	}
 	return S_OK;
-};
+}
 
 // There are 2 overloads for each function: 
 // hdc passed as int** - for new Graphics handle
@@ -169,13 +169,13 @@ STDMETHODIMP CShapeDrawingOptions::put_Picture(IImage* newVal)
 STDMETHODIMP CShapeDrawingOptions::DrawPoint(int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CDC* dc = CDC::FromHandle((HDC)hdc);
+	CDC* dc = CDC::FromHandle(reinterpret_cast<HDC>(static_cast<INT_PTR>(hdc)));
 	
 	if (clipWidth == 0)
-		clipWidth = (int)_options.pointSize + 1;
+		clipWidth = static_cast<int>(_options.pointSize) + 1;
 	
 	if (clipHeight == 0)
-		clipHeight =  (int)_options.pointSize + 1;
+		clipHeight =  static_cast<int>(_options.pointSize) + 1;
 
 	*retVal = DrawPointCore(dc, x, y, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
@@ -210,7 +210,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int 
 		return VARIANT_FALSE;
 	}
 	
-	IShape* shp = NULL;
+	IShape* shp = nullptr;
 	ComHelper::CreateShape(&shp);
 	if (!shp) 
 		return VARIANT_FALSE;
@@ -223,7 +223,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int 
 		return VARIANT_FALSE;
 	}
 
-	IPoint* pnt = NULL;
+	IPoint* pnt = nullptr;
 	ComHelper::CreatePoint(&pnt);
 	pnt->put_X(clipWidth/2.0); 
 	pnt->put_Y(clipHeight/2.0);
@@ -246,7 +246,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int 
 STDMETHODIMP CShapeDrawingOptions::DrawLine(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CDC* dc = CDC::FromHandle((HDC)hdc);
+	CDC* dc = CDC::FromHandle(reinterpret_cast<HDC>(static_cast<INT_PTR>(hdc)));
 
 	if (clipWidth == 0)
 		clipWidth = width + 1;
@@ -286,19 +286,19 @@ VARIANT_BOOL CShapeDrawingOptions::DrawLineCore(CDC* dc, float x, float y, int w
 		ErrorMessage(tkFAILED_TO_OBTAIN_DC);
 		return VARIANT_FALSE;
 	}
-	
-	IShape* shp = NULL;
+
+	IShape* shp = nullptr;
 	ComHelper::CreateShape(&shp);
 	if (!shp) return VARIANT_FALSE;
 
 	VARIANT_BOOL vbretval;
 	shp->Create(SHP_POLYLINE, &vbretval);
-	
-    long position = 0;
-    shp->InsertPart(0, &position, &vbretval);
-    
-	IPoint* pnt = NULL;
-	
+
+	long position = 0;
+	shp->InsertPart(0, &position, &vbretval);
+
+	IPoint* pnt = nullptr;
+
 	for (int i = 0; i < 2; i++)
 	{
 		ComHelper::CreatePoint(&pnt);
@@ -349,7 +349,7 @@ STDMETHODIMP CShapeDrawingOptions::DrawRectangle(int hdc, float x, float y, int 
 												 int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CDC* dc = CDC::FromHandle((HDC)hdc);
+	CDC* dc = CDC::FromHandle(reinterpret_cast<HDC>(static_cast<INT_PTR>(hdc)));
 
 	if (clipWidth == 0)
 		clipWidth = width + 1;
@@ -367,7 +367,7 @@ STDMETHODIMP CShapeDrawingOptions::DrawRectangle(int hdc, float x, float y, int 
 //STDMETHODIMP CShapeDrawingOptions::DrawRectangleVB(int hdc, float x, float y, int width, int height, VARIANT_BOOL drawVertices, 
 //												   int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, VARIANT_BOOL* retVal)
 //{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 //	CDC* dc = CDC::FromHandle((HDC)hdc);
 //	
 //	if (clipWidth == 0)
@@ -391,17 +391,17 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 		return VARIANT_FALSE;
 	}
 	
-	IShape* shp = NULL;
+	IShape* shp = nullptr;
 	ComHelper::CreateShape(&shp);
 	if (!shp) return VARIANT_FALSE;
 
 	VARIANT_BOOL vbretval;
 	shp->Create(SHP_POLYGON, &vbretval);
 	
-    long position = 0;
-    shp->InsertPart(0, &position, &vbretval);
-    
-	IPoint* pnt = NULL;
+	long position = 0;
+	shp->InsertPart(0, &position, &vbretval);
+
+	IPoint* pnt = nullptr;
 	
 	for (int i = 0; i <= 4; i++)	// <=4
 	{
@@ -467,8 +467,6 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 	VARIANT_BOOL retVal = this->DrawShapeCore(dc, x, y, shp, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	shp->Release();
 	return retVal;
-
-	return VARIANT_TRUE;
 }
 #pragma endregion
 
@@ -483,7 +481,7 @@ STDMETHODIMP CShapeDrawingOptions::DrawShape(int hdc, float x, float y, IShape* 
 											 VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CDC* dc = CDC::FromHandle((HDC)hdc);
+	CDC* dc = CDC::FromHandle(reinterpret_cast<HDC>(static_cast<INT_PTR>(hdc)));
 
 	*retVal = this->DrawShapeCore(dc, x, y, shape, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
 	return S_OK;
@@ -496,7 +494,7 @@ STDMETHODIMP CShapeDrawingOptions::DrawShape(int hdc, float x, float y, IShape* 
 //											   int clipWidth, int clipHeight, OLE_COLOR backColor, BYTE backAlpha, 
 //											   VARIANT_BOOL* retVal)
 //{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 //	CDC* dc = CDC::FromHandle((HDC)hdc);
 //
 //	*retVal = this->DrawShapeCore(dc, x, y, shape, drawVertices, clipWidth, clipHeight, backColor, backAlpha);
@@ -534,8 +532,8 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 		double xVal, yVal;
 		VARIANT_BOOL vbretval;
 		shape->get_XY(i, &xVal, &yVal, &vbretval);
-		points[i].X = (int)xVal;
-		points[i].Y = (int)yVal;
+		points[i].X = static_cast<int>(xVal);
+		points[i].Y = static_cast<int>(yVal);
 	}
 	
 	Gdiplus::GraphicsPath path;
@@ -557,7 +555,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 	{
 		VARIANT_BOOL vbretval;
 		HDC hdcTemp = g.GetHDC();
-		_options.linePattern->Draw((int)hdcTemp, 0.0f, 0.0f, clipWidth, clipHeight, backColor, backAlpha, &vbretval);
+		_options.linePattern->Draw(static_cast<int>(reinterpret_cast<INT_PTR>(hdcTemp)), 0.0f, 0.0f, clipWidth, clipHeight, backColor, backAlpha, &vbretval);
 		g.ReleaseHDC(hdcTemp);
 	}
 	else
@@ -625,7 +623,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 		{
 			g.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
 			
-			_options.DrawPointSymbol(g, dc, points, NULL, 1);
+			_options.DrawPointSymbol(g, dc, points, nullptr, 1);
 		}
 
 		// clearing
@@ -702,72 +700,72 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 // *********************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointCharacter (short* retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = (short)_options.pointCharcter;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = static_cast<short>(_options.pointCharcter);
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointCharacter (short newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_options.pointCharcter = (unsigned char)newVal;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.pointCharcter = static_cast<unsigned char>(newVal);
 	return S_OK;
 }
 
 // *****************************************************************
 //		FontName()
 // *****************************************************************
-STDMETHODIMP CShapeDrawingOptions::get_FontName(BSTR* retval)					
+STDMETHODIMP CShapeDrawingOptions::get_FontName(BSTR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	*retval = A2BSTR(_options.fontName);
 	return S_OK;
-};	
-STDMETHODIMP CShapeDrawingOptions::put_FontName(BSTR newVal)					
+}
+STDMETHODIMP CShapeDrawingOptions::put_FontName(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	_options.fontName = OLE2CA(newVal);
 	return S_OK;
-};	
+}
 
 // *****************************************************************
 //		FontName()
 // *****************************************************************
-STDMETHODIMP CShapeDrawingOptions::get_Tag(BSTR* retVal)					
+STDMETHODIMP CShapeDrawingOptions::get_Tag(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	*retVal = A2BSTR(_options.tag);
 	return S_OK;
-};	
-STDMETHODIMP CShapeDrawingOptions::put_Tag(BSTR newVal)					
+}
+STDMETHODIMP CShapeDrawingOptions::put_Tag(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	_options.tag = OLE2CA(newVal);
 	return S_OK;
-};	
+}
 
 // *****************************************************************
 //		RotationField()
 // *****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_RotationField(BSTR* retval)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	USES_CONVERSION;
 
-    *retval = A2BSTR(_options.rotationField);
-    return S_OK;
-};
+	*retval = A2BSTR(_options.rotationField);
+	return S_OK;
+}
 STDMETHODIMP CShapeDrawingOptions::put_RotationField(BSTR newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	USES_CONVERSION;
 
-    _options.rotationField = OLE2CA(newVal);
-    return S_OK;
-};
+	_options.rotationField = OLE2CA(newVal);
+	return S_OK;
+}
 
 // *****************************************************************
 //		Clone()
@@ -776,8 +774,8 @@ STDMETHODIMP CShapeDrawingOptions::Clone(IShapeDrawingOptions** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	IShapeDrawingOptions* sdo = NULL;
-	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&sdo);
+	IShapeDrawingOptions* sdo = nullptr;
+	CoCreateInstance(CLSID_ShapeDrawingOptions, nullptr,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&sdo);
 	if (sdo)
 	{
 		((CShapeDrawingOptions*)sdo)->put_underlyingOptions(&_options);
@@ -971,14 +969,14 @@ STDMETHODIMP CShapeDrawingOptions::SetDefaultPointSymbol (tkDefaultPointSymbol s
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_Visible(VARIANT_BOOL *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = (VARIANT_BOOL)_options.visible; 	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = (VARIANT_BOOL)_options.visible;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_Visible(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.visible = newVal?true:false;	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.visible = newVal?true:false;
 	return S_OK;
 }
 
@@ -987,14 +985,14 @@ STDMETHODIMP CShapeDrawingOptions::put_Visible(VARIANT_BOOL newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillVisible (VARIANT_BOOL *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.fillVisible;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillVisible (VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.fillVisible = newVal?true:false;	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.fillVisible = newVal?true:false;
 	return S_OK;
 }
 
@@ -1003,14 +1001,14 @@ STDMETHODIMP CShapeDrawingOptions::put_FillVisible (VARIANT_BOOL newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_LineVisible (VARIANT_BOOL *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.linesVisible; 				
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.linesVisible;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_LineVisible (VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_options.linesVisible = newVal?true:false;	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.linesVisible = newVal?true:false;
 	return S_OK;
 }
 
@@ -1019,13 +1017,13 @@ STDMETHODIMP CShapeDrawingOptions::put_LineVisible (VARIANT_BOOL newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillColor (OLE_COLOR *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.fillColor; 		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.fillColor;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillColor (OLE_COLOR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_options.fillColor = newVal;
 	return S_OK;
 }
@@ -1035,14 +1033,14 @@ STDMETHODIMP CShapeDrawingOptions::put_FillColor (OLE_COLOR newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_LineColor (OLE_COLOR *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.lineColor;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_LineColor (OLE_COLOR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.lineColor = newVal;		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.lineColor = newVal;
 	return S_OK;
 }
 
@@ -1051,13 +1049,13 @@ STDMETHODIMP CShapeDrawingOptions::put_LineColor (OLE_COLOR newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_DrawingMode (tkVectorDrawingMode *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.drawingMode;
 	return S_OK;
 }
-STDMETHODIMP CShapeDrawingOptions::put_DrawingMode (tkVectorDrawingMode newVal)	
+STDMETHODIMP CShapeDrawingOptions::put_DrawingMode (tkVectorDrawingMode newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	// It's no longer allowed to change drawing mode
 	//m_options.drawingMode = newVal;
 	return S_OK;
@@ -1066,18 +1064,18 @@ STDMETHODIMP CShapeDrawingOptions::put_DrawingMode (tkVectorDrawingMode newVal)
 // ****************************************************************
 //		get_FillHatchStyle
 // ****************************************************************
-STDMETHODIMP CShapeDrawingOptions::get_FillHatchStyle (tkGDIPlusHatchStyle *pVal)	
+STDMETHODIMP CShapeDrawingOptions::get_FillHatchStyle (tkGDIPlusHatchStyle *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.fillHatchStyle; 	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.fillHatchStyle;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillHatchStyle (tkGDIPlusHatchStyle newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal >= -1 && newVal <= 52)
 	{
-		_options.fillHatchStyle = newVal;	
+		_options.fillHatchStyle = newVal;
 	}
 	else
 	{
@@ -1091,16 +1089,16 @@ STDMETHODIMP CShapeDrawingOptions::put_FillHatchStyle (tkGDIPlusHatchStyle newVa
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_LineStipple (tkDashStyle *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.lineStipple; 	
 	return S_OK;
 }
-STDMETHODIMP CShapeDrawingOptions::put_LineStipple (tkDashStyle newVal)			
+STDMETHODIMP CShapeDrawingOptions::put_LineStipple (tkDashStyle newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal >= 0 && newVal <= 5)
 	{
-		_options.lineStipple = newVal;	
+		_options.lineStipple = newVal;
 	}
 	else
 	{
@@ -1114,16 +1112,16 @@ STDMETHODIMP CShapeDrawingOptions::put_LineStipple (tkDashStyle newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointShape (tkPointShapeType *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.pointShapeType;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointShape (tkPointShapeType newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal >= 0 && newVal <= 5)
 	{
-		_options.pointShapeType = newVal;	
+		_options.pointShapeType = newVal;
 	}
 	else
 	{
@@ -1137,16 +1135,16 @@ STDMETHODIMP CShapeDrawingOptions::put_PointShape (tkPointShapeType newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillTransparency (float *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.fillTransparency;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillTransparency (float newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0) newVal = 0;
 	if (newVal > 255) newVal = 255;
-	_options.fillTransparency = newVal;	
+	_options.fillTransparency = newVal;
 	return S_OK;
 }
 
@@ -1155,13 +1153,13 @@ STDMETHODIMP CShapeDrawingOptions::put_FillTransparency (float newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_LineWidth (float *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.lineWidth; 			
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.lineWidth;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_LineWidth (float newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 1) newVal = 1;
 	if (newVal > 20) newVal = 20;
 	_options.lineWidth = newVal;
@@ -1173,16 +1171,16 @@ STDMETHODIMP CShapeDrawingOptions::put_LineWidth (float newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointSize (float *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.pointSize; 							
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.pointSize;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointSize (float newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 1) newVal = 1;
 	if (newVal > 100) newVal = 100;
-	_options.pointSize = newVal;							
+	_options.pointSize = newVal;
 	return S_OK;
 }
 
@@ -1192,14 +1190,14 @@ STDMETHODIMP CShapeDrawingOptions::put_PointSize (float newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillBgTransparent (VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.fillBgTransparent; 				
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.fillBgTransparent;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillBgTransparent (VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.fillBgTransparent = newVal?true:false;	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.fillBgTransparent = newVal?true:false;
 	return S_OK;
 }
 
@@ -1208,14 +1206,14 @@ STDMETHODIMP CShapeDrawingOptions::put_FillBgTransparent (VARIANT_BOOL newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillBgColor (OLE_COLOR* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.fillBgColor; 					
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.fillBgColor;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillBgColor (OLE_COLOR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.fillBgColor = newVal;					
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.fillBgColor = newVal;
 	return S_OK;
 }
 
@@ -1224,16 +1222,16 @@ STDMETHODIMP CShapeDrawingOptions::put_FillBgColor (OLE_COLOR newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillType (tkFillType* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.fillType; 	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.fillType;
 	return S_OK;
 }
-STDMETHODIMP CShapeDrawingOptions::put_FillType (tkFillType newVal)					
+STDMETHODIMP CShapeDrawingOptions::put_FillType (tkFillType newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal >= 0 && newVal <= 3)
 	{
-		_options.fillType = newVal;		
+		_options.fillType = newVal;
 	}
 	else
 	{
@@ -1247,16 +1245,16 @@ STDMETHODIMP CShapeDrawingOptions::put_FillType (tkFillType newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillGradientType (tkGradientType* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.fillGradientType; 	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillGradientType (tkGradientType newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal >= 0 && newVal <= 2)
 	{
-		_options.fillGradientType = newVal;	
+		_options.fillGradientType = newVal;
 	}
 	else
 	{
@@ -1270,13 +1268,13 @@ STDMETHODIMP CShapeDrawingOptions::put_FillGradientType (tkGradientType newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointType(tkPointSymbolType* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.pointSymbolType;
 	return S_OK;
 }
-STDMETHODIMP CShapeDrawingOptions::put_PointType (tkPointSymbolType newVal)			
+STDMETHODIMP CShapeDrawingOptions::put_PointType (tkPointSymbolType newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal >= 0 && newVal <= 2)
 	{
 		_options.pointSymbolType = newVal;
@@ -1293,14 +1291,14 @@ STDMETHODIMP CShapeDrawingOptions::put_PointType (tkPointSymbolType newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillColor2 (OLE_COLOR *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.fillColor2; 		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.fillColor2;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillColor2 (OLE_COLOR newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.fillColor2 = newVal;		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.fillColor2 = newVal;
 	return S_OK;
 }
 
@@ -1309,20 +1307,20 @@ STDMETHODIMP CShapeDrawingOptions::put_FillColor2 (OLE_COLOR newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointRotation (double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.rotation; 		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.rotation;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointRotation (double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal > 360.0 || newVal < -360.0)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 	}
 	else
 	{
-		_options.rotation = newVal;		
+		_options.rotation = newVal;
 	}
 	return S_OK;
 }
@@ -1332,13 +1330,13 @@ STDMETHODIMP CShapeDrawingOptions::put_PointRotation (double newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointReflection(tkPointReflectionType* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.pointReflectionType;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointReflection(tkPointReflectionType newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal >= 0 && newVal <= 2)
 	{
 		_options.pointReflectionType = newVal;
@@ -1355,16 +1353,16 @@ STDMETHODIMP CShapeDrawingOptions::put_PointReflection(tkPointReflectionType new
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointSidesCount (long *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.pointNumSides;	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointSidesCount (long newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal > 20) newVal = 20;
 	if (newVal < 2) newVal = 2;
-	_options.pointNumSides = newVal;	
+	_options.pointNumSides = newVal;
 	return S_OK;
 }
 
@@ -1373,13 +1371,13 @@ STDMETHODIMP CShapeDrawingOptions::put_PointSidesCount (long newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PointSidesRatio (float *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.pointShapeRatio;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointSidesRatio (float newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0.1f) newVal = 0.1f;
 	if (newVal > 1.0f) newVal = 1.0f;
 	_options.pointShapeRatio = newVal;
@@ -1387,17 +1385,17 @@ STDMETHODIMP CShapeDrawingOptions::put_PointSidesRatio (float newVal)
 }
 
 // ****************************************************************
-//		get_PointSidesRatio
+//		get_FillRotation
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillRotation(double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.fillGradientRotation;	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.fillGradientRotation;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillRotation (double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal > 360.0 || newVal < -360.0)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
@@ -1414,16 +1412,16 @@ STDMETHODIMP CShapeDrawingOptions::put_FillRotation (double newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_FillGradientBounds (tkGradientBounds *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.fillGradientBounds;	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.fillGradientBounds;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillGradientBounds (tkGradientBounds newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal >= 0 && newVal <= 1)
 	{
-		_options.fillGradientBounds = newVal;	
+		_options.fillGradientBounds = newVal;
 	}
 	else
 	{
@@ -1437,16 +1435,16 @@ STDMETHODIMP CShapeDrawingOptions::put_FillGradientBounds (tkGradientBounds newV
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_LineTransparency(float *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.lineTransparency;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_LineTransparency(float newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0) newVal = 0;
 	if (newVal > 255) newVal = 255;
-	_options.lineTransparency = newVal;	
+	_options.lineTransparency = newVal;
 	return S_OK;
 }
 
@@ -1455,16 +1453,16 @@ STDMETHODIMP CShapeDrawingOptions::put_LineTransparency(float newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PictureScaleX(double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.scaleX; 	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.scaleX;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PictureScaleX(double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0.1) newVal = 0.1;
 	if (newVal > 5.0) newVal = 5.0;
-	_options.scaleX = newVal;	
+	_options.scaleX = newVal;
 	return S_OK;
 }
 
@@ -1473,16 +1471,16 @@ STDMETHODIMP CShapeDrawingOptions::put_PictureScaleX(double newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_PictureScaleY(double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.scaleY; 	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.scaleY;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PictureScaleY(double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0.1) newVal = 0.1;
 	if (newVal > 5.0) newVal = 5.0;
-	_options.scaleY = newVal;	
+	_options.scaleY = newVal;
 	return S_OK;
 }
 #pragma endregion
@@ -1492,14 +1490,14 @@ STDMETHODIMP CShapeDrawingOptions::put_PictureScaleY(double newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_AlignPictureByBottom(VARIANT_BOOL *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.alignIconByBottom; 	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.alignIconByBottom;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_AlignPictureByBottom(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.alignIconByBottom = newVal ? true: false;	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.alignIconByBottom = newVal ? true: false;
 	return S_OK;
 }
 
@@ -1520,10 +1518,10 @@ STDMETHODIMP CShapeDrawingOptions::Serialize(BSTR* retVal)
 CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 {
 	USES_CONVERSION;
-	
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
+
+	CPLXMLNode* psTree = CPLCreateXMLNode(nullptr, CXT_Element, ElementName);
 	CString str;
-	
+
 	CDrawingOptionsEx* opt = new CDrawingOptionsEx();
 
 	if (opt->fillBgColor != _options.fillBgColor)
@@ -1537,97 +1535,97 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 
 	if (opt->fillColor2 != _options.fillColor2)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillColor2", CPLString().Printf("%d", _options.fillColor2));
-	
+
 	if (opt->fillGradientBounds != _options.fillGradientBounds)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillGradientBounds", CPLString().Printf("%d", (int)_options.fillGradientBounds));
-	
+
 	if (opt->fillGradientRotation != _options.fillGradientRotation)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillGradientRotation", CPLString().Printf("%f", _options.fillGradientRotation));
-	
+
 	if (opt->fillGradientType != _options.fillGradientType)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillGradientType", CPLString().Printf("%d", (int)_options.fillGradientType));
-	
+
 	if (opt->fillHatchStyle != _options.fillHatchStyle)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillHatchStyle", CPLString().Printf("%d", (int)_options.fillHatchStyle));
-	
+
 	if (opt->fillTransparency != _options.fillTransparency)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillTransparency", CPLString().Printf("%f", _options.fillTransparency));
-	
+
 	if (opt->fillType != _options.fillType)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillType", CPLString().Printf("%d", (int)_options.fillType));
-	
+
 	if (opt->fillVisible != _options.fillVisible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillVisible", CPLString().Printf("%d", (int)_options.fillVisible));
-	
+
 	if (opt->fontName != _options.fontName)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FontName", _options.fontName);
-	
-    if (opt->rotationField != _options.rotationField)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "RotationField", _options.rotationField);
+
+	if (opt->rotationField != _options.rotationField)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "RotationField", _options.rotationField);
 
 	if (opt->lineColor != _options.lineColor)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineColor", CPLString().Printf("%d", _options.lineColor));
 
 	if (opt->lineTransparency != _options.lineTransparency)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineTransparency", CPLString().Printf("%f", _options.lineTransparency));
-	
+
 	if (opt->lineStipple != _options.lineStipple)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineStipple", CPLString().Printf("%d", (int)_options.lineStipple));
-	
+
 	if (opt->linesVisible != _options.linesVisible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "LinesVisible", CPLString().Printf("%d", (int)_options.linesVisible));
-	
+
 	if (opt->lineWidth != _options.lineWidth)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineWidth", CPLString().Printf("%f", _options.lineWidth));
-	
+
 	if (opt->pointCharcter != _options.pointCharcter)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointCharcter", CPLString().Printf("%d", (int)_options.pointCharcter));
-	
+
 	if (opt->pointColor != _options.pointColor)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointColor", CPLString().Printf("%d", _options.pointColor));
-	
+
 	if (opt->pointNumSides != _options.pointNumSides)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointNumSides", CPLString().Printf("%d", _options.pointNumSides));
-	
+
 	if (opt->pointShapeRatio != _options.pointShapeRatio)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointShapeRatio", CPLString().Printf("%f", _options.pointShapeRatio));
-	
+
 	if (opt->pointShapeType != _options.pointShapeType)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointShapeType", CPLString().Printf("%d", (int)_options.pointShapeType));
-	
+
 	if (opt->pointSize != _options.pointSize)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointSize", CPLString().Printf("%f", _options.pointSize));
-	
+
 	if (opt->pointSymbolType != _options.pointSymbolType)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointSymbolType", CPLString().Printf("%d", (int)_options.pointSymbolType));
-	
+
 	if (opt->rotation != _options.rotation)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Rotation", CPLString().Printf("%f", _options.rotation));
-	
+
 	if (opt->pointReflectionType != _options.pointReflectionType)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointReflectionType", CPLString().Printf("%d", (int)_options.pointReflectionType));
 
 	if (opt->scaleX != _options.scaleX)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ScaleX", CPLString().Printf("%f", _options.scaleX));
-	
+
 	if (opt->scaleY != _options.scaleY)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ScaleY", CPLString().Printf("%f", _options.scaleY));
-	
+
 	if (opt->verticesColor != _options.verticesColor)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesColor", CPLString().Printf("%d", _options.verticesColor));
-	
+
 	if (opt->verticesFillVisible != _options.verticesFillVisible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesFillVisible", CPLString().Printf("%d", (int)_options.verticesFillVisible));
-	
+
 	if (opt->verticesSize != _options.verticesSize)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesSize", CPLString().Printf("%d", _options.verticesSize));
-	
+
 	if (opt->verticesType != _options.verticesType)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesType", CPLString().Printf("%d", (int)_options.verticesType));
-	
+
 	if (opt->verticesVisible != _options.verticesVisible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesVisible", CPLString().Printf("%d", (int)_options.verticesVisible));
-		
+
 	if (opt->visible != _options.visible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_options.visible));
 
@@ -1645,21 +1643,21 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 
 	if (opt->dynamicVisibility != _options.dynamicVisibility)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "DynamicVisibility", CPLString().Printf("%d", (int)_options.dynamicVisibility));
-	
+
 	if (opt->minVisibleScale != _options.minVisibleScale)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinVisibleScale", CPLString().Printf("%f", _options.minVisibleScale));
-	
+
 	if (opt->maxVisibleScale != _options.maxVisibleScale)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleScale", CPLString().Printf("%f", _options.maxVisibleScale));
 
-    if (opt->minVisibleZoom != _options.minVisibleZoom)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "MinVisibleZoom", CPLString().Printf("%d", _options.minVisibleZoom));
+	if (opt->minVisibleZoom != _options.minVisibleZoom)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinVisibleZoom", CPLString().Printf("%d", _options.minVisibleZoom));
 
-    if (opt->maxVisibleZoom != _options.maxVisibleZoom)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleZoom", CPLString().Printf("%d", _options.maxVisibleZoom));
+	if (opt->maxVisibleZoom != _options.maxVisibleZoom)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleZoom", CPLString().Printf("%d", _options.maxVisibleZoom));
 
-    if (opt->rotationExpression != _options.rotationExpression)
-        Utility::CPLCreateXMLAttributeAndValue(psTree, "RotationExpression", OLE2CA(_options.rotationExpression));
+	if (opt->rotationExpression != _options.rotationExpression)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "RotationExpression", OLE2CA(_options.rotationExpression));
 
 	delete opt;
 
@@ -1671,7 +1669,7 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 			CPLAddXMLChild(psTree, psNode);
 		}
 	}
-	
+
 	if (_options.picture)
 	{
 		CPLXMLNode* psNode = ((CImageClass*)_options.picture)->SerializeCore(VARIANT_TRUE, "Picture");
@@ -1680,7 +1678,7 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 			CPLAddXMLChild(psTree, psNode);
 		}
 	}
-	
+
 	return psTree;
 }
 
@@ -1735,7 +1733,7 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue( node, "LineColor", nullptr);
 	_options.lineColor = (s == "") ? opt->lineColor : (OLE_COLOR)atoi(s.GetString());
-	
+
 	s = CPLGetXMLValue( node, "LineStipple", nullptr);
 	_options.lineStipple = (s == "") ? opt->lineStipple : (tkDashStyle)atoi(s.GetString());
 
@@ -1753,7 +1751,7 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue( node, "PointColor", nullptr);
 	_options.pointColor = (s == "") ? opt->pointColor : (OLE_COLOR)atoi(s.GetString());
-	
+
 	s = CPLGetXMLValue( node, "PointNumSides", nullptr);
 	_options.pointNumSides = (s == "") ? opt->pointNumSides : atoi(s.GetString());
 
@@ -1762,25 +1760,25 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue( node, "PointShapeType", nullptr);
 	_options.pointShapeType = (s == "") ? opt->pointShapeType : (tkPointShapeType)atoi(s.GetString());
-	
+
 	s = CPLGetXMLValue( node, "PointSize", nullptr);
 	_options.pointSize = (s == "") ? opt->pointSize : (float)Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "PointSymbolType", nullptr);
 	_options.pointSymbolType = (s == "") ? opt->pointSymbolType : (tkPointSymbolType)atoi(s.GetString());
-	
+
 	s = CPLGetXMLValue( node, "Rotation", nullptr);
 	_options.rotation = (s == "") ? opt->rotation : Utility::atof_custom(s);
-	
+
 	s = CPLGetXMLValue( node, "PointReflectionType", nullptr);
 	_options.pointReflectionType = (s == "") ? opt->pointReflectionType : (tkPointReflectionType)atoi(s.GetString());
-	
+
 	s = CPLGetXMLValue( node, "ScaleX", nullptr);
 	_options.scaleX = (s == "") ? opt->scaleX : Utility::atof_custom(s);
-	
+
 	s = CPLGetXMLValue( node, "ScaleY", nullptr);
 	_options.scaleY = (s == "") ? opt->scaleY : Utility::atof_custom(s);
-	
+
 	s = CPLGetXMLValue( node, "VerticesColor", nullptr);
 	_options.verticesColor = (s == "") ? opt->verticesColor : atoi(s);
 
@@ -1795,10 +1793,10 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue( node, "VerticesVisible", nullptr);
 	_options.verticesVisible = (s == "") ? opt->verticesVisible : (VARIANT_BOOL)atoi(s.GetString());
-	
+
 	s = CPLGetXMLValue( node, "Visible", nullptr);
 	_options.visible = (s == "") ? opt->visible : atoi(s.GetString()) == 0 ? false : true;
-	
+
 	s = CPLGetXMLValue( node, "AlignPictureByBottom", nullptr);
 	_options.alignIconByBottom = (s == "") ? opt->alignIconByBottom : atoi(s.GetString()) == 0 ? false : true;
 
@@ -1810,29 +1808,29 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue(node, "DynamicVisibility", nullptr);
 	_options.dynamicVisibility = (s == "") ? opt->dynamicVisibility : atoi(s.GetString()) == 0 ? false : true;
-	
+
 	s = CPLGetXMLValue(node, "MinVisibleScale", nullptr);
 	_options.minVisibleScale = (s == "") ? opt->minVisibleScale : Utility::atof_custom(s);
-	
+
 	s = CPLGetXMLValue(node, "MaxVisibleScale", nullptr);
 	_options.maxVisibleScale = (s == "") ? opt->maxVisibleScale : Utility::atof_custom(s);
 
-    s = CPLGetXMLValue(node, "MinVisibleZoom", NULL);
-    _options.minVisibleZoom = (s == "") ? opt->minVisibleZoom : atoi(s.GetString());
+	s = CPLGetXMLValue(node, "MinVisibleZoom", nullptr);
+	_options.minVisibleZoom = (s == "") ? opt->minVisibleZoom : atoi(s.GetString());
 
-    s = CPLGetXMLValue(node, "MaxVisibleZoom", NULL);
-    _options.maxVisibleZoom = (s == "") ? opt->maxVisibleZoom : atoi(s.GetString());
+	s = CPLGetXMLValue(node, "MaxVisibleZoom", nullptr);
+	_options.maxVisibleZoom = (s == "") ? opt->maxVisibleZoom : atoi(s.GetString());
 
-    s = CPLGetXMLValue(node, "RotationExpression", nullptr);
-    SysFreeString(_options.rotationExpression);
-    _options.rotationExpression = A2BSTR(s);
+	s = CPLGetXMLValue(node, "RotationExpression", nullptr);
+	SysFreeString(_options.rotationExpression);
+	_options.rotationExpression = A2BSTR(s);
 
 	// restoring picture
 	CPLXMLNode* psChild = CPLGetXMLNode(node, "Picture");
 	if (psChild)
 	{
-		IImage* img = NULL;
-		CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&img);
+		IImage* img = nullptr;
+		CoCreateInstance(CLSID_Image, nullptr,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&img);
 		if (img)
 		{
 			((CImageClass*)img)->DeserializeCore(psChild);
@@ -1845,8 +1843,8 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	psChild = CPLGetXMLNode(node, "LinePatternClass");
 	if (psChild)
 	{
-		ILinePattern* pattern = NULL;
-		CoCreateInstance(CLSID_LinePattern,NULL,CLSCTX_INPROC_SERVER,IID_ILinePattern,(void**)&pattern);
+		ILinePattern* pattern = nullptr;
+		CoCreateInstance(CLSID_LinePattern, nullptr,CLSCTX_INPROC_SERVER,IID_ILinePattern,(void**)&pattern);
 		if (pattern)
 		{
 			((CLinePattern*)pattern)->DeserializeCore(psChild);
@@ -1860,7 +1858,7 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 		{
 			_options.linePattern->Clear();
 			_options.linePattern->Release();
-			_options.linePattern = NULL;
+			_options.linePattern = nullptr;
 		}
 	}
 
@@ -1899,14 +1897,14 @@ STDMETHODIMP CShapeDrawingOptions::Deserialize(BSTR newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_MinScale (double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.minScale; 			
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.minScale;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_MinScale (double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.minScale = newVal;		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.minScale = newVal;
 	return S_OK;
 }
 
@@ -1915,14 +1913,14 @@ STDMETHODIMP CShapeDrawingOptions::put_MinScale (double newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_MaxScale (double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.maxScale; 			
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.maxScale;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_MaxScale (double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.maxScale = newVal;		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.maxScale = newVal;
 	return S_OK;
 }
 
@@ -1931,14 +1929,14 @@ STDMETHODIMP CShapeDrawingOptions::put_MaxScale (double newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_MinLineWidth (double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.minLineWidth; 			
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.minLineWidth;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_MinLineWidth (double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.minLineWidth = newVal;		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.minLineWidth = newVal;
 	return S_OK;
 }
 
@@ -1947,14 +1945,14 @@ STDMETHODIMP CShapeDrawingOptions::put_MinLineWidth (double newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_MaxLineWidth (double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = _options.maxLineWidth; 			
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _options.maxLineWidth;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_MaxLineWidth (double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	_options.maxLineWidth = newVal;		
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_options.maxLineWidth = newVal;
 	return S_OK;
 }
 
@@ -1963,77 +1961,77 @@ STDMETHODIMP CShapeDrawingOptions::put_MaxLineWidth (double newVal)
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_DynamicVisibility(VARIANT_BOOL* pVal)
  {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.dynamicVisibility ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
-};
+}
 STDMETHODIMP CShapeDrawingOptions::put_DynamicVisibility(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_options.dynamicVisibility = newVal == VARIANT_TRUE;
 	return S_OK;
-};
+}
 
 // ****************************************************************
 //		get_MinVisibleScale
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_MinVisibleScale(DOUBLE* pVal)
  {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.minVisibleScale;
 	return S_OK;
-};
+}
 STDMETHODIMP CShapeDrawingOptions::put_MinVisibleScale(DOUBLE newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_options.minVisibleScale = newVal;
 	return S_OK;
-};
+}
 
 // ****************************************************************
 //		get_MaxVisibleScale
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_MaxVisibleScale(DOUBLE* pVal)
  {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _options.maxVisibleScale;
 	return S_OK;
-};
+}
 STDMETHODIMP CShapeDrawingOptions::put_MaxVisibleScale(DOUBLE newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_options.maxVisibleScale = newVal;
 	return S_OK;
-};
+}
 
 // ****************************************************************
 //		get_MinVisibleScale
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_MinVisibleZoom(LONG* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     *pVal = _options.minVisibleZoom;
     return S_OK;
-};
+}
 STDMETHODIMP CShapeDrawingOptions::put_MinVisibleZoom(LONG newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     _options.minVisibleZoom = newVal;
     return S_OK;
-};
+}
 
 // ****************************************************************
 //		get_MaxVisibleScale
 // ****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_MaxVisibleZoom(LONG* pVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     *pVal = _options.maxVisibleZoom;
     return S_OK;
-};
+}
 STDMETHODIMP CShapeDrawingOptions::put_MaxVisibleZoom(LONG newVal)
 {
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+    AFX_MANAGE_STATE(AfxGetStaticModuleState())
     _options.maxVisibleZoom = newVal;
     return S_OK;
-};
+}

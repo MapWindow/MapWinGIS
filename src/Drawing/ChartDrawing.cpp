@@ -79,7 +79,7 @@ bool CChartDrawer::PrepareValues(IShapefile* sf, ICharts* charts, ChartOptions* 
 	CComBSTR expr;
 	charts->get_VisibilityExpression(&expr);
 
-	CComPtr<ITable> tbl = NULL;
+	CComPtr<ITable> tbl = nullptr;
 	sf->get_Table(&tbl);
 
 	std::vector<long> arrInit;
@@ -172,7 +172,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	REAL dx = _graphics->GetDpiX();
 
 	// reading chart properties
-	CComPtr<ICharts> charts = NULL;
+	CComPtr<ICharts> charts = nullptr;
 	sf->get_Charts(&charts);
 	if (!charts)
 		return;
@@ -217,9 +217,9 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	bool vertical = (options->valuesStyle == vsVertical);
 	CString sFormat = normalized ? "%.2f" : "%g";	// format for numbers
 
-	CFont* oldFont = NULL;
+	CFont* oldFont = nullptr;
 	CFont fnt;
-	Font* gdiPlusFont = NULL;
+	Font* gdiPlusFont = nullptr;
 
 	if (options->valuesVisible )
 	{
@@ -243,7 +243,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	if (gdiPlusFont) 
 	{
 		delete gdiPlusFont;
-		gdiPlusFont = NULL;
+		gdiPlusFont = nullptr;
 	}
 
 	for (size_t i = 0; i < values.size(); i++) {
@@ -374,7 +374,7 @@ void CChartDrawer::DrawPieCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 		chartRect = new CRect((int)(xStart - pieWidth / 2), (int)(yStart - pieHeight / 2), int(xStart + pieWidth / 2), int(yStart + pieHeight / 2));
 
 		// collision avoidance
-		if (options->avoidCollisions && _collisionList != NULL)
+		if (options->avoidCollisions && _collisionList != nullptr)
 		{
 			if (_collisionList->HaveCollision(*chartRect))
 			{
@@ -422,8 +422,8 @@ void CChartDrawer::DrawPieCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 					labelAngle = labelAngle - 360.0f;
 				}
 
-				int x = (int)(xStart + sin(labelAngle / 180.0 * pi_) * options->radius);
-				int y = (int)(yStart - cos(labelAngle / 180.0 * pi_) * options->radius);
+				int x = static_cast<int>(xStart + sin(labelAngle / 180.0 * pi_) * options->radius);
+				int y = static_cast<int>(yStart - cos(labelAngle / 180.0 * pi_) * options->radius);
 
 				if (labelAngle >= 0.0 && labelAngle <= 180.0)
 				{
@@ -448,7 +448,7 @@ void CChartDrawer::DrawPieCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 				rect->MoveToX(x - rect->Width() / 2);
 				rect->MoveToY(y - rect->Height() / 2);
 
-				if (options->avoidCollisions && _collisionList != NULL)
+				if (options->avoidCollisions && _collisionList != nullptr)
 				{
 					if (_collisionList->HaveCollision(*rect))
 					{
@@ -467,7 +467,7 @@ void CChartDrawer::DrawPieCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 				if (chartRect)
 				{
 					delete chartRect;
-					chartRect = NULL;
+					chartRect = nullptr;
 				}
 				continue;
 			}
@@ -487,7 +487,7 @@ void CChartDrawer::DrawPieCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 		yStart -= pieHeight / 2.0f;
 		for (int j = 0; j < numBars; j++)
 		{
-			sweepAngle = (REAL)(values[i][j] / sum * 360.0);
+			sweepAngle = static_cast<REAL>(values[i][j] / sum * 360.0);
 			if (sweepAngle > 0.0)
 			{
 				_graphics->FillPie(brushes[j], xStart, yStart, pieWidth, pieHeight, startAngle, sweepAngle);
@@ -532,7 +532,7 @@ void CChartDrawer::DrawPieCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 		// drawing the values
 		if (options->valuesVisible)
 		{
-			for (unsigned int i = initLabelIndex; i < allLabels.size(); i++)
+			for (int i = static_cast<int>(initLabelIndex); i < static_cast<int>(allLabels.size()); i++)
 			{
 				CRect* rect = &allLabels[i].rect;
 				_collisionList->AddRectangle(rect, collisionBuffer, collisionBuffer);
@@ -542,12 +542,12 @@ void CChartDrawer::DrawPieCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 		ShapeRecord* info = (*positions)[i];
 		if (info)
 		{
-			// storing rectangle for dragging operations				
+			// storing rectangle for dragging operations
 			info->chart->frame = chartRect;
 			info->chart->isDrawn = true;
 		}
 
-		if (options->avoidCollisions && _collisionList != NULL)
+		if (options->avoidCollisions && _collisionList != nullptr)
 		{
 			_collisionList->AddRectangle(chartRect, collisionBuffer, collisionBuffer);
 		}
@@ -597,8 +597,8 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 
 		ProjectionToPixel(pnt->chart->x, pnt->chart->y, x, y);
 
-		x += (double)offsetX;
-		y += (double)offsetY;
+		x += static_cast<double>(offsetX);
+		y += static_cast<double>(offsetY);
 
 		// calculating max height
 		double max = 0.0;
@@ -609,8 +609,8 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 		}
 		double maxHeight = options->barHeight / maxValue * max;
 
-		int xStart = int(x - numBars * options->barWidth / 2.0);
-		int yStart = int(y + maxHeight / 2.0);
+		int xStart = static_cast<int>(x - numBars * options->barWidth / 2.0);
+		int yStart = static_cast<int>(y + maxHeight / 2.0);
 
 		double angle = 45.0;
 
@@ -618,7 +618,7 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 		bool canDraw = false;
 		for (int j = 0; j < numBars; j++)
 		{
-			int height = int((double)options->barHeight / maxValue * values[i][j]);
+			int height = static_cast<int>(static_cast<double>(options->barHeight) / maxValue * values[i][j]);
 			if (height > 0)
 				canDraw = true;
 		}
@@ -629,14 +629,14 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 		}
 
 		// collision avoidance
-		CRect* rectChart = NULL;
-		if (options->avoidCollisions && _collisionList != NULL)
+		CRect* rectChart = nullptr;
+		if (options->avoidCollisions && _collisionList != nullptr)
 		{
 			rectChart = new CRect((int)xStart, int(yStart - options->barHeight), int(xStart + options->barWidth * numBars), (int)yStart);
 			if (options->use3Dmode)
 			{
-				rectChart->right += (long)(sin(pi_ / 4.0) * options->thickness);
-				rectChart->top -= (long)(cos(pi_ / 4.0) * options->thickness);
+				rectChart->right += static_cast<long>(sin(pi_ / 4.0) * options->thickness);
+				rectChart->top -= static_cast<long>(cos(pi_ / 4.0) * options->thickness);
 			}
 
 			if (_collisionList->HaveCollision(*rectChart))
@@ -649,15 +649,15 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 		std::vector<ValueRectangle> labels;
 		if (options->valuesVisible)
 		{
-			int xAdd = (int)(sin(45.0 / 180 * pi_) * options->thickness);
+			int xAdd = static_cast<int>(sin(45.0 / 180 * pi_) * options->thickness);
 
 			// drawing values
-			xStart = int(x - numBars * options->barWidth / 2.0);
-			yStart = int(y + maxHeight / 2.0);
+			xStart = static_cast<int>(x - numBars * options->barWidth / 2.0);
+			yStart = static_cast<int>(y + maxHeight / 2.0);
 
 			for (int j = 0; j < numBars; j++)
 			{
-				int height = int((double)options->barHeight / maxValue * values[i][j]);
+				int height = static_cast<int>(static_cast<double>(options->barHeight) / maxValue * values[i][j]);
 				if (height != 0)
 				{
 					CString s = Utility::FormatNumber(values[i][j], sFormat);
@@ -700,7 +700,7 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 						rect->MoveToXY(xShift, yShift);
 					}
 
-					if (options->avoidCollisions && _collisionList != NULL)
+					if (options->avoidCollisions && _collisionList != nullptr)
 					{
 						if (_collisionList->HaveCollision(*rect))
 						{
@@ -713,7 +713,7 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 					ValueRectangle value;
 					value.string = s;
 
-					// drawing frame							
+					// drawing frame
 					if (!vertical)
 					{
 						CRect r(rect->left - 2, rect->top, rect->right + 2, rect->bottom);
@@ -738,17 +738,17 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 				if (rectChart)
 				{
 					delete rectChart;
-					rectChart = NULL;
+					rectChart = nullptr;
 				}
 				continue;
 			}
 		}
 
 		// drawing the bars
-		xStart = int(x - numBars * options->barWidth / 2.0);
+		xStart = static_cast<int>(x - numBars * options->barWidth / 2.0);
 		for (int j = 0; j < numBars; j++)
 		{
-			int height = int((double)options->barHeight / maxValue * values[i][j]);
+			int height = static_cast<int>(static_cast<double>(options->barHeight) / maxValue * values[i][j]);
 			if (height != 0)
 			{
 				// drawing bars
@@ -796,7 +796,7 @@ void CChartDrawer::DrawBarCharts(IShapefile* sf, ICharts* charts, ChartOptions* 
 		DrawLabels(gdiPlusFont, options, labels, true, vertical);
 
 		// adding chart rect to collision list
-		if (options->avoidCollisions && _collisionList != NULL)
+		if (options->avoidCollisions && _collisionList != nullptr)
 		{
 			_collisionList->AddRectangle(rectChart, collisionBuffer, collisionBuffer);
 			ShapeRecord* info = (*positions)[i];
@@ -882,10 +882,9 @@ void CChartDrawer::DrawLabels(Gdiplus::Font* font, ChartOptions* options, std::v
 		else {
 			_graphics->DrawString(s, s.GetLength(), font, r, &format, &textBrush);
 			_graphics->SetTransform(&transform);
-
 		}
 
-		if (addToCollisionList && options->avoidCollisions && _collisionList != NULL)
+		if (addToCollisionList && options->avoidCollisions && _collisionList != nullptr)
 		{
 			_collisionList->AddRectangle(rect, 0, 0);
 		}
@@ -900,7 +899,7 @@ void CChartDrawer::PrepareBrushes(long numBars, ICharts* charts, ChartOptions* o
 {
 	for (long i = 0; i < numBars; i++)
 	{
-		CComPtr<IChartField> chartField = NULL;
+		CComPtr<IChartField> chartField = nullptr;
 		charts->get_Field(i, &chartField);
 
 		OLE_COLOR color;

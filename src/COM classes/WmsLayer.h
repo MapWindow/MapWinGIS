@@ -104,7 +104,7 @@ public:
 	STDMETHOD(get_TileSize)(LONG* pVal);
 	STDMETHOD(put_TileSize)(LONG newVal);
 
-private:
+private:	
 	BSTR _key;
 	long _lastErrorCode;
 	WmsCustomProvider* _provider;

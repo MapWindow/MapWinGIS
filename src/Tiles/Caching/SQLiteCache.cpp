@@ -32,7 +32,7 @@ void SQLiteCache::Close()
 	if (_conn)
 	{
 		sqlite3_close(_conn);
-		_conn = NULL;
+		_conn = nullptr;
 	}
 }
 
@@ -66,7 +66,7 @@ bool SQLiteCache::Initialize(SqliteOpenMode openMode)
 			}
 	}
 	_section.Unlock();
-	return _conn != NULL;
+	return _conn != nullptr;
 }
 
 // ***********************************************************
@@ -116,7 +116,7 @@ bool SQLiteCache::set_DbName(CStringW name)
 CStringW SQLiteCache::get_DefaultDbName()
 {
 	wchar_t* path = new wchar_t[MAX_PATH + 1];
-	GetModuleFileNameW(NULL, path, MAX_PATH);
+	GetModuleFileNameW(nullptr, path, MAX_PATH);
 	CStringW name = Utility::GetFolderFromPath(path);
 	name += L"\\";
 	name += DB_NAME;
@@ -139,16 +139,16 @@ bool SQLiteCache::CreateDatabase()
 	if (_conn)
 	{
 		int val = sqlite3_close(_conn);
-		_conn = NULL;
+		_conn = nullptr;
 	}
 
 	bool ret = false;
-	int val = sqlite3_open_v2(name, &_conn, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE| SQLITE_OPEN_FULLMUTEX, NULL);
+	int val = sqlite3_open_v2(name, &_conn, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE| SQLITE_OPEN_FULLMUTEX, nullptr);
 	if (!val)
 	{
 		char* sql = "CREATE TABLE IF NOT EXISTS Tiles (id INTEGER NOT NULL PRIMARY KEY, X INTEGER NOT NULL, "
 					"Y INTEGER NOT NULL, Zoom INTEGER NOT NULL, Type INTEGER NOT NULL, Size INTEGER NOT NULL, CacheTime DATETIME );";
-		val = sqlite3_exec(_conn, sql, NULL, NULL, NULL);
+		val = sqlite3_exec(_conn, sql, nullptr, nullptr, nullptr);
 		
 		if (!val)
 		{
@@ -158,12 +158,12 @@ bool SQLiteCache::CreateDatabase()
 				"UPDATE Tiles SET cacheTime = DATETIME('NOW') WHERE rowid = new.rowid; "
 				"END;";
 
-			val = sqlite3_exec(_conn, s, NULL, NULL, NULL);
+			val = sqlite3_exec(_conn, s, nullptr, nullptr, nullptr);
 			if (!val)
 			{
 				sql = "CREATE TABLE IF NOT EXISTS TilesData (id INTEGER NOT NULL PRIMARY KEY CONSTRAINT fk_Tiles_id "
 					  "REFERENCES Tiles(id) ON DELETE CASCADE, Tile BLOB NULL);";
-				val = sqlite3_exec(_conn, sql, NULL, NULL, NULL);
+				val = sqlite3_exec(_conn, sql, nullptr, nullptr, nullptr);
 				
 				if (!val)
 				{
@@ -173,7 +173,7 @@ bool SQLiteCache::CreateDatabase()
 						  "DELETE from TilesData WHERE TilesData.Id = OLD.id; "
 						  "END;";
 
-					return !sqlite3_exec(_conn, sql, NULL, NULL, NULL);
+					return !sqlite3_exec(_conn, sql, nullptr, nullptr, nullptr);
 				}
 			}
 		}
@@ -201,7 +201,7 @@ void SQLiteCache::AddTile(TileCore* tile)
 		sqlite3_stmt *stmt;
 		for (size_t i = 0; i < tile->Overlays.size(); i++)
 		{
-			CMemoryBitmap* bmp = tile->get_Bitmap(i);
+			CMemoryBitmap* bmp = tile->get_Bitmap(static_cast<int>(i));
 			if (bmp)
 			{
 				int size = bmp->get_Size();
@@ -212,7 +212,7 @@ void SQLiteCache::AddTile(TileCore* tile)
 
 					if (val != SQLITE_OK)
 					{
-#ifdef DEBUG_LOG
+#ifndef RELEASE_MODE
 						auto sqlite3_error = sqlite3_errmsg(_conn);
 						auto errorCode = sqlite3_extended_errcode(_conn);
 						CallbackHelper::ErrorMsg(Debug::Format("SQLiteCache::DoCaching: Failed to prepare statement errorNo: %d Message: %s", errorCode, sqlite3_error));
@@ -241,7 +241,7 @@ void SQLiteCache::AddTile(TileCore* tile)
 						memcpy(data, hMem, size);
 						::GlobalUnlock(hMem);
 
-						val = sqlite3_bind_blob(stmt, 2, data, size, NULL);
+						val = sqlite3_bind_blob(stmt, 2, data, size, nullptr);
 						val = sqlite3_step(stmt);
 						
 						if (val == SQLITE_OK || val == SQLITE_DONE)
@@ -282,8 +282,7 @@ void SQLiteCache::AutoClear()
 		try 
 		{
 			_section.Lock();
-			CString sql;
-			sql = "SELECT Size, CacheTime FROM Tiles ORDER BY CacheTime ASC";
+			CString sql = "SELECT Size, CacheTime FROM Tiles ORDER BY CacheTime ASC";
 			const char   *tail;
 			sqlite3_stmt *stmt;
 
@@ -313,7 +312,7 @@ void SQLiteCache::AutoClear()
 				sql = "DELETE FROM Tiles";
 			}
 			
-			val = sqlite3_exec(_conn, sql, NULL, NULL, NULL);
+			val = sqlite3_exec(_conn, sql, nullptr, nullptr, nullptr);
 			_section.Unlock();
 		}
 		catch(...)
@@ -344,7 +343,7 @@ bool SQLiteCache::get_TileExists(BaseProvider* provider, int scale, int x, int y
 			CString sql;
 			sql.Format("SELECT id FROM Tiles WHERE X = %d AND Y = %d AND Zoom = %d AND Type = %d", x, y, scale, provider->Id);
 			int val = sqlite3_prepare_v2(_conn, sql, sql.GetLength() + 1, &stmt, &tail);
-			
+
 			_section.Lock();
 			if( sqlite3_step(stmt) != SQLITE_ROW)
 			{
@@ -356,7 +355,6 @@ bool SQLiteCache::get_TileExists(BaseProvider* provider, int scale, int x, int y
 			if (!exists)
 				break;
 		}
-		
 	}
 	catch (...)
 	{
@@ -373,10 +371,10 @@ bool SQLiteCache::get_TileExists(BaseProvider* provider, int scale, int x, int y
 // Extracts a tile from the database
 TileCore* SQLiteCache::get_Tile(BaseProvider* provider, int scale, int x, int y)
 {
-	TileCore* tile = NULL;
+	TileCore* tile = nullptr;
 	
 	if(!Initialize(SqliteOpenMode::OpenIfExists))
-		return NULL;
+		return nullptr;
 
 	_section.Lock();
 
@@ -399,18 +397,18 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, int scale, int x, int y)
 					sqlite3_stmt *stmt2;
 					sqlite3_int64 id = sqlite3_column_int64(stmt, 0);
 					sql.Format("SELECT tile FROM TilesData WHERE Id = %d", id);
-					
+
 					if (sqlite3_prepare_v2(_conn, sql, sql.GetLength() + 1, &stmt2, &tail2) == SQLITE_OK)
 					{
 						if (sqlite3_step(stmt2) == SQLITE_ROW)
 						{
 							const void* data = sqlite3_column_blob(stmt2, 0);
 							int size = sqlite3_column_bytes(stmt2, 0);
-							
+
 							if (size > 0)
 							{
 								CMemoryBitmap* bmp = new CMemoryBitmap();
-								if (bmp->LoadFromRawData((const char*)data, size))
+								if (bmp->LoadFromRawData(static_cast<const char*>(data), size))
 								{
 									if (i == 0)
 										tile = new TileCore(providerId, scale, CPoint(x, y), provider->get_Projection());
@@ -437,7 +435,7 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, int scale, int x, int y)
 		if (tile && tile->Overlays.size() != provider->get_SubProviders()->size())
 		{
 			delete tile;
-			tile = NULL;
+			tile = nullptr;
 		}
 
 		// for composite providers
@@ -461,21 +459,21 @@ void SQLiteCache::Clear(int providerId, int fromScale, int toScale)
 {
 	if(!Initialize(SqliteOpenMode::OpenIfExists))
 		return;
-	
+
 	// there is no need to delete from tilesdata table as there is ON CASCADE DELETE rule specified in foreign key constraint
 	// updated: in fact there is a trigger which does the job
 	CString temp;
 	CString sql = "DELETE FROM TILES";
-	
-	if (providerId != (int)tkTileProvider::ProviderNone || fromScale != 0 || toScale != 100)
+
+	if (providerId != static_cast<int>(tkTileProvider::ProviderNone) || fromScale != 0 || toScale != 100)
 		sql += " WHERE ";
-	
-	if (providerId != (int)tkTileProvider::ProviderNone)
+
+	if (providerId != static_cast<int>(tkTileProvider::ProviderNone))
 	{
 		temp.Format(" Type = %d", providerId);
 		sql += temp;
 	}
-	
+
 	if (fromScale != 0 || toScale != 100)
 	{
 		if (temp.GetLength() > 0)
@@ -484,9 +482,9 @@ void SQLiteCache::Clear(int providerId, int fromScale, int toScale)
 		temp.Format(" Zoom >= %d AND Zoom <= %d ", fromScale, toScale);
 		sql += temp;
 	}
-	
+
 	_section.Lock();
-	int val = sqlite3_exec(_conn, sql, NULL, NULL, NULL);
+	int val = sqlite3_exec(_conn, sql, nullptr, nullptr, nullptr);
 	_section.Unlock();
 }
 
@@ -494,10 +492,10 @@ void SQLiteCache::Clear(int providerId, int fromScale, int toScale)
 //		get_FileSize()
 // ****************************************************************
 double SQLiteCache::get_SizeMB() 
-{	
+{
 	if(!Initialize(SqliteOpenMode::OpenIfExists))
 		return 0.0;
-	
+
 	const char   *tail;
 	sqlite3_stmt *stmt;
 
@@ -505,7 +503,7 @@ double SQLiteCache::get_SizeMB()
 
 	CString sql = "SELECT SUM(size) FROM Tiles";
 	int val = sqlite3_prepare_v2(_conn, sql, sql.GetLength() + 1, &stmt, &tail);
-	
+
 	if (val != SQLITE_OK)
 	{
 		CallbackHelper::ErrorMsg(Debug::Format("SQLiteCache::get_FileSize: Failed to prepare statement; %d.", val));
@@ -519,7 +517,7 @@ double SQLiteCache::get_SizeMB()
 		_section.Unlock();	
 		val = sqlite3_finalize(stmt);
 	}
-	return (double)size/(double)(0x1 << 20);
+	return static_cast<double>(size)/static_cast<double>(0x1 << 20);
 }
 
 // ****************************************************************
@@ -529,7 +527,7 @@ double SQLiteCache::get_SizeMB(int providerId, int scale)
 {
 	if(!Initialize(SqliteOpenMode::OpenIfExists))
 		return 0.0;
-	
+
 	int size = 0;
 	double result = 0.0;
 	const char   *tail;
@@ -538,11 +536,11 @@ double SQLiteCache::get_SizeMB(int providerId, int scale)
 	try
 	{
 		CString sql = "SELECT size FROM Tiles";
-		if (providerId != (int)tkTileProvider::ProviderNone || scale != -1)
+		if (providerId != static_cast<int>(tkTileProvider::ProviderNone) || scale != -1)
 			sql += " WHERE ";
-		
+
 		CString temp;
-		if (providerId != (int)tkTileProvider::ProviderNone)
+		if (providerId != static_cast<int>(tkTileProvider::ProviderNone))
 		{
 			temp.Format("Type = %d", providerId);
 			sql += temp;
@@ -569,7 +567,7 @@ double SQLiteCache::get_SizeMB(int providerId, int scale)
 		CallbackHelper::ErrorMsg("SQLiteCache: exception on getting file size.");
 	}
 
-	return (double)size/(double)(0x1 << 20);
+	return static_cast<double>(size)/static_cast<double>(0x1 << 20);
 }
 
 // ****************************************************************
@@ -588,7 +586,7 @@ long SQLiteCache::get_TileCount(int provider, int zoom, CRect indices)
 	{
 		CString format = "SELECT count(*) FROM Tiles Where Type = %d and Zoom = %d and X >= %d and "
 						 "X <= %d and Y >= %d and Y <= %d";
-		
+
 		CString sql;
 		sql.Format(format, provider, zoom, indices.left, indices.right, indices.bottom, indices.top);
 	
@@ -597,8 +595,8 @@ long SQLiteCache::get_TileCount(int provider, int zoom, CRect indices)
 		if (!val)
 		{
 			int size = 0;
-			
-			_section.Lock();	
+
+			_section.Lock();
 			if( sqlite3_step(stmt) == SQLITE_ROW)
 				size = sqlite3_column_int(stmt, 0);
 			val = sqlite3_finalize(stmt);
@@ -629,13 +627,13 @@ bool SQLiteCache::get_TilesXY(int provider, int zoom, int xMin, int xMax, int yM
 	{
 		CString format = "SELECT X, Y FROM Tiles Where Type = %d and Zoom = %d and X >= %d and "
 						 "X <= %d and Y >= %d and Y <= %d";
-		
+
 		CString sql;
 		sql.Format(format, provider, zoom, xMin, xMax, yMin, yMax);
 
 		_section.Lock();
 		int val = sqlite3_prepare_v2(_conn, sql, sql.GetLength() + 1, &stmt, &tail);
-		
+
 		while( sqlite3_step(stmt) == SQLITE_ROW)
 		{
 			int x = sqlite3_column_int(stmt, 0);

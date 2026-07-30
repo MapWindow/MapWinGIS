@@ -85,7 +85,7 @@ VARIANT_BOOL CMapView::DefaultSnappingAlgorithm(double maxDist, double minDist, 
     VARIANT_BOOL result = VARIANT_FALSE;
 
     // Determine which layer(s) to snap to:
-    bool digitizing = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode);
+    bool digitizing = EditorHelper::IsDigitizingCursor(static_cast<tkCursorMode>(m_cursorMode));
     tkLayerSelection behavior;
     _shapeEditor->get_SnapBehavior(&behavior);
     tkSnapMode mode;
@@ -109,7 +109,7 @@ VARIANT_BOOL CMapView::DefaultSnappingAlgorithm(double maxDist, double minDist, 
             continue;
 
         // Get shapefile
-        CComPtr<IShapefile> sf = NULL;
+        CComPtr<IShapefile> sf = nullptr;
         sf.Attach(this->GetShapefile(layerHandle));
         if (!sf)
             continue;
@@ -133,7 +133,7 @@ VARIANT_BOOL CMapView::DefaultSnappingAlgorithm(double maxDist, double minDist, 
             sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
             if (vb && distance < minDist)
             {
-                IShape* shape = NULL;
+                IShape* shape = nullptr;
                 sf->get_Shape(shapeIndex, &shape);
                 if (shape)
                 {
@@ -193,8 +193,8 @@ bool CMapView::SelectLayerHandles(LayerSelector selector, std::vector<int>& laye
 		}
 	}
 
-	IShapefile * sf = NULL;
-	for (int i = 0; i < (int)_activeLayers.size(); i++)
+	IShapefile * sf = nullptr;
+	for (int i = 0; i < static_cast<int>(_activeLayers.size()); i++)
 	{
 		int handle = GetLayerHandle(i);
 		bool result = CheckLayer(selector, handle);
@@ -259,7 +259,7 @@ bool CMapView::CheckShapefileLayer(LayerSelector selector, int layerHandle, ISha
 						result = VARIANT_TRUE;
 				}
 				else if ((!editorEmpty && m_cursorMode == cmEditShape) ||
-					EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
+					EditorHelper::IsDigitizingCursor(static_cast<tkCursorMode>(m_cursorMode)))
 				{
 					// highlight vertices for easier snapping
 					switch (highlighting) {
@@ -290,7 +290,7 @@ bool CMapView::CheckShapefileLayer(LayerSelector selector, int layerHandle, ISha
 // ************************************************************
 bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 {
-	CComPtr<IShapefile> sf = NULL;
+	CComPtr<IShapefile> sf = nullptr;
 	Layer* layer = GetLayer(layerHandle);
 
 	if (!layer || !layer->wasRendered) return false;
@@ -304,7 +304,7 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 	}
 	else if (layer->IsImage())
 	{
-		// it's raster		
+		// it's raster
 		switch (selector)
 		{
 			case slctIdentify:
@@ -352,9 +352,9 @@ bool CMapView::DrillDownSelect(double projX, double projY, long& layerHandle, lo
 {
 	vector<int> handles;
 	SelectLayerHandles(slctIdentify, handles);
-	for (int i = handles.size() - 1; i >= 0; i--)
+	for (long i = static_cast<long>(handles.size()) - 1; i >= 0; i--)
 	{
-		CComPtr<IShapefile> sf = NULL;
+		CComPtr<IShapefile> sf = nullptr;
 		sf.Attach(GetShapefile(handles[i]));
 		if (sf) {
 			Extent box = GetPointSelectionBox(sf, projX, projY);
@@ -379,7 +379,7 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list,
 
 	vector<long> results;
 
-	for (int i = handles.size() - 1; i >= 0; i--)
+	for (int i = static_cast<long>(handles.size()) - 1; i >= 0; i--)
 	{
 		Layer* layer = GetLayer(handles[i]);
 
@@ -400,7 +400,7 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list,
 
 		if (layer->IsShapefile())
 		{
-			CComPtr<IShapefile> sf = NULL;
+			CComPtr<IShapefile> sf = nullptr;
 			sf.Attach(GetShapefile(handles[i]));
 
 			if (sf)
@@ -430,7 +430,7 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list,
 		}
 		else if (layer->IsImage())
 		{
-			CComPtr<IImage> img = NULL;
+			CComPtr<IImage> img = nullptr;
 			img.Attach(GetImage(handles[i]));
 			if (img)
 			{
@@ -475,10 +475,10 @@ LayerShape CMapView::FindShapeAtScreenPoint(CPoint point, LayerSelector selector
 // ************************************************************
 LayerShape CMapView::FindShapeAtProjPoint(double prjX, double prjY, std::vector<int>& layers)
 {
-	IShapefile * sf = NULL;
-	for (int i = (int)layers.size() - 1; i >= 0; i--)
+	IShapefile * sf = nullptr;
+	for (int i = static_cast<int>(layers.size()) - 1; i >= 0; i--)
 	{
-		CComPtr<IShapefile> sf = NULL;
+		CComPtr<IShapefile> sf = nullptr;
 		sf.Attach(GetShapefile(layers[i]));
 		if (sf) {
 			double tol = 0.0;
@@ -519,7 +519,7 @@ bool CMapView::SelectShapeForEditing(int x, int y, long& layerHandle, long& shap
 // ************************************************************
 HotTrackingResult CMapView::RecalcHotTracking(CPoint point, LayerShape& result)
 {
-	bool cursorCheck = EditorHelper::IsSnappableCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmEditShape || m_cursorMode == cmIdentify;
+	bool cursorCheck = EditorHelper::IsSnappableCursor(static_cast<tkCursorMode>(m_cursorMode)) || m_cursorMode == cmEditShape || m_cursorMode == cmIdentify;
 	if (!cursorCheck) return NoShape;
 
 	if (_shapeCountInView < m_globalSettings.hotTrackingMaxShapeCount && HasHotTracking())
@@ -550,21 +550,21 @@ void CMapView::ClearHotTracking()
 // ************************************************************
 void CMapView::UpdateHotTracking(LayerShape info, bool fireEvent)
 {
-	CComPtr<IShapefile> sf = NULL;
+	CComPtr<IShapefile> sf = nullptr;
 	sf.Attach(GetShapefile(info.LayerHandle));
 	if (sf) {
-		CComPtr<IShape> shape = NULL;
+		CComPtr<IShape> shape = nullptr;
 		sf->get_Shape(info.ShapeIndex, &shape);
 		if (shape)
 		{
-			CComPtr<IShape> shpClone = NULL;
+			CComPtr<IShape> shpClone = nullptr;
 			shape->Clone(&shpClone);
 			_hotTracking.Update(sf, shpClone, info.LayerHandle, info.ShapeIndex);
 
 			OLE_COLOR color;
 			_identifier->get_OutlineColor(&color);
 
-			CComPtr<IShapeDrawingOptions> options = NULL;
+			CComPtr<IShapeDrawingOptions> options = nullptr;
 			options.Attach(ShapeStyleHelper::GetHotTrackingStyle(sf, color, m_cursorMode == cmIdentify));
 			if (options) {
 				_hotTracking.UpdateStyle(options);

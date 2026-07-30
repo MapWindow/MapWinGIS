@@ -34,7 +34,7 @@ double GeoShape::GetGeodesicArea(bool closingPoint, double x, double y)
 
 			poly.Clear();
 
-			for (int i = GetFirstPolyPointIndex(); i < (int)_points.size(); i++)
+			for (int i = GetFirstPolyPointIndex(); i < static_cast<int>(_points.size()); i++)
 			{
 				poly.AddPoint(_points[i]->y, _points[i]->x);
 			}
@@ -68,14 +68,14 @@ double GeoShape::GetGeodesicArea(bool closingPoint, double x, double y)
 // ****************************************************************
 IPoint* GeoShape::GetPolygonCenter(Gdiplus::PointF* data, int length)
 {
-	IPoint* pnt = NULL;
+	IPoint* pnt = nullptr;
 	if (HasPolygon() && length > 2)
 	{
 		// let's draw fill and area
 		Gdiplus::PointF* polyData = &data[0];
 
 		// find position for label
-		CComPtr<IShape> shp = NULL;
+		CComPtr<IShape> shp = nullptr;
 		ComHelper::CreateShape(&shp);
 		if (shp)
 		{
@@ -92,7 +92,7 @@ IPoint* GeoShape::GetPolygonCenter(Gdiplus::PointF* data, int length)
 			shp->get_Centroid(&pnt);
 
 			// make sure that centroid lies within extents of shapes; otherwise place it at the center
-			CComPtr<IExtents> ext = NULL;
+			CComPtr<IExtents> ext = nullptr;
 			shp->get_Extents(&ext);
 
 			double x, y;
@@ -115,7 +115,7 @@ IPoint* GeoShape::GetPolygonCenter(Gdiplus::PointF* data, int length)
 // ***************************************************************
 IGeoProjection* GeoShape::GetWgs84Projection()
 {
-	return _mapCallback ? _mapCallback->_GetWgs84Projection() : NULL;
+	return _mapCallback ? _mapCallback->_GetWgs84Projection() : nullptr;
 }
 
 // ***************************************************************
@@ -123,7 +123,7 @@ IGeoProjection* GeoShape::GetWgs84Projection()
 // ***************************************************************
 IGeoProjection* GeoShape::GetMapProjection()
 {
-	return _mapCallback ? _mapCallback->_GetMapProjection() : NULL;
+	return _mapCallback ? _mapCallback->_GetMapProjection() : nullptr;
 }
 // ***************************************************************
 //		GetTransformationMode()
@@ -164,7 +164,7 @@ void GeoShape::PixelToProj(double pixelX, double pixelY, double& projX, double& 
 // *******************************************************
 void GeoShape::UpdateLatLng(int pointIndex)
 {
-	if (pointIndex < 0 || pointIndex >= (int)_points.size()) return;
+	if (pointIndex < 0 || pointIndex >= static_cast<int>(_points.size())) return;
 
 	MeasurePoint* pnt = _points[pointIndex];
 	double x = pnt->Proj.x, y = pnt->Proj.y;
@@ -286,7 +286,7 @@ int GeoShape::GetPartStart(int partIndex) {
 		if (_points[i]->Part == PartBegin)
 			count++;
 		if (count == partIndex)
-			return i;
+			return static_cast<int>(i);
 	}
 	return 0;
 }
@@ -295,11 +295,11 @@ int GeoShape::GetPartStart(int partIndex) {
 //		GetPartStart()
 // *******************************************************
 int GeoShape::SeekPartEnd(int startSearchFrom) {
-	for (int i = startSearchFrom; i < (int)_points.size(); i++) {
+	for (int i = startSearchFrom; i < static_cast<int>(_points.size()); i++) {
 		if (_points[i]->Part == PartEnd)
 			return i;
 	}
-	return _points.size() - 1;
+	return static_cast<int>(_points.size()) - 1;
 }
 
 // *******************************************************
@@ -403,7 +403,7 @@ double GeoShape::GetGeodesicDistance()
 // ***************************************************************
 double GeoShape::GetSegmentAngle(int segmentIndex, long& errorCode)
 {
-	if (segmentIndex < 0 || segmentIndex >= (long)_points.size() - 1)
+	if (segmentIndex < 0 || segmentIndex >= static_cast<long>(_points.size()) - 1)
 	{
 		errorCode = tkINDEX_OUT_OF_BOUNDS;
 		return 0.0;
@@ -427,7 +427,7 @@ double GeoShape::GetSegmentAngle(int segmentIndex, long& errorCode)
 // **************************************************************
 double GeoShape::GetSegmentLength(int segmentIndex, long& errorCode)
 {
-	if (segmentIndex < 0 || segmentIndex >= (long)_points.size() - 1)
+	if (segmentIndex < 0 || segmentIndex >= static_cast<long>(_points.size()) - 1)
 	{
 		errorCode = tkINDEX_OUT_OF_BOUNDS;
 		return 0.0;
@@ -530,7 +530,7 @@ int GeoShape::FindSegmentWithPoint(double xProj, double yProj)
 	{
 		if (GeometryHelper::PointOnSegment(_points[i]->Proj.x, _points[i]->Proj.y,
 			_points[i + 1]->Proj.x, _points[i + 1]->Proj.y, xProj, yProj))
-			return i;
+			return static_cast<int>(i);
 	}
 	return -1;
 }
@@ -540,7 +540,7 @@ int GeoShape::FindSegmentWithPoint(double xProj, double yProj)
 // *******************************************************
 int GeoShape::GetPolyPointCount(bool dynamicPoly)
 {
-	int size = _points.size() - GetFirstPolyPointIndex();
+	int size = static_cast<int>(_points.size()) - GetFirstPolyPointIndex();
 	if (dynamicPoly) size++;
 	return size;
 }

@@ -213,7 +213,7 @@ bool CShapefileDrawer::Draw(const CRect& rcBounds, IShapefile* sf)
 			}
 			else
 			{
-				numShapes = selectResult->size();
+				numShapes = static_cast<long>(selectResult->size());
 				sort(selectResult->begin(), selectResult->end());
 			}
 		}
@@ -277,7 +277,7 @@ bool CShapefileDrawer::Draw(const CRect& rcBounds, IShapefile* sf)
 	_shapeData = _shapefile->get_ShapeVector();
 	if (_shptype == SHP_POLYGON || _shptype == SHP_POLYLINE)
 	{
-		int size = _shapeData->size();
+		int size = static_cast<int>(_shapeData->size());
 		for (int i = 0; i < size; i++)
 		{
 			(*_shapeData)[i]->size = 0;
@@ -315,7 +315,7 @@ bool CShapefileDrawer::Draw(const CRect& rcBounds, IShapefile* sf)
 	//	 Building lists of shape indices for each category
 	// --------------------------------------------------------------
 	unsigned int k = 0; // position in arr of visible shapes
-	for (int i = 0; i < (int)numShapes; i++)
+	for (int i = 0; i < static_cast<int>(numShapes); i++)
 	{
 		if (useQTree && _isEditing)
 		{
@@ -369,7 +369,7 @@ bool CShapefileDrawer::Draw(const CRect& rcBounds, IShapefile* sf)
 			}
 		}
 
-		if (offset >= (int)_shapeData->size())
+		if (offset >= static_cast<int>(_shapeData->size()))
 		{
 			// TODO: is is possible to check that the index has the same number of shapes as shapefile?
 			if (!_isEditing && useSpatialIndex) {
@@ -452,7 +452,7 @@ bool CShapefileDrawer::Draw(const CRect& rcBounds, IShapefile* sf)
 	{
 		if (selectionAppearance == saSelectionColor)
 		{
-			for (int i = categorySelIndices.size() - 1; i >= 0; i--)
+			for (int i = static_cast<int>(categorySelIndices.size()) - 1; i >= 0; i--)
 			{
 				if (i == numCategories)
 				{
@@ -476,7 +476,7 @@ bool CShapefileDrawer::Draw(const CRect& rcBounds, IShapefile* sf)
 	}
 
 	// drawing unselected shapes
-	for (int i = categoryIndices.size() - 2; i >= 0; i--)
+	for (int i = static_cast<int>(categoryIndices.size()) - 2; i >= 0; i--)
 	{
 		if (i == numCategories)
 		{
@@ -500,7 +500,7 @@ bool CShapefileDrawer::Draw(const CRect& rcBounds, IShapefile* sf)
 	{
 		if (selectionAppearance == saSelectionColor)
 		{
-			for (int i = categorySelIndices.size() - 1; i >= 0; i--)
+			for (int i = static_cast<int>(categorySelIndices.size()) - 1; i >= 0; i--)
 			{
 				if (i == numCategories)
 				{
@@ -759,7 +759,7 @@ void CShapefileDrawer::DrawPointCategory(CDrawingOptionsEx* options, std::vector
 			else if (pntShape == pshPixel && options->drawingMode == vdmGDIPlus)
 			{
 				bmPixel = new Bitmap(1, 1, _graphics);
-				long alpha = ((long)options->fillTransparency) << 24;
+				long alpha = static_cast<long>(options->fillTransparency) << 24;
 				bmPixel->SetPixel(0, 0, Color(alpha | BGR_TO_RGB(pixelColor)));
 			}
 		}
@@ -823,7 +823,7 @@ void CShapefileDrawer::DrawPointCategory(CDrawingOptionsEx* options, std::vector
 
 	size_t numShapes = hasSorting ? visibilityMask.size() : indices->size();
 
-	for (int j = 0; j < (int)numShapes; j++)
+	for (int j = 0; j < static_cast<int>(numShapes); j++)
 	{
 		if (hasSorting) {
 
@@ -987,7 +987,7 @@ void CShapefileDrawer::DrawPointCategory(CDrawingOptionsEx* options, std::vector
 
 				// if not set explicitly, try to grab it from category
 				if (angle == 0)
-					angle = (float)options->rotation;
+					angle = static_cast<float>(options->rotation);
 				// if any angle is specified, apply it
 				if (angle != 0)
 					_graphics->RotateTransform(angle);
@@ -1023,7 +1023,7 @@ void CShapefileDrawer::DrawPointCategory(CDrawingOptionsEx* options, std::vector
 
 				if (drawSelection)
 				{
-					SolidBrush brush(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency));
+					SolidBrush brush(Utility::OleColor2GdiPlus(m_selectionColor, static_cast<BYTE>(m_selectionTransparency)));
 					_graphics->FillRectangle(&brush, rect);
 				}
 
@@ -1043,10 +1043,10 @@ void CShapefileDrawer::DrawPointCategory(CDrawingOptionsEx* options, std::vector
 					_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
 
 					// does point have an individual rotation?
-					float angle = (float)((*_shapeData)[points[i].id])->rotation;
+					float angle = (*_shapeData)[points[i].id]->rotation;
 					// if nothing specified, revert to options-level angle
 					if (angle == 0)
-						angle = (float)options->rotation;
+						angle = static_cast<float>(options->rotation);
 					// if angle is non-zero, apply it
 					if (angle != 0)
 						_graphics->RotateTransform(angle);
@@ -1120,7 +1120,7 @@ void CShapefileDrawer::DrawPointCategory(CDrawingOptionsEx* options, std::vector
 					_graphics->SetTransform(&mtxInit);
 				}
 
-				(*_shapeData)[shapeIndex]->size = (int)options->pointSize;
+				(*_shapeData)[shapeIndex]->size = static_cast<int>(options->pointSize);
 			}
 		}
 	}
@@ -1202,7 +1202,7 @@ void CShapefileDrawer::DrawPolyCategory(CDrawingOptionsEx* options, std::vector<
 	// -----------------------------------------------------
 	if (perShapeDrawing)
 	{
-		for (int j = 0; j < (int)indices->size(); j++)
+		for (int j = 0; j < static_cast<int>(indices->size()); j++)
 		{
 			GraphicsPath pathFill(Gdiplus::FillModeWinding);
 
@@ -1260,7 +1260,7 @@ void CShapefileDrawer::DrawPolyCategory(CDrawingOptionsEx* options, std::vector<
 		}
 
 		// constructing a path
-		for (int j = 0; j < (int)indices->size(); j++)
+		for (int j = 0; j < static_cast<int>(indices->size()); j++)
 		{
 			this->DrawPolygonGDIPlus((*indices)[j], *path, delta, pointColor, drawingMode, xMin, xMax, yMin, yMax);
 		}
@@ -1273,10 +1273,10 @@ void CShapefileDrawer::DrawPolyCategory(CDrawingOptionsEx* options, std::vector<
 			// drawing fill (calculating measures of gradient: whole layer)
 			if (options->fillVisible && _shptype == SHP_POLYGON)
 			{
-				int xmin = int((_xMin - _extents->left) * _dx);
-				int ymin = int((_extents->top - _yMin) * _dy);
-				int xmax = int((_xMax - _extents->left) * _dx);
-				int ymax = int((_extents->top - _yMax) * _dy);
+				int xmin = static_cast<int>((_xMin - _extents->left) * _dx);
+				int ymin = static_cast<int>((_extents->top - _yMin) * _dy);
+				int xmax = static_cast<int>((_xMax - _extents->left) * _dx);
+				int ymax = static_cast<int>((_extents->top - _yMax) * _dy);
 
 				RectF rect((Gdiplus::REAL)xmin, (Gdiplus::REAL)ymin, (Gdiplus::REAL)xmax - xmin, (Gdiplus::REAL)ymax - ymin);
 				options->FillGraphicsPath(_graphics, path, rect);
@@ -1312,12 +1312,12 @@ void CShapefileDrawer::DrawPolyCategory(CDrawingOptionsEx* options, std::vector<
 		{
 			if (_shptype == SHP_POLYGON)
 			{
-				SolidBrush brush(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency));
+				SolidBrush brush(Utility::OleColor2GdiPlus(m_selectionColor, static_cast<BYTE>(m_selectionTransparency)));
 				_graphics->FillPath(&brush, path);
 			}
 			else
 			{
-				Pen pen(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency));
+				Pen pen(Utility::OleColor2GdiPlus(m_selectionColor, static_cast<BYTE>(m_selectionTransparency)));
 				pen.SetLineJoin(Gdiplus::LineJoinRound);
 				_graphics->DrawPath(&pen, path);
 			}
@@ -1488,7 +1488,7 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 	OLE_COLOR pointColor = options->linesVisible ? options->lineColor : options->fillColor;
 	_bmpPixel->SetPixel(0, 0, Utility::OleColor2GdiPlus(pointColor));
 
-	for (int j = 0; j < (int)indices->size(); j++)
+	for (int j = 0; j < static_cast<int>(indices->size()); j++)
 	{
 		int shapeIndex = (*indices)[j];
 		if (!_isEditing)
@@ -1614,8 +1614,8 @@ void CShapefileDrawer::DrawVertices(Gdiplus::GraphicsPath* path, CDrawingOptions
 
 				for (int i = 0; i < count; i++)
 				{
-					int x = (int)-points[i].X;
-					int y = (int)-points[i].Y;
+					int x = static_cast<int>(-points[i].X);
+					int y = static_cast<int>(-points[i].Y);
 
 					_dc->SetWindowOrg(x, y);
 
@@ -1663,7 +1663,7 @@ void CShapefileDrawer::DrawLinePatternCategory(CDrawingOptionsEx* options, std::
 	_bmpPixel->SetPixel(0, 0, Utility::OleColor2GdiPlus(pointColor));
 
 	// constructing a path
-	for (int j = 0; j < (int)indices->size(); j++)
+	for (int j = 0; j < static_cast<int>(indices->size()); j++)
 	{
 		this->DrawPolygonGDIPlus((*indices)[j], *path, delta, pointColor, vdmGDIPlus, xMin, xMax, yMin, yMax);
 	}
@@ -1696,7 +1696,7 @@ void CShapefileDrawer::DrawLinePatternCategory(CDrawingOptionsEx* options, std::
 
 		if (maxWidth > 0.0f)
 		{
-			Gdiplus::Pen penSelection(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency), maxWidth);
+			Gdiplus::Pen penSelection(Utility::OleColor2GdiPlus(m_selectionColor, static_cast<BYTE>(m_selectionTransparency)), maxWidth);
 			penSelection.SetLineJoin(Gdiplus::LineJoinRound);
 			_graphics->DrawPath(&penSelection, path);
 		}
@@ -1875,8 +1875,8 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 
 							totalLength = totalLengths[n] - (overflow ? 0 : markerSize);
 							// Apply scale factor for offset & interval values if requested:
-							markerOffset = markerOffsetBase * ((offsetIsRelative) ? (float)totalLength : 1.0f);
-							interval = intervalBase * ((intervalIsRelative) ? (float)totalLength : 1.0f);
+							markerOffset = markerOffsetBase * ((offsetIsRelative) ? static_cast<float>(totalLength) : 1.0f);
+							interval = intervalBase * ((intervalIsRelative) ? static_cast<float>(totalLength) : 1.0f);
 							firstMarkerDrawn = false;
 							// Set starting offset:
 							offset = markerOffset + (overflow ? 0 : markerSize * 0.5);
@@ -2326,8 +2326,8 @@ void CShapefileDrawer::DrawPolyGDI(IShapeData* shp, CDrawingOptionsEx* options, 
 // Draws point in place of small polygons
 inline void CShapefileDrawer::DrawPolygonPoint(double& xMin, double& xMax, double& yMin, double& yMax, OLE_COLOR& pointColor)
 {
-	int x = (int)(((xMax + xMin) / 2 - _extents->left) * _dx);
-	int y = (int)((_extents->top - (yMax + yMin) / 2) * _dy);
+	int x = static_cast<int>(((xMax + xMin) / 2 - _extents->left) * _dx);
+	int y = static_cast<int>((_extents->top - (yMax + yMin) / 2) * _dy);
 
 	if (!_dc)
 	{

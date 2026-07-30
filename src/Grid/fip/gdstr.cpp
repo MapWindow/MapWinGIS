@@ -100,7 +100,7 @@ int g123dstr(char **in_str,char *buf_str,int delim)
    if (strchr(*in_str,FT))  
 
       /* SET FTPOS TO POSITION OF FIELD TERMINATOR */
-      ftpos = strcspn(*in_str,FT_STR) + 1L;
+      ftpos = static_cast<long>(strcspn(*in_str,FT_STR)) + 1L;
 
    /* ELSE SET FTPOS TO ZERO */
    else ftpos = 0;
@@ -115,7 +115,7 @@ int g123dstr(char **in_str,char *buf_str,int delim)
       dlstr[1] = NC;
 
       /* SET DLPOS TO POSITION OF DELIMITOR */
-      dlpos = strcspn(*in_str,dlstr) + 1L;
+      dlpos = static_cast<long>(strcspn(*in_str,dlstr)) + 1L;
    }
    /* ELSE SET DLPOS TO ZERO */
    else dlpos = 0;
@@ -137,7 +137,7 @@ int g123dstr(char **in_str,char *buf_str,int delim)
 
    /* ELSE IF FIELD TERMINATOR OCCURS BEFORE DELIMITOR
        OR FIELD TERMINATOR OCCURS BUT DELIMITOR DOES NOT */
-   else if (((ftpos) && (ftpos < dlpos)) 
+   else if (((ftpos) && (ftpos < dlpos))
             || ((ftpos) && (!dlpos))) {
 
       /* COPY TERMINATED STRING FROM INPUT STRING TO BUF_STR */
@@ -159,4 +159,4 @@ int g123dstr(char **in_str,char *buf_str,int delim)
 
    /* RETURN SUCCESS */
    return(1);
-}  
+}
