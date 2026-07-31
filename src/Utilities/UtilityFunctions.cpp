@@ -1417,6 +1417,54 @@ namespace Utility
 		p2->get_Y(&y2);
 		return abs(x1 - x2) <= 0.00001 && abs(y1 - y2) <= maxDiff;
 	}
+
+	// ********************************************************
+	//    GetDoubleArrayFromVariant()
+	// ********************************************************
+	// Safely extracts a pointer to a double array held by a (by-ref) VARIANT SAFEARRAY.
+	// The array must be one-dimensional and contain doubles (VT_R8). numPoints is clamped
+	// to the actual number of elements to avoid out-of-bounds reads. Returns false when
+	// the variant does not hold a valid double array.
+	bool GetDoubleArrayFromVariant(VARIANT* var, double*& data, long& numPoints)
+	{
+		data = nullptr;
+
+		if (var == nullptr)
+			return false;
+
+		// resolve VT_BYREF variants pointing to another variant
+		VARIANT* v = var;
+		if ((v->vt & VT_BYREF) && !(v->vt & VT_ARRAY) && v->pvarVal != nullptr)
+			v = v->pvarVal;
+
+		if ((v->vt & VT_ARRAY) == 0)
+			return false;
+
+		if ((v->vt & VT_TYPEMASK) != VT_R8)
+			return false;
+
+		SAFEARRAY* psa = (v->vt & VT_BYREF) ? (v->pparray != nullptr ? *v->pparray : nullptr) : v->parray;
+		if (psa == nullptr)
+			return false;
+
+		if (SafeArrayGetDim(psa) != 1)
+			return false;
+
+		long lBound = 0, uBound = -1;
+		if (FAILED(SafeArrayGetLBound(psa, 1, &lBound)) ||
+			FAILED(SafeArrayGetUBound(psa, 1, &uBound)))
+			return false;
+
+		const long count = uBound - lBound + 1;
+		if (count <= 0)
+			return false;
+
+		if (numPoints < 0 || numPoints > count)
+			numPoints = count;
+
+		data = static_cast<double*>(psa->pvData);
+		return data != nullptr;
+	}
 }
 
 // ReSharper restore CppUseAuto

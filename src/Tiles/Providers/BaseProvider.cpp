@@ -172,6 +172,12 @@ CMemoryBitmap* BaseProvider::ProcessHttpRequest(void* secureHttpClient, const CS
     case TileHttpContentType::httpXml:
         if (IsWms())
         {
+#ifndef RELEASE_MODE
+            auto status = client->GetStatus();
+            CString sOutput;
+            sOutput.AppendFormat("WMS server response status: %d", status);
+            ::OutputDebugStringA(sOutput.GetBuffer());
+#endif
             const CString s(body);
             ParseServerException(s);
         }

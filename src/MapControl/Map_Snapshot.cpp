@@ -364,6 +364,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 		bmp->DeleteObject();
 		snapDC->DeleteDC();
 		delete bmp;
+		delete snapDC;
 	}
 
 	RestoreExtents();

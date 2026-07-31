@@ -751,10 +751,15 @@ void CMapView::DrawWideCircle(double x, double y, double radius, OLE_COLOR color
 void CMapView::DrawPolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoints, OLE_COLOR color, BOOL fill, BYTE alpha)
 {
 	USES_CONVERSION;
-	SAFEARRAY* sax = *xPoints->pparray;
-	SAFEARRAY* say = *yPoints->pparray;
-	double* xPts = static_cast<double*>(sax->pvData);
-	double* yPts = static_cast<double*>(say->pvData);
+
+	double* xPts = nullptr;
+	double* yPts = nullptr;
+	if (!Utility::GetDoubleArrayFromVariant(xPoints, xPts, numPoints) ||
+		!Utility::GetDoubleArrayFromVariant(yPoints, yPts, numPoints))
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return;
+	}
 
 	if (IsValidDrawList(_currentDrawing))
 	{
@@ -790,10 +795,15 @@ void CMapView::DrawPolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoints, O
 void CMapView::DrawWidePolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoints, OLE_COLOR color, BOOL fill, short width, BYTE alpha)
 {
 	USES_CONVERSION;
-	SAFEARRAY* sax = *xPoints->pparray;
-	SAFEARRAY* say = *yPoints->pparray;
-	double* xPts = static_cast<double*>(sax->pvData);
-	double* yPts = static_cast<double*>(say->pvData);
+
+	double* xPts = nullptr;
+	double* yPts = nullptr;
+	if (!Utility::GetDoubleArrayFromVariant(xPoints, xPts, numPoints) ||
+		!Utility::GetDoubleArrayFromVariant(yPoints, yPts, numPoints))
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return;
+	}
 
 	if (IsValidDrawList(_currentDrawing))
 	{

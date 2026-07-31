@@ -84,7 +84,7 @@ void BaseProjection::GetTileSizeLatLon(CPoint point, int zoom, SizeLatLng &ret)
 
 	PointLatLng pnt2;
 	this->FromXYToLatLng(newPoint, zoom, pnt2);
-    
+
 	// size
 	ret.WidthLng = fabs( pnt2.Lng - pnt1.Lng);
 	ret.HeightLat = fabs(pnt2.Lat - pnt1.Lat);
