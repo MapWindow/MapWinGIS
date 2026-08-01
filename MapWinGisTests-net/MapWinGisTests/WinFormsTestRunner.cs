@@ -13,9 +13,7 @@ namespace MapWinGisTests
 			var completed = new ManualResetEventSlim(false);
 
 			var thread = new Thread(() => {
-				try
-				{
-
+				try {
 					using var form = new Form1();
 
 					form.Shown += (_, _) =>

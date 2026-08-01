@@ -59,7 +59,7 @@ public class AxMapTests
 			_testOutputHelper.WriteLine($"MapProjectionTest() call form.OpenFile() with visible: {visible}");
 			OutputDebugString($"MapProjectionTest() call form.OpenFile() with visible: {visible}");
 			var layerHandle = form.OpenFile(sfLocation, visible);
-			Application.DoEvents();
+			//Application.DoEvents();
 
 			layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
@@ -82,7 +82,7 @@ public class AxMapTests
 			_testOutputHelper.WriteLine($"OpenShapefileWithInvalidSpatialIndex() call form.OpenFile() with visible: {visible}");
 			OutputDebugString($"OpenShapefileWithInvalidSpatialIndex() call form.OpenFile() with visible: {visible}");
 			var layerHandle = form.OpenFile(sfLocation, visible);
-			Application.DoEvents();
+			//Application.DoEvents();
 			layerHandle.ShouldNotBe(-1, "form.OpenFile failed");
 
 			var sf = form.GetShapefileFromLayer(layerHandle);
@@ -144,7 +144,7 @@ public class AxMapTests
 			_testOutputHelper.WriteLine($"ShapefileKeyTest() call form.AddShapefileToMap() with visible: {visible}");
 			OutputDebugString($"ShapefileKeyTest() call form.AddShapefileToMap() with visible: {visible}");
 			var layerHandle = form.AddShapefileToMap(sfPolygon, visible);
-			Application.DoEvents();
+			//Application.DoEvents();
 			// Get sf back:
 			var sf = form.GetShapefileFromLayer(layerHandle);
 			sf.Key.ShouldBe(sfKeyValue);
