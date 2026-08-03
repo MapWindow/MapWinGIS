@@ -14,6 +14,8 @@ public sealed partial class Form1 : Form, ICallback
             CallbackVerbosity = tkCallbackVerbosity.cvAll
         };
 
+		FormClosing += Form1_FormClosing;
+
 		if(!IsRunningOnGitHubActions)
         {
 			// Don't call LoadOsm() when running on GitHub Actions.
@@ -25,8 +27,33 @@ public sealed partial class Form1 : Form, ICallback
         }*/
     }
 
+	private void Form1_FormClosing(object? sender, FormClosingEventArgs e)
+	{
+		// Properly dispose of the AxMap control to avoid crashes on exit.
+		_ = new GlobalSettings { ApplicationCallback = null };
 
-    internal static bool IsRunningOnGitHubActions =>
+		if(axMap1 == null) return;
+
+		try {
+			if(!axMap1.IsDisposed)
+			{
+				axMap1.RemoveAllLayers();
+				if(axMap1.GlobalCallback != null)
+					axMap1.GlobalCallback = null;
+			}
+		} catch {
+			/* ignore callback/layer teardown errors during shutdown */
+		}
+
+		try {
+			if(!axMap1.IsDisposed)
+				axMap1.Dispose();
+		} catch {
+			/* ignore control disposal errors during shutdown */
+		}
+	}
+
+	internal static bool IsRunningOnGitHubActions =>
 	    string.Equals(
 		    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
 		    "true",

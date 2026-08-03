@@ -70,6 +70,9 @@ public class GdalUtilsTests : ICallback, IClassFixture<GdalUtilsTests.GdalUtilsF
         _gdalUtils.GlobalCallback = this;
         // Check:
         _gdalUtils.GlobalCallback.ShouldNotBeNull();
+        // Restore (to avoid crash if COM calls after .NET has been disposed)
+        _gdalUtils.GlobalCallback = null;
+
     }
 
     [Fact]

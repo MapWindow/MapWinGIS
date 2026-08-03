@@ -319,6 +319,9 @@ public class ShapeTests
 			Math.Round(shape1.Area, 5).ShouldBe(21938.30627);
 			Math.Round(shape2.Area, 5).ShouldBe(19583.23840);
 		}
+		// Restore (to avoid crash if COM calls after .NET has been disposed)
+		gs.ApplicationCallback = null;
+		shape.GlobalCallback = null;
 	}
 
 	[Fact]
@@ -431,9 +434,6 @@ public class ShapeTests
 	[Fact]
 	public void ShapeInsertPartTest()
 	{
-		/*var wkt = "POLYGON ((330655.56641544314334169 5915024.34312780015170574, 330712.39180534332990646 5915044.78964659571647644, 330729.12077526719076559 5914998.32028569653630257, 330678.13724788010586053 5914978.13930610567331314, 330678.13724788010586053 5914978.13930610567331314, 330655.56641544314334169 5915024.34312780015170574))";
-		var sfPolygon = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYGON, wkt, 28992);
-		var polygon = sfPolygon.Shape[0].Clone(); */
 		var shape = _firstShapePolygon.Clone();
 		var partIndex = 0;
 		shape.InsertPart(shape.NumPoints, ref partIndex).ShouldBeTrue();
