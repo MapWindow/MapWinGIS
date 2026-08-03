@@ -116,6 +116,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, const double tolerance, const
 			_hasSpatialIndex = false;
 			_spatialIndexLoaded = false;
 			IndexSearching::UnloadSpatialIndex(_spatialIndexID);
+			_spatialIndexID = 0;
 			delete res;		//TODO throw error
 		}
 		else

@@ -79,6 +79,7 @@ CShapefile::CShapefile()
 	_useSpatialIndex = TRUE;
 	_hasSpatialIndex = FALSE;
 	_spatialIndexLoaded = FALSE;
+	_spatialIndexID = 0;
 	_spatialIndexMaxAreaPercent = 0.5;
 	_spatialIndexNodeCapacity = 100;
 
@@ -977,7 +978,11 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL* retval)
 	_shapeData.clear();
 
 	if (_spatialIndexLoaded)
+	{
 		IndexSearching::UnloadSpatialIndex(_spatialIndexID);
+		_spatialIndexLoaded = FALSE;
+		_spatialIndexID = 0;
+	}
 
 	_sourceType = sstUninitialized;
 	_shpfiletype = SHP_NULLSHAPE;

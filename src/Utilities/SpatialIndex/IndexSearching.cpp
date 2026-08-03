@@ -148,6 +148,12 @@ namespace IndexSearching
 
 	void UnloadSpatialIndex(const CSpatialIndexID spatialIndex)
 	{
+		// 0 is the "not loaded" sentinel (valid ids start at 1); ignore it so a caller
+		// that unloads twice (or unloads without ever loading) cannot free a cache entry
+		// that belongs to another shapefile.
+		if (spatialIndex == 0)
+			return;
+
 		CSpatialIndexCache::Instance().UncacheSpatialIndex(spatialIndex, true);
 	}
 

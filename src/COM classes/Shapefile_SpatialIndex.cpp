@@ -165,6 +165,8 @@ STDMETHODIMP CShapefile::put_UseSpatialIndex(const VARIANT_BOOL pVal)
 	if (!_useSpatialIndex && _spatialIndexLoaded)
 	{
 		IndexSearching::UnloadSpatialIndex(_spatialIndexID);
+		_spatialIndexLoaded = FALSE;
+		_spatialIndexID = 0;
 	}
 	return S_OK;
 }
