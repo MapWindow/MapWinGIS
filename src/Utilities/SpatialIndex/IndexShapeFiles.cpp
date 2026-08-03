@@ -161,6 +161,9 @@ namespace IndexSearching
 	{
 		int rCode = 0;
 
+		if (spatialIndex == nullptr || lowVals == nullptr || hiVals == nullptr || resulSet == nullptr)
+			return -1;
+
 		try
 		{
 			vector <long> res;
@@ -175,21 +178,20 @@ namespace IndexSearching
 			hiVals[0] = xmax;
 			hiVals[1] = ymax;
 
-			const Region* const queryRegion = new Region(lowVals, hiVals, 2);
-			const auto vis = new ShapeIdxVisitor();
+			const auto queryRegion = unique_ptr<Region>(new Region(lowVals, hiVals, 2));
+			const auto vis = unique_ptr<ShapeIdxVisitor>(new ShapeIdxVisitor());
 
-			QueryIndexFile(spatialIndex, *queryRegion, queryType, vis);
+			QueryIndexFile(spatialIndex, *queryRegion, queryType, vis.get());
 
 			resulSet->SetCapacity(gsl::narrow_cast<int>(vis->ids.size()));
 			// int arrSize = vis->ids.size();
-			for (constexpr unsigned int i = 0; i < vis->ids.size(); vis->ids.pop())
+			while (!vis->ids.empty())
 			{
 				const long val = static_cast<long>(vis->ids.front());
+				vis->ids.pop();
 				//int len = resulSet->GetLength();
 				resulSet->AddValue(val);
 			}
-			delete queryRegion;
-			delete vis;
 		}
 		catch (exception&)
 		{
@@ -238,7 +240,6 @@ namespace IndexSearching
 			m_indexIO++;
 	}
 
-
 	//08-24-2009 (sm) caching for performance
 	CSpatialIndexCache& CSpatialIndexCache::Instance()
 	{
@@ -275,8 +276,13 @@ namespace IndexSearching
 
 	void CSpatialIndexCache::CacheItem::ReleaseAll()
 	{
+		// Destroy in reverse order of dependency: the tree uses the buffer,
+		// which in turn uses the disk file storage manager.
 		delete m_tree;
+		m_tree = nullptr;
 		delete m_file;
+		m_file = nullptr;
 		delete m_diskfile;
+		m_diskfile = nullptr;
 	}
 }
