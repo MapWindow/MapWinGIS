@@ -325,4 +325,24 @@ internal static class Helpers
             file.Delete();
         }
     }
+
+	public static Shapefile DeepClone(Shapefile shapefile, int? maxFeatureCopyCount = null)
+	{
+		var newShapefile = shapefile.Clone();
+		for(var i = 0; i < shapefile.NumShapes; i++)
+		{
+			if(i >= maxFeatureCopyCount) 
+				break;
+
+			var shape = shapefile.Shape[i].Clone();
+			var shpIdx = newShapefile.EditAddShape(shape);
+			for(var f = 0; f < shapefile.NumFields; f++)
+			{
+				var rawCellValue = shapefile.CellValue[f, i];
+				var cellValue = rawCellValue ?? DBNull.Value;
+				newShapefile.EditCellValue(f, shpIdx, cellValue);
+			}
+		}
+		return newShapefile;
+	}
 }

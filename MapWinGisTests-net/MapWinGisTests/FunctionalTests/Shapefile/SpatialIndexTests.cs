@@ -3,7 +3,7 @@
 namespace MapWinGisTests.FunctionalTests.Shapefile;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
-public class SpatialIndexTests: ICallback
+public class SpatialIndexTests: ICallback, IDisposable
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
@@ -17,7 +17,19 @@ public class SpatialIndexTests: ICallback
         };
     }
 
-    [Fact]
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        // The GlobalSettings.ApplicationCallback is a process-global native registration.
+        // Each test creates a new SpatialIndexTests instance and registers 'this' on it.
+        // If it is not reset, the native library keeps that managed callback alive globally
+        // and invokes/releases it during COM teardown after the .NET runtime thread state has
+        // been destroyed, crashing the test host. Reset it to null to avoid the crash.
+        _ = new GlobalSettings { ApplicationCallback = null };
+        GC.SuppressFinalize(this);
+    }
+
+	[Fact]
     public void CreateSpatialIndexTest()
     {
         // Create shapefile:
@@ -269,6 +281,11 @@ public class SpatialIndexTests: ICallback
         sf2.Extents.yMin.ShouldBe(34.149021, 0.00001);
         sf2.Extents.xMax.ShouldBe(109.139842, 0.00001);
         sf2.Extents.yMax.ShouldBe(34.457816, 0.00001);
+
+        // Clear the managed callback held by the COM objects so it isn't invoked
+        // after the .NET runtime has been torn down (which crashes the test host).
+        sf.GlobalCallback = null;
+        sf2.GlobalCallback = null;
     }
 
     private static void CheckIndexFiles(string sfFileLocation, bool shouldExists)

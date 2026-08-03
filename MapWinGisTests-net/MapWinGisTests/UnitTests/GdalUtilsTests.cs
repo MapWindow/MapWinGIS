@@ -4,7 +4,7 @@ using Xunit.Abstractions;
 namespace MapWinGisTests.UnitTests;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
-public class GdalUtilsTests : ICallback, IClassFixture<GdalUtilsTests.GdalUtilsFixture>
+public class GdalUtilsTests : ICallback, IDisposable, IClassFixture<GdalUtilsTests.GdalUtilsFixture>
 {
     private readonly GdalUtils _gdalUtils;
     private readonly ITestOutputHelper _testOutputHelper;
@@ -21,6 +21,18 @@ public class GdalUtilsTests : ICallback, IClassFixture<GdalUtilsTests.GdalUtilsF
             ApplicationCallback = this,
             CallbackVerbosity = tkCallbackVerbosity.cvAll
         };
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        // GlobalSettings.ApplicationCallback is a process-global native registration.
+        // Each test creates a new GdalUtilsTests instance and registers 'this'. If it is not
+        // reset, the native library keeps that managed callback alive globally and invokes/
+        // releases it during COM teardown after the .NET runtime thread state has been
+        // destroyed, crashing the test host. Reset it to null to avoid the crash.
+        _ = new GlobalSettings { ApplicationCallback = null };
+        GC.SuppressFinalize(this);
     }
 
     [Fact]

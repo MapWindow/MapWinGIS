@@ -3,7 +3,7 @@
 namespace MapWinGisTests.FunctionalTests.GdalUtils;
 
 [Collection(nameof(NotThreadSafeResourceCollection))]
-public class GdalUtilsTests : ICallback
+public class GdalUtilsTests : ICallback, IDisposable
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
@@ -15,6 +15,18 @@ public class GdalUtilsTests : ICallback
             ApplicationCallback = this,
             CallbackVerbosity = tkCallbackVerbosity.cvAll
         };
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        // GlobalSettings.ApplicationCallback is a process-global native registration.
+        // Each test creates a new GdalUtilsTests instance and registers 'this'. If it is not
+        // reset, the native library keeps that managed callback alive globally and invokes/
+        // releases it during COM teardown after the .NET runtime thread state has been
+        // destroyed, crashing the test host. Reset it to null to avoid the crash.
+        _ = new GlobalSettings { ApplicationCallback = null };
+        GC.SuppressFinalize(this);
     }
 
     [Theory]
@@ -81,6 +93,10 @@ public class GdalUtilsTests : ICallback
         pntNew.x.ShouldBe(dstX, tolerance);
         pntNew.y.ShouldBe(dstY, tolerance);
 
+        // Clear the managed callbacks held by the COM objects so they aren't invoked
+        // after the .NET runtime has been torn down (which crashes the test host).
+        gdalUtils.GlobalCallback = null;
+        sfNew.GlobalCallback = null;
     }
 
     #region Implementation of ICallback

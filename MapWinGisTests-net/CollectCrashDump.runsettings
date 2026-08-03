@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+	<!-- MapWinGIS is a 32-bit native COM library, so the test host must run x86. -->
+	<TargetPlatform>x86</TargetPlatform>
+  </RunConfiguration>
+
+  <!--
+	Equivalent of: dotnet test --blame-crash --blame-crash-dump-type full
+	When the test host process crashes, a full crash dump (.dmp) and a
+	Sequence.xml (listing the test that was running at the time of the crash)
+	are written to the test run's TestResults folder.
+  -->
+  <DataCollectionRunSettings>
+	<DataCollectors>
+	  <DataCollector friendlyName="blame" enabled="True">
+		<Configuration>
+		  <!-- Capture a dump when the test host crashes -->
+		  <CollectDump DumpType="Full" CollectAlways="False" />
+		</Configuration>
+	  </DataCollector>
+	</DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
