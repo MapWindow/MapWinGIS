@@ -59,6 +59,28 @@ public sealed partial class Form1 : Form, ICallback
 			"true",
 			StringComparison.OrdinalIgnoreCase);
 
+	// WM_GETOBJECT is sent when a UI Automation / accessibility client connects to the window.
+	// Handling it makes WinForms create a UIA provider for the control. When the form is later
+	// disposed, Control.ReleaseUiaProvider tears that provider down via
+	// UiaReturnRawElementProvider, which forces UI Automation to initialize by doing a
+	// cross-apartment CoCreateInstance(CUIAutomation7). On the 32-bit (x86) CI runner that
+	// cross-apartment call never returns and blocks in the STA modal loop, so the test hangs
+	// during Form1.Dispose(). Ignoring WM_GETOBJECT on the CI runner prevents the provider from
+	// ever being created, so teardown no longer performs that blocking call. This keeps the
+	// map round-trip (AddShapefileToMap) working on both x86 and x64.
+	private const int WM_GETOBJECT = 0x003D;
+
+	protected override void WndProc(ref Message m)
+	{
+		if(IsRunningOnGitHubActions && m.Msg == WM_GETOBJECT)
+		{
+			m.Result = IntPtr.Zero;
+			return;
+		}
+
+		base.WndProc(ref m);
+	}
+
 	public void EnsureMapControlCreated()
 	{
 		CreateControl();
