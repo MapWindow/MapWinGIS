@@ -54,10 +54,10 @@ public sealed partial class Form1 : Form, ICallback
 	}
 
 	internal static bool IsRunningOnGitHubActions =>
-	    string.Equals(
-		    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
-		    "true",
-		    StringComparison.OrdinalIgnoreCase);
+		string.Equals(
+			Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
+			"true",
+			StringComparison.OrdinalIgnoreCase);
 
 	public void EnsureMapControlCreated()
 	{

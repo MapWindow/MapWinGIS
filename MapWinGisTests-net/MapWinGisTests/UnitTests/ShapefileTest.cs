@@ -581,20 +581,88 @@ namespace MapWinGisTests.UnitTests
 			shapefile.Table.NumRows.ShouldBe(9);
 		}
 
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSelectShapesTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileStartEditingShapesTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileStopEditingShapesTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileEditInsertFieldTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileEditDeleteFieldTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileEditCellValueTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileStartEditingTableTest() { }
+		[Fact]
+		public void ShapefileSelectShapesTest()
+		{
+			var shape = _shapefile.Shape[10];
+			var result = new object();
+			_shapefile.SelectShapes(shape.Extents, 0D, SelectMode.INTERSECTION, ref result).ShouldBeTrue();
+			(result is Array).ShouldBeTrue();
+			var array = (Array)result;
+			array.Length.ShouldBeGreaterThan(10);
+		}
+
+		[Fact]
+		public void ShapefileStartEditingShapesTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_StartEditingShapes_TestFile", ".shp");
+			shapefile.SaveAs(fileName).ShouldBeTrue();
+			shapefile.Close().ShouldBeTrue();
+			shapefile.Open(fileName).ShouldBeTrue();
+			shapefile.EditingShapes.ShouldBeFalse();
+			shapefile.EditingTable.ShouldBeFalse();
+			shapefile.StartEditingShapes().ShouldBeTrue();
+			shapefile.EditingShapes.ShouldBeTrue();
+			shapefile.EditingTable.ShouldBeTrue();
+		}
+
+		[Fact]
+		public void ShapefileStopEditingShapesTest()
+		{
+			_shapefile.StartEditingShapes().ShouldBeTrue();
+			_shapefile.EditingShapes.ShouldBeTrue();
+			_shapefile.EditingTable.ShouldBeTrue();
+			_shapefile.StopEditingShapes(false).ShouldBeTrue();
+			_shapefile.EditingShapes.ShouldBeFalse();
+			_shapefile.EditingTable.ShouldBeFalse();
+		}
+
+		[Fact]
+		public void ShapefileEditInsertFieldTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var newField = new Field();
+			newField.Name = "Text01";
+			newField.Type = FieldType.STRING_FIELD;
+			newField.Width = 10;
+			var fieldIndex = 0;
+			shapefile.EditInsertField(newField, ref fieldIndex).ShouldBeTrue();
+		}
+
+		[Fact]
+		public void ShapefileEditDeleteFieldTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			shapefile.NumFields.ShouldBe(10);
+			shapefile.EditDeleteField(4).ShouldBeTrue();
+			shapefile.NumFields.ShouldBe(9);
+		}
+
+		[Fact]
+		public void ShapefileEditCellValueTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var value = shapefile.CellValue[2, 0];
+			var newValue = $"{value}_0";
+			shapefile.EditCellValue(2, 0, $"{value}_0").ShouldBeTrue();
+			value = shapefile.CellValue[2, 0];
+			value.ShouldBe(newValue);
+		}
+
+		[Fact]
+		public void ShapefileStartEditingTableTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_StartEditingTable_TestFile", ".shp");
+			shapefile.SaveAs(fileName).ShouldBeTrue();
+			shapefile.Close().ShouldBeTrue();
+			shapefile.Open(fileName).ShouldBeTrue();
+			shapefile.EditingTable.ShouldBeFalse();
+			shapefile.StartEditingTable().ShouldBeTrue();
+			shapefile.EditingTable.ShouldBeTrue();
+		}
+
 		[Fact(Skip = "Unit test is not yet implemented")]
 		public void ShapefileStopEditingTableTest() { }
 		[Fact(Skip = "Unit test is not yet implemented")]
