@@ -8,6 +8,42 @@ namespace MapWinGisTests
 	{
 		public static void Run(Action<Form1> action, int timeoutMilliseconds = 120000)
 		{
+			if(Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
+			{
+				throw new InvalidOperationException(
+					"WinFormsTestRunner.Run must be called on an STA thread (use [StaFact]/[StaTheory]).");
+			}
+
+			// On GitHub Actions there is no interactive desktop session, so showing a real
+			// window and running a WinForms message loop (Application.Run) causes the AxMap
+			// OCX to deadlock during activation/first paint. Instead, create the control's
+			// window handle off-screen and invoke the action directly on this STA thread.
+			if(Form1.IsRunningOnGitHubActions)
+			{
+				RunHeadless(action);
+				return;
+			}
+
+			RunWithMessageLoop(action, timeoutMilliseconds);
+		}
+
+		private static void RunHeadless(Action<Form1> action)
+		{
+			using var form = new Form1();
+
+			// Force handle creation without ever showing the form. CreateControl()
+			// (called inside EnsureMapControlCreated) builds the native window handle
+			// for the form and the AxMap OCX without a Show()/Application.Run().
+			form.EnsureMapControlCreated();
+
+			// Pump any queued messages the OCX posted during handle creation.
+			Application.DoEvents();
+
+			action(form);
+		}
+
+		public static void RunWithMessageLoop(Action<Form1> action, int timeoutMilliseconds = 120000)
+		{
 			// Runs the test action on the current thread, which is already an STA thread
 			// with a message pump supplied by Xunit.StaFact. A single, non-nested message
 			// loop is used here so the ActiveX (AxMap) control's owning thread keeps

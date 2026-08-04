@@ -53,7 +53,7 @@ public sealed partial class Form1 : Form, ICallback
 		}
 	}
 
-	internal static bool IsRunningOnGitHubActions =>
+	public static bool IsRunningOnGitHubActions =>
 		string.Equals(
 			Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
 			"true",
