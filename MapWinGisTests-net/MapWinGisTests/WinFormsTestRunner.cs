@@ -8,12 +8,22 @@ namespace MapWinGisTests
 	{
 		public static void Run(Action<Form1> action, int timeoutMilliseconds = 120000)
 		{
-			if(Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
-			{
-				throw new InvalidOperationException(
-					"WinFormsTestRunner.Run must be called on an STA thread (use [StaFact]/[StaTheory]).");
-			}
+			// All AxMap tests run on a single, long-lived STA thread owned by the StaApartment
+			// collection fixture. This avoids the per-test STA thread creation/teardown that
+			// causes a loader-lock deadlock on the 32-bit (x86) test host, because the native
+			// MapWinGIS/OCX modules load once and unload once instead of on every test.
+			var apartment = StaApartment.Current
+				?? throw new InvalidOperationException(
+					"No STA apartment is available. AxMap tests must belong to the " +
+					$"'{nameof(NotThreadSafeResourceCollection)}' collection so the shared " +
+					$"'{nameof(StaApartment)}' fixture is created.");
 
+			apartment.Invoke(() => RunOnStaThread(action, timeoutMilliseconds));
+		}
+
+		private static void RunOnStaThread(Action<Form1> action, int timeoutMilliseconds)
+		{
+			// Already on the shared STA thread here.
 			// On GitHub Actions there is no interactive desktop session, so showing a real
 			// window and running a WinForms message loop (Application.Run) causes the AxMap
 			// OCX to deadlock during activation/first paint. Instead, create the control's

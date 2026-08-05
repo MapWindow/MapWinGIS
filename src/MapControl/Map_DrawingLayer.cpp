@@ -493,7 +493,8 @@ void CMapView::ClearDrawing(long Drawing)
 		if (_allDrawLists[Drawing])
 		{
 			// it's cleared in destructor I think, but I add it here as well t be sure
-			_allDrawLists[Drawing]->m_labels->Clear();
+			if (_allDrawLists[Drawing]->m_labels)
+				_allDrawLists[Drawing]->m_labels->Clear();
 
 			delete _allDrawLists[Drawing];
 		}
@@ -578,7 +579,8 @@ void CMapView::ClearDrawingLabels(long drawHandle)
 {
 	if (IsValidDrawList(drawHandle))
 	{
-		_allDrawLists[drawHandle]->m_labels->Clear();
+		if (_allDrawLists[drawHandle]->m_labels)
+			_allDrawLists[drawHandle]->m_labels->Clear();
 		OnDrawingLayersChanged();
 	}
 	else
@@ -594,9 +596,12 @@ void CMapView::DrawingFont(long drawHandle, LPCTSTR FontName, long FontSize)
 	if (IsValidDrawList(drawHandle))
 	{
 		DrawList* dlist = _allDrawLists[drawHandle];
-		CComBSTR bstr(FontName);
-		dlist->m_labels->put_FontName(bstr);
-		dlist->m_labels->put_FontSize(FontSize);
+		if (dlist->m_labels)
+		{
+			CComBSTR bstr(FontName);
+			dlist->m_labels->put_FontName(bstr);
+			dlist->m_labels->put_FontSize(FontSize);
+		}
 		OnDrawingLayersChanged();
 	}
 	else
@@ -984,7 +989,8 @@ ILabels* CMapView::GetDrawingLabels(long DrawingLayerIndex)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (IsValidDrawList(DrawingLayerIndex))
 	{
-		_allDrawLists[DrawingLayerIndex]->m_labels->AddRef();
+		if (_allDrawLists[DrawingLayerIndex]->m_labels)
+			_allDrawLists[DrawingLayerIndex]->m_labels->AddRef();
 		return _allDrawLists[DrawingLayerIndex]->m_labels;
 	}
 	else

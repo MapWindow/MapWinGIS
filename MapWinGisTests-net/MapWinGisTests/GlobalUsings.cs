@@ -28,4 +28,7 @@ public sealed class NotThreadSafeResourceFixture : IDisposable
 }
 
 [CollectionDefinition(nameof(NotThreadSafeResourceCollection), DisableParallelization = true)]
-public class NotThreadSafeResourceCollection : ICollectionFixture<NotThreadSafeResourceFixture> { }
+public class NotThreadSafeResourceCollection
+    : ICollectionFixture<NotThreadSafeResourceFixture>,
+      ICollectionFixture<StaApartment>
+{ }

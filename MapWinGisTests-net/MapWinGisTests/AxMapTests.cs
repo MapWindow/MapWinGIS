@@ -23,7 +23,7 @@ public class AxMapTests
 		_testOutputHelper = testOutputHelper;
 	}
 
-	[StaFact]
+	[Fact]
 	public void VersionTest()
 	{
 		WinFormsTestRunner.Run(form=>
@@ -40,7 +40,7 @@ public class AxMapTests
 		});
 	}
 
-	[StaFact]
+	[Fact]
 	public void MapProjectionTest()
 	{
 		WinFormsTestRunner.Run(form =>
@@ -62,7 +62,7 @@ public class AxMapTests
 		});
 	}
 
-	[StaFact]
+	[Fact]
 	public void OpenShapefileWithInvalidSpatialIndex()
 	{
 		WinFormsTestRunner.Run(form =>
@@ -93,7 +93,7 @@ public class AxMapTests
 		});
 	}
 
-	[StaFact]
+	[Fact]
 	public void ShapefileKeyTest()
 	{
 		// AS mentioned at https://mapwindow.discourse.group/t/key-property-of-shape-object-not-work/1250
