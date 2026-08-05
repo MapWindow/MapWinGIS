@@ -28,6 +28,8 @@ internal static class LoaderWarmup
 	[ModuleInitializer]
 	internal static void Initialize()
 	{
+		ConfigureGdal();
+
 		try {
 			// Drive the exact CopyFileEx -> LdrpLoadForwardedDll path once, single-threaded, so the
 			// forwarded security-provider DLL is fully resolved before any other threads start.
@@ -50,6 +52,21 @@ internal static class LoaderWarmup
 			if (File.Exists(path)) File.Delete(path);
 		} catch {
 			// ignore cleanup failures
+		}
+	}
+
+	private static void ConfigureGdal()
+	{
+		try {
+			if(!Environment.Is64BitProcess)
+			{
+				// Forces GDAL to run raster operations single-threaded by setting the <c>GDAL_NUM_THREADS</c>
+				// /// environment variable before any native GDAL/OCX module is loaded.
+				if(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GDAL_NUM_THREADS")))
+					Environment.SetEnvironmentVariable("GDAL_NUM_THREADS", "1");
+			}
+		} catch {
+			// Ignore
 		}
 	}
 }
