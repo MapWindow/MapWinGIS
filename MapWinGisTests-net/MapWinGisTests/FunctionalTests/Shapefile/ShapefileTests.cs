@@ -146,6 +146,7 @@ public class ShapefileTests
         var retVal = sf.Open(Path.Combine(Helpers.GetTestDataLocation(), "UnitedStates-3857.shp"));
         retVal.ShouldBeTrue("sf.Open failed: " + sf.ErrorMsg[sf.LastErrorCode]);
         Helpers.CheckEpsgCode(sf.GeoProjection, 3857, false);
+        sf.Close().ShouldBeTrue("sf.Close failed");
     }
 
     [Fact]

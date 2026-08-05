@@ -3,11 +3,12 @@
 namespace MapWinGisTests.UnitTests
 {
 	[Collection(nameof(NotThreadSafeResourceCollection))]
-	public class ShapefileTest
+	public class ShapefileTest : IDisposable
 	{
 		private readonly ITestOutputHelper _testOutputHelper;
 		private readonly GlobalSettings _gs;
 		private readonly Shapefile _shapefile;
+		private readonly Shapefile _polyShapefile;
 
 		public ShapefileTest(ITestOutputHelper testOutputHelper)
 		{
@@ -16,6 +17,10 @@ namespace MapWinGisTests.UnitTests
 			var shapefileName = Helpers.GetTestFilePath("Issue-216.shp");
 			_shapefile = new Shapefile();
 			_shapefile.Open(shapefileName);
+
+			shapefileName = Helpers.GetTestFilePath("UnitedStates-3857.shp");
+			_polyShapefile = new Shapefile();
+			_polyShapefile.Open(shapefileName);
 		}
 
 		[Fact]
@@ -663,66 +668,331 @@ namespace MapWinGisTests.UnitTests
 			shapefile.EditingTable.ShouldBeTrue();
 		}
 
+		[Fact]
+		public void ShapefileStopEditingTableTest()
+		{
+			_shapefile.StartEditingTable().ShouldBeTrue();
+			_shapefile.EditingShapes.ShouldBeFalse();
+			_shapefile.EditingTable.ShouldBeTrue();
+			_shapefile.StopEditingTable(false).ShouldBeTrue();
+			_shapefile.EditingShapes.ShouldBeFalse();
+			_shapefile.EditingTable.ShouldBeFalse();
+		}
+
+		[Fact]
+		public void ShapefileQuickPointTest()
+		{
+			var pt = _shapefile.QuickPoint(10, 2);
+			pt.ShouldNotBeNull();
+			_shapefile.QuickPoint(_shapefile.NumShapes+1, 0).ShouldBeNull();
+		}
+
+		[Fact]
+		public void ShapefileQuickExtentsTest()
+		{
+			var quickExtent = _shapefile.QuickExtents(10);
+			quickExtent.ShouldNotBeNull();
+
+			var shape = _shapefile.Shape[10];
+			shape.ShouldNotBeNull();
+			var ext = shape.Extents;
+			ext.ShouldNotBeNull();
+			quickExtent.xMin.ShouldBe(ext.xMin);
+			quickExtent.xMax.ShouldBe(ext.xMax);
+			quickExtent.yMin.ShouldBe(ext.yMin);
+			quickExtent.yMax.ShouldBe(ext.yMax);
+		}
+
+		[Fact]
+		public void ShapefileQuickPointsTest()
+		{
+			var arrPoints = _shapefile.QuickPoints(10, 5);
+			arrPoints.ShouldNotBeNull();
+
+			var shape = _shapefile.Shape[10];
+			shape.ShouldNotBeNull();
+
+			var n = 0;
+			for(var i = 0;i < shape.NumPoints; i++)
+			{
+				var pt = shape.Point[i];
+				pt.x.ShouldBe(arrPoints.GetValue(n++));
+				pt.y.ShouldBe(arrPoints.GetValue(n++));
+			}
+		}
+
+		[Fact]
+		public void ShapefilePointInShapeTest()
+		{
+			_polyShapefile.PointInShape(39, -11010847.02158054895699024, 3687674.63619555253535509).ShouldBeTrue();
+			_polyShapefile.PointInShape(40, -11010847.02158054895699024, 3687674.63619555253535509).ShouldBeFalse();
+		}
+
+		[Fact]
+		public void ShapefilePointInShapefileTest()
+		{
+			/// TODO: Fix MapWinGIS to not require BeginPointInShapefile() for PointInShapefile() to work.
+			_polyShapefile.BeginPointInShapefile().ShouldBeTrue();
+			_polyShapefile.PointInShapefile(-11010847.02158054895699024, 3687674.63619555253535509).ShouldBe(39);
+			_polyShapefile.PointInShapefile(-11326538.29784329049289227, 3332521.95039996830746531).ShouldBe(-1);
+			_polyShapefile.EndPointInShapefile();
+		}
+
+		[Fact]
+		public void ShapefileBeginPointInShapefileTest()
+		{
+			_polyShapefile.BeginPointInShapefile().ShouldBeTrue();
+			_polyShapefile.EndPointInShapefile();
+		}
+
+		[Fact]
+		public void ShapefileEndPointInShapefileTest()
+		{
+			_polyShapefile.BeginPointInShapefile().ShouldBeTrue();
+			_polyShapefile.EndPointInShapefile();
+		}
+
+		[Fact]
+		public void ShapefileCreateNewWithShapeIDTest()
+		{
+			var shapefile = new Shapefile();
+			shapefile.CreateNewWithShapeID("", ShpfileType.SHP_POINT);
+			shapefile.NumFields.ShouldBe(1);
+			var field = shapefile.Field[0];
+			field.ShouldNotBeNull();
+			field.Name.ShouldBe("MWShapeID");
+			field.Key.ShouldBe("");
+			field.Alias.ShouldBe("");
+			field.Type.ShouldBe(FieldType.INTEGER_FIELD);
+		}
+
+		[Fact]
+		public void ShapefileCreateSpatialIndexTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_CreateSpatialIndex_TestFile", ".shp");
+			shapefile.SaveAs(fileName).ShouldBeTrue();
+			shapefile.CreateSpatialIndex().ShouldBeTrue();
+		}
+
+		[Fact]
+		public void ShapefileResourceTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_Resource_TestFile", ".shp");
+			shapefile.SaveAs(fileName).ShouldBeTrue();
+
+			shapefile = Helpers.DeepClone(_polyShapefile);
+			shapefile.NumShapes.ShouldBe(49);
+			shapefile.ShapefileType.ShouldBe(ShpfileType.SHP_POLYGON);
+			shapefile.Resource(fileName).ShouldBeTrue();
+			shapefile.NumShapes.ShouldBe(10);
+			shapefile.ShapefileType.ShouldBe(ShpfileType.SHP_POLYLINE);
+		}
+
+		[Fact]
+		public void ShapefileRefreshExtentsTest()
+		{
+			_shapefile.RefreshExtents().ShouldBeTrue();
+		}
+
+		[Fact]
+		public void ShapefileRefreshShapeExtentsTest()
+		{
+			_shapefile.RefreshShapeExtents(10).ShouldBeTrue();
+		}
+
+		[Fact]
+		public void ShapefileSaveTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_Resource_TestFile", ".shp");
+			shapefile.SaveAs(fileName).ShouldBeTrue();
+
+			//var value = shapefile.CellValue[0, 1];
+			shapefile.EditCellValue(0, 1, "10000");
+
+			var shape = shapefile.Shape[5];
+			var pt = shape.Point[0];
+			var currX = pt.x;
+			var currY = pt.y;
+			shape.Point[0] = new Point { x = currX + 1, y = currY + 1 };
+
+			shapefile.Save().ShouldBeTrue();
+			shapefile.Close().ShouldBeTrue();
+
+			shapefile.Open(fileName);
+			var value = shapefile.CellValue[0, 1];
+			value.ShouldBe("10000");
+			shape = shapefile.Shape[5];
+			pt = shape.Point[0];
+			pt.x.ShouldBe(currX  + 1);
+			pt.y.ShouldBe(currY + 1);
+		}
+
+		[Fact]
+		public void ShapefileIsSpatialIndexValidTest()
+		{
+			_shapefile.IsSpatialIndexValid().ShouldBeTrue();
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			shapefile.IsSpatialIndexValid().ShouldBeFalse();
+		}
+
+		[Fact]
+		public void ShapefileGetIntersectionTest()
+		{
+			// Miss test
+			var wkt = "POLYGON ((-9710414.20743004977703094 5390344.77251605130732059, -9645840.99183085188269615 5329358.9577834764495492, -9655706.3442140631377697 5276444.79500080179423094, -9705033.10613011568784714 5269269.99326755758374929, -9725660.66111319325864315 5307834.55258374474942684, -9732835.46284643746912479 5349986.51276655308902264, -9732835.46284643746912479 5349986.51276655308902264, -9710414.20743004977703094 5390344.77251605130732059))";
+			var sfPolygon = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYGON, wkt, 28992);
+
+			var result = _polyShapefile.GetIntersection(false, sfPolygon, false, ShpfileType.SHP_NULLSHAPE);
+			result.ShouldBeNull();
+
+			// Hit test
+			wkt = "POLYGON ((-10984838.36529753357172012 3877358.45701819472014904, -10935511.60338148102164268 3819960.04315224196761847, -10970488.76183104515075684 3746418.32538648974150419, -11042236.77916348725557327 3745521.47516983421519399, -11070039.13587980717420578 3808300.99033572059124708, -11029680.87613030895590782 3872874.2059349175542593, -11029680.87613030895590782 3872874.2059349175542593, -10984838.36529753357172012 3877358.45701819472014904))";
+			sfPolygon = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYGON, wkt, 28992);
+			result = _polyShapefile.GetIntersection(false, sfPolygon, false, ShpfileType.SHP_NULLSHAPE);
+			result.ShouldNotBeNull();
+
+			var testShape = sfPolygon.Shape[0];
+			testShape.ShouldNotBeNull();
+
+			var resultShape = result.Shape[0];
+			resultShape.ShouldNotBeNull();
+			Math.Round(testShape.Area - resultShape.Area, 3).ShouldBe(0.000);
+		}
+
+		[Fact]
+		public void ShapefileSelectByShapefileTest()
+		{
+			// Miss test
+			var wkt = "POLYGON ((-9710414.20743004977703094 5390344.77251605130732059, -9645840.99183085188269615 5329358.9577834764495492, -9655706.3442140631377697 5276444.79500080179423094, -9705033.10613011568784714 5269269.99326755758374929, -9725660.66111319325864315 5307834.55258374474942684, -9732835.46284643746912479 5349986.51276655308902264, -9732835.46284643746912479 5349986.51276655308902264, -9710414.20743004977703094 5390344.77251605130732059))";
+			var sfPolygon = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYGON, wkt, 28992);
+			var result = new object();
+			_polyShapefile.SelectByShapefile(sfPolygon, tkSpatialRelation.srOverlaps, false, ref result).ShouldBeFalse();
+			(result is Array).ShouldBeTrue();
+			((Array)result).Length.ShouldBe(0);
+
+			// Hit test
+			wkt = "LINESTRING (-10176776.32009091414511204 3580501.03530521970242262, -10987528.91594749875366688 3763458.4795029447413981, -11737295.6970715094357729 4244170.19563029985874891, -11737295.6970715094357729 4244170.19563029985874891)";
+			var sfPolyline = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYLINE, wkt, 28992);
+			_polyShapefile.SelectByShapefile(sfPolyline, tkSpatialRelation.srCrosses, false, ref result).ShouldBeTrue();
+			(result is Array).ShouldBeTrue();
+			((Array)result).Length.ShouldBe(3);
+		}
+
+		[Fact]
+		public void ShapefileSelectAllTest()
+		{
+			_shapefile.NumSelected.ShouldBe(0);
+			_shapefile.SelectAll();
+			_shapefile.NumSelected.ShouldBe(_shapefile.NumShapes);
+			_shapefile.SelectNone();
+		}
+
+		[Fact]
+		public void ShapefileSelectNoneTest()
+		{
+			_shapefile.SelectAll();
+			_shapefile.NumSelected.ShouldBe(_shapefile.NumShapes);
+			_shapefile.SelectNone();
+			_shapefile.NumSelected.ShouldBe(0);
+		}
+
+		[Fact]
+		public void ShapefileInvertSelectionTest()
+		{
+			_shapefile.NumSelected.ShouldBe(0);
+			_shapefile.InvertSelection();
+			_shapefile.NumSelected.ShouldBe(_shapefile.NumShapes);
+			_shapefile.SelectNone();
+		}
+
+		[Fact]
+		public void ShapefileDissolveTest()
+		{
+			var shapefile = Helpers.DeepClone(_polyShapefile, 10);
+			var name1 = shapefile.CellValue[1, 1];
+			var name2 = shapefile.CellValue[1, 3];
+
+			var newName = $"[{name1}-{name2}]";
+			shapefile.EditCellValue(1, 1, newName).ShouldBeTrue();
+			shapefile.EditCellValue(1, 3, newName).ShouldBeTrue();
+
+			var dissolvedShapefile = shapefile.Dissolve(1, false);
+			dissolvedShapefile.ShouldNotBeNull();
+			dissolvedShapefile.NumShapes.ShouldBe(9);
+		}
+
+		[Fact]
+		public void ShapefileGenerateLabelsTest()
+		{
+			_polyShapefile.Labels.Count.ShouldBe(0);
+			var result = _polyShapefile.GenerateLabels(1, tkLabelPositioning.lpCentroid);
+			result.ShouldBe(_polyShapefile.NumShapes);
+			_polyShapefile.Labels.Count.ShouldBe(result);
+			_polyShapefile.Labels.Clear();
+		}
+
+		[Fact]
+		public void ShapefileCloneTest()
+		{
+			var shapefile = _shapefile.Clone();
+			shapefile.NumShapes.ShouldBe(0);
+			shapefile.NumFields.ShouldBe(_shapefile.NumFields);
+		}
+
+		[Fact]
+		public void ShapefileBufferByDistanceTest()
+		{
+			var wkt = "LINESTRING (-10176776.32009091414511204 3580501.03530521970242262, -10987528.91594749875366688 3763458.4795029447413981, -11737295.6970715094357729 4244170.19563029985874891, -11737295.6970715094357729 4244170.19563029985874891)";
+			var sfPolyline = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYLINE, wkt, 28992);
+			var sfResult = sfPolyline.BufferByDistance(10, 30, false, true);
+			sfResult.ShouldNotBeNull();
+			sfResult.ShapefileType.ShouldBe(ShpfileType.SHP_POLYGON);
+			sfResult.NumShapes.ShouldBe(1);
+		}
+
+		[Fact]
+		public void ShapefileDifferenceTest()
+		{
+			var shapefile1 = Helpers.DeepClone(_polyShapefile, 10);
+			var shapefile2 = Helpers.DeepClone(_polyShapefile, 5);
+			var sfResult = shapefile1.Difference(false, shapefile2, false);
+			sfResult.ShouldNotBeNull();
+		}
+
 		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileStopEditingTableTest() { }
+		public void ShapefileClipTest()
+		{
+
+		}
+
 		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileQuickPointTest() { }
+		public void ShapefileSymmDifferenceTest()
+		{
+
+		}
+
 		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileQuickExtentsTest() { }
+		public void ShapefileUnionTest()
+		{
+
+		}
+
 		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileQuickPointsTest() { }
+		public void ShapefileExplodeShapesTest()
+		{
+
+		}
+
+
 		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefilePointInShapeTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefilePointInShapefileTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileBeginPointInShapefileTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileEndPointInShapefileTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileCreateNewWithShapeIDTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileCreateSpatialIndexTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileResourceTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileRefreshExtentsTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileRefreshShapeExtentsTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSaveTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileIsSpatialIndexValidTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileGetIntersectionTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSelectByShapefileTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSelectAllTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSelectNoneTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileInvertSelectionTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileDissolveTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileGenerateLabelsTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileCloneTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileBufferByDistanceTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileDifferenceTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileClipTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSymmDifferenceTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileUnionTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileExplodeShapesTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileAggregateShapesTest() { }
+		public void ShapefileAggregateShapesTest()
+		{
+
+		}
+
 		[Fact(Skip = "Unit test is not yet implemented")]
 		public void ShapefileExportSelectionTest() { }
 		[Fact(Skip = "Unit test is not yet implemented")]
@@ -794,6 +1064,23 @@ namespace MapWinGisTests.UnitTests
 				shapefile.OgrFid2ShapeIndex(0).ShouldBe(0);
 			else
 				shapefile.OgrFid2ShapeIndex(0).ShouldBe(-1);
+		}
+
+		/// <summary>
+		/// xUnit creates a new <see cref="ShapefileTest"/> instance per test method, and the
+		/// constructor opens the shared TestData shapefiles (e.g. <c>UnitedStates-3857.*</c>).
+		/// The native MapWinGIS <see cref="Shapefile"/> keeps OS file handles on the .shp/.shx/.dbf
+		/// open (the .dbf without a read-share mode). Without deterministic cleanup those handles
+		/// linger until the object is finalized by the GC, locking the TestData files and causing
+		/// other tests/fixtures (such as GdalUtilsFixture copying UnitedStates-3857) to fail with
+		/// "The process cannot access the file ... because it is being used by another process".
+		/// Closing them here releases the handles as soon as each test finishes.
+		/// </summary>
+		public void Dispose()
+		{
+			_shapefile?.Close();
+			_polyShapefile?.Close();
+			GC.SuppressFinalize(this);
 		}
 
 	}

@@ -256,7 +256,7 @@ public class GdalUtilsTests : ICallback, IDisposable, IClassFixture<GdalUtilsTes
             // Copy tiff to filename with unicode chars:
             UnicodeTiffFilename = Float32_50mTiffFilename.Replace(".tif", "-Воздух.tif");
             if (!File.Exists(UnicodeTiffFilename))
-                File.Copy(Float32_50mTiffFilename, UnicodeTiffFilename);
+                Helpers.StreamCopyFile(Float32_50mTiffFilename, UnicodeTiffFilename);
 
             UnitedStates_3857SfFilename = Helpers.GetTestFilePath("UnitedStates-3857.shp");
             UnicodeSfFilename = UnitedStates_3857SfFilename.Replace(".shp", "-Воздух.shp");

@@ -308,8 +308,26 @@ internal static class Helpers
         foreach (var file in dir.EnumerateFiles($"{baseNameSource}.*", SearchOption.TopDirectoryOnly))
         {
             var ext = Path.GetExtension(file.FullName);
-            File.Copy(file.FullName, Path.Combine(fileDirDestination, $"{baseNameDestination}{ext}"));
+            StreamCopyFile(file.FullName, Path.Combine(fileDirDestination, $"{baseNameDestination}{ext}"));
         }
+    }
+
+    /// <summary>
+    /// Copies a file using a plain managed stream copy instead of <see cref="File.Copy(string,string)"/>.
+    /// <para>
+    /// <see cref="File.Copy(string,string)"/> calls the Win32 <c>CopyFileEx</c> API, which (to copy
+    /// security/ACL information) delay-loads the forwarded <c>api-ms-win-security-provider</c> DLL.
+    /// On x86 that first-time, forwarded DLL load can happen inside the OS loader lock at the exact
+    /// moment the CLR is concurrently starting its STA/JIT/GDI+/thread-pool threads, producing a
+    /// loader deadlock (the test host hangs). A stream copy never touches that code path, so it
+    /// avoids the deadlock entirely.
+    /// </para>
+    /// </summary>
+    internal static void StreamCopyFile(string sourceFilename, string destinationFilename)
+    {
+        using var source = new FileStream(sourceFilename, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using var destination = new FileStream(destinationFilename, FileMode.Create, FileAccess.Write, FileShare.None);
+        source.CopyTo(destination);
     }
 
     internal static void DeleteShapefileFiles(string sfFilename)

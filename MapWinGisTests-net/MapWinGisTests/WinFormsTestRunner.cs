@@ -108,7 +108,10 @@ namespace MapWinGisTests
 				};
 
 				timeoutTimer.Start();
-				Application.Run(form);
+				if(Form1.IsRunningOnGitHubActions)
+					Application.Run(form);
+				else
+					form.ShowDialog();
 			}
 			finally
 			{
