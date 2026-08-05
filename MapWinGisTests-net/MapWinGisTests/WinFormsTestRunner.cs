@@ -131,12 +131,10 @@ namespace MapWinGisTests
 		/// </summary>
 		private static void DisposeAndDrainStaApartment(Form form)
 		{
-			try {
-				if(!form.IsDisposed)
-					form.Dispose();
-			} catch {
-				/* ignore disposal errors during teardown */
-			}
+			// Destroy the window handle while this STA apartment is guaranteed to be
+			// actively pumping messages (via Application.Run), rather than synchronously
+			// during teardown. See DisposeFormWhilePumping for why this avoids the x86 hang.
+			DisposeFormWhilePumping(form);
 
 			// Drain messages the OCX posted while being disposed.
 			Application.DoEvents();
@@ -150,6 +148,59 @@ namespace MapWinGisTests
 			// Pump once more so any release-driven messages are handled before the
 			// STA thread exits and runs DllMain(THREAD_DETACH) under the loader lock.
 			Application.DoEvents();
+		}
+
+		/// <summary>
+		/// Disposes the form (destroying its native window handle) while this STA apartment
+		/// is guaranteed to be running an active WinForms message loop.
+		///
+		/// Destroying the handle triggers WM_DESTROY -> Control.ReleaseUiaProvider, which
+		/// forces UI Automation to initialize via a cross-apartment
+		/// CoCreateInstance(CUIAutomation7). If that runs during teardown (no active pump),
+		/// the STA modal loop that services the cross-apartment call has nothing driving it
+		/// and blocks forever - the hang observed on the 32-bit (x86) test host.
+		///
+		/// By posting the disposal into the queue and driving it from Application.Run, the
+		/// owning apartment keeps dispatching messages while the handle is destroyed, so the
+		/// cross-apartment UIA call is serviced and the handle tears down cleanly.
+		/// </summary>
+		private static void DisposeFormWhilePumping(Form form)
+		{
+			if(form.IsDisposed)
+				return;
+
+			// The form's handle already exists on this STA thread (created via
+			// EnsureMapControlCreated / Application.Run), so we can post work to its queue.
+			if(!form.IsHandleCreated)
+			{
+				// No handle means no window to destroy under a pump; fall back to a plain
+				// dispose (there is no UIA provider to release in this case).
+				try {
+					form.Dispose();
+				} catch {
+					/* ignore disposal errors during teardown */
+				}
+				return;
+			}
+
+			using var pumpContext = new ApplicationContext();
+
+			// Queue the disposal so it executes inside the message loop started below.
+			form.BeginInvoke(new Action(() =>
+			{
+				try {
+					if(!form.IsDisposed)
+						form.Dispose();
+				} catch {
+					/* ignore disposal errors during teardown */
+				} finally {
+					// End the pump once the handle has been destroyed.
+					pumpContext.ExitThread();
+				}
+			}));
+
+			// Keep the owning apartment pumping until the disposal above completes.
+			Application.Run(pumpContext);
 		}
 	}
 }
