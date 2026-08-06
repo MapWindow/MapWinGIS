@@ -59,11 +59,46 @@ public sealed class StaApartment : IDisposable
 
 		_appContext = new ApplicationContext();
 
+		// Prime UI Automation on this STA thread while it is idle (before the message pump below
+		// becomes busy servicing tests). On the 32-bit host, the first UI Automation activation
+		// happens lazily inside Control.ReleaseUiaProvider during WM_DESTROY when a form is torn
+		// down. That first-time activation makes a cross-apartment COM call into
+		// UIAutomationCore!DoInit; if it happens while the STA thread is mid-teardown it deadlocks.
+		// Forcing the initialization here - once, on an otherwise idle thread - means later form
+		// disposals only release an already-initialized provider and never trigger that activation.
+		WarmUpUiAutomation();
+
 		_ready.Set();
 
 		// Keep pumping messages for the whole test run so the ActiveX (AxMap) control's owning
 		// apartment always has a live message loop.
 		Application.Run(_appContext);
+	}
+
+	/// <summary>
+	/// Forces first-time UI Automation / accessibility initialization on this STA thread by
+	/// creating a throwaway control, realizing its accessible object, and then destroying it. Doing
+	/// this once at startup avoids the lazy UIA activation that otherwise deadlocks on the 32-bit
+	/// host during form teardown (see <see cref="ThreadMain"/>).
+	/// </summary>
+	private static void WarmUpUiAutomation()
+	{
+		try {
+			using var warmup = new Control();
+			// Force handle creation so the control has a real HWND.
+			_ = warmup.Handle;
+
+			// Touching AccessibilityObject realizes the control's accessible/UIA provider, which
+			// drives the same UIAutomationCore initialization that Control.ReleaseUiaProvider hits
+			// during WM_DESTROY. Doing it here, on an idle STA thread, primes that init safely so
+			// later form teardown only releases an already-initialized provider.
+			_ = warmup.AccessibilityObject;
+
+			// Disposing now runs the release path once, while the thread is idle rather than
+			// mid-teardown.
+		} catch {
+			// Warm-up is best-effort; it must not fail apartment startup.
+		}
 	}
 
 	/// <summary>

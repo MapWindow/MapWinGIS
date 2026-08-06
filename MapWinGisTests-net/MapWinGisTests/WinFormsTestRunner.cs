@@ -208,16 +208,13 @@ namespace MapWinGisTests
 				finally { disposed = true; }
 			});
 
-			// Pump the queue until the handle is destroyed WITHOUT starting a second
-			// message loop. StaApartment.ThreadMain already owns the thread's only
-			// Application.Run loop; calling Application.Run again here throws
-			// "Starting a second message loop on a single thread ...".
-			// DoEvents drains queued messages (incl. the cross-apartment UIA release)
-			// without creating a nested loop.
-			while(!disposed)
+			// Pump WITHOUT starting a second message loop (fixes the x64 exception),
+			// but bound the wait so a cross-apartment UIA activation can't hang forever.
+			var deadline = Environment.TickCount64 + 30_000;
+			while(!disposed && Environment.TickCount64 < deadline)
 			{
 				Application.DoEvents();
-				Thread.Sleep(1); // yield so we don't spin the CPU
+				Thread.Sleep(1);
 			}
 		}
 	}
