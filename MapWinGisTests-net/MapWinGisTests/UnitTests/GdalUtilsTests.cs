@@ -167,7 +167,8 @@ public class GdalUtilsTests : ICallback, IDisposable, IClassFixture<GdalUtilsTes
             var options = new[]
             {
                 "-of", "GTiff",
-                "-co",  "TILED=YES"
+                "-co",  "TILED=YES",
+                "-co", "NUM_THREADS=1"
             };
 
             try
