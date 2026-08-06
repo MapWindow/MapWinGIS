@@ -84,6 +84,18 @@ public sealed partial class Form1 : Form, ICallback
 	public void EnsureMapControlCreated()
 	{
 		CreateControl();
+
+		// Force the FORM's own native window handle to exist even though it is never
+		// shown. Control.CreateControl() is a no-op while the control is invisible, so
+		// in headless mode the form otherwise has no handle. That makes the teardown in
+		// WinFormsTestRunner.DisposeFormWhilePumping fall back to a synchronous
+		// form.Dispose(), which destroys the child window (and performs the blocking
+		// cross-apartment UIA disconnect in Control.ReleaseUiaProvider) outside any
+		// active message pump - the deadlock observed as a hang on the 32-bit (x86)
+		// test host. Creating the handle here guarantees the pumped BeginInvoke +
+		// Application.Run teardown path is used instead, which services that call.
+		_ = Handle;
+
 		axMap1.CreateControl();
 
 		if(!axMap1.IsHandleCreated)

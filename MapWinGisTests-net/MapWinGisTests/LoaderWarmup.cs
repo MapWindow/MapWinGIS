@@ -58,13 +58,10 @@ internal static class LoaderWarmup
 	private static void ConfigureGdal()
 	{
 		try {
-			if(!Environment.Is64BitProcess)
-			{
-				// Forces GDAL to run raster operations single-threaded by setting the <c>GDAL_NUM_THREADS</c>
-				// /// environment variable before any native GDAL/OCX module is loaded.
-				if(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GDAL_NUM_THREADS")))
-					Environment.SetEnvironmentVariable("GDAL_NUM_THREADS", "1");
-			}
+			// Forces GDAL to run raster operations single-threaded by setting the <c>GDAL_NUM_THREADS</c>
+			// /// environment variable before any native GDAL/OCX module is loaded.
+			if(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GDAL_NUM_THREADS")))
+				Environment.SetEnvironmentVariable("GDAL_NUM_THREADS", "1");
 		} catch {
 			// Ignore
 		}
