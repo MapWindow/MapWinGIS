@@ -76,28 +76,37 @@ public sealed class StaApartment : IDisposable
 	}
 
 	/// <summary>
-	/// Forces first-time UI Automation / accessibility initialization on this STA thread by
-	/// creating a throwaway control, realizing its accessible object, and then destroying it. Doing
-	/// this once at startup avoids the lazy UIA activation that otherwise deadlocks on the 32-bit
-	/// host during form teardown (see <see cref="ThreadMain"/>).
+	/// Forces first-time UI Automation initialization on this STA thread by creating a real
+	/// window handle and then destroying it. Destroying the handle raises WM_DESTROY, which
+	/// runs Control.ReleaseUiaProvider -> UiaReturnRawElementProvider -> UIAutomationCore
+	/// CheckInit/DoInit -> CoCreateInstance(CUIAutomation7). Running that once here, while the
+	/// STA thread is idle and the native OCX/loader work is not in flight, means later form
+	/// teardown only releases an already-initialized UIA core instead of triggering a
+	/// cross-apartment COM activation that deadlocks on the 32-bit (x86) host.
 	/// </summary>
 	private static void WarmUpUiAutomation()
 	{
-		try {
-			using var warmup = new Control();
-			// Force handle creation so the control has a real HWND.
+		try		{
+			// Use a Form (not a bare Control): its WM_DESTROY path matches what Form1 hits
+			// during real test teardown, so the same UIA init code runs now.
+			using var warmup = new Form
+			{
+				ShowInTaskbar = false,
+				FormBorderStyle = FormBorderStyle.None,
+				StartPosition = FormStartPosition.Manual,
+				Location = new System.Drawing.Point(-32000, -32000),
+				Size = new System.Drawing.Size(1, 1),
+			};
+
+			// Force native handle creation.
 			_ = warmup.Handle;
 
-			// Touching AccessibilityObject realizes the control's accessible/UIA provider, which
-			// drives the same UIAutomationCore initialization that Control.ReleaseUiaProvider hits
-			// during WM_DESTROY. Doing it here, on an idle STA thread, primes that init safely so
-			// later form teardown only releases an already-initialized provider.
-			_ = warmup.AccessibilityObject;
-
-			// Disposing now runs the release path once, while the thread is idle rather than
-			// mid-teardown.
+			// Destroy the handle => WM_DESTROY => ReleaseUiaProvider => UIAutomationCore DoInit.
+			// This is the exact path that deadlocks at teardown; doing it here primes the UIA
+			// core once, on an idle thread.
+			warmup.Dispose();
 		} catch {
-			// Warm-up is best-effort; it must not fail apartment startup.
+			// Warm-up is best-effort; it must never fail apartment startup.
 		}
 	}
 
