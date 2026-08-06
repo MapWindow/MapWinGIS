@@ -196,24 +196,29 @@ namespace MapWinGisTests
 				return;
 			}
 
-			using var pumpContext = new ApplicationContext();
-
-			// Queue the disposal so it executes inside the message loop started below.
-			form.BeginInvoke(new Action(() =>
+			// Post the disposal onto this STA thread's existing queue.
+			var disposed = false;
+			form.BeginInvoke(() =>
 			{
 				try {
 					if(!form.IsDisposed)
 						form.Dispose();
-				} catch {
-					/* ignore disposal errors during teardown */
-				} finally {
-					// End the pump once the handle has been destroyed.
-					pumpContext.ExitThread();
 				}
-			}));
+				catch { /* ignore teardown errors */ }
+				finally { disposed = true; }
+			});
 
-			// Keep the owning apartment pumping until the disposal above completes.
-			Application.Run(pumpContext);
+			// Pump the queue until the handle is destroyed WITHOUT starting a second
+			// message loop. StaApartment.ThreadMain already owns the thread's only
+			// Application.Run loop; calling Application.Run again here throws
+			// "Starting a second message loop on a single thread ...".
+			// DoEvents drains queued messages (incl. the cross-apartment UIA release)
+			// without creating a nested loop.
+			while(!disposed)
+			{
+				Application.DoEvents();
+				Thread.Sleep(1); // yield so we don't spin the CPU
+			}
 		}
 	}
 }

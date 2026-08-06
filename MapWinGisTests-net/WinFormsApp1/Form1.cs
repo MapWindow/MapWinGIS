@@ -85,7 +85,7 @@ public sealed partial class Form1 : Form, ICallback
 	{
 		CreateControl();
 
-		// Force the FORM's own native window handle to exist even though it is never
+		// Force the Form's own native window handle to exist even though it is never
 		// shown. Control.CreateControl() is a no-op while the control is invisible, so
 		// in headless mode the form otherwise has no handle. That makes the teardown in
 		// WinFormsTestRunner.DisposeFormWhilePumping fall back to a synchronous
