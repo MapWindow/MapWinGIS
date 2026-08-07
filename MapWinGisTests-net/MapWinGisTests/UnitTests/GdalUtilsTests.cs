@@ -157,14 +157,11 @@ public class GdalUtilsTests : ICallback, IDisposable, IClassFixture<GdalUtilsTes
     [Fact]
     public void GdalUtilsGdalRasterTranslateTest()
     {
-        if(Form1.IsRunningOnGitHubActions)
+        if(Form1.IsRunningOnGitHubActions && !Environment.Is64BitProcess)
         {
-            if(!Environment.Is64BitProcess)
-            {
-				// Skip test on GitHub Actions for 32-bit process, as it causes crashes sometimes.
-				Form1.IsRunningOnGitHubActions.ShouldBeTrue();
-                return;
-            }
+			// Skip test on GitHub Actions for 32-bit process, as it causes crashes sometimes.
+			Form1.IsRunningOnGitHubActions.ShouldBeTrue();
+            return;
         }
 
         GdalRasterTranslateTest(_fixture.Float32_50mTiffFilename);
@@ -201,7 +198,14 @@ public class GdalUtilsTests : ICallback, IDisposable, IClassFixture<GdalUtilsTes
     [Fact]
     public void GdalUtilsGdalBuildOverviewsTest()
     {
-        GdalBuildOverviewsTest(_fixture.Float32_50mTiffFilename);
+	    if(Form1.IsRunningOnGitHubActions && !Environment.Is64BitProcess)
+	    {
+		    // Skip test on GitHub Actions for 32-bit process, as it causes crashes sometimes.
+		    Form1.IsRunningOnGitHubActions.ShouldBeTrue();
+		    return;
+	    }
+
+		GdalBuildOverviewsTest(_fixture.Float32_50mTiffFilename);
         GdalBuildOverviewsTest(_fixture.UnicodeTiffFilename);
 
         // Local function:
