@@ -3217,9 +3217,11 @@ VARIANT_BOOL CShapefile::ExplodeShapesCore(VARIANT_BOOL selectedOnly, IShapefile
 
 	result->get_NumShapes(&count);
 	if (count > 0)
+	{
+		ValidateOutput(result, "ExplodeShapes");
 		return VARIANT_TRUE;
+	}
 
-	ValidateOutput(result, "ExplodeShapes");
 	return VARIANT_FALSE;
 }
 
@@ -3307,13 +3309,19 @@ VARIANT_BOOL CShapefile::ExportSelectionCore(IShapefile* result)
         shp->Release();
     }
 
-    // ----------------------------------------------
-    //   Validating output
-    // ----------------------------------------------
-    CallbackHelper::ProgressCompleted(_globalCallback, _key);
-    ValidateOutput(result, "ExportSelection");
+	// ----------------------------------------------
+	//   Validating output
+	// ----------------------------------------------
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
-    return VARIANT_TRUE;
+	result->get_NumShapes(&count);
+	if (count > 0)
+	{
+		ValidateOutput(result, "ExportSelection");
+		return VARIANT_TRUE;
+	}
+
+	return VARIANT_FALSE;
 }
 
 // ********************************************************************

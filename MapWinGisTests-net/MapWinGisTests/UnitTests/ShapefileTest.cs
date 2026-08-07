@@ -1,4 +1,5 @@
 ﻿using Xunit.Abstractions;
+using SelectMode = MapWinGIS.SelectMode;
 
 namespace MapWinGisTests.UnitTests
 {
@@ -962,73 +963,325 @@ namespace MapWinGisTests.UnitTests
 			sfResult.ShouldNotBeNull();
 		}
 
-		[Fact(Skip = "Unit test is not yet implemented")]
+		[Fact]
 		public void ShapefileClipTest()
 		{
+			var wkt = "POLYGON ((-10984838.36529753357172012 3877358.45701819472014904, -10935511.60338148102164268 3819960.04315224196761847, -10970488.76183104515075684 3746418.32538648974150419, -11042236.77916348725557327 3745521.47516983421519399, -11070039.13587980717420578 3808300.99033572059124708, -11029680.87613030895590782 3872874.2059349175542593, -11029680.87613030895590782 3872874.2059349175542593, -10984838.36529753357172012 3877358.45701819472014904))";
+			var sfOverlay = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYGON, wkt, 28992);
+			var sfResult = _polyShapefile.Clip(false, sfOverlay, false);
+			sfResult.ShouldNotBeNull();
 
+
+			var testShape = sfOverlay.Shape[0];
+			testShape.ShouldNotBeNull();
+
+			var resultShape = sfResult.Shape[0];
+			resultShape.ShouldNotBeNull();
+			Math.Round(testShape.Area - resultShape.Area, 3).ShouldBe(0.000);
 		}
 
-		[Fact(Skip = "Unit test is not yet implemented")]
+		[Fact]
 		public void ShapefileSymmDifferenceTest()
 		{
+			var wkt = "POLYGON ((-13413508.75200067460536957 6135178.87744845822453499, -13295124.5234021469950676 6144147.37961501348763704, -13257456.81430261395871639 6067018.26098263915628195, -13318442.62903518974781036 6009619.84711668640375137, -13379428.44376776367425919 6018588.34928324166685343, -13422477.25416722893714905 6083161.56488243862986565, -13422477.25416722893714905 6083161.56488243862986565, -13413508.75200067460536957 6135178.87744845822453499))";
+			var sfOverlay = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYGON, wkt, 28992);
 
+			var shapefile = Helpers.DeepClone(_polyShapefile, 1);
+			var sfResult = shapefile.SymmDifference(false, sfOverlay, false);
+			sfResult.ShouldNotBeNull();
+
+			var orgShape = sfOverlay.Shape[0];
+			orgShape.ShouldNotBeNull();
+			var resultShape = sfResult.Shape[0];
+			resultShape.ShouldNotBeNull();
+			resultShape.NumParts.ShouldBe(4);
+			var part1 = resultShape.PartAsShape[0];
+			var part2 = resultShape.PartAsShape[1];
+			//var part3 = resultShape.PartAsShape[2];
+			//var part4 = resultShape.PartAsShape[3];
+			part1.ShouldNotBeNull();
+			part2.ShouldNotBeNull();
+			Math.Round(orgShape.Area - part2.Area, 3).ShouldBe(0.000);
 		}
 
-		[Fact(Skip = "Unit test is not yet implemented")]
+		[Fact]
 		public void ShapefileUnionTest()
 		{
+			var shapefile = Helpers.DeepClone(_polyShapefile, 1);
 
+			var wkt = "POLYGON ((-13146247.38743733428418636 6402440.24201180040836334, -13151628.48873726651072502 6153115.88178156688809395, -13504987.47409954108297825 6163878.08438143320381641, -13497812.6723662968724966 6395265.4402785561978817, -13497812.6723662968724966 6395265.4402785561978817, -13146247.38743733428418636 6402440.24201180040836334))";
+			var sfOverlay = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYGON, wkt, 28992);
+
+			var sfResult = shapefile.Union(false, sfOverlay, false);
+			sfResult.ShouldNotBeNull();
+			sfResult.NumShapes.ShouldBe(3);
+			var resultShape = sfResult.Shape[0];
+			Math.Round(resultShape.Area, 3).ShouldBe(41086641019.383);
 		}
 
-		[Fact(Skip = "Unit test is not yet implemented")]
+		[Fact]
 		public void ShapefileExplodeShapesTest()
 		{
-
+			var shapefile = Helpers.DeepClone(_polyShapefile, 1);
+			shapefile.NumShapes.ShouldBe(1);
+			var sfResult = shapefile.ExplodeShapes(true);
+			sfResult.ShouldBeNull();
+			sfResult = shapefile.ExplodeShapes(false);
+			sfResult.ShouldNotBeNull();
+			sfResult.NumShapes.ShouldBe(3);
 		}
 
 
-		[Fact(Skip = "Unit test is not yet implemented")]
+		[Fact]
 		public void ShapefileAggregateShapesTest()
 		{
+			var shapefile = Helpers.DeepClone(_polyShapefile, 10);
+			var name1 = shapefile.CellValue[1, 1];
+			var name2 = shapefile.CellValue[1, 3];
 
+			var newName = $"[{name1}-{name2}]";
+			shapefile.EditCellValue(1, 1, newName).ShouldBeTrue();
+			shapefile.EditCellValue(1, 3, newName).ShouldBeTrue();
+
+			var sfResult = shapefile.AggregateShapes(false, 1);
+			sfResult.NumShapes.ShouldBe(9);
+		}
+
+		[Fact]
+		public void ShapefileExportSelectionTest()
+		{
+			var shapefile = Helpers.DeepClone(_polyShapefile, 10);
+
+			var sfResult = shapefile.ExportSelection();
+			sfResult.ShouldBeNull();
+
+			shapefile.SelectAll();
+			sfResult = shapefile.ExportSelection();
+			sfResult.ShouldNotBeNull();
+			sfResult.NumShapes.ShouldBe(10);
+		}
+
+		[Fact]
+		public void ShapefileSortTest()
+		{
+			var value = _polyShapefile.CellValue[1, 0];
+			value.ShouldBe("Washington");
+
+			var shapefile = _polyShapefile.Sort(1, true);
+			value =  shapefile.CellValue[1, 0];
+			value.ShouldBe("Alabama");
+		}
+
+		[Fact]
+		public void ShapefileMergeTest()
+		{
+			var shapefile = Helpers.DeepClone(_polyShapefile, 1);
+
+			var wkt = "POLYGON ((-13623371.70269806869328022 6370153.63421220146119595, -13522924.47843265160918236 6151322.18134825583547354, -13542655.1831990722566843 5893029.31895146705210209, -13757899.23519639670848846 5841012.00638544745743275, -13896014.16856134496629238 5830249.80378558114171028, -13955206.28286060877144337 6239213.5025804964825511, -13955206.28286060877144337 6239213.5025804964825511, -13623371.70269806869328022 6370153.63421220146119595))";
+			var sfOverlay = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYGON, wkt, 28992);
+
+			var sfResult = shapefile.Merge(false, sfOverlay, false);
+			sfResult.ShouldNotBeNull();
+		}
+
+		[Fact]
+		public void ShapefileSerializeTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 1);
+			var serializedText = shapefile.Serialize(true);
+			serializedText.ShouldNotBeNull();
+			serializedText.ShouldStartWith("<ShapefileClass");
+			serializedText.ShouldContain("ShpType=\"3\"");
+			serializedText.ShouldContain("</ShapefileClass>");
+		}
+
+		[Fact]
+		public void ShapefileDeserializeTest()
+		{
+			var text = "<ShapefileClass ShpType=\"3\">\r\n  <DefaultDrawingOptions FillColor=\"16777215\" LineColor=\"8949349\" RotationExpression=\"\" />\r\n  <ShapefileCategoriesClass ClassificationField=\"-1\" />\r\n  <LabelsClass Generated=\"0\" TextRenderingHint=\"3\" />\r\n  <ChartsClass />\r\n  <TableClass>\r\n    <Fields />\r\n  </TableClass>\r\n</ShapefileClass>";
+			var shapefile = new Shapefile();
+			shapefile.CreateNew("", ShpfileType.SHP_NULLSHAPE);
+			shapefile.ShapefileType.ShouldBe(ShpfileType.SHP_NULLSHAPE);
+			shapefile.Deserialize(false, text);
+			shapefile.ShapefileType.ShouldBe(ShpfileType.SHP_POLYLINE);
+		}
+
+		[Fact]
+		public void ShapefileReprojectTest()
+		{
+			var geoProj = _shapefile.GeoProjection;
+			var newProjection = Helpers.MakeProjection(28992);
+			int reprojectedCount = 0;
+			var shapefile = _shapefile.Reproject(newProjection, ref reprojectedCount);
+			shapefile.ShouldNotBeNull();
+			shapefile.NumShapes.ShouldBe(13424);
+			var ext = shapefile.Extents;
+			Math.Round(ext.xMin - 7861961.7160907984, 5).ShouldBe(0);
+			Math.Round(ext.xMax - 7912482.6353602549, 5).ShouldBe(0);
+			Math.Round(ext.yMin - 5241600.7226124881, 5).ShouldBe(0);
+			Math.Round(ext.yMax - 5301001.6926183095, 5).ShouldBe(0);
+		}
+
+		[Fact]
+		public void ShapefileReprojectInPlaceTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 100);
+			var newProjection = Helpers.MakeProjection(28992);
+			int reprojectedCount = 0;
+			shapefile.ReprojectInPlace(newProjection, ref reprojectedCount).ShouldBeTrue();
+			shapefile.NumShapes.ShouldBe(100);
+			var ext = shapefile.Extents;
+			Math.Round(ext.xMin - 7873923.7115875864, 5).ShouldBe(0);
+			Math.Round(ext.xMax - 7906269.68945167, 5).ShouldBe(0);
+			Math.Round(ext.yMin - 5253933.4381718114, 5).ShouldBe(0);
+			Math.Round(ext.yMax - 5294477.8762830561, 5).ShouldBe(0);
+		}
+
+		[Fact]
+		public void ShapefileSimplifyLinesTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var shape1 = shapefile.Shape[1];
+			//var wkt1 = shape1.ExportToWKT();
+			shape1.NumPoints.ShouldBe(11);
+
+			var simplShapefile = shapefile.SimplifyLines(0.001, false);
+			var shape2 = simplShapefile.Shape[1];
+			//var wkt2 = shape2.ExportToWKT();
+			shape2.NumPoints.ShouldBe(2);
+			Math.Round(shape1.Length - shape2.Length, 3).ShouldBe(0.000);
+		}
+
+		[Fact]
+		public void ShapefileFixUpShapesTest()
+		{
+			var sfPolygon = Helpers.CreateTestPolygonShapefile();
+			var shape = sfPolygon.Shape[0].Clone();
+			shape.ReversePointsOrder(0).ShouldBeTrue();
+			var shapefile = new Shapefile();
+			shapefile.CreateNew("", ShpfileType.SHP_POLYGON);
+			shapefile.HasInvalidShapes().ShouldBeFalse();
+			shapefile.EditAddShape(shape);
+			shapefile.HasInvalidShapes().ShouldBeTrue();
+			shapefile.FixUpShapes(out var resultShapefile).ShouldBeTrue();
+			resultShapefile.ShouldNotBeNull();
+			resultShapefile.HasInvalidShapes().ShouldBeFalse();
+		}
+
+		[Fact]
+		public void ShapefileEditAddShapeTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var shape = shapefile.Shape[1].Clone();
+			shape.Move(shape.Length / 10, shape.Length / 10);
+			var ret = shapefile.EditAddShape(shape);
+			ret.ShouldBe(10);
+			shapefile.NumShapes.ShouldBe(11);
+		}
+
+		[Fact]
+		public void ShapefileEditAddFieldTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var idx = shapefile.EditAddField("NewName", FieldType.STRING_FIELD, 0, 10);
+			idx.ShouldBe(10);
+			shapefile.NumFields.ShouldBe(11);
+			shapefile.Field[idx].Name.ShouldBe("NewName");
+		}
+
+		[Fact]
+		public void ShapefileGetRelatedShapesTest()
+		{
+			var resultArray = new object();
+			_shapefile.GetRelatedShapes(1, tkSpatialRelation.srTouches, ref resultArray).ShouldBeTrue();
+			(resultArray is Array).ShouldBeTrue();
+			((Array)resultArray).Length.ShouldBe(2);
+		}
+
+		[Fact]
+		public void ShapefileGetRelatedShapes2Test()
+		{
+			var resultArray = new object();
+			var shape = _shapefile.Shape[1];
+			_shapefile.GetRelatedShapes2(shape, tkSpatialRelation.srTouches, ref resultArray).ShouldBeTrue();
+			(resultArray is Array).ShouldBeTrue();
+			((Array)resultArray).Length.ShouldBe(2);
+		}
+
+		[Fact]
+		public void ShapefileSegmentizeTest()
+		{
+			/// TODO: Needd to verify what the expected result should be for this test.
+
+			//var shapeIndexes = new long[] { 422, 510, 5041, 5141 };
+			var shapeIndexes = new long[] { 422, 510 };
+			var shapefile = Helpers.DeepClone(_shapefile, shapeIndexes);
+			shapefile.NumShapes.ShouldBe(shapeIndexes.Length);
+			//shapefile.SaveAs(@"C:\Temp\shapefile_before_Segmentize.shp");
+			//var newShapefile = shapefile.Segmentize(100);
+			var newShapefile = shapefile.Segmentize(2);
+			newShapefile.ShouldNotBeNull();
+			//newShapefile.SaveAs(@"C:\Temp\newShapefile.shp");
 		}
 
 		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileExportSelectionTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSortTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileMergeTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSerializeTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileDeserializeTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileReprojectTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileReprojectInPlaceTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSimplifyLinesTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileFixUpShapesTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileEditAddShapeTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileEditAddFieldTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileGetRelatedShapesTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileGetRelatedShapes2Test() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSegmentizeTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileGetClosestVertexTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileHasInvalidShapesTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileDumpTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileLoadDataFromTest() { }
+		public void ShapefileGetClosestVertexTest()
+		{
+			/// TODO: It seams that GetClosestVertex only works on shapes that is visible according to ShapeVisible, and a shapefile that is not added to a map is never visible. Is that correct behavioure ?
+
+			var wkt = "LINESTRING (-10176776.32009091414511204 3580501.03530521970242262, -10987528.91594749875366688 3763458.4795029447413981, -11737295.6970715094357729 4244170.19563029985874891, -11737295.6970715094357729 4244170.19563029985874891)";
+			var sfPolyline = Helpers.CreateTestShapefile(ShpfileType.SHP_POLYLINE, wkt, 28992);
+			sfPolyline.VisibilityExpression = "";
+			sfPolyline.DefaultDrawingOptions.Visible = true;
+			var isVisible = sfPolyline.ShapeVisible[0];
+			var x = -10999398.10846591927111149;
+			var y = 3771373.48348145373165607;
+			var ret = sfPolyline.GetClosestVertex(x, y, 0, out int shapeIndex, out var pointIndex, out var distance);
+			//distance.ShouldBeLessThan(200);
+		}
+
+		[Fact]
+		public void ShapefileHasInvalidShapesTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			shapefile.HasInvalidShapes().ShouldBeFalse();
+
+			var sfPolygon = Helpers.CreateTestPolygonShapefile();
+			var shape = sfPolygon.Shape[0].Clone();
+			shape.ReversePointsOrder(0).ShouldBeTrue();
+			shapefile = new Shapefile();
+			shapefile.CreateNew("", ShpfileType.SHP_POLYGON);
+			shapefile.HasInvalidShapes().ShouldBeFalse();
+			shapefile.EditAddShape(shape);
+			shapefile.HasInvalidShapes().ShouldBeTrue();
+		}
+
+		[Fact]
+		public void ShapefileDumpTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_Dump_TestFile", ".shp");
+			shapefile.Dump(fileName).ShouldBeTrue();
+
+			var newShapefile = new Shapefile();
+			newShapefile.Open(fileName).ShouldBeTrue();
+			newShapefile.ShapefileType.ShouldBe(shapefile.ShapefileType);
+			newShapefile.NumShapes.ShouldBe(shapefile.NumShapes);
+		}
+
+		[Fact]
+		public void ShapefileLoadDataFromTest()
+		{
+			var shapefile = new Shapefile();
+			var fileName = Helpers.GetTestFilePath("UnitedStates-3857.shp");
+			shapefile.LoadDataFrom(fileName).ShouldBeFalse();
+			shapefile.CreateNew("", ShpfileType.SHP_NULLSHAPE);
+			shapefile.LoadDataFrom(fileName).ShouldBeTrue();
+			shapefile.SourceType.ShouldBe(tkShapefileSourceType.sstInMemory);
+			shapefile.Filename.ShouldBeNullOrWhiteSpace();
+			shapefile.NumShapes.ShouldBeGreaterThan(0);
+		}
+
 		[Fact(Skip = "Unit test is not yet implemented")]
 		public void ShapefileClearCachedGeometriesTest() { }
 		[Fact(Skip = "Unit test is not yet implemented")]

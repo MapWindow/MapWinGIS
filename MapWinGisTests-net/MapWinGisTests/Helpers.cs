@@ -4,8 +4,8 @@ namespace MapWinGisTests;
 
 internal static class Helpers
 {
-    #region GeoProjection
-    internal static GeoProjection MakeProjection(int epsgCode)
+	#region GeoProjection
+	internal static GeoProjection MakeProjection(int epsgCode)
     {
         var geoProjection = new GeoProjection();
         geoProjection.ShouldNotBeNull();
@@ -351,6 +351,27 @@ internal static class Helpers
 		{
 			if(i >= maxFeatureCopyCount) 
 				break;
+
+			var shape = shapefile.Shape[i].Clone();
+			var shpIdx = newShapefile.EditAddShape(shape);
+			for(var f = 0; f < shapefile.NumFields; f++)
+			{
+				var rawCellValue = shapefile.CellValue[f, i];
+				var cellValue = rawCellValue ?? DBNull.Value;
+				newShapefile.EditCellValue(f, shpIdx, cellValue);
+			}
+		}
+		return newShapefile;
+	}
+
+	public static Shapefile DeepClone(Shapefile shapefile, long[] shapeIndexes)
+	{
+		var newShapefile = shapefile.Clone();
+		for(var i = 0; i < shapefile.NumShapes; i++)
+		{
+			if(!shapeIndexes.Contains(i))
+				continue;
+
 
 			var shape = shapefile.Shape[i].Clone();
 			var shpIdx = newShapefile.EditAddShape(shape);
