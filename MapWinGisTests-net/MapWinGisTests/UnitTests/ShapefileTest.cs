@@ -1413,15 +1413,26 @@ namespace MapWinGisTests.UnitTests
 			shapefile.SaveAsEx(fileName, true, true).ShouldBeTrue();
 			shapefile.Filename.ShouldBeNullOrWhiteSpace();
 			Helpers.DeleteShapefileFiles(fileName);
-			var ret2 = shapefile.SaveAsEx(fileName, true, false);
-			System.Diagnostics.Debug.WriteLine($"ret2: {ret2}");
+			shapefile.SaveAsEx(fileName, true, false).ShouldBeTrue();
 			shapefile.Filename.ShouldNotBeNullOrEmpty();
 		}
 
 		[Fact]
 		public void ShapefileFixUpShapes2Test()
 		{
-
+			var sfPolygon = Helpers.CreateTestPolygonShapefile();
+			var shape = sfPolygon.Shape[0].Clone();
+			shape.ReversePointsOrder(0).ShouldBeTrue();
+			var shapefile = new Shapefile();
+			shapefile.CreateNew("", ShpfileType.SHP_POLYGON);
+			shapefile.HasInvalidShapes().ShouldBeFalse();
+			var idx = shapefile.EditAddShape(shape);
+			shapefile.HasInvalidShapes().ShouldBeTrue();
+			shapefile.Selectable = true;
+			shapefile.ShapeSelected[idx] = true;
+			shapefile.FixUpShapes2(true, out var resultShapefile).ShouldBeTrue();
+			resultShapefile.ShouldNotBeNull();
+			resultShapefile.HasInvalidShapes().ShouldBeFalse();
 		}
 
 		[Fact]

@@ -36,77 +36,60 @@ jobs:
       with:
         submodules: true
 
-    # Setup MSBuild
-    - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v3
-      if: ${{matrix.platform == 'x64' }}
-      with:
-        msbuild-architecture: x64
-    - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v3
-      if: ${{matrix.platform == 'Win32' }}
-      with:
-        msbuild-architecture: x86
+    - name: Locate MSBuild and VSTest
+      shell: pwsh
+      run: |
+           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+           $msbuild = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
+           if (-not $msbuild) {
+             throw "MSBuild.exe was not found via vswhere"
+           }
+           "MSBUILD_EXE=$msbuild" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
     - name: Set VcpkgTriplet-x86
       if: ${{matrix.platform == 'Win32' }}
+      shell: pwsh
       run: |
            chcp 65001 #set code page to utf-8
+           $vcpkgInstalledDir = "${{ github.workspace }}/src/vcpkg_installed/x86-windows/"
            echo ("VcpkgTriplet=x86-windows") >> $env:GITHUB_ENV
-           echo ("VCPKG_INSTALLED_DIR=${{ github.workspace }}/src/vcpkg_installed/x86-windows/") >> $env:GITHUB_ENV
-           mkdir $[env.VCPKG_INSTALLED_DIR]
+           echo ("VCPKG_INSTALLED_DIR=$vcpkgInstalledDir") >> $env:GITHUB_ENV
+           New-Item -ItemType Directory -Path $vcpkgInstalledDir -Force | Out-Null
 
     - name: Set VcpkgTriplet-x64
       if: ${{matrix.platform == 'x64' }}
+      shell: pwsh
       run: |
            chcp 65001 #set code page to utf-8
+           $vcpkgInstalledDir = "${{ github.workspace }}/src/vcpkg_installed/x64-windows/"
            echo ("VcpkgTriplet=x64-windows") >> $env:GITHUB_ENV
-           echo ("VCPKG_INSTALLED_DIR=${{ github.workspace }}/src/vcpkg_installed/x64-windows/") >> $env:GITHUB_ENV
-           mkdir $[env.VCPKG_INSTALLED_DIR]
+           echo ("VCPKG_INSTALLED_DIR=$vcpkgInstalledDir") >> $env:GITHUB_ENV
+           New-Item -ItemType Directory -Path $vcpkgInstalledDir -Force | Out-Null
 
-    # Install VCPCK
-    - name: run-vcpkg
-      # You may pin to the exact commit or the version.
-      # uses: lukka/run-vcpkg@c5ce6a7de6e5ce834a25f7d55b6c250a275a6732
-      uses: lukka/run-vcpkg@v11
-      with:
-        runVcpkgInstall: true
-        vcpkgDirectory:  ${{ github.workspace }}\src\vcpkg\
-        runVcpkgFormatString: "[`install`, `--recurse`, `--clean-after-build`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]`, `--triplet`, `${{env.VcpkgTriplet}}`]"
+    # Install VCPKG without Node-based action wrappers.
+    - name: Install vcpkg dependencies
+      shell: pwsh
+      working-directory: ./src/vcpkg/
+      run: |
+           .\bootstrap-vcpkg.bat
+           .\vcpkg.exe install --recurse --clean-after-build --x-install-root "$env:VCPKG_INSTALLED_DIR" --triplet "$env:VcpkgTriplet"
  
     - name: List downloaded VCPCK files
-      uses: Azure/powershell@v1
-      with:
-        # Specify the Az PowerShell script here.
-        inlineScript: |
-          Write-Host "Test:"
-          Write-Host "VCPKG_INSTALLED_DIR: " ${{env.VCPKG_INSTALLED_DIR}} 
-          Write-Host "VcpkgTriplet: " ${{env.VcpkgTriplet}} 
-          ls -R ${{env.VCPKG_INSTALLED_DIR}} 
-        
-        # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
-        azPSVersion: "latest"
-        # Select the value of the ErrorActionPreference variable for executing the script. Options: stop, continue, silentlyContinue. Default is Stop.
-        errorActionPreference: Stop
-        # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
-        failOnStandardError: true                   
+      shell: pwsh
+      run: |
+           Write-Host "Test:"
+           Write-Host "VCPKG_INSTALLED_DIR: " $env:VCPKG_INSTALLED_DIR
+           Write-Host "VcpkgTriplet: " $env:VcpkgTriplet
+           Get-ChildItem -Path "$env:VCPKG_INSTALLED_DIR" -Recurse
     # Download GisInternals zips
     - name: Download GisInternals zips
-      uses: Azure/powershell@v1
-      with:
-        # Specify the Az PowerShell script here.
-        inlineScript: |
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-gdal-3-10-3-mapserver-8-2-2.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1930-gdal-3-10-3-mapserver-8-2-2.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-gdal-3-10-3-mapserver-8-2-2-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1930-gdal-3-10-3-mapserver-8-2-2-libs.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-x64-gdal-3-10-3-mapserver-8-2-2.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1930-x64-gdal-3-10-3-mapserver-8-2-2.zip"
-          Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-x64-gdal-3-10-3-mapserver-8-2-2-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30  -OutFile ".\Support\release-1930-x64-gdal-3-10-3-mapserver-8-2-2-libs.zip"
-          ls .\Support\
-        # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
-        azPSVersion: "latest"
-        # Select the value of the ErrorActionPreference variable for executing the script. Options: stop, continue, silentlyContinue. Default is Stop.
-        errorActionPreference: Stop
-        # If this is true, this task will fail if any errors are written to the error pipeline, or if any data is written to the Standard Error stream.
-        failOnStandardError: true
+      shell: pwsh
+      run: |
+           Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-gdal-3-10-3-mapserver-8-2-2.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1930-gdal-3-10-3-mapserver-8-2-2.zip"
+           Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-gdal-3-10-3-mapserver-8-2-2-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1930-gdal-3-10-3-mapserver-8-2-2-libs.zip"
+           Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-x64-gdal-3-10-3-mapserver-8-2-2.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1930-x64-gdal-3-10-3-mapserver-8-2-2.zip"
+           Invoke-WebRequest -Uri "https://github.com/MapWindow/Dependencies/raw/main/GisInternals/release-1930-x64-gdal-3-10-3-mapserver-8-2-2-libs.zip" -MaximumRetryCount 3 -Resume -RetryIntervalSec 30 -OutFile ".\Support\release-1930-x64-gdal-3-10-3-mapserver-8-2-2-libs.zip"
+           Get-ChildItem .\Support\
 
     # Unzip zips by calling powershell script
     - name: Unzip
@@ -116,19 +99,23 @@ jobs:
 
     # Build support libs
     - name: Build SupportLibs ${{matrix.platform}}
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{github.workspace}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m /p:Configuration=Release /p:Platform=${{matrix.platform}} ${{env.SUPPORTLIBS_SOLUTION_FILE_PATH}}
+      shell: pwsh
+      run: |
+           & $env:MSBUILD_EXE /m /p:Configuration=Release /p:Platform=${{matrix.platform}} $env:SUPPORTLIBS_SOLUTION_FILE_PATH
 
     # Build MapWinGIS
     - name: Build MapWinGIS ${{matrix.platform}}
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{github.workspace}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} /p:EnableComRegistration=false /p:RegisterOutput=false /p:VcpkgEnabled=true /p:VcpkgEnableManifest=true /p:VcpkgTriplet=${{env.VcpkgTriplet}} /p:VcpkgHostTriplet=${{env.VcpkgTriplet}} ${{env.MAPWINGIS_SOLUTION_FILE_PATH}}
+      shell: pwsh
+      run: |
+           & $env:MSBUILD_EXE /m /p:Configuration=$env:BUILD_CONFIGURATION /p:Platform=${{matrix.platform}} /p:EnableComRegistration=false /p:RegisterOutput=false /p:VcpkgEnabled=true /p:VcpkgEnableManifest=true /p:VcpkgTriplet=$env:VcpkgTriplet /p:VcpkgHostTriplet=$env:VcpkgTriplet $env:MAPWINGIS_SOLUTION_FILE_PATH
 
     # Save artifacts:
     - name: Archive production artifacts
@@ -151,6 +138,21 @@ jobs:
     steps:
     - uses: actions/checkout@v5
 
+    - name: Locate MSBuild and VSTest
+      shell: pwsh
+      run: |
+           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+           $msbuild = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
+           if (-not $msbuild) {
+             throw "MSBuild.exe was not found via vswhere"
+           }
+           $vstest = & $vswhere -latest -products * -find "Common7\IDE\Extensions\TestPlatform\vstest.console.exe" | Select-Object -First 1
+           if (-not $vstest) {
+             throw "vstest.console.exe was not found via vswhere"
+           }
+           "MSBUILD_EXE=$msbuild" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+           "VSTEST_EXE=$vstest" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
     - name: Setup dotnet 10 (x64)
       uses: actions/setup-dotnet@v5
       with:
@@ -165,102 +167,74 @@ jobs:
 
     - name: Register MapWinGIS.ocx (Win32)
       if: ${{matrix.platform == 'Win32' }}
-      uses: Azure/powershell@v1
-      with:
-        # Specify the Az PowerShell script here.
-        inlineScript: |
-          $ExitCodes = @{
-            0 = "SUCCESS";
-            1 = "FAIL_ARGS - Invalid Argument";
-            2 = "FAIL_OLE - OleInitialize Failed";
-            3 = "FAIL_LOAD - LoadLibrary Failed";
-            4 = "FAIL_ENTRY - GetProcAddress failed";
-            5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
-          }
-          $ocxPath = "${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32\MapWinGIS.ocx"
-          if (!(Test-Path $ocxPath)) {
-            Write-Error "MapWinGIS.ocx was not found at $ocxPath"
-          }
-          $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s $ocxPath" -PassThru
-
-          $regsvrp.WaitForExit(15000) # Wait (up to) 15 seconds
-          if($regsvrp.ExitCode -ne 0)
-          {
-              Write-Host "RegSrv32 for Win32 failed"
-              Write-Error $ExitCodes[$regsvrp.ExitCode]
-          }
-        # Azure PS version to be used to execute the script.
-        azPSVersion: "latest"
-        # Select the value of the ErrorActionPreference variable for executing the script.
-        errorActionPreference: Stop
-        # If this is true, this task will fail if any errors are written to the error pipeline.
-        failOnStandardError: true
+      shell: pwsh
+      run: |
+           $ExitCodes = @{
+             0 = "SUCCESS";
+             1 = "FAIL_ARGS - Invalid Argument";
+             2 = "FAIL_OLE - OleInitialize Failed";
+             3 = "FAIL_LOAD - LoadLibrary Failed";
+             4 = "FAIL_ENTRY - GetProcAddress failed";
+             5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
+           }
+           $ocxPath = "${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32\MapWinGIS.ocx"
+           if (!(Test-Path $ocxPath)) {
+             Write-Error "MapWinGIS.ocx was not found at $ocxPath"
+           }
+           $regsvrp = Start-Process C:\Windows\SysWOW64\regsvr32.exe -ArgumentList "/s $ocxPath" -PassThru
+           $regsvrp.WaitForExit(15000) # Wait (up to) 15 seconds
+           if($regsvrp.ExitCode -ne 0)
+           {
+               Write-Host "RegSrv32 for Win32 failed"
+               Write-Error $ExitCodes[$regsvrp.ExitCode]
+           }
 
     - name: Register MapWinGIS.ocx (x64)
       if: ${{matrix.platform == 'x64' }}
-      uses: Azure/powershell@v1
-      with:
-        # Specify the Az PowerShell script here.
-        inlineScript: |
-          $ExitCodes = @{
-            0 = "SUCCESS";
-            1 = "FAIL_ARGS - Invalid Argument";
-            2 = "FAIL_OLE - OleInitialize Failed";
-            3 = "FAIL_LOAD - LoadLibrary Failed";
-            4 = "FAIL_ENTRY - GetProcAddress failed";
-            5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
-          }
-          $ocxPath = "${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64\MapWinGIS.ocx"
-          if (!(Test-Path $ocxPath)) {
-            Write-Error "MapWinGIS.ocx was not found at $ocxPath"
-          }
-          $regsvrp = Start-Process C:\Windows\System32\regsvr32.exe -ArgumentList "/s $ocxPath" -PassThru
-
-          $regsvrp.WaitForExit(15000) # Wait (up to) 15 seconds
-          if($regsvrp.ExitCode -ne 0)
-          {
-              Write-Host "RegSrv32 for x64 failed"
-              Write-Error $ExitCodes[$regsvrp.ExitCode]
-          }
-        # Azure PS version to be used to execute the script.
-        azPSVersion: "latest"
-        # Select the value of the ErrorActionPreference variable for executing the script.
-        errorActionPreference: Stop
-        # If this is true, this task will fail if any errors are written to the error pipeline.
-        failOnStandardError: true
+      shell: pwsh
+      run: |
+           $ExitCodes = @{
+             0 = "SUCCESS";
+             1 = "FAIL_ARGS - Invalid Argument";
+             2 = "FAIL_OLE - OleInitialize Failed";
+             3 = "FAIL_LOAD - LoadLibrary Failed";
+             4 = "FAIL_ENTRY - GetProcAddress failed";
+             5 = "FAIL_REG - DllRegisterServer or DllUnregisterServer failed.";
+           }
+           $ocxPath = "${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64\MapWinGIS.ocx"
+           if (!(Test-Path $ocxPath)) {
+             Write-Error "MapWinGIS.ocx was not found at $ocxPath"
+           }
+           $regsvrp = Start-Process C:\Windows\System32\regsvr32.exe -ArgumentList "/s $ocxPath" -PassThru
+           $regsvrp.WaitForExit(15000) # Wait (up to) 15 seconds
+           if($regsvrp.ExitCode -ne 0)
+           {
+               Write-Host "RegSrv32 for x64 failed"
+               Write-Error $ExitCodes[$regsvrp.ExitCode]
+           }
 
     # Build test solution
-    - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v3
-      if: ${{matrix.platform == 'x64' }}
-      with:
-        msbuild-architecture: x64
-    - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v3
-      if: ${{matrix.platform == 'Win32' }}
-      with:
-        msbuild-architecture: x86
-
     - name: Build test solution x64
       if: ${{matrix.platform == 'x64' }}
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{github.workspace}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}
+      shell: pwsh
+      run: |
+           & $env:MSBUILD_EXE /m:2 /p:Configuration=$env:BUILD_CONFIGURATION /p:Platform=${{matrix.platform}} -restore /v:m $env:UNITTESTS_SOLUTION_FILE_PATH
 
     - name: Build test solution Win32
       if: ${{matrix.platform == 'Win32' }}
-      working-directory: ${{env.GITHUB_WORKSPACE}}
+      working-directory: ${{github.workspace}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
-      run: msbuild /m:2 /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{matrix.platform}} -restore /v:m ${{env.UNITTESTS_SOLUTION_FILE_PATH}}
+      shell: pwsh
+      run: |
+           & $env:MSBUILD_EXE /m:2 /p:Configuration=$env:BUILD_CONFIGURATION /p:Platform=${{matrix.platform}} -restore /v:m $env:UNITTESTS_SOLUTION_FILE_PATH
 
     # Run unit tests
-    - name: Setup VSTest.console.exe
-      uses: darenm/Setup-VSTest@v1
-
     - name: Setup dotnet 10 (x86)
       if: ${{matrix.platform == 'Win32' }}
       uses: actions/setup-dotnet@v5
@@ -276,14 +250,22 @@ jobs:
         "DOTNET_ROOT(x86)": C:\Program Files\dotnet\x86
         PATH: ${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32;${{ env.PATH }}
         PROJ_LIB: ${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32\proj9\share\proj
-      run: vstest.console.exe /Blame:"CollectHangDump;TestTimeout=120000;DumpType=Full" /Diag:logs\log.txt /Platform:x86 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\Win32\proj9\share\" .\MapWinGisTests-net\MapWinGisTests\bin\x86\${{env.BUILD_CONFIGURATION}}\net10.0-windows8.0\MapWinGisTests.dll
+      shell: pwsh
+      run: |
+           $projLib = "${{ github.workspace }}\src\bin\$env:BUILD_CONFIGURATION\Win32\proj9\share"
+           $testDll = ".\MapWinGisTests-net\MapWinGisTests\bin\x86\$env:BUILD_CONFIGURATION\net10.0-windows8.0\MapWinGisTests.dll"
+           & $env:VSTEST_EXE '/Blame:CollectHangDump;TestTimeout=120000;DumpType=Full' /Diag:logs\log.txt /Platform:x86 "-e:PROJ_LIB=$projLib" $testDll
 
     - name: Unit Testing x64
       if: ${{matrix.platform == 'x64' }}
       env:
         PATH: ${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64;${{ env.PATH }}
         PROJ_LIB: ${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64\proj9\share\proj
-      run: vstest.console.exe /Blame:"CollectHangDump;TestTimeout=120000;DumpType=Full" /Diag:logs\log.txt /Platform:x64 -e:PROJ_LIB="${{ github.workspace }}\src\bin\${{env.BUILD_CONFIGURATION}}\x64\proj9\share\" .\MapWinGisTests-net\MapWinGisTests\bin\x64\${{env.BUILD_CONFIGURATION}}\net10.0-windows8.0\MapWinGisTests.dll
+      shell: pwsh
+      run: |
+           $projLib = "${{ github.workspace }}\src\bin\$env:BUILD_CONFIGURATION\x64\proj9\share"
+           $testDll = ".\MapWinGisTests-net\MapWinGisTests\bin\x64\$env:BUILD_CONFIGURATION\net10.0-windows8.0\MapWinGisTests.dll"
+           & $env:VSTEST_EXE '/Blame:CollectHangDump;TestTimeout=120000;DumpType=Full' /Diag:logs\log.txt /Platform:x64 "-e:PROJ_LIB=$projLib" $testDll
 
     - name: Upload test logs and hang dump
       if: always()

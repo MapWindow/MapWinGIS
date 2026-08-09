@@ -47,7 +47,7 @@
 #else
 
 #if defined(WIN32) || defined(_WIN32)
-#    define STRCASECMP(a,b)         (stricmp(a,b))
+#    define STRCASECMP(a,b)         (_stricmp(a,b))
 #  else
 #include <strings.h>
 #    define STRCASECMP(a,b)         (strcasecmp(a,b))
@@ -673,7 +673,8 @@ DBFCreateLL( const char * pszFilename, const char * pszCodePage, SAHooks *psHook
         if( ldid < 0 )
         {
             SAFile fpCPG = psHooks->FOpen( pszFullname, "w" );
-            psHooks->FWrite( CONST_CAST(void*, STATIC_CAST(const void*, pszCodePage)), strlen(pszCodePage), 1, fpCPG );
+            const SAOffset nCodePageLen = STATIC_CAST(SAOffset, strlen(pszCodePage));
+            psHooks->FWrite( CONST_CAST(void*, STATIC_CAST(const void*, pszCodePage)), nCodePageLen, 1, fpCPG );
             psHooks->FClose( fpCPG );
         }
     }
@@ -915,7 +916,6 @@ DBFAddNativeFieldType(DBFHandle psDBF, const char * pszFieldName,
     if( psDBF->bWriteEndOfFileChar )
     {
         char ch = END_OF_FILE_CHARACTER;
-
         nRecordOffset =
             psDBF->nRecordLength * STATIC_CAST(SAOffset,psDBF->nRecords) + psDBF->nHeaderLength;
 
@@ -1798,8 +1798,7 @@ DBFDeleteField(DBFHandle psDBF, int iField) {
         psDBF->sHooks.FWrite( pszRecord, nDeletedFieldOffset, 1, psDBF->fp );
         psDBF->sHooks.FWrite( pszRecord + nDeletedFieldOffset + nDeletedFieldSize,
                               nOldRecordLength - nDeletedFieldOffset - nDeletedFieldSize,
-                              1, psDBF->fp );
-
+                              1, psDBF->fp);
     }
 
     if( psDBF->bWriteEndOfFileChar )
@@ -1895,8 +1894,6 @@ DBFReorderFields( DBFHandle psDBF, int* panMap ) {
               break;
             }
 
-            pszRecordNew[0] = pszRecord[0];
-
             for(int i = 0; i < psDBF->nFields; i++)
             {
                 memcpy(pszRecordNew + panFieldOffsetNew[i],
@@ -1907,6 +1904,17 @@ DBFReorderFields( DBFHandle psDBF, int* panMap ) {
             /* write record */
             psDBF->sHooks.FSeek( psDBF->fp, nRecordOffset, 0 );
             psDBF->sHooks.FWrite( pszRecordNew, psDBF->nRecordLength, 1, psDBF->fp );
+        }
+
+        if( !errorAbort && psDBF->bWriteEndOfFileChar )
+        {
+            char ch = END_OF_FILE_CHARACTER;
+
+            SAOffset nRecordOffset =
+                psDBF->nRecordLength * STATIC_CAST(SAOffset,psDBF->nRecords) + psDBF->nHeaderLength;
+
+            psDBF->sHooks.FSeek( psDBF->fp, nRecordOffset, 0 );
+            psDBF->sHooks.FWrite( &ch, 1, 1, psDBF->fp );
         }
 
         /* free record */

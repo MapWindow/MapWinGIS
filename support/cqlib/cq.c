@@ -109,32 +109,35 @@ long int line, line_r, line_g, line_b,
 	 area[33], area_r[33], area_g[33], area_b[33];
 float    line2, area2[33];
 
-    for(r=1; r<=32; ++r){
-	for(i=0; i<=32; ++i) 
-	    area2[i]=area[i]=area_r[i]=area_g[i]=area_b[i]=0;
-	for(g=1; g<=32; ++g){
-	    line2 = line = line_r = line_g = line_b = 0;
-	    for(b=1; b<=32; ++b){
-		ind1 = (r<<10) + (r<<6) + r + (g<<5) + g + b; /* [r][g][b] */
-		line += vwt[ind1];
-		line_r += vmr[ind1]; 
-		line_g += vmg[ind1]; 
-		line_b += vmb[ind1];
-		line2 += m2[ind1];
-		area[b] += line;
-		area_r[b] += line_r;
-		area_g[b] += line_g;
-		area_b[b] += line_b;
-		area2[b] += line2;
-		ind2 = ind1 - 1089; /* [r-1][g][b] */
-		vwt[ind1] = vwt[ind2] + area[b];
-		vmr[ind1] = vmr[ind2] + area_r[b];
-		vmg[ind1] = vmg[ind2] + area_g[b];
-		vmb[ind1] = vmb[ind2] + area_b[b];
-		m2[ind1] = m2[ind2] + area2[b];
-	    }
+	for(r=1; r<=32; ++r){
+		for(i=0; i<=32; ++i) {
+			area2[i] = 0.0f;
+			area[i] = area_r[i] = area_g[i] = area_b[i] = 0;
+		}
+		for(g=1; g<=32; ++g) {
+			line2 = 0.0f;
+			line = line_r = line_g = line_b = 0;
+			for(b=1; b<=32; ++b) {
+				ind1 = (r<<10) + (r<<6) + r + (g<<5) + g + b; /* [r][g][b] */
+				line += vwt[ind1];
+				line_r += vmr[ind1]; 
+				line_g += vmg[ind1]; 
+				line_b += vmb[ind1];
+				line2 += m2[ind1];
+				area[b] += line;
+				area_r[b] += line_r;
+				area_g[b] += line_g;
+				area_b[b] += line_b;
+				area2[b] += line2;
+				ind2 = ind1 - 1089; /* [r-1][g][b] */
+				vwt[ind1] = vwt[ind2] + area[b];
+				vmr[ind1] = vmr[ind2] + area_r[b];
+				vmg[ind1] = vmg[ind2] + area_g[b];
+				vmb[ind1] = vmb[ind2] + area_b[b];
+				m2[ind1] = m2[ind2] + area2[b];
+			}
+		}
 	}
-    }
 }
 
 
@@ -166,26 +169,28 @@ struct box *cube;
 unsigned char dir;
 long int mmt[33][33][33];
 {
-    switch(dir){
+	switch(dir){
 	case RED:
 	    return( -mmt[cube->r0][cube->g1][cube->b1]
 		    +mmt[cube->r0][cube->g1][cube->b0]
 		    +mmt[cube->r0][cube->g0][cube->b1]
 		    -mmt[cube->r0][cube->g0][cube->b0] );
-	    break;
+
 	case GREEN:
 	    return( -mmt[cube->r1][cube->g0][cube->b1]
 		    +mmt[cube->r1][cube->g0][cube->b0]
 		    +mmt[cube->r0][cube->g0][cube->b1]
 		    -mmt[cube->r0][cube->g0][cube->b0] );
-	    break;
+
 	case BLUE:
 	    return( -mmt[cube->r1][cube->g1][cube->b0]
 		    +mmt[cube->r1][cube->g0][cube->b0]
 		    +mmt[cube->r0][cube->g1][cube->b0]
 		    -mmt[cube->r0][cube->g0][cube->b0] );
-	    break;
-    }
+
+	default:
+		return 0;
+	}
 }
 
 
@@ -197,26 +202,28 @@ unsigned char dir;
 int   pos;
 long int mmt[33][33][33];
 {
-    switch(dir){
+	switch(dir){
 	case RED:
 	    return( mmt[pos][cube->g1][cube->b1] 
 		   -mmt[pos][cube->g1][cube->b0]
 		   -mmt[pos][cube->g0][cube->b1]
 		   +mmt[pos][cube->g0][cube->b0] );
-	    break;
+
 	case GREEN:
 	    return( mmt[cube->r1][pos][cube->b1] 
 		   -mmt[cube->r1][pos][cube->b0]
 		   -mmt[cube->r0][pos][cube->b1]
 		   +mmt[cube->r0][pos][cube->b0] );
-	    break;
+
 	case BLUE:
 	    return( mmt[cube->r1][cube->g1][pos]
 		   -mmt[cube->r1][cube->g0][pos]
 		   -mmt[cube->r0][cube->g1][pos]
 		   +mmt[cube->r0][cube->g0][pos] );
-	    break;
-    }
+
+	default:
+		return 0;
+	}
 }
 
 
@@ -227,9 +234,9 @@ struct box *cube;
 {
 float dr, dg, db, xx;
 
-    dr = Vol(cube, mr); 
-    dg = Vol(cube, mg); 
-    db = Vol(cube, mb);
+    dr = (float)(Vol(cube, mr));
+    dg = (float)(Vol(cube, mg)); 
+    db = (float)(Vol(cube, mb));
     xx =  m2[cube->r1][cube->g1][cube->b1] 
 	 -m2[cube->r1][cube->g1][cube->b0]
 	 -m2[cube->r1][cube->g0][cube->b1]
@@ -239,7 +246,7 @@ float dr, dg, db, xx;
 	 +m2[cube->r0][cube->g0][cube->b1]
 	 -m2[cube->r0][cube->g0][cube->b0];
 
-    return( xx - (dr*dr+dg*dg+db*db)/(float)Vol(cube,wt) );    
+    return( xx - (dr*dr+dg*dg+db*db)/(float)Vol(cube,wt) );
 }
 
 /* We want to minimize the sum of the variances of two subboxes.
@@ -415,8 +422,8 @@ float		vv[MAXCOLOR], temp;
         for(i=1; i<K; ++i){
             if (Cut(&cube[next], &cube[i])) {
               /* volume test ensures we won't try to cut one-cell box */
-              vv[next] = (cube[next].vol>1) ? Var(&cube[next]) : 0.0;
-              vv[i] = (cube[i].vol>1) ? Var(&cube[i]) : 0.0;
+              vv[next] = (cube[next].vol>1) ? Var(&cube[next]) : 0.0f;
+              vv[i] = (cube[i].vol>1) ? Var(&cube[i]) : 0.0f;
 	    } else {
               vv[next] = 0.0;   /* don't try to split this box again */
               i--;              /* didn't create box i */
@@ -442,9 +449,9 @@ float		vv[MAXCOLOR], temp;
 	    Mark(&cube[k], k, tag);
 	    weight = Vol(&cube[k], wt);
 	    if (weight) {
-		lut_r[k] = Vol(&cube[k], mr) / weight;
-		lut_g[k] = Vol(&cube[k], mg) / weight;
-		lut_b[k] = Vol(&cube[k], mb) / weight;
+		lut_r[k] = (unsigned char)(Vol(&cube[k], mr) / weight);
+		lut_g[k] = (unsigned char)(Vol(&cube[k], mg) / weight);
+		lut_b[k] = (unsigned char)(Vol(&cube[k], mb) / weight);
 	    }
 	    else{
 	      //fprintf(stderr, "bogus box %d\n", k);
@@ -453,7 +460,7 @@ float		vv[MAXCOLOR], temp;
 	}
 
 	for(i=0; i<size; ++i) Qadd[i] = tag[Qadd[i]];
-	
+
 	/* output lut_r, lut_g, lut_b as color look-up table contents,
 	   Qadd as the quantized image (array of table addresses). */
 }

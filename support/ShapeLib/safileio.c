@@ -106,8 +106,8 @@ void SASetupDefaultHooks(SAHooks *psHooks) {
 
 #ifdef SHPAPI_WINDOWS
 
-const wchar_t* Utf8ToWideChar(const char *pszFilename) {
-    const int nMulti = strlen(pszFilename) + 1;
+wchar_t* Utf8ToWideChar(const char *pszFilename) {
+    const int nMulti = (int)(strlen(pszFilename) + 1);
     const int nWide = MultiByteToWideChar( CP_UTF8, 0, pszFilename, nMulti, 0, 0);
     if (nWide == 0) {
         return NULL;
