@@ -198,3 +198,12 @@ docs/OptimizedImages/
 src/.scannerwork/
 demo/MigrationBackup/
 unittests/.scannerwork/
+
+# Unit test result files
+*Воздух.tif
+*Воздух.dat
+*Воздух.dbf
+*Воздух.idx
+*Воздух.prj
+*Воздух.shp
+*Воздух.shx

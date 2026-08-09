@@ -213,20 +213,20 @@ jobs:
                Write-Error $ExitCodes[$regsvrp.ExitCode]
            }
 
-        # Build test solution with dotnet SDK
+      # Build test solution (requires full MSBuild because COMReference is used)
     - name: Build test solution x64
       if: ${{matrix.platform == 'x64' }}
       working-directory: ${{github.workspace}}
       shell: pwsh
       run: |
-          dotnet build $env:UNITTESTS_SOLUTION_FILE_PATH --configuration $env:BUILD_CONFIGURATION -p:Platform=${{matrix.platform}} --verbosity minimal
+           & $env:MSBUILD_EXE /m:2 /p:Configuration=$env:BUILD_CONFIGURATION /p:Platform=${{matrix.platform}} /p:NoWarn=NETSDK1223 -restore /v:m $env:UNITTESTS_SOLUTION_FILE_PATH
 
     - name: Build test solution Win32
       if: ${{matrix.platform == 'Win32' }}
       working-directory: ${{github.workspace}}
       shell: pwsh
       run: |
-           dotnet build $env:UNITTESTS_SOLUTION_FILE_PATH --configuration $env:BUILD_CONFIGURATION -p:Platform=${{matrix.platform}} --verbosity minimal
+           & $env:MSBUILD_EXE /m:2 /p:Configuration=$env:BUILD_CONFIGURATION /p:Platform=${{matrix.platform}} /p:NoWarn=NETSDK1223 -restore /v:m $env:UNITTESTS_SOLUTION_FILE_PATH
 
     # Run unit tests
     - name: Setup dotnet 10 (x86)
