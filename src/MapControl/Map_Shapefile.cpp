@@ -1081,7 +1081,8 @@ STDMETHODIMP CShapefile::SaveAsEx(const BSTR newFilename, const VARIANT_BOOL sto
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	if (unboundFile) {
-		Save(nullptr, retVal);
+		// Save to newFilename without attaching this shapefile to the saved files.
+		Dump(newFilename, nullptr, retVal);
 		return S_OK;
 	}
 

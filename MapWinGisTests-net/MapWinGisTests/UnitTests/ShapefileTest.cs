@@ -1282,32 +1282,183 @@ namespace MapWinGisTests.UnitTests
 			shapefile.NumShapes.ShouldBeGreaterThan(0);
 		}
 
+		[Fact]
+		public void ShapefileClearCachedGeometriesTest()
+		{
+			_shapefile.ClearCachedGeometries();
+		}
+
+		[Fact]
+		public void ShapefileAggregateShapesWithStatsTest()
+		{
+			var shapefile = Helpers.DeepClone(_polyShapefile, 10);
+			shapefile.NumShapes.ShouldBe(10);
+			var name1 = shapefile.CellValue[1, 1];
+			var name2 = shapefile.CellValue[1, 3];
+
+			var newName = $"[{name1}-{name2}]";
+			shapefile.EditCellValue(1, 1, newName).ShouldBeTrue();
+			shapefile.EditCellValue(1, 3, newName).ShouldBeTrue();
+
+			var statOperations = new FieldStatOperationsClass();
+			var sfResult = shapefile.AggregateShapesWithStats(false, 1, statOperations);
+			sfResult.ShouldNotBeNull();
+			sfResult.NumShapes.ShouldBe(9);
+			var shape = sfResult.Shape[0];
+			shape.NumParts.ShouldBe(2);
+		}
+
+		[Fact]
+		public void ShapefileDissolveWithStatsTest()
+		{
+			var shapefile = Helpers.DeepClone(_polyShapefile, 10);
+			var name1 = shapefile.CellValue[1, 1];
+			var name2 = shapefile.CellValue[1, 3];
+
+			var newName = $"[{name1}-{name2}]";
+			shapefile.EditCellValue(1, 1, newName).ShouldBeTrue();
+			shapefile.EditCellValue(1, 3, newName).ShouldBeTrue();
+
+			var statOperations = new FieldStatOperationsClass();
+			/// TODO: Use FieldStatOperations
+			var sfResult = shapefile.DissolveWithStats(1, false, statOperations);
+			sfResult.ShouldNotBeNull();
+			sfResult.NumShapes.ShouldBe(9);
+			var newShape = sfResult.Shape[0];
+			newShape.NumParts.ShouldBe(1);
+
+			var shape1 = shapefile.Shape[1];
+			var shape2 = shapefile.Shape[3];
+			Math.Round((shape1.Area + shape2.Area) - newShape.Area, 4).ShouldBe(0.000);
+		}
+
+		[Fact]
+		public void ShapefileEditUpdateShapeTest()
+		{
+			var shapefile = Helpers.DeepClone(_polyShapefile, 10);
+			var newShape = shapefile.Shape[3].Clone();
+			var orgExtCenter = newShape.Extents.Center.Clone();
+			orgExtCenter.ShouldNotBeNull();
+			newShape.Move(10, 10);
+			shapefile.EditUpdateShape(3, newShape);
+			var newExt = shapefile.Shape[3].Extents;
+			newExt.Center.x.ShouldBe(orgExtCenter.x + 10);
+			newExt.Center.y.ShouldBe(orgExtCenter.y + 10);
+		}
+
+		[Fact]
+		public void ShapefileSerialize2Test()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var category = shapefile.Categories.Add("Test_100");
+			category.Name = "Test_100";
+			category.MinValue = 100;
+			category.MaxValue = 100;
+			var field = shapefile.Field[0];
+			category.Expression = $"[{field.Name}]";
+			category.DrawingOptions.Visible = true;
+			category.DrawingOptions.LineWidth = 2;
+			category.DrawingOptions.LineColor = 0;
+
+			var text = shapefile.Serialize2(true, true);
+			text.ShouldNotBeNullOrEmpty();
+
+			var newShapefile = new Shapefile();
+			newShapefile.Deserialize(true, text);
+			newShapefile.Categories.Count.ShouldBe(1);
+			var cat = newShapefile.Categories.Item[0];
+			cat.Name.ShouldBe(category.Name);
+		}
+
+		[Fact]
+		public void ShapefileMoveTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var orgCenter = shapefile.Extents.Center.Clone();
+			orgCenter.ShouldNotBeNull();
+
+			shapefile.Move(-100, -100).ShouldBeTrue();
+			var newExt = shapefile.Extents;
+			newExt.Center.x.ShouldBe(orgCenter.x - 100);
+			newExt.Center.y.ShouldBe(orgCenter.y - 100);
+		}
+
+		[Fact]
+		public void ShapefileRemoveSpatialIndexTest()
+		{
+			//Thread.Sleep(TimeSpan.FromSeconds(30));
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_RemoveSpatialIndex_File", ".shp");
+			var ret1 = shapefile.SaveAs(fileName);
+			shapefile.HasSpatialIndex.ShouldBeFalse();
+			shapefile.CreateSpatialIndex(fileName).ShouldBeTrue();
+			shapefile.RemoveSpatialIndex().ShouldBeTrue();
+		}
+
+		[Fact]
+		public void ShapefileUpdateSortFieldTest()
+		{
+			var field = _shapefile.Field[0];
+			_shapefile.SortField = field.Name;
+			_shapefile.UpdateSortField();
+			_shapefile.LastErrorCode.ShouldBe(0);
+		}
+
+		[Fact]
+		public void ShapefileSaveAsExTest()
+		{
+			//Thread.Sleep(TimeSpan.FromSeconds(30));
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_SaveAsEx_File", ".shp");
+			shapefile.SaveAsEx(fileName, true, true).ShouldBeTrue();
+			shapefile.Filename.ShouldBeNullOrWhiteSpace();
+			Helpers.DeleteShapefileFiles(fileName);
+			var ret2 = shapefile.SaveAsEx(fileName, true, false);
+			System.Diagnostics.Debug.WriteLine($"ret2: {ret2}");
+			shapefile.Filename.ShouldNotBeNullOrEmpty();
+		}
+
+		[Fact]
+		public void ShapefileFixUpShapes2Test()
+		{
+
+		}
+
+		[Fact]
+		public void ShapefileStartAppendModeTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_StartAppendMode_File", ".shp");
+			shapefile.SaveAs(fileName).ShouldBeTrue();
+			shapefile.AppendMode.ShouldBeFalse();
+			shapefile.StartAppendMode().ShouldBeTrue();
+			shapefile.AppendMode.ShouldBeTrue();
+		}
+
+		[Fact]
+		public void ShapefileStopAppendModeTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var fileName = Helpers.GetRandomFilePath("_StartAppendMode_File", ".shp");
+			shapefile.SaveAs(fileName).ShouldBeTrue();
+			shapefile.AppendMode.ShouldBeFalse();
+			shapefile.StartAppendMode().ShouldBeTrue();
+			shapefile.AppendMode.ShouldBeTrue();
+			shapefile.StopAppendMode();
+			shapefile.AppendMode.ShouldBeFalse();
+		}
+
 		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileClearCachedGeometriesTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileAggregateShapesWithStatsTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileDissolveWithStatsTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileEditUpdateShapeTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSerialize2Test() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileMoveTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileRemoveSpatialIndexTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileUpdateSortFieldTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileSaveAsExTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileFixUpShapes2Test() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileStartAppendModeTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileStopAppendModeTest() { }
-		[Fact(Skip = "Unit test is not yet implemented")]
-		public void ShapefileGetClosestSnapPositionTest() { }
+		public void ShapefileGetClosestSnapPositionTest()
+		{
+			var shapefile = Helpers.DeepClone(_shapefile, 10);
+			var x = 108.89293929165357611;
+			var y = 34.20425385854753131;
+
+			/// TODO: It seams that GetClosestSnapPosition only works on shapes that is visible according to ShapeVisible, and a shapefile that is not added to a map is never visible. Is that correct behavioure ?
+			var ret = shapefile.GetClosestSnapPosition(x, y, 0.0, out var shpIndex, out var fx, out var fy, out var distance);
+			ret.ShouldBeTrue();
+		}
 
 		[Fact]
 		public void ShapefileOgrFid2ShapeIndexTest()

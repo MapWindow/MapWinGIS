@@ -32,18 +32,18 @@ jobs:
         # platform: ['Win32']
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
 
     # Setup MSBuild
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
       if: ${{matrix.platform == 'x64' }}
       with:
         msbuild-architecture: x64
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
       if: ${{matrix.platform == 'Win32' }}
       with:
         msbuild-architecture: x86
@@ -149,7 +149,7 @@ jobs:
         # platform: ['Win32']
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup dotnet 10 (x64)
       uses: actions/setup-dotnet@v5
@@ -231,12 +231,12 @@ jobs:
 
     # Build test solution
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
       if: ${{matrix.platform == 'x64' }}
       with:
         msbuild-architecture: x64
     - name: setup-msbuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
       if: ${{matrix.platform == 'Win32' }}
       with:
         msbuild-architecture: x86
