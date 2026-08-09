@@ -119,7 +119,7 @@ jobs:
 
     # Save artifacts:
     - name: Archive production artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: binaries-${{matrix.platform}}
         path: .\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\**\*
@@ -160,7 +160,7 @@ jobs:
         architecture: x64
 
     - name: Download MapWinGIS (${{matrix.platform}}) binaries
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: binaries-${{matrix.platform}}
         path: .\src\bin\${{env.BUILD_CONFIGURATION}}\${{matrix.platform}}\
@@ -213,26 +213,20 @@ jobs:
                Write-Error $ExitCodes[$regsvrp.ExitCode]
            }
 
-    # Build test solution
+        # Build test solution with dotnet SDK
     - name: Build test solution x64
       if: ${{matrix.platform == 'x64' }}
       working-directory: ${{github.workspace}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       shell: pwsh
       run: |
-           & $env:MSBUILD_EXE /m:2 /p:Configuration=$env:BUILD_CONFIGURATION /p:Platform=${{matrix.platform}} -restore /v:m $env:UNITTESTS_SOLUTION_FILE_PATH
+          dotnet build $env:UNITTESTS_SOLUTION_FILE_PATH --configuration $env:BUILD_CONFIGURATION -p:Platform=${{matrix.platform}} --verbosity minimal
 
     - name: Build test solution Win32
       if: ${{matrix.platform == 'Win32' }}
       working-directory: ${{github.workspace}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      # MSBuild SupportLibs.sln /t:Rebuild /p:Configuration=Release /p:Platform="Win32"
       shell: pwsh
       run: |
-           & $env:MSBUILD_EXE /m:2 /p:Configuration=$env:BUILD_CONFIGURATION /p:Platform=${{matrix.platform}} -restore /v:m $env:UNITTESTS_SOLUTION_FILE_PATH
+           dotnet build $env:UNITTESTS_SOLUTION_FILE_PATH --configuration $env:BUILD_CONFIGURATION -p:Platform=${{matrix.platform}} --verbosity minimal
 
     # Run unit tests
     - name: Setup dotnet 10 (x86)
@@ -269,7 +263,7 @@ jobs:
 
     - name: Upload test logs and hang dump
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: test-logs-${{matrix.platform}}
         path: |
