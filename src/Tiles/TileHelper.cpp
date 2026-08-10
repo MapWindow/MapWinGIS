@@ -69,7 +69,7 @@ bool TileHelper::Transform(TileCore* tile, IGeoProjection* mapProjection, bool i
 		// projection for tiles matches map projection (most often it's Google Mercator; EPSG:3857)
 		PointLatLng pnt;
 		auto customProj = dynamic_cast<CustomProjection*>(tile->get_Projection());
-		
+
 		if (customProj)
 		{
 			customProj->FromXYToProj(CPoint(tile->tileX(), tile->tileY() + 1), tile->zoom(), pnt);

@@ -2775,8 +2775,8 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		return false;
 
 	m_globalSettings.gdalErrorMessage = "";
-	OGRSpatialReference* projSource = static_cast<CGeoProjection*>(_geoProjection)->get_SpatialReference();
-	OGRSpatialReference* projTarget = static_cast<CGeoProjection*>(newProjection)->get_SpatialReference();
+	OGRSpatialReference* projSource = dynamic_cast<CGeoProjection*>(_geoProjection)->get_SpatialReference();
+	OGRSpatialReference* projTarget = dynamic_cast<CGeoProjection*>(newProjection)->get_SpatialReference();
 
 	char* pszWKT;
 	projSource->exportToPrettyWkt(&pszWKT);

@@ -494,7 +494,8 @@ void CMapView::ClearDrawing(long Drawing)
 		if (_allDrawLists[Drawing])
 		{
 			// it's cleared in destructor I think, but I add it here as well t be sure
-			_allDrawLists[Drawing]->m_labels->Clear();
+			if (_allDrawLists[Drawing]->m_labels)
+				_allDrawLists[Drawing]->m_labels->Clear();
 
 			delete _allDrawLists[Drawing];
 		}
@@ -579,7 +580,8 @@ void CMapView::ClearDrawingLabels(long drawHandle)
 {
 	if (IsValidDrawList(drawHandle))
 	{
-		_allDrawLists[drawHandle]->m_labels->Clear();
+		if (_allDrawLists[drawHandle]->m_labels)
+			_allDrawLists[drawHandle]->m_labels->Clear();
 		OnDrawingLayersChanged();
 	}
 	else
@@ -595,9 +597,12 @@ void CMapView::DrawingFont(long drawHandle, LPCTSTR FontName, long FontSize)
 	if (IsValidDrawList(drawHandle))
 	{
 		DrawList* dlist = _allDrawLists[drawHandle];
-		CComBSTR bstr(FontName);
-		dlist->m_labels->put_FontName(bstr);
-		dlist->m_labels->put_FontSize(FontSize);
+		if (dlist->m_labels)
+		{
+			CComBSTR bstr(FontName);
+			dlist->m_labels->put_FontName(bstr);
+			dlist->m_labels->put_FontSize(FontSize);
+		}
 		OnDrawingLayersChanged();
 	}
 	else
@@ -752,10 +757,15 @@ void CMapView::DrawWideCircle(double x, double y, double radius, OLE_COLOR color
 void CMapView::DrawPolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoints, OLE_COLOR color, BOOL fill, BYTE alpha)
 {
 	USES_CONVERSION;
-	SAFEARRAY* sax = *xPoints->pparray;
-	SAFEARRAY* say = *yPoints->pparray;
-	double* xPts = static_cast<double*>(sax->pvData);
-	double* yPts = static_cast<double*>(say->pvData);
+
+	double* xPts = nullptr;
+	double* yPts = nullptr;
+	if (!Utility::GetDoubleArrayFromVariant(xPoints, xPts, numPoints) ||
+		!Utility::GetDoubleArrayFromVariant(yPoints, yPts, numPoints))
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return;
+	}
 
 	if (IsValidDrawList(_currentDrawing))
 	{
@@ -791,10 +801,15 @@ void CMapView::DrawPolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoints, O
 void CMapView::DrawWidePolygon(VARIANT* xPoints, VARIANT* yPoints, long numPoints, OLE_COLOR color, BOOL fill, short width, BYTE alpha)
 {
 	USES_CONVERSION;
-	SAFEARRAY* sax = *xPoints->pparray;
-	SAFEARRAY* say = *yPoints->pparray;
-	double* xPts = static_cast<double*>(sax->pvData);
-	double* yPts = static_cast<double*>(say->pvData);
+
+	double* xPts = nullptr;
+	double* yPts = nullptr;
+	if (!Utility::GetDoubleArrayFromVariant(xPoints, xPts, numPoints) ||
+		!Utility::GetDoubleArrayFromVariant(yPoints, yPts, numPoints))
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return;
+	}
 
 	if (IsValidDrawList(_currentDrawing))
 	{
@@ -975,7 +990,8 @@ ILabels* CMapView::GetDrawingLabels(long DrawingLayerIndex)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (IsValidDrawList(DrawingLayerIndex))
 	{
-		_allDrawLists[DrawingLayerIndex]->m_labels->AddRef();
+		if (_allDrawLists[DrawingLayerIndex]->m_labels)
+			_allDrawLists[DrawingLayerIndex]->m_labels->AddRef();
 		return _allDrawLists[DrawingLayerIndex]->m_labels;
 	}
 	else

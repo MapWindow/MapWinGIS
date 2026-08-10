@@ -118,20 +118,20 @@ namespace IndexSearching
 
 		try
 		{
-			//diskfile = StorageManager::loadDiskStorageManager(baseName);
+			// Hold ownership locally so the objects are cleaned up if an
+			// exception is thrown before they are handed off to the cache.
+			auto diskfile = unique_ptr<IStorageManager>(StorageManager::loadDiskStorageManager(baseName));
 			// this will try to locate and open an already existing storage manager.
-			//file = StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false);
-			//tree = RTree::loadRTree(*file, 1);
-			//spatialIndexId = CSpatialIndexCache::Instance().CacheSpatialIndex(tree, diskfile, file);
+			auto file = unique_ptr<StorageManager::IBuffer>(StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false));
+			auto tree = unique_ptr<ISpatialIndex>(RTree::loadRTree(*file, 1));
 
-			const auto diskfile = unique_ptr<IStorageManager>(StorageManager::loadDiskStorageManager(baseName));
-			// this will try to locate and open an already existing storage manager.
-			const auto file = unique_ptr<StorageManager::IBuffer>(StorageManager::createNewRandomEvictionsBuffer(*diskfile, bufferSize, false));
-			const auto tree = unique_ptr<ISpatialIndex>(RTree::loadRTree(*file, 1));
+			const bool indexValid = !validateIndex || tree->isIndexValid();
 
-			spatialIndexId = CSpatialIndexCache::Instance().CacheSpatialIndex(tree.get(), diskfile.get(), file.get());
+			// Transfer ownership of the objects to the cache. From this point
+			// on the cache is responsible for deleting them via ReleaseAll.
+			spatialIndexId = CSpatialIndexCache::Instance().CacheSpatialIndex(tree.release(), diskfile.release(), file.release());
 
-			if (validateIndex && !tree->isIndexValid())
+			if (!indexValid)
 			{
 				CSpatialIndexCache::Instance().UncacheSpatialIndex(spatialIndexId, true);
 				return false;
@@ -148,6 +148,12 @@ namespace IndexSearching
 
 	void UnloadSpatialIndex(const CSpatialIndexID spatialIndex)
 	{
+		// 0 is the "not loaded" sentinel (valid ids start at 1); ignore it so a caller
+		// that unloads twice (or unloads without ever loading) cannot free a cache entry
+		// that belongs to another shapefile.
+		if (spatialIndex == 0)
+			return;
+
 		CSpatialIndexCache::Instance().UncacheSpatialIndex(spatialIndex, true);
 	}
 

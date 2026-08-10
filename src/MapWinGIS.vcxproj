@@ -213,7 +213,7 @@ setx PROJ_LIB $(OutputPath)proj7\share</Command>
       <TargetEnvironment>Win32</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;DEBUG_LOG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</MultiProcessorCompilation>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdc11</LanguageStandard_C>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp14</LanguageStandard>
@@ -241,7 +241,7 @@ if $(PlatformName) == x64 (
       <TargetEnvironment>x64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <PreprocessorDefinitions>WIN64;DEBUG_LOG;SQUARE_TILES;BIG_TILE_SIZE;DEBUG_ALLOCATED_OBJECTS_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN64;SQUARE_TILES;BIG_TILE_SIZE;DEBUG_ALLOCATED_OBJECTS_OFF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdc11</LanguageStandard_C>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp14</LanguageStandard>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</MultiProcessorCompilation>

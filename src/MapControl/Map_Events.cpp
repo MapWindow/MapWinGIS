@@ -689,10 +689,10 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 		return;
 	}
 	
-	// add a vertex							
-	if (m_cursorMode == cmEditShape) 
+	// add a vertex
+	if (m_cursorMode == cmEditShape)
 	{
-        double projX, projY;        
+        double projX, projY;
         this->PixelToProjection(point.x, point.y, projX, projY);
 
         bool alt = GetKeyState(VK_MENU) < 0 ? true : false;
