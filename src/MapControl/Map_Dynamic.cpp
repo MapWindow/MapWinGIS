@@ -153,7 +153,7 @@ void CMapView::DrawZoombox(Gdiplus::Graphics* g)
 	{
 		CRect r = _dragging.GetRectangle();
 		Gdiplus::Rect rect(r.left, r.top, r.right - r.left, r.bottom - r.top);
-		
+
 		g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
 		if (selection)
 		{
