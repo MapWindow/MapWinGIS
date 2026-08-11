@@ -86,7 +86,7 @@ STDMETHODIMP CPointClass::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CPointClass::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = NULL;
+	*pVal = nullptr;
 	return S_OK;
 }
 
@@ -129,11 +129,30 @@ STDMETHODIMP CPointClass::put_M(double newVal)
 STDMETHODIMP CPointClass::Clone(IPoint** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)retVal );
+
+	if (retVal == nullptr)
+	{
+		return E_POINTER;
+	}
+
+	*retVal = nullptr;
+
+	HRESULT hr = CoCreateInstance(CLSID_Point, nullptr, CLSCTX_INPROC_SERVER, IID_IPoint, reinterpret_cast<void**>(retVal));
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	if (*retVal == nullptr)
+	{
+		return E_OUTOFMEMORY;
+	}
+
 	(*retVal)->put_X(_x);
 	(*retVal)->put_Y(_y);
 	(*retVal)->put_Z(_z);
 	(*retVal)->put_M(_m);
+
 	return S_OK;
 }
 

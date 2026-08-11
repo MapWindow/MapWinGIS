@@ -15,7 +15,7 @@ char* UTF8_ENCODING_MARKER = "utf8";
 //		getGeosHandle
 // *****************************************************************
 #ifdef GEOS_NEW
-GEOSContextHandle_t _geosContextHandle = NULL;
+GEOSContextHandle_t _geosContextHandle = nullptr;
 GEOSContextHandle_t getGeosHandle()
 {
 	if (!_geosContextHandle)
@@ -31,7 +31,11 @@ IUtils* GetUtils()
 {
 	if (!m_utils)
 	{
-		CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&m_utils);
+		HRESULT hr = CoCreateInstance(CLSID_Utils, nullptr, CLSCTX_INPROC_SERVER, IID_IUtils, reinterpret_cast<void**>(&m_utils));
+		if (FAILED(hr))
+		{
+			m_utils = nullptr;
+		}
 	}
 	return m_utils;
 }
@@ -43,7 +47,11 @@ IShapefile* GetTempShapefile()
 {
 	if (!m_shapefile)
 	{
-		CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&m_shapefile);
+		HRESULT hr = CoCreateInstance(CLSID_Shapefile, nullptr, CLSCTX_INPROC_SERVER, IID_IShapefile, reinterpret_cast<void**>(&m_shapefile));
+		if (FAILED(hr))
+		{
+			m_shapefile = nullptr;
+		}
 	}
 	return m_shapefile;
 }

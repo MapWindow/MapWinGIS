@@ -10,11 +10,12 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommand>"C:\Projects\Arkeologerna_Intrasis4\Intrasis\Applications\IntrasisApp\bin\x64\Debug\net10.0-windows8.0\Intrasis.exe"</LocalDebuggerCommand>
+    <LocalDebuggerCommand>"C:\Projects\WpfMapWindows\bin\x64\Debug\net10.0-windows8.0\WpfMapWindows.exe"</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>C:\Intrasis\Database\KHM2018_Dilling216873_220314\KHM2018_Dilling216873_220314.idf admin admin</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
     <LocalDebuggerDebuggerType>NativeWithManagedCore</LocalDebuggerDebuggerType>
-    <LocalDebuggerWorkingDirectory>C:\Intrasis\Database\KHM2018_Dilling216873_220314\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>"C:\Projects\WpfMapWindows\bin\x64\Debug\net10.0-windows8.0\"</LocalDebuggerWorkingDirectory>
     <LocalDebuggerAttach>false</LocalDebuggerAttach>
   </PropertyGroup>
 </Project>
