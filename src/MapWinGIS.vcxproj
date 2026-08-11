@@ -1043,6 +1043,7 @@ if $(PlatformName) == x64 (
     <None Include="Grid\fip\readme.123" />
     <None Include="MapWinGIS.def" />
     <None Include="MapWinGIS.rgs" />
+    <None Include="MapWinGisTests-net\CollectCrashDump.runsettings" />
     <None Include="resource\cur00001.cur" />
     <None Include="Resource\cursor1.cur" />
     <None Include="Resource\cursor2.cur" />
