@@ -163,7 +163,7 @@ bool GdalHelper::CanOpenAsOgrDataset(const CStringW& filename)
 	const bool success = dt != nullptr;
 	if (dt)
 	{
-		CloseDataset(dt);
+		CloseSharedOgrDataset(dt);
 	}
 	return success;
 }
