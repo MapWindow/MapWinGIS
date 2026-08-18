@@ -327,15 +327,16 @@ STDMETHODIMP COgrLayer::Close()
 			_dataset->ReleaseResultSet(_layer);
 		}
 
-		if (m_globalSettings.ogrShareConnection)
+		// Only close dataset if we own it (not external)
+		// External datasets are managed by their owner (e.g., OgrDatasource)
+		if (!_externalDatasource)
 		{
-			GdalHelper::CloseSharedOgrDataset(_dataset);
-		}
-		else
-		{
-			if (!_externalDatasource)
+			if (m_globalSettings.ogrShareConnection)
 			{
-				// this will release memory for table layer as well
+				GdalHelper::CloseSharedOgrDataset(_dataset);
+			}
+			else
+			{
 				GDALClose(_dataset);
 			}
 		}
@@ -474,6 +475,7 @@ STDMETHODIMP COgrLayer::ExtendFromQuery(BSTR sql, VARIANT_BOOL* retVal)
     }
 
     Ogr2Shape::ExtendShapefile(layer, _shapefile, true, _globalCallback);
+    ds->ReleaseResultSet(layer);
     GdalHelper::CloseSharedOgrDataset(ds);
     *retVal = VARIANT_TRUE;
     return S_OK;

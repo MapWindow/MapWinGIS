@@ -2635,7 +2635,11 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 					osInterestLayers += papszLayers[iLayer];
 				}
 
-				poDS->ExecuteSQL(osInterestLayers.c_str(), nullptr, nullptr);
+				OGRLayer* poResultSet = poDS->ExecuteSQL(osInterestLayers.c_str(), nullptr, nullptr);
+				if (poResultSet)
+				{
+					poDS->ReleaseResultSet(poResultSet);
+				}
 			}
 		}
 
