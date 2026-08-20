@@ -1,21 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommand>
-    </LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Projects\Arkeologerna_Intrasis4\Intrasis\Applications\IntrasisApp\bin\x64\Debug\net10.0-windows8.0\Intrasis.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>C:\Intrasis\Database\Tibble-kopia-v9\dhe_Byggnader_3.ipf admin admin</LocalDebuggerCommandArguments>
+    <LocalDebuggerDebuggerType>NativeWithManagedCore</LocalDebuggerDebuggerType>
+    <LocalDebuggerWorkingDirectory>C:\Projects\Arkeologerna_Intrasis4\Intrasis\Applications\IntrasisApp\bin\x64\Debug\net10.0-windows8.0</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerAttach>false</LocalDebuggerAttach>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommand>$(MSBuildProjectDirectory)\..\unittests\TestExecutor\bin\$(Platform)\Debug\ConsoleApplication1.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommand>"C:\Projects\WpfMapWindows\bin\x64\Debug\net10.0-windows8.0\WpfMapWindows.exe"</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Projects\Arkeologerna_Intrasis4\Intrasis\Applications\IntrasisApp\bin\x64\Debug\net10.0-windows8.0\Intrasis.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>
-    </LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>C:\Intrasis\Database\Tibble-kopia-v9\dhe_Byggnader_3.ipf admin admin</LocalDebuggerCommandArguments>
     <LocalDebuggerDebuggerType>NativeWithManagedCore</LocalDebuggerDebuggerType>
-    <LocalDebuggerWorkingDirectory>"C:\Projects\WpfMapWindows\bin\x64\Debug\net10.0-windows8.0\"</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>C:\Projects\Arkeologerna_Intrasis4\Intrasis\Applications\IntrasisApp\bin\x64\Debug\net10.0-windows8.0</LocalDebuggerWorkingDirectory>
     <LocalDebuggerAttach>false</LocalDebuggerAttach>
   </PropertyGroup>
 </Project>

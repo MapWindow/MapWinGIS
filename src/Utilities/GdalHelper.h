@@ -1,4 +1,5 @@
 #pragma once
+#include <mutex>
 
 int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage, void *pData);
 
@@ -69,4 +70,5 @@ private:
 	static void RemoveCachedOgrDataset(GDALDataset* ds);
 	// ReSharper disable once CppInconsistentNaming
 	static map<CStringA, GDALDataset*> m_ogrDatasets;
+	static std::mutex g_ogrDatasetsMutex;
 };

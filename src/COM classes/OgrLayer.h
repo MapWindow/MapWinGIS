@@ -17,18 +17,18 @@ class ATL_NO_VTABLE COgrLayer :
 public:
 	COgrLayer()
 	{
-		_pUnkMarshaler = NULL;
-		_globalCallback = NULL;
+		_pUnkMarshaler = nullptr;
+		_globalCallback = nullptr;
 		_key = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR;
-		_dataset = NULL;
-		_layer = NULL;
-		_shapefile = NULL;
+		_dataset = nullptr;
+		_layer = nullptr;
+		_shapefile = nullptr;
 		_sourceType = ogrUninitialized;
 		_forUpdate = false;
 		_encoding = m_globalSettings.ogrEncoding;
 		_dynamicLoading = VARIANT_FALSE;
-		_envelope = NULL;
+		_envelope = nullptr;
 		_featureCount = -1;
 		_activeShapeType = SHP_NULLSHAPE;
 		_externalDatasource = VARIANT_FALSE;
@@ -127,6 +127,7 @@ public:
 
 private:
 	VARIANT_BOOL _externalDatasource;	// we don't own this datasource, so must not close in destructor
+	CComPtr<IUnknown> _externalOwner;
 	VARIANT_BOOL _dynamicLoading;
 	tkOgrSourceType _sourceType;
 	IShapefile* _shapefile;
@@ -176,7 +177,7 @@ public:
 	CStringW LoadStyleXML(CStringW name);
 	GDALDataset* GetDataset() { return _dataset; }
 	bool DeserializeOptions(CPLXMLNode* node);
-	bool InjectLayer(GDALDataset* ds, int layerIndex, CStringW connection, VARIANT_BOOL forUpdate);
+	bool InjectLayer(GDALDataset* ds, int layerIndex, CStringW connection, VARIANT_BOOL forUpdate, IUnknown* owner);
 	void GetMsSqlShapeTypes(vector<ShpfileType>& types);
 };
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)
