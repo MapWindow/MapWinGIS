@@ -47,8 +47,10 @@ STDMETHODIMP CShapefile::get_Shape(long shapeIndex, IShape **pVal)
 	// last shape in the append mode is always in memory
 	bool appendedShape = _appendMode && shapeIndex == _shapeData.size() - 1;
 
+	auto inMemory = _sourceType == sstInMemory || _shpfile == nullptr;
+
 	// editing shapes?
-	if (_isEditingShapes || appendedShape)
+	if (_isEditingShapes || appendedShape || inMemory)
 	{
 		if (_shapeData[shapeIndex]->shape) {
 			_shapeData[shapeIndex]->shape->AddRef();

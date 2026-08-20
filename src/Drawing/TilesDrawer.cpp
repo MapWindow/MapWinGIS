@@ -18,7 +18,7 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
 #include "stdafx.h"
-#define DEBUG_TILES_DRAWER 1
+#define DEBUG_TILES_DRAWER 0
 #include <iomanip>
 #include <sys/stat.h>
 #include "TilesDrawer.h"
@@ -236,11 +236,12 @@ void TilesDrawer::DrawOverlays(TileCore* tile, RectF screenBounds, ImageAttribut
 						::OutputDebugStringA("\r\n");
 
 					//if (tilesDown > 0)
-#if RELEASE_MODE
-					screenBounds.Y += (diff / 2.0) * (tilesUpp + 1);
-#endif
+
+					screenBounds.Y += static_cast<FLOAT>((diff / 2.0) * (tilesUpp + 1));
+
 					//screenBounds.Y += (diff / 1.0) * (tilesDown - 1);
 
+#if LOG_TILE_DRAWING && !RELEASE_MODE
 					CLSID pngClsid;
 					const CString encoder = L"image/png";
 					USES_CONVERSION;
@@ -248,6 +249,7 @@ void TilesDrawer::DrawOverlays(TileCore* tile, RectF screenBounds, ImageAttribut
 					CStringW fileName;
 					fileName.Format(L"C:\\tmp\\tiles\\live\\tile_bmp_%d_%d.png", tile->tileX(), tile->tileY());
 					bmp->Save(fileName.GetBuffer(), &pngClsid, nullptr);
+#endif
 
 #if DEBUG_TILES_DRAWER
 					//DumpTile(tile, bmp);
@@ -262,18 +264,20 @@ void TilesDrawer::DrawOverlays(TileCore* tile, RectF screenBounds, ImageAttribut
 					::OutputDebugStringA(sOutput.GetBuffer());
 #endif
 				}
+#if DEBUG_TILES_DRAWER
 				else
 				{
 					::OutputDebugStringA("aspectRatio >= 1 ");
 					//screenBounds.Width = screenBounds.Height;
 				}
+#endif
 
 				//sOutput.Format("DrawImage() screenBounds.Height: %f, bmp.Height: %u, diff: %f\r\n", screenBounds.Height, bmp->GetHeight(), diff);
 				//::OutputDebugStringA(sOutput.GetBuffer());
 				//screenBounds.Width = bmp->GetWidth();
 				//screenBounds.Height = bmp->GetHeight();
 				//if (tilesUpp == 0)
-					status = _graphics->DrawImage(bmp, screenBounds, 0.0f, srcy, (REAL)bmp->GetWidth(), (REAL)bmp->GetHeight(), UnitPixel, &attr);
+					status = _graphics->DrawImage(bmp, screenBounds, 0.0f, srcy, static_cast<REAL>(bmp->GetWidth()), static_cast<REAL>(bmp->GetHeight()), UnitPixel, &attr);
 
 #endif
 
@@ -287,7 +291,7 @@ void TilesDrawer::DrawOverlays(TileCore* tile, RectF screenBounds, ImageAttribut
 			else
 			{
 				DumpTile(tile, bmp);
-				status = _graphics->DrawImage(bmp, screenBounds, 0.0f, 0.0f, (REAL)bmp->GetWidth(), (REAL)bmp->GetHeight(), UnitPixel, &attr);
+				status = _graphics->DrawImage(bmp, screenBounds, 0.0f, 0.0f, static_cast<REAL>(bmp->GetWidth()), static_cast<REAL>(bmp->GetHeight()), UnitPixel, &attr);
 #if DEBUG_TILES_DRAWER
 				if (dxyDiff > 2.5)
 				{
