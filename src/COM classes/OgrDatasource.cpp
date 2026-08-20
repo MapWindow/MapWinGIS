@@ -60,7 +60,7 @@ STDMETHODIMP COgrDatasource::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = _globalCallback;
-	if (_globalCallback != NULL) _globalCallback->AddRef();
+	if (_globalCallback != nullptr) _globalCallback->AddRef();
 	return S_OK;
 }
 
@@ -113,7 +113,7 @@ STDMETHODIMP COgrDatasource::Close()
 	if (_dataset)
 	{
 		GdalHelper::CloseSharedOgrDataset(_dataset);
-		_dataset = NULL;
+		_dataset = nullptr;
 	}
 	return S_OK;
 }
@@ -134,10 +134,10 @@ STDMETHODIMP COgrDatasource::get_LayerCount(int* retVal)
 STDMETHODIMP COgrDatasource::GetLayerByName(BSTR name, VARIANT_BOOL forUpdate, IOgrLayer** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = NULL;
+	*retVal = nullptr;
 	if (!CheckState()) return S_OK;
 	
-	IOgrLayer* layer = NULL;
+	IOgrLayer* layer = nullptr;
 	ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
 
 	VARIANT_BOOL vb;
@@ -172,9 +172,9 @@ STDMETHODIMP COgrDatasource::GetLayer(int index, VARIANT_BOOL forUpdate, IOgrLay
 // *************************************************************
 STDMETHODIMP COgrDatasource::GetLayer2(LONG index, VARIANT_BOOL forUpdate, VARIANT_BOOL newConnection, IOgrLayer** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*retVal = NULL;
+	*retVal = nullptr;
 	if (!CheckState()) return S_OK;
 
 	if (index < 0 && index >= _dataset->GetLayerCount())
@@ -183,7 +183,7 @@ STDMETHODIMP COgrDatasource::GetLayer2(LONG index, VARIANT_BOOL forUpdate, VARIA
 		return S_OK;
 	}
 	
-	IOgrLayer* layer = NULL;
+	IOgrLayer* layer = nullptr;
 	ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
 
 	if (newConnection)
@@ -206,7 +206,7 @@ STDMETHODIMP COgrDatasource::GetLayer2(LONG index, VARIANT_BOOL forUpdate, VARIA
 	}
 	else
 	{
-		((COgrLayer*)layer)->InjectLayer(_dataset, index, _connectionString, forUpdate);
+		((COgrLayer*)layer)->InjectLayer(_dataset, index, _connectionString, forUpdate, GetControllingUnknown());
 		*retVal = layer;
 	}
 
@@ -219,10 +219,10 @@ STDMETHODIMP COgrDatasource::GetLayer2(LONG index, VARIANT_BOOL forUpdate, VARIA
 STDMETHODIMP COgrDatasource::RunQuery(BSTR sql, IOgrLayer** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = NULL;
+	*retVal = nullptr;
 	if (CheckState())
 	{
-		IOgrLayer* layer = NULL;
+		IOgrLayer* layer = nullptr;
 		ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
 
 		VARIANT_BOOL vb;

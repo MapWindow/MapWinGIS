@@ -327,23 +327,16 @@ STDMETHODIMP COgrLayer::Close()
 			_dataset->ReleaseResultSet(_layer);
 		}
 
-		// Only close dataset if we own it (not external)
-		// External datasets are managed by their owner (e.g., OgrDatasource)
 		if (!_externalDatasource)
 		{
-			if (m_globalSettings.ogrShareConnection)
-			{
-				GdalHelper::CloseSharedOgrDataset(_dataset);
-			}
-			else
-			{
-				GDALClose(_dataset);
-			}
+			GdalHelper::CloseSharedOgrDataset(_dataset);
 		}
 
 		_dataset = nullptr;
 		_layer = nullptr;
 	}
+
+	_externalOwner.Release();
 
 	CloseShapefile();
 	_updateErrors.clear();
@@ -446,9 +439,14 @@ bool COgrLayer::OpenDatabaseLayerCore(GDALDataset* ds, CStringW connectionString
 // *************************************************************
 //		InjectLayer()
 // *************************************************************
-bool COgrLayer::InjectLayer(GDALDataset* ds, int layerIndex, CStringW connection, VARIANT_BOOL forUpdate)
+bool COgrLayer::InjectLayer(GDALDataset* ds, int layerIndex, CStringW connection, VARIANT_BOOL forUpdate, IUnknown* owner)
 {
-	return OpenDatabaseLayerCore(ds, connection, layerIndex, forUpdate, VARIANT_TRUE);
+	const bool ok = OpenDatabaseLayerCore(ds, connection, layerIndex, forUpdate, VARIANT_TRUE);
+	if (ok && owner)
+	{
+		_externalOwner = owner;
+	}
+	return ok;
 }
 
 // *************************************************************

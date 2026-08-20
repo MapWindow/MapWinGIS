@@ -26,6 +26,7 @@
 #include "StdAfx.h"
 #include "GdalHelper.h"
 
+#include <mutex>
 #include <gsl/pointers>
 #include <gsl/util>
 
@@ -37,6 +38,19 @@
 
 // ReSharper disable once CppInconsistentNaming
 map<CStringA, GDALDataset*> GdalHelper::m_ogrDatasets;
+std::mutex GdalHelper::g_ogrDatasetsMutex;
+
+static void RemoveCachedOgrDatasetUnlocked(std::map<CStringA, GDALDataset*>& datasets, GDALDataset* ds)
+{
+	for (auto it = datasets.begin(); it != datasets.end(); ++it)
+	{
+		if (it->second == ds)
+		{
+			datasets.erase(it);
+			return;
+		}
+	}
+}
 
 // **************************************************************
 //		OpenOgrDatasetA
@@ -70,37 +84,74 @@ GDALDataset* GdalHelper::OpenOgrDatasetA(const char* filenameUtf8, const bool fo
 // **************************************************************
 GDALDataset* GdalHelper::OpenOgrDatasetW(const CStringW& filenameW, const bool forUpdate, const bool allowShared)
 {
+	const auto start = std::chrono::steady_clock::now();
 	CStringA filenameA = Utility::ConvertToUtf8(filenameW);
+
+	auto logExit = [&](const char* outcome)
+		{
+			const auto end = std::chrono::steady_clock::now();
+			const double elapsedSeconds = std::chrono::duration<double>(end - start).count();
+
+			char buffer[1024] = {};
+			sprintf_s(
+				buffer,
+				"OpenOgrDatasetW('%s', forUpdate=%d, allowShared=%d, outcome=%s) took: %.3f s\r\n",
+				filenameA.GetString(),
+				forUpdate ? 1 : 0,
+				allowShared ? 1 : 0,
+				outcome,
+				elapsedSeconds);
+			OutputDebugStringA(buffer);
+		};
 
 	if (allowShared && m_globalSettings.ogrShareConnection)
 	{
 		CStringA key = filenameA;
 		key += forUpdate ? "1" : "0";
 
-		if (m_ogrDatasets.find(key) != m_ogrDatasets.end()) // TODO: Fix compile warning
 		{
-			// it is opened already, try to reuse
-			const gsl::not_null<GDALDataset*> ds = m_ogrDatasets[key];
+			std::lock_guard<std::mutex> lock(g_ogrDatasetsMutex);
 
-			ds->Reference();
-			//Debug::WriteLine("Referencing shared datasource: %d", count);
-			return ds;
-		}
-
-		GDALDataset* ds = OpenOgrDatasetA(filenameA.GetBuffer(), forUpdate);
-		if (ds)
-		{
-			// let's cache it for further reuse of connection
-			if (m_ogrDatasets.find(key) == m_ogrDatasets.end()) // TODO: Fix compile warning
+			auto it = m_ogrDatasets.find(key);
+			if (it != m_ogrDatasets.end())
 			{
-				m_ogrDatasets[key] = ds;
+				GDALDataset* ds = it->second;
+				ds->Reference();
+				logExit("cache-hit");
+				return ds;
 			}
 		}
 
-		return ds;
+		GDALDataset* opened = OpenOgrDatasetA(filenameA.GetString(), forUpdate);
+		if (!opened)
+		{
+			logExit("open-failed");
+			return nullptr;
+		}
+
+		{
+			std::lock_guard<std::mutex> lock(g_ogrDatasetsMutex);
+
+			auto it = m_ogrDatasets.find(key);
+			if (it != m_ogrDatasets.end())
+			{
+				GDALDataset* ds = it->second;
+				ds->Reference();
+				GDALClose(opened);
+				logExit("cache-race-hit");
+				return ds;
+			}
+
+			m_ogrDatasets[key] = opened;
+		}
+
+		logExit("opened-shared");
+		return opened;
 	}
 
-	return OpenOgrDatasetA(filenameA.GetBuffer(), forUpdate);
+	GDALDataset* ds = OpenOgrDatasetA(filenameA.GetString(), forUpdate);
+	logExit(ds ? "opened" : "open-failed");
+	return ds;
 }
 
 // **************************************************************
@@ -108,24 +159,70 @@ GDALDataset* GdalHelper::OpenOgrDatasetW(const CStringW& filenameW, const bool f
 // **************************************************************
 int GdalHelper::CloseSharedOgrDataset(GDALDataset* ds)
 {
-	if (m_globalSettings.ogrShareConnection)
+	if (!ds)
 	{
-		const int count = ds->Dereference();
-		if (count == 0)
+		return 0;
+	}
+
+	const auto start = std::chrono::steady_clock::now();
+	int count = 0;
+	bool shouldClose = false;
+	bool isCachedShared = false;
+
+	auto logExit = [&](const char* outcome)
 		{
-			//Debug::WriteLine("Shared datasource(%s) is closed.", ds->GetDescription());
-			RemoveCachedOgrDataset(ds);
-			GDALClose(ds);
-		}
-		else
+			const auto end = std::chrono::steady_clock::now();
+			const double elapsedSeconds = std::chrono::duration<double>(end - start).count();
+
+			char buffer[1024] = {};
+			sprintf_s(
+				buffer,
+				"CloseSharedOgrDataset() outcome=%s took: %.3f s\r\n",
+				outcome,
+				elapsedSeconds);
+			OutputDebugStringA(buffer);
+		};
+
+	{
+		std::lock_guard<std::mutex> lock(g_ogrDatasetsMutex);
+
+		for (const auto& item : m_ogrDatasets)
 		{
-			//Debug::WriteLine("Dereferencing shared datasource: %d", count);
+			if (item.second == ds)
+			{
+				isCachedShared = true;
+				break;
+			}
 		}
 
+		if (isCachedShared)
+		{
+			count = ds->Dereference();
+			if (count <= 0)
+			{
+				//Debug::WriteLine("Shared datasource(%s) is closed.", ds->GetDescription());
+				RemoveCachedOgrDatasetUnlocked(m_ogrDatasets, ds);
+				shouldClose = true;
+			}
+			else
+			{
+				//Debug::WriteLine("Dereferencing shared datasource: %d", count);
+			}
+		}
+	}
+
+	if (isCachedShared)
+	{
+		if (shouldClose)
+		{
+			GDALClose(ds);
+		}
+		logExit("closed CachedShared");
 		return count;
 	}
 
 	GDALClose(ds);
+	logExit("closed");
 	return 0;
 }
 
@@ -134,18 +231,19 @@ int GdalHelper::CloseSharedOgrDataset(GDALDataset* ds)
 // **************************************************************
 void GdalHelper::RemoveCachedOgrDataset(GDALDataset* ds)
 {
-	auto it = m_ogrDatasets.begin();
-	while (it != m_ogrDatasets.end())
-	{
-		if (it->second == ds)
-		{
-			//Debug::WriteLine("RemoveCachedOgrDataset(ds: %s)", it->first.GetString());
-			m_ogrDatasets.erase(it->first);
-			break;
-		}
+	const auto start = std::chrono::steady_clock::now();
 
-		++it;
-	}
+	std::lock_guard<std::mutex> lock(g_ogrDatasetsMutex);
+	RemoveCachedOgrDatasetUnlocked(m_ogrDatasets, ds);
+
+	const auto end = std::chrono::steady_clock::now();
+	const double elapsedSeconds = std::chrono::duration<double>(end - start).count();
+	char buffer[1024] = {};
+	sprintf_s(
+		buffer,
+		"RemoveCachedOgrDataset() done took: %.3f s\r\n",
+		elapsedSeconds);
+	OutputDebugStringA(buffer);
 }
 
 // **************************************************************
